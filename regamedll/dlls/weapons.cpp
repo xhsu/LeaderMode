@@ -910,6 +910,7 @@ void CBasePlayerWeapon::ItemPostFrame()
 		if ((m_pPlayer->m_bCanShoot && g_pGameRules->IsMultiplayer() && !g_pGameRules->IsFreezePeriod()) || !g_pGameRules->IsMultiplayer())
 		{
 			PrimaryAttack();
+			m_flNextPrimaryAttack *= m_pPlayer->WeaponFireIntervalModifier(this);	// passive skill applied.
 		}
 	}
 	else if ((m_pPlayer->pev->button & IN_RELOAD) && iMaxClip() != WEAPON_NOCLIP && !m_fInReload && m_flNextPrimaryAttack < UTIL_WeaponTimeBase())
@@ -1629,8 +1630,6 @@ void CWeaponBox::Touch(CBaseEntity *pOther)
 	if (pPlayer->m_bShieldDrawn)
 		return;
 
-	pPlayer->OnTouchingWeapon(this);
-
 	bool bRemove = true;
 	bool bEmitSound = false;
 
@@ -2100,7 +2099,7 @@ void CArmoury::ArmouryTouch(CBaseEntity *pOther)
 		}
 		case ARMOURY_KEVLAR:
 		{
-			if (pToucher->m_iKevlar != ARMOR_NONE && pToucher->pev->armorvalue >= MAX_NORMAL_BATTERY)
+			if (pToucher->pev->armortype != ARMOR_NONE && pToucher->pev->armorvalue >= MAX_NORMAL_BATTERY)
 			{
 				return;
 			}
@@ -2111,7 +2110,7 @@ void CArmoury::ArmouryTouch(CBaseEntity *pOther)
 		}
 		case ARMOURY_ASSAULT:
 		{
-			if (pToucher->m_iKevlar == ARMOR_VESTHELM && pToucher->pev->armorvalue >= MAX_NORMAL_BATTERY
+			if (pToucher->pev->armortype == ARMOR_VESTHELM && pToucher->pev->armorvalue >= MAX_NORMAL_BATTERY
 				)
 			{
 				return;

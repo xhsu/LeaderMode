@@ -820,9 +820,7 @@ void CCSBotManager::MaintainBotQuota()
 	int occupiedBotSlots = UTIL_BotsInGame();
 
 	// isRoundInProgress is true if the round has progressed far enough that new players will join as dead.
-	bool isRoundInProgress = CSGameRules()->IsGameStarted() &&
-							 !TheCSBots()->IsRoundOver() &&
-							 (CSGameRules()->GetRoundElapsedTime() >= CSGameRules()->GetRoundRespawnTime());
+	bool isRoundInProgress = CSGameRules()->IsGameStarted() && !TheCSBots()->IsRoundOver();
 
 	if (FStrEq(cv_bot_quota_mode.string, "fill"))
 	{
@@ -874,30 +872,27 @@ void CCSBotManager::MaintainBotQuota()
 	// Try to balance teams, if we are in the first specified seconds of a round and bots can join either team.
 	if (occupiedBotSlots > 0 && desiredBotCount == occupiedBotSlots && CSGameRules()->IsGameStarted())
 	{
-		if (CSGameRules()->GetRoundElapsedTime() < CSGameRules()->GetRoundRespawnTime()) // new bots can still spawn during this time
+		if (autoteambalance.value > 0.0f)
 		{
-			if (autoteambalance.value > 0.0f)
+			int numAliveTerrorist;
+			int numAliveCT;
+			int numDeadTerrorist;
+			int numDeadCT;
+
+			CSGameRules()->InitializePlayerCounts(numAliveTerrorist, numAliveCT, numDeadTerrorist, numDeadCT);
+
+			if (!FStrEq(cv_bot_join_team.string, "T") &&
+				!FStrEq(cv_bot_join_team.string, "CT"))
 			{
-				int numAliveTerrorist;
-				int numAliveCT;
-				int numDeadTerrorist;
-				int numDeadCT;
-
-				CSGameRules()->InitializePlayerCounts(numAliveTerrorist, numAliveCT, numDeadTerrorist, numDeadCT);
-
-				if (!FStrEq(cv_bot_join_team.string, "T") &&
-					!FStrEq(cv_bot_join_team.string, "CT"))
+				if (numAliveTerrorist > CSGameRules()->m_iNumCT + 1)
 				{
-					if (numAliveTerrorist > CSGameRules()->m_iNumCT + 1)
-					{
-						if (UTIL_KickBotFromTeam(TERRORIST))
-							return;
-					}
-					else if (numAliveCT > CSGameRules()->m_iNumTerrorist + 1)
-					{
-						if (UTIL_KickBotFromTeam(CT))
-							return;
-					}
+					if (UTIL_KickBotFromTeam(TERRORIST))
+						return;
+				}
+				else if (numAliveCT > CSGameRules()->m_iNumTerrorist + 1)
+				{
+					if (UTIL_KickBotFromTeam(CT))
+						return;
 				}
 			}
 		}

@@ -134,7 +134,7 @@ extern cvar_t maxmoney;
 extern cvar_t round_infinite;
 extern cvar_t hegrenade_penetration;
 extern cvar_t nadedrops;
-extern cvar_t roundrespawn_time;
+extern cvar_t playerrespawn_time;
 extern cvar_t auto_reload_weapons;
 extern cvar_t refill_bpammo_weapons;
 extern cvar_t freeforall;
@@ -165,5 +165,11 @@ extern cvar_t radio_maxinround;
 
 extern cvar_t scoreboard_showmoney;
 extern cvar_t scoreboard_showhealth;
+
+// new cvars from leader mod
+extern cvar_t commander_maxhealth;
+extern cvar_t godfather_maxhealth;
+extern cvar_t human_role_priority;
+extern cvar_t menpower_per_player;
 
 void GameDLLInit();

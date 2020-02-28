@@ -187,6 +187,15 @@ inline void STOP_SOUND_MSG(edict_t *entity, int msg_type, int channel, const cha
 	BUILD_SOUND_MSG(entity, channel, sample, 0, 0, SND_STOP, PITCH_NORM, msg_type, SVC_NOP, g_vecZero, player);
 }
 
+enum ChatColor
+{
+	REDCHAT = 1,
+	BLUECHAT,
+	GREYCHAT,
+	NORMALCHAT,
+	GREENCHAT,
+};
+
 class CBaseEntity;
 class CBasePlayer;
 class CBasePlayerItem;
@@ -224,8 +233,9 @@ void UTIL_ScreenFadeBuild(ScreenFade &fade, const Vector &color, float fadeTime,
 void UTIL_ScreenFadeWrite(const ScreenFade &fade, CBaseEntity *pEntity);
 void UTIL_ScreenFadeAll(const Vector &color, float fadeTime, float fadeHold, int alpha, int flags);
 void UTIL_ScreenFade(CBaseEntity *pEntity, const Vector &color, float fadeTime, float fadeHold = 0.0f, int alpha = 0, int flags = 0);
-void UTIL_HudMessage(CBaseEntity *pEntity, const hudtextparms_t &textparms, const char *pMessage);
-void UTIL_HudMessageAll(const hudtextparms_t &textparms, const char *pMessage);
+void UTIL_HudMessage(CBaseEntity *pEntity, const hudtextparms_t &textparms, const char *pMessage, ...);
+void UTIL_HudMessage(edict_t* ent, int iChannel, Vector2D vecOrigin, const colorVec& textColor, const colorVec& efxColor, float flFadeInTime, float flFadeOutTime, float flHoldTime, float flFxTime, const char* format, ...);
+void UTIL_HudMessageAll(const hudtextparms_t &textparms, const char *pMessage, ...);
 void UTIL_ClientPrintAll(int msg_dest, const char *msg_name, const char *param1 = nullptr, const char *param2 = nullptr, const char *param3 = nullptr, const char *param4 = nullptr);
 void ClientPrint(entvars_t *client, int msg_dest, const char *msg_name, const char *param1 = nullptr, const char *param2 = nullptr, const char *param3 = nullptr, const char *param4 = nullptr);
 void UTIL_Log(const char *fmt, ...);
@@ -296,6 +306,9 @@ int UTIL_GetNumPlayers();
 bool UTIL_IsSpawnPointOccupied(CBaseEntity *pSpot);
 void MAKE_STRING_CLASS(const char *str, entvars_t *pev);
 void NORETURN Sys_Error(const char *error, ...);
+void replace_all(std::string& str, const std::string& from, const std::string& to);
+void UTIL_PrintChatColor(CBasePlayer* player, ChatColor color, const char* szMessage, ...);
+void UTIL_PlayEarSound(CBasePlayer* player, const char* sfx);
 
 // Inlines
 template <typename T = CBaseEntity>

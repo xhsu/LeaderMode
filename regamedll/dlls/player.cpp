@@ -1,4 +1,4 @@
-/*
+﻿/*
 *
 *   This program is free software; you can redistribute it and/or modify it
 *   under the terms of the GNU General Public License as published by the
@@ -40,10 +40,8 @@ TYPEDESCRIPTION CBasePlayer::m_playerSaveData[] =
 	DEFINE_ARRAY(CBasePlayer, m_rgItems, FIELD_INTEGER, MAX_ITEMS),
 	DEFINE_FIELD(CBasePlayer, m_afPhysicsFlags, FIELD_INTEGER),
 	DEFINE_FIELD(CBasePlayer, m_flTimeStepSound, FIELD_TIME),
-	DEFINE_FIELD(CBasePlayer, m_flTimeWeaponIdle, FIELD_TIME),
 	DEFINE_FIELD(CBasePlayer, m_flSwimTime, FIELD_TIME),
 	DEFINE_FIELD(CBasePlayer, m_flDuckTime, FIELD_TIME),
-	DEFINE_FIELD(CBasePlayer, m_flWallJumpTime, FIELD_TIME),
 	DEFINE_FIELD(CBasePlayer, m_flSuitUpdate, FIELD_TIME),
 	DEFINE_ARRAY(CBasePlayer, m_rgSuitPlayList, FIELD_INTEGER, MAX_SUIT_PLAYLIST),
 	DEFINE_FIELD(CBasePlayer, m_iSuitPlayNext, FIELD_INTEGER),
@@ -425,7 +423,7 @@ void CBasePlayer::Pain(int iLastHitGroup, bool bHasArmour)
 
 	if (iLastHitGroup == HITGROUP_HEAD)
 	{
-		if (m_iKevlar == ARMOR_VESTHELM)
+		if (pev->armortype == ARMOR_VESTHELM)
 		{
 			EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/bhit_helmet-1.wav", VOL_NORM, ATTN_NORM);
 			return;
@@ -585,7 +583,7 @@ void EXT_FUNC CBasePlayer::TraceAttack(entvars_t *pevAttacker, float flDamage, V
 
 		case HITGROUP_HEAD:
 		{
-			if (m_iKevlar == ARMOR_VESTHELM)
+			if (pev->armortype == ARMOR_VESTHELM)
 			{
 				bShouldBleed = false;
 				bShouldSpark = true;
@@ -613,7 +611,7 @@ void EXT_FUNC CBasePlayer::TraceAttack(entvars_t *pevAttacker, float flDamage, V
 		{
 			flDamage *= 1;
 
-			if (m_iKevlar != ARMOR_NONE)
+			if (pev->armortype != ARMOR_NONE)
 				bShouldBleed = false;
 
 			else if (bShouldBleed)
@@ -629,7 +627,7 @@ void EXT_FUNC CBasePlayer::TraceAttack(entvars_t *pevAttacker, float flDamage, V
 		{
 			flDamage *= 1.25;
 
-			if (m_iKevlar != ARMOR_NONE)
+			if (pev->armortype != ARMOR_NONE)
 				bShouldBleed = false;
 
 			else if (bShouldBleed)
@@ -644,7 +642,7 @@ void EXT_FUNC CBasePlayer::TraceAttack(entvars_t *pevAttacker, float flDamage, V
 		case HITGROUP_LEFTARM:
 		case HITGROUP_RIGHTARM:
 		{
-			if (m_iKevlar != ARMOR_NONE)
+			if (pev->armortype != ARMOR_NONE)
 				bShouldBleed = false;
 
 			break;
@@ -778,6 +776,9 @@ BOOL EXT_FUNC CBasePlayer::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAtt
 	if (HasShield())
 		flShieldRatio = 0.2;
 
+	// pre damage modifier. for skills
+	flDamage *= PlayerDamageSufferedModifier(bitsDamageType);
+
 	if (bitsDamageType & (DMG_EXPLOSION | DMG_BLAST))
 	{
 		if (!IsAlive())
@@ -844,7 +845,7 @@ BOOL EXT_FUNC CBasePlayer::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAtt
 			flDamage = flNew;
 
 			if (pev->armorvalue <= 0.0)
-				m_iKevlar = ARMOR_NONE;
+				pev->armortype = ARMOR_NONE;
 
 			Pain(m_LastHitGroup, true);
 		}
@@ -886,14 +887,16 @@ BOOL EXT_FUNC CBasePlayer::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAtt
 			}
 		}
 
+		// reset damage time countdown for each type of time based damage player just sustained
+		for (int i = 0; i < ITBD_END; i++)
 		{
-			// reset damage time countdown for each type of time based damage player just sustained
-			for (int i = 0; i < ITBD_END; i++)
-			{
-				if (bitsDamageType & (DMG_PARALYZE << i))
-					m_rgbTimeBasedDamage[i] = 0;
-			}
+			if (bitsDamageType & (DMG_PARALYZE << i))
+				m_rgbTimeBasedDamage[i] = 0;
 		}
+
+		// damage money.
+		if (!FNullEnt(pAttack))
+			pAttack->AddAccount(CSGameRules()->IDamageMoney(this, pAttack, flDamage), RT_HURTING_ENEMY);
 
 		// tell director about it
 		MESSAGE_BEGIN(MSG_SPEC, SVC_DIRECTOR);
@@ -1085,7 +1088,7 @@ BOOL EXT_FUNC CBasePlayer::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAtt
 		flDamage = flNew;
 
 		if (pev->armorvalue <= 0.0f)
-			m_iKevlar = ARMOR_NONE;
+			pev->armortype = ARMOR_NONE;
 
 		Pain(m_LastHitGroup, true);
 	}
@@ -1125,6 +1128,10 @@ BOOL EXT_FUNC CBasePlayer::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAtt
 				m_rgbTimeBasedDamage[i] = 0;
 		}
 	}
+
+	// damage money.
+	if (!FNullEnt(pAttack))
+		pAttack->AddAccount(CSGameRules()->IDamageMoney(this, pAttack, flDamage), RT_HURTING_ENEMY);
 
 	// tell director about it
 	MESSAGE_BEGIN(MSG_SPEC, SVC_DIRECTOR);
@@ -1622,7 +1629,7 @@ void EXT_FUNC CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 		}
 	}
 
-	g_pGameRules->PlayerKilled(this, pevAttacker, g_pevLastInflictor);
+	CSGameRules()->PlayerKilled(this, pevAttacker, g_pevLastInflictor);
 
 	MESSAGE_BEGIN(MSG_ONE, gmsgNVGToggle, nullptr, pev);
 		WRITE_BYTE(0);
@@ -3101,34 +3108,8 @@ void CBasePlayer::PlayerDeathThink()
 		if (fAnyButtonDown)
 			return;
 
-		if (g_pGameRules->FPlayerCanRespawn(this))
-		{
-			if (m_iTeam != CT && m_iTeam != TERRORIST)
-			{
-				pev->deadflag = DEAD_RESPAWNABLE;
-
-				if (CSGameRules()->IsMultiplayer())
-					CSGameRules()->CheckWinConditions();
-			}
-		}
-
 		pev->nextthink = gpGlobals->time + 0.1f;
 		return;
-	}
-
-	if (pev->deadflag == DEAD_RESPAWNABLE)
-	{
-		if (GetObserverMode() != OBS_NONE && (m_iTeam == UNASSIGNED || m_iTeam == SPECTATOR))
-			return;
-
-		// Player cannot respawn while in the Choose Appearance menu
-		if (m_iMenu == Menu_ChooseAppearance || m_iJoiningState == SHOWTEAMSELECT)
-			return;
-
-		// don't copy a corpse if we're in deathcam.
-		respawn(pev, FALSE);
-		pev->button = 0;
-		pev->nextthink = -1;
 	}
 }
 
@@ -3407,13 +3388,8 @@ void CBasePlayer::PlayerUse()
 	}
 	else if (m_afButtonPressed & IN_USE)
 	{
-		UseEmpty();
+		EMIT_SOUND(ENT(pev), CHAN_ITEM, "common/wpn_denyselect.wav", 0.4, ATTN_NORM);
 	}
-}
-
-void EXT_FUNC CBasePlayer::UseEmpty()
-{
-	EMIT_SOUND(ENT(pev), CHAN_ITEM, "common/wpn_denyselect.wav", 0.4, ATTN_NORM);
 }
 
 void CBasePlayer::HostageUsed()
@@ -4274,6 +4250,9 @@ void EXT_FUNC CBasePlayer::PostThink()
 	// NOTE: this is useless for CS 1.6 - s1lent
 	UpdatePlayerSound();
 
+	// HUD update for those living.
+	UpdateHudText();
+
 pt_end:
 #ifdef CLIENT_WEAPONS
 	// Decay timers on weapons
@@ -4315,6 +4294,20 @@ pt_end:
 	m_iGaitsequence = pev->gaitsequence;
 
 	StudioProcessGait();
+
+	// Skill Think() functions are called from here.
+	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	{
+		if (m_rgpSkills[i])
+			m_rgpSkills[i]->Think();
+	}
+
+	// update hud text after death. observer function, for instance.
+	if (Q_strcmp(m_szHudText, m_szClientHudText))
+	{
+		UTIL_HudMessage(this, CSGameRules()->m_TextParam_Hud, m_szHudText);
+		Q_strcpy_s(m_szClientHudText, m_szHudText);
+	}
 }
 
 // checks if the spot is clear of players
@@ -4520,7 +4513,7 @@ void EXT_FUNC CBasePlayer::Spawn()
 	if (!m_bNotKilled)
 	{
 		pev->armorvalue = 0;
-		m_iKevlar = ARMOR_NONE;
+		pev->armortype = ARMOR_NONE;
 	}
 
 	pev->maxspeed = 1000;
@@ -6456,6 +6449,17 @@ void EXT_FUNC CBasePlayer::Blind(float duration, float holdTime, float fadeTime,
 	m_blindAlpha = alpha;
 }
 
+void CBasePlayer::UpdateOnRemove()
+{
+	CBaseMonster::UpdateOnRemove();
+
+	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	{
+		if (m_rgpSkills[i])
+			delete m_rgpSkills[i];
+	}
+}
+
 void CBasePlayer::InitStatusBar()
 {
 	m_flStatusBarDisappearDelay = 0.0f;
@@ -7238,14 +7242,14 @@ BOOL CBasePlayer::IsArmored(int nHitGroup)
 {
 	BOOL fApplyArmor = FALSE;
 
-	if (m_iKevlar == ARMOR_NONE)
+	if (pev->armortype == ARMOR_NONE)
 		return FALSE;
 
 	switch (nHitGroup)
 	{
 	case HITGROUP_HEAD:
 	{
-		fApplyArmor = (m_iKevlar == ARMOR_VESTHELM);
+		fApplyArmor = (pev->armortype == ARMOR_VESTHELM);
 		break;
 	}
 	case HITGROUP_GENERIC:
@@ -7367,7 +7371,7 @@ bool CBasePlayer::CanAffordSecondaryAmmo()
 
 bool CBasePlayer::CanAffordArmor()
 {
-	if (m_iKevlar == ARMOR_KEVLAR && pev->armorvalue == 100.0f && m_iAccount >= HELMET_PRICE)
+	if (pev->armortype == ARMOR_KEVLAR && pev->armorvalue == 100.0f && m_iAccount >= HELMET_PRICE)
 		return true;
 
 	return (m_iAccount >= KEVLAR_PRICE);
@@ -7400,7 +7404,7 @@ bool CBasePlayer::NeedsSecondaryAmmo()
 
 bool CBasePlayer::NeedsArmor()
 {
-	if (m_iKevlar == ARMOR_NONE)
+	if (pev->armortype == ARMOR_NONE)
 		return true;
 
 	return (pev->armorvalue < 50.0f);
@@ -8077,7 +8081,7 @@ void CBasePlayer::BuildRebuyStruct()
 		m_rebuyStruct.m_smokeGrenade = 0;
 
 	m_rebuyStruct.m_nightVision = m_bHasNightVision;	// night vision
-	m_rebuyStruct.m_armor = m_iKevlar;					// check for armor.
+	m_rebuyStruct.m_armor = static_cast<ArmorType>(int(pev->armortype));				// check for armor.
 }
 
 void CBasePlayer::Rebuy()
@@ -8218,7 +8222,7 @@ void CBasePlayer::RebuyArmor()
 {
 	if (m_rebuyStruct.m_armor)
 	{
-		if (m_rebuyStruct.m_armor > m_iKevlar)
+		if (m_rebuyStruct.m_armor > pev->armortype)
 		{
 			if (m_rebuyStruct.m_armor == ARMOR_KEVLAR)
 				ClientCommand("vest");
@@ -8453,9 +8457,9 @@ bool EXT_FUNC CBasePlayer::GetIntoGame()
 	ResetMaxSpeed();
 	m_iJoiningState = JOINED;
 
-	if (g_pGameRules->FPlayerCanRespawn(this))
+	if (CSGameRules()->FPlayerCanRespawn(this))
 	{
-		Spawn();
+		RoundRespawn();
 		CSGameRules()->CheckWinConditions();
 	}
 	else
@@ -8512,12 +8516,33 @@ void CBasePlayer::PlayerRespawnThink()
 	if (pev->deadflag < DEAD_DYING)
 		return;
 
-	if (m_flRespawnPending > 0 && m_flRespawnPending <= gpGlobals->time)
+	if (!CSGameRules()->FPlayerCanRespawn(this))
 	{
-		Spawn();
+		if (m_flRespawnPending > 0.0f)	// redeployment is forced to stop.
+		{
+			m_flRespawnPending = -1.0f;
+			SetProgressBarTime(0);
+		}
+
+		return;
+	}
+
+	if (CSGameRules()->FPlayerCanRespawn(this) && m_flRespawnPending <= 0)	// ready to redeploy in battlefield.
+	{
+		m_flRespawnPending = gpGlobals->time + CSGameRules()->GetPlayerRespawnTime(this);
+		SetProgressBarTime(CSGameRules()->GetPlayerRespawnTime(this));
+	}
+
+	if (m_flRespawnPending > 0.0f && m_flRespawnPending <= gpGlobals->time)
+	{
+		respawn(pev);
 		pev->button = 0;
 		pev->nextthink = -1;
-		return;
+		
+		CSGameRules()->m_rgiMenpowers[m_iTeam]--;
+
+		if (m_iRoleType == Role_Berserker)	// berserker has a doubled consumption.
+			CSGameRules()->m_rgiMenpowers[m_iTeam]--;
 	}
 }
 
@@ -8585,4 +8610,147 @@ bool CBasePlayer::CheckActivityInGame()
 	m_vecOldvAngle = pev->v_angle;
 
 	return (fabs(deltaYaw) >= 0.1f && fabs(deltaPitch) >= 0.1f);
+}
+
+void CBasePlayer::AssignRole(RoleTypes iNewRole)
+{
+	// these two needs special handle.
+	if (m_iRoleType == Role_Commander && iNewRole != Role_Commander)
+		CSGameRules()->AssignCommander(nullptr);
+	else if (m_iRoleType == Role_Godfather && iNewRole != Role_Godfather)
+		CSGameRules()->AssignGodfather(nullptr);
+
+	// remove all skills from last role.
+	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	{
+		if (m_rgpSkills[i])
+		{
+			if (m_rgpSkills[i]->m_bUsingSkill)
+				m_rgpSkills[i]->Terminate();	// terminate skill before remove it.
+
+			delete m_rgpSkills[i];
+		}
+
+		m_rgpSkills[i] = nullptr;
+	}
+
+	m_iRoleType = iNewRole;
+
+	switch (iNewRole)
+	{
+	case Role_Commander:
+		CBaseSkill::Grand<CSkillFireRate>(this);
+		CBaseSkill::Grand<CSkillRadarScan>(this);
+		CBaseSkill::Grand<CSkillReduceDamage>(this);
+		break;
+
+	case Role_Arsonist:
+	case Role_Godfather:
+		CBaseSkill::Grand<CSkillReduceDamage>(this);
+		break;
+
+	case Role_UNASSIGNED:
+	default:
+		break;
+	}
+}
+
+void CBasePlayer::UpdateHudText()
+{
+	// TODO: observer mode.
+
+	static char szBuffer[512];
+
+	if (!IsAlive() || IsDormant() || m_iJoiningState != JOINED)
+	{
+		Q_strcpy(m_szHudText, " ");
+		return;
+	}
+
+	// Part I: personal role information.
+	Q_sprintf(m_szHudText, "Role: %s\n", g_rgszRoleNames[m_iRoleType]);
+
+	// Part II: skills information.
+	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	{
+		if (m_rgpSkills[i])
+		{
+			Q_memset(szBuffer, NULL, sizeof(szBuffer));	// reset buffer before each use.
+
+			if (m_rgpSkills[i]->GetHudPercentage() >= 1.0f)
+				Q_strcpy(szBuffer, m_rgpSkills[i]->GetName());
+			else
+			{
+				int iLinesCount = m_rgpSkills[i]->GetHudPercentage() * 30.0f;
+				int iDotsCount = 30 - iLinesCount;
+
+				for (int i = 0; i < iLinesCount; i++)
+					Q_strcat(szBuffer, "/");
+
+				for (int i = 0; i < iDotsCount; i++)
+					Q_strcat(szBuffer, "-");
+			}
+
+			Q_strcat(szBuffer, "\n");
+			Q_strcat(m_szHudText, szBuffer);
+		}
+	}
+
+	// Part III: leader information.
+	CBasePlayer* pLeader = THE_COMMANDER;
+	RoleTypes iLeaderRole = Role_Commander;
+
+	if (m_iTeam == TERRORIST)
+	{
+		pLeader = THE_GODFATHER;
+		iLeaderRole = Role_Godfather;
+	}
+
+	if (!pLeader)
+		Q_sprintf(szBuffer, "%s: Unrevealed|", g_rgszRoleNames[iLeaderRole]);
+	else if (!pLeader->IsAlive())
+		Q_sprintf(szBuffer, "%s: K.I.A.|", g_rgszRoleNames[iLeaderRole]);
+	else
+		Q_sprintf(szBuffer, "%s: %s|", g_rgszRoleNames[iLeaderRole], STRING(pLeader->pev->netname));
+
+	Q_strcat(m_szHudText, szBuffer);
+
+	// Part IV: menpower information.
+	if (pLeader && !pLeader->IsAlive())
+		Q_strcpy(szBuffer, "Replenishment Discontinued|");
+	else if (CSGameRules()->m_rgiMenpowers[m_iTeam] > 0)
+		Q_sprintf(szBuffer, "Menpower: %d|", CSGameRules()->m_rgiMenpowers[m_iTeam]);
+	else
+		Q_strcpy(szBuffer, "Menpower Depleted|");
+
+	Q_strcat(m_szHudText, szBuffer);
+
+	// Part V: tactical scheme information.
+	Q_strcat(m_szHudText, "Tactical Scheme: Disputing");
+}
+
+float CBasePlayer::WeaponFireIntervalModifier(CBasePlayerWeapon* pWeapon)
+{
+	float flResult = 1.0f;
+
+	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	{
+		if (m_rgpSkills[i])
+			flResult *= m_rgpSkills[i]->WeaponFireIntervalModifier(pWeapon);	// the active or not is determind in the function itself.
+	}
+
+	return flResult;
+}
+
+float CBasePlayer::PlayerDamageSufferedModifier(int bitsDamageTypes)
+{
+	float flResult = 1.0f;
+
+	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	{
+		if (m_rgpSkills[i])
+			flResult *= m_rgpSkills[i]->PlayerDamageSufferedModifier(bitsDamageTypes);	// the active or not is determind in the function itself.
+	}
+
+	return flResult;
 }

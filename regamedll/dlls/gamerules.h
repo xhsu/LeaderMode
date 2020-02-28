@@ -82,6 +82,8 @@ enum RewardRules
 	RR_LOSER_BONUS_MIN,
 	RR_LOSER_BONUS_MAX,
 	RR_LOSER_BONUS_ADD,
+	RR_LEADER_KILLED,
+	RR_KILLED_ENEMY_LEADER,
 
 	RR_END
 };
@@ -99,6 +101,8 @@ enum RewardAccount
 	REWARD_LOSER_BONUS_ADD          = 500,
 
 	REWARD_KILLED_ENEMY             = 300,
+	REWARD_KILLED_LEADER			= 3000,
+	REWARD_LEADER_KILLED			= -1000,
 };
 
 // custom enum
@@ -558,7 +562,7 @@ public:
 	void SendMOTDToClient(edict_t *client);
 
 	void TerminateRound(float tmDelay, int iWinStatus);
-	float GetRoundRespawnTime() const;
+	float GetPlayerRespawnTime(CBasePlayer *pPlayer) const;
 	float GetRoundRestartDelay() const;
 
 	bool IsGameStarted() const { return m_bGameStarted; }
@@ -568,6 +572,15 @@ public:
 	bool CanPlayerBuy(CBasePlayer *pPlayer) const;
 
 	VFUNC bool HasRoundTimeExpired();
+
+	// new functions of leader mod.
+	VFUNC bool CanSkillBeUsed();
+	void AssignCommander(CBasePlayer* pPlayer);
+	void AssignGodfather(CBasePlayer* pPlayer);
+	RoleTypes FindAvaliableRole(TeamName iTeam);
+	CBasePlayer* RandomNonroleCharacter(TeamName iTeam);
+	void CheckMenpower(TeamName iTeam);
+	int IDamageMoney(CBasePlayer* pVictim, CBasePlayer* pAttacker, float flDamage);
 
 private:
 	void MarkLivingPlayersOnTeamAsNotReceivingMoneyNextRound(int iTeam);
@@ -628,6 +641,13 @@ public:
 	float m_flForceCameraValue;
 	float m_flForceChaseCamValue;
 	float m_flFadeToBlackValue;
+
+	EntityHandle<CBasePlayer> m_rgpLeaders[4];
+	hudtextparms_t m_TextParam_Notification;
+	hudtextparms_t m_TextParam_Hud;
+	int m_rgiMenpowers[4];
+	bool m_rgbMenpowerBroadcast[4];
+	
 
 protected:
 	float m_flIntermissionEndTime;
@@ -696,14 +716,25 @@ inline void CHalfLifeMultiplay::TerminateRound(float tmDelay, int iWinStatus)
 	m_bRoundTerminating = true;
 }
 
+inline float CHalfLifeMultiplay::GetPlayerRespawnTime(CBasePlayer* pPlayer) const
+{
+	float flLeaderHealthModifier = 1.0f;
+
+	if (pPlayer->m_iTeam == CT && THE_COMMANDER.IsValid())
+	{
+		flLeaderHealthModifier = THE_COMMANDER->pev->health / THE_COMMANDER->pev->max_health;
+	}
+	else if (pPlayer->m_iTeam == TERRORIST && THE_GODFATHER.IsValid())
+	{
+		flLeaderHealthModifier = THE_GODFATHER->pev->health / THE_GODFATHER->pev->max_health;
+	}
+
+	return playerrespawn_time.value * flLeaderHealthModifier;
+}
+
 inline float CHalfLifeMultiplay::GetRoundRemainingTimeReal() const
 {
 	return m_iRoundTimeSecs - gpGlobals->time + m_fRoundStartTimeReal;
-}
-
-inline float CHalfLifeMultiplay::GetRoundRespawnTime() const
-{
-	return roundrespawn_time.value;
 }
 
 inline bool CHalfLifeMultiplay::IsFreeForAll() const
@@ -754,3 +785,17 @@ int ReloadMapCycleFile(char *filename, mapcycle_t *cycle);
 int CountPlayers();
 void ExtractCommandString(char *s, char *szCommand);
 int GetMapCount();
+
+// SFX
+#define SFX_GAME_START_1		"leadermode/start_game_01.wav"
+#define SFX_GAME_START_2		"leadermode/start_game_02.wav"
+#define SFX_MENPOWER_DEPLETED	"leadermode/unable_manpower_alert.wav"
+#define SFX_TSD_GBD				"leadermode/money_in.wav"
+#define SFX_TSD_SFD				"leadermode/infantry_rifle_cartridge_0%d.wav"
+#define SFX_GAME_WON			"leadermode/brittania_mission_arrived.wav"
+#define SFX_GAME_LOST			"leadermode/end_turn_brittania_04.wav"
+#define MUSIC_GAME_WON			"sound/leadermode/Tally-ho.mp3"
+#define MUSIC_GAME_LOST			"sound/leadermode/Warrior_s_Tomb.mp3"
+#define SFX_VONC_PASSED			"leadermode/complete_focus_01.wav"
+#define SFX_VONC_REJECTED		"leadermode/peaceconference01.wav"
+#define SFX_REFUND_GUNS			"leadermode/money_out.wav"

@@ -212,8 +212,8 @@ BOOL CItemBattery::MyTouch(CBasePlayer *pPlayer)
 			armorValue = pev->armorvalue;
 		}
 
-		if (pPlayer->m_iKevlar == ARMOR_NONE)
-			pPlayer->m_iKevlar = ARMOR_KEVLAR;
+		if (pPlayer->pev->armortype == ARMOR_NONE)
+			pPlayer->pev->armortype = ARMOR_KEVLAR;
 
 		pPlayer->pev->armorvalue += armorValue;
 		pPlayer->pev->armorvalue = Q_min(pPlayer->pev->armorvalue, MAX_NORMAL_BATTERY);
@@ -365,11 +365,11 @@ BOOL CItemKevlar::MyTouch(CBasePlayer *pPlayer)
 	if (pPlayer->HasRestrictItem(ITEM_KEVLAR, ITEM_TYPE_TOUCHED))
 		return FALSE;
 
-	if (pPlayer->m_iKevlar != ARMOR_NONE && pPlayer->pev->armorvalue >= MAX_NORMAL_BATTERY)
+	if (pPlayer->pev->armortype != ARMOR_NONE && pPlayer->pev->armorvalue >= MAX_NORMAL_BATTERY)
 		return FALSE;
 
-	if (pPlayer->m_iKevlar == ARMOR_NONE)
-		pPlayer->m_iKevlar = ARMOR_KEVLAR;
+	if (pPlayer->pev->armortype == ARMOR_NONE)
+		pPlayer->pev->armortype = ARMOR_KEVLAR;
 
 	pPlayer->pev->armorvalue = MAX_NORMAL_BATTERY;
 	EMIT_SOUND(pPlayer->edict(), CHAN_ITEM, "items/ammopickup2.wav", VOL_NORM, ATTN_NORM);
@@ -379,7 +379,7 @@ BOOL CItemKevlar::MyTouch(CBasePlayer *pPlayer)
 	MESSAGE_END();
 
 	MESSAGE_BEGIN(MSG_ONE, gmsgArmorType, nullptr, pPlayer->pev);
-		WRITE_BYTE(pPlayer->m_iKevlar == ARMOR_KEVLAR ? 0 : 1); // 0 = ARMOR_KEVLAR, 1 = ARMOR_VESTHELM
+		WRITE_BYTE(pPlayer->pev->armortype == ARMOR_KEVLAR ? 0 : 1); // 0 = ARMOR_KEVLAR, 1 = ARMOR_VESTHELM
 	MESSAGE_END();
 
 	if (TheTutor)
@@ -409,10 +409,10 @@ BOOL CItemAssaultSuit::MyTouch(CBasePlayer *pPlayer)
 	if (pPlayer->HasRestrictItem(ITEM_ASSAULT, ITEM_TYPE_TOUCHED))
 		return FALSE;
 
-	if (pPlayer->m_iKevlar == ARMOR_VESTHELM && pPlayer->pev->armorvalue >= MAX_NORMAL_BATTERY)
+	if (pPlayer->pev->armortype == ARMOR_VESTHELM && pPlayer->pev->armorvalue >= MAX_NORMAL_BATTERY)
 		return FALSE;
 
-	pPlayer->m_iKevlar = ARMOR_VESTHELM;
+	pPlayer->pev->armortype = ARMOR_VESTHELM;
 	pPlayer->pev->armorvalue = MAX_NORMAL_BATTERY;
 
 	EMIT_SOUND(pPlayer->edict(), CHAN_ITEM, "items/ammopickup2.wav", VOL_NORM, ATTN_NORM);

@@ -99,7 +99,7 @@ cvar_t maxmoney              = { "mp_maxmoney", "16000", FCVAR_SERVER, 0.0f, nul
 cvar_t round_infinite        = { "mp_round_infinite", "0", FCVAR_SERVER, 0.0f, nullptr };
 cvar_t hegrenade_penetration = { "mp_hegrenade_penetration", "0", 0, 0.0f, nullptr };
 cvar_t nadedrops             = { "mp_nadedrops", "0", 0, 0.0f, nullptr };
-cvar_t roundrespawn_time     = { "mp_roundrespawn_time", "20", 0, 20.0f, nullptr };
+cvar_t playerrespawn_time     = { "lm_playerrespawn_basetime", "10", 0, 10.0f, nullptr };
 cvar_t auto_reload_weapons   = { "mp_auto_reload_weapons", "0", 0, 0.0f, nullptr };
 cvar_t refill_bpammo_weapons = { "mp_refill_bpammo_weapons", "0", 0, 0.0f, nullptr }; // Useful for mods like DeathMatch, GunGame, ZombieMod etc
 cvar_t freeforall            = { "mp_freeforall", "0", FCVAR_SERVER, 0.0f, nullptr };
@@ -132,6 +132,13 @@ cvar_t ff_damage_reduction_other        = { "ff_damage_reduction_other",        
 
 cvar_t radio_timeout           = { "mp_radio_timeout", "1.5", FCVAR_SERVER, 1.5f, nullptr };
 cvar_t radio_maxinround        = { "mp_radio_maxinround", "60", FCVAR_SERVER, 60.0f, nullptr };
+
+// new cvars from leader mod.
+cvar_t commander_maxhealth		= { "lm_commander_maxhealth", "1000", FCVAR_SERVER, 1000.0f, nullptr };
+cvar_t godfather_maxhealth		= { "lm_godfather_maxhealth", "1000", FCVAR_SERVER, 1000.0f, nullptr };
+cvar_t human_role_priority		= { "lm_human_role_priority", "1", FCVAR_SERVER, 1.0f, nullptr };
+cvar_t menpower_per_player		= { "lm_menpower_per_player", "1", FCVAR_SERVER, 1.0f, nullptr };
+
 
 void GameDLL_Version_f()
 {
@@ -233,7 +240,7 @@ void EXT_FUNC GameDLLInit()
 	CVAR_REGISTER(&round_infinite);
 	CVAR_REGISTER(&hegrenade_penetration);
 	CVAR_REGISTER(&nadedrops);
-	CVAR_REGISTER(&roundrespawn_time);
+	CVAR_REGISTER(&playerrespawn_time);
 	CVAR_REGISTER(&auto_reload_weapons);
 	CVAR_REGISTER(&refill_bpammo_weapons);
 	CVAR_REGISTER(&freeforall);
@@ -270,6 +277,11 @@ void EXT_FUNC GameDLLInit()
 
 	CVAR_REGISTER(&radio_timeout);
 	CVAR_REGISTER(&radio_maxinround);
+
+	CVAR_REGISTER(&commander_maxhealth);
+	CVAR_REGISTER(&godfather_maxhealth);
+	CVAR_REGISTER(&human_role_priority);
+	CVAR_REGISTER(&menpower_per_player);
 
 	// print version
 	CONSOLE_ECHO("ReGameDLL version: " APP_VERSION "\n");

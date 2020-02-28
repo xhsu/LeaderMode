@@ -32,6 +32,7 @@
 #include "pm_materials.h"
 #include "hintmessage.h"
 #include "unisignals.h"
+#include "player_classes.h"
 
 #define SOUND_FLASHLIGHT_ON  "items/flashlight1.wav"
 #define SOUND_FLASHLIGHT_OFF "items/flashlight1.wav"
@@ -149,15 +150,11 @@ enum RewardType
 	RT_PLAYER_JOIN,
 	RT_PLAYER_SPEC_JOIN,
 	RT_PLAYER_BOUGHT_SOMETHING,
-	RT_HOSTAGE_TOOK,
-	RT_HOSTAGE_RESCUED,
-	RT_HOSTAGE_DAMAGED,
-	RT_HOSTAGE_KILLED,
 	RT_TEAMMATES_KILLED,
 	RT_ENEMY_KILLED,
+	RT_LEADER_KILLED,
 	RT_INTO_GAME,
-	RT_VIP_KILLED,
-	RT_VIP_RESCUED_MYSELF
+	RT_HURTING_ENEMY,
 };
 
 enum PLAYER_ANIM
@@ -367,7 +364,7 @@ public:
 	virtual void RoundRespawn();
 	virtual Vector GetAutoaimVector(float flDelta);
 	virtual void Blind(float flUntilTime, float flHoldTime, float flFadeTime, int iAlpha);
-	virtual void OnTouchingWeapon(CWeaponBox *pWeapon) { }
+	virtual void UpdateOnRemove();
 
 public:
 	static CBasePlayer *Instance(edict_t *pEdict) { return GET_PRIVATE<CBasePlayer>(pEdict ? pEdict : ENT(0)); }
@@ -546,9 +543,16 @@ public:
 
 	void SetSpawnProtection(float flProtectionTime);
 	void RemoveSpawnProtection();
-	void UseEmpty();
 	void DropIdlePlayer(const char *reason);
 	bool CheckActivityInGame();
+
+	// new functions from leader mod.
+	void AssignRole(RoleTypes iNewRole);	// this function is only for skill installation.
+	void UpdateHudText();
+
+	// passive skill calculation hub
+	float WeaponFireIntervalModifier(CBasePlayerWeapon* pWeapon);
+	float PlayerDamageSufferedModifier(int bitsDamageTypes);
 
 	// templates
 	template<typename T = CBasePlayerItem, typename Functor>
@@ -609,7 +613,6 @@ public:
 	enum { MaxLocationLen = 32 };
 
 	int random_seed;
-	unsigned short m_usPlayerBleed;
 	EntityHandle<CBasePlayer> m_hObserverTarget;
 	float m_flNextObserverInput;
 	int m_iObserverWeapon;
@@ -621,7 +624,6 @@ public:
 	int m_iLastZoom;
 	bool m_bResumeZoom;
 	float m_flEjectBrass;
-	ArmorType m_iKevlar;
 	bool m_bNotKilled;
 	TeamName m_iTeam;
 	int m_iAccount;
@@ -690,14 +692,11 @@ public:
 	float m_flSndRange;
 	float m_flFallVelocity;
 	int m_rgItems[MAX_ITEMS];
-	int m_fNewAmmo;
 	unsigned int m_afPhysicsFlags;
 	float m_fNextSuicideTime;
 	float m_flTimeStepSound;
-	float m_flTimeWeaponIdle;
 	float m_flSwimTime;
 	float m_flDuckTime;
-	float m_flWallJumpTime;
 	float m_flSuitUpdate;
 	int m_rgSuitPlayList[MAX_SUIT_PLAYLIST];
 	int m_iSuitPlayNext;
@@ -731,7 +730,6 @@ public:
 	int m_iFOV;
 	int m_iClientFOV;
 	int m_iNumSpawns;
-	CBaseEntity *m_pObserver;
 	CBasePlayerItem *m_rgpPlayerItems[MAX_ITEM_TYPES];
 	CBasePlayerItem *m_pActiveItem;
 	CBasePlayerItem *m_pClientActiveItem;
@@ -799,6 +797,10 @@ public:
 	Vector m_vecOldvAngle;
 	float m_flRespawnPending;
 	float m_flSpawnProtectionEndTime;
+	RoleTypes m_iRoleType;
+	CBaseSkill *m_rgpSkills[SKILLTYPE_COUNT];
+	char m_szHudText[512];
+	char m_szClientHudText[512];
 };
 
 class CWShield: public CBaseEntity

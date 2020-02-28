@@ -10,6 +10,8 @@ RewardAccount CHalfLifeMultiplay::m_rgRewardAccountRules_default[] = {
 	REWARD_LOSER_BONUS_MIN,                 // RR_LOSER_BONUS_MIN
 	REWARD_LOSER_BONUS_MAX,                 // RR_LOSER_BONUS_MAX
 	REWARD_LOSER_BONUS_ADD,                 // RR_LOSER_BONUS_ADD
+	REWARD_LEADER_KILLED,					// RR_LEADER_KILLED,
+	REWARD_KILLED_LEADER,					// RR_KILLED_ENEMY_LEADER,
 };
 
 bool IsBotSpeaking()
@@ -881,6 +883,9 @@ void EXT_FUNC CHalfLifeMultiplay::BalanceTeams()
 			if (pEntity->IsDormant())
 				continue;
 
+			if (pEntity->entindex() == THE_COMMANDER->entindex() || pEntity->entindex() == THE_GODFATHER->entindex())
+				continue;
+
 			CBasePlayer *pPlayer = GetClassPtr((CBasePlayer *)pEntity->pev);
 
 			if (pPlayer->CanSwitchTeam(iTeamToSwap) && GETPLAYERUSERID(pPlayer->edict()) > iHighestUserID)
@@ -1097,6 +1102,7 @@ void EXT_FUNC CHalfLifeMultiplay::RestartRound()
 	}
 	else if (m_iRoundWinStatus == WINSTATUS_CTS)	// CT Won
 	{
+		m_iAccountTerrorist += m_iLoserBonus;
 		m_iAccountCT += acct_tmp;
 	}
 
@@ -1157,10 +1163,18 @@ void EXT_FUNC CHalfLifeMultiplay::RestartRound()
 			pPlayer->RoundRespawn();
 		}
 
-		// Gooseman : The following code fixes the HUD icon bug
-		// by removing the C4 and DEFUSER icons from the HUD regardless
-		// for EVERY player (regardless of what team they're on)
+		// deprive all roles.
+		// the function call of commander/godfather resign is included.
+		pPlayer->AssignRole(Role_UNASSIGNED);
+
+		// stop music from last round, etc...
+		CLIENT_COMMAND(pPlayer->edict(), "stopsound\n");
+		CLIENT_COMMAND(pPlayer->edict(), "mp3 stop\n");
 	}
+
+	// re-calculate menpower.
+	m_rgiMenpowers[CT] = m_rgiMenpowers[TERRORIST] = menpower_per_player.value * (m_iNumCT + m_iNumTerrorist) / 2.0f;
+	m_rgbMenpowerBroadcast[CT] = m_rgbMenpowerBroadcast[TERRORIST] = false;
 
 	if (TheBots)
 	{
@@ -1440,6 +1454,10 @@ void CHalfLifeMultiplay::Think()
 			SERVER_COMMAND("setpause\n");
 		}
 	}
+
+	// menpower check. just a broadcasting function, nothing related to win-lost determination.
+	CheckMenpower(CT);
+	CheckMenpower(TERRORIST);
 }
 
 bool CHalfLifeMultiplay::CheckGameOver()
@@ -1660,6 +1678,13 @@ void EXT_FUNC CHalfLifeMultiplay::OnRoundFreezeEnd()
 		plr->SyncRoundTimer();
 	}
 
+	// UNDONE: allocate roles left.
+	if (!THE_COMMANDER.IsValid())
+		AssignCommander(RandomNonroleCharacter(CT));
+
+	if (!THE_GODFATHER.IsValid())
+		AssignGodfather(RandomNonroleCharacter(TERRORIST));
+
 	if (TheBots)
 	{
 		TheBots->OnEvent(EVENT_ROUND_START);
@@ -1775,6 +1800,195 @@ bool CHalfLifeMultiplay::HasRoundTimeExpired()
 	}
 
 	return false;
+}
+
+bool CHalfLifeMultiplay::CanSkillBeUsed()
+{
+	return !IsFreezePeriod();
+}
+
+void CHalfLifeMultiplay::AssignCommander(CBasePlayer *pPlayer)
+{
+	float flSucceedHealth = commander_maxhealth.value;
+
+	if (THE_COMMANDER.IsValid())
+	{
+		CBasePlayer *iAbdicator = THE_COMMANDER;
+
+		MESSAGE_BEGIN(MSG_ALL, gmsgScoreAttrib);
+		WRITE_BYTE(iAbdicator->entindex());
+		WRITE_BYTE(0);
+		MESSAGE_END();
+
+		pPlayer ? iAbdicator->AssignRole(FindAvaliableRole(TERRORIST)) : iAbdicator->m_iRoleType = Role_UNASSIGNED;	// no new godfather means new round.
+		flSucceedHealth = iAbdicator->pev->health;	// this health will be assign to new leader. prevents the confidence motion mechanism abused by players.
+
+		iAbdicator->pev->health = 100.0f * (iAbdicator->pev->health / iAbdicator->pev->max_health);
+		iAbdicator->pev->max_health = 100.0f;
+
+		// UNDONE: reset player model.
+	}
+
+	if (FNullEnt(pPlayer))	// no new commander assigned? new round?
+	{
+		THE_COMMANDER = nullptr;
+		return;
+	}
+
+	if (!pPlayer->IsAlive())	// what if this guy was dead?
+	{
+		pPlayer->Spawn();
+		pPlayer->pev->button = 0;
+		pPlayer->pev->nextthink = -1;
+	}
+
+	// LONG LIVE THE KING!
+	THE_COMMANDER = pPlayer;
+	// UNDONE: set player model.
+	THE_COMMANDER->pev->health = flSucceedHealth;
+	THE_COMMANDER->pev->max_health = commander_maxhealth.value;
+	THE_COMMANDER->AssignRole(Role_Commander);
+
+	UTIL_HudMessage(THE_COMMANDER, CSGameRules()->m_TextParam_Notification, "You are now the %s!", g_rgszRoleNames[Role_Commander]);
+
+	MESSAGE_BEGIN(MSG_ALL, gmsgScoreAttrib);
+	WRITE_BYTE(THE_COMMANDER->entindex());	// head of CTs
+	WRITE_BYTE(SCORE_STATUS_VIP);
+	MESSAGE_END();
+
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		pPlayer = UTIL_PlayerByIndex(i);
+
+		if (!pPlayer || !pPlayer->IsAlive() || pPlayer->IsBot())
+			continue;
+
+		switch (pPlayer->m_iTeam)
+		{
+		case CT:
+			UTIL_PrintChatColor(pPlayer, BLUECHAT, "/t%s/y is your /t%s/y in this operation./g PROTECT HIM!", STRING(THE_COMMANDER->pev->netname), g_rgszRoleNames[Role_Commander]);
+			break;
+
+		case TERRORIST:
+			UTIL_PrintChatColor(pPlayer, REDCHAT, "/y%s/t is the /y%s/t, the head of CTs. To stop this assault, kill him ASAP.", STRING(THE_COMMANDER->pev->netname), g_rgszRoleNames[Role_Commander]);
+			break;
+
+		default:
+			UTIL_PrintChatColor(pPlayer, BLUECHAT, "/t%s/y is the /t%s/y of this round.", STRING(THE_COMMANDER->pev->netname), g_rgszRoleNames[Role_Commander]);
+			break;
+		}
+	}
+}
+
+void CHalfLifeMultiplay::AssignGodfather(CBasePlayer* pPlayer)
+{
+	float flSucceedHealth = godfather_maxhealth.value;
+
+	if (THE_GODFATHER.IsValid())	// deal with the old godfather...
+	{
+		CBasePlayer* iAbdicator = THE_GODFATHER;
+
+		MESSAGE_BEGIN(MSG_ALL, gmsgScoreAttrib);
+		WRITE_BYTE(iAbdicator->entindex());
+		WRITE_BYTE(0);
+		MESSAGE_END();
+
+		pPlayer ? iAbdicator->AssignRole(FindAvaliableRole(TERRORIST)) : iAbdicator->m_iRoleType = Role_UNASSIGNED;	// no new godfather means new round.
+		flSucceedHealth = iAbdicator->pev->health;	// this health will be assign to new leader. prevents the confidence motion mechanism abused by players.
+
+		iAbdicator->pev->health = 100.0f * (iAbdicator->pev->health / iAbdicator->pev->max_health);
+		iAbdicator->pev->max_health = 100.0f;
+
+		// UNDONE: reset player model.
+	}
+
+	if (FNullEnt(pPlayer))	// no new commander assigned? new round?
+	{
+		THE_GODFATHER = nullptr;
+		return;
+	}
+
+	if (!pPlayer->IsAlive())	// what if this guy was dead?
+	{
+		pPlayer->Spawn();
+		pPlayer->pev->button = 0;
+		pPlayer->pev->nextthink = -1;
+	}
+
+	// LONG LIVE THE KING!
+	THE_GODFATHER = pPlayer;
+	// UNDONE: set player model.
+	THE_GODFATHER->pev->health = flSucceedHealth;
+	THE_GODFATHER->pev->max_health = godfather_maxhealth.value;
+	THE_GODFATHER->AssignRole(Role_Godfather);
+
+	UTIL_HudMessage(THE_GODFATHER, CSGameRules()->m_TextParam_Notification, "You are now the %s!", g_rgszRoleNames[Role_Godfather]);
+
+	MESSAGE_BEGIN(MSG_ALL, gmsgScoreAttrib);
+	WRITE_BYTE(THE_GODFATHER->entindex());	// head of TRs
+	WRITE_BYTE(SCORE_STATUS_BOMB);
+	MESSAGE_END();
+
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		pPlayer = UTIL_PlayerByIndex(i);
+
+		if (!pPlayer || !pPlayer->IsAlive() || pPlayer->IsBot())
+			continue;
+
+		switch (pPlayer->m_iTeam)
+		{
+		case CT:
+			UTIL_PrintChatColor(pPlayer, REDCHAT, "/t%s/y is the /t%s/y, the most valued target of this operation.", STRING(THE_GODFATHER->pev->netname), g_rgszRoleNames[Role_Godfather]);
+			break;
+
+		case TERRORIST:
+			UTIL_PrintChatColor(pPlayer, GREYCHAT, "/g%s/t is your boss and /g%s/t. Make sure he survive in this assault.", STRING(THE_GODFATHER->pev->netname), g_rgszRoleNames[Role_Godfather]);
+			break;
+
+		default:
+			UTIL_PrintChatColor(pPlayer, REDCHAT, "/t%s/y is the /t%s/y of this round.", STRING(THE_GODFATHER->pev->netname), g_rgszRoleNames[Role_Godfather]);
+			break;
+		}
+	}
+}
+
+RoleTypes CHalfLifeMultiplay::FindAvaliableRole(TeamName iTeam)
+{
+	if (iTeam != CT && iTeam != TERRORIST)
+		return Role_UNASSIGNED;
+
+	RoleTypes iStart = Role_Commander, iEnd = Role_Medic;
+	if (iTeam == TERRORIST)
+	{
+		iStart = Role_Godfather;
+		iEnd = Role_Arsonist;
+	}
+
+	CBasePlayer* pPlayer = nullptr;
+	for (int j = iStart; j <= iEnd; j++)
+	{
+		bool bUnoccupied = true;
+
+		for (int i = 1; i <= gpGlobals->maxClients; i++)
+		{
+			pPlayer = UTIL_PlayerByIndex(i);
+
+			if (!pPlayer)
+				continue;
+
+			if (pPlayer->m_iRoleType == j)
+			{
+				bUnoccupied = false;
+				break;
+			}
+		}
+
+		if (bUnoccupied)
+			return RoleTypes(j);
+	}
+
+	return Role_UNASSIGNED;
 }
 
 // Living players on the given team need to be marked as not receiving any money next round.
@@ -2132,11 +2346,6 @@ void CHalfLifeMultiplay::ClientDisconnected(edict_t *pClient)
 			// destroy all of the players weapons and items
 			pPlayer->RemoveAllItems(TRUE);
 
-			if (pPlayer->m_pObserver)
-			{
-				pPlayer->m_pObserver->SUB_Remove();
-			}
-
 			CBasePlayer *pObserver = nullptr;
 			while ((pObserver = UTIL_FindEntityByClassname(pObserver, "player")))
 			{
@@ -2285,46 +2494,41 @@ void EXT_FUNC CHalfLifeMultiplay::PlayerSpawn(CBasePlayer *pPlayer)
 
 BOOL EXT_FUNC CHalfLifeMultiplay::FPlayerCanRespawn(CBasePlayer *pPlayer)
 {
-	// Player cannot respawn twice in a round
-	if (pPlayer->m_iNumSpawns > 0)
+	// Player cannot respawn while in the starting menu.
+	if (pPlayer->m_iMenu == Menu_ChooseAppearance || pPlayer->m_iJoiningState != JOINED)
 	{
 		return FALSE;
 	}
-
-	// Player cannot respawn until next round if more than 20 seconds in
 
 	// Tabulate the number of players on each team.
 	m_iNumCT = CountTeamPlayers(CT);
 	m_iNumTerrorist = CountTeamPlayers(TERRORIST);
 
-	if (m_iNumTerrorist > 0 && m_iNumCT > 0)
+	if (m_iNumCT <= 0 || m_iNumTerrorist <= 0)
 	{
-		// means no time limit
-		if (GetRoundRespawnTime() != -1)
-		{
-			// TODO: to be correct, need use time the real one starts of round, m_fRoundStartTimeReal instead of it.
-				// m_fRoundStartTime able to extend the time to 60 seconds when there is a remaining time of round.
-			if (gpGlobals->time > m_fRoundStartTimeReal + GetRoundRespawnTime())
-			{
-				// If this player just connected and fadetoblack is on, then maybe
-					// the server admin doesn't want him peeking around.
-				if (fadetoblack.value != 0.0f)
-				{
-					UTIL_ScreenFade(pPlayer, Vector(0, 0, 0), 3, 3, 255, (FFADE_OUT | FFADE_STAYOUT));
-				}
-
-				return FALSE;
-			}
-		}
+		return TRUE;
 	}
 
-	// Player cannot respawn while in the Choose Appearance menu
-	if (pPlayer->m_iMenu == Menu_ChooseAppearance)
+	// Player may spawn in freeze phase no matter what.
+	if (IsFreezePeriod())
+	{
+		return TRUE;
+	}
+
+	// They cannot respawn without menpower consume, unless it's Freezing phase.
+	if (m_rgiMenpowers[pPlayer->m_iTeam] <= 0)
 	{
 		return FALSE;
 	}
 
-	return TRUE;
+	// Player may respawn if their corresponding team leader is alive.
+	if ((pPlayer->m_iTeam == CT && THE_COMMANDER.IsValid() && THE_COMMANDER->IsAlive())
+		|| (pPlayer->m_iTeam == TERRORIST && THE_GODFATHER.IsValid() && THE_GODFATHER->IsAlive()))
+	{
+		return TRUE;
+	}
+
+	return FALSE;
 }
 
 float CHalfLifeMultiplay::FlPlayerSpawnTime(CBasePlayer *pPlayer)
@@ -2340,6 +2544,9 @@ BOOL CHalfLifeMultiplay::AllowAutoTargetCrosshair()
 // How many points awarded to anyone that kills this player?
 int CHalfLifeMultiplay::IPointsForKill(CBasePlayer *pAttacker, CBasePlayer *pKilled)
 {
+	if (pKilled == THE_GODFATHER || pKilled == THE_COMMANDER)
+		return 10;
+
 	return 1;
 }
 
@@ -2371,6 +2578,40 @@ void EXT_FUNC CHalfLifeMultiplay::PlayerKilled(CBasePlayer *pVictim, entvars_t *
 		}
 	}
 
+	if (pVictim == THE_GODFATHER || pVictim == THE_COMMANDER)	// one of two leaders is killed.
+	{
+		// send the message to everyone.
+		UTIL_HudMessageAll(m_TextParam_Notification, "the %s is killed!", g_rgszRoleNames[pVictim->m_iRoleType]);
+		UTIL_PrintChatColor(nullptr, pVictim->m_iTeam == CT ? BLUECHAT : REDCHAT, "/tthe %s is killed!", g_rgszRoleNames[pVictim->m_iRoleType]);
+
+		// SFX
+		CBasePlayer* pPlayer = nullptr;
+		for (int i = 1; i <= gpGlobals->maxClients; i++)
+		{
+			pPlayer = UTIL_PlayerByIndex(i);
+
+			if (!pPlayer || FNullEnt(pPlayer) || pPlayer->IsDormant())
+				continue;
+
+			if (pPlayer->m_iTeam == SPECTATOR || pPlayer->m_iTeam == UNASSIGNED)	// UNDONE. these two should play the same SFX with whoever they're watching at.
+				continue;
+
+			if (pVictim->m_iTeam != pPlayer->m_iTeam)	// mostly, the winner
+			{
+				CLIENT_COMMAND(pPlayer->edict(), "spk %s\n", SFX_GAME_WON);
+				CLIENT_COMMAND(pPlayer->edict(), "mp3 play %s\n", MUSIC_GAME_WON);
+			}
+			else	// your leader is dead!
+			{
+				CLIENT_COMMAND(pPlayer->edict(), "spk %s\n", SFX_GAME_LOST);
+				CLIENT_COMMAND(pPlayer->edict(), "mp3 play %s\n", MUSIC_GAME_LOST);
+			}
+		}
+
+		m_iAccountCT += m_rgRewardAccountRules[pVictim->m_iTeam == CT ? RR_LEADER_KILLED : RR_KILLED_ENEMY_LEADER];
+		m_iAccountTerrorist += m_rgRewardAccountRules[pVictim->m_iTeam == CT ? RR_KILLED_ENEMY_LEADER : RR_LEADER_KILLED];
+	}
+
 	FireTargets("game_playerdie", pVictim, pVictim, USE_TOGGLE, 0);
 
 	// Did the player kill himself?
@@ -2385,7 +2626,7 @@ void EXT_FUNC CHalfLifeMultiplay::PlayerKilled(CBasePlayer *pVictim, entvars_t *
 		CBasePlayer *killer = GetClassPtr((CBasePlayer *)pKiller);
 		bool killedByFFA = IsFreeForAll();
 
-		if (killer->m_iTeam == pVictim->m_iTeam && !killedByFFA)
+		if (killer->m_iTeam == pVictim->m_iTeam && !killedByFFA)	// teamkill handler
 		{
 			// if a player dies by from teammate
 			pKiller->frags -= IPointsForKill(peKiller, pVictim);
@@ -2408,6 +2649,17 @@ void EXT_FUNC CHalfLifeMultiplay::PlayerKilled(CBasePlayer *pVictim, entvars_t *
 				}
 			}
 
+			if (pVictim == THE_GODFATHER || pVictim == THE_COMMANDER)	// TK your leader? WTF?
+			{
+				ClientPrint(killer->pev, HUD_PRINTCONSOLE, "#Banned_For_Killing_Teammates");
+
+				int iUserID = GETPLAYERUSERID(killer->edict());
+				if (iUserID != -1)
+				{
+					SERVER_COMMAND(UTIL_VarArgs("kick #%d \"For sabotaging the normal gameplay\"\n", iUserID));
+				}
+			}
+
 			if (!(killer->m_flDisplayHistory & DHF_FRIEND_KILLED))
 			{
 				killer->m_flDisplayHistory |= DHF_FRIEND_KILLED;
@@ -2418,7 +2670,11 @@ void EXT_FUNC CHalfLifeMultiplay::PlayerKilled(CBasePlayer *pVictim, entvars_t *
 		{
 			// if a player dies in a deathmatch game and the killer is a client, award the killer some points
 			pKiller->frags += IPointsForKill(peKiller, pVictim);
-			killer->AddAccount(REWARD_KILLED_ENEMY, RT_ENEMY_KILLED);
+
+			if (pVictim != THE_GODFATHER && pVictim != THE_COMMANDER)
+				killer->AddAccount(REWARD_KILLED_ENEMY, RT_ENEMY_KILLED);
+			else
+				killer->AddAccount(REWARD_KILLED_LEADER, RT_LEADER_KILLED);	// give a bunch of money if you can kill the leader.
 
 			if (!(killer->m_flDisplayHistory & DHF_ENEMY_KILLED))
 			{
@@ -2446,22 +2702,18 @@ void EXT_FUNC CHalfLifeMultiplay::PlayerKilled(CBasePlayer *pVictim, entvars_t *
 	MESSAGE_END();
 
 	// killers score, if it's a player
-	CBaseEntity *ep = CBaseEntity::Instance(pKiller);
-
-	if (ep && ep->Classify() == CLASS_PLAYER)
+	if (peKiller && peKiller->IsPlayer())
 	{
-		CBasePlayer *PK = static_cast<CBasePlayer *>(ep);
-
 		MESSAGE_BEGIN(MSG_ALL, gmsgScoreInfo);
-			WRITE_BYTE(ENTINDEX(PK->edict()));
-			WRITE_SHORT(int(PK->pev->frags));
-			WRITE_SHORT(PK->m_iDeaths);
+			WRITE_BYTE(ENTINDEX(peKiller->edict()));
+			WRITE_SHORT(int(peKiller->pev->frags));
+			WRITE_SHORT(peKiller->m_iDeaths);
 			WRITE_SHORT(0);
-			WRITE_SHORT(PK->m_iTeam);
+			WRITE_SHORT(peKiller->m_iTeam);
 		MESSAGE_END();
 
 		// let the killer paint another decal as soon as he'd like.
-		PK->m_flNextDecalTime = gpGlobals->time;
+		peKiller->m_flNextDecalTime = gpGlobals->time;
 	}
 }
 
@@ -3416,6 +3668,33 @@ void CHalfLifeMultiplay::ServerActivate()
 
 	ReadMultiplayCvars();
 	CheckMapConditions();
+
+	// initialize FX message.
+	m_TextParam_Notification.x = -1.0f;
+	m_TextParam_Notification.y = 0.3f;
+	m_TextParam_Notification.effect = 0;
+	m_TextParam_Notification.r1 = m_TextParam_Notification.r2 = 255;
+	m_TextParam_Notification.g1 = m_TextParam_Notification.g2 = 100;
+	m_TextParam_Notification.b1 = m_TextParam_Notification.b2 = 255;
+	m_TextParam_Notification.a1 = m_TextParam_Notification.a2 = 255;
+	m_TextParam_Notification.fadeinTime = 0.1f;
+	m_TextParam_Notification.fadeoutTime = 0.2f;
+	m_TextParam_Notification.holdTime = 6.0f;
+	m_TextParam_Notification.fxTime = 6.0f;
+	m_TextParam_Notification.channel = 1;
+
+	m_TextParam_Hud.x = -1.0f;
+	m_TextParam_Hud.y = 0.85f;
+	m_TextParam_Hud.effect = 0;
+	m_TextParam_Hud.r1 = m_TextParam_Hud.r2 = 255;
+	m_TextParam_Hud.g1 = m_TextParam_Hud.g2 = 255;
+	m_TextParam_Hud.b1 = m_TextParam_Hud.b2 = 0;
+	m_TextParam_Hud.a1 = m_TextParam_Hud.a2 = 255;
+	m_TextParam_Hud.fadeinTime = 0;
+	m_TextParam_Hud.fadeoutTime = 0;
+	m_TextParam_Hud.holdTime = 3600.0f;
+	m_TextParam_Hud.fxTime = 6.0f;
+	m_TextParam_Hud.channel = 2;
 }
 
 TeamName CHalfLifeMultiplay::SelectDefaultTeam()
@@ -3523,4 +3802,82 @@ bool CHalfLifeMultiplay::CanPlayerBuy(CBasePlayer *pPlayer) const
 	}
 
 	return true;
+}
+
+CBasePlayer* CHalfLifeMultiplay::RandomNonroleCharacter(TeamName iTeam)
+{
+	int iCandidateCount = 0;
+	CBasePlayer* rgpCandidates[33];
+
+	CBasePlayer* pCandidate = nullptr;
+
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		pCandidate = UTIL_PlayerByIndex(i);
+
+		if (!pCandidate || FNullEnt(pCandidate) || pCandidate->IsDormant())
+			continue;
+
+		if (human_role_priority.value > 0.0 && pCandidate->IsBot())	// exclude bots if cvar says so.
+			continue;
+
+		if (pCandidate->m_iTeam != iTeam)
+			continue;
+
+		if (pCandidate->m_iRoleType != Role_UNASSIGNED)
+			continue;
+
+		iCandidateCount++;
+		rgpCandidates[iCandidateCount] = pCandidate;
+	}
+
+	if (!iCandidateCount)	// include bots this time.
+	{
+		for (int i = 1; i <= gpGlobals->maxClients; i++)
+		{
+			pCandidate = UTIL_PlayerByIndex(i);
+
+			if (!pCandidate || FNullEnt(pCandidate) || pCandidate->IsDormant())
+				continue;
+
+			if (pCandidate->m_iTeam != iTeam)
+				continue;
+
+			if (pCandidate->m_iRoleType != Role_UNASSIGNED)
+				continue;
+
+			iCandidateCount++;
+			rgpCandidates[iCandidateCount] = pCandidate;
+		}
+	}
+
+	if (iCandidateCount > 0)
+		return rgpCandidates[RANDOM_LONG(1, iCandidateCount)];
+
+	return nullptr;	// no found.
+}
+
+void CHalfLifeMultiplay::CheckMenpower(TeamName iTeam)
+{
+	if (m_rgiMenpowers[iTeam] <= 0 && !m_rgbMenpowerBroadcast[iTeam])	// broadcast it if we didn't
+	{
+		UTIL_HudMessageAll(m_TextParam_Notification, "The menpower of %s is depleted!", iTeam == CT ? "CT" : "TERRORIST");
+		UTIL_PlayEarSound(nullptr, SFX_MENPOWER_DEPLETED);
+
+		m_rgbMenpowerBroadcast[iTeam] = true;
+	}
+}
+
+int CHalfLifeMultiplay::IDamageMoney(CBasePlayer* pVictim, CBasePlayer* pAttacker, float flDamage)
+{
+	if (FNullEnt(pAttacker) || FNullEnt(pVictim))
+		return FALSE;
+
+	if (flDamage <= 0)
+		return FALSE;
+
+	if (pVictim->m_iTeam == pAttacker->m_iTeam)
+		return int(flDamage * -3.0f);	// penalty of hurting teammate.
+
+	return int(flDamage);
 }

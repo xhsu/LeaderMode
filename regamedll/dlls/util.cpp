@@ -570,10 +570,17 @@ void UTIL_ScreenFade(CBaseEntity *pEntity, const Vector &color, float fadeTime, 
 	UTIL_ScreenFadeWrite(fade, pEntity);
 }
 
-void UTIL_HudMessage(CBaseEntity *pEntity, const hudtextparms_t &textparms, const char *pMessage)
+void UTIL_HudMessage(CBaseEntity *pEntity, const hudtextparms_t &textparms, const char *pMessage, ...)
 {
 	if (!pEntity || !pEntity->IsNetClient())
 		return;
+
+	static char szHudMsgBuffer[512];
+
+	va_list ap;
+	va_start(ap, pMessage);
+	vsprintf_s(szHudMsgBuffer, pMessage, ap);
+	va_end(ap);
 
 	MESSAGE_BEGIN(MSG_ONE, SVC_TEMPENTITY, nullptr, pEntity->edict());
 		WRITE_BYTE(TE_TEXTMESSAGE);
@@ -596,34 +603,76 @@ void UTIL_HudMessage(CBaseEntity *pEntity, const hudtextparms_t &textparms, cons
 		if (textparms.effect == 2)
 			WRITE_SHORT(FixedUnsigned16(textparms.fxTime, (1<<8)));
 
-		if (!pMessage)
+		if (!szHudMsgBuffer)
 			WRITE_STRING(" ");
 		else
 		{
-			if (Q_strlen(pMessage) >= 512)
+			if (Q_strlen(szHudMsgBuffer) >= 512)
 			{
 				char tmp[512];
-				Q_strlcpy(tmp, pMessage);
+				Q_strlcpy(tmp, szHudMsgBuffer);
 				WRITE_STRING(tmp);
 			}
 			else
 			{
-				WRITE_STRING(pMessage);
+				WRITE_STRING(szHudMsgBuffer);
 			}
 		}
 	MESSAGE_END();
 }
 
-void UTIL_HudMessageAll(const hudtextparms_t &textparms, const char *pMessage)
+void UTIL_HudMessageAll(const hudtextparms_t &textparms, const char *pMessage, ...)
 {
+	static char szHudMsgBuffer[512];
+
+	va_list ap;
+	va_start(ap, pMessage);
+	vsprintf_s(szHudMsgBuffer, pMessage, ap);
+	va_end(ap);
+
 	for (int i = 1; i <= gpGlobals->maxClients; i++)
 	{
 		CBaseEntity *pPlayer = UTIL_PlayerByIndex(i);
 		if (pPlayer)
 		{
-			UTIL_HudMessage(pPlayer, textparms, pMessage);
+			UTIL_HudMessage(pPlayer, textparms, szHudMsgBuffer);
 		}
 	}
+}
+
+void UTIL_HudMessage(edict_t* ent, int iChannel, Vector2D vecOrigin, const colorVec& textColor, const colorVec& efxColor, float flFadeInTime, float flFadeOutTime, float flHoldTime, float flFxTime, const char* format, ...)
+{
+	static char szHudMsgBuffer[512];
+
+	va_list ap;
+	va_start(ap, format);
+	vsprintf_s(szHudMsgBuffer, format, ap);
+	va_end(ap);
+
+	if (ent)
+		MESSAGE_BEGIN(MSG_ONE, SVC_TEMPENTITY, g_vecZero, ent);
+	else
+		MESSAGE_BEGIN(MSG_ALL, SVC_TEMPENTITY);
+
+	WRITE_BYTE(TE_TEXTMESSAGE);
+	WRITE_BYTE(iChannel);
+	WRITE_SHORT(FixedSigned16(vecOrigin.x, 1 << 13));
+	WRITE_SHORT(FixedSigned16(vecOrigin.y, 1 << 13));
+	WRITE_BYTE(2);											// 0 = fade in / fade out, 1 is flickery credits, 2 is write out (training room)
+	WRITE_BYTE(static_cast <int> (textColor.r));
+	WRITE_BYTE(static_cast <int> (textColor.g));
+	WRITE_BYTE(static_cast <int> (textColor.b));
+	WRITE_BYTE(static_cast <int> (textColor.a));
+	WRITE_BYTE(static_cast <int> (efxColor.r));
+	WRITE_BYTE(static_cast <int> (efxColor.g));
+	WRITE_BYTE(static_cast <int> (efxColor.b));
+	WRITE_BYTE(static_cast <int> (efxColor.a));
+	WRITE_SHORT(FixedUnsigned16(flFadeInTime, 1 << 8));		// fadein time
+	WRITE_SHORT(FixedUnsigned16(flFadeOutTime, 1 << 8));	// fadeout time
+	WRITE_SHORT(FixedUnsigned16(flHoldTime, 1 << 8));		// hold time
+	WRITE_SHORT(FixedUnsigned16(flFxTime, 1 << 8));			// [optional] write_short(fxtime) time the highlight lags behing the leading text in effect 2
+	WRITE_STRING(const_cast <const char*> (&szHudMsgBuffer[0]));
+	MESSAGE_END();
 }
 
 void UTIL_ClientPrintAll(int msg_dest, const char *msg_name, const char *param1, const char *param2, const char *param3, const char *param4)
@@ -1792,4 +1841,93 @@ int UTIL_CountPlayersInBrushVolume(bool bOnlyAlive, CBaseEntity *pBrushEntity, i
 	}
 
 	return playersInCount + playersOutCount;
+}
+
+void replace_all(std::string& str, const std::string& from, const std::string& to)
+{
+	if (from.empty())
+		return;
+
+	size_t start_pos = 0;
+
+	while ((start_pos = str.find(from, start_pos)) != std::string::npos)
+	{
+		str.replace(start_pos, from.length(), to);
+		start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
+	}
+}
+
+const char* g_rgszTeamName[] = { "UNASSIGNED", "TERRORIST", "CT", "SPECTATOR" };
+
+void UTIL_PrintChatColor(CBasePlayer* player, ChatColor color, const char* szMessage, ...)
+{
+	va_list argptr;
+	static char szStr[192];
+
+	va_start(argptr, szMessage);
+	vsprintf_s(szStr, szMessage, argptr);
+	va_end(argptr);
+
+	std::string message = std::string(szStr);
+	replace_all(message, "/y", "\1");
+	replace_all(message, "/t", "\3");
+	replace_all(message, "/g", "\4");
+
+	bool bAll = (player != nullptr);
+
+	if (player == nullptr)
+	{
+		for (int i = 1; i <= gpGlobals->maxClients; i++)
+		{
+			CBasePlayer *toolman = UTIL_PlayerByIndex(i);
+
+			if (toolman && toolman->IsPlayer())
+			{
+				player = toolman;
+				break;
+			}
+		}
+	}
+
+	if (!player)	// it's dangerous to proceed.
+		return;
+
+	if (REDCHAT <= color && color <= GREYCHAT)
+	{
+		MESSAGE_BEGIN(bAll ? MSG_ALL : MSG_ONE, gmsgTeamInfo, g_vecZero, bAll ? nullptr : player->edict());
+		WRITE_BYTE(player->entindex());
+		WRITE_STRING(g_rgszTeamName[color]);
+		MESSAGE_END();
+	}
+
+	MESSAGE_BEGIN(bAll ? MSG_ALL : MSG_ONE, gmsgSayText, g_vecZero, bAll ? nullptr : player->edict());
+	WRITE_BYTE(player->entindex());
+	WRITE_STRING(message.c_str());
+	MESSAGE_END();
+
+	if (REDCHAT <= color && color <= GREYCHAT)
+	{
+		MESSAGE_BEGIN(bAll ? MSG_ALL : MSG_ONE, gmsgTeamInfo, g_vecZero, bAll ? nullptr : player->edict());
+		WRITE_BYTE(player->entindex());
+		WRITE_STRING(g_rgszTeamName[player->m_iTeam]);
+		MESSAGE_END();
+	}
+}
+
+void UTIL_PlayEarSound(CBasePlayer* player, const char* sfx)
+{
+	if (!FNullEnt(player))
+		CLIENT_COMMAND(player->edict(), "spk %s\n", sfx);
+	else
+	{
+		for (int i = 1; i <= gpGlobals->maxClients; i++)
+		{
+			player = UTIL_PlayerByIndex(i);
+
+			if (!player || FNullEnt(player) || player->IsDormant())
+				continue;
+
+			CLIENT_COMMAND(player->edict(), "spk %s\n", sfx);
+		}
+	}
 }

@@ -237,6 +237,7 @@
     <ClCompile Include="..\dlls\pathcorner.cpp" />
     <ClCompile Include="..\dlls\plats.cpp" />
     <ClCompile Include="..\dlls\player.cpp" />
+    <ClCompile Include="..\dlls\player_classes.cpp" />
     <ClCompile Include="..\dlls\revert_saved.cpp" />
     <ClCompile Include="..\dlls\saverestore.cpp" />
     <ClCompile Include="..\dlls\singleplay_gamerules.cpp" />
@@ -604,6 +605,7 @@
     <ClInclude Include="..\dlls\pathcorner.h" />
     <ClInclude Include="..\dlls\plats.h" />
     <ClInclude Include="..\dlls\player.h" />
+    <ClInclude Include="..\dlls\player_classes.h" />
     <ClInclude Include="..\dlls\qstring.h" />
     <ClInclude Include="..\dlls\revert_saved.h" />
     <ClInclude Include="..\dlls\saverestore.h" />
@@ -968,6 +970,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
+      <DisableSpecificWarnings>26814;26485;26440;26481;26482;26446;26486;26433;26402;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

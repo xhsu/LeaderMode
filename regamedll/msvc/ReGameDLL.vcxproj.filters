@@ -499,6 +499,9 @@
     <ClCompile Include="..\public\FileSystem.cpp">
       <Filter>public</Filter>
     </ClCompile>
+    <ClCompile Include="..\dlls\player_classes.cpp">
+      <Filter>dlls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\version\version.h">
@@ -980,6 +983,9 @@
     </ClInclude>
     <ClInclude Include="..\dlls\addons\point_command.h">
       <Filter>dlls\addons</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dlls\player_classes.h">
+      <Filter>dlls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -140,8 +140,8 @@ void CRecharge::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useT
 	if (m_hActivator->pev->armorvalue < MAX_CHARGE_ARMOR)
 	{
 		CBasePlayer *pPlayer = m_hActivator.Get<CBasePlayer>();
-		if (pPlayer->m_iKevlar == ARMOR_NONE)
-			pPlayer->m_iKevlar = ARMOR_KEVLAR;
+		if (pPlayer->pev->armortype == ARMOR_NONE)
+			pPlayer->pev->armortype = ARMOR_KEVLAR;
 
 		m_iJuice--;
 		m_hActivator->pev->armorvalue += AMOUNT_CHARGE_ARMOR;

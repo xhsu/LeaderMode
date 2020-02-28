@@ -1132,7 +1132,7 @@ void BuyItem(CBasePlayer *pPlayer, int iSlot)
 	}
 
 	bool bFullArmor = (pPlayer->pev->armorvalue >= 100);
-	bool bHasHelmet = (pPlayer->m_iKevlar == ARMOR_VESTHELM);
+	bool bHasHelmet = (pPlayer->pev->armortype == ARMOR_VESTHELM);
 	bool bEnoughMoney = false;
 
 	switch (iSlot)
@@ -3184,6 +3184,70 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 					}
 				}
 			}
+			else if (FStrEq(pcmd, "learn"))
+			{
+				switch (atoi(parg1))
+				{
+				case 1:	// Role_Commander: Battlefield Analysis
+					CBaseSkill::Grand<CSkillRadarScan>(pPlayer);
+					break;
+
+				case 2:	// Role_Commander: Haste
+					CBaseSkill::Grand<CSkillFireRate>(pPlayer);
+					break;
+
+				default:
+					break;
+				}
+			}
+			else if (FStrEq(pcmd, "forget"))
+			{
+				int iSkillType = atoi(parg1);
+
+				switch (iSkillType)
+				{
+				case Skill_Attack:
+				case Skill_Defense:
+				case Skill_Intel:
+				case Skill_UNASSIGNED:
+				case Skill_WeaponEnhance:
+					if (pPlayer->m_rgpSkills[iSkillType])
+					{
+						delete pPlayer->m_rgpSkills[iSkillType];
+						pPlayer->m_rgpSkills[iSkillType] = nullptr;
+						break;
+					}
+
+				default:
+					break;
+				}
+			}
+			else if (FStrEq(pcmd, "executeskill"))
+			{
+				int iSkillType = atoi(parg1);
+
+				switch (iSkillType)
+				{
+				case Skill_Attack:
+				case Skill_Defense:
+				case Skill_Intel:
+				case Skill_UNASSIGNED:
+				case Skill_WeaponEnhance:
+					if (pPlayer->m_rgpSkills[iSkillType])
+						pPlayer->m_rgpSkills[iSkillType]->Execute();
+
+					break;
+
+				default:
+					break;
+				}
+			}
+			else if (FStrEq(pcmd, "role"))
+			{
+				int iRole = atoi(parg1);
+				if (iRole >= Role_UNASSIGNED && iRole < ROLE_COUNT)
+					pPlayer->AssignRole(RoleTypes(iRole));
+			}
 			else
 			{
 				if (HandleBuyAliasCommands(pPlayer, pcmd))
@@ -4106,12 +4170,33 @@ BOOL EXT_FUNC AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, e
 	for (i = 0; i < 2; i++)
 		state->blending[i] = ent->v.blending[i];
 
-	state->rendermode = ent->v.rendermode;
-	state->renderamt = int(ent->v.renderamt);
-	state->renderfx = ent->v.renderfx;
-	state->rendercolor.r = byte(ent->v.rendercolor.x);
-	state->rendercolor.g = byte(ent->v.rendercolor.y);
-	state->rendercolor.b = byte(ent->v.rendercolor.z);
+	if (THE_GODFATHER.IsValid() && ent == THE_GODFATHER->edict())
+	{
+		state->rendermode = kRenderNormal;
+		state->renderamt = 1;
+		state->renderfx = kRenderFxGlowShell;
+		state->rendercolor.r = 255;
+		state->rendercolor.g = 0;
+		state->rendercolor.b = 0;
+	}
+	else if (THE_COMMANDER.IsValid() && ent == THE_COMMANDER->edict())
+	{
+		state->rendermode = kRenderNormal;
+		state->renderamt = 1;
+		state->renderfx = kRenderFxGlowShell;
+		state->rendercolor.r = 0;
+		state->rendercolor.g = 0;
+		state->rendercolor.b = 255;
+	}
+	else
+	{
+		state->rendermode = ent->v.rendermode;
+		state->renderamt = int(ent->v.renderamt);
+		state->renderfx = ent->v.renderfx;
+		state->rendercolor.r = byte(ent->v.rendercolor.x);
+		state->rendercolor.g = byte(ent->v.rendercolor.y);
+		state->rendercolor.b = byte(ent->v.rendercolor.z);
+	}
 
 	state->aiment = 0;
 
