@@ -283,6 +283,7 @@ public:
 	CBasePlayer *m_pPlayer;
 	CBasePlayerItem *m_pNext;
 	int m_iId;							// WEAPON_???
+	bool m_bBeingSold;	// used for commander passive skill.
 };
 
 // inventory items that
@@ -396,15 +397,16 @@ public:
 	virtual void KeyValue(KeyValueData *pkvd);
 	virtual int Save(CSave &save);
 	virtual int Restore(CRestore &restore);
+	virtual int ObjectCaps() { return FCAP_ACROSS_TRANSITION | FCAP_IMPULSE_USE; }
 	virtual void SetObjectCollisionBox();
 	virtual void Touch(CBaseEntity *pOther);
+	virtual void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType = USE_OFF, float value = 0.0f);
 
 public:
 	BOOL IsEmpty();
 	int GiveAmmo(int iCount, char *szName, int iMax, int *pIndex = nullptr);
 
 	void EXPORT Kill();
-	void EXPORT BombThink();
 	void SetModel(const char *pszModelName);
 
 	BOOL HasWeapon(CBasePlayerItem *pCheckItem);
@@ -418,7 +420,7 @@ public:
 	string_t m_rgiszAmmo[MAX_AMMO_SLOTS];
 	int m_rgAmmo[MAX_AMMO_SLOTS];
 	int m_cAmmoTypes;
-	bool m_bIsBomb;
+	bool m_bBeingSold;
 };
 
 

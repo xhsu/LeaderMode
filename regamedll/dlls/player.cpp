@@ -1241,9 +1241,7 @@ void PackPlayerNade(CBasePlayer *pPlayer, CBasePlayerItem *pItem, bool packAmmo)
 		// don't let weaponbox tilt.
 		pWeaponBox->pev->angles.x = 0;
 		pWeaponBox->pev->angles.z = 0;
-
 		pWeaponBox->pev->velocity = pPlayer->pev->velocity * 0.75f;
-
 		pWeaponBox->SetThink(&CWeaponBox::Kill);
 		pWeaponBox->pev->nextthink = gpGlobals->time + CGameRules::GetItemKillDelay();
 		pWeaponBox->PackWeapon(pItem); // now pack all of the items in the lists

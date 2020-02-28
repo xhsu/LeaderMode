@@ -1521,6 +1521,7 @@ IMPLEMENT_SAVERESTORE(CWeaponBox, CBaseEntity)
 void CWeaponBox::Precache()
 {
 	PRECACHE_MODEL("models/w_weaponbox.mdl");
+	PRECACHE_SOUND(SFX_REFUND_GUNS);
 }
 
 void CWeaponBox::KeyValue(KeyValueData *pkvd)
@@ -1538,36 +1539,6 @@ void CWeaponBox::KeyValue(KeyValueData *pkvd)
 	pkvd->fHandled = TRUE;
 }
 
-void CWeaponBox::BombThink()
-{
-	if (!m_bIsBomb)
-		return;
-
-	CBasePlayer *pPlayer = nullptr;
-	while ((pPlayer = UTIL_FindEntityByClassname(pPlayer, "player")))
-	{
-		if (FNullEnt(pPlayer->edict()))
-			break;
-
-		if (!pPlayer->IsPlayer() || pPlayer->IsDormant())
-			continue;
-
-		CBasePlayer *pTempPlayer = GetClassPtr((CBasePlayer *)pPlayer->pev);
-
-		if (pTempPlayer->pev->deadflag == DEAD_NO && pTempPlayer->m_iTeam == TERRORIST)
-		{
-			MESSAGE_BEGIN(MSG_ONE, gmsgBombDrop, nullptr, pTempPlayer->edict());
-				WRITE_COORD(pev->origin.x);
-				WRITE_COORD(pev->origin.y);
-				WRITE_COORD(pev->origin.z);
-				WRITE_BYTE(BOMB_FLAG_DROPPED);
-			MESSAGE_END();
-		}
-	}
-
-	pev->nextthink = gpGlobals->time + 1.0f;
-}
-
 void CWeaponBox::SetModel(const char *pszModelName)
 {
 	SET_MODEL(ENT(pev), pszModelName);
@@ -1579,8 +1550,6 @@ void CWeaponBox::Spawn()
 
 	pev->movetype = MOVETYPE_TOSS;
 	pev->solid = SOLID_TRIGGER;
-
-	m_bIsBomb = false;
 
 	UTIL_SetSize(pev, g_vecZero, g_vecZero);
 	SET_MODEL(ENT(pev), "models/w_weaponbox.mdl");
@@ -1732,6 +1701,45 @@ void CWeaponBox::Touch(CBaseEntity *pOther)
 		SetTouch(nullptr);
 		UTIL_Remove(this);
 	}
+}
+
+void CWeaponBox::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
+{
+	// theoretically, pActivator and pCaller are the same.
+	if (FNullEnt(pActivator) || FNullEnt(pCaller) || !pActivator->IsPlayer() || !pCaller->IsPlayer())
+		return;
+
+	CBasePlayer* pPlayer = CBasePlayer::Instance(pActivator->pev);
+
+	if (pPlayer->m_iRoleType != Role_Commander)	// only commander may sold weapon.
+		return;
+
+	if (m_bBeingSold)	// this box had been sold!
+		return;
+
+	for (int i = 0; i < MAX_ITEM_TYPES; i++)
+	{
+		CBasePlayerItem* pWeapon = m_rgpPlayerItems[i];
+
+		while (pWeapon)
+		{
+			WeaponInfoStruct* pWpnInfo = GetWeaponInfo(pWeapon->m_iId);
+
+			if (pWpnInfo && !pWeapon->m_bBeingSold)
+			{
+				pPlayer->AddAccount(pWpnInfo->cost / 2, RT_SOLD_ITEM);
+				UTIL_PrintChatColor(pPlayer, BLUECHAT, "/gSeizing weapon /t%s/g have you rewarded with /t%d/g$", WeaponIDToAlias(pWeapon->m_iId), pWpnInfo->cost / 2);
+				EMIT_SOUND(pPlayer->edict(), CHAN_ITEM, SFX_REFUND_GUNS, VOL_NORM, ATTN_NORM);
+
+				pWeapon->m_bBeingSold = true;
+			}
+
+			pWeapon = pWeapon->m_pNext;
+		}
+	}
+
+	pev->nextthink = gpGlobals->time + 0.01f;
+	m_bBeingSold = true;
 }
 
 // Add this weapon to the box
