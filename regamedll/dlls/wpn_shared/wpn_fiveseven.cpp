@@ -9,7 +9,7 @@ void CFiveSeven::Spawn()
 	m_iId = WEAPON_FIVESEVEN;
 	SET_MODEL(edict(), "models/w_fiveseven.mdl");
 
-	m_iDefaultAmmo = FIVESEVEN_DEFAULT_GIVE;
+	m_iDefaultAmmo = iinfo()->m_iMaxClip;
 	m_iWeaponState &= ~WPNSTATE_SHIELD_DRAWN;
 	m_flAccuracy = 0.92f;
 
@@ -34,23 +34,6 @@ void CFiveSeven::Precache()
 
 	m_iShell = PRECACHE_MODEL("models/pshell.mdl");
 	m_usFireFiveSeven = PRECACHE_EVENT(1, "events/fiveseven.sc");
-}
-
-int CFiveSeven::GetItemInfo(ItemInfo *p)
-{
-	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "57mm";
-	p->iMaxAmmo1 = MAX_AMMO_57MM;
-	p->pszAmmo2 = nullptr;
-	p->iMaxAmmo2 = -1;
-	p->iMaxClip = FIVESEVEN_MAX_CLIP;
-	p->iSlot = 1;
-	p->iPosition = 6;
-	p->iId = m_iId = WEAPON_FIVESEVEN;
-	p->iFlags = 0;
-	p->iWeight = FIVESEVEN_WEIGHT;
-
-	return 1;
 }
 
 BOOL CFiveSeven::Deploy()
@@ -174,7 +157,7 @@ void CFiveSeven::FiveSevenFire(float flSpread, float flCycleTime, BOOL fUseSemi)
 
 void CFiveSeven::Reload()
 {
-	if (DefaultReload(iMaxClip(), FIVESEVEN_RELOAD, FIVESEVEN_RELOAD_TIME))
+	if (DefaultReload(iinfo()->m_iMaxClip, FIVESEVEN_RELOAD, FIVESEVEN_RELOAD_TIME))
 	{
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
 		m_flAccuracy = 0.92f;

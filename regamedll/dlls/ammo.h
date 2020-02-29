@@ -28,84 +28,43 @@
 
 #pragma once
 
-class CBasePlayerAmmo: public CBaseEntity
+enum AmmoIdType
 {
-public:
-	virtual void Spawn();
-	virtual BOOL AddAmmo(CBaseEntity *pOther);
-	virtual CBaseEntity *Respawn();
+	AMMO_NONE = 0,
+	AMMO_338Magnum = 1,
+	AMMO_762Nato,
+	AMMO_556NatoBox,
+	AMMO_556Nato,
+	AMMO_Buckshot,
+	AMMO_45acp,
+	AMMO_57mm,
+	AMMO_50AE,
+	AMMO_357SIG,
+	AMMO_9mm,
+	AMMO_Flashbang,
+	AMMO_HEGrenade,
+	AMMO_SmokeGrenade,
+	AMMO_C4,
 
-public:
-	void EXPORT DefaultTouch(CBaseEntity *pOther);
-	void EXPORT Materialize();
+	AMMO_MAXTYPE
 };
 
-class C9MMAmmo: public CBasePlayerAmmo
-{
-public:
-	virtual void Spawn();
-	virtual void Precache();
-};
+#define BULLET_NONE				0
+#define BULLET_PLAYER_9MM		1
+#define BULLET_PLAYER_BUCKSHOT	4
+#define BULLET_PLAYER_CROWBAR	5	// used in knife
+#define BULLET_PLAYER_45ACP		9
+#define BULLET_PLAYER_338MAG	10
+#define BULLET_PLAYER_762MM		11
+#define BULLET_PLAYER_556MM		12
+#define BULLET_PLAYER_50AE		13
+#define BULLET_PLAYER_57MM		14
+#define BULLET_PLAYER_357SIG	15
 
-class CBuckShotAmmo: public CBasePlayerAmmo
-{
-public:
-	virtual void Spawn();
-	virtual void Precache();
-};
+// only used in func_tank
+#define BULLET_MONSTER_9MM		6
+#define BULLET_MONSTER_MP5		7
+#define BULLET_MONSTER_12MM		8
 
-class C556NatoAmmo: public CBasePlayerAmmo
-{
-public:
-	virtual void Spawn();
-	virtual void Precache();
-};
-
-class C556NatoBoxAmmo: public CBasePlayerAmmo
-{
-public:
-	virtual void Spawn();
-	virtual void Precache();
-};
-
-class C762NatoAmmo: public CBasePlayerAmmo
-{
-public:
-	virtual void Spawn();
-	virtual void Precache();
-};
-
-class C45ACPAmmo: public CBasePlayerAmmo
-{
-public:
-	virtual void Spawn();
-	virtual void Precache();
-};
-
-class C50AEAmmo: public CBasePlayerAmmo
-{
-public:
-	virtual void Spawn();
-	virtual void Precache();
-};
-
-class C338MagnumAmmo: public CBasePlayerAmmo
-{
-public:
-	virtual void Spawn();
-	virtual void Precache();
-};
-
-class C57MMAmmo: public CBasePlayerAmmo
-{
-public:
-	virtual void Spawn();
-	virtual void Precache();
-};
-
-class C357SIGAmmo: public CBasePlayerAmmo
-{
-public:
-	virtual void Spawn();
-	virtual void Precache();
-};
+const AmmoInfo* GetAmmoInfo(const char* ammoName);
+const AmmoInfo* GetAmmoInfo(int iId);

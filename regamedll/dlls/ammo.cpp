@@ -1,232 +1,39 @@
 #include "precompiled.h"
 
-void CBasePlayerAmmo::Spawn()
+const AmmoInfo CBasePlayerItem::m_rgAmmoInfo[MAX_AMMO_SLOTS] =
 {
-	pev->movetype = MOVETYPE_TOSS;
-	pev->solid = SOLID_TRIGGER;
+	{0, "", 0, 0, 0, 0},
+	{AMMO_338Magnum,	"338Magnum",	30,		10,		125,	BULLET_PLAYER_338MAG},
+	{AMMO_762Nato,		"762Nato",		180,	30,		80,		BULLET_PLAYER_762MM},
+	{AMMO_556NatoBox,	"556NatoBox",	200,	30,		60,		BULLET_PLAYER_556MM},
+	{AMMO_556Nato,		"556Nato",		180,	30,		60,		BULLET_PLAYER_556MM},
+	{AMMO_Buckshot,		"buckshot",		70,		14,		115,	BULLET_PLAYER_BUCKSHOT},
+	{AMMO_45acp,		"45acp",		200,	12,		25,		BULLET_PLAYER_45ACP},
+	{AMMO_57mm,			"57mm",			200,	50,		50,		BULLET_PLAYER_57MM},
+	{AMMO_50AE,			"50AE",			70,		7,		40,		BULLET_PLAYER_50AE},
+	{AMMO_357SIG,		"357SIG",		60,		6,		25,		BULLET_PLAYER_357SIG},
+	{AMMO_9mm,			"9mm",			240,	30,		20,		BULLET_PLAYER_9MM},
+	{AMMO_Flashbang,	"Flashbang",	2,		1,		200,	BULLET_NONE},
+	{AMMO_HEGrenade,	"HEGrenade",	1,		1,		300,	BULLET_NONE},
+	{AMMO_SmokeGrenade,	"SmokeGrenade",	1,		1,		300,	BULLET_NONE},
+	{AMMO_C4,			"C4",			1,		1,		0,		BULLET_NONE},
+};
 
-	UTIL_SetSize(pev, Vector(-16, -16, 0), Vector(16, 16, 16));
-	UTIL_SetOrigin(pev, pev->origin);
-
-	SetTouch(&CBasePlayerAmmo::DefaultTouch);
-
-	if (g_pGameRules->IsMultiplayer())
+const AmmoInfo* GetAmmoInfo(const char* ammoName)
+{
+	if (ammoName)
 	{
-		SetThink(&CBaseEntity::SUB_Remove);
-		pev->nextthink = gpGlobals->time + 2.0f;
-	}
-}
-
-BOOL CBasePlayerAmmo::AddAmmo(CBaseEntity *pOther)
-{
-	auto ammoInfo = GetAmmoInfo(pev->classname);
-	if (pOther->GiveAmmo(ammoInfo->buyClipSize, ammoInfo->ammoName2) == -1)
-	{
-		return FALSE;
-	}
-
-	EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", VOL_NORM, ATTN_NORM);
-	return TRUE;
-}
-
-CBaseEntity *CBasePlayerAmmo::Respawn()
-{
-	pev->effects |= EF_NODRAW;
-	SetTouch(nullptr);
-
-	// move to wherever I'm supposed to repawn.
-	UTIL_SetOrigin(pev, g_pGameRules->VecAmmoRespawnSpot(this));
-
-	SetThink(&CBasePlayerAmmo::Materialize);
-	pev->nextthink = g_pGameRules->FlAmmoRespawnTime(this);
-
-	return this;
-}
-
-void CBasePlayerAmmo::Materialize()
-{
-	if (pev->effects & EF_NODRAW)
-	{
-		// changing from invisible state to visible.
-		if (g_pGameRules->IsMultiplayer())
+		for (int i = 0; i < MAX_WEAPONS; i++)
 		{
-			EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "items/suitchargeok1.wav", VOL_NORM, ATTN_NORM, 0, 150);
-		}
-
-		pev->effects &= ~EF_NODRAW;
-		pev->effects |= EF_MUZZLEFLASH;
-	}
-
-	SetTouch(&CBasePlayerAmmo::DefaultTouch);
-}
-
-void CBasePlayerAmmo::DefaultTouch(CBaseEntity *pOther)
-{
-	if (!pOther->IsPlayer())
-		return;
-
-	if (AddAmmo(pOther))
-	{
-		if (g_pGameRules->AmmoShouldRespawn(this) == GR_AMMO_RESPAWN_YES)
-		{
-			Respawn();
-		}
-		else
-		{
-			SetTouch(nullptr);
-			SetThink(&CBaseEntity::SUB_Remove);
-			pev->nextthink = gpGlobals->time + 0.1f;
-			pev->owner = ENT(pOther->pev);
+			if (!Q_stricmp(ammoName, CBasePlayerItem::m_rgAmmoInfo[i].m_pszName))
+				return &CBasePlayerItem::m_rgAmmoInfo[i];
 		}
 	}
+
+	return nullptr;
 }
 
-void C9MMAmmo::Spawn()
+const AmmoInfo* GetAmmoInfo(int iId)
 {
-	Precache();
-	SET_MODEL(ENT(pev), "models/w_9mmclip.mdl");
-	CBasePlayerAmmo::Spawn();
+	return (iId > 0 && iId < AMMO_MAXTYPE) ? &CBasePlayerItem::m_rgAmmoInfo[iId] : nullptr;
 }
-
-void C9MMAmmo::Precache()
-{
-	PRECACHE_MODEL("models/w_9mmclip.mdl");
-	PRECACHE_SOUND("items/9mmclip1.wav");
-}
-
-LINK_ENTITY_TO_CLASS(ammo_9mm, C9MMAmmo)
-
-void CBuckShotAmmo::Spawn()
-{
-	Precache();
-	SET_MODEL(ENT(pev), "models/w_shotbox.mdl");
-	CBasePlayerAmmo::Spawn();
-}
-
-void CBuckShotAmmo::Precache()
-{
-	PRECACHE_MODEL("models/w_shotbox.mdl");
-	PRECACHE_SOUND("items/9mmclip1.wav");
-}
-
-LINK_ENTITY_TO_CLASS(ammo_buckshot, CBuckShotAmmo)
-
-void C556NatoAmmo::Spawn()
-{
-	Precache();
-	SET_MODEL(ENT(pev), "models/w_9mmclip.mdl");
-	CBasePlayerAmmo::Spawn();
-}
-
-void C556NatoAmmo::Precache()
-{
-	PRECACHE_MODEL("models/w_9mmclip.mdl");
-	PRECACHE_SOUND("items/9mmclip1.wav");
-}
-
-LINK_ENTITY_TO_CLASS(ammo_556nato, C556NatoAmmo)
-
-void C556NatoBoxAmmo::Spawn()
-{
-	Precache();
-	SET_MODEL(ENT(pev), "models/w_9mmclip.mdl");
-	CBasePlayerAmmo::Spawn();
-}
-
-void C556NatoBoxAmmo::Precache()
-{
-	PRECACHE_MODEL("models/w_9mmclip.mdl");
-	PRECACHE_SOUND("items/9mmclip1.wav");
-}
-
-LINK_ENTITY_TO_CLASS(ammo_556natobox, C556NatoBoxAmmo)
-
-void C762NatoAmmo::Spawn()
-{
-	Precache();
-	SET_MODEL(ENT(pev), "models/w_9mmclip.mdl");
-	CBasePlayerAmmo::Spawn();
-}
-
-void C762NatoAmmo::Precache()
-{
-	PRECACHE_MODEL("models/w_9mmclip.mdl");
-	PRECACHE_SOUND("items/9mmclip1.wav");
-}
-
-LINK_ENTITY_TO_CLASS(ammo_762nato, C762NatoAmmo)
-
-void C45ACPAmmo::Spawn()
-{
-	Precache();
-	SET_MODEL(ENT(pev), "models/w_9mmclip.mdl");
-	CBasePlayerAmmo::Spawn();
-}
-
-void C45ACPAmmo::Precache()
-{
-	PRECACHE_MODEL("models/w_9mmclip.mdl");
-	PRECACHE_SOUND("items/9mmclip1.wav");
-}
-
-LINK_ENTITY_TO_CLASS(ammo_45acp, C45ACPAmmo)
-
-void C50AEAmmo::Spawn()
-{
-	Precache();
-	SET_MODEL(ENT(pev), "models/w_9mmclip.mdl");
-	CBasePlayerAmmo::Spawn();
-}
-
-void C50AEAmmo::Precache()
-{
-	PRECACHE_MODEL("models/w_9mmclip.mdl");
-	PRECACHE_SOUND("items/9mmclip1.wav");
-}
-
-LINK_ENTITY_TO_CLASS(ammo_50ae, C50AEAmmo)
-
-void C338MagnumAmmo::Spawn()
-{
-	Precache();
-	SET_MODEL(ENT(pev), "models/w_9mmclip.mdl");
-	CBasePlayerAmmo::Spawn();
-}
-
-void C338MagnumAmmo::Precache()
-{
-	PRECACHE_MODEL("models/w_9mmclip.mdl");
-	PRECACHE_SOUND("items/9mmclip1.wav");
-}
-
-LINK_ENTITY_TO_CLASS(ammo_338magnum, C338MagnumAmmo)
-
-void C57MMAmmo::Spawn()
-{
-	Precache();
-	SET_MODEL(ENT(pev), "models/w_9mmclip.mdl");
-	CBasePlayerAmmo::Spawn();
-}
-
-void C57MMAmmo::Precache()
-{
-	PRECACHE_MODEL("models/w_9mmclip.mdl");
-	PRECACHE_SOUND("items/9mmclip1.wav");
-}
-
-LINK_ENTITY_TO_CLASS(ammo_57mm, C57MMAmmo)
-
-void C357SIGAmmo::Spawn()
-{
-	Precache();
-	SET_MODEL(ENT(pev), "models/w_9mmclip.mdl");
-	CBasePlayerAmmo::Spawn();
-}
-
-void C357SIGAmmo::Precache()
-{
-	PRECACHE_MODEL("models/w_9mmclip.mdl");
-	PRECACHE_SOUND("items/9mmclip1.wav");
-}
-
-LINK_ENTITY_TO_CLASS(ammo_357sig, C357SIGAmmo)

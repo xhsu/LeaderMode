@@ -144,6 +144,7 @@ class CFuncTankGun: public CFuncTank
 {
 public:
 	virtual void Fire(const Vector &barrelEnd, const Vector &forward, entvars_t *pevAttacker);
+	virtual void FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq, int iDamage, entvars_t* pevAttacker);
 };
 
 class CFuncTankLaser: public CFuncTank

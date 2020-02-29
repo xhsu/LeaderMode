@@ -28,59 +28,54 @@
 
 #pragma once
 
+#define SLOT_NO				0
+#define PRIMARY_WEAPON_SLOT	1
+#define PISTOL_SLOT			2
+#define KNIFE_SLOT			3
+#define GRENADE_SLOT		4
+#define EQUIPMENT_SLOT		5
+
+#define WPN_P	-1	// penalty: price * 2
+#define WPN_F	0	// forbidden: price * 99999
+#define WPN_A	1	// allowed: price * 1
+#define WPN_D	2	// discounted: price * 0.5
+
 enum WeaponIdType
 {
 	WEAPON_NONE,
-	WEAPON_P228,
-	WEAPON_GLOCK,
-	WEAPON_SCOUT,
+	WEAPON_ANACONDA,	// WEAPON_P228
+	WEAPON_UNUSED,		// WEAPON_GLOCK
+	WEAPON_M200,		// WEAPON_SCOUT
 	WEAPON_HEGRENADE,
-	WEAPON_XM1014,
+	WEAPON_STRIKER,		// WEAPON_XM1014
 	WEAPON_C4,
-	WEAPON_MAC10,
-	WEAPON_AUG,
+	WEAPON_PM9,			// WEAPON_MAC10
+	WEAPON_ACR,			// WEAPON_AUG
 	WEAPON_SMOKEGRENADE,
-	WEAPON_ELITE,
+	WEAPON_P99,			// WEAPON_ELITE
 	WEAPON_FIVESEVEN,
 	WEAPON_UMP45,
-	WEAPON_SG550,
-	WEAPON_GALIL,
-	WEAPON_FAMAS,
+	WEAPON_M14EBR,		// WEAPON_SG550
+	WEAPON_CM901,		// WEAPON_GALIL
+	WEAPON_QBZ95,		// WEAPON_FAMAS
 	WEAPON_USP,
 	WEAPON_GLOCK18,
 	WEAPON_AWP,
 	WEAPON_MP5N,
-	WEAPON_M249,
-	WEAPON_M3,
+	WEAPON_MK46,		// WEAPON_M249
+	WEAPON_KSG12,		// WEAPON_M3
 	WEAPON_M4A1,
-	WEAPON_TMP,
-	WEAPON_G3SG1,
+	WEAPON_MP7A1,		// WEAPON_TMP
+	WEAPON_SVD,			// WEAPON_G3SG1
 	WEAPON_FLASHBANG,
 	WEAPON_DEAGLE,
-	WEAPON_SG552,
+	WEAPON_SCARL,		// WEAPON_SG552
 	WEAPON_AK47,
 	WEAPON_KNIFE,
 	WEAPON_P90,
-	WEAPON_SHIELDGUN = 99
-};
 
-enum AutoBuyClassType
-{
-	AUTOBUYCLASS_NONE           = 0,
-	AUTOBUYCLASS_PRIMARY        = BIT(0),
-	AUTOBUYCLASS_SECONDARY      = BIT(1),
-	AUTOBUYCLASS_AMMO           = BIT(2),
-	AUTOBUYCLASS_ARMOR          = BIT(3),
-	AUTOBUYCLASS_DEFUSER        = BIT(4),
-	AUTOBUYCLASS_PISTOL         = BIT(5),
-	AUTOBUYCLASS_SMG            = BIT(6),
-	AUTOBUYCLASS_RIFLE          = BIT(7),
-	AUTOBUYCLASS_SNIPERRIFLE    = BIT(8),
-	AUTOBUYCLASS_SHOTGUN        = BIT(9),
-	AUTOBUYCLASS_MACHINEGUN     = BIT(10),
-	AUTOBUYCLASS_GRENADE        = BIT(11),
-	AUTOBUYCLASS_NIGHTVISION    = BIT(12),
-	AUTOBUYCLASS_SHIELD         = BIT(13),
+	LAST_WEAPON,
+	WEAPON_SHIELDGUN = 99
 };
 
 enum ItemCostType
@@ -93,124 +88,15 @@ enum ItemCostType
 	HELMET_PRICE        = 350,
 	NVG_PRICE           = 1250,
 	DEFUSEKIT_PRICE     = 200,
-};
-
-enum AmmoCostType
-{
-	AMMO_338MAG_PRICE       = 125,
-	AMMO_357SIG_PRICE       = 50,
-	AMMO_45ACP_PRICE        = 25,
-	AMMO_50AE_PRICE         = 40,
-	AMMO_556MM_PRICE        = 60,
-	AMMO_57MM_PRICE         = 50,
-	AMMO_762MM_PRICE        = 80,
-	AMMO_9MM_PRICE          = 20,
-	AMMO_BUCKSHOT_PRICE     = 65,
-	AMMO_FLASHBANG_PRICE    = FLASHBANG_PRICE,
-	AMMO_HEGRENADE_PRICE    = HEGRENADE_PRICE,
-	AMMO_SMOKEGRENADE_PRICE = SMOKEGRENADE_PRICE,
-};
-
-enum WeaponCostType
-{
-	AK47_PRICE      = 2500,
-	AWP_PRICE       = 4750,
-	DEAGLE_PRICE    = 650,
-	G3SG1_PRICE     = 5000,
-	SG550_PRICE     = 4200,
-	GLOCK18_PRICE   = 400,
-	M249_PRICE      = 5750,
-	M3_PRICE        = 1700,
-	M4A1_PRICE      = 3100,
-	AUG_PRICE       = 3500,
-	MP5NAVY_PRICE   = 1500,
-	P228_PRICE      = 600,
-	P90_PRICE       = 2350,
-	UMP45_PRICE     = 1700,
-	MAC10_PRICE     = 1400,
-	SCOUT_PRICE     = 2750,
-	SG552_PRICE     = 3500,
-	TMP_PRICE       = 1250,
-	USP_PRICE       = 500,
-	ELITE_PRICE     = 800,
-	FIVESEVEN_PRICE = 750,
-	XM1014_PRICE    = 3000,
-	GALIL_PRICE     = 2000,
-	FAMAS_PRICE     = 2250,
-	SHIELDGUN_PRICE = 2200,
+	SHIELDGUN_PRICE		= 2200,
 };
 
 enum WeaponState
 {
-	WPNSTATE_USP_SILENCED       = BIT(0),
 	WPNSTATE_GLOCK18_BURST_MODE = BIT(1),
-	WPNSTATE_M4A1_SILENCED      = BIT(2),
 	WPNSTATE_ELITE_LEFT         = BIT(3),
 	WPNSTATE_FAMAS_BURST_MODE   = BIT(4),
 	WPNSTATE_SHIELD_DRAWN       = BIT(5),
-};
-
-// custom enum
-// the default amount of ammo that comes with each gun when it spawns
-enum ClipGiveDefault
-{
-	P228_DEFAULT_GIVE           = 13,
-	GLOCK18_DEFAULT_GIVE        = 20,
-	SCOUT_DEFAULT_GIVE          = 10,
-	HEGRENADE_DEFAULT_GIVE      = 1,
-	XM1014_DEFAULT_GIVE         = 7,
-	C4_DEFAULT_GIVE             = 1,
-	MAC10_DEFAULT_GIVE          = 30,
-	AUG_DEFAULT_GIVE            = 30,
-	SMOKEGRENADE_DEFAULT_GIVE   = 1,
-	ELITE_DEFAULT_GIVE          = 30,
-	FIVESEVEN_DEFAULT_GIVE      = 20,
-	UMP45_DEFAULT_GIVE          = 25,
-	SG550_DEFAULT_GIVE          = 30,
-	GALIL_DEFAULT_GIVE          = 35,
-	FAMAS_DEFAULT_GIVE          = 25,
-	USP_DEFAULT_GIVE            = 12,
-	AWP_DEFAULT_GIVE            = 10,
-	MP5NAVY_DEFAULT_GIVE        = 30,
-	M249_DEFAULT_GIVE           = 100,
-	M3_DEFAULT_GIVE             = 8,
-	M4A1_DEFAULT_GIVE           = 30,
-	TMP_DEFAULT_GIVE            = 30,
-	G3SG1_DEFAULT_GIVE          = 20,
-	FLASHBANG_DEFAULT_GIVE      = 1,
-	DEAGLE_DEFAULT_GIVE         = 7,
-	SG552_DEFAULT_GIVE          = 30,
-	AK47_DEFAULT_GIVE           = 30,
-	//KNIFE_DEFAULT_GIVE        = 1,
-	P90_DEFAULT_GIVE            = 50,
-};
-
-enum ClipSizeType
-{
-	P228_MAX_CLIP       = 13,
-	GLOCK18_MAX_CLIP    = 20,
-	SCOUT_MAX_CLIP      = 10,
-	XM1014_MAX_CLIP     = 7,
-	MAC10_MAX_CLIP      = 30,
-	AUG_MAX_CLIP        = 30,
-	ELITE_MAX_CLIP      = 30,
-	FIVESEVEN_MAX_CLIP  = 20,
-	UMP45_MAX_CLIP      = 25,
-	SG550_MAX_CLIP      = 30,
-	GALIL_MAX_CLIP      = 35,
-	FAMAS_MAX_CLIP      = 25,
-	USP_MAX_CLIP        = 12,
-	AWP_MAX_CLIP        = 10,
-	MP5N_MAX_CLIP       = 30,
-	M249_MAX_CLIP       = 100,
-	M3_MAX_CLIP         = 8,
-	M4A1_MAX_CLIP       = 30,
-	TMP_MAX_CLIP        = 30,
-	G3SG1_MAX_CLIP      = 20,
-	DEAGLE_MAX_CLIP     = 7,
-	SG552_MAX_CLIP      = 30,
-	AK47_MAX_CLIP       = 30,
-	P90_MAX_CLIP        = 50,
 };
 
 enum WeightWeapon
@@ -246,47 +132,6 @@ enum WeightWeapon
 	KNIFE_WEIGHT        = 0,
 };
 
-enum MaxAmmoType
-{
-	MAX_AMMO_BUCKSHOT   = 32,
-	MAX_AMMO_9MM        = 120,
-	MAX_AMMO_556NATO    = 90,
-	MAX_AMMO_556NATOBOX = 200,
-	MAX_AMMO_762NATO    = 90,
-	MAX_AMMO_45ACP      = 100,
-	MAX_AMMO_50AE       = 35,
-	MAX_AMMO_338MAGNUM  = 30,
-	MAX_AMMO_57MM       = 100,
-	MAX_AMMO_357SIG     = 52,
-
-	// custom
-	MAX_AMMO_SMOKEGRENADE = 1,
-	MAX_AMMO_HEGRENADE    = 1,
-	MAX_AMMO_FLASHBANG    = 2,
-	MAX_AMMO_C4           = 1,
-};
-
-enum AmmoType
-{
-	AMMO_NONE,
-	AMMO_338MAGNUM,
-	AMMO_762NATO,
-	AMMO_556NATOBOX,
-	AMMO_556NATO,
-	AMMO_BUCKSHOT,
-	AMMO_45ACP,
-	AMMO_57MM,
-	AMMO_50AE,
-	AMMO_357SIG,
-	AMMO_9MM,
-	AMMO_FLASHBANG,
-	AMMO_HEGRENADE,
-	AMMO_SMOKEGRENADE,
-	AMMO_C4,
-
-	AMMO_MAX_TYPES
-};
-
 enum WeaponClassType
 {
 	WEAPONCLASS_NONE,
@@ -299,23 +144,6 @@ enum WeaponClassType
 	WEAPONCLASS_RIFLE,
 	WEAPONCLASS_SNIPERRIFLE,
 	WEAPONCLASS_MAX,
-};
-
-enum AmmoBuyAmount
-{
-	AMMO_338MAG_BUY       = 10,
-	AMMO_357SIG_BUY       = 13,
-	AMMO_45ACP_BUY        = 12,
-	AMMO_50AE_BUY         = 7,
-	AMMO_556NATO_BUY      = 30,
-	AMMO_556NATOBOX_BUY   = 30,
-	AMMO_57MM_BUY         = 50,
-	AMMO_762NATO_BUY      = 30,
-	AMMO_9MM_BUY          = 30,
-	AMMO_BUCKSHOT_BUY     = 8,
-	AMMO_FLASHBANG_BUY    = 1,
-	AMMO_HEGRENADE_BUY    = 1,
-	AMMO_SMOKEGRENADE_BUY = 1,
 };
 
 enum shieldgun_e
@@ -339,127 +167,15 @@ enum shieldgren_e
 	SHIELDREN_DOWN
 };
 
-enum InventorySlotType
-{
-	NONE_SLOT,
-	PRIMARY_WEAPON_SLOT,
-	PISTOL_SLOT,
-	KNIFE_SLOT,
-	GRENADE_SLOT,
-	C4_SLOT,
-};
+WeaponIdType AliasToWeaponID(const char* alias);
+const char* WeaponIDToAlias(int id);	// Given a weapon ID, return its alias
+const char* AliasToWeaponClassname(const char* alias);
+const char* WeaponIDToWeaponClassname(int id);
+WeaponClassType WeaponIDToWeaponClass(WeaponIdType id);
+bool IsPrimaryWeapon(int id);	// Return true if given weapon ID is a primary weapon
+bool IsSecondaryWeapon(int id);	// Return true if given weapon ID is a secondary weapon
+bool IsGrenadeWeapon(int id);	// Return true if given weapon ID is a grenade
+const ItemInfo* GetWeaponInfo(int weaponID);
+const ItemInfo* GetWeaponInfo(const char* weaponName);
 
-enum Bullet
-{
-	BULLET_NONE,
-	BULLET_PLAYER_9MM,
-	BULLET_PLAYER_MP5,
-	BULLET_PLAYER_357,
-	BULLET_PLAYER_BUCKSHOT,
-	BULLET_PLAYER_CROWBAR,
-	BULLET_MONSTER_9MM,
-	BULLET_MONSTER_MP5,
-	BULLET_MONSTER_12MM,
-	BULLET_PLAYER_45ACP,
-	BULLET_PLAYER_338MAG,
-	BULLET_PLAYER_762MM,
-	BULLET_PLAYER_556MM,
-	BULLET_PLAYER_50AE,
-	BULLET_PLAYER_57MM,
-	BULLET_PLAYER_357SIG,
-};
-
-struct WeaponStruct
-{
-	int m_type;
-	int m_price;
-	int m_side;
-	int m_slot;
-	int m_ammoPrice;
-};
-
-struct AutoBuyInfoStruct
-{
-	int m_class;
-	char *m_command;
-	char *m_classname;
-};
-
-struct WeaponAliasInfo
-{
-	char *alias;
-	WeaponIdType id;
-};
-
-struct WeaponBuyAliasInfo
-{
-	char *alias;
-	WeaponIdType id;
-	char *failName;
-};
-
-struct WeaponClassAliasInfo
-{
-	char *alias;
-	WeaponClassType id;
-};
-
-struct WeaponInfoStruct
-{
-	int id;
-	int cost;
-	int clipCost;
-	int buyClipSize;
-	int gunClipSize;
-	int maxRounds;
-	AmmoType ammoType;
-	char *entityName;
-
-	// custom
-	const char *ammoName1;
-	const char *ammoName2;
-};
-
-struct AmmoInfoStruct
-{
-	AmmoType ammoType;
-
-	int clipCost;
-	int buyClipSize;
-	int maxRounds;
-
-	const char *ammoName1;
-	const char *ammoName2;
-};
-
-struct WeaponSlotInfo
-{
-	WeaponIdType id;
-	InventorySlotType slot;
-	const char *weaponName;
-};
-
-extern AutoBuyInfoStruct g_autoBuyInfo[35];
-extern WeaponStruct g_weaponStruct[MAX_WEAPONS];
-
-// WeaponType
-WeaponIdType AliasToWeaponID(const char *alias);
-const char *BuyAliasToWeaponID(const char *alias, WeaponIdType &id);
-const char *WeaponIDToAlias(int id);
-WeaponClassType AliasToWeaponClass(const char *alias);
-WeaponClassType WeaponIDToWeaponClass(int id);
-WeaponClassType WeaponIDToWeaponClass(ArmouryItemPack id);
-bool IsPrimaryWeapon(int id);
-bool IsSecondaryWeapon(int id);
-bool IsGrenadeWeapon(int id);
-bool CanBuyWeaponByMaptype(int playerTeam, WeaponIdType weaponID, bool useAssasinationRestrictions);
-void WeaponInfoReset();
-
-WeaponInfoStruct *GetWeaponInfo(int weaponID);
-WeaponInfoStruct *GetWeaponInfo(const char *weaponName);
-
-AmmoInfoStruct *GetAmmoInfo(AmmoType ammoID);
-AmmoInfoStruct *GetAmmoInfo(const char *ammoName);
-
-WeaponSlotInfo *GetWeaponSlot(WeaponIdType weaponID);
-WeaponSlotInfo *GetWeaponSlot(const char *weaponName);
+inline WeaponClassType AliasToWeaponClass(const char* alias) { return WeaponIDToWeaponClass(AliasToWeaponID(alias)); }

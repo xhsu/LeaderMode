@@ -231,26 +231,24 @@ void WriteSigonMessages()
 {
 	for (int i = 0; i < MAX_WEAPONS; i++)
 	{
-		ItemInfo &info = CBasePlayerItem::m_ItemInfoArray[i];
-		if (!info.iId)
+		const ItemInfo &info = CBasePlayerItem::m_rgItemInfo[i];
+		if (!info.m_iId)
 			continue;
 
-		const char *pszName;
-		if (!info.pszName)
+		const char *pszName = info.m_pszClassName;
+		if (!pszName)
 			pszName = "Empty";
-		else
-			pszName = info.pszName;
 
 		MESSAGE_BEGIN(MSG_INIT, gmsgWeaponList);
 			WRITE_STRING(pszName);
-			WRITE_BYTE(CBasePlayer::GetAmmoIndex(info.pszAmmo1));
-			WRITE_BYTE(info.iMaxAmmo1);
-			WRITE_BYTE(CBasePlayer::GetAmmoIndex(info.pszAmmo2));
-			WRITE_BYTE(info.iMaxAmmo2);
-			WRITE_BYTE(info.iSlot);
-			WRITE_BYTE(info.iPosition);
-			WRITE_BYTE(info.iId);
-			WRITE_BYTE(info.iFlags);
+			WRITE_BYTE(info.m_iAmmoType);
+			WRITE_BYTE(info.m_iAmmoType > 0 ? CBasePlayerItem::m_rgAmmoInfo[info.m_iAmmoType].m_iMax : -1);	// avoid knife bug.
+			WRITE_BYTE(-1);
+			WRITE_BYTE(-1);
+			WRITE_BYTE(info.m_iSlot - 1);	// slot 1 in clinet is marked as 0
+			WRITE_BYTE(info.m_iPosition);
+			WRITE_BYTE(info.m_iId);
+			WRITE_BYTE(info.m_bitsFlags);
 		MESSAGE_END();
 	}
 }
@@ -305,7 +303,7 @@ void EXT_FUNC ClientDisconnect(edict_t *pEntity)
 {
 	CBasePlayer *pPlayer = CBasePlayer::Instance(pEntity);
 
-	if (!g_pGameRules->IsGameOver())
+	if (!CSGameRules()->IsGameOver())
 	{
 		UTIL_ClientPrintAll(HUD_PRINTNOTIFY, "#Game_disconnected", STRING(pEntity->v.netname));
 
@@ -613,8 +611,6 @@ void EXT_FUNC ClientPutInServer(edict_t *pEntity)
 	pPlayer->m_fDeadTime = 0;
 	pPlayer->has_disconnected = false;
 	pPlayer->m_iMenu = Menu_OFF;
-	pPlayer->ClearAutoBuyData();
-	pPlayer->m_rebuyString = nullptr;
 
 	SET_CLIENT_MAXSPEED(ENT(pPlayer->pev), 1);
 	SET_MODEL(ENT(pPlayer->pev), "models/player.mdl");
@@ -955,170 +951,10 @@ void Host_Say(edict_t *pEntity, BOOL teamonly)
 	}
 }
 
-bool CanBuyThis(CBasePlayer *pPlayer, int iWeapon)
-{
-	if (pPlayer->HasShield() && iWeapon == WEAPON_ELITE)
-		return false;
-
-	if (pPlayer->HasShield() && iWeapon == WEAPON_SHIELDGUN)
-		return false;
-
-	if (pPlayer->m_rgpPlayerItems[PISTOL_SLOT] && pPlayer->m_rgpPlayerItems[PISTOL_SLOT]->m_iId == WEAPON_ELITE && iWeapon == WEAPON_SHIELDGUN)
-		return false;
-
-	if (pPlayer->m_rgpPlayerItems[PRIMARY_WEAPON_SLOT] && pPlayer->m_rgpPlayerItems[PRIMARY_WEAPON_SLOT]->m_iId == iWeapon)
-	{
-		if (g_bClientPrintEnable)
-		{
-			ClientPrint(pPlayer->pev, HUD_PRINTCENTER, "#Cstrike_Already_Own_Weapon");
-		}
-
-		return false;
-	}
-
-	if (pPlayer->m_rgpPlayerItems[PISTOL_SLOT] && pPlayer->m_rgpPlayerItems[PISTOL_SLOT]->m_iId == iWeapon)
-	{
-		if (g_bClientPrintEnable)
-		{
-			ClientPrint(pPlayer->pev, HUD_PRINTCENTER, "#Cstrike_Already_Own_Weapon");
-		}
-
-		return false;
-	}
-
-	if (!CanBuyWeaponByMaptype(pPlayer->m_iTeam, (WeaponIdType)iWeapon, FALSE))
-	{
-		if (g_bClientPrintEnable)
-		{
-			ClientPrint(pPlayer->pev, HUD_PRINTCENTER, "#Cannot_Buy_This");
-		}
-
-		return false;
-	}
-
-	return true;
-}
-
-void BuyPistol(CBasePlayer *pPlayer, int iSlot)
-{
-	if (iSlot < 1 || iSlot > 5)
-		return;
-
-	WeaponIdType buyWeapon = WEAPON_NONE;
-	switch (iSlot)
-	{
-	case 1:
-		buyWeapon = WEAPON_GLOCK18;
-		break;
-	case 2:
-		buyWeapon = WEAPON_USP;
-		break;
-	case 3:
-		buyWeapon = WEAPON_P228;
-		break;
-	case 4:
-		buyWeapon = WEAPON_DEAGLE;
-		break;
-	case 5:
-		buyWeapon = (pPlayer->m_iTeam == CT) ? WEAPON_FIVESEVEN : WEAPON_ELITE;
-		break;
-	}
-
-	BuyWeaponByWeaponID(pPlayer, buyWeapon);
-}
-
-void BuyShotgun(CBasePlayer *pPlayer, int iSlot)
-{
-	if (iSlot < 1 || iSlot > 2)
-		return;
-
-	WeaponIdType buyWeapon = WEAPON_NONE;
-	switch (iSlot)
-	{
-	case 1:
-		buyWeapon = WEAPON_M3;
-		break;
-	case 2:
-		buyWeapon = WEAPON_XM1014;
-		break;
-	}
-
-	BuyWeaponByWeaponID(pPlayer, buyWeapon);
-}
-
-void BuySubMachineGun(CBasePlayer *pPlayer, int iSlot)
-{
-	if (iSlot < 1 || iSlot > 4)
-		return;
-
-	WeaponIdType buyWeapon = WEAPON_NONE;
-	switch (iSlot)
-	{
-	case 1:
-		buyWeapon = (pPlayer->m_iTeam == CT) ? WEAPON_TMP : WEAPON_MAC10;
-		break;
-	case 2:
-		buyWeapon = WEAPON_MP5N;
-		break;
-	case 3:
-		buyWeapon = WEAPON_UMP45;
-		break;
-	case 4:
-		buyWeapon = WEAPON_P90;
-		break;
-	}
-
-	BuyWeaponByWeaponID(pPlayer, buyWeapon);
-}
-
-void BuyRifle(CBasePlayer *pPlayer, int iSlot)
-{
-	if (iSlot < 1 || iSlot > 6)
-		return;
-
-	WeaponIdType buyWeapon = WEAPON_NONE;
-	bool bIsCT = (pPlayer->m_iTeam == CT) ? true : false;
-
-	switch (iSlot)
-	{
-	case 2:
-		buyWeapon = bIsCT ? WEAPON_SCOUT : WEAPON_AK47;
-		break;
-	case 3:
-		buyWeapon = bIsCT ? WEAPON_M4A1 : WEAPON_SCOUT;
-		break;
-	case 4:
-		buyWeapon = bIsCT ? WEAPON_AUG : WEAPON_SG552;
-		break;
-	case 5:
-		buyWeapon = bIsCT ? WEAPON_SG550 : WEAPON_AWP;
-		break;
-	case 6:
-		buyWeapon = bIsCT ? WEAPON_AWP : WEAPON_G3SG1;
-		break;
-	default:
-		buyWeapon = bIsCT ? WEAPON_FAMAS : WEAPON_GALIL;
-		break;
-	}
-
-	BuyWeaponByWeaponID(pPlayer, buyWeapon);
-}
-
-void BuyMachineGun(CBasePlayer *pPlayer, int iSlot)
-{
-	if (iSlot != 1)
-		return;
-
-	BuyWeaponByWeaponID(pPlayer, WEAPON_M249);
-}
-
 void BuyItem(CBasePlayer *pPlayer, int iSlot)
 {
 	int iItemPrice = 0;
 	const char *pszItem = nullptr;
-
-	if (!pPlayer->CanPlayerBuy(true))
-		return;
 
 	if (pPlayer->m_iTeam == CT)
 	{
@@ -1139,9 +975,6 @@ void BuyItem(CBasePlayer *pPlayer, int iSlot)
 	{
 		case MENU_SLOT_ITEM_VEST:
 		{
-			if (pPlayer->HasRestrictItem(ITEM_KEVLAR, ITEM_TYPE_BUYING))
-				return;
-
 			if (bFullArmor)
 			{
 				if (g_bClientPrintEnable)
@@ -1167,9 +1000,6 @@ void BuyItem(CBasePlayer *pPlayer, int iSlot)
 		}
 		case MENU_SLOT_ITEM_VESTHELM:
 		{
-			if (pPlayer->HasRestrictItem(ITEM_ASSAULT, ITEM_TYPE_BUYING))
-				return;
-
 			if (bFullArmor)
 			{
 				if (bHasHelmet)
@@ -1225,10 +1055,10 @@ void BuyItem(CBasePlayer *pPlayer, int iSlot)
 		}
 		case MENU_SLOT_ITEM_FLASHGREN:
 		{
-			if (pPlayer->HasRestrictItem(ITEM_FLASHBANG, ITEM_TYPE_BUYING))
+			if (CSGameRules()->CanHavePlayerItem(pPlayer, WEAPON_FLASHBANG))
 				return;
 
-			if (pPlayer->AmmoInventory(AMMO_FLASHBANG) >= MaxAmmoCarry(WEAPON_FLASHBANG))
+			if (pPlayer->m_rgAmmo[AMMO_Flashbang] >= CBasePlayerItem::m_rgAmmoInfo[AMMO_Flashbang].m_iMax)
 			{
 				if (g_bClientPrintEnable)
 				{
@@ -1249,10 +1079,10 @@ void BuyItem(CBasePlayer *pPlayer, int iSlot)
 		}
 		case MENU_SLOT_ITEM_HEGREN:
 		{
-			if (pPlayer->HasRestrictItem(ITEM_HEGRENADE, ITEM_TYPE_BUYING))
+			if (CSGameRules()->CanHavePlayerItem(pPlayer, WEAPON_HEGRENADE))
 				return;
 
-			if (pPlayer->AmmoInventory(AMMO_HEGRENADE) >= MaxAmmoCarry(WEAPON_HEGRENADE))
+			if (pPlayer->m_rgAmmo[AMMO_HEGrenade] >= CBasePlayerItem::m_rgAmmoInfo[AMMO_HEGrenade].m_iMax)
 			{
 				if (g_bClientPrintEnable)
 				{
@@ -1272,10 +1102,10 @@ void BuyItem(CBasePlayer *pPlayer, int iSlot)
 		}
 		case MENU_SLOT_ITEM_SMOKEGREN:
 		{
-			if (pPlayer->HasRestrictItem(ITEM_SMOKEGRENADE, ITEM_TYPE_BUYING))
+			if (CSGameRules()->CanHavePlayerItem(pPlayer, WEAPON_SMOKEGRENADE))
 				return;
 
-			if (pPlayer->AmmoInventory(AMMO_SMOKEGRENADE) >= MaxAmmoCarry(WEAPON_SMOKEGRENADE))
+			if (pPlayer->m_rgAmmo[AMMO_SmokeGrenade] >= CBasePlayerItem::m_rgAmmoInfo[AMMO_SmokeGrenade].m_iMax)
 			{
 				if (g_bClientPrintEnable)
 				{
@@ -1295,9 +1125,6 @@ void BuyItem(CBasePlayer *pPlayer, int iSlot)
 		}
 		case MENU_SLOT_ITEM_NVG:
 		{
-			if (pPlayer->HasRestrictItem(ITEM_NVG, ITEM_TYPE_BUYING))
-				return;
-
 			if (pPlayer->m_bHasNightVision)
 			{
 				if (g_bClientPrintEnable)
@@ -1332,10 +1159,7 @@ void BuyItem(CBasePlayer *pPlayer, int iSlot)
 		}
 		case MENU_SLOT_ITEM_SHIELD:
 		{
-			if (pPlayer->HasRestrictItem(ITEM_SHIELDGUN, ITEM_TYPE_BUYING))
-				return;
-
-			if (!CanBuyThis(pPlayer, WEAPON_SHIELDGUN))
+			if (CSGameRules()->CanHavePlayerItem(pPlayer, WEAPON_SHIELDGUN))
 				return;
 
 			if (pPlayer->m_iAccount >= SHIELDGUN_PRICE)
@@ -1377,20 +1201,14 @@ void BuyItem(CBasePlayer *pPlayer, int iSlot)
 
 CBaseEntity *EXT_FUNC BuyWeaponByWeaponID(CBasePlayer *pPlayer, WeaponIdType weaponID)
 {
-	if (!pPlayer->CanPlayerBuy(true))
+	if (CSGameRules()->CanHavePlayerItem(pPlayer, weaponID))
 		return nullptr;
 
-	if (pPlayer->HasRestrictItem((ItemID)weaponID, ITEM_TYPE_BUYING))
+	const ItemInfo *info = &CBasePlayerItem::m_rgItemInfo[weaponID];
+	if (!info || !Q_strlen(info->m_pszClassName))
 		return nullptr;
 
-	if (!CanBuyThis(pPlayer, weaponID))
-		return nullptr;
-
-	WeaponInfoStruct *info = GetWeaponInfo(weaponID);
-	if (!info || !info->entityName)
-		return nullptr;
-
-	if (pPlayer->m_iAccount < info->cost)
+	if (pPlayer->m_iAccount < info->m_iCost)
 	{
 		if (g_bClientPrintEnable)
 		{
@@ -1410,15 +1228,16 @@ CBaseEntity *EXT_FUNC BuyWeaponByWeaponID(CBasePlayer *pPlayer, WeaponIdType wea
 		pPlayer->DropSecondary();
 	}
 
-	auto pEntity = pPlayer->GiveNamedItem(info->entityName);
-	pPlayer->AddAccount(-info->cost, RT_PLAYER_BOUGHT_SOMETHING);
+	auto pEntity = pPlayer->GiveNamedItem(info->m_pszClassName);
+	pPlayer->AddAccount(-info->m_iCost, RT_PLAYER_BOUGHT_SOMETHING);
 
 	if (refill_bpammo_weapons.value > 1)
 	{
 		CBasePlayerItem *pItem = static_cast<CBasePlayerItem *>(pEntity);
 
-		if (pItem) {
-			pPlayer->GiveAmmo(pItem->iMaxAmmo1(), pItem->pszAmmo1(), pItem->iMaxAmmo1());
+		if (pItem)
+		{
+			pPlayer->GiveAmmo(CBasePlayerItem::m_rgAmmoInfo[info->m_iAmmoType].m_iCountPerBox, (AmmoIdType)info->m_iAmmoType);
 		}
 	}
 
@@ -1878,7 +1697,7 @@ void Radio1(CBasePlayer *pPlayer, int slot)
 		return;
 
 	pPlayer->m_iRadioMessages--;
-	pPlayer->m_flRadioTime = gpGlobals->time + CGameRules::GetRadioTimeout();
+	pPlayer->m_flRadioTime = gpGlobals->time + radio_timeout.value;
 
 	switch (slot)
 	{
@@ -1917,7 +1736,7 @@ void Radio2(CBasePlayer *pPlayer, int slot)
 		return;
 
 	pPlayer->m_iRadioMessages--;
-	pPlayer->m_flRadioTime = gpGlobals->time + CGameRules::GetRadioTimeout();
+	pPlayer->m_flRadioTime = gpGlobals->time + radio_timeout.value;
 
 	switch (slot)
 	{
@@ -1956,7 +1775,7 @@ void Radio3(CBasePlayer *pPlayer, int slot)
 		return;
 
 	pPlayer->m_iRadioMessages--;
-	pPlayer->m_flRadioTime = gpGlobals->time + CGameRules::GetRadioTimeout();
+	pPlayer->m_flRadioTime = gpGlobals->time + radio_timeout.value;
 
 	switch (slot)
 	{
@@ -2001,34 +1820,23 @@ void Radio3(CBasePlayer *pPlayer, int slot)
 
 bool EXT_FUNC BuyGunAmmo(CBasePlayer *pPlayer, CBasePlayerItem *weapon, bool bBlinkMoney)
 {
-	if (!pPlayer->CanPlayerBuy(true))
-		return false;
-
 	// Ensure that the weapon uses ammo
-	int nAmmo = weapon->PrimaryAmmoIndex();
-	if (nAmmo == -1)
+	if (weapon->ainfo()->m_iId <= 0 && weapon->ainfo()->m_iId >= AMMO_MAXTYPE)
 		return false;
 
 	// Can only buy if the player does not already have full ammo
-	if (pPlayer->m_rgAmmo[nAmmo] >= weapon->iMaxAmmo1())
+	if (!CSGameRules()->CanHaveAmmo(pPlayer, (AmmoIdType)weapon->ainfo()->m_iId))
 		return false;
-
-	WeaponInfoStruct *info = GetWeaponInfo(weapon->m_iId);
-	if (!info)
-	{
-		ALERT(at_console, "Tried to buy ammo for an unrecognized gun\n");
-		return false;
-	}
 
 	// Purchase the ammo if the player has enough money
-	if (pPlayer->m_iAccount >= info->clipCost)
+	if (pPlayer->m_iAccount >= weapon->ainfo()->m_iCostPerBox)
 	{
-		if (pPlayer->GiveAmmo(info->buyClipSize, info->ammoName2, weapon->iMaxAmmo1()) == -1)
+		if (!pPlayer->GiveAmmo(weapon->ainfo()->m_iCountPerBox, (AmmoIdType)weapon->ainfo()->m_iId))
 			return false;
 
 		EMIT_SOUND(ENT(weapon->pev), CHAN_ITEM, "items/9mmclip1.wav", VOL_NORM, ATTN_NORM);
 
-		pPlayer->AddAccount(-info->clipCost, RT_PLAYER_BOUGHT_SOMETHING);
+		pPlayer->AddAccount(-weapon->ainfo()->m_iCostPerBox, RT_PLAYER_BOUGHT_SOMETHING);
 		return true;
 	}
 
@@ -2047,9 +1855,6 @@ bool EXT_FUNC BuyGunAmmo(CBasePlayer *pPlayer, CBasePlayerItem *weapon, bool bBl
 
 bool BuyAmmo(CBasePlayer *pPlayer, int nSlot, bool bBlinkMoney)
 {
-	if (!pPlayer->CanPlayerBuy(true))
-		return false;
-
 	if (nSlot < PRIMARY_WEAPON_SLOT || nSlot > PISTOL_SLOT)
 		return false;
 
@@ -2119,152 +1924,6 @@ NOXREF int CountPlayersInServer()
 	}
 
 	return count;
-}
-
-// Handles the special "buy" alias commands we're creating to accommodate the buy
-// scripts players use (now that we've rearranged the buy menus and broken the scripts)
-// ** Returns TRUE if we've handled the command **
-BOOL HandleBuyAliasCommands(CBasePlayer *pPlayer, const char *pszCommand)
-{
-	// Let them buy it if it's got a weapon data string.
-	BOOL bRetVal = FALSE;
-	const char *pszFailItem = nullptr;
-
-	WeaponIdType weaponID = WEAPON_NONE;
-	const char *weaponFailName = BuyAliasToWeaponID(pszCommand, weaponID);
-
-	// Ok, we have weapon info ID.
-	if (weaponID != WEAPON_NONE)
-	{
-		// assasination maps have a specific set of weapons that can be used in them.
-		if (CanBuyWeaponByMaptype(pPlayer->m_iTeam, weaponID, FALSE))
-		{
-			bRetVal = TRUE;
-			BuyWeaponByWeaponID(pPlayer, weaponID);
-		}
-		else if (weaponFailName)
-		{
-			bRetVal = TRUE;
-			if (g_bClientPrintEnable)
-			{
-				ClientPrint(pPlayer->pev, HUD_PRINTCENTER, "#Alias_Not_Avail", weaponFailName);
-			}
-		}
-		else
-		{
-			bRetVal = TRUE;
-			if (g_bClientPrintEnable)
-			{
-				ClientPrint(pPlayer->pev, HUD_PRINTCENTER, "#Cannot_Buy_This");
-			}
-		}
-	}
-	else
-	{
-		// primary ammo
-		if (FStrEq(pszCommand, "primammo"))
-		{
-			bRetVal = TRUE;
-
-			// Buy as much primary ammo as possible
-			// Blink money only if player doesn't have enough for the
-			// first clip
-			if (BuyAmmo(pPlayer, PRIMARY_WEAPON_SLOT, true))
-			{
-				while (BuyAmmo(pPlayer, PRIMARY_WEAPON_SLOT, false))
-					;
-
-				if (TheTutor)
-				{
-					TheTutor->OnEvent(EVENT_PLAYER_BOUGHT_SOMETHING, pPlayer);
-				}
-			}
-		}
-		// secondary ammo
-		else if (FStrEq(pszCommand, "secammo"))
-		{
-			bRetVal = TRUE;
-
-			// Buy as much secondary ammo as possible
-			// Blink money only if player doesn't have enough for the
-			// first clip
-			if (BuyAmmo(pPlayer, PISTOL_SLOT, true))
-			{
-				while (BuyAmmo(pPlayer, PISTOL_SLOT, false))
-					;
-
-				if (TheTutor)
-				{
-					TheTutor->OnEvent(EVENT_PLAYER_BOUGHT_SOMETHING, pPlayer);
-				}
-			}
-		}
-		// equipment
-		else if (FStrEq(pszCommand, "vest"))
-		{
-			bRetVal = TRUE;
-			BuyItem(pPlayer, MENU_SLOT_ITEM_VEST);
-		}
-		else if (FStrEq(pszCommand, "vesthelm"))
-		{
-			bRetVal = TRUE;
-			BuyItem(pPlayer, MENU_SLOT_ITEM_VESTHELM);
-		}
-		else if (FStrEq(pszCommand, "flash"))
-		{
-			bRetVal = TRUE;
-			BuyItem(pPlayer, MENU_SLOT_ITEM_FLASHGREN);
-		}
-		else if (FStrEq(pszCommand, "hegren"))
-		{
-			bRetVal = TRUE;
-			BuyItem(pPlayer, MENU_SLOT_ITEM_HEGREN);
-		}
-		else if (FStrEq(pszCommand, "sgren"))
-		{
-			bRetVal = TRUE;
-			BuyItem(pPlayer, MENU_SLOT_ITEM_SMOKEGREN);
-		}
-		else if (FStrEq(pszCommand, "nvgs"))
-		{
-			bRetVal = TRUE;
-			BuyItem(pPlayer, MENU_SLOT_ITEM_NVG);
-		}
-		else if (FStrEq(pszCommand, "defuser"))
-		{
-			bRetVal = TRUE;
-			if (pPlayer->m_iTeam == CT)
-			{
-				BuyItem(pPlayer, MENU_SLOT_ITEM_DEFUSEKIT);
-			}
-			else
-			{
-				// fail gracefully
-				pszFailItem = "#Bomb_Defusal_Kit";
-			}
-		}
-		else if (FStrEq(pszCommand, "shield"))
-		{
-			bRetVal = TRUE;
-			if (pPlayer->m_iTeam == CT)
-			{
-				BuyItem(pPlayer, MENU_SLOT_ITEM_SHIELD);
-			}
-			else
-			{
-				// fail gracefully
-				pszFailItem = "#TactShield_Desc";
-			}
-		}
-	}
-
-	if (g_bClientPrintEnable && pszFailItem)
-	{
-		ClientPrint(pPlayer->pev, HUD_PRINTCENTER, "#Alias_Not_Avail", pszFailItem);
-	}
-
-	pPlayer->BuildRebuyStruct();
-	return bRetVal;
 }
 
 struct RadioStruct
@@ -2542,7 +2201,9 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 	{
 		if (pPlayer->m_iMenu == Menu_OFF)
 		{
-			pPlayer->m_iMenu = Menu_ClientBuy;
+			pPlayer->m_iMenu = Menu_Buy3;
+
+			// UNDONE
 		}
 
 		if (pPlayer->m_signals.GetState() & SIGNAL_BUY)
@@ -2560,7 +2221,7 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 	}
 	else if (FStrEq(pcmd, "client_buy_close"))
 	{
-		if (pPlayer->m_iMenu == Menu_ClientBuy)
+		if (pPlayer->m_iMenu == Menu_Buy3)
 		{
 			pPlayer->m_iMenu = Menu_OFF;
 		}
@@ -2608,166 +2269,6 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 			{
 				if (canOpenOldMenu()) {
 					HandleMenu_ChooseAppearance(pPlayer, slot);
-				}
-				break;
-			}
-			case Menu_Buy:
-			{
-				if (canOpenOldMenu())
-				{
-					switch (slot)
-					{
-						case VGUI_MenuSlot_Buy_Pistol:
-						{
-							pPlayer->m_iMenu = Menu_BuyPistol;
-							if (pPlayer->m_iTeam == CT)
-								ShowVGUIMenu(pPlayer, VGUI_Menu_Buy_Pistol, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5 | MENU_KEY_0), "#CT_BuyPistol");
-							else
-								ShowVGUIMenu(pPlayer, VGUI_Menu_Buy_Pistol, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5 | MENU_KEY_0), "#T_BuyPistol");
-							break;
-						}
-						case VGUI_MenuSlot_Buy_ShotGun:
-						{
-							pPlayer->m_iMenu = Menu_BuyShotgun;
-
-							ShowVGUIMenu(pPlayer, VGUI_Menu_Buy_ShotGun, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_0), "#BuyShotgun");
-							break;
-						}
-						case VGUI_MenuSlot_Buy_SubMachineGun:
-						{
-							pPlayer->m_iMenu = Menu_BuySubMachineGun;
-
-							if (pPlayer->m_iTeam == CT)
-								ShowVGUIMenu(pPlayer, VGUI_Menu_Buy_SubMachineGun, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_0), "#CT_BuySubMachineGun");
-							else
-								ShowVGUIMenu(pPlayer, VGUI_Menu_Buy_SubMachineGun, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_0), "#T_BuySubMachineGun");
-							break;
-						}
-						case VGUI_MenuSlot_Buy_Rifle:
-						{
-							pPlayer->m_iMenu = Menu_BuyRifle;
-
-							if (pPlayer->m_iTeam == CT)
-								ShowVGUIMenu(pPlayer, VGUI_Menu_Buy_Rifle, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5 | MENU_KEY_6 | MENU_KEY_0), "#CT_BuyRifle");
-							else
-								ShowVGUIMenu(pPlayer, VGUI_Menu_Buy_Rifle, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5 | MENU_KEY_6 | MENU_KEY_0), "#T_BuyRifle");
-							
-							break;
-						}
-						case VGUI_MenuSlot_Buy_MachineGun:
-						{
-							pPlayer->m_iMenu = Menu_BuyMachineGun;
-
-							ShowVGUIMenu(pPlayer, VGUI_Menu_Buy_MachineGun, (MENU_KEY_1 | MENU_KEY_0), "#BuyMachineGun");
-							break;
-						}
-						case VGUI_MenuSlot_Buy_PrimAmmo:
-						{
-							if (pPlayer->m_signals.GetState() & SIGNAL_BUY)
-							{
-								if (BuyAmmo(pPlayer, PRIMARY_WEAPON_SLOT, true))
-								{
-									while (BuyAmmo(pPlayer, PRIMARY_WEAPON_SLOT, false))
-										;
-
-									if (TheTutor)
-									{
-										TheTutor->OnEvent(EVENT_PLAYER_BOUGHT_SOMETHING, pPlayer);
-									}
-								}
-
-								pPlayer->BuildRebuyStruct();
-							}
-							break;
-						}
-						case VGUI_MenuSlot_Buy_SecAmmo:
-						{
-							if (pPlayer->m_signals.GetState() & SIGNAL_BUY)
-							{
-								if (BuyAmmo(pPlayer, PISTOL_SLOT, true))
-								{
-									while (BuyAmmo(pPlayer, PISTOL_SLOT, false))
-										;
-
-									if (TheTutor)
-									{
-										TheTutor->OnEvent(EVENT_PLAYER_BOUGHT_SOMETHING, pPlayer);
-									}
-								}
-
-								pPlayer->BuildRebuyStruct();
-							}
-							break;
-						}
-						case VGUI_MenuSlot_Buy_Item:
-						{
-							if (pPlayer->m_signals.GetState() & SIGNAL_BUY)
-							{
-								pPlayer->m_iMenu = Menu_BuyItem;
-
-								if (pPlayer->m_iTeam == CT)
-									ShowVGUIMenu(pPlayer, VGUI_Menu_Buy_Item, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5 | MENU_KEY_6 | MENU_KEY_8 | MENU_KEY_0), "#CT_BuyItem");
-								else
-									ShowVGUIMenu(pPlayer, VGUI_Menu_Buy_Item, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5 | MENU_KEY_6 | MENU_KEY_0), "#T_BuyItem");
-							}
-
-							break;
-						}
-					}
-				}
-				break;
-			}
-			case Menu_BuyPistol:
-			{
-				if (canOpenOldMenu())
-				{
-					BuyPistol(pPlayer, slot);
-					pPlayer->BuildRebuyStruct();
-				}
-				break;
-			}
-			case Menu_BuyShotgun:
-			{
-				if (canOpenOldMenu())
-				{
-					BuyShotgun(pPlayer, slot);
-					pPlayer->BuildRebuyStruct();
-				}
-				break;
-			}
-			case Menu_BuySubMachineGun:
-			{
-				if (canOpenOldMenu())
-				{
-					BuySubMachineGun(pPlayer, slot);
-					pPlayer->BuildRebuyStruct();
-				}
-				break;
-			}
-			case Menu_BuyRifle:
-			{
-				if (canOpenOldMenu())
-				{
-					BuyRifle(pPlayer, slot);
-					pPlayer->BuildRebuyStruct();
-				}
-				break;
-			}
-			case Menu_BuyMachineGun:
-			{
-				if (canOpenOldMenu())
-				{
-					BuyMachineGun(pPlayer, slot);
-					pPlayer->BuildRebuyStruct();
-				}
-				break;
-			}
-			case Menu_BuyItem:
-			{
-				if (canOpenOldMenu())
-				{
-					BuyItem(pPlayer, slot);
-					pPlayer->BuildRebuyStruct();
 				}
 				break;
 			}
@@ -2895,41 +2396,13 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 	}
 	else if (FStrEq(pcmd, "cl_setautobuy"))
 	{
-		if (pPlayer->pev->deadflag != DEAD_NO && pPlayer->m_autoBuyString[0] != '\0')
-			return;
-
-		pPlayer->ClearAutoBuyData();
-
-		for (int i = 1; i < CMD_ARGC_(); i++)
-		{
-			pPlayer->AddAutoBuyData(CMD_ARGV_(i));
-		}
-
-		if (pPlayer->m_signals.GetState() & SIGNAL_BUY)
-		{
-			bool oldval = g_bClientPrintEnable;
-			g_bClientPrintEnable = false;
-			pPlayer->AutoBuy();
-			g_bClientPrintEnable = oldval;
-		}
 	}
 	else if (FStrEq(pcmd, "cl_setrebuy"))
 	{
-		if (pPlayer->pev->deadflag != DEAD_NO && pPlayer->m_rebuyString)
+		if (pPlayer->pev->deadflag != DEAD_NO)
 			return;
 
-		if (CMD_ARGC_() == 2)
-		{
-			pPlayer->InitRebuyData(parg1);
-
-			if (pPlayer->m_signals.GetState() & SIGNAL_BUY)
-			{
-				bool oldval = g_bClientPrintEnable;
-				g_bClientPrintEnable = false;
-				pPlayer->Rebuy();
-				g_bClientPrintEnable = oldval;
-			}
-		}
+		pPlayer->SaveRebuy();
 	}
 	else
 	{
@@ -3099,7 +2572,6 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 				if (pPlayer->m_signals.GetState() & SIGNAL_BUY)
 				{
 					BuyAmmo(pPlayer, PRIMARY_WEAPON_SLOT, true);
-					pPlayer->BuildRebuyStruct();
 
 					if (TheTutor)
 					{
@@ -3112,7 +2584,6 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 				if (pPlayer->m_signals.GetState() & SIGNAL_BUY)
 				{
 					BuyAmmo(pPlayer, PISTOL_SLOT, true);
-					pPlayer->BuildRebuyStruct();
 
 					if (TheTutor)
 					{
@@ -3122,23 +2593,11 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 			}
 			else if (FStrEq(pcmd, "buyequip"))
 			{
-				if (pPlayer->m_signals.GetState() & SIGNAL_BUY)
-				{
-					if (pPlayer->m_iTeam == CT)
-						ShowVGUIMenu(pPlayer, VGUI_Menu_Buy_Item, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5 | MENU_KEY_6 | MENU_KEY_8 | MENU_KEY_0), "#CT_BuyItem");
-					else
-						ShowVGUIMenu(pPlayer, VGUI_Menu_Buy_Item, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5 | MENU_KEY_6 | MENU_KEY_0), "#T_BuyItem");
-
-					pPlayer->m_iMenu = Menu_BuyItem;
-				}
 			}
 			else if (FStrEq(pcmd, "buy"))
 			{
 				if (pPlayer->m_signals.GetState() & SIGNAL_BUY)
 				{
-					ShowVGUIMenu(pPlayer, VGUI_Menu_Buy, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5 | MENU_KEY_6 | MENU_KEY_7 | MENU_KEY_8 | MENU_KEY_0), "#Buy");
-					pPlayer->m_iMenu = Menu_Buy;
-
 					if (TheBots)
 					{
 						TheBots->OnEvent(EVENT_TUTOR_BUY_MENU_OPENNED);
@@ -3149,20 +2608,14 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 			{
 				if (pPlayer->m_signals.GetState() & SIGNAL_BUY)
 				{
-					bool oldval = g_bClientPrintEnable;
-					g_bClientPrintEnable = false;
-					pPlayer->AutoBuy();
-					g_bClientPrintEnable = oldval;
+					pPlayer->ParseAutoBuy();
 				}
 			}
 			else if (FStrEq(pcmd, "cl_rebuy"))
 			{
 				if (pPlayer->m_signals.GetState() & SIGNAL_BUY)
 				{
-					bool oldval = g_bClientPrintEnable;
-					g_bClientPrintEnable = false;
-					pPlayer->Rebuy();
-					g_bClientPrintEnable = oldval;
+					pPlayer->ParseRebuy();
 				}
 			}
 			else if (FStrEq(pcmd, "smartradio"))
@@ -3171,16 +2624,12 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 			}
 			else if (FStrEq(pcmd, "give"))
 			{
-				if (CVAR_GET_FLOAT("sv_cheats") != 0.0f && CMD_ARGC() > 1 && FStrnEq(parg1, "weapon_", sizeof("weapon_") - 1))
+				if (CMD_ARGC() > 1 && FStrnEq(parg1, "weapon_", sizeof("weapon_") - 1))
 				{
 					const auto pInfo = GetWeaponInfo(parg1);
 					if (pInfo)
 					{
-						if (pInfo->id != WEAPON_GLOCK && pInfo->id != WEAPON_C4 /* && pInfo->id != WEAPON_KNIFE */)
-						{
-							pPlayer->GiveNamedItemEx(pInfo->entityName);
-							pPlayer->GiveAmmo(pInfo->maxRounds, pInfo->ammoName2);
-						}
+						pPlayer->GiveNamedItem(pInfo->m_pszClassName);
 					}
 				}
 			}
@@ -3250,9 +2699,6 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 			}
 			else
 			{
-				if (HandleBuyAliasCommands(pPlayer, pcmd))
-					return;
-
 				if (HandleRadioAliasCommands(pPlayer, pcmd))
 					return;
 
@@ -3348,8 +2794,6 @@ void EXT_FUNC ServerDeactivate()
 	{
 		TheBots->ServerDeactivate();
 	}
-
-	WeaponInfoReset();
 }
 
 void EXT_FUNC ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
@@ -3452,13 +2896,14 @@ void EXT_FUNC StartFrame()
 	}
 
 	gpGlobals->teamplay = 1.0f;
-	g_iSkillLevel = g_pskill ? (int)g_pskill->value : 0;
 
-	if (TheBots) {
+	if (TheBots)
+	{
 		TheBots->StartFrame();
 	}
 
-	if (TheTutor) {
+	if (TheTutor)
+	{
 		TheTutor->StartFrame(gpGlobals->time);
 	}
 
@@ -3881,11 +3326,13 @@ void ClientPrecache()
 
 const char *EXT_FUNC GetGameDescription()
 {
-	if (CSGameRules()) {
+	if (CSGameRules())
+	{
 		return CSGameRules()->GetGameDescription();
 	}
 
-	if (AreRunningCZero()) {
+	if (AreRunningCZero())
+	{
 		return "Condition Zero";
 	}
 
@@ -4469,19 +3916,18 @@ int EXT_FUNC GetWeaponData(edict_t *pEdict, struct weapon_data_s *info)
 		while (pPlayerItem)
 		{
 			// there's a weapon here. Should I pack it?
-			auto weapon = (CBasePlayerWeapon *)pPlayerItem->GetWeaponPtr();
-			if (weapon && weapon->UseDecrement())
+			auto weapon = (CBasePlayerWeapon*)pPlayerItem;
+			if (weapon && weapon->IsWeapon() && weapon->UseDecrement())
 			{
 				// Get The ID
 				ItemInfo II;
-				Q_memset(&II, 0, sizeof(II));
 				weapon->GetItemInfo(&II);
 
-				if (II.iId >= 0 && II.iId < MAX_WEAPONS)
+				if (II.m_iId >= 0 && II.m_iId < MAX_WEAPONS)
 				{
-					auto item = &info[II.iId];
+					auto item = &info[II.m_iId];
 
-					item->m_iId = II.iId;
+					item->m_iId = II.m_iId;
 					item->m_iClip = weapon->m_iClip;
 					item->m_flTimeWeaponIdle = Q_max(weapon->m_flTimeWeaponIdle, -0.001f);
 					item->m_flNextPrimaryAttack = Q_max(weapon->m_flNextPrimaryAttack, -0.001f);
@@ -4606,10 +4052,10 @@ void EXT_FUNC UpdateClientData(const edict_t *ent, int sendweapons, struct clien
 			ItemInfo II;
 			Q_memset(&II, 0, sizeof(II));
 
-			CBasePlayerWeapon *weapon = (CBasePlayerWeapon *)pPlayer->m_pActiveItem->GetWeaponPtr();
+			CBasePlayerWeapon* weapon = (CBasePlayerWeapon*)pPlayer->m_pActiveItem;
 			if (weapon && weapon->UseDecrement() && weapon->GetItemInfo(&II))
 			{
-				cd->m_iId = II.iId;
+				cd->m_iId = II.m_iId;
 
 				if ((unsigned int)weapon->m_iPrimaryAmmoType < MAX_AMMO_SLOTS)
 				{

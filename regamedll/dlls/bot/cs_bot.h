@@ -831,7 +831,7 @@ private:
 	bool DoEquip(CBasePlayerWeapon *pWeapon);	// equip the given item
 
 	void ReloadCheck();						// reload our weapon if we must
-	void SilencerCheck();					// use silencer
+	// UNDONE: maybe future scope/steelsight here?
 
 	float m_fireWeaponTimestamp;
 

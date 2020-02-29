@@ -11,7 +11,7 @@ void CHEGrenade::Spawn()
 
 	pev->dmg = 4;
 
-	m_iDefaultAmmo = HEGRENADE_DEFAULT_GIVE;
+	m_iDefaultAmmo = 1;
 	m_flStartThrow = 0;
 	m_flReleaseThrow = -1.0f;
 	m_iWeaponState &= ~WPNSTATE_SHIELD_DRAWN;
@@ -34,27 +34,6 @@ void CHEGrenade::Precache()
 	PRECACHE_SOUND("weapons/pinpull.wav");
 
 	m_usCreateExplosion = PRECACHE_EVENT(1, "events/createexplo.sc");
-}
-
-int CHEGrenade::GetItemInfo(ItemInfo *p)
-{
-	auto info = GetWeaponInfo(WEAPON_HEGRENADE);
-
-	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "HEGrenade";
-
-	p->iMaxAmmo1 = info ? info->maxRounds : MAX_AMMO_HEGRENADE;
-	p->iMaxClip = info ? info->gunClipSize : WEAPON_NOCLIP;
-
-	p->pszAmmo2 = nullptr;
-	p->iMaxAmmo2 = -1;
-	p->iSlot = 3;
-	p->iPosition = 1;
-	p->iId = m_iId = WEAPON_HEGRENADE;
-	p->iWeight = HEGRENADE_WEIGHT;
-	p->iFlags = ITEM_FLAG_LIMITINWORLD | ITEM_FLAG_EXHAUSTIBLE;
-
-	return 1;
 }
 
 BOOL CHEGrenade::Deploy()

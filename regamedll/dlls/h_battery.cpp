@@ -12,6 +12,8 @@ TYPEDESCRIPTION CRecharge::m_SaveData[] =
 IMPLEMENT_SAVERESTORE(CRecharge, CBaseEntity)
 LINK_ENTITY_TO_CLASS(func_recharge, CRecharge)
 
+const int CRecharge::suitchargerCapacity = 30;
+
 void CRecharge::KeyValue(KeyValueData *pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "style")
@@ -45,7 +47,7 @@ void CRecharge::Spawn()
 	UTIL_SetSize(pev, pev->mins, pev->maxs);
 	SET_MODEL(ENT(pev), STRING(pev->model));
 
-	int armorValue = (int)gSkillData.suitchargerCapacity;
+	int armorValue = suitchargerCapacity;
 	if (pev->armorvalue != 0.0f)
 		armorValue = (int)pev->armorvalue;
 
@@ -156,7 +158,7 @@ void CRecharge::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useT
 
 void CRecharge::Recharge()
 {
-	int armorValue = (int)gSkillData.suitchargerCapacity;
+	int armorValue = suitchargerCapacity;
 	if (pev->armorvalue != 0.0f)
 		armorValue = (int)pev->armorvalue;
 

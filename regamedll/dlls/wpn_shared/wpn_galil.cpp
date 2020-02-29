@@ -6,10 +6,10 @@ void CGalil::Spawn()
 {
 	Precache();
 
-	m_iId = WEAPON_GALIL;
+	m_iId = WEAPON_CM901;
 	SET_MODEL(edict(), "models/w_galil.mdl");
 
-	m_iDefaultAmmo = GALIL_DEFAULT_GIVE;
+	m_iDefaultAmmo = iinfo()->m_iMaxClip;
 
 	// Get ready to fall down
 	FallInit();
@@ -31,23 +31,6 @@ void CGalil::Precache()
 
 	m_iShell = PRECACHE_MODEL("models/rshell.mdl");
 	m_usFireGalil = PRECACHE_EVENT(1, "events/galil.sc");
-}
-
-int CGalil::GetItemInfo(ItemInfo *p)
-{
-	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "556Nato";
-	p->iMaxAmmo1 = MAX_AMMO_556NATO;
-	p->pszAmmo2 = nullptr;
-	p->iMaxAmmo2 = -1;
-	p->iMaxClip = GALIL_MAX_CLIP;
-	p->iSlot = 0;
-	p->iPosition = 17;
-	p->iId = m_iId = WEAPON_GALIL;
-	p->iFlags = 0;
-	p->iWeight = GALIL_WEIGHT;
-
-	return 1;
 }
 
 BOOL CGalil::Deploy()
@@ -170,7 +153,7 @@ void CGalil::GalilFire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 
 void CGalil::Reload()
 {
-	if (DefaultReload(iMaxClip(), GALIL_RELOAD, GALIL_RELOAD_TIME))
+	if (DefaultReload(iinfo()->m_iMaxClip, GALIL_RELOAD, GALIL_RELOAD_TIME))
 	{
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
 

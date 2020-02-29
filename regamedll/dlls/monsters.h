@@ -28,8 +28,6 @@
 
 #pragma once
 
-#include "skill.h"
-
 #define R_AL -2 // (ALLY) pals. Good alternative to R_NO when applicable.
 #define R_FR -1 // (FEAR) will run
 #define R_NO 0  // (NO RELATIONSHIP) disregard

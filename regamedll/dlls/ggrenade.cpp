@@ -661,7 +661,7 @@ NOXREF CGrenade *CGrenade::ShootContact(entvars_t *pevOwner, Vector vecStart, Ve
 	// Explode on contact
 	pGrenade->SetTouch(&CGrenade::ExplodeTouch);
 
-	pGrenade->pev->dmg = gSkillData.plrDmgM203Grenade;
+	pGrenade->pev->dmg = 100;
 	pGrenade->m_bJustBlew = true;
 	return pGrenade;
 }

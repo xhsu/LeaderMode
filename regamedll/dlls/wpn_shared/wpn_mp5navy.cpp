@@ -9,7 +9,7 @@ void CMP5N::Spawn()
 	m_iId = WEAPON_MP5N;
 	SET_MODEL(edict(), "models/w_mp5.mdl");
 
-	m_iDefaultAmmo = MP5NAVY_DEFAULT_GIVE;
+	m_iDefaultAmmo = iinfo()->m_iMaxClip;
 	m_flAccuracy = 0.0f;
 	m_bDelayFire = false;
 
@@ -33,23 +33,6 @@ void CMP5N::Precache()
 
 	m_iShell = PRECACHE_MODEL("models/pshell.mdl");
 	m_usFireMP5N = PRECACHE_EVENT(1, "events/mp5n.sc");
-}
-
-int CMP5N::GetItemInfo(ItemInfo *p)
-{
-	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "9mm";
-	p->iMaxAmmo1 = MAX_AMMO_9MM;
-	p->pszAmmo2 = nullptr;
-	p->iMaxAmmo2 = -1;
-	p->iMaxClip = MP5N_MAX_CLIP;
-	p->iSlot = 0;
-	p->iPosition = 7;
-	p->iId = m_iId = WEAPON_MP5N;
-	p->iFlags = 0;
-	p->iWeight = MP5NAVY_WEIGHT;
-
-	return 1;
 }
 
 BOOL CMP5N::Deploy()
@@ -157,7 +140,7 @@ void CMP5N::MP5NFire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 
 void CMP5N::Reload()
 {
-	if (DefaultReload(iMaxClip(), MP5N_RELOAD, MP5N_RELOAD_TIME))
+	if (DefaultReload(iinfo()->m_iMaxClip, MP5N_RELOAD, MP5N_RELOAD_TIME))
 	{
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
 

@@ -30,7 +30,6 @@
 
 extern const Vector g_vecZero;
 extern int g_Language;
-extern int g_iSkillLevel;
 
 extern Vector g_vecAttackDir;
 

@@ -103,6 +103,7 @@ C_DLLEXPORT int CountTeamPlayers(int iTeam);
 
 extern bool g_bServerActive;
 extern bool g_skipCareerInitialSpawn;
+extern bool g_bClientPrintEnable;
 
 extern unsigned short m_usResetDecals;
 extern unsigned short g_iShadowSprite;
@@ -125,15 +126,7 @@ void ProcessKickVote(CBasePlayer *pVotingPlayer, CBasePlayer *pKickPlayer);
 void CheckStartMoney();
 void ClientPutInServer(edict_t *pEntity);
 void Host_Say(edict_t *pEntity, BOOL teamonly);
-void DropSecondary(CBasePlayer *pPlayer);
-void DropPrimary(CBasePlayer *pPlayer);
-bool CanBuyThis(CBasePlayer *pPlayer, int iWeapon);
-void BuyPistol(CBasePlayer *pPlayer, int iSlot);
-void BuyShotgun(CBasePlayer *pPlayer, int iSlot);
-void BuySubMachineGun(CBasePlayer *pPlayer, int iSlot);
 CBaseEntity *BuyWeaponByWeaponID(CBasePlayer *pPlayer, WeaponIdType weaponID);
-void BuyRifle(CBasePlayer *pPlayer, int iSlot);
-void BuyMachineGun(CBasePlayer *pPlayer, int iSlot);
 void BuyItem(CBasePlayer *pPlayer, int iSlot);
 void HandleMenu_ChooseAppearance(CBasePlayer *pPlayer, int slot);
 BOOL HandleMenu_ChooseTeam(CBasePlayer *pPlayer, int slot);
@@ -144,7 +137,6 @@ bool BuyGunAmmo(CBasePlayer *pPlayer, CBasePlayerItem *weapon, bool bBlinkMoney)
 bool BuyAmmo(CBasePlayer *pPlayer, int nSlot, bool bBlinkMoney);
 CBaseEntity *EntityFromUserID(int userID);
 int CountPlayersInServer();
-BOOL HandleBuyAliasCommands(CBasePlayer *pPlayer, const char *pszCommand);
 BOOL HandleRadioAliasCommands(CBasePlayer *pPlayer, const char *pszCommand);
 void ClientCommand_(edict_t *pEntity);
 void ClientUserInfoChanged(edict_t *pEntity, char *infobuffer);

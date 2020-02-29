@@ -6,10 +6,10 @@ void CFamas::Spawn()
 {
 	Precache();
 
-	m_iId = WEAPON_FAMAS;
+	m_iId = WEAPON_QBZ95;
 	SET_MODEL(edict(), "models/w_famas.mdl");
 
-	m_iDefaultAmmo = FAMAS_DEFAULT_GIVE;
+	m_iDefaultAmmo = iinfo()->m_iMaxClip;
 	m_iFamasShotsFired = 0;
 	m_flFamasShoot = 0;
 
@@ -36,23 +36,6 @@ void CFamas::Precache()
 
 	m_iShell = PRECACHE_MODEL("models/rshell.mdl");
 	m_usFireFamas = PRECACHE_EVENT(1, "events/famas.sc");
-}
-
-int CFamas::GetItemInfo(ItemInfo *p)
-{
-	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "556Nato";
-	p->iMaxAmmo1 = MAX_AMMO_556NATO;
-	p->pszAmmo2 = nullptr;
-	p->iMaxAmmo2 = -1;
-	p->iMaxClip = FAMAS_MAX_CLIP;
-	p->iSlot = 0;
-	p->iPosition = 18;
-	p->iId = m_iId = WEAPON_FAMAS;
-	p->iFlags = 0;
-	p->iWeight = FAMAS_WEIGHT;
-
-	return 1;
 }
 
 BOOL CFamas::Deploy()
@@ -208,7 +191,7 @@ void CFamas::FamasFire(float flSpread, float flCycleTime, BOOL fUseAutoAim, BOOL
 
 void CFamas::Reload()
 {
-	if (DefaultReload(iMaxClip(), FAMAS_RELOAD, FAMAS_RELOAD_TIME))
+	if (DefaultReload(iinfo()->m_iMaxClip, FAMAS_RELOAD, FAMAS_RELOAD_TIME))
 	{
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
 

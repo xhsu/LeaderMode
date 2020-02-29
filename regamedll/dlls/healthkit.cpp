@@ -2,6 +2,8 @@
 
 LINK_ENTITY_TO_CLASS(item_healthkit, CHealthKit)
 
+const float CHealthKit::healthkitCapacity = 15.0f;
+
 void CHealthKit::Spawn()
 {
 	Precache();
@@ -21,7 +23,7 @@ BOOL CHealthKit::MyTouch(CBasePlayer *pPlayer)
 	if (pPlayer->HasRestrictItem(ITEM_HEALTHKIT, ITEM_TYPE_TOUCHED))
 		return FALSE;
 
-	auto healthValue = gSkillData.healthkitCapacity;
+	auto healthValue = healthkitCapacity;
 
 	if (pev->health != 0.0f)
 	{
@@ -59,6 +61,8 @@ TYPEDESCRIPTION CWallHealth::m_SaveData[] =
 IMPLEMENT_SAVERESTORE(CWallHealth, CBaseEntity)
 LINK_ENTITY_TO_CLASS(func_healthcharger, CWallHealth)
 
+const float CWallHealth::healthchargerCapacity = 50.0f;
+
 void CWallHealth::KeyValue(KeyValueData *pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "style") || FStrEq(pkvd->szKeyName, "height") || FStrEq(pkvd->szKeyName, "value1") || FStrEq(pkvd->szKeyName, "value2") || FStrEq(pkvd->szKeyName, "value3"))
@@ -89,7 +93,7 @@ void CWallHealth::Spawn()
 
 	SET_MODEL(ENT(pev), pev->model);
 
-	int healthValue = (int)gSkillData.healthchargerCapacity;
+	int healthValue = (int)healthchargerCapacity;
 	if (pev->health != 0.0f)
 		healthValue = (int)pev->health;
 
@@ -184,7 +188,7 @@ void CWallHealth::Recharge()
 {
 	EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/medshot4.wav", VOL_NORM, ATTN_NORM);
 
-	int healthValue = (int)gSkillData.healthchargerCapacity;
+	int healthValue = (int)healthchargerCapacity;
 	if (pev->health != 0.0f)
 		healthValue = (int)pev->health;
 

@@ -6,10 +6,10 @@ void CAUG::Spawn()
 {
 	Precache();
 
-	m_iId = WEAPON_AUG;
+	m_iId = WEAPON_ACR;
 	SET_MODEL(edict(), "models/w_aug.mdl");
 
-	m_iDefaultAmmo = AUG_DEFAULT_GIVE;
+	m_iDefaultAmmo = iinfo()->m_iMaxClip;
 	m_flAccuracy = 0.2f;
 	m_iShotsFired = 0;
 
@@ -34,23 +34,6 @@ void CAUG::Precache()
 
 	m_iShell = PRECACHE_MODEL("models/rshell.mdl");
 	m_usFireAug = PRECACHE_EVENT(1, "events/aug.sc");
-}
-
-int CAUG::GetItemInfo(ItemInfo *p)
-{
-	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "556Nato";
-	p->iMaxAmmo1 = MAX_AMMO_556NATO;
-	p->pszAmmo2 = nullptr;
-	p->iMaxAmmo2 = -1;
-	p->iMaxClip = AUG_MAX_CLIP;
-	p->iSlot = 0;
-	p->iPosition = 14;
-	p->iId = m_iId = WEAPON_AUG;
-	p->iFlags = 0;
-	p->iWeight = AUG_WEIGHT;
-
-	return 1;
 }
 
 BOOL CAUG::Deploy()
@@ -175,7 +158,7 @@ void CAUG::AUGFire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 
 void CAUG::Reload()
 {
-	if (DefaultReload(iMaxClip(), AUG_RELOAD, AUG_RELOAD_TIME))
+	if (DefaultReload(iinfo()->m_iMaxClip, AUG_RELOAD, AUG_RELOAD_TIME))
 	{
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
 

@@ -648,31 +648,16 @@ bool IsGameEventAudible(GameEventType event, CBaseEntity *pEntity, CBaseEntity *
 			return false;
 		// quiet
 		case WEAPON_KNIFE:
-		case WEAPON_TMP:
+		case WEAPON_MP7A1:
+		case WEAPON_M14EBR:
+		case WEAPON_M200:
+		case WEAPON_USP:
 			*range = ShortRange;
 			break;
-		// M4A1 - check for silencer
-		case WEAPON_M4A1:
-		{
-			CBasePlayerWeapon *pWeapon = static_cast<CBasePlayerWeapon *>(pPlayer->m_pActiveItem);
-			if (pWeapon->m_iWeaponState & WPNSTATE_M4A1_SILENCED)
-				*range = ShortRange;
-			else
-				*range = NormalRange;
-			break;
-		}
-		// USP - check for silencer
-		case WEAPON_USP:
-		{
-			CBasePlayerWeapon *pWeapon = static_cast<CBasePlayerWeapon *>(pPlayer->m_pActiveItem);
-			if (pWeapon->m_iWeaponState & WPNSTATE_USP_SILENCED)
-				*range = ShortRange;
-			else
-				*range = NormalRange;
-			break;
-		}
 		// loud
 		case WEAPON_AWP:
+		case WEAPON_SVD:
+		case WEAPON_DEAGLE:
 			*range = 99999.0f;
 			break;
 		// normal

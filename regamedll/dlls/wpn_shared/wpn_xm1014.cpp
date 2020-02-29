@@ -6,10 +6,10 @@ void CXM1014::Spawn()
 {
 	Precache();
 
-	m_iId = WEAPON_XM1014;
+	m_iId = WEAPON_STRIKER;
 	SET_MODEL(edict(), "models/w_xm1014.mdl");
 
-	m_iDefaultAmmo = XM1014_DEFAULT_GIVE;
+	m_iDefaultAmmo = iinfo()->m_iMaxClip;
 
 	// Get ready to fall down
 	FallInit();
@@ -30,23 +30,6 @@ void CXM1014::Precache()
 	PRECACHE_SOUND("weapons/reload3.wav");
 
 	m_usFireXM1014 = PRECACHE_EVENT(1, "events/xm1014.sc");
-}
-
-int CXM1014::GetItemInfo(ItemInfo *p)
-{
-	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "buckshot";
-	p->iMaxAmmo1 = MAX_AMMO_BUCKSHOT;
-	p->pszAmmo2 = nullptr;
-	p->iMaxAmmo2 = -1;
-	p->iMaxClip = XM1014_MAX_CLIP;
-	p->iSlot = 0;
-	p->iPosition = 12;
-	p->iId = m_iId = WEAPON_XM1014;
-	p->iFlags = 0;
-	p->iWeight = XM1014_WEIGHT;
-
-	return 1;
 }
 
 BOOL CXM1014::Deploy()
@@ -158,7 +141,7 @@ void CXM1014::WeaponIdle()
 		}
 		else if (m_fInSpecialReload != 0)
 		{
-			if (m_iClip != iMaxClip() && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType])
+			if (m_iClip != iinfo()->m_iMaxClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType])
 			{
 				Reload();
 			}

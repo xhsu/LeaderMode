@@ -45,39 +45,6 @@ enum ItemRestType
 enum ItemID
 {
 	ITEM_NONE = -1,
-	ITEM_SHIELDGUN,
-	ITEM_P228,
-	ITEM_GLOCK,
-	ITEM_SCOUT,
-	ITEM_HEGRENADE,
-	ITEM_XM1014,
-	ITEM_C4,
-	ITEM_MAC10,
-	ITEM_AUG,
-	ITEM_SMOKEGRENADE,
-	ITEM_ELITE,
-	ITEM_FIVESEVEN,
-	ITEM_UMP45,
-	ITEM_SG550,
-	ITEM_GALIL,
-	ITEM_FAMAS,
-	ITEM_USP,
-	ITEM_GLOCK18,
-	ITEM_AWP,
-	ITEM_MP5N,
-	ITEM_M249,
-	ITEM_M3,
-	ITEM_M4A1,
-	ITEM_TMP,
-	ITEM_G3SG1,
-	ITEM_FLASHBANG,
-	ITEM_DEAGLE,
-	ITEM_SG552,
-	ITEM_AK47,
-	ITEM_KNIFE,
-	ITEM_P90,
-	ITEM_NVG,
-	ITEM_DEFUSEKIT,
 	ITEM_KEVLAR,
 	ITEM_ASSAULT,
 	ITEM_LONGJUMP,
@@ -119,6 +86,9 @@ public:
 
 class CItemBattery: public CItem
 {
+public:
+	static const float batteryCapacity;
+
 public:
 	virtual void Spawn();
 	virtual void Precache();
@@ -164,6 +134,3 @@ public:
 	virtual void Precache();
 	virtual BOOL MyTouch(CBasePlayer *pPlayer);
 };
-
-ItemID GetItemIdByName(const char *pszName);
-ItemID GetItemIdByArmoury(ArmouryItemPack armoury);

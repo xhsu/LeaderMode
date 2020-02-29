@@ -6,10 +6,10 @@ void CTMP::Spawn()
 {
 	Precache();
 
-	m_iId = WEAPON_TMP;
+	m_iId = WEAPON_MP7A1;
 	SET_MODEL(edict(), "models/w_tmp.mdl");
 
-	m_iDefaultAmmo = TMP_DEFAULT_GIVE;
+	m_iDefaultAmmo = iinfo()->m_iMaxClip;
 	m_flAccuracy = 0.2f;
 	m_iShotsFired = 0;
 	m_bDelayFire = false;
@@ -31,23 +31,6 @@ void CTMP::Precache()
 
 	m_iShell = PRECACHE_MODEL("models/pshell.mdl");
 	m_usFireTMP = PRECACHE_EVENT(1, "events/tmp.sc");
-}
-
-int CTMP::GetItemInfo(ItemInfo *p)
-{
-	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "9mm";
-	p->iMaxAmmo1 = MAX_AMMO_9MM;
-	p->pszAmmo2 = nullptr;
-	p->iMaxAmmo2 = -1;
-	p->iMaxClip = TMP_MAX_CLIP;
-	p->iSlot = 0;
-	p->iPosition = 11;
-	p->iId = m_iId = WEAPON_TMP;
-	p->iFlags = 0;
-	p->iWeight = TMP_WEIGHT;
-
-	return 1;
 }
 
 BOOL CTMP::Deploy()
@@ -153,7 +136,7 @@ void CTMP::TMPFire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 
 void CTMP::Reload()
 {
-	if (DefaultReload(iMaxClip(), TMP_RELOAD, TMP_RELOAD_TIME))
+	if (DefaultReload(iinfo()->m_iMaxClip, TMP_RELOAD, TMP_RELOAD_TIME))
 	{
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
 

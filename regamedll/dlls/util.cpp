@@ -1262,20 +1262,6 @@ void UTIL_Ricochet(const Vector &position, float scale)
 	MESSAGE_END();
 }
 
-bool UTIL_TeamsMatch(const char *pTeamName1, const char *pTeamName2)
-{
-	if (!g_pGameRules->IsTeamplay())
-		return true;
-
-	if (*pTeamName1 != '\0' && *pTeamName2 != '\0')
-	{
-		if (!Q_stricmp(pTeamName1, pTeamName2))
-			return true;
-	}
-
-	return false;
-}
-
 void UTIL_StringToVector(float *pVector, const char *pString)
 {
 	char *pstr;

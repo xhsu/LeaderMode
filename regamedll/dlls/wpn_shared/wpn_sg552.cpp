@@ -6,10 +6,10 @@ void CSG552::Spawn()
 {
 	Precache();
 
-	m_iId = WEAPON_SG552;
+	m_iId = WEAPON_SCARL;
 	SET_MODEL(edict(), "models/w_sg552.mdl");
 
-	m_iDefaultAmmo = SG552_DEFAULT_GIVE;
+	m_iDefaultAmmo = iinfo()->m_iMaxClip;
 	m_flAccuracy = 0.2f;
 	m_iShotsFired = 0;
 
@@ -33,23 +33,6 @@ void CSG552::Precache()
 
 	m_iShell = PRECACHE_MODEL("models/rshell.mdl");
 	m_usFireSG552 = PRECACHE_EVENT(1, "events/sg552.sc");
-}
-
-int CSG552::GetItemInfo(ItemInfo *p)
-{
-	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "556Nato";
-	p->iMaxAmmo1 = MAX_AMMO_556NATO;
-	p->pszAmmo2 = nullptr;
-	p->iMaxAmmo2 = -1;
-	p->iMaxClip = SG552_MAX_CLIP;
-	p->iSlot = 0;
-	p->iPosition = 10;
-	p->iId = m_iId = WEAPON_SG552;
-	p->iFlags = 0;
-	p->iWeight = SG552_WEIGHT;
-
-	return 1;
 }
 
 BOOL CSG552::Deploy()
@@ -174,7 +157,7 @@ void CSG552::SG552Fire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 
 void CSG552::Reload()
 {
-	if (DefaultReload(iMaxClip(), SG552_RELOAD, SG552_RELOAD_TIME))
+	if (DefaultReload(iinfo()->m_iMaxClip, SG552_RELOAD, SG552_RELOAD_TIME))
 	{
 		if (m_pPlayer->m_iFOV != DEFAULT_FOV)
 		{

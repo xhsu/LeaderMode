@@ -44,6 +44,7 @@ enum SkillType
 };
 
 extern const char* g_rgszRoleNames[ROLE_COUNT];
+extern const int g_rgRoleWeaponsAccessibility[ROLE_COUNT][LAST_WEAPON];
 
 class CBaseSkill
 {

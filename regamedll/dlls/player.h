@@ -179,17 +179,10 @@ enum _Menu
 	Menu_ChooseTeam,
 	Menu_IGChooseTeam,
 	Menu_ChooseAppearance,
-	Menu_Buy,
-	Menu_BuyPistol,
-	Menu_BuyRifle,
-	Menu_BuyMachineGun,
-	Menu_BuyShotgun,
-	Menu_BuySubMachineGun,
-	Menu_BuyItem,
 	Menu_Radio1,
 	Menu_Radio2,
 	Menu_Radio3,
-	Menu_ClientBuy
+	Menu_Buy3
 };
 
 enum TeamName
@@ -245,20 +238,6 @@ enum IgnoreChatMsg : int
 	IGNOREMSG_NONE,  // Nothing to do
 	IGNOREMSG_ENEMY, // To ignore any chat messages from the enemy
 	IGNOREMSG_TEAM   // Same as IGNOREMSG_ENEMY but ignore teammates
-};
-
-struct RebuyStruct
-{
-	int m_primaryWeapon;
-	int m_primaryAmmo;
-	int m_secondaryWeapon;
-	int m_secondaryAmmo;
-	int m_heGrenade;
-	int m_flashbang;
-	int m_smokeGrenade;
-	int m_defuser;
-	int m_nightVision;
-	ArmorType m_armor;
 };
 
 enum ThrowDirection
@@ -338,7 +317,7 @@ public:
 	virtual void AddPointsToTeam(int score, BOOL bAllowNegativeScore);
 	virtual BOOL AddPlayerItem(CBasePlayerItem *pItem);
 	virtual BOOL RemovePlayerItem(CBasePlayerItem *pItem);
-	virtual int GiveAmmo(int iAmount, const char *szName, int iMax = -1);
+	virtual bool GiveAmmo(int iAmount, AmmoIdType iId);
 	virtual void StartSneaking() { m_tSneaking = gpGlobals->time - 1; }
 	virtual void StopSneaking() { m_tSneaking = gpGlobals->time + 30; }
 
@@ -390,14 +369,12 @@ public:
 	CGrenade *ThrowGrenade(CBasePlayerWeapon *pWeapon, Vector vecSrc, Vector vecThrow, float time, unsigned short usEvent = 0);
 	void AddAccount(int amount, RewardType type = RT_NONE, bool bTrackChange = true);
 	void Disappear();
-	bool CanPlayerBuy(bool display = false);
 	bool CanSwitchTeam(TeamName teamToSwap);
 	void SwitchTeam();
 	void Pain(int iLastHitGroup, bool bHasArmour);
 	bool IsLookingAtPosition(Vector *pos, float angleTolerance = 20.0f);
 	void Reset();
 	void SetScoreboardAttributes(CBasePlayer *destination = nullptr);
-	void RenewItems();
 	void PackDeadPlayerItems();
 	void GiveDefaultItems();
 	void RemoveAllItems(BOOL removeSuit);
@@ -409,15 +386,6 @@ public:
 	void SetNewPlayerModel(const char *modelName);
 	BOOL SwitchWeapon(CBasePlayerItem *pWeapon);
 	void CheckPowerups();
-	bool CanAffordPrimary();
-	bool CanAffordPrimaryAmmo();
-	bool CanAffordSecondaryAmmo();
-	bool CanAffordArmor();
-	bool CanAffordGrenade();
-	bool NeedsPrimaryAmmo();
-	bool NeedsSecondaryAmmo();
-	bool NeedsArmor();
-	bool NeedsGrenade();
 	BOOL IsOnLadder();
 	BOOL FlashlightIsOn();
 	void FlashlightTurnOn();
@@ -431,7 +399,7 @@ public:
 	void StartObserver(Vector &vecPosition, Vector &vecViewAngle);
 	void HandleSignals();
 	CBaseEntity *DropPlayerItem(const char *pszItemName);
-	bool HasPlayerItem(CBasePlayerItem *pCheckItem);
+	bool HasPlayerItem(WeaponIdType iId);
 	bool HasNamedPlayerItem(const char *pszItemName);
 	bool HasWeapons();
 	void SelectPrevItem(int iItem);
@@ -441,7 +409,6 @@ public:
 	void ItemPreFrame();
 	void ItemPostFrame();
 	CBaseEntity *GiveNamedItem(const char *pszName);
-	CBaseEntity *GiveNamedItemEx(const char *pszName);
 	void EnableControl(BOOL fControl);
 	bool HintMessage(const char *pMessage, BOOL bDisplayIfPlayerDead = FALSE, BOOL bOverride = FALSE);
 	bool HintMessageEx(const char *pMessage, float duration = 6.0f, bool bDisplayIfPlayerDead = false, bool bOverride = false);
@@ -463,12 +430,9 @@ public:
 	void CheckTimeBasedDamage();
 	void BarnacleVictimBitten(entvars_t *pevBarnacle);
 	void BarnacleVictimReleased();
-	static int GetAmmoIndex(const char *psz);
-	int AmmoInventory(int iAmmoIndex);
 	void ResetAutoaim();
 	Vector AutoaimDeflection(Vector &vecSrc, float flDist, float flDelta);
 	void ForceClientDllUpdate();
-	void DeathMessage(entvars_t *pevAttacker) {};
 	void SetCustomDecalFrames(int nFrames);
 	int GetCustomDecalFrames();
 	void InitStatusBar();
@@ -496,31 +460,14 @@ public:
 	bool IsAutoFollowAllowed() const { return (gpGlobals->time > m_allowAutoFollowTime); }
 	void InhibitAutoFollow(float duration) { m_allowAutoFollowTime = gpGlobals->time + duration; }
 	void AllowAutoFollow() { m_allowAutoFollowTime = 0; }
-	void ClearAutoBuyData();
-	void AddAutoBuyData(const char *str);
-	void AutoBuy();
 	void ClientCommand(const char *cmd, const char *arg1 = nullptr, const char *arg2 = nullptr, const char *arg3 = nullptr);
-	void PrioritizeAutoBuyString(char *autobuyString, const char *priorityString);
 	const char *PickPrimaryCareerTaskWeapon();
 	const char *PickSecondaryCareerTaskWeapon();
 	const char *PickFlashKillWeaponString();
 	const char *PickGrenadeKillWeaponString();
-	bool ShouldExecuteAutoBuyCommand(AutoBuyInfoStruct *commandInfo, bool boughtPrimary, bool boughtSecondary);
-	void PostAutoBuyCommandProcessing(AutoBuyInfoStruct *commandInfo, bool &boughtPrimary, bool &boughtSecondary);
-	void ParseAutoBuyString(const char *string, bool &boughtPrimary, bool &boughtSecondary);
-	AutoBuyInfoStruct *GetAutoBuyCommandInfo(const char *command);
-	void InitRebuyData(const char *str);
-	void BuildRebuyStruct();
-	void Rebuy();
-	void RebuyPrimaryWeapon();
-	void RebuyPrimaryAmmo();
-	void RebuySecondaryWeapon();
-	void RebuySecondaryAmmo();
-	void RebuyHEGrenade();
-	void RebuyFlashbang();
-	void RebuySmokeGrenade();
-	void RebuyNightVision();
-	void RebuyArmor();
+	void ParseAutoBuy();
+	void ParseRebuy();
+	void SaveRebuy();
 	void UpdateLocation(bool forceUpdate = false);
 	void SetObserverAutoDirector(bool val) { m_bObserverAutoDirector = val; }
 	bool IsObservingPlayer(CBasePlayer *pPlayer);
@@ -777,10 +724,6 @@ public:
 	float m_blindFadeTime;
 	int m_blindAlpha;
 	float m_allowAutoFollowTime;
-	char m_autoBuyString[MAX_AUTOBUY_LENGTH];
-	char *m_rebuyString;
-	RebuyStruct m_rebuyStruct;
-	bool m_bIsInRebuy;
 	float m_flLastUpdateTime;
 	char m_lastLocation[MaxLocationLen];
 	float m_progressStart;

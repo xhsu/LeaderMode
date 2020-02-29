@@ -293,10 +293,10 @@ bool isSniperRifle(CBasePlayerItem *item)
 {
 	switch (item->m_iId)
 	{
-	case WEAPON_SCOUT:
-	case WEAPON_SG550:
+	case WEAPON_M200:
+	case WEAPON_M14EBR:
 	case WEAPON_AWP:
-	case WEAPON_G3SG1:
+	case WEAPON_SVD:
 		return true;
 
 	default:
@@ -362,20 +362,15 @@ bool CCSBot::IsUsingShotgun() const
 	if (!pCurrentWeapon)
 		return false;
 
-	if (pCurrentWeapon->m_iId == WEAPON_XM1014 || pCurrentWeapon->m_iId == WEAPON_M3)
-		return true;
-
-	return false;
+	return (pCurrentWeapon->m_iId == WEAPON_STRIKER || pCurrentWeapon->m_iId == WEAPON_KSG12);
 }
 
 // Returns true if using the big 'ol machinegun
 bool CCSBot::IsUsingMachinegun() const
 {
 	CBasePlayerWeapon *pCurrentWeapon = GetActiveWeapon();
-	if (pCurrentWeapon && pCurrentWeapon->m_iId == WEAPON_M249)
-		return true;
 
-	return false;
+	return (pCurrentWeapon && pCurrentWeapon->m_iId == WEAPON_MK46);
 }
 
 // Return true if primary weapon doesn't exist or is totally out of ammo
@@ -747,43 +742,6 @@ void CCSBot::ReloadCheck()
 					Hide(spot, 0.0f);
 				}
 			}
-		}
-	}
-}
-
-// Silence/unsilence our weapon if we must
-void CCSBot::SilencerCheck()
-{
-	// longer than reload check because reloading should take precedence
-	const float safeSilencerWaitTime = 3.5f;
-
-	if (IsActiveWeaponReloading() || IsAttacking())
-		return;
-
-	// M4A1 and USP are the only weapons with removable silencers
-	if (!DoesActiveWeaponHaveSilencer())
-		return;
-
-	if (GetTimeSinceLastSawEnemy() < safeSilencerWaitTime)
-		return;
-
-	// don't touch the silencer if there are enemies nearby
-	if (GetNearbyEnemyCount() == 0)
-	{
-		CBasePlayerWeapon *pCurrentWeapon = GetActiveWeapon();
-		if (!pCurrentWeapon)
-			return;
-
-		bool isSilencerOn = (pCurrentWeapon->m_iWeaponState & (WPNSTATE_M4A1_SILENCED | WPNSTATE_USP_SILENCED)) != 0;
-
-		if (pCurrentWeapon->m_flNextSecondaryAttack >= gpGlobals->time)
-			return;
-
-		// equip silencer if we want to and we don't have a shield.
-		if (isSilencerOn != (GetProfile()->PrefersSilencer() || GetProfile()->GetSkill() > 0.7f) && !HasShield())
-		{
-			PrintIfWatched("%s silencer!\n", (isSilencerOn) ? "Unequipping" : "Equipping");
-			pCurrentWeapon->SecondaryAttack();
 		}
 	}
 }

@@ -149,13 +149,10 @@ void CCSBotManager::StartFrame()
 // Return true if the bot can use this weapon
 bool CCSBotManager::IsWeaponUseable(CBasePlayerItem *item) const
 {
-	if (!item)
+	if (FNullEnt(item))
 	{
 		return false;
 	}
-
-	if (item->m_iId == WEAPON_C4)
-		return true;
 
 	WeaponClassType weaponClass = WeaponIDToWeaponClass(item->m_iId);
 
@@ -174,18 +171,18 @@ bool CCSBotManager::IsWeaponUseable(CBasePlayerItem *item) const
 	return true;
 }
 
-bool CCSBotManager::IsWeaponUseable(ArmouryItemPack item) const
+bool CCSBotManager::IsWeaponUseable(WeaponIdType item) const
 {
 	WeaponClassType weaponClass = WeaponIDToWeaponClass(item);
 
-	if ((!AllowShotguns()          && weaponClass == WEAPONCLASS_SHOTGUN)
-		|| (!AllowMachineGuns()    && weaponClass == WEAPONCLASS_MACHINEGUN)
-		|| (!AllowRifles()         && weaponClass == WEAPONCLASS_RIFLE)
-		|| (!AllowSnipers()        && weaponClass == WEAPONCLASS_SNIPERRIFLE)
+	if ((!AllowShotguns() && weaponClass == WEAPONCLASS_SHOTGUN)
+		|| (!AllowMachineGuns() && weaponClass == WEAPONCLASS_MACHINEGUN)
+		|| (!AllowRifles() && weaponClass == WEAPONCLASS_RIFLE)
+		|| (!AllowSnipers() && weaponClass == WEAPONCLASS_SNIPERRIFLE)
 		|| (!AllowSubMachineGuns() && weaponClass == WEAPONCLASS_SUBMACHINEGUN)
-		|| (!AllowTacticalShield() && item == ARMOURY_SHIELD)
-		|| (!AllowPistols()        && weaponClass == WEAPONCLASS_PISTOL)
-		|| (!AllowGrenades()       && weaponClass == WEAPONCLASS_GRENADE))
+		|| (!AllowTacticalShield() && item == WEAPON_SHIELDGUN)
+		|| (!AllowPistols() && weaponClass == WEAPONCLASS_PISTOL)
+		|| (!AllowGrenades() && weaponClass == WEAPONCLASS_GRENADE))
 	{
 		return false;
 	}

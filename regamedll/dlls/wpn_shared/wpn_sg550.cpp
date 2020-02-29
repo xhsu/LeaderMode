@@ -6,10 +6,10 @@ void CSG550::Spawn()
 {
 	Precache();
 
-	m_iId = WEAPON_SG550;
+	m_iId = WEAPON_M14EBR;
 	SET_MODEL(edict(), "models/w_sg550.mdl");
 
-	m_iDefaultAmmo = SG550_DEFAULT_GIVE;
+	m_iDefaultAmmo = iinfo()->m_iMaxClip;
 	m_flLastFire = 0;
 	m_flAccuracy = 0.2f;
 
@@ -33,23 +33,6 @@ void CSG550::Precache()
 
 	m_iShellId = m_iShell = PRECACHE_MODEL("models/rshell.mdl");
 	m_usFireSG550 = PRECACHE_EVENT(1, "events/sg550.sc");
-}
-
-int CSG550::GetItemInfo(ItemInfo *p)
-{
-	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "556Nato";
-	p->iMaxAmmo1 = MAX_AMMO_556NATO;
-	p->pszAmmo2 = nullptr;
-	p->iMaxAmmo2 = -1;
-	p->iMaxClip = SG550_MAX_CLIP;
-	p->iSlot = 0;
-	p->iPosition = 16;
-	p->iId = m_iId = WEAPON_SG550;
-	p->iFlags = 0;
-	p->iWeight = SG550_WEIGHT;
-
-	return 1;
 }
 
 BOOL CSG550::Deploy()
@@ -176,7 +159,7 @@ void CSG550::SG550Fire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 
 void CSG550::Reload()
 {
-	if (DefaultReload(iMaxClip(), SG550_RELOAD, SG550_RELOAD_TIME))
+	if (DefaultReload(iinfo()->m_iMaxClip, SG550_RELOAD, SG550_RELOAD_TIME))
 	{
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
 

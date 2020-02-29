@@ -215,7 +215,7 @@ float CBot::GetActiveWeaponAmmoRatio() const
 	if (pCurrentWeapon->m_iClip < 0)
 		return 1.0f;
 
-	return float(pCurrentWeapon->m_iClip) / float(pCurrentWeapon->iMaxClip());
+	return float(pCurrentWeapon->m_iClip) / float(pCurrentWeapon->iinfo()->m_iMaxClip);
 }
 
 // Return true if active weapon has an empty clip

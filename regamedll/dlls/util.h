@@ -277,7 +277,6 @@ void UTIL_PlayerDecalTrace(TraceResult *pTrace, int playernum, int decalNumber, 
 void UTIL_GunshotDecalTrace(TraceResult *pTrace, int decalNumber, bool ClientOnly, entvars_t *pShooter);
 void UTIL_Sparks(const Vector &position);
 void UTIL_Ricochet(const Vector &position, float scale);
-bool UTIL_TeamsMatch(const char *pTeamName1, const char *pTeamName2);
 void UTIL_StringToVector(float *pVector, const char *pString);
 void UTIL_StringToVector(Vector &vecIn, const char *pString, char cSeparator);
 void UTIL_StringToVectorND(Vector &vecIn, int nCount, const char *pString, char cSeparator);

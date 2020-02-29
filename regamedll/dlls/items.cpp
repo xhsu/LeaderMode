@@ -1,46 +1,5 @@
 #include "precompiled.h"
 
-ItemInfo itemInfo[] = {
-	DEFINE_ITEMINFO(ITEM_SHIELDGUN,     "weapon_shield"),
-	DEFINE_ITEMINFO(ITEM_P228,          "weapon_p228"),
-	DEFINE_ITEMINFO(ITEM_GLOCK,         "weapon_glock"),
-	DEFINE_ITEMINFO(ITEM_SCOUT,         "weapon_scout"),
-	DEFINE_ITEMINFO(ITEM_HEGRENADE,     "weapon_hegrenade"),
-	DEFINE_ITEMINFO(ITEM_XM1014,        "weapon_xm1014"),
-	DEFINE_ITEMINFO(ITEM_MAC10,         "weapon_mac10"),
-	DEFINE_ITEMINFO(ITEM_AUG,           "weapon_aug"),
-	DEFINE_ITEMINFO(ITEM_SMOKEGRENADE,  "weapon_smokegrenade"),
-	DEFINE_ITEMINFO(ITEM_ELITE,         "weapon_elite"),
-	DEFINE_ITEMINFO(ITEM_FIVESEVEN,     "weapon_fiveseven"),
-	DEFINE_ITEMINFO(ITEM_UMP45,         "weapon_ump45"),
-	DEFINE_ITEMINFO(ITEM_SG550,         "weapon_sg550"),
-	DEFINE_ITEMINFO(ITEM_GALIL,         "weapon_galil"),
-	DEFINE_ITEMINFO(ITEM_FAMAS,         "weapon_famas"),
-	DEFINE_ITEMINFO(ITEM_USP,           "weapon_usp"),
-	DEFINE_ITEMINFO(ITEM_GLOCK18,       "weapon_glock18"),
-	DEFINE_ITEMINFO(ITEM_AWP,           "weapon_awp"),
-	DEFINE_ITEMINFO(ITEM_MP5N,          "weapon_mp5navy"),
-	DEFINE_ITEMINFO(ITEM_M249,          "weapon_m249"),
-	DEFINE_ITEMINFO(ITEM_M3,            "weapon_m3"),
-	DEFINE_ITEMINFO(ITEM_M4A1,          "weapon_m4a1"),
-	DEFINE_ITEMINFO(ITEM_TMP,           "weapon_tmp"),
-	DEFINE_ITEMINFO(ITEM_G3SG1,         "weapon_g3sg1"),
-	DEFINE_ITEMINFO(ITEM_FLASHBANG,     "weapon_flashbang"),
-	DEFINE_ITEMINFO(ITEM_DEAGLE,        "weapon_deagle"),
-	DEFINE_ITEMINFO(ITEM_SG552,         "weapon_sg552"),
-	DEFINE_ITEMINFO(ITEM_AK47,          "weapon_ak47"),
-	DEFINE_ITEMINFO(ITEM_KNIFE,         "weapon_knife"),
-	DEFINE_ITEMINFO(ITEM_P90,           "weapon_p90"),
-	DEFINE_ITEMINFO(ITEM_NVG,           ""),
-	DEFINE_ITEMINFO(ITEM_DEFUSEKIT,     "item_thighpack"),
-	DEFINE_ITEMINFO(ITEM_KEVLAR,        "item_kevlar"),
-	DEFINE_ITEMINFO(ITEM_ASSAULT,       "item_assaultsuit"),
-	DEFINE_ITEMINFO(ITEM_LONGJUMP,      "item_longjump"),
-	DEFINE_ITEMINFO(ITEM_HEALTHKIT,     "item_healthkit"),
-	DEFINE_ITEMINFO(ITEM_ANTIDOTE,      "item_antidote"),
-	DEFINE_ITEMINFO(ITEM_BATTERY,       "item_battery"),
-};
-
 LINK_ENTITY_TO_CLASS(world_items, CWorldItem)
 
 void CWorldItem::KeyValue(KeyValueData *pkvd)
@@ -185,6 +144,8 @@ BOOL CItemSuit::MyTouch(CBasePlayer *pPlayer)
 
 LINK_ENTITY_TO_CLASS(item_suit, CItemSuit)
 
+const float CItemBattery::batteryCapacity = 15.0f;
+
 void CItemBattery::Spawn()
 {
 	Precache();
@@ -205,7 +166,7 @@ BOOL CItemBattery::MyTouch(CBasePlayer *pPlayer)
 
 	if (pPlayer->pev->armorvalue < MAX_NORMAL_BATTERY && (pPlayer->pev->weapons & (1 << WEAPON_SUIT)))
 	{
-		auto armorValue = gSkillData.batteryCapacity;
+		auto armorValue = batteryCapacity;
 
 		if (pev->armorvalue != 0.0f)
 		{
@@ -434,51 +395,3 @@ BOOL CItemAssaultSuit::MyTouch(CBasePlayer *pPlayer)
 }
 
 LINK_ENTITY_TO_CLASS(item_assaultsuit, CItemAssaultSuit)
-
-ItemID GetItemIdByName(const char *pszName)
-{
-	for (auto& item : itemInfo) {
-		if (item.pszName[0] != '\0' && FStrEq(item.pszName, pszName))
-			return (ItemID)item.iId;
-	}
-
-	return ITEM_NONE;
-}
-
-ItemID GetItemIdByArmoury(ArmouryItemPack armoury)
-{
-	switch (armoury)
-	{
-	case ARMOURY_MP5NAVY: return ITEM_MP5N;
-	case ARMOURY_TMP: return ITEM_TMP;
-	case ARMOURY_P90: return ITEM_P90;
-	case ARMOURY_MAC10: return ITEM_MAC10;
-	case ARMOURY_AK47: return ITEM_AK47;
-	case ARMOURY_SG552: return ITEM_SG552;
-	case ARMOURY_M4A1: return ITEM_M4A1;
-	case ARMOURY_AUG: return ITEM_AUG;
-	case ARMOURY_SCOUT: return ITEM_SCOUT;
-	case ARMOURY_G3SG1: return ITEM_G3SG1;
-	case ARMOURY_AWP: return ITEM_AWP;
-	case ARMOURY_M3: return ITEM_M3;
-	case ARMOURY_XM1014: return ITEM_XM1014;
-	case ARMOURY_M249: return ITEM_M249;
-	case ARMOURY_FLASHBANG: return ITEM_FLASHBANG;
-	case ARMOURY_HEGRENADE: return ITEM_HEGRENADE;
-	case ARMOURY_KEVLAR: return ITEM_KEVLAR;
-	case ARMOURY_ASSAULT: return ITEM_ASSAULT;
-	case ARMOURY_SMOKEGRENADE: return ITEM_SMOKEGRENADE;
-	case ARMOURY_SHIELD: return ITEM_SHIELDGUN;
-	case ARMOURY_GLOCK18: return ITEM_GLOCK18;
-	case ARMOURY_USP: return ITEM_USP;
-	case ARMOURY_ELITE: return ITEM_ELITE;
-	case ARMOURY_FIVESEVEN: return ITEM_FIVESEVEN;
-	case ARMOURY_P228: return ITEM_P228;
-	case ARMOURY_DEAGLE: return ITEM_DEAGLE;
-	case ARMOURY_FAMAS: return ITEM_FAMAS;
-	case ARMOURY_SG550: return ITEM_SG550;
-	case ARMOURY_GALIL: return ITEM_GALIL;
-	case ARMOURY_UMP45: return ITEM_UMP45;
-	default: return ITEM_NONE;
-	}
-}

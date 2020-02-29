@@ -205,19 +205,7 @@
     <ClCompile Include="..\dlls\animation.cpp">
       <Filter>dlls</Filter>
     </ClCompile>
-    <ClCompile Include="..\dlls\skill.cpp">
-      <Filter>dlls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\dlls\gamerules.cpp">
-      <Filter>dlls</Filter>
-    </ClCompile>
     <ClCompile Include="..\dlls\game.cpp">
-      <Filter>dlls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\dlls\training_gamerules.cpp">
-      <Filter>dlls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\dlls\multiplay_gamerules.cpp">
       <Filter>dlls</Filter>
     </ClCompile>
     <ClCompile Include="..\game_shared\voice_gamemgr.cpp">
@@ -391,9 +379,6 @@
     <ClCompile Include="..\dlls\bot\cs_gamestate.cpp">
       <Filter>dlls\bot</Filter>
     </ClCompile>
-    <ClCompile Include="..\dlls\singleplay_gamerules.cpp">
-      <Filter>dlls</Filter>
-    </ClCompile>
     <ClCompile Include="..\dlls\ammo.cpp">
       <Filter>dlls</Filter>
     </ClCompile>
@@ -413,9 +398,6 @@
       <Filter>dlls</Filter>
     </ClCompile>
     <ClCompile Include="..\dlls\maprules.cpp">
-      <Filter>dlls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\dlls\soundent.cpp">
       <Filter>dlls</Filter>
     </ClCompile>
     <ClCompile Include="..\dlls\pathcorner.cpp">
@@ -478,9 +460,6 @@
     <ClCompile Include="..\dlls\addons\trigger_setorigin.cpp">
       <Filter>dlls\addons</Filter>
     </ClCompile>
-    <ClCompile Include="..\dlls\addons\item_airbox.cpp">
-      <Filter>dlls\addons</Filter>
-    </ClCompile>
     <ClCompile Include="..\dlls\saverestore.cpp">
       <Filter>dlls</Filter>
     </ClCompile>
@@ -500,6 +479,12 @@
       <Filter>public</Filter>
     </ClCompile>
     <ClCompile Include="..\dlls\player_classes.cpp">
+      <Filter>dlls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dlls\soundent.cpp">
+      <Filter>dlls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dlls\gamerules.cpp">
       <Filter>dlls</Filter>
     </ClCompile>
   </ItemGroup>
@@ -573,12 +558,6 @@
     <ClInclude Include="..\dlls\saverestore.h">
       <Filter>dlls</Filter>
     </ClInclude>
-    <ClInclude Include="..\dlls\skill.h">
-      <Filter>dlls</Filter>
-    </ClInclude>
-    <ClInclude Include="..\dlls\soundent.h">
-      <Filter>dlls</Filter>
-    </ClInclude>
     <ClInclude Include="..\dlls\spectator.h">
       <Filter>dlls</Filter>
     </ClInclude>
@@ -614,9 +593,6 @@
     </ClInclude>
     <ClInclude Include="..\game_shared\GameEvent.h">
       <Filter>game_shared</Filter>
-    </ClInclude>
-    <ClInclude Include="..\dlls\training_gamerules.h">
-      <Filter>dlls</Filter>
     </ClInclude>
     <ClInclude Include="..\game_shared\voice_gamemgr.h">
       <Filter>game_shared</Filter>
@@ -960,9 +936,6 @@
     <ClInclude Include="..\dlls\addons\trigger_setorigin.h">
       <Filter>dlls\addons</Filter>
     </ClInclude>
-    <ClInclude Include="..\dlls\addons\item_airbox.h">
-      <Filter>dlls\addons</Filter>
-    </ClInclude>
     <ClInclude Include="..\dlls\bot\cs_bot_init.h">
       <Filter>dlls\bot</Filter>
     </ClInclude>
@@ -985,6 +958,9 @@
       <Filter>dlls\addons</Filter>
     </ClInclude>
     <ClInclude Include="..\dlls\player_classes.h">
+      <Filter>dlls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dlls\soundent.h">
       <Filter>dlls</Filter>
     </ClInclude>
   </ItemGroup>

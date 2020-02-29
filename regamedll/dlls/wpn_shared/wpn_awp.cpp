@@ -9,7 +9,7 @@ void CAWP::Spawn()
 	m_iId = WEAPON_AWP;
 	SET_MODEL(ENT(pev), "models/w_awp.mdl");
 
-	m_iDefaultAmmo = AWP_DEFAULT_GIVE;
+	m_iDefaultAmmo = iinfo()->m_iMaxClip;
 
 	// Get ready to fall down
 	FallInit();
@@ -35,23 +35,6 @@ void CAWP::Precache()
 	m_iShell = PRECACHE_MODEL("models/rshell_big.mdl");
 	m_iShellId = m_iShell;
 	m_usFireAWP = PRECACHE_EVENT(1, "events/awp.sc");
-}
-
-int CAWP::GetItemInfo(ItemInfo *p)
-{
-	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "338Magnum";
-	p->iMaxAmmo1 = MAX_AMMO_338MAGNUM;
-	p->pszAmmo2 = nullptr;
-	p->iMaxAmmo2 = -1;
-	p->iMaxClip = AWP_MAX_CLIP;
-	p->iSlot = 0;
-	p->iPosition = 2;
-	p->iId = m_iId = WEAPON_AWP;
-	p->iFlags = 0;
-	p->iWeight = AWP_WEIGHT;
-
-	return 1;
 }
 
 BOOL CAWP::Deploy()
@@ -186,7 +169,7 @@ void CAWP::AWPFire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 
 void CAWP::Reload()
 {
-	if (DefaultReload(iMaxClip(), AWP_RELOAD, AWP_RELOAD_TIME))
+	if (DefaultReload(iinfo()->m_iMaxClip, AWP_RELOAD, AWP_RELOAD_TIME))
 	{
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
 

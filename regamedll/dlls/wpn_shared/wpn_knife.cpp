@@ -38,23 +38,6 @@ void CKnife::Precache()
 	m_usKnife = PRECACHE_EVENT(1, "events/knife.sc");
 }
 
-int CKnife::GetItemInfo(ItemInfo *p)
-{
-	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = nullptr;
-	p->iMaxAmmo1 = -1;
-	p->pszAmmo2 = nullptr;
-	p->iMaxAmmo2 = -1;
-	p->iMaxClip = WEAPON_NOCLIP;
-	p->iSlot = 2;
-	p->iPosition = 1;
-	p->iId = WEAPON_KNIFE;
-	p->iFlags = 0;
-	p->iWeight = KNIFE_WEIGHT;
-
-	return 1;
-}
-
 BOOL CKnife::Deploy()
 {
 	EMIT_SOUND(m_pPlayer->edict(), CHAN_ITEM, "weapons/knife_deploy1.wav", 0.3, 2.4);

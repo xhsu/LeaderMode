@@ -70,7 +70,6 @@ using FloatRef = float;
 #include "monsters.h"
 #include "unisignals.h"
 #include "maprules.h"
-#include "ammo.h"
 #include "mortar.h"
 #include "effects.h"
 #include "lights.h"
@@ -119,7 +118,6 @@ using FloatRef = float;
 #include "bot/cs_bot.h"
 
 // Addons
-#include "addons/item_airbox.h"
 #include "addons/trigger_setorigin.h"
 #include "addons/trigger_random.h"
 #include "addons/point_command.h"
@@ -139,10 +137,8 @@ using FloatRef = float;
 #include "gamerules.h"
 #include "mapinfo.h"
 #include "career_tasks.h"
-#include "training_gamerules.h"
 #include "maprules.h"
 #include "monsterevent.h"
-#include "skill.h"
 #include "soundent.h"
 #include "spectator.h"
 #include "talkmonster.h"

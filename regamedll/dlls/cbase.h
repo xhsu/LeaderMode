@@ -41,7 +41,9 @@ class CBaseEntity;
 class CBaseMonster;
 class CBasePlayerItem;
 class CSquadMonster;
-class CCSEntity;
+
+enum AmmoIdType;
+enum WeaponIdType;
 
 #undef CREATE_NAMED_ENTITY
 #undef REMOVE_ENTITY
@@ -94,7 +96,7 @@ public:
 	virtual void AddPointsToTeam(int score, BOOL bAllowNegativeScore) {}
 	virtual BOOL AddPlayerItem(CBasePlayerItem *pItem) { return FALSE; }
 	virtual BOOL RemovePlayerItem(CBasePlayerItem *pItem) { return FALSE; }
-	virtual int GiveAmmo(int iAmount, const char *szName, int iMax = -1) { return -1; }
+	virtual bool GiveAmmo(int iAmount, AmmoIdType iId) { return false; }
 	virtual float GetDelay() { return 0.0f; }
 	virtual int IsMoving() { return (pev->velocity != g_vecZero); }
 	virtual void OverrideReset() {}
@@ -157,7 +159,6 @@ public:
 	void EXPORT SUB_FadeOut();
 	void EXPORT SUB_CallUseToggle() { Use(this, this, USE_TOGGLE, 0); }
 	int ShouldToggle(USE_TYPE useType, BOOL currentState);
-	void FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq = 4, int iDamage = 0, entvars_t *pevAttacker = nullptr);
 	void FireBuckshots(ULONG cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iTracerFreq, int iDamage, entvars_t *pevAttacker = nullptr);
 	Vector FireBullets3(Vector vecSrc, Vector vecDirShooting, float vecSpread, float flDistance, int iPenetration, int iBulletType, int iDamage, float flRangeModifier, entvars_t *pevAttacker, bool bPistol, int shared_rand = 0);
 	void SUB_UseTargets(CBaseEntity *pActivator, USE_TYPE useType, float value);

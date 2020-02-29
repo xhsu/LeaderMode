@@ -6,10 +6,10 @@ void CSCOUT::Spawn()
 {
 	Precache();
 
-	m_iId = WEAPON_SCOUT;
+	m_iId = WEAPON_M200;
 	SET_MODEL(edict(), "models/w_scout.mdl");
 
-	m_iDefaultAmmo = SCOUT_DEFAULT_GIVE;
+	m_iDefaultAmmo = iinfo()->m_iMaxClip;
 
 	// Get ready to fall down
 	FallInit();
@@ -31,23 +31,6 @@ void CSCOUT::Precache()
 
 	m_iShellId = m_iShell = PRECACHE_MODEL("models/rshell_big.mdl");
 	m_usFireScout = PRECACHE_EVENT(1, "events/scout.sc");
-}
-
-int CSCOUT::GetItemInfo(ItemInfo *p)
-{
-	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "762Nato";
-	p->iMaxAmmo1 = MAX_AMMO_762NATO;
-	p->pszAmmo2 = nullptr;
-	p->iMaxAmmo2 = -1;
-	p->iMaxClip = SCOUT_MAX_CLIP;
-	p->iSlot = 0;
-	p->iPosition = 9;
-	p->iId = m_iId = WEAPON_SCOUT;
-	p->iFlags = 0;
-	p->iWeight = SCOUT_WEIGHT;
-
-	return 1;
 }
 
 BOOL CSCOUT::Deploy()
@@ -173,7 +156,7 @@ void CSCOUT::SCOUTFire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 
 void CSCOUT::Reload()
 {
-	if (DefaultReload(iMaxClip(), SCOUT_RELOAD, SCOUT_RELOAD_TIME))
+	if (DefaultReload(iinfo()->m_iMaxClip, SCOUT_RELOAD, SCOUT_RELOAD_TIME))
 	{
 		if (m_pPlayer->pev->fov != DEFAULT_FOV)
 		{

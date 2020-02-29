@@ -6,10 +6,10 @@ void CM3::Spawn()
 {
 	Precache();
 
-	m_iId = WEAPON_M3;
+	m_iId = WEAPON_KSG12;
 	SET_MODEL(edict(), "models/w_m3.mdl");
 
-	m_iDefaultAmmo = M3_DEFAULT_GIVE;
+	m_iDefaultAmmo = iinfo()->m_iMaxClip;
 
 	// Get ready to fall down
 	FallInit();
@@ -32,23 +32,6 @@ void CM3::Precache()
 	PRECACHE_SOUND("weapons/reload3.wav");
 
 	m_usFireM3 = PRECACHE_EVENT(1, "events/m3.sc");
-}
-
-int CM3::GetItemInfo(ItemInfo *p)
-{
-	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "buckshot";
-	p->iMaxAmmo1 = MAX_AMMO_BUCKSHOT;
-	p->pszAmmo2 = nullptr;
-	p->iMaxAmmo2 = -1;
-	p->iMaxClip = M3_MAX_CLIP;
-	p->iSlot = 0;
-	p->iPosition = 5;
-	p->iId = m_iId = WEAPON_M3;
-	p->iFlags = 0;
-	p->iWeight = M3_WEIGHT;
-
-	return 1;
 }
 
 BOOL CM3::Deploy()
@@ -161,7 +144,7 @@ void CM3::WeaponIdle()
 		}
 		else if (m_fInSpecialReload != 0)
 		{
-			if (m_iClip != iMaxClip() && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType])
+			if (m_iClip != iinfo()->m_iMaxClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType])
 			{
 				Reload();
 			}

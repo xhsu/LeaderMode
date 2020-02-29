@@ -9,7 +9,7 @@ void CM4A1::Spawn()
 	m_iId = WEAPON_M4A1;
 	SET_MODEL(edict(), "models/w_m4a1.mdl");
 
-	m_iDefaultAmmo = M4A1_DEFAULT_GIVE;
+	m_iDefaultAmmo = iinfo()->m_iMaxClip;
 	m_flAccuracy = 0.2f;
 	m_iShotsFired = 0;
 	m_bDelayFire = true;
@@ -40,23 +40,6 @@ void CM4A1::Precache()
 	m_usFireM4A1 = PRECACHE_EVENT(1, "events/m4a1.sc");
 }
 
-int CM4A1::GetItemInfo(ItemInfo *p)
-{
-	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "556Nato";
-	p->iMaxAmmo1 = MAX_AMMO_556NATO;
-	p->pszAmmo2 = nullptr;
-	p->iMaxAmmo2 = -1;
-	p->iMaxClip = M4A1_MAX_CLIP;
-	p->iSlot = 0;
-	p->iPosition = 6;
-	p->iId = m_iId = WEAPON_M4A1;
-	p->iFlags = 0;
-	p->iWeight = M4A1_WEIGHT;
-
-	return 1;
-}
-
 BOOL CM4A1::Deploy()
 {
 	m_bDelayFire = true;
@@ -65,62 +48,27 @@ BOOL CM4A1::Deploy()
 
 	iShellOn = 1;
 
-	if (m_iWeaponState & WPNSTATE_M4A1_SILENCED)
-		return DefaultDeploy("models/v_m4a1.mdl", "models/p_m4a1.mdl", M4A1_DRAW, "rifle", UseDecrement() != FALSE);
-	else
-		return DefaultDeploy("models/v_m4a1.mdl", "models/p_m4a1.mdl", M4A1_UNSIL_DRAW, "rifle", UseDecrement() != FALSE);
+	return DefaultDeploy("models/v_m4a1.mdl", "models/p_m4a1.mdl", M4A1_UNSIL_DRAW, "rifle", UseDecrement() != FALSE);
 }
 
 void CM4A1::SecondaryAttack()
 {
-	if (m_iWeaponState & WPNSTATE_M4A1_SILENCED)
-	{
-		m_iWeaponState &= ~WPNSTATE_M4A1_SILENCED;
-		SendWeaponAnim(M4A1_DETACH_SILENCER, UseDecrement() != FALSE);
-		Q_strcpy(m_pPlayer->m_szAnimExtention, "rifle");
-	}
-	else
-	{
-		m_iWeaponState |= WPNSTATE_M4A1_SILENCED;
-		SendWeaponAnim(M4A1_ATTACH_SILENCER, UseDecrement() != FALSE);
-		Q_strcpy(m_pPlayer->m_szAnimExtention, "rifle");
-	}
-
-	m_flTimeWeaponIdle = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 2.0f;
-	m_flNextPrimaryAttack = GetNextAttackDelay(2.0);
+	;
 }
 
 void CM4A1::PrimaryAttack()
 {
-	if (m_iWeaponState & WPNSTATE_M4A1_SILENCED)
+	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
 	{
-		if (!(m_pPlayer->pev->flags & FL_ONGROUND))
-		{
-			M4A1Fire(0.035 + (0.4 * m_flAccuracy), 0.0875, FALSE);
-		}
-		else if (m_pPlayer->pev->velocity.Length2D() > 140)
-		{
-			M4A1Fire(0.035 + (0.07 * m_flAccuracy), 0.0875, FALSE);
-		}
-		else
-		{
-			M4A1Fire(0.025 * m_flAccuracy, 0.0875, FALSE);
-		}
+		M4A1Fire(0.035 + (0.4 * m_flAccuracy), 0.0875, FALSE);
+	}
+	else if (m_pPlayer->pev->velocity.Length2D() > 140)
+	{
+		M4A1Fire(0.035 + (0.07 * m_flAccuracy), 0.0875, FALSE);
 	}
 	else
 	{
-		if (!(m_pPlayer->pev->flags & FL_ONGROUND))
-		{
-			M4A1Fire(0.035 + (0.4 * m_flAccuracy), 0.0875, FALSE);
-		}
-		else if (m_pPlayer->pev->velocity.Length2D() > 140)
-		{
-			M4A1Fire(0.035 + (0.07 * m_flAccuracy), 0.0875, FALSE);
-		}
-		else
-		{
-			M4A1Fire(0.02 * m_flAccuracy, 0.0875, FALSE);
-		}
+		M4A1Fire(0.02 * m_flAccuracy, 0.0875, FALSE);
 	}
 }
 
@@ -164,20 +112,8 @@ void CM4A1::M4A1Fire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 	vecSrc = m_pPlayer->GetGunPosition();
 	vecAiming = gpGlobals->v_forward;
 
-	float flBaseDamage = (m_iWeaponState & WPNSTATE_M4A1_SILENCED) ? M4A1_DAMAGE_SIL : M4A1_DAMAGE;
-
-	if (m_iWeaponState & WPNSTATE_M4A1_SILENCED)
-	{
-		vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, 8192, 2, BULLET_PLAYER_556MM,
-			flBaseDamage, M4A1_RANGE_MODIFER_SIL, m_pPlayer->pev, false, m_pPlayer->random_seed);
-	}
-	else
-	{
-		vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, 8192, 2, BULLET_PLAYER_556MM,
-			flBaseDamage, M4A1_RANGE_MODIFER, m_pPlayer->pev, false, m_pPlayer->random_seed);
-
-		m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
-	}
+	vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, 8192, 2, BULLET_PLAYER_556MM, M4A1_DAMAGE, M4A1_RANGE_MODIFER, m_pPlayer->pev, false, m_pPlayer->random_seed);
+	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 
 #ifdef CLIENT_WEAPONS
 	flag = FEV_NOTHOST;
@@ -185,8 +121,7 @@ void CM4A1::M4A1Fire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 	flag = 0;
 #endif
 
-	PLAYBACK_EVENT_FULL(flag, m_pPlayer->edict(), m_usFireM4A1, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y,
-		int(m_pPlayer->pev->punchangle.x * 100), int(m_pPlayer->pev->punchangle.y * 100), (m_iWeaponState & WPNSTATE_M4A1_SILENCED) == WPNSTATE_M4A1_SILENCED, FALSE);
+	PLAYBACK_EVENT_FULL(flag, m_pPlayer->edict(), m_usFireM4A1, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, int(m_pPlayer->pev->punchangle.x * 100), int(m_pPlayer->pev->punchangle.y * 100), FALSE, FALSE);
 
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = GetNextAttackDelay(flCycleTime);
 
@@ -217,7 +152,7 @@ void CM4A1::M4A1Fire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 
 void CM4A1::Reload()
 {
-	if (DefaultReload(iMaxClip(), ((m_iWeaponState & WPNSTATE_M4A1_SILENCED) == WPNSTATE_M4A1_SILENCED) ? M4A1_RELOAD : M4A1_UNSIL_RELOAD, M4A1_RELOAD_TIME))
+	if (DefaultReload(iinfo()->m_iMaxClip, M4A1_UNSIL_RELOAD, M4A1_RELOAD_TIME))
 	{
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
 
@@ -238,7 +173,7 @@ void CM4A1::WeaponIdle()
 	}
 
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
-	SendWeaponAnim((m_iWeaponState & WPNSTATE_M4A1_SILENCED) == WPNSTATE_M4A1_SILENCED ? M4A1_IDLE : M4A1_UNSIL_IDLE, UseDecrement() != FALSE);
+	SendWeaponAnim(M4A1_UNSIL_IDLE, UseDecrement() != FALSE);
 }
 
 float CM4A1::GetMaxSpeed()

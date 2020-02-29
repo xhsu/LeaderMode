@@ -3,7 +3,6 @@
 const Vector g_vecZero(0, 0, 0);
 
 int g_Language;
-int g_iSkillLevel;
 
 Vector g_vecAttackDir;
 BOOL gDisplayTitle;

@@ -543,9 +543,6 @@ void CCSBot::Update()
 	// reload our weapon if we must
 	ReloadCheck();
 
-	// equip silencer
-	SilencerCheck();
-
 	// listen to the radio
 	RespondToRadioCommands();
 

@@ -11,7 +11,7 @@ void CSmokeGrenade::Spawn()
 
 	pev->dmg = 4;
 
-	m_iDefaultAmmo = SMOKEGRENADE_DEFAULT_GIVE;
+	m_iDefaultAmmo = 1;
 	m_flStartThrow = 0;
 	m_flReleaseThrow = -1;
 	m_iWeaponState &= ~WPNSTATE_SHIELD_DRAWN;
@@ -32,27 +32,6 @@ void CSmokeGrenade::Precache()
 	PRECACHE_SOUND("weapons/sg_explode.wav");
 
 	m_usCreateSmoke = PRECACHE_EVENT(1, "events/createsmoke.sc");
-}
-
-int CSmokeGrenade::GetItemInfo(ItemInfo *p)
-{
-	auto info = GetWeaponInfo(WEAPON_SMOKEGRENADE);
-
-	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "SmokeGrenade";
-
-	p->iMaxAmmo1 = info ? info->maxRounds : MAX_AMMO_SMOKEGRENADE;
-	p->iMaxClip = info ? info->gunClipSize : WEAPON_NOCLIP;
-
-	p->pszAmmo2 = nullptr;
-	p->iMaxAmmo2 = -1;
-	p->iSlot = 3;
-	p->iPosition = 3;
-	p->iId = m_iId = WEAPON_SMOKEGRENADE;
-	p->iWeight = SMOKEGRENADE_WEIGHT;
-	p->iFlags = ITEM_FLAG_LIMITINWORLD | ITEM_FLAG_EXHAUSTIBLE;
-
-	return 1;
 }
 
 BOOL CSmokeGrenade::Deploy()

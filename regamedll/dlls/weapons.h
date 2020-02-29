@@ -35,6 +35,7 @@ const float MAX_DIST_RELOAD_SOUND = 512.0f;
 
 #define MAX_WEAPONS                 32
 
+#define ITEM_FLAG_NONE				0
 #define ITEM_FLAG_SELECTONEMPTY     1
 #define ITEM_FLAG_NOAUTORELOAD      2
 #define ITEM_FLAG_NOAUTOSWITCHEMPTY 4
@@ -63,67 +64,31 @@ const float MAX_DIST_RELOAD_SOUND = 512.0f;
 // spawn flags
 #define SF_DETONATE                 BIT(0) // Grenades flagged with this will be triggered when the owner calls detonateSatchelCharges
 
-// custom enum
-enum ArmorType
-{
-	ARMOR_NONE,     // No armor
-	ARMOR_KEVLAR,   // Body vest only
-	ARMOR_VESTHELM, // Vest and helmet
-};
-
-enum ArmouryItemPack
-{
-	ARMOURY_MP5NAVY,
-	ARMOURY_TMP,
-	ARMOURY_P90,
-	ARMOURY_MAC10,
-	ARMOURY_AK47,
-	ARMOURY_SG552,
-	ARMOURY_M4A1,
-	ARMOURY_AUG,
-	ARMOURY_SCOUT,
-	ARMOURY_G3SG1,
-	ARMOURY_AWP,
-	ARMOURY_M3,
-	ARMOURY_XM1014,
-	ARMOURY_M249,
-	ARMOURY_FLASHBANG,
-	ARMOURY_HEGRENADE,
-	ARMOURY_KEVLAR,
-	ARMOURY_ASSAULT,
-	ARMOURY_SMOKEGRENADE,
-	ARMOURY_SHIELD,
-	ARMOURY_FAMAS,
-	ARMOURY_SG550,
-	ARMOURY_GALIL,
-	ARMOURY_UMP45,
-	ARMOURY_GLOCK18,
-	ARMOURY_USP,
-	ARMOURY_ELITE,
-	ARMOURY_FIVESEVEN,
-	ARMOURY_P228,
-	ARMOURY_DEAGLE,
-};
+#define ARMOR_NONE		0.0f	// No armor
+#define ARMOR_KEVLAR	1.0f	// Body vest only
+#define ARMOR_VESTHELM	2.0f	// Vest and helmet
 
 struct ItemInfo
 {
-	int iSlot;
-	int iPosition;
-	const char *pszAmmo1;
-	int iMaxAmmo1;
-	const char *pszAmmo2;
-	int iMaxAmmo2;
-	const char *pszName;
-	int iMaxClip;
-	int iId;
-	int iFlags;
-	int iWeight;
+	int m_iId;
+	const char* m_pszClassName;
+	int m_iAmmoType;
+	int m_iMaxClip;
+	int m_iSlot;
+	int m_iPosition;
+	int m_bitsFlags;
+	int m_iWeight;
+	int m_iCost;
 };
 
 struct AmmoInfo
 {
-	const char *pszName;
-	int iId;
+	int m_iId;
+	const char* m_pszName;
+	int m_iMax;
+	int m_iCountPerBox;
+	int m_iCostPerBox;
+	int m_iBulletBehavior;
 };
 
 struct MULTIDAMAGE
@@ -133,33 +98,9 @@ struct MULTIDAMAGE
 	int type;
 };
 
+#include "ammo.h"
 #include "weapontype.h"
 #include "items.h"
-
-class CArmoury: public CBaseEntity
-{
-public:
-	virtual void Spawn();
-	virtual void Precache();
-	virtual void Restart();
-	virtual void KeyValue(KeyValueData *pkvd);
-	virtual void SetObjectCollisionBox();
-
-public:
-	void EXPORT ArmouryTouch(CBaseEntity *pOther);
-
-private:
-	void Draw();
-	void Hide();
-
-public:
-	static char *m_ItemModels[];
-
-	ArmouryItemPack m_iItem;
-	int m_iCount;
-	int m_iInitialCount;
-	bool m_bAlreadyCounted;
-};
 
 class CGrenade: public CBaseMonster
 {
@@ -232,10 +173,9 @@ public:
 	virtual int Save(CSave &save);
 	virtual int Restore(CRestore &restore);
 	virtual void SetObjectCollisionBox();
-	virtual CBaseEntity *Respawn();
 	virtual int AddToPlayer(CBasePlayer *pPlayer);							// return TRUE if the item you want the item added to the player inventory
 	virtual int AddDuplicate(CBasePlayerItem *pItem) { return FALSE; }		// return TRUE if you want your duplicate removed from world
-	virtual int GetItemInfo(ItemInfo *p) { return 0; }						// returns 0 if struct not filled out
+	virtual int GetItemInfo(ItemInfo* p);									// returns 0 if struct not filled out
 	virtual BOOL CanDeploy() { return TRUE; }
 	virtual BOOL CanDrop() { return TRUE; }									// returns is deploy was successful
 	virtual BOOL Deploy() { return TRUE; }
@@ -248,49 +188,35 @@ public:
 	virtual void Drop();
 	virtual void Kill();
 	virtual void AttachToPlayer(CBasePlayer *pPlayer);
-	virtual int PrimaryAmmoIndex() { return -1; }
-	virtual int SecondaryAmmoIndex() { return -1; }
 	virtual int UpdateClientData(CBasePlayer *pPlayer) { return 0; }
-	virtual CBasePlayerItem *GetWeaponPtr() { return nullptr; }
 	virtual float GetMaxSpeed() { return 260.0f; }
-	virtual int iItemSlot() { return 0; }									// return 0 to MAX_ITEMS_SLOTS, used in hud
+	virtual const ItemInfo* iinfo() { return &m_rgItemInfo[(m_iId > 0 && m_iId < LAST_WEAPON) ? m_iId : 0]; }
+	virtual const AmmoInfo* ainfo() { return &m_rgAmmoInfo[0]; }
 
 public:
 	void EXPORT DestroyItem();
 	void EXPORT DefaultTouch(CBaseEntity *pOther);
 	void EXPORT FallThink();
 	void EXPORT Materialize();
-	void EXPORT AttemptToMaterialize();
 
 	void FallInit();
-	void CheckRespawn();
-
-public:
-	const char *pszAmmo1() const;
-	int iMaxAmmo1() const;
-	const char *pszAmmo2() const;
-	int iMaxAmmo2() const;
-	const char *pszName() const;
-	int iMaxClip() const;
-	int iWeight() const;
-	int iFlags() const;
 
 public:
 	static TYPEDESCRIPTION m_SaveData[];
-	static ItemInfo m_ItemInfoArray[MAX_WEAPONS];
-	static AmmoInfo m_AmmoInfoArray[MAX_AMMO_SLOTS];
+	static const ItemInfo m_rgItemInfo[MAX_WEAPONS];
+	static const AmmoInfo m_rgAmmoInfo[MAX_AMMO_SLOTS];
 
 	CBasePlayer *m_pPlayer;
 	CBasePlayerItem *m_pNext;
-	int m_iId;							// WEAPON_???
-	bool m_bBeingSold;	// used for commander passive skill.
+	WeaponIdType m_iId;			// WEAPON_???
+	bool m_bHadBeenSold;			// used for commander passive skill.
 };
 
 // inventory items that
 class CBasePlayerWeapon: public CBasePlayerItem
 {
 public:
-	virtual void Spawn();
+	virtual void Spawn() {}
 	virtual int Save(CSave &save);
 	virtual int Restore(CRestore &restore);
 
@@ -302,20 +228,13 @@ public:
 	virtual void Holster(int skiplocal = 0);
 	virtual void UpdateItemInfo() {};
 	virtual void ItemPostFrame();
-	virtual int PrimaryAmmoIndex();
-	virtual int SecondaryAmmoIndex();
 	virtual int UpdateClientData(CBasePlayer *pPlayer);
-	virtual CBasePlayerItem *GetWeaponPtr() { return (CBasePlayerItem *)this; }
 	virtual int ExtractAmmo(CBasePlayerWeapon *pWeapon);
 	virtual int ExtractClipAmmo(CBasePlayerWeapon *pWeapon);
-	virtual int AddWeapon()
-	{
-		ExtractAmmo(this);
-		return 1;
-	}
 	virtual BOOL PlayEmptySound();
 	virtual void ResetEmptySound();
 	virtual void SendWeaponAnim(int iAnim, int skiplocal = 0);
+	virtual bool AddPrimaryAmmo(int iCount);
 	virtual BOOL IsUseable();
 	virtual void PrimaryAttack() {};
 	virtual void SecondaryAttack() {};
@@ -324,22 +243,18 @@ public:
 	virtual void RetireWeapon();
 	virtual BOOL ShouldWeaponIdle() { return FALSE; }
 	virtual BOOL UseDecrement() { return FALSE; }
+	virtual const AmmoInfo* ainfo() { return &m_rgAmmoInfo[(m_iPrimaryAmmoType > 0 && m_iPrimaryAmmoType < AMMO_MAXTYPE) ? m_iPrimaryAmmoType : 0]; }
 
 public:
-	BOOL AddPrimaryAmmo(int iCount, char *szName, int iMaxClip, int iMaxCarry);
-	BOOL AddSecondaryAmmo(int iCount, char *szName, int iMaxCarry);
 	BOOL DefaultDeploy(char *szViewModel, char *szWeaponModel, int iAnim, char *szAnimExt, int skiplocal = 0);
 	int DefaultReload(int iClipSize, int iAnim, float fDelay);
 	void FireRemaining(int &shotsFired, float &shootTime, BOOL isGlock18);
 	void KickBack(float up_base, float lateral_base, float up_modifier, float lateral_modifier, float up_max, float lateral_max, int direction_change);
 	void EjectBrassLate();
-	void MakeBeam();
-	void BeamUpdate();
 	void ReloadSound();
 	float GetNextAttackDelay(float delay);
-	float GetNextAttackDelay2(float delay);
 	bool HasSecondaryAttack();
-	BOOL IsPistol() { return (m_iId == WEAPON_USP || m_iId == WEAPON_GLOCK18 || m_iId == WEAPON_P228 || m_iId == WEAPON_DEAGLE || m_iId == WEAPON_ELITE || m_iId == WEAPON_FIVESEVEN); }
+	BOOL IsPistol() { return m_rgItemInfo[m_iId].m_iSlot == PISTOL_SLOT; }
 	void SetPlayerShieldAnim();
 	void ResetPlayerShieldAnim();
 	bool ShieldSecondaryFire(int iUpAnim, int iDownAnim);
@@ -399,28 +314,25 @@ public:
 	virtual int Restore(CRestore &restore);
 	virtual int ObjectCaps() { return FCAP_ACROSS_TRANSITION | FCAP_IMPULSE_USE; }
 	virtual void SetObjectCollisionBox();
+	virtual bool GiveAmmo(int iCount, AmmoIdType iId);
 	virtual void Touch(CBaseEntity *pOther);
 	virtual void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType = USE_OFF, float value = 0.0f);
 
 public:
-	BOOL IsEmpty();
-	int GiveAmmo(int iCount, char *szName, int iMax, int *pIndex = nullptr);
+	bool IsEmpty();
 
 	void EXPORT Kill();
 	void SetModel(const char *pszModelName);
 
-	BOOL HasWeapon(CBasePlayerItem *pCheckItem);
-	BOOL PackWeapon(CBasePlayerItem *pWeapon);
-	BOOL PackAmmo(string_t iszName, int iCount);
+	bool HasWeapon(CBasePlayerItem *pCheckItem);
+	bool PackWeapon(CBasePlayerItem *pWeapon);
 
 public:
 	static TYPEDESCRIPTION m_SaveData[];
 
 	CBasePlayerItem *m_rgpPlayerItems[MAX_ITEM_TYPES];
-	string_t m_rgiszAmmo[MAX_AMMO_SLOTS];
 	int m_rgAmmo[MAX_AMMO_SLOTS];
-	int m_cAmmoTypes;
-	bool m_bBeingSold;
+	bool m_bHadBeenSold;
 };
 
 
@@ -469,10 +381,8 @@ class CUSP: public CBasePlayerWeapon
 public:
 	virtual void Spawn();
 	virtual void Precache();
-	virtual int GetItemInfo(ItemInfo *p);
 	virtual BOOL Deploy();
 	virtual float GetMaxSpeed() { return m_fMaxSpeed; }
-	virtual int iItemSlot() { return PISTOL_SLOT; }
 	virtual void PrimaryAttack();
 	virtual void SecondaryAttack();
 	virtual void Reload();
@@ -489,8 +399,6 @@ public:
 
 public:
 	void USPFire(float flSpread, float flCycleTime, BOOL fUseSemi);
-	void MakeBeam();
-	void BeamUpdate();
 	int m_iShell;
 
 private:
@@ -518,10 +426,8 @@ class CMP5N: public CBasePlayerWeapon
 public:
 	virtual void Spawn();
 	virtual void Precache();
-	virtual int GetItemInfo(ItemInfo *p);
 	virtual BOOL Deploy();
 	virtual float GetMaxSpeed() { return MP5N_MAX_SPEED; }
-	virtual int iItemSlot() { return PRIMARY_WEAPON_SLOT; }
 	virtual void PrimaryAttack();
 	virtual void Reload();
 	virtual void WeaponIdle();
@@ -566,10 +472,8 @@ class CSG552: public CBasePlayerWeapon
 public:
 	virtual void Spawn();
 	virtual void Precache();
-	virtual int GetItemInfo(ItemInfo *p);
 	virtual BOOL Deploy();
 	virtual float GetMaxSpeed();
-	virtual int iItemSlot() { return PRIMARY_WEAPON_SLOT; }
 	virtual void PrimaryAttack();
 	virtual void SecondaryAttack();
 	virtual void Reload();
@@ -614,10 +518,8 @@ class CAK47: public CBasePlayerWeapon
 public:
 	virtual void Spawn();
 	virtual void Precache();
-	virtual int GetItemInfo(ItemInfo *p);
 	virtual BOOL Deploy();
 	virtual float GetMaxSpeed() { return AK47_MAX_SPEED; }
-	virtual int iItemSlot() { return PRIMARY_WEAPON_SLOT; }
 	virtual void PrimaryAttack();
 	virtual void SecondaryAttack();
 	virtual void Reload();
@@ -662,10 +564,8 @@ class CAUG: public CBasePlayerWeapon
 public:
 	virtual void Spawn();
 	virtual void Precache();
-	virtual int GetItemInfo(ItemInfo *p);
 	virtual BOOL Deploy();
 	virtual float GetMaxSpeed() { return AUG_MAX_SPEED; }
-	virtual int iItemSlot() { return PRIMARY_WEAPON_SLOT; }
 	virtual void PrimaryAttack();
 	virtual void SecondaryAttack();
 	virtual void Reload();
@@ -711,10 +611,8 @@ class CAWP: public CBasePlayerWeapon
 public:
 	virtual void Spawn();
 	virtual void Precache();
-	virtual int GetItemInfo(ItemInfo *p);
 	virtual BOOL Deploy();
 	virtual float GetMaxSpeed();
-	virtual int iItemSlot() { return PRIMARY_WEAPON_SLOT; }
 	virtual void PrimaryAttack();
 	virtual void SecondaryAttack();
 	virtual void Reload();
@@ -738,54 +636,6 @@ private:
 };
 
 
-// for usermsg BombDrop
-#define BOMB_FLAG_DROPPED	0 // if the bomb was dropped due to voluntary dropping or death/disconnect
-#define BOMB_FLAG_PLANTED	1 // if the bomb has been planted will also trigger the round timer to hide will also show where the dropped bomb on the Terrorist team's radar.
-
-const float C4_MAX_SPEED      = 250.0f;
-const float C4_ARMING_ON_TIME = 3.0f;
-
-enum c4_e
-{
-	C4_IDLE1,
-	C4_DRAW,
-	C4_DROP,
-	C4_ARM,
-};
-
-class CC4: public CBasePlayerWeapon
-{
-public:
-	virtual void Spawn();
-	virtual void Precache();
-	virtual void KeyValue(KeyValueData *pkvd);
-	virtual void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
-	virtual int GetItemInfo(ItemInfo *p);
-	virtual BOOL Deploy();
-	virtual void Holster(int skiplocal);
-	virtual float GetMaxSpeed();
-	virtual int iItemSlot() { return C4_SLOT; }
-	virtual void PrimaryAttack();
-	virtual void WeaponIdle();
-	virtual BOOL UseDecrement()
-	{
-	#ifdef CLIENT_WEAPONS
-		return TRUE;
-	#else
-		return FALSE;
-	#endif
-	}
-
-public:
-	bool m_bStartedArming;
-	bool m_bBombPlacedAnimation;
-	float m_fArmedTime;
-
-private:
-	bool m_bHasShield;
-};
-
-
 const float DEAGLE_MAX_SPEED     = 250.0f;
 const float DEAGLE_DAMAGE        = 54.0f;
 const float DEAGLE_RANGE_MODIFER = 0.81f;
@@ -806,10 +656,8 @@ class CDEAGLE: public CBasePlayerWeapon
 public:
 	virtual void Spawn();
 	virtual void Precache();
-	virtual int GetItemInfo(ItemInfo *p);
 	virtual BOOL Deploy();
 	virtual float GetMaxSpeed() { return m_fMaxSpeed; }
-	virtual int iItemSlot() { return PISTOL_SLOT; }
 	virtual void PrimaryAttack();
 	virtual void SecondaryAttack();
 	virtual void Reload();
@@ -850,13 +698,11 @@ class CFlashbang: public CBasePlayerWeapon
 public:
 	virtual void Spawn();
 	virtual void Precache();
-	virtual int GetItemInfo(ItemInfo *p);
 	virtual BOOL CanDeploy();
 	virtual BOOL CanDrop() { return FALSE; }
 	virtual BOOL Deploy();
 	virtual void Holster(int skiplocal);
 	virtual float GetMaxSpeed() { return m_fMaxSpeed; }
-	virtual int iItemSlot() { return GRENADE_SLOT; }
 	virtual void PrimaryAttack();
 	virtual void SecondaryAttack();
 	virtual void WeaponIdle();
@@ -897,10 +743,8 @@ class CG3SG1: public CBasePlayerWeapon
 public:
 	virtual void Spawn();
 	virtual void Precache();
-	virtual int GetItemInfo(ItemInfo *p);
 	virtual BOOL Deploy();
 	virtual float GetMaxSpeed();
-	virtual int iItemSlot() { return PRIMARY_WEAPON_SLOT; }
 	virtual void PrimaryAttack();
 	virtual void SecondaryAttack();
 	virtual void Reload();
@@ -964,10 +808,8 @@ class CGLOCK18: public CBasePlayerWeapon
 public:
 	virtual void Spawn();
 	virtual void Precache();
-	virtual int GetItemInfo(ItemInfo *p);
 	virtual BOOL Deploy();
 	virtual float GetMaxSpeed() { return m_fMaxSpeed; }
-	virtual int iItemSlot() { return PISTOL_SLOT; }
 	virtual void PrimaryAttack();
 	virtual void SecondaryAttack();
 	virtual void Reload();
@@ -1007,13 +849,11 @@ class CHEGrenade: public CBasePlayerWeapon
 public:
 	virtual void Spawn();
 	virtual void Precache();
-	virtual int GetItemInfo(ItemInfo *p);
 	virtual BOOL CanDeploy();
 	virtual BOOL CanDrop() { return FALSE; }
 	virtual BOOL Deploy();
 	virtual void Holster(int skiplocal);
 	virtual float GetMaxSpeed() { return m_fMaxSpeed; }
-	virtual int iItemSlot() { return GRENADE_SLOT; }
 	virtual void PrimaryAttack();
 	virtual void SecondaryAttack();
 	virtual void WeaponIdle();
@@ -1069,12 +909,10 @@ class CKnife: public CBasePlayerWeapon
 public:
 	virtual void Spawn();
 	virtual void Precache();
-	virtual int GetItemInfo(ItemInfo *p);
 	virtual BOOL CanDrop() { return FALSE; }
 	virtual BOOL Deploy();
 	virtual void Holster(int skiplocal);
 	virtual float GetMaxSpeed() { return m_fMaxSpeed; }
-	virtual int iItemSlot() { return KNIFE_SLOT; }
 	virtual void PrimaryAttack();
 	virtual void SecondaryAttack();
 	virtual BOOL UseDecrement()
@@ -1125,10 +963,8 @@ class CM249: public CBasePlayerWeapon
 public:
 	virtual void Spawn();
 	virtual void Precache();
-	virtual int GetItemInfo(ItemInfo *p);
 	virtual BOOL Deploy();
 	virtual float GetMaxSpeed() { return M249_MAX_SPEED; }
-	virtual int iItemSlot() { return PRIMARY_WEAPON_SLOT; }
 	virtual void PrimaryAttack();
 	virtual void Reload();
 	virtual void WeaponIdle();
@@ -1173,10 +1009,8 @@ class CM3: public CBasePlayerWeapon
 public:
 	virtual void Spawn();
 	virtual void Precache();
-	virtual int GetItemInfo(ItemInfo *p);
 	virtual BOOL Deploy();
 	virtual float GetMaxSpeed() { return M3_MAX_SPEED; }
-	virtual int iItemSlot() { return PRIMARY_WEAPON_SLOT; }
 	virtual BOOL PlayEmptySound();
 	virtual void PrimaryAttack();
 	virtual void Reload();
@@ -1229,10 +1063,8 @@ class CM4A1: public CBasePlayerWeapon
 public:
 	virtual void Spawn();
 	virtual void Precache();
-	virtual int GetItemInfo(ItemInfo *p);
 	virtual BOOL Deploy();
 	virtual float GetMaxSpeed();
-	virtual int iItemSlot() { return PRIMARY_WEAPON_SLOT; }
 	virtual void PrimaryAttack();
 	virtual void SecondaryAttack();
 	virtual void Reload();
@@ -1277,10 +1109,8 @@ class CMAC10: public CBasePlayerWeapon
 public:
 	virtual void Spawn();
 	virtual void Precache();
-	virtual int GetItemInfo(ItemInfo *p);
 	virtual BOOL Deploy();
 	virtual float GetMaxSpeed() { return MAC10_MAX_SPEED; }
-	virtual int iItemSlot() { return PRIMARY_WEAPON_SLOT; }
 	virtual void PrimaryAttack();
 	virtual void Reload();
 	virtual void WeaponIdle();
@@ -1338,10 +1168,8 @@ class CP228: public CBasePlayerWeapon
 public:
 	virtual void Spawn();
 	virtual void Precache();
-	virtual int GetItemInfo(ItemInfo *p);
 	virtual BOOL Deploy();
 	virtual float GetMaxSpeed() { return m_fMaxSpeed; }
-	virtual int iItemSlot() { return PISTOL_SLOT; }
 	virtual void PrimaryAttack();
 	virtual void SecondaryAttack();
 	virtual void Reload();
@@ -1389,10 +1217,8 @@ class CP90: public CBasePlayerWeapon
 public:
 	virtual void Spawn();
 	virtual void Precache();
-	virtual int GetItemInfo(ItemInfo *p);
 	virtual BOOL Deploy();
 	virtual float GetMaxSpeed();
-	virtual int iItemSlot() { return PRIMARY_WEAPON_SLOT; }
 	virtual void PrimaryAttack();
 	virtual void Reload();
 	virtual void WeaponIdle();
@@ -1436,10 +1262,8 @@ class CSCOUT: public CBasePlayerWeapon
 public:
 	virtual void Spawn();
 	virtual void Precache();
-	virtual int GetItemInfo(ItemInfo *p);
 	virtual BOOL Deploy();
 	virtual float GetMaxSpeed();
-	virtual int iItemSlot() { return PRIMARY_WEAPON_SLOT; }
 	virtual void PrimaryAttack();
 	virtual void SecondaryAttack();
 	virtual void Reload();
@@ -1478,13 +1302,11 @@ class CSmokeGrenade: public CBasePlayerWeapon
 public:
 	virtual void Spawn();
 	virtual void Precache();
-	virtual int GetItemInfo(ItemInfo *p);
 	virtual BOOL CanDeploy();
 	virtual BOOL CanDrop() { return FALSE; }
 	virtual BOOL Deploy();
 	virtual void Holster(int skiplocal);
 	virtual float GetMaxSpeed() { return m_fMaxSpeed; }
-	virtual int iItemSlot() { return GRENADE_SLOT; }
 	virtual void PrimaryAttack();
 	virtual void SecondaryAttack();
 	virtual void WeaponIdle();
@@ -1527,10 +1349,8 @@ class CTMP: public CBasePlayerWeapon
 public:
 	virtual void Spawn();
 	virtual void Precache();
-	virtual int GetItemInfo(ItemInfo *p);
 	virtual BOOL Deploy();
 	virtual float GetMaxSpeed() { return TMP_MAX_SPEED; }
-	virtual int iItemSlot() { return PRIMARY_WEAPON_SLOT; }
 	virtual void PrimaryAttack();
 	virtual void Reload();
 	virtual void WeaponIdle();
@@ -1575,10 +1395,8 @@ class CXM1014: public CBasePlayerWeapon
 public:
 	virtual void Spawn();
 	virtual void Precache();
-	virtual int GetItemInfo(ItemInfo *p);
 	virtual BOOL Deploy();
 	virtual float GetMaxSpeed() { return XM1014_MAX_SPEED; }
-	virtual int iItemSlot() { return PRIMARY_WEAPON_SLOT; }
 	virtual BOOL PlayEmptySound();
 	virtual void PrimaryAttack();
 	virtual void Reload();
@@ -1631,10 +1449,8 @@ class CELITE: public CBasePlayerWeapon
 public:
 	virtual void Spawn();
 	virtual void Precache();
-	virtual int GetItemInfo(ItemInfo *p);
 	virtual BOOL Deploy();
 	virtual float GetMaxSpeed() { return ELITE_MAX_SPEED; }
-	virtual int iItemSlot() { return PISTOL_SLOT; }
 	virtual void PrimaryAttack();
 	virtual void Reload();
 	virtual void WeaponIdle();
@@ -1679,10 +1495,8 @@ class CFiveSeven: public CBasePlayerWeapon
 public:
 	virtual void Spawn();
 	virtual void Precache();
-	virtual int GetItemInfo(ItemInfo *p);
 	virtual BOOL Deploy();
 	virtual float GetMaxSpeed() { return m_fMaxSpeed; }
-	virtual int iItemSlot() { return PISTOL_SLOT; }
 	virtual void PrimaryAttack();
 	virtual void SecondaryAttack();
 	virtual void Reload();
@@ -1730,10 +1544,8 @@ class CUMP45: public CBasePlayerWeapon
 public:
 	virtual void Spawn();
 	virtual void Precache();
-	virtual int GetItemInfo(ItemInfo *p);
 	virtual BOOL Deploy();
 	virtual float GetMaxSpeed() { return UMP45_MAX_SPEED; }
-	virtual int iItemSlot() { return PRIMARY_WEAPON_SLOT; }
 	virtual void PrimaryAttack();
 	virtual void Reload();
 	virtual void WeaponIdle();
@@ -1777,10 +1589,8 @@ class CSG550: public CBasePlayerWeapon
 public:
 	virtual void Spawn();
 	virtual void Precache();
-	virtual int GetItemInfo(ItemInfo *p);
 	virtual BOOL Deploy();
 	virtual float GetMaxSpeed();
-	virtual int iItemSlot() { return PRIMARY_WEAPON_SLOT; }
 	virtual void PrimaryAttack();
 	virtual void SecondaryAttack();
 	virtual void Reload();
@@ -1823,10 +1633,8 @@ class CGalil: public CBasePlayerWeapon
 public:
 	virtual void Spawn();
 	virtual void Precache();
-	virtual int GetItemInfo(ItemInfo *p);
 	virtual BOOL Deploy();
 	virtual float GetMaxSpeed() { return GALIL_MAX_SPEED; }
-	virtual int iItemSlot() { return PRIMARY_WEAPON_SLOT; }
 	virtual void PrimaryAttack();
 	virtual void SecondaryAttack();
 	virtual void Reload();
@@ -1873,10 +1681,8 @@ class CFamas: public CBasePlayerWeapon
 public:
 	virtual void Spawn();
 	virtual void Precache();
-	virtual int GetItemInfo(ItemInfo *p);
 	virtual BOOL Deploy();
 	virtual float GetMaxSpeed() { return FAMAS_MAX_SPEED; }
-	virtual int iItemSlot() { return PRIMARY_WEAPON_SLOT; }
 	virtual void PrimaryAttack();
 	virtual void SecondaryAttack();
 	virtual void Reload();
@@ -1922,9 +1728,6 @@ void WeaponsPrecache();
 void FindHullIntersection(const Vector &vecSrc, TraceResult &tr, float *mins, float *maxs, edict_t *pEntity);
 void AnnounceFlashInterval(float interval, float offset = 0);
 
-int MaxAmmoCarry(const char *szName);
-int MaxAmmoCarry(WeaponIdType ammoType);
-
 void ClearMultiDamage();
 void ApplyMultiDamage(entvars_t *pevInflictor, entvars_t *pevAttacker);
 void AddMultiDamage(entvars_t *pevInflictor, CBaseEntity *pEntity, float flDamage, int bitsDamageType);
@@ -1933,6 +1736,5 @@ int DamageDecal(CBaseEntity *pEntity, int bitsDamageType);
 void DecalGunshot(TraceResult *pTrace, int iBulletType, bool ClientOnly, entvars_t *pShooter, bool bHitMetal);
 void EjectBrass(const Vector &vecOrigin, const Vector &vecLeft, const Vector &vecVelocity, float rotation, int model, int soundtype, int entityIndex);
 void EjectBrass2(const Vector &vecOrigin, const Vector &vecVelocity, float rotation, int model, int soundtype, entvars_t *pev);
-void AddAmmoNameToAmmoRegistry(const char *szAmmoname);
 void UTIL_PrecacheOtherWeapon(const char *szClassname);
 BOOL CanAttack(float attack_time, float curtime, BOOL isPredicted);

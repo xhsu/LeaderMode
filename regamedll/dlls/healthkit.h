@@ -31,6 +31,8 @@
 class CHealthKit: public CItem
 {
 public:
+	static const float healthkitCapacity;
+public:
 	virtual void Spawn();
 	virtual void Precache();
 	virtual BOOL MyTouch(CBasePlayer *pPlayer);
@@ -40,6 +42,9 @@ const float AMOUNT_CHARGE_HEALTH = 1.0f;
 
 class CWallHealth: public CBaseToggle
 {
+public:
+	static const float healthchargerCapacity;
+
 public:
 	virtual void Spawn();
 	virtual void Precache();

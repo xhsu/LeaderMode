@@ -18,36 +18,8 @@ short int g_sModelIndexCTGhost;
 short int g_sModelIndexTGhost;
 short int g_sModelIndexC4Glow;
 
-int giAmmoIndex;
-
 MULTIDAMAGE gMultiDamage;
 
-// Pass in a name and this function will tell
-// you the maximum amount of that type of ammunition that a player can carry.
-int MaxAmmoCarry(const char *szName)
-{
-	for (int i = 0; i < MAX_WEAPONS; i++)
-	{
-		ItemInfo *info = &CBasePlayerItem::m_ItemInfoArray[i];
-		if (info->pszAmmo1 && !Q_stricmp(szName, info->pszAmmo1))
-		{
-			return info->iMaxAmmo1;
-		}
-
-		if (info->pszAmmo2 && !Q_stricmp(szName, info->pszAmmo2))
-		{
-			return info->iMaxAmmo2;
-		}
-	}
-
-	ALERT(at_console, "MaxAmmoCarry() doesn't recognize '%s'!\n", szName);
-	return -1;
-}
-
-int MaxAmmoCarry(WeaponIdType weaponId)
-{
-	return CBasePlayerItem::m_ItemInfoArray[weaponId].iMaxAmmo1;
-}
 
 // Resets the global multi damage accumulator
 void ClearMultiDamage()
@@ -159,66 +131,6 @@ NOXREF void EjectBrass2(const Vector &vecOrigin, const Vector &vecVelocity, floa
 	MESSAGE_END();
 }
 
-struct {
-	AmmoType type;
-	const char *name;
-} ammoIndex[] =
-{
-	{ AMMO_338MAGNUM,    "338Magnum" },
-	{ AMMO_762NATO,      "762Nato" },
-	{ AMMO_556NATOBOX,   "556NatoBox" },
-	{ AMMO_556NATO,      "556Nato" },
-	{ AMMO_BUCKSHOT,     "buckshot" },
-	{ AMMO_45ACP,        "45acp" },
-	{ AMMO_57MM,         "57mm" },
-	{ AMMO_50AE,         "50AE" },
-	{ AMMO_357SIG,       "357SIG" },
-	{ AMMO_9MM,          "9mm" },
-	{ AMMO_FLASHBANG,    "Flashbang" },
-	{ AMMO_HEGRENADE,    "HEGrenade" },
-	{ AMMO_SMOKEGRENADE, "SmokeGrenade" },
-	{ AMMO_C4,           "C4" },
-};
-
-// Precaches the ammo and queues the ammo info for sending to clients
-void AddAmmoNameToAmmoRegistry(const char *szAmmoname)
-{
-	// make sure it's not already in the registry
-	for (int i = 0; i < MAX_AMMO_SLOTS; i++)
-	{
-		if (!CBasePlayerItem::m_AmmoInfoArray[i].pszName)
-			continue;
-
-		if (!Q_stricmp(CBasePlayerItem::m_AmmoInfoArray[i].pszName, szAmmoname))
-		{
-			// ammo already in registry, just quite
-			return;
-		}
-	}
-
-	giAmmoIndex++;
-	assert(giAmmoIndex < MAX_AMMO_SLOTS);
-
-	if (giAmmoIndex >= MAX_AMMO_SLOTS)
-		giAmmoIndex = 0;
-
-	for (auto& ammo : ammoIndex)
-	{
-		if (Q_stricmp(ammo.name, szAmmoname))
-			continue;
-
-		if (ammo.type != giAmmoIndex) {
-			CONSOLE_ECHO("Warning: ammo '%s' index mismatch; expected %i, real %i\n", szAmmoname, ammo.type, giAmmoIndex);
-		}
-		break;
-	}
-
-	CBasePlayerItem::m_AmmoInfoArray[giAmmoIndex].pszName = szAmmoname;
-
-	// Yes, this info is redundant
-	CBasePlayerItem::m_AmmoInfoArray[giAmmoIndex].iId = giAmmoIndex;
-}
-
 // Precaches the weapon and queues the weapon info for sending to clients
 void UTIL_PrecacheOtherWeapon(const char *szClassname)
 {
@@ -231,26 +143,7 @@ void UTIL_PrecacheOtherWeapon(const char *szClassname)
 
 	CBasePlayerItem *pItem = GET_PRIVATE<CBasePlayerItem>(pEdict);
 	if (pItem)
-	{
-		ItemInfo info;
-		Q_memset(&info, 0, sizeof(info));
-
 		pItem->Precache();
-		if (pItem->GetItemInfo(&info))
-		{
-			CBasePlayerItem::m_ItemInfoArray[info.iId] = info;
-
-			if (info.pszAmmo1 && info.pszAmmo1[0] != '\0')
-			{
-				AddAmmoNameToAmmoRegistry(info.pszAmmo1);
-			}
-
-			if (info.pszAmmo2 && info.pszAmmo2[0] != '\0')
-			{
-				AddAmmoNameToAmmoRegistry(info.pszAmmo2);
-			}
-		}
-	}
 
 	REMOVE_ENTITY(pEdict);
 }
@@ -258,10 +151,7 @@ void UTIL_PrecacheOtherWeapon(const char *szClassname)
 // Called by worldspawn
 void WeaponsPrecache()
 {
-	Q_memset(CBasePlayerItem::m_ItemInfoArray, 0, sizeof(CBasePlayerItem::m_ItemInfoArray));
-	Q_memset(CBasePlayerItem::m_AmmoInfoArray, 0, sizeof(CBasePlayerItem::m_AmmoInfoArray));
-
-	giAmmoIndex = 0;
+	// originally, m_rgItemInfo and m_rgAmmoInfo should be re-zero here.
 
 	// custom items...
 
@@ -277,44 +167,37 @@ void WeaponsPrecache()
 
 	// awp magnum
 	UTIL_PrecacheOtherWeapon("weapon_awp");
-	UTIL_PrecacheOther("ammo_338magnum");
 
 	UTIL_PrecacheOtherWeapon("weapon_g3sg1");
 	UTIL_PrecacheOtherWeapon("weapon_ak47");
 	UTIL_PrecacheOtherWeapon("weapon_scout");
-	UTIL_PrecacheOther("ammo_762nato");
 
 	// m249
 	UTIL_PrecacheOtherWeapon("weapon_m249");
-	UTIL_PrecacheOther("ammo_556natobox");
 
 	UTIL_PrecacheOtherWeapon("weapon_m4a1");
 	UTIL_PrecacheOtherWeapon("weapon_sg552");
 	UTIL_PrecacheOtherWeapon("weapon_aug");
 	UTIL_PrecacheOtherWeapon("weapon_sg550");
-	UTIL_PrecacheOther("ammo_556nato");
+	UTIL_PrecacheOtherWeapon("weapon_galil");
+	UTIL_PrecacheOtherWeapon("weapon_famas");
 
 	// shotgun
 	UTIL_PrecacheOtherWeapon("weapon_m3");
 	UTIL_PrecacheOtherWeapon("weapon_xm1014");
-	UTIL_PrecacheOther("ammo_buckshot");
 
 	UTIL_PrecacheOtherWeapon("weapon_usp");
 	UTIL_PrecacheOtherWeapon("weapon_mac10");
 	UTIL_PrecacheOtherWeapon("weapon_ump45");
-	UTIL_PrecacheOther("ammo_45acp");
 
 	UTIL_PrecacheOtherWeapon("weapon_fiveseven");
 	UTIL_PrecacheOtherWeapon("weapon_p90");
-	UTIL_PrecacheOther("ammo_57mm");
 
 	// deagle
 	UTIL_PrecacheOtherWeapon("weapon_deagle");
-	UTIL_PrecacheOther("ammo_50ae");
 
 	// p228
 	UTIL_PrecacheOtherWeapon("weapon_p228");
-	UTIL_PrecacheOther("ammo_357sig");
 
 	// knife
 	UTIL_PrecacheOtherWeapon("weapon_knife");
@@ -323,13 +206,10 @@ void WeaponsPrecache()
 	UTIL_PrecacheOtherWeapon("weapon_mp5navy");
 	UTIL_PrecacheOtherWeapon("weapon_tmp");
 	UTIL_PrecacheOtherWeapon("weapon_elite");
-	UTIL_PrecacheOther("ammo_9mm");
 
 	UTIL_PrecacheOtherWeapon("weapon_flashbang");
 	UTIL_PrecacheOtherWeapon("weapon_hegrenade");
 	UTIL_PrecacheOtherWeapon("weapon_smokegrenade");
-	UTIL_PrecacheOtherWeapon("weapon_galil");
-	UTIL_PrecacheOtherWeapon("weapon_famas");
 
 	if (g_pGameRules->IsDeathmatch())
 	{
@@ -375,9 +255,6 @@ void WeaponsPrecache()
 	PRECACHE_SOUND("items/weapondrop1.wav");	// weapon falls to the ground
 	PRECACHE_SOUND("weapons/generic_reload.wav");
 }
-
-ItemInfo CBasePlayerItem::m_ItemInfoArray[MAX_WEAPONS];
-AmmoInfo CBasePlayerItem::m_AmmoInfoArray[MAX_AMMO_SLOTS];
 
 TYPEDESCRIPTION CBasePlayerItem::m_SaveData[] =
 {
@@ -487,65 +364,6 @@ void CBasePlayerItem::Materialize()
 	}
 }
 
-// AttemptToMaterialize - the item is trying to rematerialize,
-// should it do so now or wait longer?
-void CBasePlayerItem::AttemptToMaterialize()
-{
-	float time = g_pGameRules->FlWeaponTryRespawn(this);
-
-	if (time == 0)
-	{
-		Materialize();
-		return;
-	}
-
-	pev->nextthink = gpGlobals->time + time;
-}
-
-// CheckRespawn - a player is taking this weapon, should
-// it respawn?
-void CBasePlayerItem::CheckRespawn()
-{
-	switch (g_pGameRules->WeaponShouldRespawn(this))
-	{
-		case GR_WEAPON_RESPAWN_YES:
-			return;
-		case GR_WEAPON_RESPAWN_NO:
-			return;
-	}
-}
-
-// Respawn - this item is already in the world, but it is
-// invisible and intangible. Make it visible and tangible.
-CBaseEntity *CBasePlayerItem::Respawn()
-{
-	// make a copy of this weapon that is invisible and inaccessible to players (no touch function). The weapon spawn/respawn code
-	// will decide when to make the weapon visible and touchable.
-	CBaseEntity *pNewWeapon = CBaseEntity::Create(pev->classname, g_pGameRules->VecWeaponRespawnSpot(this), pev->angles, pev->owner);
-
-	if (pNewWeapon)
-	{
-		// invisible for now
-		pNewWeapon->pev->effects |= EF_NODRAW;
-
-		// no touch
-		pNewWeapon->SetTouch(nullptr);
-		pNewWeapon->SetThink(&CBasePlayerItem::AttemptToMaterialize);
-
-		DROP_TO_FLOOR(ENT(pev));
-
-		// not a typo! We want to know when the weapon the player just picked up should respawn! This new entity we created is the replacement,
-		// but when it should respawn is based on conditions belonging to the weapon that was taken.
-		pNewWeapon->pev->nextthink = g_pGameRules->FlWeaponRespawnTime(this);
-	}
-	else
-	{
-		ALERT(at_console, "Respawn failed to create %s!\n", STRING(pev->classname));
-	}
-
-	return pNewWeapon;
-}
-
 // whats going on here is that if the player drops this weapon, they shouldn't take it back themselves
 // for a little while. But if they throw it at someone else, the other player should get it immediately.
 void CBasePlayerItem::DefaultTouch(CBaseEntity *pOther)
@@ -559,7 +377,7 @@ void CBasePlayerItem::DefaultTouch(CBaseEntity *pOther)
 	CBasePlayer *pPlayer = static_cast<CBasePlayer *>(pOther);
 
 	// can I have this?
-	if (!g_pGameRules->CanHavePlayerItem(pPlayer, this))
+	if (!CSGameRules()->CanHavePlayerItem(pPlayer, m_iId))
 	{
 		return;
 	}
@@ -611,7 +429,7 @@ void CBasePlayerWeapon::EjectBrassLate()
 	vecRight = RANDOM_FLOAT(50, 70) * gpGlobals->v_right;
 
 	vecShellVelocity = (m_pPlayer->pev->velocity + vecRight + vecUp) + gpGlobals->v_forward * 25;
-	soundType = (m_iId == WEAPON_XM1014 || m_iId == WEAPON_M3) ? 2 : 1;
+	soundType = (m_iId == WEAPON_STRIKER || m_iId == WEAPON_KSG12) ? 2 : 1;
 
 	EjectBrass(pev->origin + m_pPlayer->pev->view_ofs + gpGlobals->v_up * -9 + gpGlobals->v_forward * 16, gpGlobals->v_right * -9,
 		vecShellVelocity, pev->angles.y, m_iShellId, soundType, m_pPlayer->entindex());
@@ -771,20 +589,20 @@ bool CBasePlayerWeapon::HasSecondaryAttack()
 	switch (m_iId)
 	{
 	case WEAPON_AK47:
-	case WEAPON_XM1014:
-	case WEAPON_MAC10:
-	case WEAPON_ELITE:
+	case WEAPON_STRIKER:
+	case WEAPON_PM9:
+	case WEAPON_P99:
 	case WEAPON_FIVESEVEN:
 	case WEAPON_MP5N:
 	case WEAPON_UMP45:
-	case WEAPON_M249:
-	case WEAPON_M3:
-	case WEAPON_TMP:
+	case WEAPON_MK46:
+	case WEAPON_KSG12:
+	case WEAPON_MP7A1:
 	case WEAPON_DEAGLE:
-	case WEAPON_P228:
+	case WEAPON_ANACONDA:
 	case WEAPON_P90:
 	case WEAPON_C4:
-	case WEAPON_GALIL:
+	case WEAPON_CM901:
 		return false;
 
 	default:
@@ -803,18 +621,13 @@ void CBasePlayerWeapon::HandleInfiniteAmmo()
 
 	if (nInfiniteAmmo == 1 && !IsGrenadeWeapon(m_iId))	// assuming WPNMODE_INFINITE_CLIP == 1
 	{
-		m_iClip = iMaxClip();
+		m_iClip = iinfo()->m_iMaxClip;
 	}
 	else if (nInfiniteAmmo == 2 || (IsGrenadeWeapon(m_iId) && infiniteGrenades.value == 1.0f))	// assuming WPNMODE_INFINITE_BPAMMO == 2
 	{
-		if (pszAmmo1())
+		if (m_iPrimaryAmmoType > 0)
 		{
-			m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] = iMaxAmmo1();
-		}
-
-		if (pszAmmo2())
-		{
-			m_pPlayer->m_rgAmmo[SecondaryAmmoIndex()] = iMaxAmmo2();
+			m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] = GetAmmoInfo(m_iPrimaryAmmoType)->m_iMax;
 		}
 	}
 }
@@ -879,7 +692,7 @@ void CBasePlayerWeapon::ItemPostFrame()
 	if (m_fInReload && m_pPlayer->m_flNextAttack <= UTIL_WeaponTimeBase())
 	{
 		// complete the reload.
-		int j = Q_min(iMaxClip() - m_iClip, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]);
+		int j = Q_min(iinfo()->m_iMaxClip - m_iClip, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]);
 
 		// Add them to the clip
 		m_iClip += j;
@@ -890,17 +703,12 @@ void CBasePlayerWeapon::ItemPostFrame()
 
 	if ((usableButtons & IN_ATTACK2) && CanAttack(m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), UseDecrement()))
 	{
-		if (pszAmmo2() && !m_pPlayer->m_rgAmmo[SecondaryAmmoIndex()])
-		{
-			m_fFireOnEmpty = TRUE;
-		}
-
 		SecondaryAttack();
 		m_pPlayer->pev->button &= ~IN_ATTACK2;
 	}
 	else if ((m_pPlayer->pev->button & IN_ATTACK) && CanAttack(m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), UseDecrement()))
 	{
-		if ((m_iClip == 0 && pszAmmo1()) || (iMaxClip() == WEAPON_NOCLIP && !m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()]))
+		if ((m_iClip <= 0 && m_iPrimaryAmmoType > 0) || (iinfo()->m_iMaxClip == WEAPON_NOCLIP && !m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]))
 		{
 			m_fFireOnEmpty = TRUE;
 		}
@@ -913,7 +721,7 @@ void CBasePlayerWeapon::ItemPostFrame()
 			m_flNextPrimaryAttack *= m_pPlayer->WeaponFireIntervalModifier(this);	// passive skill applied.
 		}
 	}
-	else if ((m_pPlayer->pev->button & IN_RELOAD) && iMaxClip() != WEAPON_NOCLIP && !m_fInReload && m_flNextPrimaryAttack < UTIL_WeaponTimeBase())
+	else if ((m_pPlayer->pev->button & IN_RELOAD) && iinfo()->m_iMaxClip != WEAPON_NOCLIP && !m_fInReload && m_flNextPrimaryAttack < UTIL_WeaponTimeBase())
 	{
 		// reload when reload is pressed, or if no buttons are down and weapon is empty.
 		if (m_flFamasShoot == 0 && m_flGlock18Shoot == 0)
@@ -975,7 +783,7 @@ void CBasePlayerWeapon::ItemPostFrame()
 			if (!(m_iWeaponState & WPNSTATE_SHIELD_DRAWN))
 			{
 				// weapon is useable. Reload if empty and weapon has waited as long as it has to after firing
-				if (!m_iClip && !(iFlags() & ITEM_FLAG_NOAUTORELOAD) && m_flNextPrimaryAttack < UTIL_WeaponTimeBase())
+				if (!m_iClip && !(iinfo()->m_bitsFlags & ITEM_FLAG_NOAUTORELOAD) && m_flNextPrimaryAttack < UTIL_WeaponTimeBase())
 				{
 					if (m_flFamasShoot == 0 && m_flGlock18Shoot == 0)
 					{
@@ -1032,6 +840,15 @@ int CBasePlayerItem::AddToPlayer(CBasePlayer *pPlayer)
 	return TRUE;
 }
 
+int CBasePlayerItem::GetItemInfo(ItemInfo* p)
+{
+	if (m_iId < 1 || m_iId >= LAST_WEAPON)
+		return FALSE;
+
+	Q_memcpy(p, &m_rgItemInfo[m_iId], sizeof(ItemInfo));
+	return TRUE;
+}
+
 void CBasePlayerItem::Drop()
 {
 	SetTouch(nullptr);
@@ -1071,13 +888,6 @@ void CBasePlayerItem::AttachToPlayer(CBasePlayer *pPlayer)
 	SetTouch(nullptr);
 }
 
-void CBasePlayerWeapon::Spawn()
-{
-	ItemInfo info;
-	Q_memset(&info, 0, sizeof(info));
-	GetItemInfo(&info);
-}
-
 // CALLED THROUGH the newly-touched weapon's instance. The existing player weapon is pOriginal
 int CBasePlayerWeapon::AddDuplicate(CBasePlayerItem *pOriginal)
 {
@@ -1099,16 +909,11 @@ int CBasePlayerWeapon::AddToPlayer(CBasePlayer *pPlayer)
 
 	if (!m_iPrimaryAmmoType)
 	{
-		m_iPrimaryAmmoType = pPlayer->GetAmmoIndex(pszAmmo1());
-		m_iSecondaryAmmoType = pPlayer->GetAmmoIndex(pszAmmo2());
+		m_iPrimaryAmmoType = iinfo()->m_iAmmoType;
+		m_iSecondaryAmmoType = -1;
 	}
 
-	if (AddWeapon())
-	{
-		return CBasePlayerItem::AddToPlayer(pPlayer);
-	}
-
-	return FALSE;
+	return CBasePlayerItem::AddToPlayer(pPlayer);
 }
 
 int CBasePlayerWeapon::UpdateClientData(CBasePlayer *pPlayer)
@@ -1172,32 +977,31 @@ void CBasePlayerWeapon::SendWeaponAnim(int iAnim, int skiplocal)
 	MESSAGE_END();
 }
 
-BOOL CBasePlayerWeapon::AddPrimaryAmmo(int iCount, char *szName, int iMaxClip, int iMaxCarry)
+bool CBasePlayerWeapon::AddPrimaryAmmo(int iCount)
 {
-	int iIdAmmo;
+	bool bGotAmmo;
 
-	if (iMaxClip < 1)
+	if (iinfo()->m_iMaxClip < 1)
 	{
 		m_iClip = WEAPON_NOCLIP;
-		iIdAmmo = m_pPlayer->GiveAmmo(iCount, szName, iMaxCarry);
+		bGotAmmo = m_pPlayer->GiveAmmo(iCount, (AmmoIdType)m_iPrimaryAmmoType);
 	}
-	else if (m_iClip == 0)
+	else if (m_iClip <= 0)
 	{
 		int i;
-		i = Q_min(m_iClip + iCount, iMaxClip);
+		i = Q_min(m_iClip + iCount, iinfo()->m_iMaxClip);
 		m_iClip += i;
 
-		iIdAmmo = m_pPlayer->GiveAmmo(iCount - i, szName, iMaxCarry);
+		bGotAmmo = m_pPlayer->GiveAmmo(iCount - i, (AmmoIdType)m_iPrimaryAmmoType);
 	}
 	else
 	{
-		iIdAmmo = m_pPlayer->GiveAmmo(iCount, szName, iMaxCarry);
+		bGotAmmo = m_pPlayer->GiveAmmo(iCount, (AmmoIdType)m_iPrimaryAmmoType);
 	}
 
-	if (iIdAmmo > 0)
+	if (bGotAmmo)
 	{
-		m_iPrimaryAmmoType = iIdAmmo;
-		if (m_pPlayer->HasPlayerItem(this))
+		if (m_pPlayer->HasPlayerItem((WeaponIdType)m_iId))
 		{
 			// play the "got ammo" sound only if we gave some ammo to a player that already had this gun.
 			// if the player is just getting this gun for the first time, DefaultTouch will play the "picked up gun" sound for us.
@@ -1205,20 +1009,7 @@ BOOL CBasePlayerWeapon::AddPrimaryAmmo(int iCount, char *szName, int iMaxClip, i
 		}
 	}
 
-	return iIdAmmo > 0 ? TRUE : FALSE;
-}
-
-BOOL CBasePlayerWeapon::AddSecondaryAmmo(int iCount, char *szName, int iMax)
-{
-	int iIdAmmo = m_pPlayer->GiveAmmo(iCount, szName, iMax);
-
-	if (iIdAmmo > 0)
-	{
-		m_iSecondaryAmmoType = iIdAmmo;
-		EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", VOL_NORM, ATTN_NORM);
-	}
-
-	return iIdAmmo > 0 ? TRUE : FALSE;
+	return bGotAmmo;
 }
 
 // IsUseable - this function determines whether or not a
@@ -1229,7 +1020,7 @@ BOOL CBasePlayerWeapon::IsUseable()
 {
 	if (m_iClip <= 0)
 	{
-		if (m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] <= 0 && iMaxAmmo1() != -1)
+		if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 && m_iPrimaryAmmoType > 0)
 		{
 			// clip is empty (or nonexistant) and the player has no more ammo of this type.
 			return FALSE;
@@ -1318,7 +1109,7 @@ int EXT_FUNC CBasePlayerWeapon::DefaultReload(int iClipSize, int iAnim, float fD
 
 bool EXT_FUNC CBasePlayerWeapon::DefaultShotgunReload(int iAnim, int iStartAnim, float fDelay, float fStartDelay, const char *pszReloadSound1, const char *pszReloadSound2)
 {
-	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_iClip == iMaxClip())
+	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_iClip >= iinfo()->m_iMaxClip)
 		return false;
 
 	// don't reload until recoil is done
@@ -1375,9 +1166,9 @@ BOOL CBasePlayerWeapon::PlayEmptySound()
 		{
 		case WEAPON_USP:
 		case WEAPON_GLOCK18:
-		case WEAPON_P228:
+		case WEAPON_ANACONDA:
 		case WEAPON_DEAGLE:
-		case WEAPON_ELITE:
+		case WEAPON_P99:
 		case WEAPON_FIVESEVEN:
 			EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/dryfire_pistol.wav", 0.8, ATTN_NORM);
 			break;
@@ -1395,16 +1186,6 @@ void CBasePlayerWeapon::ResetEmptySound()
 	m_iPlayEmptySound = 1;
 }
 
-int CBasePlayerWeapon::PrimaryAmmoIndex()
-{
-	return m_iPrimaryAmmoType;
-}
-
-int CBasePlayerWeapon::SecondaryAmmoIndex()
-{
-	return -1;
-}
-
 void CBasePlayerWeapon::Holster(int skiplocal)
 {
 	// cancel any reload in progress.
@@ -1419,21 +1200,13 @@ void CBasePlayerWeapon::Holster(int skiplocal)
 // the first time. If it is spawned by the world, m_iDefaultAmmo will have a default ammo amount in it.
 // if  this is a weapon dropped by a dying player, has 0 m_iDefaultAmmo, which means only the ammo in
 // the weapon clip comes along.
-int CBasePlayerWeapon::ExtractAmmo(CBasePlayerWeapon *pWeapon)
+int CBasePlayerWeapon::ExtractAmmo(CBasePlayerWeapon* pWeapon)
 {
-	int res = 0;
-	if (pszAmmo1())
-	{
-		// blindly call with m_iDefaultAmmo. It's either going to be a value or zero. If it is zero,
-		// we only get the ammo in the weapon's clip, which is what we want.
-		res = pWeapon->AddPrimaryAmmo(m_iDefaultAmmo, (char *)pszAmmo1(), iMaxClip(), iMaxAmmo1());
-		m_iDefaultAmmo = 0;
-	}
+	// blindly call with m_iDefaultAmmo. It's either going to be a value or zero. If it is zero,
+	// we only get the ammo in the weapon's clip, which is what we want.
 
-	if (pszAmmo2())
-	{
-		res = AddSecondaryAmmo(0, (char *)pszAmmo2(), iMaxAmmo2());
-	}
+	int res = pWeapon->AddPrimaryAmmo(m_iDefaultAmmo);
+	m_iDefaultAmmo = 0;
 
 	return res;
 }
@@ -1452,7 +1225,7 @@ int CBasePlayerWeapon::ExtractClipAmmo(CBasePlayerWeapon *pWeapon)
 		iAmmo = m_iClip;
 	}
 
-	return pWeapon->m_pPlayer->GiveAmmo(iAmmo, pszAmmo1(), iMaxAmmo1());
+	return pWeapon->m_pPlayer->GiveAmmo(iAmmo, (AmmoIdType)pWeapon->m_iPrimaryAmmoType);
 }
 
 // RetireWeapon - no more ammo for this gun, put it away.
@@ -1495,14 +1268,15 @@ void CBasePlayerWeapon::InstantReload(bool bCanRefillBPAmmo)
 	m_pPlayer->m_flNextAttack = 0;
 
 	// complete the reload.
-	int j = Q_min(iMaxClip() - m_iClip, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]);
+	int j = Q_min(iinfo()->m_iMaxClip - m_iClip, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]);
 	if (j == 0)
 		return;
 
 	// Add them to the clip
 	m_iClip += j;
 
-	if (!bCanRefillBPAmmo) {
+	if (!bCanRefillBPAmmo)
+	{
 		m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= j;
 	}
 }
@@ -1510,9 +1284,7 @@ void CBasePlayerWeapon::InstantReload(bool bCanRefillBPAmmo)
 TYPEDESCRIPTION CWeaponBox::m_SaveData[] =
 {
 	DEFINE_ARRAY(CWeaponBox, m_rgAmmo, FIELD_INTEGER, MAX_AMMO_SLOTS),
-	DEFINE_ARRAY(CWeaponBox, m_rgiszAmmo, FIELD_STRING, MAX_AMMO_SLOTS),
 	DEFINE_ARRAY(CWeaponBox, m_rgpPlayerItems, FIELD_CLASSPTR, MAX_ITEM_TYPES),
-	DEFINE_FIELD(CWeaponBox, m_cAmmoTypes, FIELD_INTEGER),
 };
 
 LINK_ENTITY_TO_CLASS(weaponbox, CWeaponBox)
@@ -1522,21 +1294,13 @@ void CWeaponBox::Precache()
 {
 	PRECACHE_MODEL("models/w_weaponbox.mdl");
 	PRECACHE_SOUND(SFX_REFUND_GUNS);
+	PRECACHE_SOUND("items/9mmclip1.wav");
 }
 
 void CWeaponBox::KeyValue(KeyValueData *pkvd)
 {
-	if (m_cAmmoTypes >= MAX_AMMO_SLOTS)
-	{
-		ALERT(at_console, "WeaponBox too full! only %d ammotypes allowed\n", MAX_AMMO_SLOTS);
-		return;
-	}
-
-	PackAmmo(ALLOC_STRING(pkvd->szKeyName), Q_atoi(pkvd->szValue));
-
-	// count this new ammo type.
-	m_cAmmoTypes++;
-	pkvd->fHandled = TRUE;
+	if (GiveAmmo(Q_atoi(pkvd->szValue), (AmmoIdType)GetAmmoInfo(pkvd->szKeyName)->m_iId))
+		pkvd->fHandled = TRUE;
 }
 
 void CWeaponBox::SetModel(const char *pszModelName)
@@ -1615,14 +1379,11 @@ void CWeaponBox::Touch(CBaseEntity *pOther)
 		// have at least one weapon in this slot
 		while (pItem)
 		{
-			if ((pPlayer->HasShield() && pItem->m_iId == WEAPON_ELITE)
+			if (!CSGameRules()->CanHavePlayerItem(pPlayer, pItem->m_iId)
 				|| (pPlayer->IsBot() && TheCSBots() && !TheCSBots()->IsWeaponUseable(pItem)))
 			{
 				return;
 			}
-
-			if (pPlayer->HasRestrictItem((pItem->m_iId == WEAPON_SHIELDGUN) ? ITEM_SHIELDGUN : (ItemID)pItem->m_iId, ITEM_TYPE_TOUCHED))
-				return;
 
 			if (i >= PRIMARY_WEAPON_SLOT && i <= PISTOL_SLOT && pPlayer->m_rgpPlayerItems[i])
 			{
@@ -1634,9 +1395,9 @@ void CWeaponBox::Touch(CBaseEntity *pOther)
 				if (pGrenade && pGrenade->IsWeapon())
 				{
 					int playerGrenades = pPlayer->m_rgAmmo[pGrenade->m_iPrimaryAmmoType];
+					auto info = GetAmmoInfo(pGrenade->m_iPrimaryAmmoType);
 
-					auto info = GetWeaponInfo(pGrenade->m_iId);
-					if (info && playerGrenades < info->maxRounds)
+					if (info && playerGrenades < info->m_iMax)
 					{
 						auto pNext = m_rgpPlayerItems[i]->m_pNext;
 						if (pPlayer->AddPlayerItem(pItem))
@@ -1679,15 +1440,11 @@ void CWeaponBox::Touch(CBaseEntity *pOther)
 		// dole out ammo
 		for (int n = 0; n < MAX_AMMO_SLOTS; n++)
 		{
-			if (!FStringNull(m_rgiszAmmo[n]))
-			{
-				// there's some ammo of this type.
-				pPlayer->GiveAmmo(m_rgAmmo[n], (char *)STRING(m_rgiszAmmo[n]), MaxAmmoCarry(m_rgiszAmmo[n]));
+			// there's some ammo of this type.
+			pPlayer->GiveAmmo(m_rgAmmo[n], (AmmoIdType)n);
 
-				// now empty the ammo from the weaponbox since we just gave it to the player
-				m_rgiszAmmo[n] = iStringNull;
-				m_rgAmmo[n] = 0;
-			}
+			// now empty the ammo from the weaponbox since we just gave it to the player
+			m_rgAmmo[n] = 0;
 		}
 	}
 
@@ -1714,7 +1471,7 @@ void CWeaponBox::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE use
 	if (pPlayer->m_iRoleType != Role_Commander)	// only commander may sold weapon.
 		return;
 
-	if (m_bBeingSold)	// this box had been sold!
+	if (m_bHadBeenSold)	// this box had been sold!
 		return;
 
 	for (int i = 0; i < MAX_ITEM_TYPES; i++)
@@ -1723,15 +1480,15 @@ void CWeaponBox::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE use
 
 		while (pWeapon)
 		{
-			WeaponInfoStruct* pWpnInfo = GetWeaponInfo(pWeapon->m_iId);
+			auto pWpnInfo = GetWeaponInfo(pWeapon->m_iId);
 
-			if (pWpnInfo && !pWeapon->m_bBeingSold)
+			if (pWpnInfo && !pWeapon->m_bHadBeenSold)
 			{
-				pPlayer->AddAccount(pWpnInfo->cost / 2, RT_SOLD_ITEM);
-				UTIL_PrintChatColor(pPlayer, BLUECHAT, "/gSeizing weapon /t%s/g have you rewarded with /t%d/g$", WeaponIDToAlias(pWeapon->m_iId), pWpnInfo->cost / 2);
+				pPlayer->AddAccount(pWpnInfo->m_iCost / 2, RT_SOLD_ITEM);
+				UTIL_PrintChatColor(pPlayer, BLUECHAT, "/gSeizing weapon /t%s/g have you rewarded with /t%d/g$", WeaponIDToAlias(pWeapon->m_iId), pWpnInfo->m_iCost / 2);
 				EMIT_SOUND(pPlayer->edict(), CHAN_ITEM, SFX_REFUND_GUNS, VOL_NORM, ATTN_NORM);
 
-				pWeapon->m_bBeingSold = true;
+				pWeapon->m_bHadBeenSold = true;
 			}
 
 			pWeapon = pWeapon->m_pNext;
@@ -1739,17 +1496,17 @@ void CWeaponBox::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE use
 	}
 
 	pev->nextthink = gpGlobals->time + 0.01f;
-	m_bBeingSold = true;
+	m_bHadBeenSold = true;
 }
 
 // Add this weapon to the box
-BOOL CWeaponBox::PackWeapon(CBasePlayerItem *pWeapon)
+bool CWeaponBox::PackWeapon(CBasePlayerItem *pWeapon)
 {
 	// is one of these weapons already packed in this box?
 	if (HasWeapon(pWeapon))
 	{
 		// box can only hold one of each weapon type
-		return FALSE;
+		return false;
 	}
 
 	if (pWeapon->m_pPlayer)
@@ -1762,11 +1519,11 @@ BOOL CWeaponBox::PackWeapon(CBasePlayerItem *pWeapon)
 		if (!pWeapon->m_pPlayer->RemovePlayerItem(pWeapon))
 		{
 			// failed to unhook the weapon from the player!
-			return FALSE;
+			return false;
 		}
 	}
 
-	int iWeaponSlot = pWeapon->iItemSlot();
+	int iWeaponSlot = pWeapon->iinfo()->m_iSlot;
 	if (m_rgpPlayerItems[iWeaponSlot])
 	{
 		// there's already one weapon in this slot, so link this into the slot's column
@@ -1792,431 +1549,61 @@ BOOL CWeaponBox::PackWeapon(CBasePlayerItem *pWeapon)
 	pWeapon->SetTouch(nullptr);
 	pWeapon->m_pPlayer = nullptr;
 
-	return TRUE;
+	return true;
 }
 
-BOOL CWeaponBox::PackAmmo(string_t iszName, int iCount)
+bool CWeaponBox::GiveAmmo(int iCount, AmmoIdType iId)
 {
-	if (!iszName)
-	{
-		// error here
-		ALERT(at_console, "NULL String in PackAmmo!\n");
-		return FALSE;
-	}
+	if (iId <= 0 || iId >= AMMO_MAXTYPE)
+		return false;
 
-	int iMaxCarry = MaxAmmoCarry(iszName);
-	if (iMaxCarry != -1 && iCount > 0)
-	{
-		GiveAmmo(iCount, (char *)STRING(iszName), iMaxCarry);
-		return TRUE;
-	}
-
-	return FALSE;
-}
-
-int CWeaponBox::GiveAmmo(int iCount, char *szName, int iMax, int *pIndex)
-{
-	int i;
-	for (i = 1; i < MAX_AMMO_SLOTS && !FStringNull(m_rgiszAmmo[i]); i++)
-	{
-		if (!Q_stricmp(szName, STRING(m_rgiszAmmo[i])))
-		{
-			if (pIndex)
-				*pIndex = i;
-
-			int iAdd = Q_min(iCount, iMax - m_rgAmmo[i]);
-			if (iCount == 0 || iAdd > 0)
-			{
-				m_rgAmmo[i] += iAdd;
-				return i;
-			}
-
-			return -1;
-		}
-	}
-
-	if (i < MAX_AMMO_SLOTS)
-	{
-		if (pIndex)
-			*pIndex = i;
-
-		m_rgiszAmmo[i] = MAKE_STRING(szName);
-		m_rgAmmo[i] = iCount;
-
-		return i;
-	}
-
-	ALERT(at_console, "out of named ammo slots\n");
-	return i;
+	m_rgAmmo[iId] += iCount;
+	return true;
 }
 
 // Is a weapon of this type already packed in this box?
-BOOL CWeaponBox::HasWeapon(CBasePlayerItem *pCheckItem)
+bool CWeaponBox::HasWeapon(CBasePlayerItem *pCheckItem)
 {
-	CBasePlayerItem *pItem = m_rgpPlayerItems[pCheckItem->iItemSlot()];
+	CBasePlayerItem *pItem = m_rgpPlayerItems[pCheckItem->iinfo()->m_iSlot];
+
 	while (pItem)
 	{
 		if (FClassnameIs(pItem->pev, pCheckItem->pev->classname)) {
-			return TRUE;
+			return true;
 		}
 
 		pItem = pItem->m_pNext;
 	}
 
-	return FALSE;
+	return false;
 }
 
 // Is there anything in this box?
-BOOL CWeaponBox::IsEmpty()
+bool CWeaponBox::IsEmpty()
 {
 	int i;
 	for (i = 0; i < MAX_ITEM_TYPES; i++)
 	{
 		if (m_rgpPlayerItems[i])
 		{
-			return FALSE;
+			return false;
 		}
 	}
 
 	for (i = 0; i < MAX_AMMO_SLOTS; i++)
 	{
-		if (m_rgiszAmmo[i])
+		if (m_rgAmmo[i] > 0)
 		{
 			// still have a bit of this type of ammo
-			return FALSE;
+			return false;
 		}
 	}
 
-	return TRUE;
+	return true;
 }
 
 void CWeaponBox::SetObjectCollisionBox()
 {
 	pev->absmin = pev->origin + Vector(-16, -16, 0);
 	pev->absmax = pev->origin + Vector(16, 16, 16);
-}
-
-char *CArmoury::m_ItemModels[] = {
-	"models/w_mp5.mdl",
-	"models/w_tmp.mdl",
-	"models/w_p90.mdl",
-	"models/w_mac10.mdl",
-	"models/w_ak47.mdl",
-	"models/w_sg552.mdl",
-	"models/w_m4a1.mdl",
-	"models/w_aug.mdl",
-	"models/w_scout.mdl",
-	"models/w_g3sg1.mdl",
-	"models/w_awp.mdl",
-	"models/w_m3.mdl",
-	"models/w_xm1014.mdl",
-	"models/w_m249.mdl",
-	"models/w_flashbang.mdl",
-	"models/w_hegrenade.mdl",
-	"models/w_kevlar.mdl",
-	"models/w_assault.mdl",
-	"models/w_smokegrenade.mdl",
-
-	"models/w_shield.mdl",
-	"models/w_famas.mdl",
-	"models/w_sg550.mdl",
-	"models/w_galil.mdl",
-	"models/w_ump45.mdl",
-	"models/w_glock18.mdl",
-	"models/w_usp.mdl",
-	"models/w_elite.mdl",
-	"models/w_fiveseven.mdl",
-	"models/w_p228.mdl",
-	"models/w_deagle.mdl"
-};
-
-void CArmoury::Spawn()
-{
-	Precache();
-
-	pev->movetype = MOVETYPE_TOSS;
-	pev->solid = SOLID_TRIGGER;
-
-	UTIL_SetSize(pev, Vector(-16, -16, 0), Vector(16, 16, 16));
-	UTIL_SetOrigin(pev, pev->origin);
-
-	SetTouch(&CArmoury::ArmouryTouch);
-
-	if (m_iItem < ARRAYSIZE(m_ItemModels))
-	{
-		SET_MODEL(ENT(pev), m_ItemModels[m_iItem]);
-	}
-
-	if (m_iCount <= 0)
-	{
-		m_iCount = 1;
-	}
-
-	// Cache the placed origin of source point
-	pev->oldorigin = pev->origin;
-
-	m_bAlreadyCounted = false;
-	m_iInitialCount = m_iCount;
-}
-
-void CArmoury::Restart()
-{
-	if (!weapons_allow_map_placed.value)
-	{
-		Hide();
-		return;
-	}
-
-	m_iCount = m_iInitialCount;
-
-	if (m_iCount < 1)
-		m_iCount = 1;
-
-	Draw();
-
-	// Restored origin from the cache
-	UTIL_SetOrigin(pev, pev->oldorigin);
-	DROP_TO_FLOOR(edict());
-}
-
-void CArmoury::Precache()
-{
-	if (m_iItem < ARRAYSIZE(m_ItemModels))
-	{
-		PRECACHE_MODEL(m_ItemModels[m_iItem]);
-	}
-}
-
-void CArmoury::Draw()
-{
-	pev->effects &= ~EF_NODRAW;
-	pev->solid = SOLID_TRIGGER;
-}
-
-void CArmoury::Hide()
-{
-	pev->effects |= EF_NODRAW;
-
-	// more not to touch with the world.
-	pev->solid = SOLID_NOT;
-}
-
-struct ArmouryItemStruct
-{
-	const char *entityName;
-	char *ammoName;
-	int giveAmount;
-	int maxRounds;
-} armouryItemInfo[] = {
-	{ "weapon_mp5navy",   "9mm",        60, MAX_AMMO_9MM        }, // ARMOURY_MP5NAVY
-	{ "weapon_tmp",       "9mm",        60, MAX_AMMO_9MM        }, // ARMOURY_TMP
-	{ "weapon_p90",       "57mm",       50, MAX_AMMO_57MM       }, // ARMOURY_P90
-	{ "weapon_mac10",     "45acp",      60, MAX_AMMO_45ACP      }, // ARMOURY_MAC10
-	{ "weapon_ak47",      "762Nato",    60, MAX_AMMO_762NATO    }, // ARMOURY_AK47
-	{ "weapon_sg552",     "556Nato",    60, MAX_AMMO_556NATO    }, // ARMOURY_SG552
-	{ "weapon_m4a1",      "556Nato",    60, MAX_AMMO_556NATO    }, // ARMOURY_M4A1
-	{ "weapon_aug",       "556Nato",    60, MAX_AMMO_556NATO    }, // ARMOURY_AUG
-	{ "weapon_scout",     "762Nato",    30, MAX_AMMO_762NATO    }, // ARMOURY_SCOUT
-	{ "weapon_g3sg1",     "762Nato",    30, MAX_AMMO_762NATO    }, // ARMOURY_G3SG1
-	{ "weapon_awp",       "338Magnum",  20, MAX_AMMO_338MAGNUM  }, // ARMOURY_AWP
-	{ "weapon_m3",        "buckshot",   24, MAX_AMMO_BUCKSHOT   }, // ARMOURY_M3
-	{ "weapon_xm1014",    "buckshot",   24, MAX_AMMO_BUCKSHOT   }, // ARMOURY_XM1014
-	{ "weapon_m249",      "556NatoBox", 60, MAX_AMMO_556NATOBOX }, // ARMOURY_M249
-	{ nullptr,            nullptr,      0,  0                   }, // ARMOURY_FLASHBANG
-	{ nullptr,            nullptr,      0,  0                   }, // ARMOURY_HEGRENADE
-	{ nullptr,            nullptr,      0,  0                   }, // ARMOURY_KEVLAR
-	{ nullptr,            nullptr,      0,  0                   }, // ARMOURY_ASSAULT
-	{ nullptr,            nullptr,      0,  0                   }, // ARMOURY_SMOKEGRENADE
-	{ nullptr,            nullptr,      0,  0                   }, // ARMOURY_SHIELD
-	{ "weapon_famas",     "556Nato",    90,  MAX_AMMO_556NATO   }, // ARMOURY_FAMAS
-	{ "weapon_sg550",     "556Nato",    90,  MAX_AMMO_556NATO   }, // ARMOURY_SG550
-	{ "weapon_galil",     "556Nato",    90,  MAX_AMMO_556NATO   }, // ARMOURY_GALIL
-	{ "weapon_ump45",     "45acp",      100, MAX_AMMO_45ACP     }, // ARMOURY_UMP45
-	{ "weapon_glock18",   "9mm",        120, MAX_AMMO_9MM       }, // ARMOURY_GLOCK18
-	{ "weapon_usp",       "45acp",      100, MAX_AMMO_45ACP     }, // ARMOURY_USP
-	{ "weapon_elite",     "9mm",        120, MAX_AMMO_9MM       }, // ARMOURY_ELITE
-	{ "weapon_fiveseven", "57mm",       100, MAX_AMMO_57MM      }, // ARMOURY_FIVESEVEN
-	{ "weapon_p228",      "357SIG",     52,  MAX_AMMO_357SIG    }, // ARMOURY_P228
-	{ "weapon_deagle",    "50AE",       35,  MAX_AMMO_50AE      }, // ARMOURY_DEAGLE
-};
-
-void CArmoury::ArmouryTouch(CBaseEntity *pOther)
-{
-	if (!pOther->IsPlayer())
-		return;
-
-	CBasePlayer *pToucher = static_cast<CBasePlayer *>(pOther);
-
-	if (pToucher->HasRestrictItem(GetItemIdByArmoury(m_iItem), ITEM_TYPE_TOUCHED))
-		return;
-
-	if (pToucher->IsBot() && TheCSBots() && !TheCSBots()->IsWeaponUseable(m_iItem))
-		return;
-
-	// primary weapons
-	if (m_iCount > 0 && (m_iItem <= ARMOURY_M249 || (m_iItem >= ARMOURY_FAMAS && m_iItem <= ARMOURY_UMP45)) )
-	{
-		if (pToucher->m_bHasPrimary)
-			return;
-
-		m_iCount--;
-		auto item = &armouryItemInfo[m_iItem];
-
-		pToucher->GiveNamedItemEx(item->entityName);
-		pToucher->GiveAmmo(item->giveAmount, item->ammoName, item->maxRounds);
-	}
-
-	// secondary weapons (pistols)
-	else if (m_iCount > 0 && m_iItem >= ARMOURY_GLOCK18)
-	{
-		if (pToucher->m_rgpPlayerItems[PISTOL_SLOT])
-			return;
-
-		if (pToucher->HasShield() && m_iItem == ARMOURY_ELITE)
-			return;
-
-		m_iCount--;
-		auto item = &armouryItemInfo[m_iItem];
-
-		pToucher->GiveNamedItemEx(item->entityName);
-		pToucher->GiveAmmo(item->giveAmount, item->ammoName, item->maxRounds);
-	}
-
-	// items & grenades
-	else if (m_iCount > 0 && m_iItem >= ARMOURY_FLASHBANG)
-	{
-		switch (m_iItem)
-		{
-		case ARMOURY_FLASHBANG:
-		{
-			if (pToucher->AmmoInventory(AMMO_FLASHBANG) >= MaxAmmoCarry(WEAPON_FLASHBANG))
-				return;
-
-			pToucher->GiveNamedItem("weapon_flashbang");
-			m_iCount--;
-			break;
-		}
-		case ARMOURY_HEGRENADE:
-		{
-			if (pToucher->AmmoInventory(AMMO_HEGRENADE) >= MaxAmmoCarry(WEAPON_HEGRENADE))
-				return;
-
-			pToucher->GiveNamedItem("weapon_hegrenade");
-			m_iCount--;
-			break;
-		}
-		case ARMOURY_KEVLAR:
-		{
-			if (pToucher->pev->armortype != ARMOR_NONE && pToucher->pev->armorvalue >= MAX_NORMAL_BATTERY)
-			{
-				return;
-			}
-
-			pToucher->GiveNamedItem("item_kevlar");
-			m_iCount--;
-			break;
-		}
-		case ARMOURY_ASSAULT:
-		{
-			if (pToucher->pev->armortype == ARMOR_VESTHELM && pToucher->pev->armorvalue >= MAX_NORMAL_BATTERY
-				)
-			{
-				return;
-			}
-
-			pToucher->GiveNamedItem("item_assaultsuit");
-			m_iCount--;
-			break;
-		}
-		case ARMOURY_SMOKEGRENADE:
-		{
-			if (pToucher->AmmoInventory(AMMO_SMOKEGRENADE) >= MaxAmmoCarry(WEAPON_SMOKEGRENADE))
-				return;
-
-			pToucher->GiveNamedItem("weapon_smokegrenade");
-			m_iCount--;
-			break;
-		}
-		case ARMOURY_SHIELD:
-		{
-			if (pToucher->m_bHasPrimary || (pToucher->m_rgpPlayerItems[PISTOL_SLOT] && pToucher->GetItemById(WEAPON_ELITE)))
-				return;
-
-			pToucher->GiveNamedItemEx("weapon_shield");
-			m_iCount--;
-			break;
-		}
-		}
-	}
-
-	if (!m_iCount)
-		Hide();
-}
-
-void CArmoury::KeyValue(KeyValueData *pkvd)
-{
-	if (FStrEq(pkvd->szKeyName, "item"))
-	{
-		m_iItem = (ArmouryItemPack)Q_atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
-	}
-	else if (FStrEq(pkvd->szKeyName, "count"))
-	{
-		m_iCount = Q_atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
-	}
-	else
-	{
-		CBaseEntity::KeyValue(pkvd);
-	}
-}
-
-void CArmoury::SetObjectCollisionBox()
-{
-	pev->absmin = pev->origin + Vector(-16, -16, 0);
-	pev->absmax = pev->origin + Vector(16, 16, 16);
-}
-
-LINK_ENTITY_TO_CLASS(armoury_entity, CArmoury)
-
-#define m_ItemInfoEx m_ItemInfoArray[m_iId]
-
-const char *CBasePlayerItem::pszAmmo1() const
-{
-	return m_ItemInfoEx.pszAmmo1;
-}
-
-int CBasePlayerItem::iMaxAmmo1() const
-{
-	return m_ItemInfoEx.iMaxAmmo1;
-}
-
-const char *CBasePlayerItem::pszAmmo2() const
-{
-	return m_ItemInfoEx.pszAmmo2;
-}
-
-int CBasePlayerItem::iMaxAmmo2() const
-{
-	return m_ItemInfoEx.iMaxAmmo2;
-}
-
-const char *CBasePlayerItem::pszName() const
-{
-	return m_ItemInfoEx.pszName;
-}
-
-int CBasePlayerItem::iMaxClip() const
-{
-	return m_ItemInfoEx.iMaxClip;
-}
-
-int CBasePlayerItem::iWeight() const
-{
-	return m_ItemInfoEx.iWeight;
-}
-
-int CBasePlayerItem::iFlags() const
-{
-	return m_ItemInfoEx.iFlags;
 }

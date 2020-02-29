@@ -1995,25 +1995,21 @@ void CCSTutor::CheckForNeedToReload(bool isPassiveCheck)
 	if (!pCurrentWeapon || !pCurrentWeapon->IsWeapon())
 		return;
 
-	ItemInfo itemInfo;
-	Q_memset(&itemInfo, 0, sizeof(itemInfo));
-	pCurrentWeapon->GetItemInfo(&itemInfo);
-
-	if (itemInfo.iSlot && itemInfo.iSlot != 1)
+	if (pCurrentWeapon->iinfo()->m_iSlot && pCurrentWeapon->iinfo()->m_iSlot != 1)
 		return;
 
 	if (pLocalPlayer->m_rgAmmo[pCurrentWeapon->m_iPrimaryAmmoType])
 	{
 		if (isPassiveCheck)
 		{
-			if ((2 * pCurrentWeapon->m_iClip) < pCurrentWeapon->iMaxClip() && !pCurrentWeapon->m_fInReload)
+			if ((2 * pCurrentWeapon->m_iClip) < pCurrentWeapon->iinfo()->m_iMaxClip && !pCurrentWeapon->m_fInReload)
 			{
 				CreateAndAddEventToList(YOU_SHOULD_RELOAD);
 			}
 		}
 		else
 		{
-			if ((5 * pCurrentWeapon->m_iClip) < pCurrentWeapon->iMaxClip() && !pCurrentWeapon->m_fInReload)
+			if ((5 * pCurrentWeapon->m_iClip) < pCurrentWeapon->iinfo()->m_iMaxClip && !pCurrentWeapon->m_fInReload)
 			{
 				TutorMessage *message = GetTutorMessageDefinition(YOU_SHOULD_RELOAD);
 				if (message)
@@ -2134,7 +2130,7 @@ bool CCSTutor::CanLocalPlayerBuyStuff()
 	CBasePlayer *pLocalPlayer = UTIL_GetLocalPlayer();
 	if (pLocalPlayer)
 	{
-		return pLocalPlayer->CanPlayerBuy();
+		return true;
 	}
 
 	return false;
@@ -2151,7 +2147,8 @@ void CCSTutor::CheckBuyZoneMessages()
 
 	if (pPrimaryWeapon)
 	{
-		if (pLocalPlayer->NeedsPrimaryAmmo() && pLocalPlayer->CanAffordPrimaryAmmo())
+		if (pLocalPlayer->m_rgAmmo[pPrimaryWeapon->iinfo()->m_iAmmoType] < pPrimaryWeapon->ainfo()->m_iMax
+			&& pLocalPlayer->m_iAccount >= pPrimaryWeapon->ainfo()->m_iCostPerBox)
 		{
 			TheTutor->OnEvent(EVENT_TUTOR_NEED_TO_BUY_PRIMARY_AMMO);
 			return;
@@ -2159,22 +2156,26 @@ void CCSTutor::CheckBuyZoneMessages()
 	}
 	else
 	{
-		if (pLocalPlayer->CanAffordPrimary())
+		if ( (pLocalPlayer->m_iTeam == CT && pLocalPlayer->m_iAccount >= 1250)		// COST of tmp
+			|| (pLocalPlayer->m_iTeam == TERRORIST && pLocalPlayer->m_iAccount >= 1400) )	// COST of mac10
 		{
 			TheTutor->OnEvent(EVENT_TUTOR_NEED_TO_BUY_PRIMARY_WEAPON);
 			return;
 		}
 	}
 
-	if (pSecondaryWeapon && pLocalPlayer->NeedsSecondaryAmmo() && pLocalPlayer->CanAffordSecondaryAmmo())
+	if (!FNullEnt(pSecondaryWeapon)
+		&& pLocalPlayer->m_rgAmmo[pSecondaryWeapon->iinfo()->m_iAmmoType] < pSecondaryWeapon->ainfo()->m_iMax
+		&& pLocalPlayer->m_iAccount >= pSecondaryWeapon->ainfo()->m_iCostPerBox)
 	{
 		TheTutor->OnEvent(EVENT_TUTOR_NEED_TO_BUY_SECONDARY_AMMO);
 	}
-	else if (pLocalPlayer->NeedsArmor() && pLocalPlayer->CanAffordArmor())
+	else if (pLocalPlayer->pev->armorvalue < 50.0f && pLocalPlayer->m_iAccount >= KEVLAR_PRICE
+		|| pLocalPlayer->pev->armortype != ARMOR_VESTHELM && pLocalPlayer->m_iAccount >= HELMET_PRICE)
 	{
 		TheTutor->OnEvent(EVENT_TUTOR_NEED_TO_BUY_ARMOR);
 	}
-	else if (pLocalPlayer->NeedsGrenade() && pLocalPlayer->CanAffordGrenade())
+	else if (FNullEnt(pLocalPlayer->m_rgpPlayerItems[GRENADE_SLOT]) && pLocalPlayer->m_iAccount > 5000)	// you are rich, you should get better stuff.
 	{
 		TheTutor->OnEvent(EVENT_TUTOR_NEED_TO_BUY_GRENADE);
 	}

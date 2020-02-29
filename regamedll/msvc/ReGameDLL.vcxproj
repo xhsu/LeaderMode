@@ -23,7 +23,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\dlls\addons\item_airbox.cpp" />
     <ClCompile Include="..\dlls\addons\point_command.cpp" />
     <ClCompile Include="..\dlls\addons\trigger_random.cpp" />
     <ClCompile Include="..\dlls\addons\trigger_setorigin.cpp" />
@@ -218,7 +217,6 @@
     <ClCompile Include="..\dlls\func_break.cpp" />
     <ClCompile Include="..\dlls\func_tank.cpp" />
     <ClCompile Include="..\dlls\game.cpp" />
-    <ClCompile Include="..\dlls\gamerules.cpp" />
     <ClCompile Include="..\dlls\ggrenade.cpp" />
     <ClCompile Include="..\dlls\gib.cpp" />
     <ClCompile Include="..\dlls\globals.cpp" />
@@ -232,7 +230,7 @@
     <ClCompile Include="..\dlls\mapinfo.cpp" />
     <ClCompile Include="..\dlls\maprules.cpp" />
     <ClCompile Include="..\dlls\mortar.cpp" />
-    <ClCompile Include="..\dlls\multiplay_gamerules.cpp" />
+    <ClCompile Include="..\dlls\gamerules.cpp" />
     <ClCompile Include="..\dlls\observer.cpp" />
     <ClCompile Include="..\dlls\pathcorner.cpp" />
     <ClCompile Include="..\dlls\plats.cpp" />
@@ -240,13 +238,10 @@
     <ClCompile Include="..\dlls\player_classes.cpp" />
     <ClCompile Include="..\dlls\revert_saved.cpp" />
     <ClCompile Include="..\dlls\saverestore.cpp" />
-    <ClCompile Include="..\dlls\singleplay_gamerules.cpp" />
-    <ClCompile Include="..\dlls\skill.cpp" />
     <ClCompile Include="..\dlls\sound.cpp" />
     <ClCompile Include="..\dlls\soundent.cpp" />
     <ClCompile Include="..\dlls\spectator.cpp" />
     <ClCompile Include="..\dlls\subs.cpp" />
-    <ClCompile Include="..\dlls\training_gamerules.cpp" />
     <ClCompile Include="..\dlls\triggers.cpp" />
     <ClCompile Include="..\dlls\tutor.cpp" />
     <ClCompile Include="..\dlls\tutor_base_states.cpp" />
@@ -522,7 +517,6 @@
     <ClInclude Include="..\common\winsani_in.h" />
     <ClInclude Include="..\common\winsani_out.h" />
     <ClInclude Include="..\dlls\activity.h" />
-    <ClInclude Include="..\dlls\addons\item_airbox.h" />
     <ClInclude Include="..\dlls\addons\point_command.h" />
     <ClInclude Include="..\dlls\addons\trigger_random.h" />
     <ClInclude Include="..\dlls\addons\trigger_setorigin.h" />
@@ -611,13 +605,11 @@
     <ClInclude Include="..\dlls\saverestore.h" />
     <ClInclude Include="..\dlls\schedule.h" />
     <ClInclude Include="..\dlls\scriptevent.h" />
-    <ClInclude Include="..\dlls\skill.h" />
     <ClInclude Include="..\dlls\sound.h" />
     <ClInclude Include="..\dlls\soundent.h" />
     <ClInclude Include="..\dlls\spectator.h" />
     <ClInclude Include="..\dlls\subs.h" />
     <ClInclude Include="..\dlls\talkmonster.h" />
-    <ClInclude Include="..\dlls\training_gamerules.h" />
     <ClInclude Include="..\dlls\trains.h" />
     <ClInclude Include="..\dlls\triggers.h" />
     <ClInclude Include="..\dlls\tutor.h" />
@@ -971,7 +963,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
-      <DisableSpecificWarnings>26814;26485;26440;26481;26482;26446;26486;26433;26402;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <DisableSpecificWarnings>26814;26485;26440;26481;26482;26446;26486;26433;26402;26496;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

@@ -34,6 +34,9 @@ const float MAX_CHARGE_ARMOR    = 100.0f;
 class CRecharge: public CBaseToggle
 {
 public:
+	static const int suitchargerCapacity;
+
+public:
 	virtual void Spawn();
 	virtual void Precache();
 	virtual void KeyValue(KeyValueData *pkvd);

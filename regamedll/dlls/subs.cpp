@@ -13,6 +13,7 @@ void CNullEntity::Spawn()
 }
 
 LINK_ENTITY_TO_CLASS(info_null, CNullEntity)
+LINK_ENTITY_TO_CLASS(armoury_entity, CNullEntity)
 
 // These are the new entry points to entities.
 LINK_ENTITY_TO_CLASS(info_player_deathmatch, CBaseDMStart)

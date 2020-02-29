@@ -30,7 +30,6 @@
 
 #include "voice_common.h"
 
-class CGameRules;
 class CBasePlayer;
 
 class IVoiceGameMgrHelper

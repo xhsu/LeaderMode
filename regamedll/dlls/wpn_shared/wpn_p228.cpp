@@ -6,11 +6,11 @@ void CP228::Spawn()
 {
 	Precache();
 
-	m_iId = WEAPON_P228;
+	m_iId = WEAPON_ANACONDA;
 	SET_MODEL(ENT(pev), "models/w_p228.mdl");
 
 	m_iWeaponState &= ~WPNSTATE_SHIELD_DRAWN;
-	m_iDefaultAmmo = P228_DEFAULT_GIVE;
+	m_iDefaultAmmo = iinfo()->m_iMaxClip;
 	m_flAccuracy = 0.9f;
 
 	// Get ready to fall down
@@ -34,23 +34,6 @@ void CP228::Precache()
 
 	m_iShell = PRECACHE_MODEL("models/pshell.mdl");
 	m_usFireP228 = PRECACHE_EVENT(1, "events/p228.sc");
-}
-
-int CP228::GetItemInfo(ItemInfo *p)
-{
-	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "357SIG";
-	p->iMaxAmmo1 = MAX_AMMO_357SIG;
-	p->pszAmmo2 = nullptr;
-	p->iMaxAmmo2 = -1;
-	p->iMaxClip = P228_MAX_CLIP;
-	p->iSlot = 1;
-	p->iPosition = 3;
-	p->iId = m_iId = WEAPON_P228;
-	p->iFlags = 0;
-	p->iWeight = P228_WEIGHT;
-
-	return 1;
 }
 
 BOOL CP228::Deploy()
@@ -174,7 +157,7 @@ void CP228::P228Fire(float flSpread, float flCycleTime, BOOL fUseSemi)
 
 void CP228::Reload()
 {
-	if (DefaultReload(iMaxClip(), m_pPlayer->HasShield() ? P228_SHIELD_RELOAD : P228_RELOAD, P228_RELOAD_TIME))
+	if (DefaultReload(iinfo()->m_iMaxClip, m_pPlayer->HasShield() ? P228_SHIELD_RELOAD : P228_RELOAD, P228_RELOAD_TIME))
 	{
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
 		m_flAccuracy = 0.9f;

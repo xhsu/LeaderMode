@@ -6,10 +6,10 @@ void CELITE::Spawn()
 {
 	Precache();
 
-	m_iId = WEAPON_ELITE;
+	m_iId = WEAPON_P99;
 	SET_MODEL(edict(), "models/w_elite.mdl");
 
-	m_iDefaultAmmo = ELITE_DEFAULT_GIVE;
+	m_iDefaultAmmo = iinfo()->m_iMaxClip;
 	m_flAccuracy = 0.88f;
 
 	// Get ready to fall down
@@ -36,23 +36,6 @@ void CELITE::Precache()
 
 	m_usFireELITE_LEFT = PRECACHE_EVENT(1, "events/elite_left.sc");
 	m_usFireELITE_RIGHT = PRECACHE_EVENT(1, "events/elite_right.sc");
-}
-
-int CELITE::GetItemInfo(ItemInfo *p)
-{
-	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "9mm";
-	p->iMaxAmmo1 = MAX_AMMO_9MM;
-	p->pszAmmo2 = nullptr;
-	p->iMaxAmmo2 = -1;
-	p->iMaxClip = ELITE_MAX_CLIP;
-	p->iSlot = 1;
-	p->iPosition = 5;
-	p->iId = m_iId = WEAPON_ELITE;
-	p->iFlags = 0;
-	p->iWeight = ELITE_WEIGHT;
-
-	return 1;
 }
 
 BOOL CELITE::Deploy()
@@ -191,7 +174,7 @@ void CELITE::ELITEFire(float flSpread, float flCycleTime, BOOL fUseSemi)
 
 void CELITE::Reload()
 {
-	if (DefaultReload(iMaxClip(), ELITE_RELOAD, ELITE_RELOAD_TIME))
+	if (DefaultReload(iinfo()->m_iMaxClip, ELITE_RELOAD, ELITE_RELOAD_TIME))
 	{
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
 		m_flAccuracy = 0.88f;

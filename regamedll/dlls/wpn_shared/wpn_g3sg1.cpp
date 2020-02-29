@@ -6,10 +6,10 @@ void CG3SG1::Spawn()
 {
 	Precache();
 
-	m_iId = WEAPON_G3SG1;
+	m_iId = WEAPON_SVD;
 	SET_MODEL(edict(), "models/w_g3sg1.mdl");
 
-	m_iDefaultAmmo = G3SG1_DEFAULT_GIVE;
+	m_iDefaultAmmo = iinfo()->m_iMaxClip;
 	m_flLastFire = 0;
 
 	// Get ready to fall down
@@ -32,23 +32,6 @@ void CG3SG1::Precache()
 
 	m_iShellId = m_iShell = PRECACHE_MODEL("models/rshell.mdl");
 	m_usFireG3SG1 = PRECACHE_EVENT(1, "events/g3sg1.sc");
-}
-
-int CG3SG1::GetItemInfo(ItemInfo *p)
-{
-	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "762Nato";
-	p->iMaxAmmo1 = MAX_AMMO_762NATO;
-	p->pszAmmo2 = nullptr;
-	p->iMaxAmmo2 = -1;
-	p->iMaxClip = G3SG1_MAX_CLIP;
-	p->iSlot = 0;
-	p->iPosition = 3;
-	p->iId = m_iId = WEAPON_G3SG1;
-	p->iFlags = 0;
-	p->iWeight = G3SG1_WEIGHT;
-
-	return 1;
 }
 
 BOOL CG3SG1::Deploy()
@@ -178,7 +161,7 @@ void CG3SG1::G3SG1Fire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 
 void CG3SG1::Reload()
 {
-	if (DefaultReload(iMaxClip(), G3SG1_RELOAD, G3SG1_RELOAD_TIME))
+	if (DefaultReload(iinfo()->m_iMaxClip, G3SG1_RELOAD, G3SG1_RELOAD_TIME))
 	{
 		m_flAccuracy = 0.2f;
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);

@@ -9,7 +9,7 @@ void CDEAGLE::Spawn()
 	m_iId = WEAPON_DEAGLE;
 	SET_MODEL(edict(), "models/w_deagle.mdl");
 
-	m_iDefaultAmmo = DEAGLE_DEFAULT_GIVE;
+	m_iDefaultAmmo = iinfo()->m_iMaxClip;
 	m_iWeaponState &= ~WPNSTATE_SHIELD_DRAWN;
 	m_fMaxSpeed = DEAGLE_MAX_SPEED;
 	m_flAccuracy = 0.9f;
@@ -35,23 +35,6 @@ void CDEAGLE::Precache()
 
 	m_iShell = PRECACHE_MODEL("models/pshell.mdl");
 	m_usFireDeagle = PRECACHE_EVENT(1, "events/deagle.sc");
-}
-
-int CDEAGLE::GetItemInfo(ItemInfo *p)
-{
-	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "50AE";
-	p->iMaxAmmo1 = MAX_AMMO_50AE;
-	p->pszAmmo2 = nullptr;
-	p->iMaxAmmo2 = -1;
-	p->iMaxClip = DEAGLE_MAX_CLIP;
-	p->iSlot = 1;
-	p->iPosition = 1;
-	p->iId = m_iId = WEAPON_DEAGLE;
-	p->iFlags = 0;
-	p->iWeight = DEAGLE_WEIGHT;
-
-	return 1;
 }
 
 BOOL CDEAGLE::Deploy()
@@ -175,7 +158,7 @@ void CDEAGLE::DEAGLEFire(float flSpread, float flCycleTime, BOOL fUseSemi)
 
 void CDEAGLE::Reload()
 {
-	if (DefaultReload(iMaxClip(), DEAGLE_RELOAD, DEAGLE_RELOAD_TIME))
+	if (DefaultReload(iinfo()->m_iMaxClip, DEAGLE_RELOAD, DEAGLE_RELOAD_TIME))
 	{
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
 		m_flAccuracy = 0.9f;
