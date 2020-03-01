@@ -28,6 +28,8 @@
 
 #pragma once
 
+#include "menus.h"
+
 // custom enum
 enum ChooseTeamMenuSlot
 {
@@ -119,14 +121,14 @@ BOOL ClientConnect(edict_t *pEntity, const char *pszName, const char *pszAddress
 void ClientDisconnect(edict_t *pEntity);
 void respawn(entvars_t *pev, BOOL fCopyCorpse = FALSE);
 void ClientKill(edict_t *pEntity);
-void ShowMenu(CBasePlayer *pPlayer, int bitsValidSlots, int nDisplayTime, BOOL fNeedMore, char *pszText);
+void ShowMenu(CBasePlayer* pPlayer, int bitsValidSlots, int nDisplayTime, const std::string& szText);
 void ShowVGUIMenu(CBasePlayer *pPlayer, int MenuType, int BitMask, char *szOldMenu);
 void ListPlayers(CBasePlayer *current);
 void ProcessKickVote(CBasePlayer *pVotingPlayer, CBasePlayer *pKickPlayer);
 void CheckStartMoney();
 void ClientPutInServer(edict_t *pEntity);
 void Host_Say(edict_t *pEntity, BOOL teamonly);
-CBaseEntity *BuyWeaponByWeaponID(CBasePlayer *pPlayer, WeaponIdType weaponID);
+CBaseEntity *BuyWeapon(CBasePlayer *pPlayer, WeaponIdType weaponID);
 void BuyItem(CBasePlayer *pPlayer, int iSlot);
 void HandleMenu_ChooseAppearance(CBasePlayer *pPlayer, int slot);
 BOOL HandleMenu_ChooseTeam(CBasePlayer *pPlayer, int slot);

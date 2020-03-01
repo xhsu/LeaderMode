@@ -308,6 +308,7 @@ void NORETURN Sys_Error(const char *error, ...);
 void replace_all(std::string& str, const std::string& from, const std::string& to);
 void UTIL_PrintChatColor(CBasePlayer* player, ChatColor color, const char* szMessage, ...);
 void UTIL_PlayEarSound(CBasePlayer* player, const char* sfx);
+bool UTIL_CheckPassibility(const Vector& vecPoint);	// return true is accessable
 
 // Inlines
 template <typename T = CBaseEntity>

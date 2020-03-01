@@ -33,6 +33,7 @@
 #include "hintmessage.h"
 #include "unisignals.h"
 #include "player_classes.h"
+#include <list>
 
 #define SOUND_FLASHLIGHT_ON  "items/flashlight1.wav"
 #define SOUND_FLASHLIGHT_OFF "items/flashlight1.wav"
@@ -156,6 +157,7 @@ enum RewardType
 	RT_INTO_GAME,
 	RT_HURTING_ENEMY,
 	RT_SOLD_ITEM,
+	RT_GBD_GIFTED,
 };
 
 enum PLAYER_ANIM
@@ -182,7 +184,16 @@ enum _Menu
 	Menu_Radio1,
 	Menu_Radio2,
 	Menu_Radio3,
-	Menu_Buy3
+	Menu_DeclareRole,
+	Menu_VoteTS,
+
+	Menu_Buy3,
+	Menu_BuyPistols,
+	Menu_BuyShotguns,
+	Menu_BuySMGs,
+	Menu_BuyAssaultFirearms,
+	Menu_BuySniperRifle,
+	Menu_BuyEquipments,
 };
 
 enum TeamName
@@ -301,6 +312,9 @@ public:
 	void Spray();
 };
 
+// dummy
+enum TacticalSchemes;
+
 class CBasePlayer: public CBaseMonster {
 public:
 	virtual void Spawn();
@@ -376,7 +390,6 @@ public:
 	void Reset();
 	void SetScoreboardAttributes(CBasePlayer *destination = nullptr);
 	void PackDeadPlayerItems();
-	void GiveDefaultItems();
 	void RemoveAllItems(BOOL removeSuit);
 	void SetProgressBarTime(int time);
 	void SetProgressBarTime2(int time, float timeElapsed);
@@ -497,6 +510,7 @@ public:
 	// new functions from leader mod.
 	void AssignRole(RoleTypes iNewRole);	// this function is only for skill installation.
 	void UpdateHudText();
+	void CheckItemAccessibility();
 
 	// passive skill calculation hub
 	float WeaponFireIntervalModifier(CBasePlayerWeapon* pWeapon);
@@ -745,6 +759,9 @@ public:
 	CBaseSkill *m_rgpSkills[SKILLTYPE_COUNT];
 	char m_szHudText[512];
 	char m_szClientHudText[512];
+	std::list<WeaponIdType> m_lstRebuy;
+	TacticalSchemes m_iVotedTS;
+	float m_flTSThink;
 };
 
 class CWShield: public CBaseEntity

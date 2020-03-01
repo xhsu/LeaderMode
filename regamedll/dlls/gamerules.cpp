@@ -14,6 +14,26 @@ RewardAccount CHalfLifeMultiplay::m_rgRewardAccountRules_default[] = {
 	REWARD_KILLED_LEADER,					// RR_KILLED_ENEMY_LEADER,
 };
 
+const char* g_rgszTacticalSchemeNames[SCHEMES_COUNT] =
+{
+	"Disputing",
+	"Superior Firepower Doctrine",
+	"Mass Assault Doctrine",
+	"Grand Battleplan Doctrine",
+	"Mobile Warfare Doctrine",
+};
+
+const char* g_rgszTacticalSchemeDesc[SCHEMES_COUNT] =
+{
+	"/yIf most of you are /gUNDETERMINED/y, or you are having a /tdisputation/y: Your team /twon't receive/y any buff.",
+	"/gSuperior Firepower Doctrine/y: Refill /g4%%%%/y of your /tmaximum/y clip /teach second/y.",
+	"/gMass Assault Doctrine/y: /gMinimize /tredeployment interval/y of your squad along with /gdoubled/y menpower.",
+	"/gGrand Battleplan Doctrine/y: Slowly /grefill accounts/y of all your squad members. In addition, you will receive /trudimentary equipments/y after each redeployment.",
+	"/gMobile Warfare Doctrine/y: /gRedeployment loci/y are relocated near the /tSquad Leader/y. In addition, you are allowed to purchase gears /geverywhere/y.",
+};
+
+const ChatColor g_rgiTacticalSchemeDescColor[SCHEMES_COUNT] = { GREYCHAT, REDCHAT, BLUECHAT, BLUECHAT, GREYCHAT };
+
 bool IsBotSpeaking()
 {
 	for (int i = 1; i <= gpGlobals->maxClients; i++)
@@ -1196,6 +1216,10 @@ void EXT_FUNC CHalfLifeMultiplay::RestartRound()
 	m_rgiMenpowers[CT] = m_rgiMenpowers[TERRORIST] = menpower_per_player.value * (m_iNumCT + m_iNumTerrorist) / 2.0f;
 	m_rgbMenpowerBroadcast[CT] = m_rgbMenpowerBroadcast[TERRORIST] = false;
 
+	for (int iTeam = TERRORIST; iTeam <= CT; iTeam++)	// Doctrine_MassAssault on new round.
+		if (m_rgTeamTacticalScheme[iTeam] == Doctrine_MassAssault)
+			m_rgiMenpowers[iTeam] *= 2;
+
 	if (TheBots)
 	{
 		TheBots->OnEvent(EVENT_BUY_TIME_START);
@@ -1209,6 +1233,7 @@ void EXT_FUNC CHalfLifeMultiplay::RestartRound()
 	m_iRoundWinStatus = WINSTATUS_NONE;
 	m_bLevelInitialized = false;
 	m_bCompleteReset = false;
+	m_flNextTSBallotBoxesOpen = 0;
 }
 
 BOOL CHalfLifeMultiplay::TeamFull(int team_id)
@@ -1478,6 +1503,45 @@ void CHalfLifeMultiplay::Think()
 	// menpower check. just a broadcasting function, nothing related to win-lost determination.
 	CheckMenpower(CT);
 	CheckMenpower(TERRORIST);
+
+	// team tactical scheme think
+	if (m_flNextTSBallotBoxesOpen <= gpGlobals->time)
+	{
+		m_flNextTSBallotBoxesOpen = gpGlobals->time + ballot_boxes_opening_interval.value;
+
+		if (IsFreezePeriod())
+			m_flNextTSBallotBoxesOpen = gpGlobals->time + 0.1f;
+
+		TacticalSchemes rgSave[4];
+		for (int iTeam = TERRORIST; iTeam <= CT; iTeam++)
+		{
+			rgSave[iTeam] = m_rgTeamTacticalScheme[iTeam];
+			m_rgTeamTacticalScheme[iTeam] = CalcTSVoteResult(TeamName(iTeam));
+
+			if (rgSave[iTeam] != m_rgTeamTacticalScheme[iTeam])
+			{
+				CBasePlayer* pPlayer = nullptr;
+				for (int i = 1; i <= gpGlobals->maxClients; i++)
+				{
+					pPlayer = UTIL_PlayerByIndex(i);
+
+					if (!pPlayer || FNullEnt(pPlayer) || pPlayer->IsDormant())
+						continue;
+
+					if (pPlayer->IsBot())
+						continue;
+
+					if (pPlayer->m_iTeam == iTeam)
+						UTIL_HudMessage(pPlayer, m_TextParam_Notification, "Executing new tactical scheme: %s", g_rgszTacticalSchemeNames[m_rgTeamTacticalScheme[iTeam]]);
+				}
+
+				if (m_rgTeamTacticalScheme[iTeam] == Doctrine_MassAssault)	// switching to Doctrine_MassAssault
+					m_rgiMenpowers[iTeam] *= 2;
+				else if (rgSave[iTeam] == Doctrine_MassAssault)	// switching to others
+					m_rgiMenpowers[iTeam] /= 2;
+			}
+		}
+	}
 }
 
 bool CHalfLifeMultiplay::CheckGameOver()
@@ -2177,6 +2241,15 @@ BOOL CHalfLifeMultiplay::ClientCommand(CBasePlayer *pPlayer, const char *pcmd)
 
 bool CHalfLifeMultiplay::ClientConnected(edict_t *pEntity, const char *pszName, const char *pszAddress, char szRejectReason[128])
 {
+	if (pEntity)
+	{
+		CBasePlayer* pPlayer = CBasePlayer::Instance(pEntity);
+		if (pPlayer)
+		{
+			pPlayer->Reset();
+		}
+	}
+
 	m_VoiceGameMgr.ClientConnected(pEntity);
 	return TRUE;
 }
@@ -2435,10 +2508,31 @@ void CHalfLifeMultiplay::PlayerThink(CBasePlayer *pPlayer)
 	if (pPlayer->m_pActiveItem && pPlayer->m_pActiveItem->IsWeapon())
 	{
 		CBasePlayerWeapon* pWeapon = static_cast<CBasePlayerWeapon*>(pPlayer->m_pActiveItem);
+
 		if (pWeapon->m_iWeaponState & WPNSTATE_SHIELD_DRAWN)
 		{
 			pPlayer->m_bCanShoot = false;
 		}
+
+		// Superior Firepower Doctrine allows you have your clip constantly regen.
+		if (m_rgTeamTacticalScheme[pPlayer->m_iTeam] == Doctrine_SuperiorFirepower && pPlayer->m_flTSThink < gpGlobals->time)
+		{
+			pPlayer->m_flTSThink = gpGlobals->time + 1.0f;
+
+			pWeapon->m_iClip += int(float(pWeapon->iinfo()->m_iMaxClip) * 0.04f);
+
+			if (pWeapon->m_iClip > 127)
+				pWeapon->m_iClip = 127;
+		}
+	}
+
+	// Doctrine_GrandBattleplan gives player 50$ every 5 sec.
+	if (m_rgTeamTacticalScheme[pPlayer->m_iTeam] == Doctrine_GrandBattleplan && pPlayer->m_flTSThink < gpGlobals->time)
+	{
+		pPlayer->m_flTSThink = gpGlobals->time + 5.0f;
+
+		pPlayer->AddAccount(50, RT_GBD_GIFTED);
+		UTIL_PlayEarSound(pPlayer, SFX_TSD_GBD);
 	}
 
 	if (pPlayer->m_iMenu != Menu_ChooseTeam && pPlayer->m_iJoiningState == SHOWTEAMSELECT)
@@ -2872,6 +2966,7 @@ bool CHalfLifeMultiplay::CanHavePlayerItem(CBasePlayer* pPlayer, WeaponIdType iI
 		if (g_bClientPrintEnable)
 		{
 			ClientPrint(pPlayer->pev, HUD_PRINTCENTER, "#Cannot_Buy_This");
+			UTIL_PrintChatColor(pPlayer, REDCHAT, "/yYou are unqualified to use /t%s/y since you are /g%s/y.", g_rgszWeaponAlias[iId], g_rgszRoleNames[pPlayer->m_iRoleType]);
 		}
 
 		return false;
@@ -3024,6 +3119,59 @@ edict_t *EXT_FUNC CHalfLifeMultiplay::GetPlayerSpawnSpot(CBasePlayer *pPlayer)
 		if (pentSpawnSpot->v.target)
 		{
 			FireTargets(STRING(pentSpawnSpot->v.target), pPlayer, pPlayer, USE_TOGGLE, 0);
+		}
+	}
+
+	// redeployment of Doctrine_MobileWarfare
+	if (!IsFreezePeriod() && m_rgTeamTacticalScheme[pPlayer->m_iTeam] == Doctrine_MobileWarfare && m_rgpLeaders[pPlayer->m_iTeam].IsValid())
+	{
+		CBasePlayer* pLeader = m_rgpLeaders[pPlayer->m_iTeam];
+		Vector vecCandidates[8], vecDest;
+		bool bFind = false;
+
+		for (int i = 0; i < 8; i++)
+			vecCandidates[i] = pLeader->pev->origin;
+
+		vecCandidates[0] += Vector(0,		128,	0);
+		vecCandidates[1] += Vector(128,		128,	0);
+		vecCandidates[2] += Vector(128,		0,		0);
+		vecCandidates[3] += Vector(128,		-128,	0);
+		vecCandidates[4] += Vector(0,		-128,	0);
+		vecCandidates[5] += Vector(-128,	-128,	0);
+		vecCandidates[6] += Vector(-128,	0,		0);
+		vecCandidates[7] += Vector(-128,	128,	0);
+
+		TraceResult tr[8];
+		for (int i = 0; i < 8; i++)
+		{
+			TRACE_HULL(pLeader->pev->origin, vecCandidates[i], dont_ignore_monsters, head_hull, pLeader->edict(), &tr[i]);
+
+			if (tr[i].flFraction >= 1.0 && UTIL_CheckPassibility(vecCandidates[i]))
+			{
+				bFind = true;
+				vecDest = vecCandidates[i];
+				break;
+			}
+
+			if (UTIL_CheckPassibility(tr[i].vecEndPos))
+			{
+				bFind = true;
+				vecDest = tr[i].vecEndPos;
+				break;
+			}
+		}
+
+		if (bFind)
+		{
+			// make sure your minion landed on ground properly.
+			Vector vecGroundPos = vecDest - Vector(0, 0, 9999);
+			TRACE_HULL(vecDest, vecGroundPos, dont_ignore_monsters, head_hull, pLeader->edict(), &tr[0]);
+			vecDest = tr[0].vecEndPos;
+
+			pPlayer->pev->flags |= FL_DUCKING;
+			SET_SIZE(pPlayer->edict(), Vector(-16.0f, -16.0f, -18.0f), Vector(16.0f, 16.0f, 32.0f));
+			pPlayer->pev->view_ofs = Vector(0, 0, 12);
+			pPlayer->pev->origin = vecDest;
 		}
 	}
 
@@ -3905,4 +4053,95 @@ int CHalfLifeMultiplay::IDamageMoney(CBasePlayer* pVictim, CBasePlayer* pAttacke
 		return int(flDamage * -3.0f);	// penalty of hurting teammate.
 
 	return int(flDamage);
+}
+
+bool CHalfLifeMultiplay::HasRoleOccupied(RoleTypes iRole, TeamName iTeam)
+{
+	CBasePlayer* pPlayer = nullptr;
+
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		pPlayer = UTIL_PlayerByIndex(i);
+
+		if (!pPlayer || FNullEnt(pPlayer) || pPlayer->IsDormant())
+			continue;
+
+		if (pPlayer->m_iRoleType == iRole && pPlayer->m_iTeam == iTeam)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+TacticalSchemes CHalfLifeMultiplay::CalcTSVoteResult(TeamName iTeam)
+{
+	int rgiBallotBoxes[SCHEMES_COUNT] = { 0, 0, 0, 0, 0 };
+	GetTSVoteDetail(iTeam, rgiBallotBoxes);
+
+	TacticalSchemes iWinner = Scheme_UNASSIGNED;
+	int iWinnerVotes = 0;
+	for (int i = 0; i < SCHEMES_COUNT; i++)
+	{
+		if (rgiBallotBoxes[i] > iWinnerVotes)
+		{
+			iWinner = (TacticalSchemes)i;
+			iWinnerVotes = rgiBallotBoxes[i];
+		}
+		else if (rgiBallotBoxes[i] == iWinnerVotes && iWinnerVotes > 0)
+		{
+			return Scheme_UNASSIGNED;	// a disputation occurs.
+		}
+	}
+
+	return iWinner;
+}
+
+void CHalfLifeMultiplay::GetTSVoteDetail(TeamName iTeam, int* rgiBallotBoxes)
+{
+	CBasePlayer* pPlayer = nullptr;
+
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		pPlayer = UTIL_PlayerByIndex(i);
+
+		if (!pPlayer || FNullEnt(pPlayer) || pPlayer->IsDormant())
+			continue;
+
+		// UNDONE: maybe bots can think & vote someday?
+		if (pPlayer->IsBot())
+			continue;
+
+		if (pPlayer->m_iTeam == iTeam)
+		{
+			rgiBallotBoxes[pPlayer->m_iVotedTS]++;
+		}
+	}
+}
+
+void CHalfLifeMultiplay::GiveDefaultItems(CBasePlayer* pPlayer)
+{
+	pPlayer->RemoveAllItems(FALSE);
+
+	pPlayer->GiveNamedItem("weapon_knife");
+	pPlayer->GiveNamedItem("weapon_usp");
+	pPlayer->GiveAmmo(24, AMMO_45acp);
+
+	if (m_rgTeamTacticalScheme[pPlayer->m_iTeam] != Doctrine_GrandBattleplan)
+		return;
+
+	// bonus equipments for Doctrine_GrandBattleplan
+	pPlayer->GiveNamedItem("item_kevlar");	// vest without helmet
+	pPlayer->m_bHasNightVision = true;	// NVG
+	pPlayer->SendItemStatus();
+
+	if (g_rgRoleWeaponsAccessibility[pPlayer->m_iRoleType][WEAPON_HEGRENADE] != WPN_F)
+		pPlayer->GiveNamedItem("weapon_hegrenade");
+
+	if (g_rgRoleWeaponsAccessibility[pPlayer->m_iRoleType][WEAPON_FLASHBANG] != WPN_F)
+		pPlayer->GiveNamedItem("weapon_flashbang");
+
+	if (g_rgRoleWeaponsAccessibility[pPlayer->m_iRoleType][WEAPON_SMOKEGRENADE] != WPN_F)
+		pPlayer->GiveNamedItem("weapon_smokegrenade");
 }

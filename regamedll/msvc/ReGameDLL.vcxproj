@@ -229,6 +229,7 @@
     <ClCompile Include="..\dlls\lights.cpp" />
     <ClCompile Include="..\dlls\mapinfo.cpp" />
     <ClCompile Include="..\dlls\maprules.cpp" />
+    <ClCompile Include="..\dlls\menus.cpp" />
     <ClCompile Include="..\dlls\mortar.cpp" />
     <ClCompile Include="..\dlls\gamerules.cpp" />
     <ClCompile Include="..\dlls\observer.cpp" />
@@ -591,6 +592,7 @@
     <ClInclude Include="..\dlls\lights.h" />
     <ClInclude Include="..\dlls\mapinfo.h" />
     <ClInclude Include="..\dlls\maprules.h" />
+    <ClInclude Include="..\dlls\menus.h" />
     <ClInclude Include="..\dlls\monsterevent.h" />
     <ClInclude Include="..\dlls\monsters.h" />
     <ClInclude Include="..\dlls\mortar.h" />
@@ -963,7 +965,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
-      <DisableSpecificWarnings>26814;26485;26440;26481;26482;26446;26486;26433;26402;26496;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <DisableSpecificWarnings>26814;26812;26485;26440;26481;26482;26446;26486;26433;26402;26496;26489;26461;26462;26429;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

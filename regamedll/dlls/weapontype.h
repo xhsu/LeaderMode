@@ -167,6 +167,8 @@ enum shieldgren_e
 	SHIELDREN_DOWN
 };
 
+extern const char* g_rgszWeaponAlias[MAX_WEAPONS];
+
 WeaponIdType AliasToWeaponID(const char* alias);
 const char* WeaponIDToAlias(int id);	// Given a weapon ID, return its alias
 const char* AliasToWeaponClassname(const char* alias);

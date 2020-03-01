@@ -138,6 +138,7 @@ cvar_t commander_maxhealth		= { "lm_commander_maxhealth", "1000", FCVAR_SERVER, 
 cvar_t godfather_maxhealth		= { "lm_godfather_maxhealth", "1000", FCVAR_SERVER, 1000.0f, nullptr };
 cvar_t human_role_priority		= { "lm_human_role_priority", "1", FCVAR_SERVER, 1.0f, nullptr };
 cvar_t menpower_per_player		= { "lm_menpower_per_player", "1", FCVAR_SERVER, 1.0f, nullptr };
+cvar_t ballot_boxes_opening_interval = { "lm_ballot_boxes_opening_interval", "20.0", FCVAR_SERVER, 20.0f, nullptr };
 
 
 void GameDLL_Version_f()
@@ -282,6 +283,7 @@ void EXT_FUNC GameDLLInit()
 	CVAR_REGISTER(&godfather_maxhealth);
 	CVAR_REGISTER(&human_role_priority);
 	CVAR_REGISTER(&menpower_per_player);
+	CVAR_REGISTER(&ballot_boxes_opening_interval);
 
 	// print version
 	CONSOLE_ECHO("ReGameDLL version: " APP_VERSION "\n");

@@ -140,83 +140,60 @@ enum WeaponType
 struct BuyInfo
 {
 	WeaponType type;
-	bool preferred; // more challenging bots prefer these weapons
-	char *buyAlias; // the buy alias for this equipment
+	bool preferred;		// more challenging bots prefer these weapons
+	WeaponIdType iId;	// use iId to buy this equipment
 };
 
-// These tables MUST be kept in sync with the CT and T buy aliases
-BuyInfo primaryWeaponBuyInfoCT[MAX_BUY_WEAPON_PRIMARY] =
+BuyInfo primaryWeapons[] =
 {
-	{ SHOTGUN,          false, "m3"     }, // WEAPON_M3
-	{ SHOTGUN,          false, "xm1014" }, // WEAPON_XM1014
-	{ SUB_MACHINE_GUN,  false, "tmp"    }, // WEAPON_TMP
-	{ SUB_MACHINE_GUN,  false, "mp5"    }, // WEAPON_MP5N
-	{ SUB_MACHINE_GUN,  false, "ump45"  }, // WEAPON_UMP45
-	{ SUB_MACHINE_GUN,  false, "p90"    }, // WEAPON_P90
-	{ RIFLE,            true,  "famas"  }, // WEAPON_FAMAS
-	{ SNIPER_RIFLE,     false, "scout"  }, // WEAPON_SCOUT
-	{ RIFLE,            true,  "m4a1"   }, // WEAPON_M4A1
-	{ RIFLE,            false, "aug"    }, // WEAPON_AUG
-	{ SNIPER_RIFLE,     true,  "sg550"  }, // WEAPON_SG550
-	{ SNIPER_RIFLE,     true,  "awp"    }, // WEAPON_AWP
-	{ MACHINE_GUN,      false, "m249"   }, // WEAPON_M249
+	{ SHOTGUN,          false, WEAPON_KSG12		},
+	{ SHOTGUN,          false, WEAPON_STRIKER	},
+
+	{ SUB_MACHINE_GUN,  false, WEAPON_MP7A1		},
+	{ SUB_MACHINE_GUN,  false, WEAPON_PM9		},
+	{ SUB_MACHINE_GUN,  false, WEAPON_MP5N		},
+	{ SUB_MACHINE_GUN,  false, WEAPON_UMP45		},
+	{ SUB_MACHINE_GUN,  false, WEAPON_P90		},
+
+	{ RIFLE,            true,  WEAPON_CM901		},
+	{ RIFLE,            true,  WEAPON_QBZ95		},
+	{ RIFLE,            true,  WEAPON_AK47		},
+	{ RIFLE,            true,  WEAPON_M4A1		},
+	{ RIFLE,            false, WEAPON_ACR		},
+	{ RIFLE,            false, WEAPON_SCARL		},
+
+	{ SNIPER_RIFLE,     false, WEAPON_M200		},
+	{ SNIPER_RIFLE,     true,  WEAPON_M14EBR	},
+	{ SNIPER_RIFLE,     true,  WEAPON_AWP		},
+	{ SNIPER_RIFLE,     true,  WEAPON_SVD		},
+
+	{ MACHINE_GUN,      false, WEAPON_MK46		},
 };
 
-BuyInfo secondaryWeaponBuyInfoCT[MAX_BUY_WEAPON_SECONDARY] =
+BuyInfo secondaryWeapon[] =
 {
-//	{ PISTOL, false, "glock"  },
-//	{ PISTOL, false, "usp"    },
-	{ PISTOL, true,  "p228"   },
-	{ PISTOL, true,  "deagle" },
-	{ PISTOL, true,  "fn57"   },
-};
-
-BuyInfo primaryWeaponBuyInfoT[MAX_BUY_WEAPON_PRIMARY] =
-{
-	{ SHOTGUN,          false, "m3"     }, // WEAPON_M3
-	{ SHOTGUN,          false, "xm1014" }, // WEAPON_XM1014
-	{ SUB_MACHINE_GUN,  false, "mac10"  }, // WEAPON_MAC10
-	{ SUB_MACHINE_GUN,  false, "mp5"    }, // WEAPON_MP5N
-	{ SUB_MACHINE_GUN,  false, "ump45"  }, // WEAPON_UMP45
-	{ SUB_MACHINE_GUN,  false, "p90"    }, // WEAPON_P90
-	{ RIFLE,            true,  "galil"  }, // WEAPON_GALIL
-	{ RIFLE,            true,  "ak47"   }, // WEAPON_AK47
-	{ SNIPER_RIFLE,     false, "scout"  }, // WEAPON_SCOUT
-	{ RIFLE,            true,  "sg552"  }, // WEAPON_SG552
-	{ SNIPER_RIFLE,     true,  "awp"    }, // WEAPON_AWP
-	{ SNIPER_RIFLE,     true,  "g3sg1"  }, // WEAPON_G3SG1
-	{ MACHINE_GUN,      false, "m249"   }, // WEAPON_M249
-};
-
-BuyInfo secondaryWeaponBuyInfoT[MAX_BUY_WEAPON_SECONDARY] =
-{
-//	{ PISTOL, false, "glock"  },
-//	{ PISTOL, false, "usp"    },
-	{ PISTOL, true,  "p228"   },
-	{ PISTOL, true,  "deagle" },
-	{ PISTOL, true,  "elites" },
+	{ PISTOL, false,	WEAPON_GLOCK18	},
+	{ PISTOL, false,	WEAPON_USP		},
+	{ PISTOL, true,		WEAPON_ANACONDA	},
+	{ PISTOL, true,		WEAPON_DEAGLE	},
+	{ PISTOL, true,		WEAPON_FIVESEVEN},
+	{ PISTOL, true,		WEAPON_P99		},
 };
 
 // Given a weapon alias, return the kind of weapon it is
-inline WeaponType GetWeaponType(const char *alias)
+inline WeaponType GetWeaponType(WeaponIdType iId)
 {
 	int i;
-	for (i = 0; i < MAX_BUY_WEAPON_PRIMARY; i++)
+	for (i = 0; i < _countof(primaryWeapons); i++)
 	{
-		if (!Q_stricmp(alias, primaryWeaponBuyInfoCT[i].buyAlias))
-			return primaryWeaponBuyInfoCT[i].type;
-
-		if (!Q_stricmp(alias, primaryWeaponBuyInfoT[i].buyAlias))
-			return primaryWeaponBuyInfoT[i].type;
+		if (iId == primaryWeapons[i].iId)
+			return primaryWeapons[i].type;
 	}
 
-	for (i = 0; i < MAX_BUY_WEAPON_SECONDARY; i++)
+	for (i = 0; i < _countof(secondaryWeapon); i++)
 	{
-		if (!Q_stricmp(alias, secondaryWeaponBuyInfoCT[i].buyAlias))
-			return secondaryWeaponBuyInfoCT[i].type;
-
-		if (!Q_stricmp(alias, secondaryWeaponBuyInfoT[i].buyAlias))
-			return secondaryWeaponBuyInfoT[i].type;
+		if (iId == secondaryWeapon[i].iId)
+			return secondaryWeapon[i].type;
 	}
 
 	return NUM_WEAPON_TYPES;
@@ -302,50 +279,53 @@ void BuyState::OnUpdate(CCSBot *me)
 				return;
 			}
 
-			const char *buyAlias = nullptr;
+			WeaponIdType buyWeaponId = WEAPON_NONE;
 			if (weaponPreference == WEAPON_SHIELDGUN)
 			{
 				if (TheCSBots()->AllowTacticalShield())
-					buyAlias = "shield";
+					buyWeaponId = WEAPON_SHIELDGUN;
 			}
 			else
 			{
-				buyAlias = WeaponIDToAlias(weaponPreference);
-				WeaponType type = GetWeaponType(buyAlias);
+				buyWeaponId = (WeaponIdType)weaponPreference;
+				WeaponType type = GetWeaponType(buyWeaponId);
 
 				switch (type)
 				{
 				case PISTOL:
 					if (!TheCSBots()->AllowPistols())
-						buyAlias = nullptr;
+						buyWeaponId = WEAPON_NONE;
 					break;
 				case SHOTGUN:
 					if (!TheCSBots()->AllowShotguns())
-						buyAlias = nullptr;
+						buyWeaponId = WEAPON_NONE;
 					break;
 				case SUB_MACHINE_GUN:
 					if (!TheCSBots()->AllowSubMachineGuns())
-						buyAlias = nullptr;
+						buyWeaponId = WEAPON_NONE;
 					break;
 				case RIFLE:
 					if (!TheCSBots()->AllowRifles())
-						buyAlias = nullptr;
+						buyWeaponId = WEAPON_NONE;
 					break;
 				case MACHINE_GUN:
 					if (!TheCSBots()->AllowMachineGuns())
-						buyAlias = nullptr;
+						buyWeaponId = WEAPON_NONE;
 					break;
 				case SNIPER_RIFLE:
 					if (!TheCSBots()->AllowSnipers())
-						buyAlias = nullptr;
+						buyWeaponId = WEAPON_NONE;
 					break;
 				}
+
+				if (g_rgRoleWeaponsAccessibility[me->m_iRoleType][buyWeaponId] == WPN_F)
+					buyWeaponId = WEAPON_NONE;
 			}
 
-			if (buyAlias)
+			if (buyWeaponId != WEAPON_NONE)
 			{
-				me->ClientCommand(buyAlias);
-				me->PrintIfWatched("Tried to buy preferred weapon %s.\n", buyAlias);
+				BuyWeapon(me, buyWeaponId);
+				me->PrintIfWatched("Tried to buy preferred weapon %s.\n", buyWeaponId == WEAPON_SHIELDGUN ? "Tactical Shield" : g_rgszWeaponAlias[buyWeaponId]);
 
 				isPreferredAllDisallowed = false;
 			}
@@ -370,15 +350,15 @@ void BuyState::OnUpdate(CCSBot *me)
 			else
 			{
 				// build list of allowable weapons to buy
-				BuyInfo *masterPrimary = (me->m_iTeam == TERRORIST) ? primaryWeaponBuyInfoT : primaryWeaponBuyInfoCT;
-				BuyInfo *stockPrimary[MAX_BUY_WEAPON_PRIMARY];
+				BuyInfo* masterPrimary = primaryWeapons;
+				BuyInfo *stockPrimary[_countof(primaryWeapons)];
 				int stockPrimaryCount = 0;
 
 				// dont choose sniper rifles as often
 				const float sniperRifleChance = 50.0f;
 				bool wantSniper = (RANDOM_FLOAT(0, 100) < sniperRifleChance) ? true : false;
 
-				for (int i = 0; i < MAX_BUY_WEAPON_PRIMARY; i++)
+				for (int i = 0; i < _countof(primaryWeapons); i++)
 				{
 					if ((masterPrimary[i].type == SHOTGUN && TheCSBots()->AllowShotguns())
 						|| (masterPrimary[i].type == SUB_MACHINE_GUN && TheCSBots()->AllowSubMachineGuns())
@@ -393,7 +373,7 @@ void BuyState::OnUpdate(CCSBot *me)
 				if (stockPrimaryCount)
 				{
 					// buy primary weapon if we don't have one
-					int which;
+					int which = 0;
 
 					// on hard difficulty levels, bots try to buy preferred weapons on the first pass
 					if (m_retries == 0 && TheCSBots()->GetDifficultyLevel() >= BOT_HARD)
@@ -426,8 +406,8 @@ void BuyState::OnUpdate(CCSBot *me)
 						which = RANDOM_LONG(0, stockPrimaryCount - 1);
 					}
 
-					me->ClientCommand(stockPrimary[which]->buyAlias);
-					me->PrintIfWatched("Tried to buy %s.\n", stockPrimary[which]->buyAlias);
+					BuyWeapon(me, stockPrimary[which]->iId);
+					me->PrintIfWatched("Tried to buy %s.\n", g_rgszWeaponAlias[stockPrimary[which]->iId]);
 				}
 			}
 		}
@@ -438,30 +418,26 @@ void BuyState::OnUpdate(CCSBot *me)
 			// primary ammo
 			if (me->m_bHasPrimary)
 			{
-				me->ClientCommand("primammo");
+				BuyAmmo(me, PRIMARY_WEAPON_SLOT, false);
 			}
 
 			// buy armor last, to make sure we bought a weapon first
-			me->ClientCommand("vesthelm");
-			me->ClientCommand("vest");
+			BuyItem(me, MENU_SLOT_ITEM_VESTHELM);
+			BuyItem(me, MENU_SLOT_ITEM_VEST);
 
 			// pistols - if we have no preferred pistol, buy at random
 			if (TheCSBots()->AllowPistols() && !me->GetProfile()->HasPistolPreference())
 			{
 				if (m_buyPistol)
 				{
-					int which = RANDOM_LONG(0, MAX_BUY_WEAPON_SECONDARY - 1);
-
-					if (me->m_iTeam == TERRORIST)
-						me->ClientCommand(secondaryWeaponBuyInfoT[which].buyAlias);
-					else
-						me->ClientCommand(secondaryWeaponBuyInfoCT[which].buyAlias);
+					int which = RANDOM_LONG(0, _countof(secondaryWeapon) - 1);
+					BuyWeapon(me, secondaryWeapon[which].iId);
 
 					// only buy one pistol
 					m_buyPistol = false;
 				}
 
-				me->ClientCommand("secammo");
+				BuyAmmo(me, PISTOL_SLOT, false);
 			}
 
 			// buy a grenade if we wish, and we don't already have one
@@ -475,17 +451,17 @@ void BuyState::OnUpdate(CCSBot *me)
 					if (rnd < 10.0f)
 					{
 						// smoke grenade
-						me->ClientCommand("sgren");
+						BuyItem(me, MENU_SLOT_ITEM_SMOKEGREN);
 					}
 					else if (rnd < 35.0f)
 					{
 						// flashbang
-						me->ClientCommand("flash");
+						BuyItem(me, MENU_SLOT_ITEM_FLASHGREN);
 					}
 					else
 					{
 						// he grenade
-						me->ClientCommand("hegren");
+						BuyItem(me, MENU_SLOT_ITEM_HEGREN);
 					}
 				}
 				else
@@ -493,19 +469,19 @@ void BuyState::OnUpdate(CCSBot *me)
 					if (RANDOM_FLOAT(0, 100) < 10.0f)
 					{
 						// smoke grenade
-						me->ClientCommand("sgren");
+						BuyItem(me, MENU_SLOT_ITEM_SMOKEGREN);
 					}
 					else
 					{
 						// he grenade
-						me->ClientCommand("hegren");
+						BuyItem(me, MENU_SLOT_ITEM_HEGREN);
 					}
 				}
 			}
 
 			if (m_buyDefuseKit)
 			{
-				me->ClientCommand("defuser");
+				BuyItem(me, MENU_SLOT_ITEM_DEFUSEKIT);
 			}
 
 			m_doneBuying = true;

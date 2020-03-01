@@ -891,6 +891,12 @@ void CBasePlayerItem::AttachToPlayer(CBasePlayer *pPlayer)
 // CALLED THROUGH the newly-touched weapon's instance. The existing player weapon is pOriginal
 int CBasePlayerWeapon::AddDuplicate(CBasePlayerItem *pOriginal)
 {
+	if (m_iPrimaryAmmoType <= 0)	// make sure we have a ammotype to give ammo.
+	{
+		m_iPrimaryAmmoType = iinfo()->m_iAmmoType;
+		m_iSecondaryAmmoType = -1;
+	}
+
 	if (m_iDefaultAmmo)
 	{
 		return ExtractAmmo((CBasePlayerWeapon *)pOriginal);
@@ -907,7 +913,7 @@ int CBasePlayerWeapon::AddToPlayer(CBasePlayer *pPlayer)
 	m_pPlayer = pPlayer;
 	pPlayer->pev->weapons |= (1 << m_iId);
 
-	if (!m_iPrimaryAmmoType)
+	if (m_iPrimaryAmmoType <= 0)	// make sure we have a ammotype to give ammo.
 	{
 		m_iPrimaryAmmoType = iinfo()->m_iAmmoType;
 		m_iSecondaryAmmoType = -1;
@@ -979,7 +985,10 @@ void CBasePlayerWeapon::SendWeaponAnim(int iAnim, int skiplocal)
 
 bool CBasePlayerWeapon::AddPrimaryAmmo(int iCount)
 {
-	bool bGotAmmo;
+	if (m_iPrimaryAmmoType <= 0 || m_iPrimaryAmmoType >= AMMO_MAXTYPE)	// wrongful ammo type!
+		return false;
+
+	bool bGotAmmo = false;
 
 	if (iinfo()->m_iMaxClip < 1)
 	{

@@ -160,6 +160,21 @@ enum
 	GR_NEUTRAL,
 };
 
+enum TacticalSchemes
+{
+	Scheme_UNASSIGNED = 0,	// disputation
+	Doctrine_SuperiorFirepower,
+	Doctrine_MassAssault,
+	Doctrine_GrandBattleplan,
+	Doctrine_MobileWarfare,
+
+	SCHEMES_COUNT
+};
+
+extern const char* g_rgszTacticalSchemeNames[SCHEMES_COUNT];
+extern const char* g_rgszTacticalSchemeDesc[SCHEMES_COUNT];
+extern const ChatColor g_rgiTacticalSchemeDescColor[SCHEMES_COUNT];
+
 class CItem;
 
 // CHalfLifeMultiplay - rules for the basic half life multiplayer competition
@@ -369,6 +384,10 @@ public:
 	CBasePlayer* RandomNonroleCharacter(TeamName iTeam);
 	void CheckMenpower(TeamName iTeam);
 	int IDamageMoney(CBasePlayer* pVictim, CBasePlayer* pAttacker, float flDamage);
+	bool HasRoleOccupied(RoleTypes iRole, TeamName iTeam);
+	TacticalSchemes CalcTSVoteResult(TeamName iTeam);
+	void GetTSVoteDetail(TeamName iTeam, int* rgiBallotBoxes);
+	void GiveDefaultItems(CBasePlayer* pPlayer);
 
 private:
 	void MarkLivingPlayersOnTeamAsNotReceivingMoneyNextRound(int iTeam);
@@ -435,7 +454,8 @@ public:
 	hudtextparms_t m_TextParam_Hud;
 	int m_rgiMenpowers[4];
 	bool m_rgbMenpowerBroadcast[4];
-	
+	TacticalSchemes m_rgTeamTacticalScheme[4];
+	float m_flNextTSBallotBoxesOpen;
 
 protected:
 	float m_flIntermissionEndTime;
@@ -519,6 +539,9 @@ inline float CHalfLifeMultiplay::GetPlayerRespawnTime(CBasePlayer* pPlayer) cons
 	{
 		flLeaderHealthModifier = THE_GODFATHER->pev->health / THE_GODFATHER->pev->max_health;
 	}
+
+	if (m_rgTeamTacticalScheme[pPlayer->m_iTeam] == Doctrine_MassAssault)
+		flLeaderHealthModifier = 0.1f;
 
 	return playerrespawn_time.value * flLeaderHealthModifier;
 }

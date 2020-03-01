@@ -1333,27 +1333,6 @@ void CBasePlayer::PackDeadPlayerItems()
 	RemoveAllItems(TRUE);
 }
 
-void EXT_FUNC CBasePlayer::GiveDefaultItems()
-{
-	RemoveAllItems(FALSE);
-
-	switch (m_iTeam)
-	{
-	case CT:
-	{
-		GiveNamedItem("weapon_knife");
-		GiveNamedItem("weapon_usp");
-		break;
-	}
-	case TERRORIST:
-	{
-		GiveNamedItem("weapon_knife");
-		GiveNamedItem("weapon_usp");	// LUNA: should be no difference between two teams.
-		break;
-	}
-	}
-}
-
 void CBasePlayer::RemoveAllItems(BOOL removeSuit)
 {
 	bool bKillProgBar = false;
@@ -4582,7 +4561,7 @@ void EXT_FUNC CBasePlayer::Spawn()
 
 	if (!g_skipCareerInitialSpawn)
 	{
-		g_pGameRules->GetPlayerSpawnSpot(this);
+		CSGameRules()->GetPlayerSpawnSpot(this);
 	}
 
 	if (!pev->modelindex)
@@ -4846,6 +4825,8 @@ void CBasePlayer::Reset()
 	m_flRespawnPending = 0.0f;
 	m_flSpawnProtectionEndTime = 0.0f;
 	m_vecOldvAngle = g_vecZero;
+	m_lstRebuy.clear();
+	m_iVotedTS = Scheme_UNASSIGNED;
 }
 
 NOXREF void CBasePlayer::SelectNextItem(int iItem)
@@ -7483,10 +7464,46 @@ void CBasePlayer::ParseAutoBuy()
 
 void CBasePlayer::ParseRebuy()
 {
+	if (m_lstRebuy.empty())
+	{
+		UTIL_PrintChatColor(this, GREYCHAT, "/tYou have to save a rebuy list first!");
+		return;
+	}
+
+	for (auto iId : m_lstRebuy)
+	{
+		BuyWeapon(this, iId);
+	}
 }
 
 void CBasePlayer::SaveRebuy()
 {
+	m_lstRebuy.clear();
+
+	for (int i = 0; i < MAX_ITEM_TYPES; i++)
+	{
+		CBasePlayerItem* pItem = m_rgpPlayerItems[i];
+
+		while (pItem)
+		{
+			if (pItem->m_iId != WEAPON_KNIFE)
+				m_lstRebuy.emplace_back(pItem->m_iId);
+
+			pItem = pItem->m_pNext;
+		}
+	}
+
+	char szText[192];
+	Q_snprintf(szText, sizeof(szText) - 1, "/tRebuy items set: ");
+
+	for (auto iId : m_lstRebuy)
+	{
+		Q_strlcat(szText, "/y[/g");
+		Q_strlcat(szText, g_rgszWeaponAlias[iId]);
+		Q_strlcat(szText, "/y]/t ");
+	}
+
+	UTIL_PrintChatColor(this, BLUECHAT, szText);
 }
 
 bool CBasePlayer::IsObservingPlayer(CBasePlayer *pPlayer)
@@ -7679,7 +7696,7 @@ void EXT_FUNC CBasePlayer::OnSpawnEquip(bool addDefault, bool equipGame)
 
 	if (addDefault)
 	{
-		GiveDefaultItems();
+		CSGameRules()->GiveDefaultItems(this);
 	}
 }
 
@@ -7898,6 +7915,9 @@ void CBasePlayer::AssignRole(RoleTypes iNewRole)
 	default:
 		break;
 	}
+
+	// is all weapon you have okay?
+	CheckItemAccessibility();
 }
 
 void CBasePlayer::UpdateHudText()
@@ -7908,12 +7928,12 @@ void CBasePlayer::UpdateHudText()
 
 	if (!IsAlive() || IsDormant() || m_iJoiningState != JOINED)
 	{
-		Q_strcpy(m_szHudText, " ");
+		Q_strlcpy(m_szHudText, " ");
 		return;
 	}
 
 	// Part I: personal role information.
-	Q_sprintf(m_szHudText, "Role: %s\n", g_rgszRoleNames[m_iRoleType]);
+	Q_snprintf(m_szHudText, sizeof(m_szHudText) - 1, "Role: %s\n", g_rgszRoleNames[m_iRoleType]);
 
 	// Part II: skills information.
 	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
@@ -7923,21 +7943,21 @@ void CBasePlayer::UpdateHudText()
 			Q_memset(szBuffer, NULL, sizeof(szBuffer));	// reset buffer before each use.
 
 			if (m_rgpSkills[i]->GetHudPercentage() >= 1.0f)
-				Q_strcpy(szBuffer, m_rgpSkills[i]->GetName());
+				Q_strlcpy(szBuffer, m_rgpSkills[i]->GetName());
 			else
 			{
 				int iLinesCount = m_rgpSkills[i]->GetHudPercentage() * 30.0f;
 				int iDotsCount = 30 - iLinesCount;
 
 				for (int i = 0; i < iLinesCount; i++)
-					Q_strcat(szBuffer, "/");
+					Q_strlcat(szBuffer, "/");
 
 				for (int i = 0; i < iDotsCount; i++)
-					Q_strcat(szBuffer, "-");
+					Q_strlcat(szBuffer, "-");
 			}
 
-			Q_strcat(szBuffer, "\n");
-			Q_strcat(m_szHudText, szBuffer);
+			Q_strlcat(szBuffer, "\n");
+			Q_strlcat(m_szHudText, szBuffer);
 		}
 	}
 
@@ -7952,26 +7972,55 @@ void CBasePlayer::UpdateHudText()
 	}
 
 	if (!pLeader)
-		Q_sprintf(szBuffer, "%s: Unrevealed|", g_rgszRoleNames[iLeaderRole]);
+		Q_snprintf(szBuffer, sizeof(szBuffer) - 1, "%s: Unrevealed|", g_rgszRoleNames[iLeaderRole]);
 	else if (!pLeader->IsAlive())
-		Q_sprintf(szBuffer, "%s: K.I.A.|", g_rgszRoleNames[iLeaderRole]);
+		Q_snprintf(szBuffer, sizeof(szBuffer) - 1, "%s: K.I.A.|", g_rgszRoleNames[iLeaderRole]);
 	else
-		Q_sprintf(szBuffer, "%s: %s|", g_rgszRoleNames[iLeaderRole], STRING(pLeader->pev->netname));
+		Q_snprintf(szBuffer, sizeof(szBuffer) - 1, "%s: %s|", g_rgszRoleNames[iLeaderRole], STRING(pLeader->pev->netname));
 
-	Q_strcat(m_szHudText, szBuffer);
+	Q_strlcat(m_szHudText, szBuffer);
 
 	// Part IV: menpower information.
 	if (pLeader && !pLeader->IsAlive())
-		Q_strcpy(szBuffer, "Replenishment Discontinued|");
+		Q_strlcpy(szBuffer, "Replenishment Discontinued|");
 	else if (CSGameRules()->m_rgiMenpowers[m_iTeam] > 0)
-		Q_sprintf(szBuffer, "Menpower: %d|", CSGameRules()->m_rgiMenpowers[m_iTeam]);
+		Q_snprintf(szBuffer, sizeof(szBuffer) - 1, "Menpower: %d|", CSGameRules()->m_rgiMenpowers[m_iTeam]);
 	else
-		Q_strcpy(szBuffer, "Menpower Depleted|");
+		Q_strlcpy(szBuffer, "Menpower Depleted|");
 
-	Q_strcat(m_szHudText, szBuffer);
+	Q_strlcat(m_szHudText, szBuffer);
 
 	// Part V: tactical scheme information.
-	Q_strcat(m_szHudText, "Tactical Scheme: Disputing");
+	Q_snprintf(szBuffer, sizeof(szBuffer) - 1, "Tactical Scheme: %s", g_rgszTacticalSchemeNames[CSGameRules()->m_rgTeamTacticalScheme[m_iTeam]]);
+	Q_strlcat(m_szHudText, szBuffer);
+}
+
+void CBasePlayer::CheckItemAccessibility()
+{
+	for (int i = 0; i < MAX_ITEM_TYPES; i++)
+	{
+		CBasePlayerItem* pItem = m_rgpPlayerItems[i];
+
+		while (pItem)
+		{
+			if (g_rgRoleWeaponsAccessibility[m_iRoleType][pItem->m_iId] == WPN_F && pItem->m_iId != WEAPON_KNIFE && !pItem->m_bHadBeenSold)
+			{
+				AddAccount(GetWeaponInfo(pItem->m_iId)->m_iCost / 2);
+				UTIL_PrintChatColor(this, REDCHAT, "/gRefunding/y improper item /t%s/y for /g%d$/y.", g_rgszWeaponAlias[pItem->m_iId], GetWeaponInfo(pItem->m_iId)->m_iCost / 2);
+				UTIL_PlayEarSound(this, SFX_REFUND_GUNS);
+
+				CBasePlayerWeapon* pWeapon = (CBasePlayerWeapon*)pItem;
+
+				pItem->m_bHadBeenSold = true;
+				this->pev->weapons &= ~(1 << pItem->m_iId);
+				pWeapon->RetireWeapon();
+				this->RemovePlayerItem(pItem);
+				pWeapon->Kill();
+			}
+
+			pItem = pItem->m_pNext;
+		}
+	}
 }
 
 float CBasePlayer::WeaponFireIntervalModifier(CBasePlayerWeapon* pWeapon)

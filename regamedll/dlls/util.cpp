@@ -1917,3 +1917,11 @@ void UTIL_PlayEarSound(CBasePlayer* player, const char* sfx)
 		}
 	}
 }
+
+bool UTIL_CheckPassibility(const Vector& vecPoint)	// return true is accessable
+{
+	TraceResult tr;
+	TRACE_HULL(vecPoint, vecPoint, dont_ignore_monsters, head_hull, nullptr, &tr);
+
+	return !(tr.fStartSolid || tr.fAllSolid || !tr.fInOpen);
+}

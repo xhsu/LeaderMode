@@ -372,14 +372,36 @@ void EXT_FUNC ClientKill(edict_t *pEntity)
 	pPlayer->Killed(pev, GIB_NEVER);
 }
 
-void EXT_FUNC ShowMenu(CBasePlayer *pPlayer, int bitsValidSlots, int nDisplayTime, BOOL fNeedMore, char *pszText)
+void ShowMenu(CBasePlayer *pPlayer, int bitsValidSlots, int nDisplayTime, const std::string& szText)
 {
-	MESSAGE_BEGIN(MSG_ONE, gmsgShowMenu, nullptr, pPlayer->pev);
+	const int iLimit = 185;
+
+	if (szText.length() <= iLimit)
+	{
+		MESSAGE_BEGIN(MSG_ONE, gmsgShowMenu, nullptr, pPlayer->pev);
 		WRITE_SHORT(bitsValidSlots);
 		WRITE_CHAR(nDisplayTime);
-		WRITE_BYTE(fNeedMore);
-		WRITE_STRING(pszText);
-	MESSAGE_END();
+		WRITE_BYTE(FALSE);
+		WRITE_STRING(szText.c_str());
+		MESSAGE_END();
+	}
+	else
+	{
+		int iProgress = 0;
+		int len = (int)szText.length();
+
+		while ((len - iProgress) > 0)
+		{
+			MESSAGE_BEGIN(MSG_ONE, gmsgShowMenu, nullptr, pPlayer->pev);
+			WRITE_SHORT(bitsValidSlots);
+			WRITE_CHAR(nDisplayTime);
+			WRITE_BYTE((szText.length() - iProgress) <= iLimit ? FALSE : TRUE);
+			WRITE_STRING(szText.substr(iProgress, iProgress + iLimit).c_str());
+			MESSAGE_END();
+
+			iProgress += iLimit;
+		}
+	}
 }
 
 void EXT_FUNC ShowVGUIMenu(CBasePlayer *pPlayer, int MenuType, int BitMask, char *szOldMenu)
@@ -395,7 +417,7 @@ void EXT_FUNC ShowVGUIMenu(CBasePlayer *pPlayer, int MenuType, int BitMask, char
 		MESSAGE_END();
 	}
 	else
-		ShowMenu(pPlayer, BitMask, -1, 0, szOldMenu);
+		ShowMenu(pPlayer, BitMask, -1, szOldMenu);
 }
 
 NOXREF int CountTeams()
@@ -1068,11 +1090,11 @@ void BuyItem(CBasePlayer *pPlayer, int iSlot)
 				return;
 			}
 
-			if (pPlayer->m_iAccount >= FLASHBANG_PRICE)
+			if (pPlayer->m_iAccount >= GetCost(pPlayer->m_iRoleType, WEAPON_FLASHBANG))
 			{
 				bEnoughMoney = true;
 				pszItem = "weapon_flashbang";
-				iItemPrice = FLASHBANG_PRICE;
+				iItemPrice = GetCost(pPlayer->m_iRoleType, WEAPON_FLASHBANG);
 
 			}
 			break;
@@ -1092,11 +1114,11 @@ void BuyItem(CBasePlayer *pPlayer, int iSlot)
 				return;
 			}
 
-			if (pPlayer->m_iAccount >= HEGRENADE_PRICE)
+			if (pPlayer->m_iAccount >= GetCost(pPlayer->m_iRoleType, WEAPON_HEGRENADE))
 			{
 				bEnoughMoney = true;
 				pszItem = "weapon_hegrenade";
-				iItemPrice = HEGRENADE_PRICE;
+				iItemPrice = GetCost(pPlayer->m_iRoleType, WEAPON_HEGRENADE);
 			}
 			break;
 		}
@@ -1115,11 +1137,11 @@ void BuyItem(CBasePlayer *pPlayer, int iSlot)
 				return;
 			}
 
-			if (pPlayer->m_iAccount >= SMOKEGRENADE_PRICE)
+			if (pPlayer->m_iAccount >= GetCost(pPlayer->m_iRoleType, WEAPON_SMOKEGRENADE))
 			{
 				bEnoughMoney = true;
 				pszItem = "weapon_smokegrenade";
-				iItemPrice = SMOKEGRENADE_PRICE;
+				iItemPrice = GetCost(pPlayer->m_iRoleType, WEAPON_SMOKEGRENADE);
 			}
 			break;
 		}
@@ -1199,16 +1221,21 @@ void BuyItem(CBasePlayer *pPlayer, int iSlot)
 	}
 }
 
-CBaseEntity *EXT_FUNC BuyWeaponByWeaponID(CBasePlayer *pPlayer, WeaponIdType weaponID)
+CBaseEntity *BuyWeapon(CBasePlayer *pPlayer, WeaponIdType weaponID)
 {
-	if (CSGameRules()->CanHavePlayerItem(pPlayer, weaponID))
+	if (weaponID <= 0 || weaponID >= LAST_WEAPON)
+		return nullptr;
+
+	if (!CSGameRules()->CanHavePlayerItem(pPlayer, weaponID))
 		return nullptr;
 
 	const ItemInfo *info = &CBasePlayerItem::m_rgItemInfo[weaponID];
 	if (!info || !Q_strlen(info->m_pszClassName))
 		return nullptr;
 
-	if (pPlayer->m_iAccount < info->m_iCost)
+	int iCost = GetCost(pPlayer->m_iRoleType, weaponID);
+
+	if (pPlayer->m_iAccount < iCost)
 	{
 		if (g_bClientPrintEnable)
 		{
@@ -1223,13 +1250,13 @@ CBaseEntity *EXT_FUNC BuyWeaponByWeaponID(CBasePlayer *pPlayer, WeaponIdType wea
 	{
 		pPlayer->DropPrimary();
 	}
-	else
+	else if (IsSecondaryWeapon(weaponID))
 	{
 		pPlayer->DropSecondary();
 	}
 
 	auto pEntity = pPlayer->GiveNamedItem(info->m_pszClassName);
-	pPlayer->AddAccount(-info->m_iCost, RT_PLAYER_BOUGHT_SOMETHING);
+	pPlayer->AddAccount(-iCost, RT_PLAYER_BOUGHT_SOMETHING);
 
 	if (refill_bpammo_weapons.value > 1)
 	{
@@ -2197,17 +2224,34 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 			ListPlayers(pPlayer);
 		}
 	}
-	else if (FStrEq(pcmd, "client_buy_open"))
+	else if (FStrEq(pcmd, "client_buy_open") || FStrEq(pcmd, "buy3"))
 	{
-		if (pPlayer->m_iMenu == Menu_OFF)
-		{
-			pPlayer->m_iMenu = Menu_Buy3;
-
-			// UNDONE
-		}
-
 		if (pPlayer->m_signals.GetState() & SIGNAL_BUY)
 		{
+			char szTitle[64];
+			Q_sprintf(szTitle,	"\\rBuy Menu\n"
+								"\\yRole: \\w%s\n", g_rgszRoleNames[pPlayer->m_iRoleType]);
+
+			const char szItem[] =
+			"\n"
+			"\\r1.\\w Pistols\n"
+			"\\r2.\\w Shotguns\n"
+			"\\r3.\\w SMGs\n"
+			"\\r4.\\w Assault Firearms\n"
+			"\\r5.\\w Sniper Rifle\n"
+			"\\r6.\\w Equipments\n"
+			"\n"
+			"\\r7.\\w Auto Buy\n"
+			"\\r8.\\w Rebuy\n"
+			"\\r9.\\w Save Rebuy\n"
+			"\n"
+			"\\r0.\\w Exit\n"
+			;
+			std::string szMenu = std::string(szTitle) + std::string(szItem);
+
+			ShowMenu(pPlayer, MENU_KEY_0 | MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5 | MENU_KEY_6 | MENU_KEY_7 | MENU_KEY_8 | MENU_KEY_9, -1, szMenu);
+			pPlayer->m_iMenu = Menu_Buy3;
+
 			if (TheTutor)
 			{
 				TheTutor->OnEvent(EVENT_TUTOR_BUY_MENU_OPENNED);
@@ -2285,6 +2329,67 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 			case Menu_Radio3:
 			{
 				Radio3(pPlayer, slot);
+				break;
+			}
+			case Menu_DeclareRole:
+			{
+				if (!MenuHandler_DeclareRole(pPlayer, slot))
+					OpenMenu_DeclareRole(pPlayer);
+
+				break;
+			}
+			case Menu_VoteTS:
+			{
+				if (!MenuHandler_VoteTacticalSchemes(pPlayer, slot))
+					OpenMenu_VoteTacticalSchemes(pPlayer);
+
+				break;
+			}
+			case Menu_Buy3:
+			{
+				MenuHandler_Buy3(pPlayer, slot);
+				break;
+			}
+			case Menu_BuyPistols:
+			{
+				if (!MenuHandler_BuyPistols(pPlayer, slot))
+					MenuHandler_Buy3(pPlayer, BuyMenu_BuyPistols);
+
+				break;
+			}
+			case Menu_BuyShotguns:
+			{
+				if (!MenuHandler_BuyShotguns(pPlayer, slot))
+					MenuHandler_Buy3(pPlayer, BuyMenu_BuyShotguns);
+
+				break;
+			}
+			case Menu_BuySMGs:
+			{
+				if (!MenuHandler_BuySMGs(pPlayer, slot))
+					MenuHandler_Buy3(pPlayer, BuyMenu_BuySMGs);
+
+				break;
+			}
+			case Menu_BuyAssaultFirearms:
+			{
+				if (!MenuHandler_BuyAssaultFirearms(pPlayer, slot))
+					MenuHandler_Buy3(pPlayer, BuyMenu_BuyAssaultFirearms);
+
+				break;
+			}
+			case Menu_BuySniperRifle:
+			{
+				if (!MenuHandler_BuySniperRifles(pPlayer, slot))
+					MenuHandler_Buy3(pPlayer, BuyMenu_BuySniperRifles);
+
+				break;
+			}
+			case Menu_BuyEquipments:
+			{
+				if (!MenuHandler_BuyEquipments(pPlayer, slot))
+					MenuHandler_Buy3(pPlayer, BuyMenu_BuyEquipments);
+
 				break;
 			}
 			default:
@@ -2522,18 +2627,18 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 			}
 			else if (FStrEq(pcmd, "radio1"))
 			{
-				ShowMenu(pPlayer, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5 | MENU_KEY_6 | MENU_KEY_0), -1, FALSE, "#RadioA");
+				ShowMenu(pPlayer, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5 | MENU_KEY_6 | MENU_KEY_0), -1, "#RadioA");
 				pPlayer->m_iMenu = Menu_Radio1;
 			}
 			else if (FStrEq(pcmd, "radio2"))
 			{
-				ShowMenu(pPlayer, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5 | MENU_KEY_6 | MENU_KEY_0), -1, FALSE, "#RadioB");
+				ShowMenu(pPlayer, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5 | MENU_KEY_6 | MENU_KEY_0), -1, "#RadioB");
 				pPlayer->m_iMenu = Menu_Radio2;
 				return;
 			}
 			else if (FStrEq(pcmd, "radio3"))
 			{
-				ShowMenu(pPlayer, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5 | MENU_KEY_6 | MENU_KEY_7 | MENU_KEY_8 | MENU_KEY_9 | MENU_KEY_0), -1, FALSE, "#RadioC");
+				ShowMenu(pPlayer, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5 | MENU_KEY_6 | MENU_KEY_7 | MENU_KEY_8 | MENU_KEY_9 | MENU_KEY_0), -1, "#RadioC");
 				pPlayer->m_iMenu = Menu_Radio3;
 			}
 			else if (FStrEq(pcmd, "drop"))
@@ -2590,9 +2695,6 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 						TheTutor->OnEvent(EVENT_PLAYER_BOUGHT_SOMETHING, pPlayer);
 					}
 				}
-			}
-			else if (FStrEq(pcmd, "buyequip"))
-			{
 			}
 			else if (FStrEq(pcmd, "buy"))
 			{
@@ -2696,6 +2798,19 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 				int iRole = atoi(parg1);
 				if (iRole >= Role_UNASSIGNED && iRole < ROLE_COUNT)
 					pPlayer->AssignRole(RoleTypes(iRole));
+			}
+			else if (FStrEq(pcmd, "addmoney"))
+			{
+				int iMoney = atoi(parg1);
+				pPlayer->AddAccount(iMoney);
+			}
+			else if (FStrEq(pcmd, "declarerole"))
+			{
+				OpenMenu_DeclareRole(pPlayer);
+			}
+			else if (FStrEq(pcmd, "votescheme"))
+			{
+				OpenMenu_VoteTacticalSchemes(pPlayer);
 			}
 			else
 			{
