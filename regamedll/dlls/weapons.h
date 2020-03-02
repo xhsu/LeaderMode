@@ -70,9 +70,9 @@ const float MAX_DIST_RELOAD_SOUND = 512.0f;
 
 struct ItemInfo
 {
-	int m_iId;
+	WeaponIdType m_iId;
 	const char* m_pszClassName;
-	int m_iAmmoType;
+	AmmoIdType m_iAmmoType;
 	int m_iMaxClip;
 	int m_iSlot;
 	int m_iPosition;
@@ -83,7 +83,7 @@ struct ItemInfo
 
 struct AmmoInfo
 {
-	int m_iId;
+	AmmoIdType m_iId;
 	const char* m_pszName;
 	int m_iMax;
 	int m_iCountPerBox;
@@ -114,18 +114,11 @@ public:
 	virtual void BounceSound();
 
 public:
-	enum SATCHELCODE
-	{
-		SATCHEL_DETONATE,
-		SATCHEL_RELEASE,
-	};
-public:
 
 	static CGrenade *ShootTimed(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, float time);
 	static CGrenade *ShootTimed2(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, float time, int iTeam, unsigned short usEvent);
-	static CGrenade *ShootContact(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity);
 	static CGrenade *ShootSmokeGrenade(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, float time, unsigned short usEvent);
-	static void UseSatchelCharges(entvars_t *pevOwner, SATCHELCODE code);
+
 public:
 	void Explode(Vector vecSrc, Vector vecAim);
 	void Explode(TraceResult *pTrace, int bitsDamageType);
@@ -270,8 +263,8 @@ public:
 	float m_flNextPrimaryAttack;	// soonest time ItemPostFrame will call PrimaryAttack
 	float m_flNextSecondaryAttack;	// soonest time ItemPostFrame will call SecondaryAttack
 	float m_flTimeWeaponIdle;		// soonest time ItemPostFrame will call WeaponIdle
-	int m_iPrimaryAmmoType;			// "primary" ammo index into players m_rgAmmo[]
-	int m_iSecondaryAmmoType;		// "secondary" ammo index into players m_rgAmmo[]
+	AmmoIdType m_iPrimaryAmmoType;			// "primary" ammo index into players m_rgAmmo[]
+	AmmoIdType m_iSecondaryAmmoType;		// "secondary" ammo index into players m_rgAmmo[]
 	int m_iClip;					// number of shots left in the primary weapon clip, -1 it not used
 	int m_iClientClip;				// the last version of m_iClip sent to hud dll
 	int m_iClientWeaponState;		// the last version of the weapon state sent to hud dll (is current weapon, is on target)

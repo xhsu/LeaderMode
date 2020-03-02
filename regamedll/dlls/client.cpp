@@ -1078,7 +1078,7 @@ void BuyItem(CBasePlayer *pPlayer, int iSlot)
 		}
 		case MENU_SLOT_ITEM_FLASHGREN:
 		{
-			if (CSGameRules()->CanHavePlayerItem(pPlayer, WEAPON_FLASHBANG))
+			if (CSGameRules()->CanHavePlayerItem(pPlayer, WEAPON_FLASHBANG, true))
 				return;
 
 			if (pPlayer->m_rgAmmo[AMMO_Flashbang] >= CBasePlayerItem::m_rgAmmoInfo[AMMO_Flashbang].m_iMax)
@@ -1102,7 +1102,7 @@ void BuyItem(CBasePlayer *pPlayer, int iSlot)
 		}
 		case MENU_SLOT_ITEM_HEGREN:
 		{
-			if (CSGameRules()->CanHavePlayerItem(pPlayer, WEAPON_HEGRENADE))
+			if (CSGameRules()->CanHavePlayerItem(pPlayer, WEAPON_HEGRENADE, true))
 				return;
 
 			if (pPlayer->m_rgAmmo[AMMO_HEGrenade] >= CBasePlayerItem::m_rgAmmoInfo[AMMO_HEGrenade].m_iMax)
@@ -1125,7 +1125,7 @@ void BuyItem(CBasePlayer *pPlayer, int iSlot)
 		}
 		case MENU_SLOT_ITEM_SMOKEGREN:
 		{
-			if (CSGameRules()->CanHavePlayerItem(pPlayer, WEAPON_SMOKEGRENADE))
+			if (CSGameRules()->CanHavePlayerItem(pPlayer, WEAPON_SMOKEGRENADE, true))
 				return;
 
 			if (pPlayer->m_rgAmmo[AMMO_SmokeGrenade] >= CBasePlayerItem::m_rgAmmoInfo[AMMO_SmokeGrenade].m_iMax)
@@ -1182,7 +1182,7 @@ void BuyItem(CBasePlayer *pPlayer, int iSlot)
 		}
 		case MENU_SLOT_ITEM_SHIELD:
 		{
-			if (CSGameRules()->CanHavePlayerItem(pPlayer, WEAPON_SHIELDGUN))
+			if (CSGameRules()->CanHavePlayerItem(pPlayer, WEAPON_SHIELDGUN, true))
 				return;
 
 			if (pPlayer->m_iAccount >= SHIELDGUN_PRICE)
@@ -1227,7 +1227,7 @@ CBaseEntity *BuyWeapon(CBasePlayer *pPlayer, WeaponIdType weaponID)
 	if (weaponID <= 0 || weaponID >= LAST_WEAPON)
 		return nullptr;
 
-	if (!CSGameRules()->CanHavePlayerItem(pPlayer, weaponID))
+	if (!CSGameRules()->CanHavePlayerItem(pPlayer, weaponID, true))
 		return nullptr;
 
 	const ItemInfo *info = &CBasePlayerItem::m_rgItemInfo[weaponID];
@@ -2738,7 +2738,7 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 				{
 				case Skill_Attack:
 				case Skill_Defense:
-				case Skill_Intel:
+				case Skill_Auxiliary:
 				case Skill_UNASSIGNED:
 				case Skill_WeaponEnhance:
 					if (pPlayer->m_rgpSkills[iSkillType])
@@ -2760,7 +2760,7 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 				{
 				case Skill_Attack:
 				case Skill_Defense:
-				case Skill_Intel:
+				case Skill_Auxiliary:
 				case Skill_UNASSIGNED:
 				case Skill_WeaponEnhance:
 					if (pPlayer->m_rgpSkills[iSkillType])

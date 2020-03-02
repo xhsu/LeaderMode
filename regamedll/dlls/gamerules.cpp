@@ -2852,6 +2852,9 @@ void EXT_FUNC CHalfLifeMultiplay::PlayerKilled(CBasePlayer *pVictim, entvars_t *
 
 		// let the killer paint another decal as soon as he'd like.
 		peKiller->m_flNextDecalTime = gpGlobals->time;
+
+		// post event for skill.
+		peKiller->OnPlayerKills(pVictim);
 	}
 }
 
@@ -2977,7 +2980,7 @@ bool CHalfLifeMultiplay::CanHaveAmmo(CBasePlayer* pPlayer, AmmoIdType iId)
 }
 
 // Returns FALSE if the player is not allowed to pick up this weapon
-bool CHalfLifeMultiplay::CanHavePlayerItem(CBasePlayer* pPlayer, WeaponIdType iId)
+bool CHalfLifeMultiplay::CanHavePlayerItem(CBasePlayer* pPlayer, WeaponIdType iId, bool bPrintHint)
 {
 	// only living players can have items
 	if (pPlayer->pev->deadflag != DEAD_NO)
@@ -2987,7 +2990,7 @@ bool CHalfLifeMultiplay::CanHavePlayerItem(CBasePlayer* pPlayer, WeaponIdType iI
 
 	if (g_rgRoleWeaponsAccessibility[pPlayer->m_iRoleType][iId] == WPN_F && iId != WEAPON_KNIFE)	// you should never forbid a player from getting his knife.
 	{
-		if (g_bClientPrintEnable)
+		if (g_bClientPrintEnable && bPrintHint)
 		{
 			ClientPrint(pPlayer->pev, HUD_PRINTCENTER, "#Cannot_Buy_This");
 			UTIL_PrintChatColor(pPlayer, REDCHAT, "/yYou are unqualified to use /t%s/y since you are /g%s/y.", g_rgszWeaponAlias[iId], g_rgszRoleNames[pPlayer->m_iRoleType]);
@@ -3012,7 +3015,7 @@ bool CHalfLifeMultiplay::CanHavePlayerItem(CBasePlayer* pPlayer, WeaponIdType iI
 
 	if (pPlayer->m_rgpPlayerItems[PRIMARY_WEAPON_SLOT] && pPlayer->m_rgpPlayerItems[PRIMARY_WEAPON_SLOT]->m_iId == iId)
 	{
-		if (g_bClientPrintEnable)
+		if (g_bClientPrintEnable && bPrintHint)
 		{
 			ClientPrint(pPlayer->pev, HUD_PRINTCENTER, "#Cstrike_Already_Own_Weapon");
 		}
@@ -3022,7 +3025,7 @@ bool CHalfLifeMultiplay::CanHavePlayerItem(CBasePlayer* pPlayer, WeaponIdType iI
 
 	if (pPlayer->m_rgpPlayerItems[PISTOL_SLOT] && pPlayer->m_rgpPlayerItems[PISTOL_SLOT]->m_iId == iId)
 	{
-		if (g_bClientPrintEnable)
+		if (g_bClientPrintEnable && bPrintHint)
 		{
 			ClientPrint(pPlayer->pev, HUD_PRINTCENTER, "#Cstrike_Already_Own_Weapon");
 		}
@@ -4172,4 +4175,12 @@ void CHalfLifeMultiplay::GiveDefaultItems(CBasePlayer* pPlayer)
 
 	if (g_rgRoleWeaponsAccessibility[pPlayer->m_iRoleType][WEAPON_SMOKEGRENADE] != WPN_F)
 		pPlayer->GiveNamedItem("weapon_smokegrenade");
+}
+
+float CHalfLifeMultiplay::PlayerMaxArmour(CBasePlayer* pPlayer)
+{
+	if (pPlayer->m_iRoleType == Role_SWAT)
+		return swat_max_armour.value;
+
+	return MAX_NORMAL_BATTERY;
 }

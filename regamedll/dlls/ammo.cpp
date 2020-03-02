@@ -2,7 +2,7 @@
 
 const AmmoInfo CBasePlayerItem::m_rgAmmoInfo[MAX_AMMO_SLOTS] =
 {
-	{0, "", 0, 0, 0, 0},
+	{AMMO_NONE, "", 0, 0, 0, 0},
 	{AMMO_338Magnum,	"338Magnum",	30,		10,		125,	BULLET_PLAYER_338MAG},
 	{AMMO_762Nato,		"762Nato",		180,	30,		80,		BULLET_PLAYER_762MM},
 	{AMMO_556NatoBox,	"556NatoBox",	200,	30,		60,		BULLET_PLAYER_556MM},

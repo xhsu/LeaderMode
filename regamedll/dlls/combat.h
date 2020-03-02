@@ -29,7 +29,6 @@
 #pragma once
 
 EXT_FUNC void PlayerBlind(CBasePlayer *pPlayer, entvars_t *pevInflictor, entvars_t *pevAttacker, float fadeTime, float fadeHold, int alpha, Vector &color);
-EXT_FUNC void RadiusFlash_TraceLine_hook(CBasePlayer *pPlayer, entvars_t *pevInflictor, entvars_t *pevAttacker, Vector &vecSrc, Vector &vecSpot, TraceResult *tr);
 
 void RadiusFlash(Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int iClassIgnore = 0, int bitsDamageType = 0);
 void RadiusDamage(Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, float flRadius, int iClassIgnore, int bitsDamageType);

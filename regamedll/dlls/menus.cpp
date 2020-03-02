@@ -62,10 +62,10 @@ void OpenMenu_Buy3(CBasePlayer* pPlayer)
 			}
 		}
 
-		if (!iAffordableCount)
-			Q_snprintf(szItem, sizeof(szItem) - 1, "\\r%d. %s - [NONE AFFORDABLE]\n", ++g_iMenuItemCount, g_rgszBuyMenuItemName[i]);
-		else if (!iAvailableCount)
+		if (!iAvailableCount)
 			Q_snprintf(szItem, sizeof(szItem) - 1, "\\d%d. %s - [NONE AVAILABLE]\n", ++g_iMenuItemCount, g_rgszBuyMenuItemName[i]);
+		else if (!iAffordableCount)
+			Q_snprintf(szItem, sizeof(szItem) - 1, "\\r%d. %s - [NONE AFFORDABLE]\n", ++g_iMenuItemCount, g_rgszBuyMenuItemName[i]);
 		else
 			Q_snprintf(szItem, sizeof(szItem) - 1, "\\r%d. \\w%s - \\r[\\y%d\\wAVAILABLE\\r|\\y%d\\wAFFORDABLE\\r]\n", ++g_iMenuItemCount, g_rgszBuyMenuItemName[i], iAvailableCount, iAffordableCount);
 
@@ -171,8 +171,8 @@ bool MenuHandler_Buy3(CBasePlayer* pPlayer, int iSlot)
 									"\\yRole: \\w%s\n\n", g_rgszRoleNames[pPlayer->m_iRoleType]);
 
 			g_iMenuItemCount = 0;
+			AddMenuWeaponItem(pPlayer, WEAPON_CM901, szMenuText);	// 2
 			AddMenuWeaponItem(pPlayer, WEAPON_QBZ95,	szMenuText);	// 1
-			AddMenuWeaponItem(pPlayer, WEAPON_CM901,	szMenuText);	// 2
 			AddMenuWeaponItem(pPlayer, WEAPON_AK47,		szMenuText);	// 3
 			AddMenuWeaponItem(pPlayer, WEAPON_M4A1,		szMenuText);	// 4
 			AddMenuWeaponItem(pPlayer, WEAPON_ACR,		szMenuText);	// 5
@@ -317,10 +317,10 @@ bool MenuHandler_BuyAssaultFirearms(CBasePlayer* pPlayer, int iSlot)
 	switch (iSlot)
 	{
 	case 1:
-		return BuyWeapon(pPlayer, WEAPON_QBZ95);
+		return BuyWeapon(pPlayer, WEAPON_CM901);
 
 	case 2:
-		return BuyWeapon(pPlayer, WEAPON_CM901);
+		return BuyWeapon(pPlayer, WEAPON_QBZ95);
 
 	case 3:
 		return BuyWeapon(pPlayer, WEAPON_AK47);

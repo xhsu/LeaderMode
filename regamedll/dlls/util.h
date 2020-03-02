@@ -103,6 +103,8 @@
 		GetClassPtr((DLLClassName *)pev);\
 	}
 
+#define RANDOM_ARRAY(a)	a[RANDOM_LONG(0, ARRAYSIZE(a) - 1)]
+
 const EOFFSET eoNullEntity = (EOFFSET)0;	// Testing the three types of "entity" for nullity
 
 class UTIL_GroupTrace

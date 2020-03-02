@@ -377,7 +377,7 @@ void CBasePlayerItem::DefaultTouch(CBaseEntity *pOther)
 	CBasePlayer *pPlayer = static_cast<CBasePlayer *>(pOther);
 
 	// can I have this?
-	if (!CSGameRules()->CanHavePlayerItem(pPlayer, m_iId))
+	if (!CSGameRules()->CanHavePlayerItem(pPlayer, m_iId, false))
 	{
 		return;
 	}
@@ -894,7 +894,7 @@ int CBasePlayerWeapon::AddDuplicate(CBasePlayerItem *pOriginal)
 	if (m_iPrimaryAmmoType <= 0)	// make sure we have a ammotype to give ammo.
 	{
 		m_iPrimaryAmmoType = iinfo()->m_iAmmoType;
-		m_iSecondaryAmmoType = -1;
+		m_iSecondaryAmmoType = AMMO_NONE;
 	}
 
 	if (m_iDefaultAmmo)
@@ -916,7 +916,7 @@ int CBasePlayerWeapon::AddToPlayer(CBasePlayer *pPlayer)
 	if (m_iPrimaryAmmoType <= 0)	// make sure we have a ammotype to give ammo.
 	{
 		m_iPrimaryAmmoType = iinfo()->m_iAmmoType;
-		m_iSecondaryAmmoType = -1;
+		m_iSecondaryAmmoType = AMMO_NONE;
 	}
 
 	return CBasePlayerItem::AddToPlayer(pPlayer);
@@ -1388,7 +1388,7 @@ void CWeaponBox::Touch(CBaseEntity *pOther)
 		// have at least one weapon in this slot
 		while (pItem)
 		{
-			if (!CSGameRules()->CanHavePlayerItem(pPlayer, pItem->m_iId)
+			if (!CSGameRules()->CanHavePlayerItem(pPlayer, pItem->m_iId, false)
 				|| (pPlayer->IsBot() && TheCSBots() && !TheCSBots()->IsWeaponUseable(pItem)))
 			{
 				return;

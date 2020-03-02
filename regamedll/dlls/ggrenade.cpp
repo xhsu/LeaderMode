@@ -77,8 +77,6 @@ void CGrenade::Explode(TraceResult *pTrace, int bitsDamageType)
 
 void CGrenade::Explode3(TraceResult *pTrace, int bitsDamageType)
 {
-	float flRndSound; // sound randomizer
-
 	pev->model = iStringNull; // invisible
 	pev->solid = SOLID_NOT;   // intangible
 	pev->takedamage = DAMAGE_NO;
@@ -124,9 +122,6 @@ void CGrenade::Explode3(TraceResult *pTrace, int bitsDamageType)
 		UTIL_DecalTrace(pTrace, DECAL_SCORCH1);
 	else
 		UTIL_DecalTrace(pTrace, DECAL_SCORCH2);
-
-	// TODO: unused
-	flRndSound = RANDOM_FLOAT(0, 1);
 
 	switch (RANDOM_LONG(0, 2))
 	{
@@ -443,17 +438,16 @@ void CGrenade::Detonate3()
 	Explode3(&tr, DMG_EXPLOSION);
 }
 
-// Contact grenade, explode when it touches something
 void CGrenade::ExplodeTouch(CBaseEntity *pOther)
 {
-	TraceResult tr;
-	Vector vecSpot; // trace starts here!
+	// LUNA: the function of this function had been changed.
+	// this is set when a grenade was thrown by a Breacher.
 
-	pev->enemy = pOther->edict();
+	pev->dmgtime = gpGlobals->time;
+	pev->nextthink = gpGlobals->time;
 
-	vecSpot = pev->origin - pev->velocity.Normalize() * 32.0f;
-	UTIL_TraceLine(vecSpot, vecSpot + pev->velocity.Normalize() * 64, ignore_monsters, ENT(pev), &tr);
-	Explode(&tr, DMG_BLAST);
+	if (!Q_strcmp(STRING(pev->model), "models/w_smokegrenade.mdl"))
+		pev->flags |= FL_ONGROUND;	// SG is a little bit different.
 }
 
 void CGrenade::DangerSoundThink()
@@ -638,35 +632,7 @@ void CGrenade::Spawn()
 	m_fRegisteredSound = FALSE;
 }
 
-NOXREF CGrenade *CGrenade::ShootContact(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity)
-{
-	CGrenade *pGrenade = GetClassPtr((CGrenade *)nullptr);
-	pGrenade->Spawn();
-
-	// contact grenades arc lower
-	pGrenade->pev->gravity = 0.5f; // lower gravity since grenade is aerodynamic and engine doesn't know it.
-
-	UTIL_SetOrigin(pGrenade->pev, vecStart);
-	pGrenade->pev->velocity = vecVelocity;
-	pGrenade->pev->angles = UTIL_VecToAngles(pGrenade->pev->velocity);
-	pGrenade->pev->owner = ENT(pevOwner);
-
-	// make monsters afaid of it while in the air
-	pGrenade->SetThink(&CGrenade::DangerSoundThink);
-	pGrenade->pev->nextthink = gpGlobals->time;
-
-	// Tumble in air
-	pGrenade->pev->avelocity.x = RANDOM_FLOAT(-100, -500);
-
-	// Explode on contact
-	pGrenade->SetTouch(&CGrenade::ExplodeTouch);
-
-	pGrenade->pev->dmg = 100;
-	pGrenade->m_bJustBlew = true;
-	return pGrenade;
-}
-
-CGrenade *CGrenade::ShootTimed2(entvars_t *pevOwner, VectorRef vecStart, VectorRef vecVelocity, float time, int iTeam, unsigned short usEvent)
+CGrenade *CGrenade::ShootTimed2(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, float time, int iTeam, unsigned short usEvent)
 {
 	CGrenade *pGrenade = GetClassPtr((CGrenade *)nullptr);
 	pGrenade->Spawn();
@@ -700,7 +666,7 @@ CGrenade *CGrenade::ShootTimed2(entvars_t *pevOwner, VectorRef vecStart, VectorR
 	return pGrenade;
 }
 
-CGrenade *CGrenade::ShootTimed(entvars_t *pevOwner, VectorRef vecStart, VectorRef vecVelocity, float time)
+CGrenade *CGrenade::ShootTimed(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, float time)
 {
 	CGrenade *pGrenade = GetClassPtr((CGrenade *)nullptr);
 	pGrenade->Spawn();
@@ -741,7 +707,7 @@ CGrenade *CGrenade::ShootTimed(entvars_t *pevOwner, VectorRef vecStart, VectorRe
 	return pGrenade;
 }
 
-CGrenade *CGrenade::ShootSmokeGrenade(entvars_t *pevOwner, VectorRef vecStart, VectorRef vecVelocity, float time, unsigned short usEvent)
+CGrenade *CGrenade::ShootSmokeGrenade(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, float time, unsigned short usEvent)
 {
 	CGrenade *pGrenade = GetClassPtr((CGrenade *)nullptr);
 	pGrenade->Spawn();
@@ -791,36 +757,6 @@ void AnnounceFlashInterval(float interval, float offset)
 		WRITE_SHORT(int(interval));	// interval
 		WRITE_SHORT(int(offset));
 	MESSAGE_END();
-}
-
-NOXREF void CGrenade::UseSatchelCharges(entvars_t *pevOwner, SATCHELCODE code)
-{
-	if (!pevOwner)
-		return;
-
-	edict_t *pentFind = nullptr;
-	CBaseEntity *pOwner = CBaseEntity::Instance(pevOwner);
-
-	while ((pentFind = FIND_ENTITY_BY_CLASSNAME(pentFind, "grenade")))
-	{
-		if (FNullEnt(pentFind))
-			break;
-
-		CBaseEntity *pEnt = Instance(pentFind);
-		if (pEnt)
-		{
-			if ((pEnt->pev->spawnflags & SF_DETONATE) && pEnt->pev->owner == pOwner->edict())
-			{
-				if (code == SATCHEL_DETONATE)
-					pEnt->Use(pOwner, pOwner, USE_ON, 0);
-				else
-				{
-					// SATCHEL_RELEASE
-					pEnt->pev->owner = nullptr;
-				}
-			}
-		}
-	}
 }
 
 IMPLEMENT_SAVERESTORE(CGrenade, CBaseMonster)

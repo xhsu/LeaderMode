@@ -17,16 +17,64 @@ enum RoleTypes
 	Role_UNASSIGNED = 0,
 
 	Role_Commander = 1,
+	// WeaponEnhance:	CSkillFireRate
+	// Attack:			-
+	// Defense:			CSkillReduceDamage
+	// Auxiliary:		CSkillRadarScan
+
 	Role_SWAT,
+	// WeaponEnhance:	-
+	// Attack:			-
+	// Defense:			CSkillBulletproof
+	// Auxiliary:		CSkillArmorRegen
+
 	Role_Breacher,
+	// WeaponEnhance:	CSkillExplosiveBullets
+	// Attack:			CSkillInfiniteGrenade
+	// Defense:			-
+	// Auxiliary:		-
+
 	Role_Sharpshooter,
+	// WeaponEnhance:	
+	// Attack:			
+	// Defense:			
+	// Auxiliary:		
+
 	Role_Medic,
+	// WeaponEnhance:	
+	// Attack:			
+	// Defense:			
+	// Auxiliary:		
 
 	Role_Godfather = 6,
+	// WeaponEnhance:	
+	// Attack:			
+	// Defense:			CSkillReduceDamage
+	// Auxiliary:		
+
 	Role_Berserker,
+	// WeaponEnhance:	
+	// Attack:			
+	// Defense:			
+	// Auxiliary:		
+
 	Role_MadScientist,
+	// WeaponEnhance:	
+	// Attack:			
+	// Defense:			
+	// Auxiliary:		
+
 	Role_Assassin,
+	// WeaponEnhance:	
+	// Attack:			
+	// Defense:			
+	// Auxiliary:		
+
 	Role_Arsonist,
+	// WeaponEnhance:	
+	// Attack:			
+	// Defense:			CSkillReduceDamage
+	// Auxiliary:		
 
 	ROLE_COUNT
 };
@@ -38,7 +86,7 @@ enum SkillType
 	Skill_WeaponEnhance,
 	Skill_Attack,
 	Skill_Defense,
-	Skill_Intel,
+	Skill_Auxiliary,
 
 	SKILLTYPE_COUNT
 };
@@ -87,6 +135,9 @@ public:
 	static const char* RADAR_BEEP_SFX;
 	static const char* RADAR_TARGET_DEAD_SFX;
 	static const char* COOLDOWN_COMPLETE_SFX;
+	static const char* CRETICAL_SHOT_SFX;
+
+	static void	Precache();
 
 public:
 	bool m_bUsingSkill;
@@ -111,7 +162,20 @@ public:	// skill action
 
 	// passive skill: weapons
 	virtual float WeaponFireIntervalModifier(CBasePlayerWeapon* pWeapon) { return 1.0f; }
+	virtual void OnGrenadeThrew(WeaponIdType iId, CGrenade* pGrenade) { }
+
+	// passive skill: damage
 	virtual float PlayerDamageSufferedModifier(int bitsDamageTypes) { return 1.0f; }
+	virtual float PlayerDamageDealtModifier(int bitsDamageTypes) { return 1.0f; }
+	virtual void OnPlayerDamagedPre(float& flDamage) { }
+	virtual void OnTraceDamagePre(float& flDamage, TraceResult& tr) { }
+	virtual void OnFireBullets3PreDamage(float& flDamage, TraceResult& tr) { }
+	virtual void OnFireBuckshotsPreTraceAttack(float& flDamage, TraceResult& tr) { }
+	virtual void OnPlayerFiringTraceLine(TraceResult& tr) { }
+
+	// passive skill: death
+	virtual void OnPlayerDeath(CBasePlayer* pKiller) { Terminate(); }
+	virtual void OnPlayerKills(CBasePlayer* pVictim) { }
 };
 
 // Role_Commander: Battlefield Analysis
@@ -134,7 +198,7 @@ public:
 	bool Terminate();
 
 	const char* GetName() const	{ return "Battlefield Analysis"; }
-	SkillType Classify() const	{ return Skill_Intel; }
+	SkillType Classify() const	{ return Skill_Auxiliary; }
 	float GetDuration() const { return DURATION; }
 	float GetCooldown() const { return COOLDOWN; }
 };
@@ -160,10 +224,9 @@ public:
 	float WeaponFireIntervalModifier(CBasePlayerWeapon* pWeapon) { return m_bUsingSkill ? FIREINTERVAL_MODIFIER : 1.0f; }
 };
 
-//
 // Role_Commander: Stainless Steel
 // Role_Godfather: Rockstand
-//
+// Role_Arsonist: [Passive] Nonflammable
 class CSkillReduceDamage : public CBaseSkill
 {
 public:
@@ -183,3 +246,115 @@ public:
 
 	float PlayerDamageSufferedModifier(int bitsDamageTypes);
 };
+
+// Role_SWAT: Bulletproof
+class CSkillBulletproof : public CBaseSkill
+{
+public:
+	static const float DURATION;
+	static const float COOLDOWN;
+	static const char* ACTIVATION_SFX;
+	static const char* CLOSURE_SFX;
+	static const float GIFT_RADIUS;
+
+public:
+	bool Execute();
+	void Think();
+	bool Terminate();
+
+	const char* GetName() const { return "Bulletproof"; }
+	SkillType Classify() const { return Skill_Defense; }
+	float GetDuration() const { return DURATION; }
+	float GetCooldown() const { return COOLDOWN; }
+
+	void OnTraceDamagePre(float& flDamage, TraceResult& tr);
+};
+
+// Role_SWAT: Liquid Armor
+class CSkillArmorRegen : public CBaseSkill
+{
+public:
+	CSkillArmorRegen() { m_bShouldSelfArmourRegenPlaySFX = true; }
+
+public:
+	static const float GIFT_RADIUS;
+	static const float GIFT_INTERVAL;
+	static const float GIFT_AMOUNT;
+	static const char* GIFT_SFX;
+	static const char* SELF_REGEN_SFX;
+	static const float SELF_REGEN_AFTER_DMG;
+	static const float SELF_REGEN_INTERVAL;
+	static const float SELF_REGEN_AMOUNT;
+
+public:
+	float m_flNextArmourOffer;
+	float m_flNextSelfArmourRegen;
+	bool m_bShouldSelfArmourRegenPlaySFX;
+
+public:
+	void Think();
+
+	const char* GetName() const { return "[Passive] Liquid Armor"; }
+	SkillType Classify() const { return Skill_Auxiliary; }
+
+	void OnPlayerDamagedPre(float& flDamage);
+};
+
+// Role_Breacher: Explosive Bullets
+class CSkillExplosiveBullets : public CBaseSkill
+{
+public:
+	static const float DURATION;
+	static const float COOLDOWN;
+	static const int EXPLO_LIGHT_RAD;
+	static const float EXPLO_RADIUS;
+	static const float EXPLO_DAMAGE;
+	static const float RETAINED_DMG_PER_BULLET;
+	static const float RETAINED_RAD_PER_BULLET;
+	static int m_rgidSmokeSprite[4];
+
+public:
+	int m_rgiRetainedBullets[33];
+
+public:
+	bool Execute();
+	void Think();
+	bool Terminate();
+
+	const char* GetName() const { return "Explosive Bullets"; }
+	SkillType Classify() const { return Skill_WeaponEnhance; }
+	float GetDuration() const { return DURATION; }
+	float GetCooldown() const { return COOLDOWN; }
+
+	void OnPlayerFiringTraceLine(TraceResult& tr);
+	void OnPlayerDeath(CBasePlayer* pKiller);
+	void OnPlayerKills(CBasePlayer* pVictim);
+};
+
+// Role_Breacher: Bombard
+class CSkillInfiniteGrenade : public CBaseSkill
+{
+public:
+	static const float DURATION;
+	static const float COOLDOWN;
+	static const char* ACTIVATION_SFX;
+	static const char* CLOSURE_SFX;
+	static const float SELF_EXPLO_DMG_MUL;
+	static const float DEALT_EXPLO_DMG_MUL;
+	static const float GIFT_RADIUS;
+
+public:
+	bool Execute();
+	void Think();
+	bool Terminate();
+
+	const char* GetName() const { return "Bombard"; }
+	SkillType Classify() const { return Skill_Attack; }
+	float GetDuration() const { return DURATION; }
+	float GetCooldown() const { return COOLDOWN; }
+
+	float PlayerDamageSufferedModifier(int bitsDamageTypes) { return (m_bUsingSkill && (bitsDamageTypes & (DMG_EXPLOSION | DMG_BLAST))) ? SELF_EXPLO_DMG_MUL : 1.0f; }
+	float PlayerDamageDealtModifier(int bitsDamageTypes) { return (bitsDamageTypes & (DMG_EXPLOSION | DMG_BLAST)) ? DEALT_EXPLO_DMG_MUL : 1.0f; }
+	void OnGrenadeThrew(WeaponIdType iId, CGrenade* pGrenade);
+};
+

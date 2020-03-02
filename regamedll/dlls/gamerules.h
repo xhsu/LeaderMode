@@ -227,7 +227,7 @@ public:
 	virtual void DeathNotice(CBasePlayer *pVictim, entvars_t *pKiller, entvars_t *pInflictor);
 
 	// Weapon retrieval
-	virtual bool CanHavePlayerItem(CBasePlayer* pPlayer, WeaponIdType iId);	// The player is touching an CBasePlayerItem, do I give it to him?
+	virtual bool CanHavePlayerItem(CBasePlayer* pPlayer, WeaponIdType iId, bool bPrintHint);	// The player is touching an CBasePlayerItem, do I give it to him?
 	virtual void PlayerGotWeapon(CBasePlayer *pPlayer, CBasePlayerItem *pWeapon);
 
 	// Ammo retrieval
@@ -388,6 +388,7 @@ public:
 	TacticalSchemes CalcTSVoteResult(TeamName iTeam);
 	void GetTSVoteDetail(TeamName iTeam, int* rgiBallotBoxes);
 	void GiveDefaultItems(CBasePlayer* pPlayer);
+	float PlayerMaxArmour(CBasePlayer* pPlayer);
 
 private:
 	void MarkLivingPlayersOnTeamAsNotReceivingMoneyNextRound(int iTeam);

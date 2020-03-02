@@ -282,6 +282,7 @@ void CWorld::Precache()
 	WeaponsPrecache();
 	ClientPrecache();
 	BotPrecache();
+	CBaseSkill::Precache();
 
 	// sounds used from C physics code
 	// clears sound channels

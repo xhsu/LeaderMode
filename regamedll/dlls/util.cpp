@@ -1847,6 +1847,9 @@ const char* g_rgszTeamName[] = { "UNASSIGNED", "TERRORIST", "CT", "SPECTATOR" };
 
 void UTIL_PrintChatColor(CBasePlayer* player, ChatColor color, const char* szMessage, ...)
 {
+	if (player && player->IsBot())
+		return;
+
 	va_list argptr;
 	static char szStr[192];
 

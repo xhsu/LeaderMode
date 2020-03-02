@@ -441,8 +441,6 @@ public:
 	void SetSuitUpdate(char *name = nullptr, bool group = SUIT_SENTENCE, int iNoRepeatTime = SUIT_REPEAT_OK);
 	void UpdateGeigerCounter();
 	void CheckTimeBasedDamage();
-	void BarnacleVictimBitten(entvars_t *pevBarnacle);
-	void BarnacleVictimReleased();
 	void ResetAutoaim();
 	Vector AutoaimDeflection(Vector &vecSrc, float flDist, float flDelta);
 	void ForceClientDllUpdate();
@@ -515,6 +513,14 @@ public:
 	// passive skill calculation hub
 	float WeaponFireIntervalModifier(CBasePlayerWeapon* pWeapon);
 	float PlayerDamageSufferedModifier(int bitsDamageTypes);
+	float PlayerDamageDealtModifier(int bitsDamageTypes);
+	void OnPlayerDamagedPre(float& flDamage);
+	void OnTraceDamagePre(float& flDamage, TraceResult& tr);
+	void OnFireBullets3PreDamage(float& flDamage, TraceResult& tr);
+	void OnFireBuckshotsPreTraceAttack(float& flDamage, TraceResult& tr);
+	void OnPlayerFiringTraceLine(TraceResult& tr);
+	void OnPlayerKills(CBasePlayer* pVictim);
+	void OnGrenadeThrew(WeaponIdType iId, CGrenade* pGrenade);
 
 	// templates
 	template<typename T = CBasePlayerItem, typename Functor>

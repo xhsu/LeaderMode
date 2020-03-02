@@ -587,9 +587,11 @@ void CBasePlayer::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vec
 			{
 				bShouldBleed = false;
 				bShouldSpark = true;
+				flDamage *= 2.0f;
 			}
+			else
+				flDamage *= 6.0f;
 
-			flDamage *= 4;
 			if (bShouldBleed)
 			{
 				pev->punchangle.x = flDamage * -0.5;
@@ -679,6 +681,8 @@ void CBasePlayer::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vec
 			WRITE_SHORT(65); // ramdon velocity
 		MESSAGE_END();
 	}
+
+	OnTraceDamagePre(flDamage, *ptr);	// hook it right before AddMultiDamage();
 
 	AddMultiDamage(pevAttacker, this, flDamage, bitsDamageType);
 }
@@ -779,6 +783,12 @@ BOOL CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 	// pre damage modifier. for skills
 	flDamage *= PlayerDamageSufferedModifier(bitsDamageType);
 
+	if (!FNullEnt(pevAttacker) && CBaseEntity::Instance(pevAttacker)->IsPlayer())
+	{
+		pAttack = CBasePlayer::Instance(pevAttacker);
+		flDamage *= pAttack->PlayerDamageDealtModifier(bitsDamageType);
+	}
+
 	if (bitsDamageType & (DMG_EXPLOSION | DMG_BLAST))
 	{
 		if (!IsAlive())
@@ -866,6 +876,8 @@ BOOL CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 			if (bitsDamageType & DMG_EXPLOSION)
 				m_bKilledByGrenade = true;
 		}
+
+		OnPlayerDamagedPre(flDamage);	// skills should hook on here.
 
 		LogAttack(pAttack, this, bTeamAttack, int(flDamage), armorHit, pev->health - flDamage, pev->armorvalue, GetWeaponName(pevInflictor, pevAttacker));
 		bTookDamage = CBaseMonster::TakeDamage(pevInflictor, pevAttacker, int(flDamage), bitsDamageType);
@@ -1096,6 +1108,8 @@ BOOL CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 	{
 		Pain(m_LastHitGroup, false);
 	}
+
+	OnPlayerDamagedPre(flDamage);	// skills should hook on here.
 
 	LogAttack(pAttack, this, bTeamAttack, flDamage, armorHit, pev->health - flDamage, pev->armorvalue, GetWeaponName(pevInflictor, pevAttacker));
 
@@ -1812,6 +1826,13 @@ void EXT_FUNC CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 	{
 		HintMessage("#Spec_Duck", TRUE, TRUE);
 		m_flDisplayHistory |= DHF_SPEC_DUCK;
+	}
+
+	// normally, skills should terminating here.
+	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	{
+		if (m_rgpSkills[i])
+			m_rgpSkills[i]->OnPlayerDeath(pAttackerEntity->IsPlayer() ? CBasePlayer::Instance(pevAttacker) : nullptr);
 	}
 }
 
@@ -2545,7 +2566,7 @@ void CWShield::Touch(CBaseEntity *pOther)
 				return;
 		}
 
-		if (CSGameRules()->CanHavePlayerItem(pPlayer, WEAPON_SHIELDGUN))
+		if (CSGameRules()->CanHavePlayerItem(pPlayer, WEAPON_SHIELDGUN, false))
 			return;
 
 		pPlayer->GiveShield();
@@ -2674,14 +2695,18 @@ NOXREF void CBasePlayer::ThrowPrimary()
 
 CGrenade *CBasePlayer::ThrowGrenade(CBasePlayerWeapon *pWeapon, Vector vecSrc, Vector vecThrow, float time, unsigned short usEvent)
 {
+	CGrenade* pGrenade = nullptr;
+
 	switch (pWeapon->m_iId)
 	{
-	case WEAPON_HEGRENADE:    return CGrenade::ShootTimed2(pev, vecSrc, vecThrow, time, m_iTeam, usEvent);
-	case WEAPON_FLASHBANG:    return CGrenade::ShootTimed(pev, vecSrc, vecThrow, time);
-	case WEAPON_SMOKEGRENADE: return CGrenade::ShootSmokeGrenade(pev, vecSrc, vecThrow, time, usEvent);
+	case WEAPON_HEGRENADE:    pGrenade = CGrenade::ShootTimed2(pev, vecSrc, vecThrow, time, m_iTeam, usEvent); break;
+	case WEAPON_FLASHBANG:    pGrenade = CGrenade::ShootTimed(pev, vecSrc, vecThrow, time); break;
+	case WEAPON_SMOKEGRENADE: pGrenade = CGrenade::ShootSmokeGrenade(pev, vecSrc, vecThrow, time, usEvent); break;
 	}
 
-	return nullptr;
+	OnGrenadeThrew(pWeapon->m_iId, pGrenade);
+
+	return pGrenade;
 }
 
 void EXT_FUNC CBasePlayer::AddAccount(int amount, RewardType type, bool bTrackChange)
@@ -6115,16 +6140,6 @@ BOOL CBasePlayer::FBecomeProne()
 	return TRUE;
 }
 
-NOXREF void CBasePlayer::BarnacleVictimBitten(entvars_t *pevBarnacle)
-{
-	TakeDamage(pevBarnacle, pevBarnacle, pev->armorvalue + pev->health, DMG_SLASH | DMG_ALWAYSGIB);
-}
-
-NOXREF void CBasePlayer::BarnacleVictimReleased()
-{
-	m_afPhysicsFlags &= ~PFLAG_ONBARNACLE;
-}
-
 // return player light level plus virtual muzzle flash
 int CBasePlayer::Illumination()
 {
@@ -7874,6 +7889,16 @@ void CBasePlayer::AssignRole(RoleTypes iNewRole)
 		CBaseSkill::Grand<CSkillReduceDamage>(this);
 		break;
 
+	case Role_SWAT:
+		CBaseSkill::Grand<CSkillBulletproof>(this);
+		CBaseSkill::Grand<CSkillArmorRegen>(this);
+		break;
+
+	case Role_Breacher:
+		CBaseSkill::Grand<CSkillExplosiveBullets>(this);
+		CBaseSkill::Grand<CSkillInfiniteGrenade>(this);
+		break;
+
 	case Role_Arsonist:
 	case Role_Godfather:
 		CBaseSkill::Grand<CSkillReduceDamage>(this);
@@ -8022,4 +8047,80 @@ float CBasePlayer::PlayerDamageSufferedModifier(int bitsDamageTypes)
 	}
 
 	return flResult;
+}
+
+float CBasePlayer::PlayerDamageDealtModifier(int bitsDamageTypes)
+{
+	float flResult = 1.0f;
+
+	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	{
+		if (m_rgpSkills[i])
+			flResult *= m_rgpSkills[i]->PlayerDamageDealtModifier(bitsDamageTypes);	// the active or not is determind in the function itself.
+	}
+
+	return flResult;
+}
+
+void CBasePlayer::OnPlayerDamagedPre(float& flDamage)
+{
+	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	{
+		if (m_rgpSkills[i])
+			m_rgpSkills[i]->OnPlayerDamagedPre(flDamage);	// the active or not is determind in the function itself.
+	}
+}
+
+void CBasePlayer::OnTraceDamagePre(float& flDamage, TraceResult& tr)
+{
+	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	{
+		if (m_rgpSkills[i])
+			m_rgpSkills[i]->OnTraceDamagePre(flDamage, tr);	// the active or not is determind in the function itself.
+	}
+}
+
+void CBasePlayer::OnFireBullets3PreDamage(float& flDamage, TraceResult& tr)
+{
+	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	{
+		if (m_rgpSkills[i])
+			m_rgpSkills[i]->OnFireBullets3PreDamage(flDamage, tr);	// the active or not is determind in the function itself.
+	}
+}
+
+void CBasePlayer::OnFireBuckshotsPreTraceAttack(float& flDamage, TraceResult& tr)
+{
+	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	{
+		if (m_rgpSkills[i])
+			m_rgpSkills[i]->OnFireBuckshotsPreTraceAttack(flDamage, tr);	// the active or not is determind in the function itself.
+	}
+}
+
+void CBasePlayer::OnPlayerFiringTraceLine(TraceResult& tr)
+{
+	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	{
+		if (m_rgpSkills[i])
+			m_rgpSkills[i]->OnPlayerFiringTraceLine(tr);	// the active or not is determind in the function itself.
+	}
+}
+
+void CBasePlayer::OnPlayerKills(CBasePlayer* pVictim)
+{
+	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	{
+		if (m_rgpSkills[i])
+			m_rgpSkills[i]->OnPlayerKills(pVictim);
+	}
+}
+
+void CBasePlayer::OnGrenadeThrew(WeaponIdType iId, CGrenade* pGrenade)
+{
+	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	{
+		if (m_rgpSkills[i])
+			m_rgpSkills[i]->OnGrenadeThrew(iId, pGrenade);	// the active or not is determind in the function itself.
+	}
 }

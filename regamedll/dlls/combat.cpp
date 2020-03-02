@@ -24,11 +24,6 @@ void PlayerBlind(CBasePlayer *pPlayer, entvars_t *pevInflictor, entvars_t *pevAt
 	}
 }
 
-void RadiusFlash_TraceLine_hook(CBasePlayer *pPlayer, entvars_t *pevInflictor, entvars_t *pevAttacker, Vector &vecSrc, Vector &vecSpot, TraceResult *tr)
-{
-	UTIL_TraceLine(vecSrc, vecSpot, dont_ignore_monsters, ENT(pevInflictor), tr);
-}
-
 void RadiusFlash(Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int iClassIgnore, int bitsDamageType)
 {
 	CBaseEntity *pEntity = nullptr;

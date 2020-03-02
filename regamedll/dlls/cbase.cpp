@@ -1029,6 +1029,17 @@ void CBaseEntity::FireBuckshots(ULONG cShots, Vector vecSrc, Vector vecDirShooti
         UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev), &tr);
         tracer = 0;
 
+		if (IsPlayer())
+		{
+			CBasePlayer* me = CBasePlayer::Instance(this->pev);
+			me->OnPlayerFiringTraceLine(tr);
+		}
+
+		if (TheBots && tr.flFraction != 1.0f)
+		{
+			TheBots->OnEvent(EVENT_BULLET_IMPACT, this, (CBaseEntity*)&tr.vecEndPos);
+		}
+
         if (iTracerFreq != 0 && !(tracerCount++ % iTracerFreq))
         {
             Vector vecTracerSrc;
@@ -1063,6 +1074,13 @@ void CBaseEntity::FireBuckshots(ULONG cShots, Vector vecSrc, Vector vecDirShooti
         {
             CBaseEntity *pEntity = CBaseEntity::Instance(tr.pHit);
             float flDamage = ((1 - tr.flFraction) * iDamage);
+
+			if (IsPlayer())
+			{
+				CBasePlayer* me = CBasePlayer::Instance(this->pev);
+				me->OnFireBuckshotsPreTraceAttack(flDamage, tr);
+			}
+
             pEntity->TraceAttack(pevAttacker, int(flDamage), vecDir, &tr, DMG_BULLET);
         }
 
@@ -1071,11 +1089,6 @@ void CBaseEntity::FireBuckshots(ULONG cShots, Vector vecSrc, Vector vecDirShooti
     }
 
     ApplyMultiDamage(pev, pevAttacker);
-}
-
-bool EXT_FUNC IsPenetrableEntity_default(Vector &vecSrc, Vector &vecEnd, entvars_t *pevAttacker, edict_t *pHit)
-{
-	return true;
 }
 
 // Go to the trouble of combining multiple pellets into a single damage call.
@@ -1177,6 +1190,12 @@ Vector CBaseEntity::FireBullets3(Vector vecSrc, Vector vecDirShooting, float vec
 	{
 		ClearMultiDamage();
 		UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev), &tr);
+
+		if (IsPlayer())
+		{
+			CBasePlayer* me = CBasePlayer::Instance(this->pev);
+			me->OnPlayerFiringTraceLine(tr);
+		}
 
 		if (TheBots && tr.flFraction != 1.0f)
 		{
@@ -1291,6 +1310,12 @@ Vector CBaseEntity::FireBullets3(Vector vecSrc, Vector vecDirShooting, float vec
 		}
 		else
 			iPenetration = 0;
+
+		if (IsPlayer())
+		{
+			CBasePlayer* me = CBasePlayer::Instance(pevAttacker);
+			me->OnFireBullets3PreDamage(gMultiDamage.amount, tr);
+		}
 
 		ApplyMultiDamage(pev, pevAttacker);
 	}

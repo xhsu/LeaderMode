@@ -172,5 +172,6 @@ extern cvar_t godfather_maxhealth;
 extern cvar_t human_role_priority;
 extern cvar_t menpower_per_player;
 extern cvar_t ballot_boxes_opening_interval;
+extern cvar_t swat_max_armour;
 
 void GameDLLInit();

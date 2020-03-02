@@ -164,7 +164,7 @@ BOOL CItemBattery::MyTouch(CBasePlayer *pPlayer)
 	if (pPlayer->HasRestrictItem(ITEM_BATTERY, ITEM_TYPE_TOUCHED))
 		return FALSE;
 
-	if (pPlayer->pev->armorvalue < MAX_NORMAL_BATTERY && (pPlayer->pev->weapons & (1 << WEAPON_SUIT)))
+	if (pPlayer->pev->armorvalue < CSGameRules()->PlayerMaxArmour(pPlayer) && (pPlayer->pev->weapons & (1 << WEAPON_SUIT)))
 	{
 		auto armorValue = batteryCapacity;
 
@@ -177,7 +177,7 @@ BOOL CItemBattery::MyTouch(CBasePlayer *pPlayer)
 			pPlayer->pev->armortype = ARMOR_KEVLAR;
 
 		pPlayer->pev->armorvalue += armorValue;
-		pPlayer->pev->armorvalue = Q_min(pPlayer->pev->armorvalue, MAX_NORMAL_BATTERY);
+		pPlayer->pev->armorvalue = Q_min(pPlayer->pev->armorvalue, CSGameRules()->PlayerMaxArmour(pPlayer));
 
 		EMIT_SOUND(pPlayer->edict(), CHAN_ITEM, "items/gunpickup2.wav", VOL_NORM, ATTN_NORM);
 
@@ -187,7 +187,7 @@ BOOL CItemBattery::MyTouch(CBasePlayer *pPlayer)
 
 		// Suit reports new power level
 		// For some reason this wasn't working in release build -- round it.
-		int pct = int(float(pPlayer->pev->armorvalue * 100.0f) * (1.0f / MAX_NORMAL_BATTERY) + 0.5f);
+		int pct = int(float(pPlayer->pev->armorvalue * 100.0f) * (1.0f / CSGameRules()->PlayerMaxArmour(pPlayer)) + 0.5f);
 		pct = (pct / 5);
 
 		if (pct > 0)
@@ -326,13 +326,13 @@ BOOL CItemKevlar::MyTouch(CBasePlayer *pPlayer)
 	if (pPlayer->HasRestrictItem(ITEM_KEVLAR, ITEM_TYPE_TOUCHED))
 		return FALSE;
 
-	if (pPlayer->pev->armortype != ARMOR_NONE && pPlayer->pev->armorvalue >= MAX_NORMAL_BATTERY)
+	if (pPlayer->pev->armortype != ARMOR_NONE && pPlayer->pev->armorvalue >= CSGameRules()->PlayerMaxArmour(pPlayer))
 		return FALSE;
 
 	if (pPlayer->pev->armortype == ARMOR_NONE)
 		pPlayer->pev->armortype = ARMOR_KEVLAR;
 
-	pPlayer->pev->armorvalue = MAX_NORMAL_BATTERY;
+	pPlayer->pev->armorvalue = CSGameRules()->PlayerMaxArmour(pPlayer);
 	EMIT_SOUND(pPlayer->edict(), CHAN_ITEM, "items/ammopickup2.wav", VOL_NORM, ATTN_NORM);
 
 	MESSAGE_BEGIN(MSG_ONE, gmsgItemPickup, nullptr, pPlayer->pev);
@@ -370,11 +370,11 @@ BOOL CItemAssaultSuit::MyTouch(CBasePlayer *pPlayer)
 	if (pPlayer->HasRestrictItem(ITEM_ASSAULT, ITEM_TYPE_TOUCHED))
 		return FALSE;
 
-	if (pPlayer->pev->armortype == ARMOR_VESTHELM && pPlayer->pev->armorvalue >= MAX_NORMAL_BATTERY)
+	if (pPlayer->pev->armortype == ARMOR_VESTHELM && pPlayer->pev->armorvalue >= CSGameRules()->PlayerMaxArmour(pPlayer))
 		return FALSE;
 
 	pPlayer->pev->armortype = ARMOR_VESTHELM;
-	pPlayer->pev->armorvalue = MAX_NORMAL_BATTERY;
+	pPlayer->pev->armorvalue = CSGameRules()->PlayerMaxArmour(pPlayer);
 
 	EMIT_SOUND(pPlayer->edict(), CHAN_ITEM, "items/ammopickup2.wav", VOL_NORM, ATTN_NORM);
 
