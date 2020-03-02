@@ -7,8 +7,8 @@ Created date: 02/26/2020
 
 #pragma once
 
-#define THE_GODFATHER CSGameRules()->m_rgpLeaders[TERRORIST]
-#define THE_COMMANDER CSGameRules()->m_rgpLeaders[CT]
+#define THE_GODFATHER CSGameRules()->m_rgpCharacters[Role_Godfather]
+#define THE_COMMANDER CSGameRules()->m_rgpCharacters[Role_Commander]
 
 class CBasePlayer;
 

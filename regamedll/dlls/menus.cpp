@@ -8,9 +8,99 @@ Created date: 03/01/2020
 
 int g_iMenuItemCount = 0;
 
+const int g_rgiBuyMenuClassify[] =
+{
+	WEAPON_NONE,
+	(1 << WEAPON_GLOCK18) | (1 << WEAPON_USP) | (1 << WEAPON_ANACONDA) | (1 << WEAPON_DEAGLE) | (1 << WEAPON_FIVESEVEN) | (1 << WEAPON_P99),
+	(1 << WEAPON_KSG12) | (1 << WEAPON_STRIKER),
+	(1 << WEAPON_MP7A1) | (1 << WEAPON_PM9) | (1 << WEAPON_MP5N) | (1 << WEAPON_UMP45) | (1 << WEAPON_P90),
+	(1 << WEAPON_QBZ95) | (1 << WEAPON_CM901) | (1 << WEAPON_AK47) | (1 << WEAPON_M4A1) | (1 << WEAPON_SCARL) | (1 << WEAPON_ACR) | (1 << WEAPON_MK46),
+	(1 << WEAPON_M200) | (1 << WEAPON_M14EBR) | (1 << WEAPON_AWP) | (1 << WEAPON_SVD),
+	(1 << WEAPON_HEGRENADE) | (1 << WEAPON_FLASHBANG) | (1 << WEAPON_SMOKEGRENADE),
+};
+
+const char* g_rgszBuyMenuItemName[] =
+{
+	"",
+	"Pistols",
+	"Shotguns",
+	"SMGs",
+	"Assault Firearms",
+	"Sniper Rifles",
+	"Equipments",
+};
+
 ///////////
 //	BUY
 ///////////
+
+void OpenMenu_Buy3(CBasePlayer* pPlayer)
+{
+	std::string szMenu;
+	szMenu.clear();
+
+	char szTitle[64];
+	Q_sprintf(szTitle,	"\\rBuy Menu\n"
+						"\\yRole: \\w%s\n\n", g_rgszRoleNames[pPlayer->m_iRoleType]);
+
+	szMenu += szTitle;
+
+	char szItem[128];
+	g_iMenuItemCount = 0;
+	for (int i = 1; i <= 6; i++)
+	{
+		int iAvailableCount = 0, iAffordableCount = 0;
+		for (int iId = 1; iId < LAST_WEAPON; iId++)
+		{
+			if ((1 << iId) & g_rgiBuyMenuClassify[i])	// is this iId a part of this weapon class?
+			{
+				if (GetCost(pPlayer->m_iRoleType, (WeaponIdType)iId) <= pPlayer->m_iAccount)
+					iAffordableCount++;
+
+				if (g_rgRoleWeaponsAccessibility[pPlayer->m_iRoleType][iId] != WPN_F)
+					iAvailableCount++;
+			}
+		}
+
+		if (!iAffordableCount)
+			Q_snprintf(szItem, sizeof(szItem) - 1, "\\r%d. %s - [NONE AFFORDABLE]\n", ++g_iMenuItemCount, g_rgszBuyMenuItemName[i]);
+		else if (!iAvailableCount)
+			Q_snprintf(szItem, sizeof(szItem) - 1, "\\d%d. %s - [NONE AVAILABLE]\n", ++g_iMenuItemCount, g_rgszBuyMenuItemName[i]);
+		else
+			Q_snprintf(szItem, sizeof(szItem) - 1, "\\r%d. \\w%s - \\r[\\y%d\\wAVAILABLE\\r|\\y%d\\wAFFORDABLE\\r]\n", ++g_iMenuItemCount, g_rgszBuyMenuItemName[i], iAvailableCount, iAffordableCount);
+
+		szMenu += szItem;
+	}
+
+	/*const char szItem[] =
+		"\n"
+		"\\r1.\\w Pistols\n"
+		"\\r2.\\w Shotguns\n"
+		"\\r3.\\w SMGs\n"
+		"\\r4.\\w Assault Firearms\n"
+		"\\r5.\\w Sniper Rifle\n"
+		"\\r6.\\w Equipments\n"
+		"\n"
+		"\\r7.\\w Auto Buy\n"
+		"\\r8.\\w Rebuy\n"
+		"\\r9.\\w Save Rebuy\n"
+		"\n"
+		"\\r0.\\w Exit\n"
+		;*/
+
+	// the function part.
+	szMenu += "\n";
+	szMenu += "\\r7.\\w Auto Buy\n";
+	szMenu += "\\r8.\\w Rebuy\n";
+	szMenu += "\\r9.\\w Save Rebuy\n";
+
+	// never forget the exit item.
+	szMenu += "\n";
+	szMenu += "\\r0.\\w Exit\n";
+
+	ShowMenu(pPlayer, MENU_KEY_0 | MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5 | MENU_KEY_6 | MENU_KEY_7 | MENU_KEY_8 | MENU_KEY_9, -1, szMenu);
+	pPlayer->m_iMenu = Menu_Buy3;
+}
 
 bool MenuHandler_Buy3(CBasePlayer* pPlayer, int iSlot)
 {

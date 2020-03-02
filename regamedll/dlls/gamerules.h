@@ -449,7 +449,7 @@ public:
 	float m_flForceChaseCamValue;
 	float m_flFadeToBlackValue;
 
-	EntityHandle<CBasePlayer> m_rgpLeaders[4];
+	EntityHandle<CBasePlayer> m_rgpCharacters[ROLE_COUNT];
 	hudtextparms_t m_TextParam_Notification;
 	hudtextparms_t m_TextParam_Hud;
 	int m_rgiMenpowers[4];

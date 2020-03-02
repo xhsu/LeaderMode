@@ -18,6 +18,7 @@ enum BuyMenus
 	BuyMenu_SaveRebuy,
 };
 
+void OpenMenu_Buy3(CBasePlayer* pPlayer);
 bool MenuHandler_Buy3(CBasePlayer* pPlayer, int iSlot);
 
 bool MenuHandler_BuyPistols(CBasePlayer* pPlayer, int iSlot);

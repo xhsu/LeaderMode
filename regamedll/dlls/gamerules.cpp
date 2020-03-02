@@ -1762,12 +1762,36 @@ void EXT_FUNC CHalfLifeMultiplay::OnRoundFreezeEnd()
 		plr->SyncRoundTimer();
 	}
 
-	// UNDONE: allocate roles left.
+	// allocate roles left.
 	if (!THE_COMMANDER.IsValid())
 		AssignCommander(RandomNonroleCharacter(CT));
 
 	if (!THE_GODFATHER.IsValid())
 		AssignGodfather(RandomNonroleCharacter(TERRORIST));
+
+	for (int iRole = 1; iRole < ROLE_COUNT; iRole++)
+	{
+		if (!m_rgpCharacters[iRole].IsValid())
+		{
+			if (iRole <= Role_Medic)	// CT
+			{
+				CBasePlayer* pPlayer = RandomNonroleCharacter(CT);
+
+				if (pPlayer)
+					pPlayer->AssignRole((RoleTypes)iRole);
+
+				// it is not either command nor godfather.
+				// we don't need special functions to assign them.
+			}
+			else if (iRole <= Role_Arsonist)
+			{
+				CBasePlayer* pPlayer = RandomNonroleCharacter(TERRORIST);
+
+				if (pPlayer)
+					pPlayer->AssignRole((RoleTypes)iRole);
+			}
+		}
+	}
 
 	if (TheBots)
 	{
@@ -3123,9 +3147,13 @@ edict_t *EXT_FUNC CHalfLifeMultiplay::GetPlayerSpawnSpot(CBasePlayer *pPlayer)
 	}
 
 	// redeployment of Doctrine_MobileWarfare
-	if (!IsFreezePeriod() && m_rgTeamTacticalScheme[pPlayer->m_iTeam] == Doctrine_MobileWarfare && m_rgpLeaders[pPlayer->m_iTeam].IsValid())
+	if (!IsFreezePeriod() && m_rgTeamTacticalScheme[pPlayer->m_iTeam] == Doctrine_MobileWarfare
+		&& ( (pPlayer->m_iTeam == CT && THE_COMMANDER.IsValid()) || (pPlayer->m_iTeam == TERRORIST && THE_GODFATHER.IsValid()) ))
 	{
-		CBasePlayer* pLeader = m_rgpLeaders[pPlayer->m_iTeam];
+		CBasePlayer* pLeader = THE_COMMANDER;
+		if (pPlayer->m_iTeam == TERRORIST)
+			pLeader = THE_GODFATHER;
+
 		Vector vecCandidates[8], vecDest;
 		bool bFind = false;
 

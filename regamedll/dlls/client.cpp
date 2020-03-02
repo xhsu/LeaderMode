@@ -374,9 +374,11 @@ void EXT_FUNC ClientKill(edict_t *pEntity)
 
 void ShowMenu(CBasePlayer *pPlayer, int bitsValidSlots, int nDisplayTime, const std::string& szText)
 {
-	const int iLimit = 185;
+	const int iLimit = 192 - sizeof(short) - sizeof(char) - sizeof(byte) - 1;	// include '\0' at the end of a string.
 
-	if (szText.length() <= iLimit)
+	int len = (int)szText.length();
+
+	if (len <= iLimit)
 	{
 		MESSAGE_BEGIN(MSG_ONE, gmsgShowMenu, nullptr, pPlayer->pev);
 		WRITE_SHORT(bitsValidSlots);
@@ -388,15 +390,14 @@ void ShowMenu(CBasePlayer *pPlayer, int bitsValidSlots, int nDisplayTime, const 
 	else
 	{
 		int iProgress = 0;
-		int len = (int)szText.length();
 
 		while ((len - iProgress) > 0)
 		{
 			MESSAGE_BEGIN(MSG_ONE, gmsgShowMenu, nullptr, pPlayer->pev);
 			WRITE_SHORT(bitsValidSlots);
 			WRITE_CHAR(nDisplayTime);
-			WRITE_BYTE((szText.length() - iProgress) <= iLimit ? FALSE : TRUE);
-			WRITE_STRING(szText.substr(iProgress, iProgress + iLimit).c_str());
+			WRITE_BYTE((len - iProgress) <= iLimit ? FALSE : TRUE);
+			WRITE_STRING(szText.substr(iProgress, iLimit).c_str());
 			MESSAGE_END();
 
 			iProgress += iLimit;
@@ -2228,29 +2229,7 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 	{
 		if (pPlayer->m_signals.GetState() & SIGNAL_BUY)
 		{
-			char szTitle[64];
-			Q_sprintf(szTitle,	"\\rBuy Menu\n"
-								"\\yRole: \\w%s\n", g_rgszRoleNames[pPlayer->m_iRoleType]);
-
-			const char szItem[] =
-			"\n"
-			"\\r1.\\w Pistols\n"
-			"\\r2.\\w Shotguns\n"
-			"\\r3.\\w SMGs\n"
-			"\\r4.\\w Assault Firearms\n"
-			"\\r5.\\w Sniper Rifle\n"
-			"\\r6.\\w Equipments\n"
-			"\n"
-			"\\r7.\\w Auto Buy\n"
-			"\\r8.\\w Rebuy\n"
-			"\\r9.\\w Save Rebuy\n"
-			"\n"
-			"\\r0.\\w Exit\n"
-			;
-			std::string szMenu = std::string(szTitle) + std::string(szItem);
-
-			ShowMenu(pPlayer, MENU_KEY_0 | MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5 | MENU_KEY_6 | MENU_KEY_7 | MENU_KEY_8 | MENU_KEY_9, -1, szMenu);
-			pPlayer->m_iMenu = Menu_Buy3;
+			OpenMenu_Buy3(pPlayer);
 
 			if (TheTutor)
 			{

@@ -5428,11 +5428,12 @@ void OLD_CheckBuyZone(CBasePlayer *pPlayer)
 
 void CBasePlayer::HandleSignals()
 {
-	if (CSGameRules()->IsMultiplayer())
-	{
-		if (!CSGameRules()->m_bMapHasBuyZone)
-			OLD_CheckBuyZone(this);
-	}
+	if (!CSGameRules()->m_bMapHasBuyZone)
+		OLD_CheckBuyZone(this);
+
+	// Doctrine_MobileWarfare allows buying everywhere.
+	if (CSGameRules()->m_rgTeamTacticalScheme[m_iTeam] == Doctrine_MobileWarfare)
+		m_signals.Signal(SIGNAL_BUY);
 
 	int state = m_signals.GetSignal();
 	int changed = m_signals.GetState() ^ state;
@@ -6310,7 +6311,7 @@ void CBasePlayer::UpdateStatusBar()
 	char sbuf0[MAX_SBAR_STRING];
 
 	Q_memset(newSBarState, 0, sizeof(newSBarState));
-	Q_strcpy(sbuf0, m_SbarString0);
+	Q_strlcpy(sbuf0, " ");
 
 	// Find an ID Target
 	TraceResult tr;
@@ -6326,26 +6327,28 @@ void CBasePlayer::UpdateStatusBar()
 		if (!FNullEnt(tr.pHit))
 		{
 			CBaseEntity *pEntity = CBaseEntity::Instance(tr.pHit);
-			bool isVisiblePlayer = ((TheBots == nullptr || !TheBots->IsLineBlockedBySmoke(&pev->origin, &pEntity->pev->origin)) && pEntity->Classify() == CLASS_PLAYER);
+			bool isVisiblePlayer = ((TheBots == nullptr || !TheBots->IsLineBlockedBySmoke(&pev->origin, &pEntity->pev->origin)) && pEntity->IsPlayer());
 
 			if (gpGlobals->time >= m_blindUntilTime && isVisiblePlayer)
 			{
-				CBasePlayer *pTarget = (CBasePlayer *)pEntity;
-
+				CBasePlayer *pTarget = CBasePlayer::Instance(pEntity->pev);
 				bool sameTeam = !CSGameRules()->IsFreeForAll() && pTarget->m_iTeam == m_iTeam;
 
 				newSBarState[SBAR_ID_TARGETNAME] = ENTINDEX(pTarget->edict());
 				newSBarState[SBAR_ID_TARGETTYPE] = sameTeam ? SBAR_TARGETTYPE_TEAMMATE : SBAR_TARGETTYPE_ENEMY;
 
+				if (m_iRoleType == Role_Sharpshooter
+					|| (m_iRoleType == Role_Assassin && m_rgpSkills[Skill_Defense] && m_rgpSkills[Skill_Defense]->m_bUsingSkill)	// only sniper and sneaking assassin have the detail.
+					|| sameTeam		// or you are in the same team.
+					|| (pTarget->m_iRoleType == Role_Assassin && pTarget->m_rgpSkills[Skill_Defense] && pTarget->m_rgpSkills[Skill_Defense]->m_bUsingSkill)	// you are aiming at a sneaking assassin!
+					)
+				{
+					Q_snprintf(sbuf0, sizeof(sbuf0) - 1, "%s: %%p2 | HP: %d%%%%", g_rgszRoleNames[pTarget->m_iRoleType], int(pTarget->pev->health));
+				}
+
+				// hint message.
 				if (sameTeam || GetObserverMode() != OBS_NONE)
 				{
-					if (playerid.value != PLAYERID_MODE_OFF || GetObserverMode() != OBS_NONE)
-						Q_strcpy(sbuf0, "1 %c1: %p2\n2  %h: %i3%%");
-					else
-						Q_strcpy(sbuf0, " ");
-
-					newSBarState[SBAR_ID_TARGETHEALTH] = int((pEntity->pev->health / pEntity->pev->max_health) * 100);
-
 					if (!(m_flDisplayHistory & DHF_FRIEND_SEEN) && !(pev->flags & FL_SPECTATOR))
 					{
 						m_flDisplayHistory |= DHF_FRIEND_SEEN;
@@ -6354,44 +6357,11 @@ void CBasePlayer::UpdateStatusBar()
 				}
 				else if (GetObserverMode() == OBS_NONE)
 				{
-					if (playerid.value != PLAYERID_MODE_TEAMONLY && playerid.value != PLAYERID_MODE_OFF)
-						Q_strcpy(sbuf0, "1 %c1: %p2");
-					else
-						Q_strcpy(sbuf0, " ");
-
 					if (!(m_flDisplayHistory & DHF_ENEMY_SEEN))
 					{
 						m_flDisplayHistory |= DHF_ENEMY_SEEN;
 						HintMessage("#Hint_spotted_an_enemy");
 					}
-				}
-
-				m_flStatusBarDisappearDelay = gpGlobals->time + 2.0f;
-			}
-			else if (pEntity->Classify() == CLASS_HUMAN_PASSIVE)
-			{
-				if (playerid.value != PLAYERID_MODE_OFF || GetObserverMode() != OBS_NONE)
-					Q_strcpy(sbuf0, "1 %c1  %h: %i3%%");
-				else
-					Q_strcpy(sbuf0, " ");
-
-				newSBarState[SBAR_ID_TARGETTYPE] = SBAR_TARGETTYPE_HOSTAGE;
-				newSBarState[SBAR_ID_TARGETHEALTH] = int((pEntity->pev->health / pEntity->pev->max_health) * 100);
-
-				if (!(m_flDisplayHistory & DHF_HOSTAGE_SEEN_FAR) && tr.flFraction > 0.1f)
-				{
-					m_flDisplayHistory |= DHF_HOSTAGE_SEEN_FAR;
-
-					if (m_iTeam == TERRORIST)
-						HintMessage("#Hint_prevent_hostage_rescue", TRUE);
-
-					else if (m_iTeam == CT)
-						HintMessage("#Hint_rescue_the_hostages", TRUE);
-				}
-				else if (m_iTeam == CT && !(m_flDisplayHistory & DHF_HOSTAGE_SEEN_NEAR) && tr.flFraction <= 0.1f)
-				{
-					m_flDisplayHistory |= (DHF_HOSTAGE_SEEN_NEAR | DHF_HOSTAGE_SEEN_FAR);
-					HintMessage("#Hint_press_use_so_hostage_will_follow");
 				}
 
 				m_flStatusBarDisappearDelay = gpGlobals->time + 2.0f;
@@ -6408,14 +6378,14 @@ void CBasePlayer::UpdateStatusBar()
 
 	bool bForceResend = false;
 
-	if (Q_strcmp(sbuf0, m_SbarString0) != 0)
+	if (Q_strcmp(sbuf0, m_SbarString0))
 	{
 		MESSAGE_BEGIN(MSG_ONE, gmsgStatusText, nullptr, pev);
 			WRITE_BYTE(0);
 			WRITE_STRING(sbuf0);
 		MESSAGE_END();
 
-		Q_strcpy(m_SbarString0, sbuf0);
+		Q_strlcpy(m_SbarString0, sbuf0);
 
 		// make sure everything's resent
 		bForceResend = true;
@@ -7896,8 +7866,6 @@ void CBasePlayer::AssignRole(RoleTypes iNewRole)
 		m_rgpSkills[i] = nullptr;
 	}
 
-	m_iRoleType = iNewRole;
-
 	switch (iNewRole)
 	{
 	case Role_Commander:
@@ -7918,6 +7886,13 @@ void CBasePlayer::AssignRole(RoleTypes iNewRole)
 
 	// is all weapon you have okay?
 	CheckItemAccessibility();
+
+	// send the news to gamerules.
+	CSGameRules()->m_rgpCharacters[iNewRole] = this;
+	CSGameRules()->m_rgpCharacters[m_iRoleType] = nullptr;
+
+	// self-crowned
+	m_iRoleType = iNewRole;
 }
 
 void CBasePlayer::UpdateHudText()
