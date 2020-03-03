@@ -51,7 +51,7 @@ void CP90::PrimaryAttack()
 {
 	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
 	{
-		P90Fire(0.3 * m_flAccuracy, 0.066, FALSE);
+		P90Fire(0.3 * m_flAccuracy, 0.066, FALSE);	// P90: 900 RPM
 	}
 	else if (m_pPlayer->pev->velocity.Length2D() > 170)
 	{

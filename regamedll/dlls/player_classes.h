@@ -7,6 +7,8 @@ Created date: 02/26/2020
 
 #pragma once
 
+#include <list>
+
 #define THE_GODFATHER CSGameRules()->m_rgpCharacters[Role_Godfather]
 #define THE_COMMANDER CSGameRules()->m_rgpCharacters[Role_Commander]
 
@@ -47,12 +49,12 @@ enum RoleTypes
 	// Auxiliary:		CSkillHealingShot
 
 	Role_Godfather = 6,
-	// WeaponEnhance:	
-	// Attack:			
+	// WeaponEnhance:	-
+	// Attack:			-
 	// Defense:			CSkillReduceDamage
-	// Auxiliary:		
+	// Auxiliary:		CSkillGavelkind
 
-	Role_Berserker,
+	Role_LeadEnforcer,
 	// WeaponEnhance:	
 	// Attack:			
 	// Defense:			
@@ -429,4 +431,48 @@ public:
 	float GetCooldown() const { return COOLDOWN; }
 
 	void OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr);
+};
+
+// Role_Godfather: Baptism
+class CSkillGavelkind : public CBaseSkill
+{
+public:
+	static const float DURATION;
+	static const float COOLDOWN;
+	static const char* ACTIVATION_SFX;
+	static const char* CLOSURE_SFX;
+	static const char* PASSIVE_SFX;
+	static const float RADIUS;
+	static const float PASSIVE_HEALING_INTERVAL;
+	static const float PASSIVE_HEALING_RADIUS;
+	static const float PASSIVE_HEALING_AMOUNT;
+
+public:
+	typedef class godchild_c
+	{
+	public:
+		godchild_c(CBasePlayer* pPlayer, float flOriginalHealth)
+		{
+			m_pGodchild = pPlayer;
+			m_flOriginalHealth = flOriginalHealth;
+		}
+
+		EntityHandle<CBasePlayer> m_pGodchild;
+		float m_flOriginalHealth;
+	} godchild_t;
+
+public:
+	std::list<godchild_t> m_lstGodchildren;
+	float m_flSavedDeltaHP;
+	float m_flNextPassiveHealingThink;
+
+public:
+	bool Execute();
+	void Think();
+	bool Terminate();
+
+	const char* GetName() const { return "Baptism"; }
+	SkillType Classify() const { return Skill_Auxiliary; }
+	float GetDuration() const { return DURATION; }
+	float GetCooldown() const { return COOLDOWN; }
 };

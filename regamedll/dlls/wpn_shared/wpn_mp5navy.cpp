@@ -48,7 +48,7 @@ void CMP5N::PrimaryAttack()
 {
 	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
 	{
-		MP5NFire(0.2 * m_flAccuracy, 0.075, FALSE);
+		MP5NFire(0.2 * m_flAccuracy, 0.075, FALSE);	// MP5A: 800RPM
 	}
 	else
 	{

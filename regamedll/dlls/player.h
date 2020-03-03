@@ -513,6 +513,9 @@ public:
 	void AssignRole(RoleTypes iNewRole);	// this function is only for skill installation.
 	void UpdateHudText();
 	void CheckItemAccessibility();
+	CBaseSkill* GetPrimarySkill();
+	bool IsUsingPrimarySkill();
+	bool TerminatePrimarySkill();
 
 	// passive skill calculation hub
 	float WeaponFireIntervalModifier(CBasePlayerWeapon* pWeapon);

@@ -47,11 +47,11 @@ void CMAC10::PrimaryAttack()
 {
 	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
 	{
-		MAC10Fire(0.375 * m_flAccuracy, 0.07, FALSE);
+		MAC10Fire(0.375 * m_flAccuracy, 0.0546f, FALSE);	// PM9: 1100 RPM
 	}
 	else
 	{
-		MAC10Fire(0.03 * m_flAccuracy, 0.07, FALSE);
+		MAC10Fire(0.03 * m_flAccuracy, 0.0546f, FALSE);
 	}
 }
 

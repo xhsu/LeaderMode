@@ -6426,9 +6426,9 @@ void CBasePlayer::UpdateStatusBar()
 				newSBarState[SBAR_ID_TARGETTYPE] = sameTeam ? SBAR_TARGETTYPE_TEAMMATE : SBAR_TARGETTYPE_ENEMY;
 
 				if (m_iRoleType == Role_Sharpshooter
-					|| (m_iRoleType == Role_Assassin && m_rgpSkills[Skill_Defense] && m_rgpSkills[Skill_Defense]->m_bUsingSkill)	// only sniper and sneaking assassin have the detail.
+					|| (m_iRoleType == Role_Assassin && IsUsingPrimarySkill())	// only sniper and sneaking assassin have the detail.
 					|| sameTeam		// or you are in the same team.
-					|| (pTarget->m_iRoleType == Role_Assassin && pTarget->m_rgpSkills[Skill_Defense] && pTarget->m_rgpSkills[Skill_Defense]->m_bUsingSkill)	// you are aiming at a sneaking assassin!
+					|| (pTarget->m_iRoleType == Role_Assassin && pTarget->IsUsingPrimarySkill())	// watch out! you are aiming at a sneaking assassin!
 					)
 				{
 					Q_snprintf(sbuf0, sizeof(sbuf0) - 1, "%s: %%p2 | HP: %d%%%%", g_rgszRoleNames[pTarget->m_iRoleType], int(pTarget->pev->health));
@@ -7861,7 +7861,7 @@ void CBasePlayer::PlayerRespawnThink()
 		
 		CSGameRules()->m_rgiMenpowers[m_iTeam]--;
 
-		if (m_iRoleType == Role_Berserker)	// berserker has a doubled consumption.
+		if (m_iRoleType == Role_LeadEnforcer)	// berserker has a doubled consumption.
 			CSGameRules()->m_rgiMenpowers[m_iTeam]--;
 	}
 }
@@ -8002,8 +8002,12 @@ void CBasePlayer::AssignRole(RoleTypes iNewRole)
 		CBaseSkill::Grand<CSkillHealingShot>(this);
 		break;
 
-	case Role_Arsonist:
 	case Role_Godfather:
+		CBaseSkill::Grand<CSkillReduceDamage>(this);
+		CBaseSkill::Grand<CSkillGavelkind>(this);
+		break;
+
+	case Role_Arsonist:
 		CBaseSkill::Grand<CSkillReduceDamage>(this);
 		break;
 
@@ -8125,6 +8129,83 @@ void CBasePlayer::CheckItemAccessibility()
 			pItem = pItem->m_pNext;
 		}
 	}
+}
+
+CBaseSkill* CBasePlayer::GetPrimarySkill()
+{
+	CBaseSkill* pSkill = nullptr;
+
+	switch (m_iRoleType)
+	{
+	case Role_Commander:
+		pSkill = m_rgpSkills[Skill_Auxiliary];
+		break;
+
+	case Role_SWAT:
+		pSkill = m_rgpSkills[Skill_Defense];
+		break;
+
+	case Role_Breacher:
+		pSkill = m_rgpSkills[Skill_Attack];
+		break;
+
+	case Role_Sharpshooter:
+		pSkill = m_rgpSkills[Skill_WeaponEnhance];
+		break;
+
+	case Role_Medic:
+		pSkill = m_rgpSkills[Skill_Auxiliary];
+		break;
+
+	case Role_Godfather:
+		pSkill = m_rgpSkills[Skill_Auxiliary];
+		break;
+
+	case Role_LeadEnforcer:
+		pSkill = m_rgpSkills[Skill_Attack];
+		break;
+
+	case Role_MadScientist:
+		pSkill = m_rgpSkills[Skill_WeaponEnhance];
+		break;
+
+	case Role_Assassin:
+		pSkill = m_rgpSkills[Skill_Defense];
+		break;
+
+	case Role_Arsonist:
+		pSkill = m_rgpSkills[Skill_WeaponEnhance];
+		break;
+
+	default:
+		break;
+	}
+
+	return pSkill;
+}
+
+bool CBasePlayer::IsUsingPrimarySkill()
+{
+	CBaseSkill* pSkill = GetPrimarySkill();
+
+	if (pSkill)
+	{
+		return pSkill->m_bUsingSkill;
+	}
+
+	return false;
+}
+
+bool CBasePlayer::TerminatePrimarySkill()
+{
+	CBaseSkill* pSkill = GetPrimarySkill();
+
+	if (pSkill)
+	{
+		return pSkill->Terminate();
+	}
+
+	return false;
 }
 
 float CBasePlayer::WeaponFireIntervalModifier(CBasePlayerWeapon* pWeapon)

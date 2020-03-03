@@ -47,7 +47,7 @@ void CUMP45::PrimaryAttack()
 {
 	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
 	{
-		UMP45Fire(0.24 * m_flAccuracy, 0.1, FALSE);
+		UMP45Fire(0.24 * m_flAccuracy, 0.1, FALSE);	// UMP.45 600 RPM
 	}
 	else
 	{

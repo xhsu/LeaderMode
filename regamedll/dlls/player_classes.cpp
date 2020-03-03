@@ -36,6 +36,7 @@ void CBaseSkill::Precache()
 	PRECACHE_SOUND(CSkillInfiniteGrenade::ACTIVATION_SFX);
 	PRECACHE_SOUND(CSkillEnfoceHeadshot::ACTIVATION_SFX);
 	PRECACHE_SOUND(CSkillHealingShot::HEALINGSHOT_SFX);
+	PRECACHE_SOUND(CSkillGavelkind::ACTIVATION_SFX);
 	PRECACHE_SOUND(CRETICAL_SHOT_SFX);
 
 	CSkillExplosiveBullets::m_rgidSmokeSprite[0] = PRECACHE_MODEL("sprites/black_smoke1.spr");
@@ -1234,7 +1235,7 @@ const float CSkillHealingShot::DURATION = 5.0f;
 const float CSkillHealingShot::COOLDOWN = 20.0f;
 const float CSkillHealingShot::DMG_HEAL_CONVERTING_RATIO = 0.5f;
 const char* CSkillHealingShot::HEALINGSHOT_SFX = "leadermode/healsound.wav";
-const Vector  CSkillHealingShot::HEALING_COLOR(51, 204, 255);
+const Vector CSkillHealingShot::HEALING_COLOR(51, 204, 255);
 int CSkillHealingShot::m_idHealingSpr = 0;
 
 bool CSkillHealingShot::Execute()
@@ -1334,4 +1335,190 @@ void CSkillHealingShot::OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr)
 	UTIL_PlayEarSound(m_pPlayer, SFX_TSD_GBD);
 
 	tr.flFraction = 1.0f;	// make sure no further damage dealt.
+}
+
+//
+// Role_Godfather: Baptism
+//
+
+const float CSkillGavelkind::DURATION = 20.0f;
+const float CSkillGavelkind::COOLDOWN = 60.0f;
+const char* CSkillGavelkind::ACTIVATION_SFX = "leadermode/sfx_event_sainthood_01.wav";
+const char* CSkillGavelkind::CLOSURE_SFX = "leadermode/sfx_bloodline_add_bloodline_01.wav";
+const char* CSkillGavelkind::PASSIVE_SFX = "leadermode/holy_roman_empire_screen.wav";
+const float CSkillGavelkind::RADIUS = 200.0f;
+const float CSkillGavelkind::PASSIVE_HEALING_AMOUNT = 10.0f;
+const float CSkillGavelkind::PASSIVE_HEALING_INTERVAL = 5.0f;
+const float CSkillGavelkind::PASSIVE_HEALING_RADIUS = 250.0f;
+
+bool CSkillGavelkind::Execute()
+{
+	if (!m_pPlayer || !m_pPlayer->IsAlive() || !CSGameRules()->CanSkillBeUsed())	// skill is not allowed in freezing phase.
+		return false;
+
+	if (m_bUsingSkill)
+	{
+		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently activated!", GetName());
+		return false;
+	}
+
+	if (!m_bAllowSkill)
+	{
+		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently cooling down!", GetName());
+		return false;
+	}
+
+	EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, ACTIVATION_SFX, VOL_NORM, ATTN_NORM);
+
+	// empty the list.
+	m_lstGodchildren.clear();
+
+	CBasePlayer* pPlayer = nullptr;
+	while ((pPlayer = UTIL_FindEntityInSphere(pPlayer, m_pPlayer->pev->origin, RADIUS)))
+	{
+		if (!pPlayer->IsPlayer())
+			continue;
+
+		if (pPlayer == m_pPlayer)	// you can't be your own godchild!
+			continue;
+
+		if (pPlayer->m_iTeam != m_pPlayer->m_iTeam)	// you have to fight side by side to be godchild.
+			continue;
+
+		if (pPlayer->m_iRoleType == Role_LeadEnforcer && pPlayer->IsUsingPrimarySkill())	// berserker would not allow to be both godchildren and crazy freaking monster.
+			pPlayer->TerminatePrimarySkill();
+
+		if (pPlayer->m_iRoleType == Role_Assassin && pPlayer->IsUsingPrimarySkill())	// assassin cannot accepts baptism while sneaking.
+			continue;
+
+		m_lstGodchildren.emplace_back(pPlayer, pPlayer->pev->health);
+	}
+
+	// remove the OH health.
+	if (m_pPlayer->m_flOHNextThink > 0.0f)
+	{
+		m_pPlayer->pev->health = m_pPlayer->m_flOHOriginalHealth;
+		m_pPlayer->m_flOHNextThink = 0;
+	}
+
+	// time to 'gavelkind' the HP!
+	float flDividedHealth = m_pPlayer->pev->health / float(m_lstGodchildren.size() + 1);	// including godfather himself.
+	m_flSavedDeltaHP = m_pPlayer->pev->health - flDividedHealth;	// the point is, the godchildrens may receive their original health back, but not the godfather.
+
+	// assign the health to the godfather first.
+	m_pPlayer->pev->health = flDividedHealth;
+
+	// set the health to all godchildren.
+	if (!m_lstGodchildren.empty())
+	{
+		for (auto Godchild : m_lstGodchildren)
+		{
+			Godchild.m_pGodchild->pev->health += flDividedHealth;	// as for the godchildren, the health is PLUS not just ASSIGN.
+		}
+	}
+
+	m_bUsingSkill = true;
+	m_bAllowSkill = false;
+	m_flTimeLastUsed = gpGlobals->time;
+
+	return true;
+}
+
+void CSkillGavelkind::Think()
+{
+	// A. it's time up!
+	if (m_bUsingSkill && m_flTimeLastUsed + GetDuration() < gpGlobals->time)
+	{
+		// the death of godchildren will NOT stop the HP payback. this is the rule. intended.
+		if (!m_lstGodchildren.empty())
+		{
+			for (auto Godchild : m_lstGodchildren)
+			{
+				if (!Godchild.m_pGodchild.IsValid() || !Godchild.m_pGodchild->IsAlive())	// only death or ... disconnection would stop this.
+					continue;
+
+				Godchild.m_pGodchild->pev->health = Godchild.m_flOriginalHealth;
+				UTIL_PlayEarSound(Godchild.m_pGodchild, CLOSURE_SFX);
+			}
+		}
+
+		// clear the list.
+		m_lstGodchildren.clear();
+
+		UTIL_PlayEarSound(m_pPlayer, CLOSURE_SFX);
+		UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is over!", GetName());
+
+		// as for the godfather... he would get all his health back.
+		m_pPlayer->pev->health += m_flSavedDeltaHP;
+		m_flSavedDeltaHP = 0;
+
+		m_bUsingSkill = false;
+		m_flTimeCooldownOver = gpGlobals->time + GetCooldown();
+	}
+
+	// B. it's active!
+
+
+	// C. the CD is over!
+	else if (!m_bUsingSkill && !m_bAllowSkill && m_flTimeCooldownOver <= gpGlobals->time)
+	{
+		m_bAllowSkill = true;
+
+		UTIL_PrintChatColor(m_pPlayer, GREENCHAT, "/g%s is ready again!", GetName());
+		UTIL_PlayEarSound(m_pPlayer, COOLDOWN_COMPLETE_SFX);
+	}
+
+	// D. the Passive portion of skill!
+	if (m_flNextPassiveHealingThink < gpGlobals->time && !m_bUsingSkill)	// passive effect is disabled while using main skill.
+	{
+		m_flNextPassiveHealingThink = gpGlobals->time + PASSIVE_HEALING_INTERVAL;
+
+		CBasePlayer* pPlayer = nullptr;
+		while ((pPlayer = UTIL_FindEntityInSphere(pPlayer, m_pPlayer->pev->origin, RADIUS)))
+		{
+			if (!pPlayer->IsPlayer())
+				continue;
+
+			if (pPlayer == m_pPlayer)	// you can't heal yourself.
+				continue;
+
+			if (pPlayer->m_iTeam != m_pPlayer->m_iTeam)	// you have to be the same team.
+				continue;
+
+			if (pPlayer->m_iRoleType == Role_Assassin && pPlayer->IsUsingPrimarySkill())	// the heal might expose him.
+				continue;
+
+			if (pPlayer->m_iRoleType == Role_LeadEnforcer && pPlayer->IsUsingPrimarySkill())
+				pPlayer->TerminatePrimarySkill();
+
+			if (pPlayer->TakeHealth(PASSIVE_HEALING_AMOUNT, HEALING_NO_OH))	// weaker healing. no DOT removal, no overheal.
+			{
+				// but with a LOT of FXs!
+				UTIL_PlayEarSound(pPlayer, PASSIVE_SFX);
+				UTIL_ScreenFade(pPlayer, Vector(179, 217, 255), 0.2f, 0.1f, 30, FFADE_IN);
+			}
+		}
+	}
+}
+
+bool CSkillGavelkind::Terminate()	// the terminate machism is different in this skill. this would permanently increase their HP limit in the rest of round.
+{
+	if (!m_lstGodchildren.empty())
+	{
+		for (auto Godchild : m_lstGodchildren)
+		{
+			if (!Godchild.m_pGodchild.IsValid() || !Godchild.m_pGodchild->IsAlive())
+				continue;
+
+			Godchild.m_pGodchild->pev->max_health = Godchild.m_pGodchild->pev->health;	// increase HP limit to the current value.
+
+			UTIL_PlayEarSound(m_pPlayer, PASSIVE_SFX);
+			UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/yThough /t%s %s/y was killed, but a part of him is /gnow a part of you/y.", g_rgszRoleNames[m_pPlayer->m_iRoleType], STRING(m_pPlayer->pev->netname));
+		}
+	}
+
+	m_bUsingSkill = false;
+	m_flTimeCooldownOver = gpGlobals->time + GetCooldown() * Q_clamp((gpGlobals->time - m_flTimeLastUsed) / GetDuration(), 0.0f, 1.0f);	// return the unused time.
+
+	return true;
 }

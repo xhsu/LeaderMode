@@ -32,6 +32,7 @@ enum AmmoIdType
 {
 	AMMO_NONE = 0,
 	AMMO_338Magnum = 1,
+	AMMO_408CheyTac,
 	AMMO_762Nato,
 	AMMO_556NatoBox,
 	AMMO_556Nato,
@@ -41,6 +42,7 @@ enum AmmoIdType
 	AMMO_50AE,
 	AMMO_357SIG,
 	AMMO_9mm,
+	AMMO_46PDW,
 	AMMO_Flashbang,
 	AMMO_HEGrenade,
 	AMMO_SmokeGrenade,

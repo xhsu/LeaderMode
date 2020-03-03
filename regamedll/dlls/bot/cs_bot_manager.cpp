@@ -193,11 +193,8 @@ bool CCSBotManager::IsWeaponUseable(WeaponIdType item) const
 // Return true if this player is on "defense"
 bool CCSBotManager::IsOnDefense(CBasePlayer *pPlayer) const
 {
-	switch (GetScenario())
-	{
-	default:
-		break;
-	}
+	if (pPlayer == THE_GODFATHER || pPlayer == THE_COMMANDER)
+		return true;	// godfather and commander needs to protect themselves instead of hunting.
 
 	return false;
 }
@@ -1291,11 +1288,8 @@ void CCSBotManager::OnEvent(GameEventType event, CBaseEntity *pEntity, CBaseEnti
 // Return true if player is important to scenario (VIP, bomb carrier, etc)
 bool CCSBotManager::IsImportantPlayer(CBasePlayer *pPlayer) const
 {
-	switch (GetScenario())
-	{
-	default:
-		break;	// TODO; maybe the godfather and commander is going to be here?
-	}
+	if (pPlayer == THE_GODFATHER || pPlayer == THE_COMMANDER)
+		return true;
 
 	// everyone is equally important in a deathmatch
 	return false;
@@ -1309,21 +1303,18 @@ unsigned int CCSBotManager::GetPlayerPriority(CBasePlayer *pPlayer) const
 	if (!pPlayer->IsPlayer())
 		return lowestPriority;
 
-	// human players have highest priority
-	if (!pPlayer->IsBot())
+	// godfather and commander have the highest priority
+	if (pPlayer == THE_GODFATHER || pPlayer == THE_COMMANDER)
 		return 0;
+
+	// human players have 2nd highest priority
+	if (!pPlayer->IsBot())
+		return 1;
 
 	CCSBot *pBot = static_cast<CCSBot *>(pPlayer);
 
-	// bots doing something important for the current scenario have high priority
-	switch (GetScenario())
-	{
-	default:
-		break;	// TODO: return 1 for godfather and commander.
-	}
-
 	// everyone else is ranked by their unique ID (which cannot be zero)
-	return 1 + pBot->GetID();
+	return 2 + pBot->GetID();
 }
 
 // Return the last time the given radio message was sent for given team

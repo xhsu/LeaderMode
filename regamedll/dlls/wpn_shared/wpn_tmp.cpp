@@ -47,7 +47,7 @@ void CTMP::PrimaryAttack()
 {
 	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
 	{
-		TMPFire(0.25 * m_flAccuracy, 0.07, FALSE);
+		TMPFire(0.25 * m_flAccuracy, 0.07, FALSE);	// MP7A1: 850 RPM
 	}
 	else
 	{
