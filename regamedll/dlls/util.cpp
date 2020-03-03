@@ -1928,3 +1928,49 @@ bool UTIL_CheckPassibility(const Vector& vecPoint)	// return true is accessable
 
 	return !(tr.fStartSolid || tr.fAllSolid || !tr.fInOpen);
 }
+
+void UTIL_BeamEntPoint(int id, Vector point, int SpriteId, int StartFrame, int FrameRate, int life, int width, int noise, int red, int green, int bule, int brightness, int ScrollSpeed)
+{
+	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, point);
+	WRITE_BYTE(TE_BEAMENTPOINT);
+	WRITE_SHORT(id);
+	WRITE_COORD(point[0]);
+	WRITE_COORD(point[1]);
+	WRITE_COORD(point[2]);
+	WRITE_SHORT(SpriteId);
+	WRITE_BYTE(StartFrame);		// starting frame
+	WRITE_BYTE(FrameRate);		// frame rate in 0.1's
+	WRITE_BYTE(life);			// life in 0.1's
+	WRITE_BYTE(width);			// line width in 0.1's
+	WRITE_BYTE(noise);			// noise amplitude in 0.01's
+	WRITE_BYTE(red);			// r
+	WRITE_BYTE(green);			// g
+	WRITE_BYTE(bule);			// b
+	WRITE_BYTE(brightness);		// brightness
+	WRITE_BYTE(ScrollSpeed);	// scroll speed in 0.1's
+	MESSAGE_END();
+}
+
+void UTIL_NvgScreen(CBasePlayer* pPlayer, int R, int G, int B, int density)	// copy from zombieriot.sma
+{
+	MESSAGE_BEGIN(MSG_ONE, gmsgFade, g_vecZero, pPlayer->pev);
+
+	if (R || B || G || density)
+	{
+		WRITE_SHORT(~0);
+		WRITE_SHORT(~0);
+		WRITE_SHORT(0x0004);
+	}
+	else
+	{
+		WRITE_SHORT(0);
+		WRITE_SHORT(0);
+		WRITE_SHORT(0);
+	}
+
+	WRITE_BYTE(R);
+	WRITE_BYTE(G);
+	WRITE_BYTE(B);
+	WRITE_BYTE(density);
+	MESSAGE_END();
+}

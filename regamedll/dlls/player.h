@@ -34,6 +34,7 @@
 #include "unisignals.h"
 #include "player_classes.h"
 #include <list>
+#include "effect_over_time.h"
 
 #define SOUND_FLASHLIGHT_ON  "items/flashlight1.wav"
 #define SOUND_FLASHLIGHT_OFF "items/flashlight1.wav"
@@ -158,6 +159,7 @@ enum RewardType
 	RT_HURTING_ENEMY,
 	RT_SOLD_ITEM,
 	RT_GBD_GIFTED,
+	RT_HELPED_TEAMMATE,
 };
 
 enum PLAYER_ANIM
@@ -504,6 +506,8 @@ public:
 	void RemoveSpawnProtection();
 	void DropIdlePlayer(const char *reason);
 	bool CheckActivityInGame();
+	void QuickThrowGrenade_Start();
+	void QuickThrowGrenade_Release();
 
 	// new functions from leader mod.
 	void AssignRole(RoleTypes iNewRole);	// this function is only for skill installation.
@@ -518,9 +522,11 @@ public:
 	void OnTraceDamagePre(float& flDamage, TraceResult& tr);
 	void OnFireBullets3PreDamage(float& flDamage, TraceResult& tr);
 	void OnFireBuckshotsPreTraceAttack(float& flDamage, TraceResult& tr);
-	void OnPlayerFiringTraceLine(TraceResult& tr);
+	void OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr);
 	void OnPlayerKills(CBasePlayer* pVictim);
 	void OnGrenadeThrew(WeaponIdType iId, CGrenade* pGrenade);
+	bool OnBlind();
+	void OnAddToFullPack(entity_state_s* pState, edict_t* pEnt, BOOL FIsPlayer);
 
 	// templates
 	template<typename T = CBasePlayerItem, typename Functor>
@@ -768,6 +774,16 @@ public:
 	std::list<WeaponIdType> m_lstRebuy;
 	TacticalSchemes m_iVotedTS;
 	float m_flTSThink;
+
+	// overhealing mechanism.
+	float m_flOHNextThink;
+	float m_flOHOriginalHealth;
+
+	// frozen
+	float m_flFrozenNextThink;
+	Vector m_vecFrozenAngles;
+	float m_flFrozenFrame;
+	Vector m_vecFrozenVAngle;
 };
 
 class CWShield: public CBaseEntity
@@ -824,7 +840,6 @@ extern cvar_t *sv_aim;
 
 void OLD_CheckBuyZone(CBasePlayer *pPlayer);
 
-void SendItemStatus(CBasePlayer *pPlayer);
 const char *GetCSModelName(int item_id);
 Vector VecVelocityForDamage(float flDamage);
 int TrainSpeed(int iSpeed, int iMax);

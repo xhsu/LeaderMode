@@ -2,6 +2,9 @@
 
 void PlayerBlind(CBasePlayer *pPlayer, entvars_t *pevInflictor, entvars_t *pevAttacker, float fadeTime, float fadeHold, int alpha, Vector &color)
 {
+	if (!pPlayer->OnBlind())	// return false if you don't want to blind.
+		return;
+
 	UTIL_ScreenFade(pPlayer, color, fadeTime, fadeHold, alpha, 0);
 
 	if (!fadetoblack.value)

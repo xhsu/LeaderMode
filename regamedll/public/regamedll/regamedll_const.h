@@ -92,7 +92,11 @@
 #define DMG_SLOWBURN            (1<<21) // in an oven
 #define DMG_SLOWFREEZE          (1<<22) // in a subzero freezer
 #define DMG_MORTAR              (1<<23) // Hit by air raid (done to distinguish grenade from mortar)
-#define DMG_EXPLOSION           (1<<24)
+#define DMG_EXPLOSION           (1<<24) // Used in CS grenade explosion.
+
+// healing flags.
+#define HEALING_REMOVE_DOT		(1<<25)	// Remove burning, electrified, poisoned and freezed.
+#define HEALING_NO_OH			(1<<26)	// Heal player, but no overhealing allowed.
 
 // These are the damage types that are allowed to gib corpses
 #define DMG_GIB_CORPSE         (DMG_CRUSH | DMG_FALL | DMG_BLAST | DMG_SONIC | DMG_CLUB)

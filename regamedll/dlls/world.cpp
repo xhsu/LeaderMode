@@ -284,6 +284,10 @@ void CWorld::Precache()
 	BotPrecache();
 	CBaseSkill::Precache();
 
+	// other entities' precache.
+	UTIL_PrecacheOther("ice_cube");
+	UTIL_PrecacheOther("healing_smoke_centre");
+
 	// sounds used from C physics code
 	// clears sound channels
 	PRECACHE_SOUND("common/null.wav");

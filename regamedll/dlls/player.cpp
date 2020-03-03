@@ -509,7 +509,51 @@ void CBasePlayer::DeathSound()
 // bitsDamageType indicates type of damage healed.
 BOOL EXT_FUNC CBasePlayer::TakeHealth(float flHealth, int bitsDamageType)
 {
-	return CBaseMonster::TakeHealth(flHealth, bitsDamageType);
+	if (pev->takedamage == DAMAGE_NO)
+		return FALSE;
+
+	// clear out any damage types we healed.
+	m_bitsDamageType &= ~(bitsDamageType & ~DMG_TIMEBASED);
+
+	if (bitsDamageType & HEALING_REMOVE_DOT)
+	{
+		// UNDONE
+		if (m_flFrozenNextThink > 0.0f)
+			gFrozenDOTMgr::Free(this);
+	}
+
+	if (bitsDamageType & HEALING_NO_OH)
+	{
+		if (pev->health >= pev->max_health)
+			return FALSE;
+
+		pev->health = Q_min(pev->health + flHealth, pev->max_health);
+		return TRUE;	// never move to the later part if overhealing is not allowed.
+	}
+
+	if (m_iRoleType == Role_Commander || m_iRoleType == Role_Godfather)
+	{
+		// save current HP only if the last overhealing was depleted.
+		if (m_flOHNextThink <= 0.0f)
+			m_flOHOriginalHealth = pev->health;
+
+		m_flOHNextThink = gpGlobals->time + gOverHealingMgr::OVERHEALING_DECAY_INTERVAL;
+
+		// finally, we heal. (temporary)
+		pev->health = Q_min(pev->health + flHealth, pev->max_health * gOverHealingMgr::OVERHEALING_MAX_RATIO);
+	}
+	else
+	{
+		pev->health = Q_min(pev->health + flHealth, pev->max_health * gOverHealingMgr::OVERHEALING_MAX_RATIO);
+
+		if (pev->health > pev->max_health)
+		{
+			m_flOHOriginalHealth = pev->max_health;
+			m_flOHNextThink = gpGlobals->time + gOverHealingMgr::OVERHEALING_DECAY_INTERVAL;
+		}
+	}
+
+	return (pev->health - flHealth < pev->max_health * gOverHealingMgr::OVERHEALING_MAX_RATIO);	// if the healing is capped, consider it is a failure.
 }
 
 Vector CBasePlayer::GetGunPosition()
@@ -1541,6 +1585,13 @@ void EXT_FUNC CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 	if (TheBots)
 	{
 		TheBots->OnEvent(EVENT_PLAYER_DIED, this, pAttackerEntity);
+	}
+
+	// being killed like smashing a ice block is never good..
+	if (m_flFrozenNextThink > gpGlobals->time)
+	{
+		gFrozenDOTMgr::Free(this);
+		iGib = GIB_ALWAYS;
 	}
 
 	if (CSGameRules()->IsCareer())
@@ -2697,11 +2748,23 @@ CGrenade *CBasePlayer::ThrowGrenade(CBasePlayerWeapon *pWeapon, Vector vecSrc, V
 {
 	CGrenade* pGrenade = nullptr;
 
-	switch (pWeapon->m_iId)
+	// special gr first.
+	if (pWeapon->m_iId == WEAPON_HEGRENADE && m_iRoleType == Role_Sharpshooter)	// frost grenade
 	{
-	case WEAPON_HEGRENADE:    pGrenade = CGrenade::ShootTimed2(pev, vecSrc, vecThrow, time, m_iTeam, usEvent); break;
-	case WEAPON_FLASHBANG:    pGrenade = CGrenade::ShootTimed(pev, vecSrc, vecThrow, time); break;
-	case WEAPON_SMOKEGRENADE: pGrenade = CGrenade::ShootSmokeGrenade(pev, vecSrc, vecThrow, time, usEvent); break;
+		pGrenade = CGrenade::FrostGrenade(this);
+	}
+	else if (pWeapon->m_iId == WEAPON_SMOKEGRENADE && m_iRoleType == Role_Medic)	// healing grenade
+	{
+		pGrenade = CGrenade::HealingGrenade(pev, vecSrc, vecThrow, time, usEvent);
+	}
+	else
+	{
+		switch (pWeapon->m_iId)
+		{
+		case WEAPON_HEGRENADE:    pGrenade = CGrenade::ShootTimed2(pev, vecSrc, vecThrow, time, m_iTeam, usEvent); break;
+		case WEAPON_FLASHBANG:    pGrenade = CGrenade::ShootTimed(pev, vecSrc, vecThrow, time); break;
+		case WEAPON_SMOKEGRENADE: pGrenade = CGrenade::ShootSmokeGrenade(pev, vecSrc, vecThrow, time, usEvent); break;
+		}
 	}
 
 	OnGrenadeThrew(pWeapon->m_iId, pGrenade);
@@ -3054,7 +3117,8 @@ void CBasePlayer::PlayerDeathThink()
 	BOOL fAnyButtonDown = (pev->button & ~IN_SCORE);
 
 	// do not make a corpse if the player goes to respawn.
-	if (pev->deadflag != DEAD_RESPAWNABLE)
+	// LUNA: never make a body if the body is not there.
+	if (pev->deadflag != DEAD_RESPAWNABLE && !(pev->effects & EF_NODRAW))
 	{
 		// if the player has been dead for one second longer than allowed by forcerespawn,
 		// forcerespawn isn't on. Send the player off to an intermission camera until they choose to respawn.
@@ -3751,6 +3815,8 @@ void EXT_FUNC CBasePlayer::PreThink()
 	}
 
 	UpdateLocation();
+
+	gFrozenDOTMgr::Think(this);
 }
 
 // If player is taking time based damage, continue doing damage to player -
@@ -4176,6 +4242,9 @@ void EXT_FUNC CBasePlayer::PostThink()
 
 	// HUD update for those living.
 	UpdateHudText();
+
+	// no Overhealing think for the dead, of course.
+	gOverHealingMgr::Think(this);
 
 pt_end:
 #ifdef CLIENT_WEAPONS
@@ -4721,6 +4790,10 @@ void EXT_FUNC CBasePlayer::Spawn()
 
 	for (i = 0; i < COMMANDS_TO_TRACK; i++)
 		m_flLastCommandTime[i] = -1;
+
+	m_flOHNextThink = 0.0f;
+	m_flOHOriginalHealth = pev->max_health;
+	m_flFrozenNextThink = 0.0f;
 
 	// everything that comes after this, this spawn of the player a the game.
 	if (m_bJustConnected)
@@ -7859,6 +7932,27 @@ bool CBasePlayer::CheckActivityInGame()
 	return (fabs(deltaYaw) >= 0.1f && fabs(deltaPitch) >= 0.1f);
 }
 
+void CBasePlayer::QuickThrowGrenade_Start()
+{
+	CBasePlayerWeapon* pGrenade = CSGameRules()->SelectProperGrenade(this);
+
+	if (pGrenade == m_pActiveItem)	// you shouldn't QTG when you already have it on your hand.
+		return;
+
+	pGrenade->m_bQuickThrow = true;
+	SelectItem(pGrenade->pev->classname);
+}
+
+void CBasePlayer::QuickThrowGrenade_Release()
+{
+	CBasePlayerWeapon* pGrenade = CSGameRules()->SelectProperGrenade(this);
+
+	if (pGrenade != m_pActiveItem)	// by the time you should already put it on your hand. what's wrong here?
+		return;
+
+	pGrenade->m_bReleaseLock = false;	// release the lock, let WeaponIdle() do its job.
+}
+
 void CBasePlayer::AssignRole(RoleTypes iNewRole)
 {
 	// these two needs special handle.
@@ -7899,6 +7993,15 @@ void CBasePlayer::AssignRole(RoleTypes iNewRole)
 		CBaseSkill::Grand<CSkillInfiniteGrenade>(this);
 		break;
 
+	case Role_Sharpshooter:
+		CBaseSkill::Grand<CSkillEnfoceHeadshot>(this);
+		CBaseSkill::Grand<CSkillHighlightSight>(this);
+		break;
+
+	case Role_Medic:
+		CBaseSkill::Grand<CSkillHealingShot>(this);
+		break;
+
 	case Role_Arsonist:
 	case Role_Godfather:
 		CBaseSkill::Grand<CSkillReduceDamage>(this);
@@ -7909,15 +8012,16 @@ void CBasePlayer::AssignRole(RoleTypes iNewRole)
 		break;
 	}
 
-	// is all weapon you have okay?
-	CheckItemAccessibility();
-
 	// send the news to gamerules.
 	CSGameRules()->m_rgpCharacters[iNewRole] = this;
 	CSGameRules()->m_rgpCharacters[m_iRoleType] = nullptr;
 
 	// self-crowned
 	m_iRoleType = iNewRole;
+
+	// is all weapon you have okay now?
+	// remember, this must be used after m_iRoleType be renewed.
+	CheckItemAccessibility();
 }
 
 void CBasePlayer::UpdateHudText()
@@ -8098,12 +8202,12 @@ void CBasePlayer::OnFireBuckshotsPreTraceAttack(float& flDamage, TraceResult& tr
 	}
 }
 
-void CBasePlayer::OnPlayerFiringTraceLine(TraceResult& tr)
+void CBasePlayer::OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr)
 {
 	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
 	{
 		if (m_rgpSkills[i])
-			m_rgpSkills[i]->OnPlayerFiringTraceLine(tr);	// the active or not is determind in the function itself.
+			m_rgpSkills[i]->OnPlayerFiringTraceLine(iDamage, tr);	// the active or not is determind in the function itself.
 	}
 }
 
@@ -8122,5 +8226,33 @@ void CBasePlayer::OnGrenadeThrew(WeaponIdType iId, CGrenade* pGrenade)
 	{
 		if (m_rgpSkills[i])
 			m_rgpSkills[i]->OnGrenadeThrew(iId, pGrenade);	// the active or not is determind in the function itself.
+	}
+}
+
+bool CBasePlayer::OnBlind()
+{
+	bool rgbResults[SKILLTYPE_COUNT];
+
+	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	{
+		if (m_rgpSkills[i])
+			rgbResults[i] = m_rgpSkills[i]->OnBlind();
+	}
+
+	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	{
+		if (!rgbResults[i])	// if a skill decided not to blind, it would be a veto.
+			return false;
+	}
+
+	return true;
+}
+
+void CBasePlayer::OnAddToFullPack(entity_state_s* pState, edict_t* pEnt, BOOL FIsPlayer)
+{
+	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	{
+		if (m_rgpSkills[i])
+			m_rgpSkills[i]->OnAddToFullPack(pState, pEnt, FIsPlayer);
 	}
 }

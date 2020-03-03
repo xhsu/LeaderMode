@@ -490,6 +490,9 @@
     <ClCompile Include="..\dlls\menus.cpp">
       <Filter>dlls</Filter>
     </ClCompile>
+    <ClCompile Include="..\dlls\effect_over_time.cpp">
+      <Filter>dlls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\version\version.h">
@@ -967,6 +970,9 @@
       <Filter>dlls</Filter>
     </ClInclude>
     <ClInclude Include="..\dlls\menus.h">
+      <Filter>dlls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dlls\effect_over_time.h">
       <Filter>dlls</Filter>
     </ClInclude>
   </ItemGroup>

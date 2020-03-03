@@ -213,6 +213,7 @@
     <ClCompile Include="..\dlls\debug.cpp" />
     <ClCompile Include="..\dlls\doors.cpp" />
     <ClCompile Include="..\dlls\effects.cpp" />
+    <ClCompile Include="..\dlls\effect_over_time.cpp" />
     <ClCompile Include="..\dlls\explode.cpp" />
     <ClCompile Include="..\dlls\func_break.cpp" />
     <ClCompile Include="..\dlls\func_tank.cpp" />
@@ -573,6 +574,7 @@
     <ClInclude Include="..\dlls\decals.h" />
     <ClInclude Include="..\dlls\doors.h" />
     <ClInclude Include="..\dlls\effects.h" />
+    <ClInclude Include="..\dlls\effect_over_time.h" />
     <ClInclude Include="..\dlls\ehandle.h" />
     <ClInclude Include="..\dlls\enginecallback.h" />
     <ClInclude Include="..\dlls\explode.h" />

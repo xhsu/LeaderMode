@@ -35,16 +35,16 @@ enum RoleTypes
 	// Auxiliary:		-
 
 	Role_Sharpshooter,
-	// WeaponEnhance:	
-	// Attack:			
-	// Defense:			
-	// Auxiliary:		
+	// WeaponEnhance:	CSkillEnfoceHeadshot
+	// Attack:			CSkillHighlightSight
+	// Defense:			-
+	// Auxiliary:		-
 
 	Role_Medic,
-	// WeaponEnhance:	
-	// Attack:			
-	// Defense:			
-	// Auxiliary:		
+	// WeaponEnhance:	-
+	// Attack:			-
+	// Defense:			-
+	// Auxiliary:		CSkillHealingShot
 
 	Role_Godfather = 6,
 	// WeaponEnhance:	
@@ -137,6 +137,8 @@ public:
 	static const char* COOLDOWN_COMPLETE_SFX;
 	static const char* CRETICAL_SHOT_SFX;
 
+	static int m_idBulletTrace;
+
 	static void	Precache();
 
 public:
@@ -171,11 +173,15 @@ public:	// skill action
 	virtual void OnTraceDamagePre(float& flDamage, TraceResult& tr) { }
 	virtual void OnFireBullets3PreDamage(float& flDamage, TraceResult& tr) { }
 	virtual void OnFireBuckshotsPreTraceAttack(float& flDamage, TraceResult& tr) { }
-	virtual void OnPlayerFiringTraceLine(TraceResult& tr) { }
+	virtual void OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr) { }
 
 	// passive skill: death
 	virtual void OnPlayerDeath(CBasePlayer* pKiller) { Terminate(); }
 	virtual void OnPlayerKills(CBasePlayer* pVictim) { }
+
+	// passive skill: sight
+	virtual bool OnBlind() { return true; }	// return false to block the blind.
+	virtual void OnAddToFullPack(entity_state_s* pState, edict_t* pEnt, BOOL FIsPlayer) { }
 };
 
 // Role_Commander: Battlefield Analysis
@@ -326,7 +332,7 @@ public:
 	float GetDuration() const { return DURATION; }
 	float GetCooldown() const { return COOLDOWN; }
 
-	void OnPlayerFiringTraceLine(TraceResult& tr);
+	void OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr);
 	void OnPlayerDeath(CBasePlayer* pKiller);
 	void OnPlayerKills(CBasePlayer* pVictim);
 };
@@ -358,3 +364,69 @@ public:
 	void OnGrenadeThrew(WeaponIdType iId, CGrenade* pGrenade);
 };
 
+// Role_Sharpshooter: Bullseye
+class CSkillEnfoceHeadshot : public CBaseSkill
+{
+public:
+	static const float DURATION;
+	static const float COOLDOWN;
+	static const char* ACTIVATION_SFX;
+	static const char* CLOSURE_SFX;
+
+public:
+	bool Execute();
+	void Think();
+	bool Terminate();
+
+	const char* GetName() const { return "Bullseye"; }
+	SkillType Classify() const { return Skill_WeaponEnhance; }
+	float GetDuration() const { return DURATION; }
+	float GetCooldown() const { return COOLDOWN; }
+
+	void OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr);
+};
+
+// Role_Sharpshooter: Glitter Dust
+class CSkillHighlightSight : public CBaseSkill
+{
+public:
+	static const float DURATION;
+	static const float COOLDOWN;
+
+public:
+	bool Execute();
+	void Think();
+	bool Terminate();
+
+	const char* GetName() const { return "Glitter Dust"; }
+	SkillType Classify() const { return Skill_Attack; }
+	float GetDuration() const { return DURATION; }
+	float GetCooldown() const { return COOLDOWN; }
+
+	bool OnBlind() { return !m_bUsingSkill; }	// return false to block the blind.
+	void OnAddToFullPack(entity_state_s* pState, edict_t* pEnt, BOOL FIsPlayer);
+};
+
+// Role_Medic: Healing Dart
+class CSkillHealingShot : public CBaseSkill
+{
+public:
+	static const float DURATION;
+	static const float COOLDOWN;
+	static const float DMG_HEAL_CONVERTING_RATIO;
+	static const char* HEALINGSHOT_SFX;
+	static const Vector HEALING_COLOR;
+	static int m_idHealingSpr;
+
+public:
+	bool Execute();
+	void Think();
+	bool Terminate();
+
+	const char* GetName() const { return "Healing Dart"; }
+	SkillType Classify() const { return Skill_Auxiliary; }
+	float GetDuration() const { return DURATION; }
+	float GetCooldown() const { return COOLDOWN; }
+
+	void OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr);
+};

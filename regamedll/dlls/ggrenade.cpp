@@ -142,55 +142,6 @@ void CGrenade::Explode3(TraceResult *pTrace, int bitsDamageType)
 	}
 }
 
-NOXREF void CGrenade::SG_Explode(TraceResult *pTrace, int bitsDamageType)
-{
-	float flRndSound; // sound randomizer
-
-	pev->model = iStringNull; // invisible
-	pev->solid = SOLID_NOT;   // intangible
-
-	pev->takedamage = DAMAGE_NO;
-
-	if (pTrace->flFraction != 1.0f)
-	{
-		pev->origin = pTrace->vecEndPos + (pTrace->vecPlaneNormal * (pev->dmg - 24.0f) * 0.6f);
-	}
-
-	int iContents = UTIL_PointContents(pev->origin);
-
-	// can't traceline attack owner if this is set
-	pev->owner = nullptr;
-
-	if (RANDOM_FLOAT(0, 1) < 0.5f)
-		UTIL_DecalTrace(pTrace, DECAL_SCORCH1);
-	else
-		UTIL_DecalTrace(pTrace, DECAL_SCORCH2);
-
-	// TODO: unused
-	flRndSound = RANDOM_FLOAT(0, 1);
-
-	switch (RANDOM_LONG(0, 1))
-	{
-	case 0: EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/flashbang-2.wav", 0.55, ATTN_NORM); break;
-	case 1: EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/flashbang-1.wav", 0.55, ATTN_NORM); break;
-	}
-
-	pev->effects |= EF_NODRAW;
-	SetThink(&CGrenade::Smoke);
-	pev->velocity = g_vecZero;
-	pev->nextthink = gpGlobals->time + 0.1f;
-
-	if (iContents != CONTENTS_WATER)
-	{
-		int sparkCount = RANDOM_LONG(0, 3);
-
-		for (int i = 0; i < sparkCount; i++)
-		{
-			Create("spark_shower", pev->origin, pTrace->vecPlaneNormal, nullptr);
-		}
-	}
-}
-
 void CGrenade::Smoke3_C()
 {
 	if (UTIL_PointContents(pev->origin) == CONTENTS_WATER)
@@ -426,6 +377,9 @@ void CGrenade::SG_Detonate()
 
 	pev->nextthink = gpGlobals->time + 0.1f;
 	SetThink(&CGrenade::SG_Smoke);
+
+	if (m_bHealing)	// is this a healing grenade?
+		CHealingSmokeCenter::Create(vecSpot, CBasePlayer::Instance(pev->owner));
 }
 
 void CGrenade::Detonate3()
@@ -739,6 +693,159 @@ CGrenade *CGrenade::ShootSmokeGrenade(entvars_t *pevOwner, Vector vecStart, Vect
 
 	SET_MODEL(ENT(pGrenade->pev), "models/w_smokegrenade.mdl");
 	pGrenade->pev->dmg = 35.0f;
+
+	return pGrenade;
+}
+
+const float CGrenade::FROST_GR_DAMAGE = 20.0f;
+const float CGrenade::FROST_GR_RADIUS = 240.0f;
+const float CGrenade::FROST_GR_EFTIME = 4.0f;
+
+CGrenade* CGrenade::FrostGrenade(CBasePlayer* pPlayer)
+{
+	CGrenade* pGrenade = GetClassPtr((CGrenade*)nullptr);
+	pGrenade->Spawn();
+
+	UTIL_MakeVectors(pPlayer->pev->v_angle + pPlayer->pev->punchangle);
+	Vector vecSrc = pPlayer->pev->origin + pPlayer->pev->view_ofs + gpGlobals->v_forward * 16.0f;
+
+	UTIL_SetOrigin(pGrenade->pev, vecSrc);
+	pGrenade->pev->velocity = gpGlobals->v_forward * 9000.0f;	// LONGBOW grenade from Borderlands.
+	pGrenade->pev->angles = pPlayer->pev->angles;
+	pGrenade->pev->owner = pPlayer->edict();
+
+	pGrenade->SetTouch(&CGrenade::FrostTouch);
+	pGrenade->SetThink(&CGrenade::SUB_DoNothing);
+
+	pGrenade->pev->gravity = 0.55f;
+	pGrenade->pev->friction = 0.7f;
+
+	pGrenade->m_iTeam = pPlayer->m_iTeam;
+
+	SET_MODEL(ENT(pGrenade->pev), "models/w_hegrenade.mdl");
+	pGrenade->pev->dmg = FROST_GR_DAMAGE;
+
+	// Give it a glow
+	pGrenade->pev->renderfx = kRenderFxGlowShell;
+	pGrenade->pev->rendercolor = Vector(0, 100, 200);
+	pGrenade->pev->rendermode = kRenderNormal;
+	pGrenade->pev->renderamt = 16.0f;
+
+	// And a colored trail
+	MESSAGE_BEGIN(MSG_ALL, SVC_TEMPENTITY);
+	WRITE_BYTE(TE_BEAMFOLLOW); // TE id
+	WRITE_SHORT(pGrenade->entindex()); // entity
+	WRITE_SHORT(MODEL_INDEX("sprites/lgtning.spr")); // sprite
+	WRITE_BYTE(10); // life
+	WRITE_BYTE(10); // width
+	WRITE_BYTE(0); // r
+	WRITE_BYTE(100); // g
+	WRITE_BYTE(200); // b
+	WRITE_BYTE(200); // brightness
+	MESSAGE_END();
+
+	return pGrenade;
+}
+
+void CGrenade::FrostTouch(CBaseEntity* pOther)
+{
+	// Smallest ring
+	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
+	WRITE_BYTE(TE_BEAMCYLINDER); // TE id
+	WRITE_COORD(pev->origin[0]); // x
+	WRITE_COORD(pev->origin[1]); // y
+	WRITE_COORD(pev->origin[2]); // z
+	WRITE_COORD(pev->origin[0]); // x axis
+	WRITE_COORD(pev->origin[1]); // y axis
+	WRITE_COORD(pev->origin[2] + 385.0f); // z axis
+	WRITE_SHORT(MODEL_INDEX("sprites/shockwave.spr")); // sprite
+	WRITE_BYTE(0); // startframe
+	WRITE_BYTE(0); // framerate
+	WRITE_BYTE(4); // life
+	WRITE_BYTE(60); // width
+	WRITE_BYTE(0); // noise
+	WRITE_BYTE(0); // red
+	WRITE_BYTE(100); // green
+	WRITE_BYTE(200); // blue
+	WRITE_BYTE(200); // brightness
+	WRITE_BYTE(0); // speed
+	MESSAGE_END();
+
+	// Medium ring
+	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
+	WRITE_BYTE(TE_BEAMCYLINDER); // TE id
+	WRITE_COORD(pev->origin[0]); // x
+	WRITE_COORD(pev->origin[1]); // y
+	WRITE_COORD(pev->origin[2]); // z
+	WRITE_COORD(pev->origin[0]); // x axis
+	WRITE_COORD(pev->origin[1]); // y axis
+	WRITE_COORD(pev->origin[2] + 470.0f); // z axis
+	WRITE_SHORT(MODEL_INDEX("sprites/shockwave.spr")); // sprite
+	WRITE_BYTE(0); // startframe
+	WRITE_BYTE(0); // framerate
+	WRITE_BYTE(4); // life
+	WRITE_BYTE(60); // width
+	WRITE_BYTE(0); // noise
+	WRITE_BYTE(0); // red
+	WRITE_BYTE(100); // green
+	WRITE_BYTE(200); // blue
+	WRITE_BYTE(200); // brightness
+	WRITE_BYTE(0); // speed
+	MESSAGE_END();
+
+	// Largest ring
+	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
+	WRITE_BYTE(TE_BEAMCYLINDER); // TE id
+	WRITE_COORD(pev->origin[0]); // x
+	WRITE_COORD(pev->origin[1]); // y
+	WRITE_COORD(pev->origin[2]); // z
+	WRITE_COORD(pev->origin[0]); // x axis
+	WRITE_COORD(pev->origin[1]); // y axis
+	WRITE_COORD(pev->origin[2] + 555.0f); // z axis
+	WRITE_SHORT(MODEL_INDEX("sprites/shockwave.spr")); // sprite
+	WRITE_BYTE(0); // startframe
+	WRITE_BYTE(0); // framerate
+	WRITE_BYTE(4); // life
+	WRITE_BYTE(60); // width
+	WRITE_BYTE(0); // noise
+	WRITE_BYTE(0); // red
+	WRITE_BYTE(100); // green
+	WRITE_BYTE(200); // blue
+	WRITE_BYTE(200); // brightness
+	WRITE_BYTE(0); // speed
+	MESSAGE_END();
+
+	CBaseEntity* pEntity = nullptr;
+	while ((pEntity = UTIL_FindEntityInSphere(pEntity, pev->origin, FROST_GR_RADIUS)))
+	{
+		if (FNullEnt(pEntity) || pEntity->pev == pev)
+			continue;
+
+		if (pEntity->pev->takedamage == DAMAGE_NO)
+			continue;
+
+		if (pEntity->IsPlayer())
+		{
+			CBasePlayer* pPlayer = CBasePlayer::Instance(pEntity->pev);
+			if (pPlayer->IsAlive())
+			{
+				gFrozenDOTMgr::Set(pPlayer, FROST_GR_DAMAGE, pev, &pev->owner->v, FROST_GR_EFTIME);
+			}
+		}
+		else
+		{
+			pEntity->TakeDamage(pev, &pev->owner->v, FROST_GR_DAMAGE, DMG_FREEZE);
+		}
+	}
+
+	EMIT_SOUND(edict(), CHAN_AUTO, gFrozenDOTMgr::ICEGRE_NOVA_SFX, VOL_NORM, ATTN_NORM);
+	pev->flags |= FL_KILLME;
+}
+
+CGrenade* CGrenade::HealingGrenade(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity, float time, unsigned short usEvent)
+{
+	CGrenade* pGrenade = ShootSmokeGrenade(pevOwner, vecStart, vecVelocity, time, usEvent);
+	pGrenade->m_bHealing = true;
 
 	return pGrenade;
 }

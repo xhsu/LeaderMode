@@ -497,4 +497,17 @@ public:
 	virtual void Think();
 };
 
+class CIceCube : public CBaseEntity
+{
+public:
+	static CIceCube* Create(CBasePlayer* pPlayer);
+
+public:
+	void Precache();
+	void Think();
+
+public:
+	EntityHandle<CBasePlayer> m_pPlayer;
+};
+
 int IsPointEntity(CBaseEntity *pEnt);

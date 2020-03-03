@@ -27,18 +27,25 @@ const char* CBaseSkill::RADAR_BEEP_SFX = "leadermode/nes_8bit_alien3_radar_beep1
 const char* CBaseSkill::RADAR_TARGET_DEAD_SFX = "leadermode/sfx_event_duel_win_01.wav";
 const char* CBaseSkill::COOLDOWN_COMPLETE_SFX = "leadermode/pope_accepts_crusade_arrived.wav";
 const char* CBaseSkill::CRETICAL_SHOT_SFX = "leadermode/siege_attack.wav";
+int CBaseSkill::m_idBulletTrace = 0;
 
 void CBaseSkill::Precache()
 {
 	PRECACHE_SOUND(CSkillBulletproof::ACTIVATION_SFX);
 	PRECACHE_SOUND(CSkillArmorRegen::GIFT_SFX);
 	PRECACHE_SOUND(CSkillInfiniteGrenade::ACTIVATION_SFX);
+	PRECACHE_SOUND(CSkillEnfoceHeadshot::ACTIVATION_SFX);
+	PRECACHE_SOUND(CSkillHealingShot::HEALINGSHOT_SFX);
 	PRECACHE_SOUND(CRETICAL_SHOT_SFX);
 
 	CSkillExplosiveBullets::m_rgidSmokeSprite[0] = PRECACHE_MODEL("sprites/black_smoke1.spr");
 	CSkillExplosiveBullets::m_rgidSmokeSprite[1] = PRECACHE_MODEL("sprites/black_smoke2.spr");
 	CSkillExplosiveBullets::m_rgidSmokeSprite[2] = PRECACHE_MODEL("sprites/black_smoke3.spr");
 	CSkillExplosiveBullets::m_rgidSmokeSprite[3] = PRECACHE_MODEL("sprites/black_smoke4.spr");
+
+	CSkillHealingShot::m_idHealingSpr = PRECACHE_MODEL("sprites/leadermode/heal.spr");
+
+	m_idBulletTrace = PRECACHE_MODEL("sprites/leadermode/FireSmoke.spr");
 }
 
 float CBaseSkill::GetHudPercentage() const
@@ -534,7 +541,14 @@ void CSkillBulletproof::Think()
 	}
 
 	// B. it's active!
-
+	if (m_bUsingSkill)
+	{
+		if (m_pPlayer->pev->armorvalue <= 0.0f)	// if you running out of all armour during skill is activated, you would be force to terminate your skill and receive no time refund.
+		{
+			Terminate();
+			m_flTimeCooldownOver = gpGlobals->time + GetCooldown();	// override.
+		}
+	}
 
 	// C. the CD is over!
 	else if (!m_bUsingSkill && !m_bAllowSkill && m_flTimeCooldownOver <= gpGlobals->time)
@@ -568,9 +582,6 @@ void CSkillBulletproof::OnTraceDamagePre(float& flDamage, TraceResult& tr)
 
 	m_pPlayer->pev->armorvalue = Q_max(m_pPlayer->pev->armorvalue - flDamage * 0.9f, 0.0f);
 	flDamage = 0;	// if a single shot damage is more than 100HP + 200AP, this skill will make sure that you won't 1-shot die.
-
-	if (m_pPlayer->pev->armorvalue <= 0)
-		Terminate();	// no armor, no skill.
 }
 
 //
@@ -747,7 +758,7 @@ bool CSkillExplosiveBullets::Terminate()
 	return true;
 }
 
-void CSkillExplosiveBullets::OnPlayerFiringTraceLine(TraceResult& tr)
+void CSkillExplosiveBullets::OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr)
 {
 	// active condition:
 	// a. use KSG12 or STRIKER
@@ -1023,4 +1034,304 @@ void CSkillInfiniteGrenade::OnGrenadeThrew(WeaponIdType iId, CGrenade* pGrenade)
 
 	pGrenade->pev->dmgtime = gpGlobals->time + 9999.0f;
 	pGrenade->SetTouch(&CGrenade::ExplodeTouch);
+}
+
+//
+// Role_Sharpshooter: Bullseye
+//
+
+const float CSkillEnfoceHeadshot::DURATION = 5.0f;
+const float CSkillEnfoceHeadshot::COOLDOWN = 30.0f;
+const char* CSkillEnfoceHeadshot::ACTIVATION_SFX = "leadermode/agent_recruited.wav";
+const char* CSkillEnfoceHeadshot::CLOSURE_SFX = "leadermode/attack_out_of_range_01.wav";
+
+bool CSkillEnfoceHeadshot::Execute()
+{
+	if (!m_pPlayer || !m_pPlayer->IsAlive() || !CSGameRules()->CanSkillBeUsed())	// skill is not allowed in freezing phase.
+		return false;
+
+	if (m_bUsingSkill)
+	{
+		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently activated!", GetName());
+		return false;
+	}
+
+	if (!m_bAllowSkill)
+	{
+		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently cooling down!", GetName());
+		return false;
+	}
+
+	EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, ACTIVATION_SFX, VOL_NORM, ATTN_NONE);
+
+	m_bUsingSkill = true;
+	m_bAllowSkill = false;
+	m_flTimeLastUsed = gpGlobals->time;
+
+	return true;
+}
+
+void CSkillEnfoceHeadshot::Think()
+{
+	// A. it's time up!
+	if (m_bUsingSkill && m_flTimeLastUsed + GetDuration() < gpGlobals->time)
+	{
+		UTIL_PlayEarSound(m_pPlayer, CLOSURE_SFX);
+		UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is over!", GetName());
+
+		m_bUsingSkill = false;
+		m_flTimeCooldownOver = gpGlobals->time + GetCooldown();
+	}
+
+	// B. it's active!
+
+
+	// C. the CD is over!
+	else if (!m_bUsingSkill && !m_bAllowSkill && m_flTimeCooldownOver <= gpGlobals->time)
+	{
+		m_bAllowSkill = true;
+
+		UTIL_PrintChatColor(m_pPlayer, GREENCHAT, "/g%s is ready again!", GetName());
+		UTIL_PlayEarSound(m_pPlayer, COOLDOWN_COMPLETE_SFX);
+	}
+}
+
+bool CSkillEnfoceHeadshot::Terminate()
+{
+	//UTIL_PlayEarSound(m_pPlayer, CLOSURE_SFX);
+	UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is terminated in advanced!", GetName());
+
+	m_bUsingSkill = false;
+	m_flTimeCooldownOver = gpGlobals->time + GetCooldown() * Q_clamp((gpGlobals->time - m_flTimeLastUsed) / GetDuration(), 0.0f, 1.0f);	// return the unused time.
+
+	return true;
+}
+
+void CSkillEnfoceHeadshot::OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr)
+{
+	if (!m_bUsingSkill)
+		return;
+
+	WeaponIdType iId = m_pPlayer->m_pActiveItem->m_iId;
+
+	// you have to use one of these weapon to trigger the enforced headshot.
+	if (iId != WEAPON_M200 && iId != WEAPON_M14EBR && iId != WEAPON_AWP && iId != WEAPON_SVD && iId != WEAPON_ANACONDA && iId != WEAPON_DEAGLE)
+		return;
+
+	if (FNullEnt(tr.pHit))
+		return;
+
+	if (!CBaseEntity::Instance(tr.pHit)->IsPlayer())
+		return;
+
+	CBasePlayer* pVictim = CBasePlayer::Instance(tr.pHit);
+
+	// step I. enforce headshot.
+	tr.iHitgroup = HITGROUP_HEAD;
+
+	// step II. flashbang.
+	RadiusFlash(tr.vecEndPos, pVictim->pev, m_pPlayer->pev, 1.0f, CLASS_NONE, DMG_BULLET | DMG_NEVERGIB);
+}
+
+//
+// Role_Sharpshooter: Glitter Dust
+//
+
+const float CSkillHighlightSight::DURATION = 5.0f;
+const float CSkillHighlightSight::COOLDOWN = 30.0f;
+
+bool CSkillHighlightSight::Execute()
+{
+	if (!m_pPlayer || !m_pPlayer->IsAlive() || !CSGameRules()->CanSkillBeUsed())	// skill is not allowed in freezing phase.
+		return false;
+
+	if (m_bUsingSkill)
+	{
+		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently activated!", GetName());
+		return false;
+	}
+
+	if (!m_bAllowSkill)
+	{
+		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently cooling down!", GetName());
+		return false;
+	}
+
+	UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/g%s/y is active now. All your /tenemies /y would be /ghighlight/y in your sight.", GetName());
+
+	m_bUsingSkill = true;
+	m_bAllowSkill = false;
+	m_flTimeLastUsed = gpGlobals->time;
+
+	return true;
+}
+
+void CSkillHighlightSight::Think()
+{
+	// A. it's time up!
+	if (m_bUsingSkill && m_flTimeLastUsed + GetDuration() < gpGlobals->time)
+	{
+		//UTIL_PlayEarSound(m_pPlayer, CLOSURE_SFX);
+		UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is over!", GetName());
+
+		m_bUsingSkill = false;
+		m_flTimeCooldownOver = gpGlobals->time + GetCooldown();
+	}
+
+	// B. it's active!
+
+
+	// C. the CD is over!
+	else if (!m_bUsingSkill && !m_bAllowSkill && m_flTimeCooldownOver <= gpGlobals->time)
+	{
+		m_bAllowSkill = true;
+
+		UTIL_PrintChatColor(m_pPlayer, GREENCHAT, "/g%s is ready again!", GetName());
+		UTIL_PlayEarSound(m_pPlayer, COOLDOWN_COMPLETE_SFX);
+	}
+}
+
+bool CSkillHighlightSight::Terminate()
+{
+	//UTIL_PlayEarSound(m_pPlayer, CLOSURE_SFX);
+	UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is terminated in advanced!", GetName());
+
+	m_bUsingSkill = false;
+	m_flTimeCooldownOver = gpGlobals->time + GetCooldown() * Q_clamp((gpGlobals->time - m_flTimeLastUsed) / GetDuration(), 0.0f, 1.0f);	// return the unused time.
+
+	return true;
+}
+
+void CSkillHighlightSight::OnAddToFullPack(entity_state_s* pState, edict_t* pEnt, BOOL FIsPlayer)
+{
+	if (!m_bUsingSkill || !FIsPlayer)
+		return;
+
+	CBasePlayer* pPlayer = CBasePlayer::Instance(pEnt);
+
+	if (pPlayer->m_iTeam == m_pPlayer->m_iTeam)	// never marks teammates.
+		return;
+
+	if (!pPlayer->IsAlive())	// never marks the dead.
+		return;
+
+	if (pPlayer != THE_COMMANDER && pPlayer != THE_GODFATHER && pPlayer->m_flFrozenNextThink <= 0.0f)	// never re-render the frozen player.
+	{
+		pState->rendermode = kRenderTransAdd;
+		pState->renderamt = 255;
+		pState->renderfx = kRenderFxFadeSlow;
+		pState->rendercolor = { 0, 0, 0 };
+	}
+
+	pState->effects |= EF_DIMLIGHT;
+}
+
+//
+// Role_Medic: Healing Dart
+//
+
+const float CSkillHealingShot::DURATION = 5.0f;
+const float CSkillHealingShot::COOLDOWN = 20.0f;
+const float CSkillHealingShot::DMG_HEAL_CONVERTING_RATIO = 0.5f;
+const char* CSkillHealingShot::HEALINGSHOT_SFX = "leadermode/healsound.wav";
+const Vector  CSkillHealingShot::HEALING_COLOR(51, 204, 255);
+int CSkillHealingShot::m_idHealingSpr = 0;
+
+bool CSkillHealingShot::Execute()
+{
+	if (!m_pPlayer || !m_pPlayer->IsAlive() || !CSGameRules()->CanSkillBeUsed())	// skill is not allowed in freezing phase.
+		return false;
+
+	if (m_bUsingSkill)
+	{
+		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently activated!", GetName());
+		return false;
+	}
+
+	if (!m_bAllowSkill)
+	{
+		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently cooling down!", GetName());
+		return false;
+	}
+
+	//UTIL_PlayEarSound(m_pPlayer, ACTIVATION_SFX);
+	UTIL_ScreenFade(m_pPlayer, HEALING_COLOR, 0.2f, 0.2f, 60, FFADE_IN);
+	UTIL_PrintChatColor(m_pPlayer, BLUECHAT, "/g%s/y is active now. All your weapons are loaded with /thealing dart/y.", GetName());
+
+	m_bUsingSkill = true;
+	m_bAllowSkill = false;
+	m_flTimeLastUsed = gpGlobals->time;
+
+	return true;
+}
+
+void CSkillHealingShot::Think()
+{
+	// A. it's time up!
+	if (m_bUsingSkill && m_flTimeLastUsed + GetDuration() < gpGlobals->time)
+	{
+		//UTIL_PlayEarSound(m_pPlayer, CLOSURE_SFX);
+		UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is over!", GetName());
+
+		m_bUsingSkill = false;
+		m_flTimeCooldownOver = gpGlobals->time + GetCooldown();
+	}
+
+	// B. it's active!
+
+
+	// C. the CD is over!
+	else if (!m_bUsingSkill && !m_bAllowSkill && m_flTimeCooldownOver <= gpGlobals->time)
+	{
+		m_bAllowSkill = true;
+
+		UTIL_PrintChatColor(m_pPlayer, GREENCHAT, "/g%s is ready again!", GetName());
+		UTIL_PlayEarSound(m_pPlayer, COOLDOWN_COMPLETE_SFX);
+	}
+}
+
+bool CSkillHealingShot::Terminate()
+{
+	//UTIL_PlayEarSound(m_pPlayer, CLOSURE_SFX);
+	UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is terminated in advanced!", GetName());
+
+	m_bUsingSkill = false;
+	m_flTimeCooldownOver = gpGlobals->time + GetCooldown() * Q_clamp((gpGlobals->time - m_flTimeLastUsed) / GetDuration(), 0.0f, 1.0f);	// return the unused time.
+
+	return true;
+}
+
+void CSkillHealingShot::OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr)
+{
+	if (!m_bUsingSkill)
+		return;
+
+	if (FNullEnt(tr.pHit))
+		return;
+
+	if (!CBaseEntity::Instance(tr.pHit)->IsPlayer())
+		return;
+
+	CBasePlayer* pPatient = CBasePlayer::Instance(tr.pHit);
+
+	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, tr.vecEndPos);
+	WRITE_BYTE(TE_SPRITE);
+	WRITE_COORD(pPatient->pev->origin.x);
+	WRITE_COORD(pPatient->pev->origin.y);
+	WRITE_COORD(pPatient->pev->origin.z);
+	WRITE_SHORT(m_idHealingSpr);
+	WRITE_BYTE(10);
+	WRITE_BYTE(255);
+	MESSAGE_END();
+
+	UTIL_BeamEntPoint(m_pPlayer->entindex() | 0x1000, tr.vecEndPos, m_idBulletTrace, 1, 10, 1, 6, 0, HEALING_COLOR[0], HEALING_COLOR[1], HEALING_COLOR[2], 128, 10);
+	EMIT_SOUND(pPatient->edict(), CHAN_AUTO, HEALINGSHOT_SFX, 0.8f, ATTN_NORM);
+
+	float flLastHealth = pPatient->pev->health;
+	pPatient->TakeHealth(float(iDamage) * DMG_HEAL_CONVERTING_RATIO, HEALING_REMOVE_DOT);
+
+	m_pPlayer->AddAccount(pPatient->pev->health - flLastHealth, RT_HELPED_TEAMMATE);
+	UTIL_PlayEarSound(m_pPlayer, SFX_TSD_GBD);
+
+	tr.flFraction = 1.0f;	// make sure no further damage dealt.
 }

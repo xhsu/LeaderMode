@@ -93,7 +93,6 @@ enum ItemCostType
 
 enum WeaponState
 {
-	WPNSTATE_GLOCK18_BURST_MODE = BIT(1),
 	WPNSTATE_ELITE_LEFT         = BIT(3),
 	WPNSTATE_FAMAS_BURST_MODE   = BIT(4),
 	WPNSTATE_SHIELD_DRAWN       = BIT(5),

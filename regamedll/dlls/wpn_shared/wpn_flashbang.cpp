@@ -1,5 +1,10 @@
 #include "precompiled.h"
 
+#define QTG_ANIM_PULLPIN	1
+#define QTG_ANIM_THROW		2
+#define QTG_TIME_PULLPIN	0.825
+#define QTG_TIME_THROW		0.833
+
 LINK_ENTITY_TO_CLASS(weapon_flashbang, CFlashbang)
 
 void CFlashbang::Spawn()
@@ -41,7 +46,20 @@ BOOL CFlashbang::Deploy()
 	m_iWeaponState &= ~WPNSTATE_SHIELD_DRAWN;
 	m_pPlayer->m_bShieldDrawn = false;
 
-	if (m_pPlayer->HasShield())
+	if (m_bQuickThrow)
+	{
+		BOOL FResult = DefaultDeploy("models/v_CODflashbang.mdl", "models/p_flashbang.mdl", QTG_ANIM_PULLPIN, "grenade", UseDecrement() != FALSE);
+
+		SendWeaponAnim(QTG_ANIM_PULLPIN, FALSE);
+		m_pPlayer->m_flNextAttack = m_flNextPrimaryAttack = m_flNextSecondaryAttack = m_flTimeWeaponIdle = QTG_TIME_PULLPIN;
+
+		m_flReleaseThrow = 0;
+		m_flStartThrow = gpGlobals->time;
+		m_bReleaseLock = true;
+
+		return FResult;
+	}
+	else if (m_pPlayer->HasShield())
 		return DefaultDeploy("models/shield/v_shield_flashbang.mdl", "models/shield/p_shield_flashbang.mdl", FLASHBANG_DRAW, "shieldgren", UseDecrement() != FALSE);
 	else
 		return DefaultDeploy("models/v_flashbang.mdl", "models/p_flashbang.mdl", FLASHBANG_DRAW, "grenade", UseDecrement() != FALSE);
@@ -58,6 +76,8 @@ void CFlashbang::Holster(int skiplocal)
 
 	m_flStartThrow = 0;
 	m_flReleaseThrow = -1.0f;
+	m_bQuickThrow = false;
+	m_bReleaseLock = false;
 }
 
 void CFlashbang::PrimaryAttack()
@@ -150,6 +170,9 @@ void CFlashbang::WeaponIdle()
 	if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase())
 		return;
 
+	if (m_bReleaseLock)
+		return;
+
 	if (m_flStartThrow)
 	{
 		m_pPlayer->Radio("%!MRAD_FIREINHOLE", "#Fire_in_the_hole");
@@ -199,6 +222,9 @@ void CFlashbang::WeaponIdle()
 		// we've finished the throw, restart.
 		m_flStartThrow = 0;
 		RetireWeapon();
+
+		// LUNA: flashbang requires quick switch another weapon to assault.
+		// thus, no post QTG handling needed.
 	}
 	else if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType])
 	{

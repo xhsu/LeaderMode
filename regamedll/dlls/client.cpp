@@ -2791,6 +2791,14 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 			{
 				OpenMenu_VoteTacticalSchemes(pPlayer);
 			}
+			else if (FStrEq(pcmd, "+qtg"))
+			{
+				pPlayer->QuickThrowGrenade_Start();
+			}
+			else if (FStrEq(pcmd, "-qtg"))
+			{
+				pPlayer->QuickThrowGrenade_Release();
+			}
 			else
 			{
 				if (HandleRadioAliasCommands(pPlayer, pcmd))
@@ -3689,8 +3697,8 @@ BOOL EXT_FUNC AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, e
 	// don't send unhandled custom bits to client
 	state->effects &= ~(EF_FORCEVISIBILITY | EF_OWNER_VISIBILITY | EF_OWNER_NO_VISIBILITY);
 
-	if  (ent->v.skin == CONTENTS_LADDER &&
-		(host->v.iuser3 & PLAYER_PREVENT_CLIMB) == PLAYER_PREVENT_CLIMB) {
+	if  (ent->v.skin == CONTENTS_LADDER && (host->v.iuser3 & PLAYER_PREVENT_CLIMB) == PLAYER_PREVENT_CLIMB)
+	{
 		state->skin = CONTENTS_EMPTY;
 	}
 
@@ -3739,6 +3747,20 @@ BOOL EXT_FUNC AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, e
 		state->rendercolor.b = byte(ent->v.rendercolor.z);
 	}
 
+	if (player)
+	{
+		CBasePlayer* pPlayer = CBasePlayer::Instance(ent);
+		if (pPlayer->m_flFrozenNextThink > 0.0f)	// a frozen character.
+		{
+			state->renderfx = kRenderFxGlowShell;
+			state->renderamt = 50;
+			state->rendermode = kRenderNormal;
+			state->rendercolor.r = 80;
+			state->rendercolor.g = 80;
+			state->rendercolor.b = 100;
+		}
+	}
+
 	state->aiment = 0;
 
 	if (ent->v.aiment)
@@ -3769,6 +3791,8 @@ BOOL EXT_FUNC AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, e
 		state->playerclass = ent->v.playerclass;
 
 	state->iuser4 = ent->v.iuser4;
+
+	CBasePlayer::Instance(host)->OnAddToFullPack(state, ent, player);
 	return TRUE;
 }
 

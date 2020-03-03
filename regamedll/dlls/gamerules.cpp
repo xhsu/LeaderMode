@@ -2543,10 +2543,33 @@ void CHalfLifeMultiplay::PlayerThink(CBasePlayer *pPlayer)
 		{
 			pPlayer->m_flTSThink = gpGlobals->time + 1.0f;
 
-			pWeapon->m_iClip += int(float(pWeapon->iinfo()->m_iMaxClip) * 0.04f);
+			int iClipAdd = 0; //int(float(pWeapon->iinfo()->m_iMaxClip) * 0.04f)
 
-			if (pWeapon->m_iClip > 127)
-				pWeapon->m_iClip = 127;
+			if (pWeapon->iinfo()->m_iMaxClip >= 113)	// 4.5 / 0.04
+				iClipAdd = 5;
+			else if (pWeapon->iinfo()->m_iMaxClip >= 88)
+				iClipAdd = 4;
+			else if (pWeapon->iinfo()->m_iMaxClip >= 63)
+				iClipAdd = 3;
+			else if (pWeapon->iinfo()->m_iMaxClip >= 38)
+				iClipAdd = 2;
+			else if (pWeapon->iinfo()->m_iMaxClip >= 13 && pWeapon->m_iId != WEAPON_M14EBR)	// nerf the stupit semi-auto sharpshooter rifle.
+				iClipAdd = 1;
+
+			if (iClipAdd > 0 && pWeapon->m_iClip < 127)
+			{
+				pWeapon->m_iClip += iClipAdd;
+
+				if (pWeapon->m_iClip > 127)
+					pWeapon->m_iClip = 127;
+
+				if (!RANDOM_LONG(0, 3))	// if you play it constantly, it IS annoying.
+				{
+					char szSFX[64];
+					Q_snprintf(szSFX, sizeof(szSFX) - 1, SFX_TSD_SFD, RANDOM_LONG(1, 7));
+					UTIL_PlayEarSound(pPlayer, szSFX);
+				}
+			}
 		}
 	}
 
@@ -3899,6 +3922,9 @@ void CHalfLifeMultiplay::ServerActivate()
 
 	ReadMultiplayCvars();
 	CheckMapConditions();
+
+	CVAR_SET_FLOAT("sv_maxvelocity", 99999.0);	// stupit limitation.
+	CVAR_SET_FLOAT("sv_maxspeed", 9999.0);
 }
 
 TeamName CHalfLifeMultiplay::SelectDefaultTeam()
@@ -4183,4 +4209,46 @@ float CHalfLifeMultiplay::PlayerMaxArmour(CBasePlayer* pPlayer)
 		return swat_max_armour.value;
 
 	return MAX_NORMAL_BATTERY;
+}
+
+CBasePlayerWeapon* CHalfLifeMultiplay::SelectProperGrenade(CBasePlayer* pPlayer)
+{
+	if (FNullEnt(pPlayer->m_rgpPlayerItems[GRENADE_SLOT]))
+		return nullptr;
+
+	char* pGrenadeName = nullptr;
+
+	switch (pPlayer->m_iRoleType)
+	{
+	case Role_Sharpshooter:
+	case Role_Breacher:
+	case Role_Arsonist:
+		pGrenadeName = "weapon_hegrenade";
+		break;
+
+	case Role_Medic:
+	case Role_MadScientist:
+		pGrenadeName = "weapon_smokegrenade";
+		break;
+
+	default:
+		pGrenadeName = "weapon_flashbang";
+		break;
+	}
+
+	CBaseEntity* pEntity = nullptr;
+	CBasePlayerWeapon* pWeapon = nullptr;
+	while ((pEntity = UTIL_FindEntityByClassname(pEntity, pGrenadeName)))
+	{
+		if (FNullEnt(pEntity))
+			continue;
+
+		pWeapon = (CBasePlayerWeapon*)pEntity;
+		if (pWeapon->m_pPlayer != pPlayer)
+			continue;
+
+		return pWeapon;
+	}
+
+	return nullptr;
 }

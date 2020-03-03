@@ -1032,7 +1032,7 @@ void CBaseEntity::FireBuckshots(ULONG cShots, Vector vecSrc, Vector vecDirShooti
 		if (IsPlayer())
 		{
 			CBasePlayer* me = CBasePlayer::Instance(this->pev);
-			me->OnPlayerFiringTraceLine(tr);
+			me->OnPlayerFiringTraceLine(iDamage, tr);
 		}
 
 		if (TheBots && tr.flFraction != 1.0f)
@@ -1194,7 +1194,7 @@ Vector CBaseEntity::FireBullets3(Vector vecSrc, Vector vecDirShooting, float vec
 		if (IsPlayer())
 		{
 			CBasePlayer* me = CBasePlayer::Instance(this->pev);
-			me->OnPlayerFiringTraceLine(tr);
+			me->OnPlayerFiringTraceLine(iCurrentDamage, tr);
 		}
 
 		if (TheBots && tr.flFraction != 1.0f)

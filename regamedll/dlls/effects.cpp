@@ -2112,3 +2112,44 @@ void CInfoIntermission::Think()
 		pev->v_angle.x = -pev->v_angle.x;
 	}
 }
+
+LINK_ENTITY_TO_CLASS(ice_cube, CIceCube);
+
+CIceCube* CIceCube::Create(CBasePlayer* pPlayer)
+{
+	CIceCube* pEntity = GetClassPtr((CIceCube*)nullptr);
+	SET_MODEL(pEntity->edict(), "models/leadermode/ice_cube.mdl");
+	SET_ORIGIN(pEntity->edict(), pPlayer->pev->origin + Vector(0, 0, -36));
+	SET_SIZE(pEntity->edict(), Vector(-32, -32, 0), Vector(32, 32, 80));
+	pEntity->pev->solid = SOLID_BBOX;
+	pEntity->pev->angles = Vector(0, RANDOM_FLOAT(0.0f, 360.0f), 0);
+	pEntity->pev->nextthink = gpGlobals->time + 0.1f;
+
+	pEntity->pev->renderfx = kRenderFxNone;
+	pEntity->pev->rendercolor = Vector(255, 255, 255);
+	pEntity->pev->rendermode = kRenderTransAdd;
+	pEntity->pev->renderamt = 255;
+
+	pEntity->m_pPlayer = pPlayer;
+	return pEntity;
+}
+
+void CIceCube::Precache()
+{
+	PRECACHE_MODEL("models/leadermode/ice_cube.mdl");
+	PRECACHE_MODEL("sprites/lgtning.spr");
+	PRECACHE_SOUND(gFrozenDOTMgr::ICEGRE_NOVA_SFX);
+	PRECACHE_SOUND(gFrozenDOTMgr::ICEGRE_BREAKOUT_SFX);
+	PRECACHE_SOUND(gFrozenDOTMgr::ICEGRE_FLESH_SFX);
+}
+
+void CIceCube::Think()
+{
+	if (!m_pPlayer.IsValid() || !m_pPlayer->IsAlive() || m_pPlayer->m_flFrozenNextThink <= 0.0f)
+	{
+		pev->flags |= FL_KILLME;
+		return;
+	}
+
+	pev->nextthink = gpGlobals->time + 0.1f;
+}

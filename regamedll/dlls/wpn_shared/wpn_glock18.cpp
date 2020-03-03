@@ -58,7 +58,6 @@ BOOL CGLOCK18::Deploy()
 
 	if (m_pPlayer->HasShield())
 	{
-		m_iWeaponState &= ~WPNSTATE_GLOCK18_BURST_MODE;
 		return DefaultDeploy("models/shield/v_shield_glock18.mdl", "models/shield/p_shield_glock18.mdl", GLOCK18_SHIELD_DRAW, "shieldgun", UseDecrement() != FALSE);
 	}
 	else if (RANDOM_LONG(0, 1))
@@ -71,64 +70,26 @@ BOOL CGLOCK18::Deploy()
 
 void CGLOCK18::SecondaryAttack()
 {
-	if (ShieldSecondaryFire(GLOCK18_SHIELD_UP, GLOCK18_SHIELD_DOWN))
-	{
-		return;
-	}
-
-	if (m_iWeaponState & WPNSTATE_GLOCK18_BURST_MODE)
-	{
-		ClientPrint(m_pPlayer->pev, HUD_PRINTCENTER, "#Switch_To_SemiAuto");
-		m_iWeaponState &= ~WPNSTATE_GLOCK18_BURST_MODE;
-	}
-	else
-	{
-		ClientPrint(m_pPlayer->pev, HUD_PRINTCENTER, "#Switch_To_BurstFire");
-		m_iWeaponState |= WPNSTATE_GLOCK18_BURST_MODE;
-	}
-
-	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.3f;
+	ShieldSecondaryFire(GLOCK18_SHIELD_UP, GLOCK18_SHIELD_DOWN);
 }
 
 void CGLOCK18::PrimaryAttack()
 {
-	if (m_iWeaponState & WPNSTATE_GLOCK18_BURST_MODE)
+	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
 	{
-		if (!(m_pPlayer->pev->flags & FL_ONGROUND))
-		{
-			GLOCK18Fire(1.2 * (1 - m_flAccuracy), 0.5, TRUE);
-		}
-		else if (m_pPlayer->pev->velocity.Length2D() > 0)
-		{
-			GLOCK18Fire(0.185 * (1 - m_flAccuracy), 0.5, TRUE);
-		}
-		else if (m_pPlayer->pev->flags & FL_DUCKING)
-		{
-			GLOCK18Fire(0.095 * (1 - m_flAccuracy), 0.5, TRUE);
-		}
-		else
-		{
-			GLOCK18Fire(0.3 * (1 - m_flAccuracy), 0.5, TRUE);
-		}
+		GLOCK18Fire(1.0 * (1 - m_flAccuracy), 0.05f, FALSE);
+	}
+	else if (m_pPlayer->pev->velocity.Length2D() > 0)
+	{
+		GLOCK18Fire(0.165 * (1 - m_flAccuracy), 0.05f, FALSE);
+	}
+	else if (m_pPlayer->pev->flags & FL_DUCKING)
+	{
+		GLOCK18Fire(0.075 * (1 - m_flAccuracy), 0.05f, FALSE);
 	}
 	else
 	{
-		if (!(m_pPlayer->pev->flags & FL_ONGROUND))
-		{
-			GLOCK18Fire(1.0 * (1 - m_flAccuracy), 0.2, FALSE);
-		}
-		else if (m_pPlayer->pev->velocity.Length2D() > 0)
-		{
-			GLOCK18Fire(0.165 * (1 - m_flAccuracy), 0.2, FALSE);
-		}
-		else if (m_pPlayer->pev->flags & FL_DUCKING)
-		{
-			GLOCK18Fire(0.075 * (1 - m_flAccuracy), 0.2, FALSE);
-		}
-		else
-		{
-			GLOCK18Fire(0.1 * (1 - m_flAccuracy), 0.2, FALSE);
-		}
+		GLOCK18Fire(0.1 * (1 - m_flAccuracy), 0.05f, FALSE);
 	}
 }
 
@@ -141,15 +102,8 @@ void CGLOCK18::GLOCK18Fire(float flSpread, float flCycleTime, BOOL bFireBurst)
 	{
 		m_iGlock18ShotsFired = 0;
 	}
-	else
-	{
-		if (++m_iShotsFired > 1)
-		{
-			return;
-		}
 
-		flCycleTime -= 0.05f;
-	}
+	// LUNA: G18C is allowed to fire in FULL AUTO.
 
 	if (m_flLastFire)
 	{
@@ -229,6 +183,24 @@ void CGLOCK18::GLOCK18Fire(float flSpread, float flCycleTime, BOOL bFireBurst)
 	}
 
 	ResetPlayerShieldAnim();
+
+	// LUNA: copied from MAC10 (PM9).
+	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
+	{
+		KickBack(1.3, 0.55, 0.4, 0.05, 4.75, 3.75, 5);
+	}
+	else if (m_pPlayer->pev->velocity.Length2D() > 0)
+	{
+		KickBack(0.9, 0.45, 0.25, 0.035, 3.5, 2.75, 7);
+	}
+	else if (m_pPlayer->pev->flags & FL_DUCKING)
+	{
+		KickBack(0.75, 0.4, 0.175, 0.03, 2.75, 2.5, 10);
+	}
+	else
+	{
+		KickBack(0.775, 0.425, 0.2, 0.03, 3.0, 2.75, 9);
+	}
 }
 
 void CGLOCK18::Reload()

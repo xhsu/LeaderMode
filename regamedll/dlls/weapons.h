@@ -105,6 +105,11 @@ struct MULTIDAMAGE
 class CGrenade: public CBaseMonster
 {
 public:
+	static const float FROST_GR_DAMAGE;
+	static const float FROST_GR_RADIUS;
+	static const float FROST_GR_EFTIME;
+
+public:
 	virtual void Spawn();
 	virtual int Save(CSave &save);
 	virtual int Restore(CRestore &restore);
@@ -119,11 +124,14 @@ public:
 	static CGrenade *ShootTimed2(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, float time, int iTeam, unsigned short usEvent);
 	static CGrenade *ShootSmokeGrenade(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, float time, unsigned short usEvent);
 
+	// skill grenade
+	static CGrenade* FrostGrenade(CBasePlayer* pPlayer);
+	static CGrenade* HealingGrenade(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity, float time, unsigned short usEvent);
+
 public:
 	void Explode(Vector vecSrc, Vector vecAim);
 	void Explode(TraceResult *pTrace, int bitsDamageType);
 	void Explode3(TraceResult *pTrace, int bitsDamageType);
-	void SG_Explode(TraceResult *pTrace, int bitsDamageType);
 
 	void EXPORT Smoke();
 	void EXPORT Smoke2();
@@ -143,6 +151,8 @@ public:
 	void EXPORT TumbleThink();
 	void EXPORT SG_TumbleThink();
 
+	void EXPORT FrostTouch(CBaseEntity* pOther);
+
 public:
 	static TYPEDESCRIPTION m_SaveData[];
 
@@ -157,6 +167,7 @@ public:
 	Vector m_vSmokeDetonate;
 	int m_iBounceCount;
 	BOOL m_fRegisteredSound;
+	bool m_bHealing;
 };
 
 // Items that the player has in their inventory that they can use
@@ -291,6 +302,8 @@ public:
 	float m_flDecreaseShotsFired;
 	unsigned short m_usFireGlock18;
 	unsigned short m_usFireFamas;
+	bool m_bQuickThrow;
+	bool m_bReleaseLock;
 
 	// hle time creep vars
 	float m_flPrevPrimaryAttack;
