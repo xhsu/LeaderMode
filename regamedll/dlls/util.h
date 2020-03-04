@@ -313,6 +313,7 @@ void UTIL_PlayEarSound(CBasePlayer* player, const char* sfx);
 bool UTIL_CheckPassibility(const Vector& vecPoint);	// return true is accessable
 void UTIL_BeamEntPoint(int id, Vector point, int SpriteId, int StartFrame, int FrameRate, int life, int width, int noise, int red, int green, int bule, int brightness, int ScrollSpeed);
 void UTIL_NvgScreen(CBasePlayer* pPlayer, int R = 0, int G = 0, int B = 0, int density = 0);
+void UTIL_LieFlat(CBaseEntity* pEntity);
 
 // Inlines
 template <typename T = CBaseEntity>

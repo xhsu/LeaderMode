@@ -26,7 +26,7 @@ const char* g_rgszRoleNames[ROLE_COUNT] =
 const char* CBaseSkill::RADAR_BEEP_SFX = "leadermode/nes_8bit_alien3_radar_beep1.wav";
 const char* CBaseSkill::RADAR_TARGET_DEAD_SFX = "leadermode/sfx_event_duel_win_01.wav";
 const char* CBaseSkill::COOLDOWN_COMPLETE_SFX = "leadermode/pope_accepts_crusade_arrived.wav";
-const char* CBaseSkill::CRETICAL_SHOT_SFX = "leadermode/siege_attack.wav";
+const char* CBaseSkill::CRITICAL_SHOT_SFX = "leadermode/siege_attack.wav";
 int CBaseSkill::m_idBulletTrace = 0;
 
 void CBaseSkill::Precache()
@@ -37,7 +37,12 @@ void CBaseSkill::Precache()
 	PRECACHE_SOUND(CSkillEnfoceHeadshot::ACTIVATION_SFX);
 	PRECACHE_SOUND(CSkillHealingShot::HEALINGSHOT_SFX);
 	PRECACHE_SOUND(CSkillGavelkind::ACTIVATION_SFX);
-	PRECACHE_SOUND(CRETICAL_SHOT_SFX);
+	PRECACHE_SOUND(CSkillResistDeath::ACTIVATION_SFX);
+	PRECACHE_SOUND(CSkillTaserGun::ELECTRIFY_SFX);
+	PRECACHE_SOUND(CSkillTaserGun::ELECTROBULLETS_SFX);
+	PRECACHE_SOUND(CSkillTaserGun::STATIC_ELEC_SFX);
+	PRECACHE_SOUND(CSkillInvisible::DISCOVERED_SFX);
+	PRECACHE_SOUND(CRITICAL_SHOT_SFX);
 
 	CSkillExplosiveBullets::m_rgidSmokeSprite[0] = PRECACHE_MODEL("sprites/black_smoke1.spr");
 	CSkillExplosiveBullets::m_rgidSmokeSprite[1] = PRECACHE_MODEL("sprites/black_smoke2.spr");
@@ -69,6 +74,7 @@ float CBaseSkill::GetHudPercentage() const
 
 const float CSkillRadarScan::DURATION = 20.0f;
 const float CSkillRadarScan::COOLDOWN = 60.0f;
+const float CSkillRadarScan::UPDATE_INTERVAL = 1.5f;
 const char* CSkillRadarScan::ACTIVATION_SFX = "leadermode/peace_summary_message_01.wav";
 const char* CSkillRadarScan::CLOSURE_SFX = "leadermode/assign_leader_02.wav";
 
@@ -143,7 +149,7 @@ bool CSkillRadarScan::Execute()
 	m_bUsingSkill = true;
 	m_bAllowSkill = false;
 	m_flTimeLastUsed = gpGlobals->time;
-	m_flNextRadarUpdate = gpGlobals->time + 1.0;
+	m_flNextRadarUpdate = gpGlobals->time + UPDATE_INTERVAL;
 
 	return true;
 }
@@ -212,7 +218,7 @@ void CSkillRadarScan::Think()
 			return;
 		}
 
-		m_flNextRadarUpdate = gpGlobals->time + 1.5f;
+		m_flNextRadarUpdate = gpGlobals->time + UPDATE_INTERVAL;
 
 		for (int i = 1; i <= gpGlobals->maxClients; i++)
 		{
@@ -347,7 +353,6 @@ bool CSkillFireRate::Terminate()
 
 	return true;
 }
-
 
 //
 // Role_Commander: Stainless Steel
@@ -673,7 +678,7 @@ void CSkillArmorRegen::Think()
 	}
 }
 
-void CSkillArmorRegen::OnPlayerDamagedPre(float& flDamage)
+void CSkillArmorRegen::OnPlayerDamagedPre(entvars_t* pevInflictor, entvars_t* pevAttacker, float& flDamage, int& bitsDamageTypes)
 {
 	// stop armour regen.
 	m_bShouldSelfArmourRegenPlaySFX = true;
@@ -784,7 +789,7 @@ void CSkillExplosiveBullets::OnPlayerFiringTraceLine(int& iDamage, TraceResult& 
 	if (POINT_CONTENTS(tr.vecEndPos) == CONTENTS_SKY)	// never explode on skybox
 		return;
 
-	EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, CRETICAL_SHOT_SFX, VOL_NORM, ATTN_NORM);
+	EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, CRITICAL_SHOT_SFX, VOL_NORM, ATTN_NORM);
 
 	Vector vecOrigin = tr.vecPlaneNormal * 27.0f + tr.vecEndPos;
 
@@ -915,7 +920,7 @@ void CSkillExplosiveBullets::OnPlayerKills(CBasePlayer* pVictim)
 //
 
 const float CSkillInfiniteGrenade::DURATION = 10.0f;
-const float CSkillInfiniteGrenade::COOLDOWN = 3.0f;
+const float CSkillInfiniteGrenade::COOLDOWN = 30.0f;
 const char* CSkillInfiniteGrenade::ACTIVATION_SFX = "leadermode/sabotage_event_01.wav";
 const char* CSkillInfiniteGrenade::CLOSURE_SFX = "leadermode/drum_02.wav";
 const float CSkillInfiniteGrenade::SELF_EXPLO_DMG_MUL = 0.25f;
@@ -1334,6 +1339,9 @@ void CSkillHealingShot::OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr)
 	m_pPlayer->AddAccount(pPatient->pev->health - flLastHealth, RT_HELPED_TEAMMATE);
 	UTIL_PlayEarSound(m_pPlayer, SFX_TSD_GBD);
 
+	if (pPatient->m_iRoleType == Role_LeadEnforcer && pPatient->IsUsingPrimarySkill())
+		pPatient->DischargePrimarySkill(m_pPlayer);
+
 	tr.flFraction = 1.0f;	// make sure no further damage dealt.
 }
 
@@ -1386,7 +1394,7 @@ bool CSkillGavelkind::Execute()
 			continue;
 
 		if (pPlayer->m_iRoleType == Role_LeadEnforcer && pPlayer->IsUsingPrimarySkill())	// berserker would not allow to be both godchildren and crazy freaking monster.
-			pPlayer->TerminatePrimarySkill();
+			pPlayer->DischargePrimarySkill(m_pPlayer);
 
 		if (pPlayer->m_iRoleType == Role_Assassin && pPlayer->IsUsingPrimarySkill())	// assassin cannot accepts baptism while sneaking.
 			continue;
@@ -1413,6 +1421,10 @@ bool CSkillGavelkind::Execute()
 	{
 		for (auto Godchild : m_lstGodchildren)
 		{
+			// minor nerf: it's overhealing.
+			Godchild.m_pGodchild->m_flOHOriginalHealth = Godchild.m_pGodchild->pev->health;
+			Godchild.m_pGodchild->m_flOHNextThink = gpGlobals->time;
+
 			Godchild.m_pGodchild->pev->health += flDividedHealth;	// as for the godchildren, the health is PLUS not just ASSIGN.
 		}
 	}
@@ -1437,7 +1449,13 @@ void CSkillGavelkind::Think()
 				if (!Godchild.m_pGodchild.IsValid() || !Godchild.m_pGodchild->IsAlive())	// only death or ... disconnection would stop this.
 					continue;
 
-				Godchild.m_pGodchild->pev->health = Godchild.m_flOriginalHealth;
+				// A. Godfather take everything back.
+				//Godchild.m_pGodchild->pev->health = Godchild.m_flOriginalHealth;
+
+				// or, B, the buffed version. the excess HP will now your Overhealing HP!
+				Godchild.m_pGodchild->m_flOHNextThink = gpGlobals->time;
+				Godchild.m_pGodchild->m_flOHOriginalHealth = Godchild.m_flOriginalHealth;
+
 				UTIL_PlayEarSound(Godchild.m_pGodchild, CLOSURE_SFX);
 			}
 		}
@@ -1489,7 +1507,7 @@ void CSkillGavelkind::Think()
 				continue;
 
 			if (pPlayer->m_iRoleType == Role_LeadEnforcer && pPlayer->IsUsingPrimarySkill())
-				pPlayer->TerminatePrimarySkill();
+				pPlayer->DischargePrimarySkill(m_pPlayer);
 
 			if (pPlayer->TakeHealth(PASSIVE_HEALING_AMOUNT, HEALING_NO_OH))	// weaker healing. no DOT removal, no overheal.
 			{
@@ -1516,6 +1534,742 @@ bool CSkillGavelkind::Terminate()	// the terminate machism is different in this 
 			UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/yThough /t%s %s/y was killed, but a part of him is /gnow a part of you/y.", g_rgszRoleNames[m_pPlayer->m_iRoleType], STRING(m_pPlayer->pev->netname));
 		}
 	}
+
+	m_bUsingSkill = false;
+	m_flTimeCooldownOver = gpGlobals->time + GetCooldown() * Q_clamp((gpGlobals->time - m_flTimeLastUsed) / GetDuration(), 0.0f, 1.0f);	// return the unused time.
+
+	return true;
+}
+
+//
+// Role_LeadEnforcer: Death Wish
+//
+
+float CSkillDmgIncByHP::PlayerDamageDealtModifier(int bitsDamageTypes)
+{
+	// >= 100 HP -> 0% dmg bonus
+	// 1 HP -> 99% dmg bonus
+
+	float flLostHealth = Q_clamp(m_pPlayer->pev->max_health - m_pPlayer->pev->health, 0.0f, 100.0f);
+	float flBonus = Q_clamp(flLostHealth / m_pPlayer->pev->max_health, 0.0f, 1.0f);
+
+	return 1.0f + flBonus;
+}
+
+//
+// Role_LeadEnforcer: Swan Song
+//
+
+const float CSkillResistDeath::DURATION = 6.0f;
+const float CSkillResistDeath::COOLDOWN = 40.0f;
+const char* CSkillResistDeath::ACTIVATION_SFX = "leadermode/war_declared.wav";
+const float CSkillResistDeath::DASH_SPEED = 300.0f;
+const float CSkillResistDeath::INJURE_SPEED = 1.0f;
+
+bool CSkillResistDeath::Execute()
+{
+	if (!m_pPlayer || !m_pPlayer->IsAlive() || !CSGameRules()->CanSkillBeUsed())	// skill is not allowed in freezing phase.
+		return false;
+
+	if (m_bUsingSkill)
+	{
+		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently activated!", GetName());
+		return false;
+	}
+
+	if (!m_bAllowSkill)
+	{
+		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently cooling down!", GetName());
+		return false;
+	}
+
+	if (m_pPlayer->m_flOHNextThink > 0.0f && m_pPlayer->pev->health > 2.0f)	// never allow Swan Song while being OH.
+	{
+		UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/yYou can't perform /t%s/y while you're /goverhealed/y!", GetName());
+		return false;
+	}
+
+	UTIL_ScreenFade(m_pPlayer, Vector(255, 10, 10), 0.5f, DURATION, 60, FFADE_IN);
+	EMIT_SOUND(m_pPlayer->edict(), CHAN_VOICE, ACTIVATION_SFX, 1.5f, 0.7f);	// this is a powerful skill, so it must be loud enough.
+
+	// remove the data from last time.
+	m_pLastAttacker = nullptr;
+	m_pLastInflictor = nullptr;
+
+	m_bUsingSkill = true;
+	m_bAllowSkill = false;
+	m_flTimeLastUsed = gpGlobals->time;
+	m_pPlayer->ResetMaxSpeed();
+
+	return true;
+}
+
+void CSkillResistDeath::Think()
+{
+	// A. it's time up!
+	if (m_bUsingSkill && m_flTimeLastUsed + GetDuration() < gpGlobals->time)
+	{
+		//UTIL_PlayEarSound(m_pPlayer, CLOSURE_SFX);
+		UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is over!", GetName());
+
+		m_bUsingSkill = false;
+		m_flTimeCooldownOver = gpGlobals->time + GetCooldown();
+		m_pPlayer->ResetMaxSpeed();
+
+		if (m_pPlayer->pev->health <= 1.0f)	// execute player after the time.
+		{
+			m_pPlayer->TakeDamage(
+									m_pLastInflictor.IsValid() ? m_pLastInflictor->pev : m_pPlayer->pev,
+									m_pLastAttacker.IsValid() ? m_pLastAttacker->pev : m_pPlayer->pev,
+									666.0f, DMG_GENERIC
+								);
+		}
+	}
+
+	// B. it's active!
+
+
+	// C. the CD is over!
+	else if (!m_bUsingSkill && !m_bAllowSkill && m_flTimeCooldownOver <= gpGlobals->time)
+	{
+		m_bAllowSkill = true;
+
+		UTIL_PrintChatColor(m_pPlayer, GREENCHAT, "/g%s is ready again!", GetName());
+		UTIL_PlayEarSound(m_pPlayer, COOLDOWN_COMPLETE_SFX);
+	}
+}
+
+bool CSkillResistDeath::Terminate()
+{
+	if (!m_pPlayer->IsAlive())	// if this terminate call cames from the end of swan song, we do nothing.
+		return false;
+
+	STOP_SOUND(m_pPlayer->edict(), CHAN_VOICE, ACTIVATION_SFX);
+	UTIL_ScreenFade(m_pPlayer, Vector(255, 10, 10), 0.5f, 0.1f, 60, FFADE_IN);
+	UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is terminated in advanced!", GetName());
+
+	m_bUsingSkill = false;
+	m_flTimeCooldownOver = gpGlobals->time + GetCooldown() * Q_clamp((gpGlobals->time - m_flTimeLastUsed) / GetDuration(), 0.0f, 1.0f);	// return the unused time.
+	m_pPlayer->ResetMaxSpeed();
+
+	return true;
+}
+
+void CSkillResistDeath::OnPlayerDamagedPre(entvars_t* pevInflictor, entvars_t* pevAttacker, float& flDamage, int& bitsDamageTypes)
+{
+	if (!m_bUsingSkill)
+	{
+		if (m_bAllowSkill && m_pPlayer->pev->health <= flDamage)	// if the skill is allowed, execute it.
+		{
+			Execute();
+		}
+		else
+			return;	// otherwise, leave.
+	}
+
+	if (flDamage >= m_pPlayer->pev->health || m_pPlayer->pev->health <= 1.0f)
+	{
+		// remove the damage
+		m_pPlayer->pev->health = 1.0f;
+		flDamage = 0.0f;
+
+		// but remember who did that.
+		if (!FNullEnt(pevInflictor))
+			m_pLastInflictor = CBaseEntity::Instance(pevInflictor);
+		if (!FNullEnt(pevAttacker))
+			m_pLastInflictor = CBaseEntity::Instance(pevAttacker);
+	}
+
+	m_pPlayer->ResetMaxSpeed();
+}
+
+void CSkillResistDeath::OnResetPlayerMaxspeed(float& flSpeed)
+{
+	if (!m_bUsingSkill)
+		return;
+
+	if (m_pPlayer->pev->health <= 1.5f)	// on the edge of death.
+		flSpeed = INJURE_SPEED;
+	else
+		flSpeed = DASH_SPEED;
+}
+
+//
+// Role_MadScientist: Electromagnetic Bullets
+//
+
+const float CSkillTaserGun::DURATION = 14.5f;
+const float CSkillTaserGun::COOLDOWN = 70.0f;
+const char* CSkillTaserGun::ACTIVATION_SFX = "leadermode/hermetic_society_interface_01.wav";
+const char* CSkillTaserGun::STATIC_ELEC_SFX = "leadermode/electric_hum2.wav";
+const char* CSkillTaserGun::ELECTROBULLETS_SFX = "leadermode/electro1.wav";
+const char* CSkillTaserGun::ELECTRIFY_SFX = "leadermode/electric_damage.wav";
+const float CSkillTaserGun::DRAG_SPEED = 900.0f;
+const float CSkillTaserGun::ELEC_LASTING = 3.0f;
+
+bool CSkillTaserGun::Execute()
+{
+	if (!m_pPlayer || !m_pPlayer->IsAlive() || !CSGameRules()->CanSkillBeUsed())	// skill is not allowed in freezing phase.
+		return false;
+
+	if (m_bUsingSkill)
+	{
+		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently activated!", GetName());
+		return false;
+	}
+
+	if (!m_bAllowSkill)
+	{
+		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently cooling down!", GetName());
+		return false;
+	}
+
+	UTIL_PlayEarSound(m_pPlayer, ACTIVATION_SFX);
+	EMIT_SOUND(m_pPlayer->edict(), CHAN_STATIC, STATIC_ELEC_SFX, 0.65f, ATTN_NORM);
+
+	m_bUsingSkill = true;
+	m_bAllowSkill = false;
+	m_flTimeLastUsed = gpGlobals->time;
+
+	return true;
+}
+
+void CSkillTaserGun::Think()
+{
+	// A. it's time up!
+	if (m_bUsingSkill && m_flTimeLastUsed + GetDuration() < gpGlobals->time)
+	{
+		STOP_SOUND(m_pPlayer->edict(), CHAN_STATIC, STATIC_ELEC_SFX);
+		UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is over!", GetName());
+
+		m_bUsingSkill = false;
+		m_flTimeCooldownOver = gpGlobals->time + GetCooldown();
+	}
+
+	// B. it's active!
+
+
+	// C. the CD is over!
+	else if (!m_bUsingSkill && !m_bAllowSkill && m_flTimeCooldownOver <= gpGlobals->time)
+	{
+		m_bAllowSkill = true;
+
+		UTIL_PrintChatColor(m_pPlayer, GREENCHAT, "/g%s is ready again!", GetName());
+		UTIL_PlayEarSound(m_pPlayer, COOLDOWN_COMPLETE_SFX);
+	}
+}
+
+bool CSkillTaserGun::Terminate()
+{
+	CLIENT_COMMAND(m_pPlayer->edict(), "stopsound\n");
+	STOP_SOUND(m_pPlayer->edict(), CHAN_STATIC, STATIC_ELEC_SFX);
+	UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is terminated in advanced!", GetName());
+
+	m_bUsingSkill = false;
+	m_flTimeCooldownOver = gpGlobals->time + GetCooldown() * Q_clamp((gpGlobals->time - m_flTimeLastUsed) / GetDuration(), 0.0f, 1.0f);	// return the unused time.
+
+	return true;
+}
+
+float CSkillTaserGun::WeaponFireIntervalModifier(CBasePlayerWeapon* pWeapon)
+{
+	// play the shooting sfx here.
+	// if I place it at trace line, the shotgun would freaking out.
+
+	if (!m_bUsingSkill)
+		return CBaseSkill::WeaponFireIntervalModifier(pWeapon);
+
+	EMIT_SOUND(pWeapon->edict(), CHAN_AUTO, ELECTROBULLETS_SFX, VOL_NORM, ATTN_NONE);
+
+	return CBaseSkill::WeaponFireIntervalModifier(pWeapon);
+}
+
+void CSkillTaserGun::OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr)
+{
+	if (!m_bUsingSkill)
+		return;
+
+	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, tr.vecEndPos);
+	WRITE_BYTE(TE_DLIGHT);
+	WRITE_COORD(tr.vecEndPos[0]);
+	WRITE_COORD(tr.vecEndPos[1]);
+	WRITE_COORD(tr.vecEndPos[2]);
+	WRITE_BYTE(8);		//range
+	WRITE_BYTE(160);
+	WRITE_BYTE(250);
+	WRITE_BYTE(250);
+	WRITE_BYTE(1);		//time
+	WRITE_BYTE(0);
+	MESSAGE_END();
+
+	if (!FNullEnt(tr.pHit))	// actually hit somebody.
+	{
+		if (CBaseEntity::Instance(tr.pHit)->IsPlayer())
+		{
+			CBasePlayer* pPlayer = CBasePlayer::Instance(tr.pHit);
+
+			gElectrifiedDOTMgr::Set(pPlayer, ELEC_LASTING, tr.vecEndPos);
+		}
+	}
+}
+
+//
+// Role_MadScientist: Electromagnetic Armour
+//
+
+const float CSkillRetribution::RETRIBUTION_RATIO = 0.15f;
+
+void CSkillRetribution::OnPlayerDamagedPre(entvars_t* pevInflictor, entvars_t* pevAttacker, float& flDamage, int& bitsDamageTypes)
+{
+	if (m_pPlayer->pev->armortype < ARMOR_VESTHELM)	// you have to get a full armour to active this skill.
+		return;
+
+	if (FNullEnt(pevAttacker))
+		return;
+
+	if (!CBaseEntity::Instance(pevAttacker)->IsPlayer())
+		return;
+
+	CBasePlayer* pAttacker = CBasePlayer::Instance(pevAttacker);
+
+	// this prevents infinite loop.
+	if (pAttacker->m_rgpSkills[Classify()])
+	{
+		CBaseSkill* pSkill = pAttacker->m_rgpSkills[Classify()];
+
+		if (!Q_strcmp(pSkill->GetName(), GetName()))
+			return;
+	}
+
+	MESSAGE_BEGIN(MSG_BROADCAST, SVC_TEMPENTITY);
+	WRITE_BYTE(TE_BEAMENTS);
+	WRITE_SHORT(ENTINDEX(pevAttacker));
+	WRITE_SHORT(m_pPlayer->entindex());
+	WRITE_SHORT(MODEL_INDEX("sprites/lgtning.spr"));
+	WRITE_BYTE(0);
+	WRITE_BYTE(100);
+	WRITE_BYTE(1);
+	WRITE_BYTE(31);
+	WRITE_BYTE(125);
+	WRITE_BYTE(160);
+	WRITE_BYTE(250);
+	WRITE_BYTE(250);
+	WRITE_BYTE(255);
+	WRITE_BYTE(RANDOM_LONG(20, 30));
+	MESSAGE_END();
+
+	gElectrifiedDOTMgr::VFX(pAttacker);
+	gElectrifiedDOTMgr::VFX(m_pPlayer);
+	EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, CSkillTaserGun::ELECTROBULLETS_SFX, VOL_NORM, ATTN_STATIC);
+
+	pAttacker->TakeDamage(m_pPlayer->m_pActiveItem->pev, m_pPlayer->pev, flDamage * RETRIBUTION_RATIO, DMG_SHOCK | DMG_NEVERGIB);
+}
+
+//
+// Role_Assassin: Chameleon Cloak
+//
+
+const float CSkillInvisible::DURATION = 10.0f;
+const float CSkillInvisible::COOLDOWN = 65.0f;
+const char* CSkillInvisible::ACTIVATION_SFX = "leadermode/assassins_drug_induced_visions_01.wav";
+const char* CSkillInvisible::DISCOVERED_SFX = "leadermode/agent_detected_and_expelled.wav";
+const float CSkillInvisible::SNEAKING_SPEED = 320.0f;
+const float CSkillInvisible::SNEAKING_GRAVITY = 0.5f;
+const int CSkillInvisible::HIDEHUD = (HIDEHUD_WEAPONS | HIDEHUD_FLASHLIGHT | HIDEHUD_CROSSHAIR);
+const Vector CSkillInvisible::SCREEN_COLOUR = Vector(10, 10, 255);
+
+bool CSkillInvisible::Execute()
+{
+	if (!m_pPlayer || !m_pPlayer->IsAlive() || !CSGameRules()->CanSkillBeUsed())	// skill is not allowed in freezing phase.
+		return false;
+
+	if (m_bUsingSkill)
+	{
+		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently activated!", GetName());
+		return false;
+	}
+
+	if (!m_bAllowSkill)
+	{
+		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently cooling down!", GetName());
+		return false;
+	}
+
+	m_bUsingSkill = true;
+	m_bAllowSkill = false;
+	m_flTimeLastUsed = gpGlobals->time;
+
+	UTIL_ScreenFade(m_pPlayer, SCREEN_COLOUR, 0.3f, DURATION, 60, FFADE_IN);
+	UTIL_PlayEarSound(m_pPlayer, ACTIVATION_SFX);
+
+	m_pPlayer->ResetMaxSpeed();
+	m_pPlayer->pev->gravity = SNEAKING_GRAVITY;
+	m_pPlayer->pev->flags |= FL_NOTARGET;
+
+	m_pPlayer->pev->viewmodel = 0;
+	m_pPlayer->m_iHideHUD |= HIDEHUD;
+
+	return true;
+}
+
+void CSkillInvisible::Think()
+{
+	// A. it's time up!
+	if (m_bUsingSkill && m_flTimeLastUsed + GetDuration() < gpGlobals->time)
+	{
+		UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is over!", GetName());
+
+		m_bUsingSkill = false;
+		m_flTimeCooldownOver = gpGlobals->time + GetCooldown();
+
+		m_pPlayer->ResetMaxSpeed();
+		m_pPlayer->pev->gravity = 1.0f;
+		m_pPlayer->pev->flags &= ~FL_NOTARGET;
+
+		m_pPlayer->m_pActiveItem->Deploy();
+		m_pPlayer->m_iHideHUD &= ~HIDEHUD;
+	}
+
+	// B. it's active!
+	if (m_bUsingSkill)
+	{
+		if (m_pPlayer->pev->button & IN_ATTACK)
+			Terminate();
+	}
+
+	// C. the CD is over!
+	else if (!m_bUsingSkill && !m_bAllowSkill && m_flTimeCooldownOver <= gpGlobals->time)
+	{
+		m_bAllowSkill = true;
+
+		UTIL_PrintChatColor(m_pPlayer, GREENCHAT, "/g%s is ready again!", GetName());
+		UTIL_PlayEarSound(m_pPlayer, COOLDOWN_COMPLETE_SFX);
+	}
+}
+
+bool CSkillInvisible::Terminate()
+{
+	CLIENT_COMMAND(m_pPlayer->edict(), "stopsound\n");
+	UTIL_ScreenFade(m_pPlayer, SCREEN_COLOUR, 0.3f, 0.1f, 60, FFADE_IN);
+	UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is terminated in advanced!", GetName());
+
+	m_bUsingSkill = false;
+	m_flTimeCooldownOver = gpGlobals->time + GetCooldown() * Q_clamp((gpGlobals->time - m_flTimeLastUsed) / GetDuration(), 0.0f, 1.0f);	// return the unused time.
+
+	m_pPlayer->ResetMaxSpeed();
+	m_pPlayer->pev->gravity = 1.0f;
+	m_pPlayer->pev->flags &= ~FL_NOTARGET;
+
+	m_pPlayer->m_pActiveItem->Deploy();
+	m_pPlayer->m_iHideHUD &= ~HIDEHUD;
+
+	return true;
+}
+
+void CSkillInvisible::Discharge(CBasePlayer* pCause)
+{
+	CLIENT_COMMAND(m_pPlayer->edict(), "stopsound\n");
+	EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, DISCOVERED_SFX, VOL_NORM, ATTN_NONE);
+	UTIL_PlayEarSound(pCause, DISCOVERED_SFX);
+	UTIL_PlayEarSound(m_pPlayer, DISCOVERED_SFX);
+	UTIL_ScreenFade(m_pPlayer, SCREEN_COLOUR, 0.3f, 0.1f, 60, FFADE_IN);
+	UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/tYou are discovered!", GetName());
+	UTIL_PrintChatColor(pCause, REDCHAT, "/tYou just discovered %s, the %s!", STRING(m_pPlayer->pev->netname), g_rgszRoleNames[m_pPlayer->m_iRoleType]);
+
+	m_bUsingSkill = false;
+	m_flTimeCooldownOver = gpGlobals->time + GetCooldown();	// unhonored discovered. no CD return.
+
+	m_pPlayer->ResetMaxSpeed();
+	m_pPlayer->pev->gravity = 1.0f;
+	m_pPlayer->pev->flags &= ~FL_NOTARGET;
+
+	m_pPlayer->m_pActiveItem->Deploy();
+	m_pPlayer->m_iHideHUD &= ~HIDEHUD;
+}
+
+void CSkillInvisible::OnPlayerDamagedPre(entvars_t* pevInflictor, entvars_t* pevAttacker, float& flDamage, int& bitsDamageTypes)
+{
+	if (!m_bUsingSkill)
+		return;
+
+	if (!FNullEnt(pevAttacker) && CBaseEntity::Instance(pevAttacker)->IsPlayer() && pevAttacker != m_pPlayer->pev)
+	{
+		Discharge(CBasePlayer::Instance(pevAttacker));	// shot by a player.
+		flDamage *= 10.0f;	// deals a great amount of damage.
+	}
+	else
+	{
+		Terminate();	// e.g. fall down.
+	}
+}
+
+void CSkillInvisible::OnBeingAddToFullPack(entity_state_s* pState, CBasePlayer* pHost)
+{
+	if (!m_bUsingSkill)
+		return;
+
+	if (pHost->m_iRoleType != Role_Sharpshooter || !pHost->IsUsingPrimarySkill())
+		return;
+
+	pState->effects |= EF_NODRAW;
+}
+
+void CSkillInvisible::OnTouched(CBaseEntity* pOther)
+{
+	if (!m_bUsingSkill)
+		return;
+
+	if (!pOther->IsPlayer())
+		return;
+
+	CBasePlayer* pWhistleblower = CBasePlayer::Instance(pOther->pev);
+
+	if (pWhistleblower->m_iTeam == m_pPlayer->m_iTeam)
+		Terminate();
+	else
+		Discharge(pWhistleblower);
+}
+
+//
+// Role_Assassin: Backlash
+//
+
+const float CSkillCriticalHit::NORMAL_CHANCE = 0.01f;
+const float CSkillCriticalHit::BACKSTAB_CHANCE = 0.10f;
+const int CSkillCriticalHit::ALLOWED_WEAPONS = (1 << WEAPON_MP7A1) | (1 << WEAPON_M14EBR) | (1 << WEAPON_USP) | (1 << WEAPON_M200);
+
+void CSkillCriticalHit::OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr)
+{
+	if (!((1 << m_pPlayer->m_pActiveItem->m_iId) & ALLOWED_WEAPONS))	// you have to use these weapons!
+		return;
+
+	if (FNullEnt(tr.pHit) || !CBaseEntity::Instance(tr.pHit)->IsPlayer())
+		return;
+
+	CBasePlayer* pVictim = CBasePlayer::Instance(tr.pHit);
+	if (pVictim->m_iTeam == m_pPlayer->m_iTeam)	// don't crit your teammate!
+		return;
+
+	float flChance = NORMAL_CHANCE;
+
+	UTIL_MakeVectors(pVictim->pev->v_angle);
+	Vector vecVictimFwd = gpGlobals->v_forward;
+	UTIL_MakeVectors(m_pPlayer->pev->v_angle);
+	Vector vecAssassinFwd = gpGlobals->v_forward;
+
+	if (DotProduct(vecVictimFwd, vecAssassinFwd) > 0.0f)	// deg90 is 0.
+		flChance = BACKSTAB_CHANCE;
+
+	if (RANDOM_FLOAT(0.0f, 1.0f) > flChance)
+		return;
+
+	EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, CRITICAL_SHOT_SFX, 2.0f, 0.5f);	// it's very loud, you can't miss it.
+	UTIL_BeamEntPoint(m_pPlayer->entindex() | 0x1000, tr.vecEndPos, MODEL_INDEX("sprites/lgtning.spr"), 0, 100, 1, 47, 5, 75, 75, 75, 255, 5);
+
+	iDamage *= RANDOM_LONG(6, 10);
+}
+
+//
+// Role_Commander: Battlefield Analysis
+//
+
+const float CSkillRadarScan2::DURATION = 10.0f;
+const float CSkillRadarScan2::COOLDOWN = 6.0f;
+const float CSkillRadarScan2::UPDATE_DISTANCE_INTERVAL = 150.0f;
+
+bool CSkillRadarScan2::Execute()
+{
+	if (!m_pPlayer || !m_pPlayer->IsAlive() || !CSGameRules()->CanSkillBeUsed())	// skill is not allowed in freezing phase.
+		return false;
+
+	if (m_bUsingSkill)
+	{
+		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently activated!", GetName());
+		return false;
+	}
+
+	if (!m_bAllowSkill)
+	{
+		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently cooling down!", GetName());
+		return false;
+	}
+
+	if (!THE_COMMANDER.IsValid() || !THE_COMMANDER->IsAlive())	// then pick a random guy.
+	{
+		CBasePlayer* pEnemy = nullptr;
+
+		for (int i = 1; i <= gpGlobals->maxClients; i++)
+		{
+			pEnemy = UTIL_PlayerByIndex(i);
+
+			if (!pEnemy || !pEnemy->IsAlive() || pEnemy->IsDormant())
+				continue;
+
+			if (m_pPlayer->m_iTeam == pEnemy->m_iTeam)
+				continue;
+
+			m_pTracing = pEnemy;
+			break;
+		}
+	}
+	else
+		m_pTracing = THE_COMMANDER;
+
+	// nobody to trace.
+	if (!m_pTracing)
+	{
+		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/tWe have no one to trace currently!");
+		return false;
+	}
+
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		CBasePlayer* pTeammate = UTIL_PlayerByIndex(i);
+
+		if (!pTeammate || !pTeammate->IsAlive() || pTeammate->IsBot())
+			continue;
+
+		if (m_pPlayer->m_iTeam != pTeammate->m_iTeam)
+			continue;
+
+		MESSAGE_BEGIN(MSG_ONE, gmsgBombDrop, g_vecZero, pTeammate->pev);
+		WRITE_COORD(m_pTracing->pev->origin[0]);
+		WRITE_COORD(m_pTracing->pev->origin[1]);
+		WRITE_COORD(m_pTracing->pev->origin[2]);
+		WRITE_BYTE(0);
+		MESSAGE_END();
+
+		UTIL_PlayEarSound(pTeammate, RADAR_BEEP_SFX);
+
+		if (m_pTracing == THE_COMMANDER)
+			UTIL_PrintChatColor(nullptr, REDCHAT, "/yAccorading to the intel, they are executing %s with %d menpower remaining.", g_rgszTacticalSchemeNames[CSGameRules()->m_rgTeamTacticalScheme[3 - m_pPlayer->m_iTeam]], CSGameRules()->m_rgiMenpowers[3 - m_pPlayer->m_iTeam]);
+	}
+
+	UTIL_PrintChatColor(nullptr, REDCHAT, "/yThe /t%s %s/y makes his intel public, which reveal the /gapproximate position/y of the /t%s %s/y!", g_rgszRoleNames[m_pPlayer->m_iRoleType], STRING(m_pPlayer->pev->netname), g_rgszRoleNames[m_pTracing->m_iRoleType], STRING(m_pTracing->pev->netname));
+
+	m_bUsingSkill = true;
+	m_bAllowSkill = false;
+	m_flTimeLastUsed = gpGlobals->time;
+	m_vecLastPosition = m_pTracing->pev->origin;
+
+	return true;
+}
+
+void CSkillRadarScan2::Think()
+{
+	// A. it's time up!
+	if (m_bUsingSkill && m_flTimeLastUsed + GetDuration() < gpGlobals->time)
+	{
+		for (int i = 1; i <= gpGlobals->maxClients; i++)
+		{
+			CBasePlayer* pTeammate = UTIL_PlayerByIndex(i);
+
+			if (!pTeammate || !pTeammate->IsAlive() || pTeammate->IsBot())
+				continue;
+
+			if (m_pPlayer->m_iTeam != pTeammate->m_iTeam)
+				continue;
+
+			MESSAGE_BEGIN(MSG_ONE, gmsgBombPickup, g_vecZero, pTeammate->pev);
+			MESSAGE_END();
+		}
+
+		UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is over!", GetName());
+
+		m_bUsingSkill = false;
+		m_flTimeCooldownOver = gpGlobals->time + GetCooldown();
+	}
+
+	// B. it's active!
+	else if (m_bUsingSkill)
+	{
+		if (!m_pPlayer->IsAlive())
+			return;
+
+		// if the target we are tracing just disappear, then terminate skill.
+		if (!m_pTracing.IsValid())
+		{
+			Terminate();
+			return;
+		}
+
+		if ((m_vecLastPosition - m_pTracing->pev->origin).Length() < UPDATE_DISTANCE_INTERVAL)	// minor move won't trigger.
+			return;
+
+		if (!m_pTracing->IsAlive())
+		{
+			if (m_pTracing->entindex() != THE_COMMANDER->entindex())	// we have to specify the != operator.
+			{
+				for (int i = 1; i <= gpGlobals->maxClients; i++)
+				{
+					CBasePlayer* pTeammate = UTIL_PlayerByIndex(i);
+
+					if (!pTeammate || pTeammate->IsBot())
+						continue;
+
+					if (m_pPlayer->m_iTeam != pTeammate->m_iTeam)
+						continue;
+
+					UTIL_PlayEarSound(pTeammate, RADAR_TARGET_DEAD_SFX);
+					UTIL_PrintChatColor(pTeammate, REDCHAT, "/gThe target /t%s %s/g traced by /y%s %s/g was eliminated!", g_rgszRoleNames[m_pTracing->m_iRoleType], STRING(m_pTracing->pev->netname), g_rgszRoleNames[m_pPlayer->m_iRoleType], STRING(m_pPlayer->pev->netname));
+				}
+			}
+
+			Terminate();
+			return;
+		}
+
+		// update to the current location.
+		m_vecLastPosition = m_pTracing->pev->origin;
+
+		for (int i = 1; i <= gpGlobals->maxClients; i++)
+		{
+			CBasePlayer* pTeammate = UTIL_PlayerByIndex(i);
+
+			if (!pTeammate || pTeammate->IsBot())
+				continue;
+
+			if (m_pPlayer->m_iTeam != pTeammate->m_iTeam)
+				continue;
+
+			MESSAGE_BEGIN(MSG_ONE, gmsgBombDrop, g_vecZero, pTeammate->pev);
+			WRITE_COORD(m_pTracing->pev->origin[0]);
+			WRITE_COORD(m_pTracing->pev->origin[1]);
+			WRITE_COORD(m_pTracing->pev->origin[2]);
+			WRITE_BYTE(0);
+			MESSAGE_END();
+
+			UTIL_PlayEarSound(pTeammate, RADAR_BEEP_SFX);
+		}
+	}
+
+	// C. the CD is over!
+	else if (!m_bUsingSkill && !m_bAllowSkill && m_flTimeCooldownOver <= gpGlobals->time)
+	{
+		m_bAllowSkill = true;
+
+		UTIL_PrintChatColor(m_pPlayer, GREENCHAT, "/g%s is ready again!", GetName());
+		UTIL_PlayEarSound(m_pPlayer, COOLDOWN_COMPLETE_SFX);
+	}
+}
+
+bool CSkillRadarScan2::Terminate()
+{
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		CBasePlayer* pTeammate = UTIL_PlayerByIndex(i);
+
+		if (!pTeammate || !pTeammate->IsAlive() || pTeammate->IsBot())
+			continue;
+
+		if (m_pPlayer->m_iTeam != pTeammate->m_iTeam)
+			continue;
+
+		MESSAGE_BEGIN(MSG_ONE, gmsgBombPickup, g_vecZero, pTeammate->pev);
+		MESSAGE_END();
+	}
+
+	UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is terminated in advanced!", GetName());
 
 	m_bUsingSkill = false;
 	m_flTimeCooldownOver = gpGlobals->time + GetCooldown() * Q_clamp((gpGlobals->time - m_flTimeLastUsed) / GetDuration(), 0.0f, 1.0f);	// return the unused time.

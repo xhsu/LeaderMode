@@ -127,6 +127,7 @@ public:
 	// skill grenade
 	static CGrenade* FrostGrenade(CBasePlayer* pPlayer);
 	static CGrenade* HealingGrenade(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity, float time, unsigned short usEvent);
+	static CGrenade* NerveGasGrenade(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity, float time, unsigned short usEvent);
 
 public:
 	void Explode(Vector vecSrc, Vector vecAim);
@@ -168,6 +169,7 @@ public:
 	int m_iBounceCount;
 	BOOL m_fRegisteredSound;
 	bool m_bHealing;
+	bool m_bPoisoned;
 };
 
 // Items that the player has in their inventory that they can use
@@ -312,6 +314,8 @@ public:
 
 class CWeaponBox: public CBaseEntity
 {
+	static const float THROWING_FORCE;
+
 public:
 	virtual void Spawn();
 	virtual void Precache();
@@ -320,6 +324,8 @@ public:
 	virtual int Restore(CRestore &restore);
 	virtual int ObjectCaps() { return FCAP_ACROSS_TRANSITION | FCAP_IMPULSE_USE; }
 	virtual void SetObjectCollisionBox();
+	virtual void TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType);
+	virtual BOOL TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType);
 	virtual bool GiveAmmo(int iCount, AmmoIdType iId);
 	virtual void Touch(CBaseEntity *pOther);
 	virtual void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType = USE_OFF, float value = 0.0f);
@@ -339,6 +345,7 @@ public:
 	CBasePlayerItem *m_rgpPlayerItems[MAX_ITEM_TYPES];
 	int m_rgAmmo[MAX_AMMO_SLOTS];
 	bool m_bHadBeenSold;
+	float m_flNextPhysSFX;
 };
 
 

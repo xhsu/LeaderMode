@@ -1296,6 +1296,8 @@ TYPEDESCRIPTION CWeaponBox::m_SaveData[] =
 	DEFINE_ARRAY(CWeaponBox, m_rgpPlayerItems, FIELD_CLASSPTR, MAX_ITEM_TYPES),
 };
 
+const float CWeaponBox::THROWING_FORCE = 350.0f;
+
 LINK_ENTITY_TO_CLASS(weaponbox, CWeaponBox)
 IMPLEMENT_SAVERESTORE(CWeaponBox, CBaseEntity)
 
@@ -1314,6 +1316,38 @@ void CWeaponBox::KeyValue(KeyValueData *pkvd)
 
 void CWeaponBox::SetModel(const char *pszModelName)
 {
+	float flSpeed = pev->velocity.Length();
+	pev->avelocity.x = flSpeed;
+	pev->avelocity.y = RANDOM_FLOAT(-flSpeed, flSpeed);
+
+	CBasePlayer* pPlayer = CBasePlayer::Instance(pev->owner);
+	if (pPlayer->IsAlive())
+	{
+		UTIL_MakeVectors(pPlayer->pev->v_angle);
+
+		Vector vecSrc = pPlayer->GetGunPosition();
+		Vector vecEnd = vecSrc + gpGlobals->v_forward * 16.0f;
+
+		TraceResult tr;
+		UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, dont_ignore_glass, pPlayer->edict(), &tr);
+
+		SET_ORIGIN(edict(), tr.vecEndPos);
+		pev->velocity = gpGlobals->v_forward * THROWING_FORCE;
+	}
+	else
+	{
+		UTIL_MakeVectors(pPlayer->pev->v_angle);
+
+		Vector vecSrc = pPlayer->GetGunPosition();
+		Vector vecEnd = vecSrc + gpGlobals->v_forward * 28.0f;
+
+		TraceResult tr;
+		UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, dont_ignore_glass, pPlayer->edict(), &tr);
+
+		SET_ORIGIN(edict(), tr.vecEndPos);
+		pev->velocity = g_vecZero;
+	}
+
 	SET_MODEL(ENT(pev), pszModelName);
 }
 
@@ -1321,10 +1355,12 @@ void CWeaponBox::Spawn()
 {
 	Precache();
 
-	pev->movetype = MOVETYPE_TOSS;
+	pev->movetype = MOVETYPE_BOUNCE;
 	pev->solid = SOLID_TRIGGER;
+	pev->takedamage = DAMAGE_YES;
+	pev->fuser1 = gpGlobals->time;
 
-	UTIL_SetSize(pev, g_vecZero, g_vecZero);
+	UTIL_SetSize(pev, Vector(-8.0, -5.0, -1.0), Vector(8.0, 5.0, 1.0));
 	SET_MODEL(ENT(pev), "models/w_weaponbox.mdl");
 }
 
@@ -1350,14 +1386,40 @@ void CWeaponBox::Kill()
 // Try to add my contents to the toucher if the toucher is a player.
 void CWeaponBox::Touch(CBaseEntity *pOther)
 {
-	if (!(pev->flags & FL_ONGROUND))
-	{
+	if (pev->fuser1 + 1.0f >= gpGlobals->time && pOther->edict() == pev->owner)
 		return;
-	}
 
 	if (!pOther->IsPlayer())
 	{
-		// only players may touch a weaponbox.
+		if (pOther->pev->solid < SOLID_BBOX)
+			return;
+
+		if (!Q_strcmp(pOther->pev->classname, "func_breakable"))
+			DispatchUse(pOther->edict(), edict());
+
+		if (pev->velocity.Length() > 1000.0f)
+		{
+			MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
+			WRITE_BYTE(TE_SPARKS);
+			WRITE_COORD(pev->origin[0] + RANDOM_FLOAT(-10, 10));
+			WRITE_COORD(pev->origin[1] + RANDOM_FLOAT(-10, 10));
+			WRITE_COORD(pev->origin[2] + RANDOM_FLOAT(-10, 10));
+			MESSAGE_END();
+		}
+
+		pev->velocity *= 0.4f;
+		pev->avelocity.x = 0;
+		pev->avelocity.y = RANDOM_FLOAT(-pev->velocity.Length(), pev->velocity.Length());
+
+		UTIL_LieFlat(this);
+
+		if (m_flNextPhysSFX < gpGlobals->time)
+		{
+			EMIT_SOUND(edict(), CHAN_WEAPON, "items/weapondrop1.wav", 0.25f, ATTN_STATIC);
+			m_flNextPhysSFX = gpGlobals->time + 0.2f;
+		}
+
+		// only players may pickup a weaponbox.
 		return;
 	}
 
@@ -1366,7 +1428,7 @@ void CWeaponBox::Touch(CBaseEntity *pOther)
 		// no dead guys.
 		return;
 	}
-
+	
 	CBasePlayer *pPlayer = static_cast<CBasePlayer *>(pOther);
 
 	if (pPlayer->m_bShieldDrawn)
@@ -1466,6 +1528,12 @@ void CWeaponBox::Touch(CBaseEntity *pOther)
 	{
 		SetTouch(nullptr);
 		UTIL_Remove(this);
+	}
+
+	// player kick a weaponbox.
+	if (!bRemove)
+	{
+		pev->velocity = (pev->origin - pOther->pev->origin).Normalize() * pOther->pev->velocity.Length() * 3.0f;
 	}
 }
 
@@ -1615,4 +1683,30 @@ void CWeaponBox::SetObjectCollisionBox()
 {
 	pev->absmin = pev->origin + Vector(-16, -16, 0);
 	pev->absmax = pev->origin + Vector(16, 16, 16);
+}
+
+void CWeaponBox::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType)
+{
+	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, ptr->vecEndPos);
+	WRITE_BYTE(TE_SPARKS);
+	WRITE_COORD(ptr->vecEndPos[0]);
+	WRITE_COORD(ptr->vecEndPos[1]);
+	WRITE_COORD(ptr->vecEndPos[2]);
+	MESSAGE_END();
+
+	pev->velocity = vecDir.Normalize() * flDamage * 20.0f;
+	EMIT_SOUND(edict(), CHAN_ITEM, "debris/metal6.wav", 0.5f, ATTN_STATIC);
+}
+
+BOOL CWeaponBox::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType)
+{
+	if (bitsDamageType & DMG_EXPLOSION)
+	{
+		pev->velocity = (pev->origin - pevInflictor->origin).Normalize() * flDamage * 20.0f;
+	}
+
+	pev->avelocity.x = 0;
+	pev->avelocity.y = RANDOM_FLOAT(-pev->velocity.Length(), pev->velocity.Length());
+
+	return FALSE;	// sorry, damage cannot destory weaponbox.
 }

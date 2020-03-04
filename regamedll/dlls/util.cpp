@@ -1974,3 +1974,28 @@ void UTIL_NvgScreen(CBasePlayer* pPlayer, int R, int G, int B, int density)	// c
 	WRITE_BYTE(density);
 	MESSAGE_END();
 }
+
+void UTIL_LieFlat(CBaseEntity* pEntity)
+{
+	TraceResult tr;
+	UTIL_TraceLine(pEntity->pev->origin, pEntity->pev->origin - Vector(0, 0, 10.0f), ignore_monsters, pEntity->edict(), &tr);
+
+	if (tr.flFraction >= 1.0f)
+		return;
+
+	UTIL_MakeVectors(pEntity->pev->angles);
+
+	Vector vecOriginalFwd = gpGlobals->v_forward;
+	Vector vecUp = tr.vecPlaneNormal;
+	Vector vecRight = CrossProduct(vecOriginalFwd, vecUp);
+	Vector vecFwd = CrossProduct(vecUp, vecRight);
+
+	Vector vecAngles;
+	VEC_TO_ANGLES(vecFwd, vecAngles);
+
+	Vector vecAngles2;
+	VEC_TO_ANGLES(vecRight, vecAngles2);
+
+	vecAngles.z = -vecAngles2.x;
+	pEntity->pev->angles = vecAngles;
+}

@@ -334,14 +334,12 @@ public:
 	virtual BOOL AddPlayerItem(CBasePlayerItem *pItem);
 	virtual BOOL RemovePlayerItem(CBasePlayerItem *pItem);
 	virtual bool GiveAmmo(int iAmount, AmmoIdType iId);
-	virtual void StartSneaking() { m_tSneaking = gpGlobals->time - 1; }
-	virtual void StopSneaking() { m_tSneaking = gpGlobals->time + 30; }
 
-	virtual BOOL IsSneaking() { return m_tSneaking <= gpGlobals->time; }
 	virtual BOOL IsAlive() { return (pev->deadflag == DEAD_NO && pev->health > 0.0f); }
 	virtual BOOL IsPlayer() { return (pev->flags & FL_SPECTATOR) != FL_SPECTATOR; }
 	virtual BOOL IsNetClient() { return TRUE; }
 	virtual const char *TeamID();
+	virtual void Touch(CBaseEntity* pOther);
 	virtual BOOL FBecomeProne();
 
 	// TODO: Need to investigate for what purposes used random to get relative eyes position
@@ -515,13 +513,13 @@ public:
 	void CheckItemAccessibility();
 	CBaseSkill* GetPrimarySkill();
 	bool IsUsingPrimarySkill();
-	bool TerminatePrimarySkill();
+	void DischargePrimarySkill(CBasePlayer* pCause);	// due to this player, I have to stop my skill.
 
 	// passive skill calculation hub
 	float WeaponFireIntervalModifier(CBasePlayerWeapon* pWeapon);
 	float PlayerDamageSufferedModifier(int bitsDamageTypes);
 	float PlayerDamageDealtModifier(int bitsDamageTypes);
-	void OnPlayerDamagedPre(float& flDamage);
+	void OnPlayerDamagedPre(entvars_t* pevInflictor, entvars_t* pevAttacker, float& flDamage, int& bitsDamageTypes);
 	void OnTraceDamagePre(float& flDamage, TraceResult& tr);
 	void OnFireBullets3PreDamage(float& flDamage, TraceResult& tr);
 	void OnFireBuckshotsPreTraceAttack(float& flDamage, TraceResult& tr);
@@ -530,6 +528,8 @@ public:
 	void OnGrenadeThrew(WeaponIdType iId, CGrenade* pGrenade);
 	bool OnBlind();
 	void OnAddToFullPack(entity_state_s* pState, edict_t* pEnt, BOOL FIsPlayer);
+	void OnBeingAddToFullPack(entity_state_s* pState, CBasePlayer* pHost);
+	void OnResetPlayerMaxspeed(float& flSpeed);
 
 	// templates
 	template<typename T = CBasePlayerItem, typename Functor>
@@ -698,7 +698,6 @@ public:
 	float m_fDeadTime;
 	BOOL m_fNoPlayerSound;
 	BOOL m_fLongJump;
-	float m_tSneaking;
 	int m_iUpdateTime;
 	int m_iClientHealth;
 	int m_iClientBattery;
@@ -787,6 +786,33 @@ public:
 	Vector m_vecFrozenAngles;
 	float m_flFrozenFrame;
 	Vector m_vecFrozenVAngle;
+
+	// electrify
+	float m_flElectrifyTimeUp;
+	float m_flElectrifyStarts;
+	bool m_bElectrifySFXPlayed;
+	float m_flElectrifyNextScreenFade;
+	float m_flElectrifyNextPunch;
+	float m_flElectrifyNextVFX;
+	float m_flElectrifyIcon;
+	Vector m_vecElectrifyBulletOFS;
+
+	// poisoned
+	float m_flPoisonedTimeUp;
+	EntityHandle<CBasePlayer> m_pPoisonedBy;
+	bool m_bPoisonedScreenFadeIn;
+	float m_flPoisonedNextDamage;
+	float m_flPoisonedNextFade;
+	float m_flPoisonedNextCoughSFX;
+	float m_flPoisonedBreathSFXStop;
+
+	// burning
+	float m_flBurningTimeUp;
+	float m_flBurningNextScream;
+	EntityHandle<CBasePlayer> m_pIgnitedBy;
+	float m_flBurningFlameThink;
+	float m_flBurningNextDamage;
+	float m_flBurningSFX;
 };
 
 class CWShield: public CBaseEntity

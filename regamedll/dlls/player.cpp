@@ -54,7 +54,6 @@ TYPEDESCRIPTION CBasePlayer::m_playerSaveData[] =
 	DEFINE_ARRAY(CBasePlayer, m_rgAmmo, FIELD_INTEGER, MAX_AMMO_SLOTS),
 	DEFINE_FIELD(CBasePlayer, m_idrowndmg, FIELD_INTEGER),
 	DEFINE_FIELD(CBasePlayer, m_idrownrestored, FIELD_INTEGER),
-	DEFINE_FIELD(CBasePlayer, m_tSneaking, FIELD_TIME),
 	DEFINE_FIELD(CBasePlayer, m_iTrain, FIELD_INTEGER),
 	DEFINE_FIELD(CBasePlayer, m_bitsHUDDamage, FIELD_INTEGER),
 	DEFINE_FIELD(CBasePlayer, m_flFallVelocity, FIELD_FLOAT),
@@ -520,6 +519,12 @@ BOOL EXT_FUNC CBasePlayer::TakeHealth(float flHealth, int bitsDamageType)
 		// UNDONE
 		if (m_flFrozenNextThink > 0.0f)
 			gFrozenDOTMgr::Free(this);
+
+		if (m_flElectrifyTimeUp > 0.0f)
+			gElectrifiedDOTMgr::Free(this);
+
+		if (m_flPoisonedTimeUp > 0.0f)
+			gPoisonDOTMgr::Free(this);
 	}
 
 	if (bitsDamageType & HEALING_NO_OH)
@@ -921,7 +926,7 @@ BOOL CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 				m_bKilledByGrenade = true;
 		}
 
-		OnPlayerDamagedPre(flDamage);	// skills should hook on here.
+		OnPlayerDamagedPre(pevInflictor, pevAttacker, flDamage, bitsDamageType);	// skills should hook on here.
 
 		LogAttack(pAttack, this, bTeamAttack, int(flDamage), armorHit, pev->health - flDamage, pev->armorvalue, GetWeaponName(pevInflictor, pevAttacker));
 		bTookDamage = CBaseMonster::TakeDamage(pevInflictor, pevAttacker, int(flDamage), bitsDamageType);
@@ -1109,6 +1114,10 @@ BOOL CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 
 			SetAnimation(PLAYER_LARGE_FLINCH);
 		}
+
+		// burning does not slowing so much.
+		if (bitsDamageType & (DMG_BURN | DMG_SLOWBURN))
+			m_flVelocityModifier = 0.9f;
 	}
 
 	// keep track of amount of damage last sustained
@@ -1153,7 +1162,7 @@ BOOL CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 		Pain(m_LastHitGroup, false);
 	}
 
-	OnPlayerDamagedPre(flDamage);	// skills should hook on here.
+	OnPlayerDamagedPre(pevInflictor, pevAttacker, flDamage, bitsDamageType);	// skills should hook on here.
 
 	LogAttack(pAttack, this, bTeamAttack, flDamage, armorHit, pev->health - flDamage, pev->armorvalue, GetWeaponName(pevInflictor, pevAttacker));
 
@@ -1593,6 +1602,12 @@ void EXT_FUNC CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 		gFrozenDOTMgr::Free(this);
 		iGib = GIB_ALWAYS;
 	}
+
+	if (m_flElectrifyTimeUp > 0.0f)
+		gElectrifiedDOTMgr::Free(this);
+
+	if (m_flPoisonedTimeUp > 0.0f)
+		gPoisonDOTMgr::Free(this);
 
 	if (CSGameRules()->IsCareer())
 	{
@@ -2757,6 +2772,10 @@ CGrenade *CBasePlayer::ThrowGrenade(CBasePlayerWeapon *pWeapon, Vector vecSrc, V
 	{
 		pGrenade = CGrenade::HealingGrenade(pev, vecSrc, vecThrow, time, usEvent);
 	}
+	else if (pWeapon->m_iId == WEAPON_SMOKEGRENADE && m_iRoleType == Role_MadScientist)
+	{
+		pGrenade = CGrenade::NerveGasGrenade(pev, vecSrc, vecThrow, time, usEvent);
+	}
 	else
 	{
 		switch (pWeapon->m_iId)
@@ -3817,6 +3836,9 @@ void EXT_FUNC CBasePlayer::PreThink()
 	UpdateLocation();
 
 	gFrozenDOTMgr::Think(this);
+	gElectrifiedDOTMgr::Think(this);
+	gPoisonDOTMgr::Think(this);
+	gBurningDOTMgr::Think(this);
 }
 
 // If player is taking time based damage, continue doing damage to player -
@@ -4636,8 +4658,6 @@ void EXT_FUNC CBasePlayer::Spawn()
 	m_flNextAttack = 0;
 	m_flgeigerDelay = gpGlobals->time + 2;
 
-	StartSneaking();
-
 	m_iFlashBattery = 99;
 	m_flFlashLightTime = 1;
 
@@ -4794,6 +4814,8 @@ void EXT_FUNC CBasePlayer::Spawn()
 	m_flOHNextThink = 0.0f;
 	m_flOHOriginalHealth = pev->max_health;
 	m_flFrozenNextThink = 0.0f;
+	gElectrifiedDOTMgr::Free(this);
+	gPoisonDOTMgr::Free(this);
 
 	// everything that comes after this, this spawn of the player a the game.
 	if (m_bJustConnected)
@@ -5098,6 +5120,17 @@ const char *CBasePlayer::TeamID()
 
 	// return their team name
 	return m_szTeamName;
+}
+
+void CBasePlayer::Touch(CBaseEntity* pOther)
+{
+	CBaseMonster::Touch(pOther);
+
+	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	{
+		if (m_rgpSkills[i])
+			m_rgpSkills[i]->OnTouched(pOther);
+	}
 }
 
 void CSprayCan::Spawn(entvars_t *pevOwner)
@@ -6236,7 +6269,8 @@ void CBasePlayer::EnableControl(BOOL fControl)
 
 void EXT_FUNC CBasePlayer::ResetMaxSpeed()
 {
-	float speed;
+	// default speed.
+	float speed = 240;
 
 	if (GetObserverMode() != OBS_NONE)
 	{
@@ -6253,12 +6287,11 @@ void EXT_FUNC CBasePlayer::ResetMaxSpeed()
 		// Get player speed from selected weapon
 		speed = m_pActiveItem->GetMaxSpeed();
 	}
-	else
-	{
-		// No active item, set the player's speed to default
-		speed = 240;
-	}
 
+	// hook it right before reset it.
+	OnResetPlayerMaxspeed(speed);
+
+	SET_CLIENT_MAXSPEED(edict(), speed);
 	pev->maxspeed = speed;
 }
 
@@ -8007,6 +8040,22 @@ void CBasePlayer::AssignRole(RoleTypes iNewRole)
 		CBaseSkill::Grand<CSkillGavelkind>(this);
 		break;
 
+	case Role_LeadEnforcer:
+		CBaseSkill::Grand<CSkillDmgIncByHP>(this);
+		CBaseSkill::Grand<CSkillResistDeath>(this);
+		break;
+
+	case Role_MadScientist:
+		CBaseSkill::Grand<CSkillTaserGun>(this);
+		CBaseSkill::Grand<CSkillRetribution>(this);
+		break;
+
+	case Role_Assassin:
+		CBaseSkill::Grand<CSkillInvisible>(this);
+		CBaseSkill::Grand<CSkillCriticalHit>(this);
+		CBaseSkill::Grand<CSkillRadarScan2>(this);
+		break;
+
 	case Role_Arsonist:
 		CBaseSkill::Grand<CSkillReduceDamage>(this);
 		break;
@@ -8196,16 +8245,14 @@ bool CBasePlayer::IsUsingPrimarySkill()
 	return false;
 }
 
-bool CBasePlayer::TerminatePrimarySkill()
+void CBasePlayer::DischargePrimarySkill(CBasePlayer* pCause)
 {
 	CBaseSkill* pSkill = GetPrimarySkill();
 
 	if (pSkill)
 	{
-		return pSkill->Terminate();
+		pSkill->Discharge(pCause);
 	}
-
-	return false;
 }
 
 float CBasePlayer::WeaponFireIntervalModifier(CBasePlayerWeapon* pWeapon)
@@ -8247,12 +8294,12 @@ float CBasePlayer::PlayerDamageDealtModifier(int bitsDamageTypes)
 	return flResult;
 }
 
-void CBasePlayer::OnPlayerDamagedPre(float& flDamage)
+void CBasePlayer::OnPlayerDamagedPre(entvars_t* pevInflictor, entvars_t* pevAttacker, float& flDamage, int& bitsDamageTypes)
 {
 	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
 	{
 		if (m_rgpSkills[i])
-			m_rgpSkills[i]->OnPlayerDamagedPre(flDamage);	// the active or not is determind in the function itself.
+			m_rgpSkills[i]->OnPlayerDamagedPre(pevInflictor, pevAttacker, flDamage, bitsDamageTypes);	// the active or not is determind in the function itself.
 	}
 }
 
@@ -8335,5 +8382,23 @@ void CBasePlayer::OnAddToFullPack(entity_state_s* pState, edict_t* pEnt, BOOL FI
 	{
 		if (m_rgpSkills[i])
 			m_rgpSkills[i]->OnAddToFullPack(pState, pEnt, FIsPlayer);
+	}
+}
+
+void CBasePlayer::OnBeingAddToFullPack(entity_state_s* pState, CBasePlayer* pHost)
+{
+	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	{
+		if (m_rgpSkills[i])
+			m_rgpSkills[i]->OnBeingAddToFullPack(pState, pHost);
+	}
+}
+
+void CBasePlayer::OnResetPlayerMaxspeed(float& flSpeed)
+{
+	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	{
+		if (m_rgpSkills[i])
+			m_rgpSkills[i]->OnResetPlayerMaxspeed(flSpeed);
 	}
 }

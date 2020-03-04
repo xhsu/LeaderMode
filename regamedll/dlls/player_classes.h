@@ -55,22 +55,22 @@ enum RoleTypes
 	// Auxiliary:		CSkillGavelkind
 
 	Role_LeadEnforcer,
-	// WeaponEnhance:	
-	// Attack:			
-	// Defense:			
-	// Auxiliary:		
+	// WeaponEnhance:	CSkillDmgIncByHP
+	// Attack:			CSkillResistDeath
+	// Defense:			-
+	// Auxiliary:		-
 
 	Role_MadScientist,
-	// WeaponEnhance:	
-	// Attack:			
-	// Defense:			
-	// Auxiliary:		
+	// WeaponEnhance:	CSkillTaserGun
+	// Attack:			-
+	// Defense:			CSkillRetribution
+	// Auxiliary:		-
 
 	Role_Assassin,
-	// WeaponEnhance:	
-	// Attack:			
-	// Defense:			
-	// Auxiliary:		
+	// WeaponEnhance:	CSkillCriticalHit
+	// Attack:			-
+	// Defense:			CSkillInvisible
+	// Auxiliary:		CSkillRadarScan2
 
 	Role_Arsonist,
 	// WeaponEnhance:	
@@ -137,7 +137,7 @@ public:
 	static const char* RADAR_BEEP_SFX;
 	static const char* RADAR_TARGET_DEAD_SFX;
 	static const char* COOLDOWN_COMPLETE_SFX;
-	static const char* CRETICAL_SHOT_SFX;
+	static const char* CRITICAL_SHOT_SFX;
 
 	static int m_idBulletTrace;
 
@@ -151,9 +151,10 @@ public:
 	CBasePlayer* m_pPlayer;
 
 public:	// skill action
-	virtual bool Execute()		{ return false; }
-	virtual void Think()		{ }
-	virtual bool Terminate()	{ return false; }
+	virtual bool Execute()						{ return false; }
+	virtual void Think()						{ }
+	virtual bool Terminate()					{ return false; }
+	virtual void Discharge(CBasePlayer* pCause) { Terminate(); }
 
 	// skill info
 	virtual const char* GetName() const		{ return "NULL skill!!"; }
@@ -171,19 +172,24 @@ public:	// skill action
 	// passive skill: damage
 	virtual float PlayerDamageSufferedModifier(int bitsDamageTypes) { return 1.0f; }
 	virtual float PlayerDamageDealtModifier(int bitsDamageTypes) { return 1.0f; }
-	virtual void OnPlayerDamagedPre(float& flDamage) { }
+	virtual void OnPlayerDamagedPre(entvars_t* pevInflictor, entvars_t* pevAttacker, float& flDamage, int& bitsDamageTypes) { }
 	virtual void OnTraceDamagePre(float& flDamage, TraceResult& tr) { }
 	virtual void OnFireBullets3PreDamage(float& flDamage, TraceResult& tr) { }
 	virtual void OnFireBuckshotsPreTraceAttack(float& flDamage, TraceResult& tr) { }
 	virtual void OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr) { }
 
 	// passive skill: death
-	virtual void OnPlayerDeath(CBasePlayer* pKiller) { Terminate(); }
+	virtual void OnPlayerDeath(CBasePlayer* pKiller) { if (m_bUsingSkill) Terminate(); }
 	virtual void OnPlayerKills(CBasePlayer* pVictim) { }
 
-	// passive skill: sight
+	// passive skill: visual
 	virtual bool OnBlind() { return true; }	// return false to block the blind.
 	virtual void OnAddToFullPack(entity_state_s* pState, edict_t* pEnt, BOOL FIsPlayer) { }
+	virtual void OnBeingAddToFullPack(entity_state_s* pState, CBasePlayer* pHost) { }
+
+	// passive skill: misc
+	virtual void OnResetPlayerMaxspeed(float& flSpeed) { }
+	virtual void OnTouched(CBaseEntity* pOther) { }
 };
 
 // Role_Commander: Battlefield Analysis
@@ -201,14 +207,14 @@ public:
 	float m_flNextRadarUpdate;
 
 public:
-	bool Execute();
-	void Think();
-	bool Terminate();
+	virtual bool Execute();
+	virtual void Think();
+	virtual bool Terminate();
 
-	const char* GetName() const	{ return "Battlefield Analysis"; }
-	SkillType Classify() const	{ return Skill_Auxiliary; }
-	float GetDuration() const { return DURATION; }
-	float GetCooldown() const { return COOLDOWN; }
+	virtual const char* GetName() const	{ return "Battlefield Analysis"; }
+	virtual SkillType Classify() const	{ return Skill_Auxiliary; }
+	virtual float GetDuration() const { return DURATION; }
+	virtual float GetCooldown() const { return COOLDOWN; }
 };
 
 // Role_Commander: Haste
@@ -305,7 +311,7 @@ public:
 	const char* GetName() const { return "[Passive] Liquid Armor"; }
 	SkillType Classify() const { return Skill_Auxiliary; }
 
-	void OnPlayerDamagedPre(float& flDamage);
+	void OnPlayerDamagedPre(entvars_t* pevInflictor, entvars_t* pevAttacker, float& flDamage, int& bitsDamageTypes);
 };
 
 // Role_Breacher: Explosive Bullets
@@ -475,4 +481,151 @@ public:
 	SkillType Classify() const { return Skill_Auxiliary; }
 	float GetDuration() const { return DURATION; }
 	float GetCooldown() const { return COOLDOWN; }
+};
+
+// Role_LeadEnforcer: Death Wish
+class CSkillDmgIncByHP : public CBaseSkill
+{
+public:
+	const char* GetName() const { return "[Passive] Death Wish"; }
+	SkillType Classify() const { return Skill_WeaponEnhance; }
+
+	float PlayerDamageDealtModifier(int bitsDamageTypes);
+};
+
+// Role_LeadEnforcer: Swan Song
+class CSkillResistDeath : public CBaseSkill
+{
+public:
+	static const float DURATION;
+	static const float COOLDOWN;
+	static const char* ACTIVATION_SFX;
+	static const float DASH_SPEED;
+	static const float INJURE_SPEED;
+
+public:
+	EntityHandle<CBaseEntity> m_pLastAttacker;
+	EntityHandle<CBaseEntity> m_pLastInflictor;
+
+public:
+	bool Execute();
+	void Think();
+	bool Terminate();
+
+	const char* GetName() const { return "Swan Song"; }
+	SkillType Classify() const { return Skill_Attack; }
+	float GetDuration() const { return DURATION; }
+	float GetCooldown() const { return COOLDOWN; }
+
+	void OnPlayerDamagedPre(entvars_t* pevInflictor, entvars_t* pevAttacker, float& flDamage, int& bitsDamageTypes);
+	bool OnBlind() { return !m_bUsingSkill; }	// return false to block the blind.
+	void OnResetPlayerMaxspeed(float& flSpeed);
+};
+
+// Role_MadScientist: Electromagnetic Bullets
+class CSkillTaserGun : public CBaseSkill
+{
+public:
+	static const float DURATION;
+	static const float COOLDOWN;
+	static const char* ACTIVATION_SFX;
+	static const char* STATIC_ELEC_SFX;
+	static const char* ELECTROBULLETS_SFX;
+	static const char* ELECTRIFY_SFX;
+	static const float DRAG_SPEED;
+	static const float ELEC_LASTING;
+
+public:
+	bool Execute();
+	void Think();
+	bool Terminate();
+
+	const char* GetName() const { return "Electromagnetic Bullets"; }
+	SkillType Classify() const { return Skill_WeaponEnhance; }
+	float GetDuration() const { return DURATION; }
+	float GetCooldown() const { return COOLDOWN; }
+
+	float WeaponFireIntervalModifier(CBasePlayerWeapon* pWeapon);
+	void OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr);
+};
+
+// Role_MadScientist: Electromagnetic Armour
+class CSkillRetribution : public CBaseSkill
+{
+public:
+	static const float RETRIBUTION_RATIO;
+
+public:
+	const char* GetName() const { return "[Passive] Electromagnetic Armour"; }
+	SkillType Classify() const { return Skill_Defense; }
+
+	void OnPlayerDamagedPre(entvars_t* pevInflictor, entvars_t* pevAttacker, float& flDamage, int& bitsDamageTypes);
+};
+
+// Role_Assassin: Chameleon Cloak
+class CSkillInvisible : public CBaseSkill
+{
+public:
+	static const float DURATION;
+	static const float COOLDOWN;
+	static const char* ACTIVATION_SFX;
+	static const char* DISCOVERED_SFX;
+	static const float SNEAKING_SPEED;
+	static const float SNEAKING_GRAVITY;
+	static const int HIDEHUD;
+	static const Vector SCREEN_COLOUR;
+
+public:
+	bool Execute();
+	void Think();
+	bool Terminate();
+	void Discharge(CBasePlayer* pCause);
+
+	const char* GetName() const { return "Chameleon Cloak"; }
+	SkillType Classify() const { return Skill_Defense; }
+	float GetDuration() const { return DURATION; }
+	float GetCooldown() const { return COOLDOWN; }
+
+	void OnPlayerDamagedPre(entvars_t* pevInflictor, entvars_t* pevAttacker, float& flDamage, int& bitsDamageTypes);
+	void OnBeingAddToFullPack(entity_state_s* pState, CBasePlayer* pHost);
+	void OnResetPlayerMaxspeed(float& flSpeed) { if (m_bUsingSkill) flSpeed = SNEAKING_SPEED; }
+	void OnTouched(CBaseEntity* pOther);
+};
+
+// Role_Assassin: Backlash
+class CSkillCriticalHit : public CBaseSkill
+{
+public:
+	static const float NORMAL_CHANCE;
+	static const float BACKSTAB_CHANCE;
+	static const int ALLOWED_WEAPONS;
+
+public:
+	const char* GetName() const { return "[Passive] Backlash"; }
+	SkillType Classify() const { return Skill_WeaponEnhance; }
+
+	void OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr);
+};
+
+// Role_Assassin: Inside Job
+class CSkillRadarScan2 : public CBaseSkill
+{
+public:
+	static const float DURATION;
+	static const float COOLDOWN;
+	static const float UPDATE_DISTANCE_INTERVAL;
+
+public:
+	EntityHandle<CBasePlayer> m_pTracing;
+	Vector m_vecLastPosition;
+
+public:
+	virtual bool Execute();
+	virtual void Think();
+	virtual bool Terminate();
+
+	virtual const char* GetName() const { return "Inside Job"; }
+	virtual SkillType Classify() const { return Skill_Auxiliary; }
+	virtual float GetDuration() const { return DURATION; }
+	virtual float GetCooldown() const { return COOLDOWN; }
 };

@@ -2490,7 +2490,7 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 	}
 	else
 	{
-		if (g_pGameRules->ClientCommand_DeadOrAlive(GetClassPtr((CBasePlayer *)pev), pcmd))
+		if (CSGameRules()->ClientCommand_DeadOrAlive(GetClassPtr((CBasePlayer *)pev), pcmd))
 			return;
 
 		if (TheBots)
@@ -2798,6 +2798,18 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 			else if (FStrEq(pcmd, "-qtg"))
 			{
 				pPlayer->QuickThrowGrenade_Release();
+			}
+			else if (FStrEq(pcmd, "electrify"))
+			{
+				gElectrifiedDOTMgr::Set(pPlayer, atoi(parg1), pPlayer->pev->origin + pPlayer->pev->view_ofs);
+			}
+			else if (FStrEq(pcmd, "poison"))
+			{
+				gPoisonDOTMgr::Set(pPlayer, pPlayer, atoi(parg1));
+			}
+			else if (FStrEq(pcmd, "ignite"))
+			{
+				gBurningDOTMgr::Set(pPlayer, pPlayer, atoi(parg1));
 			}
 			else
 			{
@@ -3793,6 +3805,10 @@ BOOL EXT_FUNC AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, e
 	state->iuser4 = ent->v.iuser4;
 
 	CBasePlayer::Instance(host)->OnAddToFullPack(state, ent, player);
+
+	if (player)
+		CBasePlayer::Instance(ent)->OnBeingAddToFullPack(state, CBasePlayer::Instance(host));
+
 	return TRUE;
 }
 

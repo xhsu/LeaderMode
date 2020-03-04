@@ -380,6 +380,9 @@ void CGrenade::SG_Detonate()
 
 	if (m_bHealing)	// is this a healing grenade?
 		CHealingSmokeCenter::Create(vecSpot, CBasePlayer::Instance(pev->owner));
+
+	if (m_bPoisoned)	// is this a nerve gas grenade?
+		CPoisonedSmokeCentre::Create(vecSpot, CBasePlayer::Instance(pev->owner));
 }
 
 void CGrenade::Detonate3()
@@ -846,6 +849,14 @@ CGrenade* CGrenade::HealingGrenade(entvars_t* pevOwner, Vector vecStart, Vector 
 {
 	CGrenade* pGrenade = ShootSmokeGrenade(pevOwner, vecStart, vecVelocity, time, usEvent);
 	pGrenade->m_bHealing = true;
+
+	return pGrenade;
+}
+
+CGrenade* CGrenade::NerveGasGrenade(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity, float time, unsigned short usEvent)
+{
+	CGrenade* pGrenade = ShootSmokeGrenade(pevOwner, vecStart, vecVelocity, time, usEvent);
+	pGrenade->m_bPoisoned = true;
 
 	return pGrenade;
 }

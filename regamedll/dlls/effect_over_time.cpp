@@ -88,6 +88,9 @@ void CHealingSmokeCenter::Think()
 			continue;
 		*/
 
+		if ((pPlayer->m_iRoleType == Role_Assassin || pPlayer->m_iRoleType == Role_LeadEnforcer) && pPlayer->IsUsingPrimarySkill())
+			pPlayer->DischargePrimarySkill(m_pPlayer);
+
 		float flOHMaximum = pPlayer->pev->max_health * gOverHealingMgr::OVERHEALING_MAX_RATIO;
 		if (pPlayer->pev->health >= flOHMaximum)
 		{
@@ -174,6 +177,9 @@ void gFrozenDOTMgr::Set(CBasePlayer* pPlayer, int iDamage, entvars_t* pevInflict
 		CIceCube::Create(pPlayer);
 	}
 
+	if (pPlayer->m_flElectrifyTimeUp > 0.0f)	// stop the electricity then we can freeze.
+		gElectrifiedDOTMgr::Free(pPlayer);
+
 	if (iDamage > 0)
 		pPlayer->TakeDamage(pevInflictor, pevAttacker, iDamage, DMG_FREEZE);
 
@@ -239,4 +245,389 @@ void gFrozenDOTMgr::Free(CBasePlayer* pPlayer)
 	MESSAGE_END();
 
 	pPlayer->m_flFrozenNextThink = 0.0f;
+}
+
+/////////////////
+// ELECTRIFIED //
+/////////////////
+
+const float gElectrifiedDOTMgr::WALK_SPEED_LIMIT = 125.0f;
+
+void gElectrifiedDOTMgr::Set(CBasePlayer* pPlayer, float flTime, Vector vecShotPlace)
+{
+	if (pPlayer->m_flFrozenNextThink > 0.0)	// you can't electrify some frozen guy.
+		return;
+
+	if (pPlayer->m_flElectrifyTimeUp <= 0.0)
+	{
+		pPlayer->m_flElectrifyStarts = gpGlobals->time;	// this value is not reset even if re-electrified.
+		pPlayer->m_bElectrifySFXPlayed = false;
+	}
+
+	pPlayer->m_flElectrifyTimeUp = gpGlobals->time + flTime;
+	pPlayer->m_vecElectrifyBulletOFS = vecShotPlace - pPlayer->pev->origin;
+}
+
+void gElectrifiedDOTMgr::Think(CBasePlayer* pPlayer)
+{
+	if (pPlayer->m_flElectrifyTimeUp <= 0.0)	// not electrified.
+		return;
+
+	if (pPlayer->m_flElectrifyTimeUp < gpGlobals->time)	// de-electrify
+	{
+		pPlayer->ResetMaxSpeed();
+		pPlayer->m_flElectrifyTimeUp = -1.0f;
+
+		STOP_SOUND(pPlayer->edict(), CHAN_STATIC, CSkillTaserGun::ELECTRIFY_SFX);
+		UTIL_ScreenFade(pPlayer, Vector(RANDOM_LONG(0, 255), RANDOM_LONG(0, 255), RANDOM_LONG(0, 255)), 0.3f, 0.2f, RANDOM_LONG(60, 100), FFADE_IN);
+
+		return;
+	}
+
+	if (!pPlayer->m_bElectrifySFXPlayed)
+	{
+		pPlayer->m_bElectrifySFXPlayed = true;
+		EMIT_SOUND(pPlayer->edict(), CHAN_STATIC, CSkillTaserGun::ELECTRIFY_SFX, VOL_NORM, ATTN_STATIC);
+	}
+
+	if (pPlayer->m_flElectrifyIcon < gpGlobals->time)
+	{
+		MESSAGE_BEGIN(MSG_ONE_UNRELIABLE, gmsgDamage, g_vecZero, pPlayer->pev);
+		WRITE_BYTE(0); // damage save
+		WRITE_BYTE(0); // damage take
+		WRITE_LONG(DMG_SHOCK); // damage type
+		WRITE_COORD(0); // x
+		WRITE_COORD(0); // y
+		WRITE_COORD(0); // z
+		MESSAGE_END();
+
+		pPlayer->m_flElectrifyIcon = gpGlobals->time + 3.75f;
+	}
+
+	if (pPlayer->m_flElectrifyNextVFX < gpGlobals->time)
+	{
+		VFX(pPlayer);
+		pPlayer->m_flElectrifyNextVFX = gpGlobals->time + RANDOM_FLOAT(0.1f, 0.5f);
+	}
+
+	if (pPlayer->m_flElectrifyNextScreenFade < gpGlobals->time)
+	{
+		UTIL_NvgScreen(pPlayer, RANDOM_LONG(0, 255), RANDOM_LONG(0, 255), RANDOM_LONG(0, 255), RANDOM_LONG(64, 128));
+		pPlayer->m_flElectrifyNextScreenFade = gpGlobals->time + RANDOM_FLOAT(1.5, 3.0);
+	}
+
+	if (pPlayer->m_flElectrifyNextPunch < gpGlobals->time)
+	{
+		pPlayer->pev->punchangle = Vector(RANDOM_LONG(-20, 20), RANDOM_LONG(-20, 20), RANDOM_LONG(-20, 20));
+
+		MESSAGE_BEGIN(MSG_ONE, gmsgShake, g_vecZero, pPlayer->edict());
+		WRITE_SHORT(FixedUnsigned16(32.0f, 1 << 12));	// atu
+		WRITE_SHORT(FixedUnsigned16(0.5f, 1 << 12));	// freq
+		WRITE_SHORT(FixedUnsigned16(5.0f, 1 << 12));	// dur
+		MESSAGE_END();
+
+		pPlayer->m_flElectrifyNextPunch = gpGlobals->time + RANDOM_FLOAT(0.6f, 1.2f);
+	}
+
+	if (gpGlobals->time - pPlayer->m_flElectrifyStarts > 6.0f)	// drop primary weapon.
+	{
+		if (!FNullEnt(pPlayer->m_rgpPlayerItems[PRIMARY_WEAPON_SLOT]))
+		{
+			pPlayer->DropPlayerItem(pPlayer->m_rgpPlayerItems[PRIMARY_WEAPON_SLOT]->pev->classname);
+		}
+	}
+
+	// random shoot
+	if (!RANDOM_LONG(0, 5))
+		pPlayer->pev->button |= IN_ATTACK;
+
+	// random don't shoot.
+	if (!RANDOM_LONG(0, 2))
+		pPlayer->pev->button &= ~IN_ATTACK;
+
+	SET_CLIENT_MAXSPEED(pPlayer->edict(), WALK_SPEED_LIMIT);
+}
+
+void gElectrifiedDOTMgr::Free(CBasePlayer* pPlayer)
+{
+	pPlayer->m_flElectrifyTimeUp = Q_min(pPlayer->m_flElectrifyTimeUp, 1.0f);	// if it was 0, never set it back to 1.
+}
+
+void gElectrifiedDOTMgr::VFX(CBasePlayer* pPlayer)
+{
+	Vector vecOrigin = pPlayer->pev->origin + pPlayer->m_vecElectrifyBulletOFS;
+
+	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, vecOrigin);
+	WRITE_BYTE(TE_DLIGHT);
+	WRITE_COORD(vecOrigin[0]);
+	WRITE_COORD(vecOrigin[1]);
+	WRITE_COORD(vecOrigin[2]);
+	WRITE_BYTE(20);		//range
+	WRITE_BYTE(160);
+	WRITE_BYTE(250);
+	WRITE_BYTE(250);
+	WRITE_BYTE(1);		//time
+	WRITE_BYTE(0);
+	MESSAGE_END();
+
+	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, vecOrigin);
+	WRITE_BYTE(TE_SPARKS);
+	WRITE_COORD(vecOrigin[0]);
+	WRITE_COORD(vecOrigin[1]);
+	WRITE_COORD(vecOrigin[2]);
+	MESSAGE_END();
+
+	vecOrigin[0] += RANDOM_FLOAT(-32.0, 32.0);
+	vecOrigin[1] += RANDOM_FLOAT(-32.0, 32.0);
+	vecOrigin[2] += RANDOM_FLOAT(-36.0, 36.0);
+
+	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, vecOrigin);
+	WRITE_BYTE(TE_SPARKS);
+	WRITE_COORD(vecOrigin[0]);
+	WRITE_COORD(vecOrigin[1]);
+	WRITE_COORD(vecOrigin[2]);
+	MESSAGE_END();
+
+	UTIL_BeamEntPoint(pPlayer->entindex(), vecOrigin, MODEL_INDEX("sprites/lgtning.spr"), 0, 100, 1, 31, 125, 160, 250, 250, 255, RANDOM_LONG(20, 30));
+}
+
+//////////////
+// POISONED //
+//////////////
+
+LINK_ENTITY_TO_CLASS(poisoned_smoke_centre, CPoisonedSmokeCentre);
+
+const char* CPoisonedSmokeCentre::COUGH_SFX[6] =
+{
+	"leadermode/cough1.wav",
+	"leadermode/cough2.wav",
+	"leadermode/cough3.wav",
+	"leadermode/cough4.wav",
+	"leadermode/cough5.wav",
+	"leadermode/cough6.wav",
+};
+const char* CPoisonedSmokeCentre::BREATHE_SFX = "leadermode/breathe1.wav";
+const float CPoisonedSmokeCentre::DURATION = 5.0f;
+const Vector CPoisonedSmokeCentre::POISON_COLOUR = Vector(128, 255, 128);
+
+CPoisonedSmokeCentre* CPoisonedSmokeCentre::Create(Vector vecOrigin, CBasePlayer* pAttacker, float flRadius, float flTimeRemoved)
+{
+	CPoisonedSmokeCentre* pEntity = GetClassPtr((CPoisonedSmokeCentre*)nullptr);
+	SET_ORIGIN(pEntity->edict(), vecOrigin);
+	pEntity->pev->nextthink = gpGlobals->time + 0.01f;
+	pEntity->m_pPlayer = pAttacker;
+	pEntity->m_flTimeRemoved = gpGlobals->time + flTimeRemoved;
+	pEntity->m_flRadius = flRadius;
+
+	MESSAGE_BEGIN(MSG_ALL, SVC_TEMPENTITY);
+	WRITE_BYTE(TE_DLIGHT);
+	WRITE_COORD(vecOrigin[0]);
+	WRITE_COORD(vecOrigin[1]);
+	WRITE_COORD(vecOrigin[2]);
+	WRITE_BYTE(int(flRadius / 10.0f));		// range: 275 ?
+	WRITE_BYTE(POISON_COLOUR.x);
+	WRITE_BYTE(POISON_COLOUR.y);
+	WRITE_BYTE(POISON_COLOUR.z);
+	WRITE_BYTE(int(flTimeRemoved * 10.0f));	// time: original CS smokegrenade lasts 25 sec.
+	WRITE_BYTE(0);
+	MESSAGE_END();
+
+	return pEntity;
+}
+
+void CPoisonedSmokeCentre::Precache()
+{
+	PRECACHE_SOUND(BREATHE_SFX);
+	PRECACHE_SOUND_ARRAY(COUGH_SFX);
+}
+
+void CPoisonedSmokeCentre::Think()
+{
+	if (m_flTimeRemoved < gpGlobals->time)
+	{
+		pev->flags |= FL_KILLME;
+		return;
+	}
+
+	CBasePlayer* pPlayer = nullptr;
+	while ((pPlayer = UTIL_FindEntityInSphere(pPlayer, pev->origin, m_flRadius)))
+	{
+		if (FNullEnt(pPlayer) || !pPlayer->IsPlayer())
+			continue;
+
+		TraceResult tr;
+		UTIL_TraceLine(pev->origin, pPlayer->pev->origin, ignore_monsters, ignore_glass, pPlayer->edict(), &tr);
+		if (tr.flFraction < 1.0f)	// not visible.
+			continue;
+
+		if (pPlayer->m_iRoleType == Role_Assassin && pPlayer->IsUsingPrimarySkill())
+			pPlayer->DischargePrimarySkill(m_pPlayer);
+
+		gPoisonDOTMgr::Set(pPlayer, m_pPlayer, DURATION);
+	}
+
+	pev->nextthink = gpGlobals->time + 0.1f;
+}
+
+extern const float gPoisonDOTMgr::MAX_DAMAGE = 7.0f;
+extern const float gPoisonDOTMgr::DAMAGE_INTERVAL = 1.0f;
+
+void gPoisonDOTMgr::Set(CBasePlayer* pPlayer, CBasePlayer* pAttacker, float flTime)
+{
+	pPlayer->m_pPoisonedBy = pAttacker;
+	pPlayer->m_flPoisonedTimeUp = gpGlobals->time + flTime;
+}
+
+void gPoisonDOTMgr::Think(CBasePlayer* pPlayer)
+{
+	if (pPlayer->m_flPoisonedBreathSFXStop > 0.0 && pPlayer->m_flPoisonedBreathSFXStop < gpGlobals->time)
+	{
+		STOP_SOUND(pPlayer->edict(), CHAN_STATIC, CPoisonedSmokeCentre::BREATHE_SFX);
+		pPlayer->m_flPoisonedBreathSFXStop = 0;
+		return;
+	}
+
+	if (pPlayer->m_flPoisonedTimeUp <= 0.0)	// not poisoned.
+		return;
+
+	if (pPlayer->m_flPoisonedTimeUp < gpGlobals->time)	// detoxify
+	{
+		pPlayer->m_bPoisonedScreenFadeIn = false;
+		pPlayer->m_flPoisonedTimeUp = 0.0;
+		pPlayer->m_flPoisonedBreathSFXStop = gpGlobals->time + 6.0f;
+		EMIT_SOUND(pPlayer->edict(), CHAN_STATIC, CPoisonedSmokeCentre::BREATHE_SFX, VOL_NORM, ATTN_STATIC);
+		return;
+	}
+
+	if (pPlayer->m_flPoisonedNextFade < gpGlobals->time)
+	{
+		UTIL_ScreenFade(pPlayer, CPoisonedSmokeCentre::POISON_COLOUR, 0.6f, 0.4f, 150, pPlayer->m_bPoisonedScreenFadeIn ? FFADE_IN : FFADE_OUT);
+
+		pPlayer->m_bPoisonedScreenFadeIn = !pPlayer->m_bPoisonedScreenFadeIn;
+		pPlayer->m_flPoisonedNextFade = gpGlobals->time + 1.0f;
+	}
+
+	if (pPlayer->m_flPoisonedNextCoughSFX < gpGlobals->time)
+	{
+		EMIT_SOUND(pPlayer->edict(), CHAN_AUTO, RANDOM_ARRAY(CPoisonedSmokeCentre::COUGH_SFX), VOL_NORM, ATTN_STATIC);
+		pPlayer->m_flPoisonedNextCoughSFX = gpGlobals->time + RANDOM_FLOAT(2.5f, 4.0f);
+	}
+
+	if (pPlayer->m_flPoisonedNextDamage < gpGlobals->time)
+	{
+		pPlayer->TakeDamage(pPlayer->m_pPoisonedBy.IsValid() ? pPlayer->m_pPoisonedBy->pev : pPlayer->pev,
+							pPlayer->m_pPoisonedBy.IsValid() ? pPlayer->m_pPoisonedBy->pev : pPlayer->pev,
+							RANDOM_FLOAT(MAX_DAMAGE / 2.0f, MAX_DAMAGE),
+							DMG_NERVEGAS | DMG_NEVERGIB);
+
+		pPlayer->m_flPoisonedNextDamage = gpGlobals->time + DAMAGE_INTERVAL;
+	}
+}
+
+void gPoisonDOTMgr::Free(CBasePlayer* pPlayer)
+{
+	pPlayer->m_flPoisonedTimeUp = Q_min(pPlayer->m_flPoisonedTimeUp, 1.0f);	// if it was already 0, never set it back to 1.
+}
+
+/////////////
+// BURNING //
+/////////////
+
+LINK_ENTITY_TO_CLASS(incendiary_grenade_centre, CIncendiaryGrenadeCentre);
+
+const char* CIncendiaryGrenadeCentre::DETONATE = "leadermode/molotov_detonate_3.wav";
+const char* CIncendiaryGrenadeCentre::FIRE_SFX_LOOP = "leadermode/fire_loop_1.wav";
+const char* CIncendiaryGrenadeCentre::FIRE_SFX_FADEOUT = "leadermode/fire_loop_fadeout_01.wav";
+const char* CIncendiaryGrenadeCentre::SCREAMS[5] = { "leadermode/burning_scream_01.wav", "leadermode/burning_scream_02.wav", "leadermode/burning_scream_03.wav", "leadermode/burning_scream_04.wav", "leadermode/burning_scream_05.wav" };
+const float CIncendiaryGrenadeCentre::DAMAGE = 15.0f;
+const float CIncendiaryGrenadeCentre::INTERVAL = 0.7f;
+int CIncendiaryGrenadeCentre::FLAME_SPR = 0;
+
+void CIncendiaryGrenadeCentre::Precache()
+{
+	PRECACHE_SOUND(DETONATE);
+	PRECACHE_SOUND(FIRE_SFX_LOOP);
+	PRECACHE_SOUND(FIRE_SFX_FADEOUT);
+	PRECACHE_SOUND_ARRAY(SCREAMS);
+
+	FLAME_SPR = PRECACHE_MODEL("sprites/leadermode/flame.spr");
+}
+
+void CIncendiaryGrenadeCentre::Think()
+{
+}
+
+const float gBurningDOTMgr::MAX_DAMAGE = 14.0f;
+const float gBurningDOTMgr::DAMAGE_INTERVAL = 0.5f;
+
+void gBurningDOTMgr::Set(CBasePlayer* pPlayer, CBasePlayer* pAttacker, float flTime)
+{
+	pPlayer->m_pIgnitedBy = pAttacker;
+	pPlayer->m_flBurningTimeUp = gpGlobals->time + flTime;
+
+	UTIL_NvgScreen(pPlayer, 255, 117, 26, 40);
+}
+
+void gBurningDOTMgr::Think(CBasePlayer* pPlayer)
+{
+	if (pPlayer->m_flBurningTimeUp <= 0.0f)	// not burning.
+		return;
+
+	if (pPlayer->m_flBurningTimeUp < gpGlobals->time)	// quench.
+	{
+		UTIL_ScreenFade(pPlayer, Vector(255, 117, 26), 0.3f, 0.2f, 40, FFADE_IN);
+		pPlayer->ResetMaxSpeed();
+		pPlayer->m_flBurningTimeUp = -1.0f;
+		STOP_SOUND(pPlayer->edict(), CHAN_STATIC, CIncendiaryGrenadeCentre::FIRE_SFX_LOOP);
+		EMIT_SOUND(pPlayer->edict(), CHAN_AUTO, CIncendiaryGrenadeCentre::FIRE_SFX_FADEOUT, VOL_NORM, ATTN_STATIC);
+
+		return;
+	}
+
+	if (pPlayer->m_flBurningNextDamage < gpGlobals->time)
+	{
+		pPlayer->TakeDamage(&INDEXENT(0)->v, pPlayer->m_pIgnitedBy.IsValid() ? pPlayer->m_pIgnitedBy->pev : &INDEXENT(0)->v, RANDOM_FLOAT(MAX_DAMAGE / 2.0F, MAX_DAMAGE), DMG_BURN | DMG_NEVERGIB);
+
+		pPlayer->m_flBurningNextDamage = gpGlobals->time + DAMAGE_INTERVAL;
+	}
+
+	if (pPlayer->m_flBurningFlameThink < gpGlobals->time)
+	{
+		Vector vecOrigin = pPlayer->pev->origin + Vector(RANDOM_FLOAT(-16.0f, 16.0f), RANDOM_FLOAT(-16.0f, 16.0f), RANDOM_FLOAT(-36.0f, 36.0f));
+
+		MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, vecOrigin);
+		WRITE_BYTE(TE_SPRITE);
+		WRITE_COORD(vecOrigin[0]);
+		WRITE_COORD(vecOrigin[1]);
+		WRITE_COORD(vecOrigin[2]);
+		WRITE_SHORT(CIncendiaryGrenadeCentre::FLAME_SPR);
+		WRITE_BYTE(RANDOM_LONG(9, 11));
+		WRITE_BYTE(100);
+		MESSAGE_END();
+
+		pPlayer->m_flBurningFlameThink = gpGlobals->time + 0.1f;
+	}
+
+	if (pPlayer->m_flBurningNextScream < gpGlobals->time)
+		Scream(pPlayer);
+
+	if (pPlayer->m_flBurningSFX < gpGlobals->time)
+	{
+		EMIT_SOUND(pPlayer->edict(), CHAN_STATIC, CIncendiaryGrenadeCentre::FIRE_SFX_LOOP, VOL_NORM, ATTN_STATIC);
+		pPlayer->m_flBurningSFX = gpGlobals->time + 4.0f;
+	}
+}
+
+void gBurningDOTMgr::Free(CBasePlayer* pPlayer)
+{
+	pPlayer->m_flBurningTimeUp = Q_min(pPlayer->m_flBurningTimeUp, 1.0f);	// if it was already 0, never set it back to 1.
+}
+
+void gBurningDOTMgr::Scream(CBasePlayer* pPlayer)
+{
+	if (pPlayer->m_flBurningNextScream >= gpGlobals->time)
+		return;
+
+	EMIT_SOUND(pPlayer->edict(), CHAN_AUTO, RANDOM_ARRAY(CIncendiaryGrenadeCentre::SCREAMS), VOL_NORM, ATTN_NORM);
+	pPlayer->m_flBurningNextScream = gpGlobals->time + RANDOM_FLOAT(3.0f, 3.5f);
 }

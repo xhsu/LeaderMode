@@ -105,11 +105,7 @@ public:
 	// This is ONLY used by the node graph to test movement through a door
 	virtual void SetToggleState(int state) {}
 
-	virtual void StartSneaking() {}
-	virtual void StopSneaking() {}
-
 	virtual BOOL OnControls(entvars_t *onpev) { return FALSE; }
-	virtual BOOL IsSneaking() { return FALSE; }
 	virtual BOOL IsAlive() { return (pev->deadflag == DEAD_NO && pev->health > 0.0f); }
 	virtual BOOL IsBSPModel() { return (pev->solid == SOLID_BSP || pev->movetype == MOVETYPE_PUSHSTEP); }
 	virtual BOOL ReflectGauss() { return (IsBSPModel() && pev->takedamage == DAMAGE_NO); }
