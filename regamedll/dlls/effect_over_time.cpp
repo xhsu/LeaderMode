@@ -180,6 +180,9 @@ void gFrozenDOTMgr::Set(CBasePlayer* pPlayer, int iDamage, entvars_t* pevInflict
 	if (pPlayer->m_flElectrifyTimeUp > 0.0f)	// stop the electricity then we can freeze.
 		gElectrifiedDOTMgr::Free(pPlayer);
 
+	if (pPlayer->m_flBurningTimeUp > 0.0f)	// quench the flames on him.
+		gBurningDOTMgr::Free(pPlayer);
+
 	if (iDamage > 0)
 		pPlayer->TakeDamage(pevInflictor, pevAttacker, iDamage, DMG_FREEZE);
 
@@ -543,6 +546,41 @@ const float CIncendiaryGrenadeCentre::DAMAGE = 15.0f;
 const float CIncendiaryGrenadeCentre::INTERVAL = 0.7f;
 int CIncendiaryGrenadeCentre::FLAME_SPR = 0;
 
+CIncendiaryGrenadeCentre* CIncendiaryGrenadeCentre::Create(Vector vecOrigin, CBasePlayer* pAttacker, float flRadius, float flTimeRemoved)
+{
+	CIncendiaryGrenadeCentre* pEntity = GetClassPtr((CIncendiaryGrenadeCentre*)nullptr);
+	SET_ORIGIN(pEntity->edict(), vecOrigin);
+	pEntity->m_pPlayer = pAttacker;
+	pEntity->m_flRadius = flRadius;
+	pEntity->m_flTimeRemoved = gpGlobals->time + flTimeRemoved + 10.0f;	// a buffer for SFX.
+	pEntity->pev->rendermode = kRenderTransAlpha;
+	pEntity->pev->renderamt = 0;
+	pEntity->pev->solid = SOLID_NOT;
+	pEntity->pev->movetype = MOVETYPE_NONE;
+	pEntity->pev->nextthink = gpGlobals->time + INTERVAL;
+
+	EMIT_SOUND(pEntity->edict(), CHAN_AUTO, DETONATE, VOL_NORM, ATTN_NORM);
+
+	CBasePlayer* pPlayer = nullptr;
+	while ((pPlayer = UTIL_FindEntityInSphere(pPlayer, pEntity->pev->origin, pEntity->m_flRadius)))
+	{
+		if (FNullEnt(pPlayer) || !pPlayer->IsPlayer())
+			continue;
+
+		if (pPlayer->pev->takedamage == DAMAGE_NO)
+			continue;
+
+		TraceResult tr;
+		UTIL_TraceLine(pEntity->pev->origin, pPlayer->pev->origin, ignore_monsters, ignore_glass, pPlayer->edict(), &tr);
+		if (tr.flFraction < 1.0f)	// not visible.
+			continue;
+
+		gBurningDOTMgr::Set(pPlayer, pAttacker, flTimeRemoved / 2.0f);	// it would be an extremely long burning if you are inside.
+	}
+
+	return nullptr;
+}
+
 void CIncendiaryGrenadeCentre::Precache()
 {
 	PRECACHE_SOUND(DETONATE);
@@ -555,6 +593,104 @@ void CIncendiaryGrenadeCentre::Precache()
 
 void CIncendiaryGrenadeCentre::Think()
 {
+	if (m_flTimeRemoved - gpGlobals->time <= 10.0f)
+	{
+		STOP_SOUND(edict(), CHAN_WEAPON, FIRE_SFX_LOOP);
+		EMIT_SOUND(edict(), CHAN_ITEM, FIRE_SFX_FADEOUT, VOL_NORM, ATTN_NORM);
+
+		pev->flags |= FL_KILLME;
+		return;
+	}
+
+	pev->nextthink = gpGlobals->time + 0.01f;
+
+	if (m_flNextDamageCheck <= gpGlobals->time)
+	{
+		CBaseEntity* pEntity = nullptr;
+		while ((pEntity = UTIL_FindEntityInSphere(pEntity, pev->origin, m_flRadius)))
+		{
+			if (FNullEnt(pEntity))
+				continue;
+
+			if (pEntity->pev->takedamage == DAMAGE_NO)
+				continue;
+
+			TraceResult tr;
+			UTIL_TraceLine(pEntity->Center(), pev->origin, ignore_monsters, ignore_glass, pEntity->edict(), &tr);
+			if (tr.flFraction < 1.0f)	// not visible.
+				continue;
+
+			if (pEntity->IsPlayer())
+			{
+				CBasePlayer* pPlayer = CBasePlayer::Instance(pEntity->pev);
+
+				if (pPlayer->m_flFrozenNextThink > 0.0f)	// melt the ice.
+					gFrozenDOTMgr::Free(pPlayer);
+
+				if (pPlayer->m_iRoleType == Role_Assassin && pPlayer->IsUsingPrimarySkill())
+					pPlayer->DischargePrimarySkill(m_pPlayer);
+
+				gBurningDOTMgr::Scream(pPlayer);	// scream SFX CD is included in function.
+			}
+
+			float flDamage = Q_max(DAMAGE * ((m_flRadius - (pev->origin - pEntity->pev->origin).Length()) / m_flRadius), 0.0);
+
+			if (flDamage <= 1.0)
+				continue;
+
+			pEntity->TakeDamage(pev, m_pPlayer.IsValid() ? m_pPlayer->pev : &INDEXENT(0)->v, flDamage, DMG_SLOWBURN);
+		}
+
+		m_flNextDamageCheck = gpGlobals->time + INTERVAL;
+	}
+
+	if (m_flNextFireLoopSFX <= gpGlobals->time)
+	{
+		EMIT_SOUND(edict(), CHAN_WEAPON, FIRE_SFX_LOOP, VOL_NORM, ATTN_NORM);
+		m_flNextFireLoopSFX = gpGlobals->time + 4.0f;
+	}
+
+	if (m_flNextFlameSpr <= gpGlobals->time)
+	{
+		m_flNextFlameSpr = gpGlobals->time + 0.1f;
+
+		Vector vecOrigin;
+		edict_t* pEntity = CREATE_NAMED_ENTITY(MAKE_STRING("info_target"));
+
+		for (int i = 0; i < int(m_flRadius / 40.0f); i++)
+		{
+			vecOrigin = pev->origin;
+			vecOrigin.x += RANDOM_FLOAT(-m_flRadius / 2.0f, m_flRadius / 2.0f);
+			vecOrigin.y += RANDOM_FLOAT(-m_flRadius / 2.0f, m_flRadius / 2.0f);
+
+			if (POINT_CONTENTS(vecOrigin) != CONTENTS_EMPTY)
+				vecOrigin[2] += (vecOrigin - pev->origin).Length2D();
+
+			pEntity->v.origin = vecOrigin;
+			DROP_TO_FLOOR(pEntity);
+			vecOrigin = pEntity->v.origin;
+
+			if (POINT_CONTENTS(vecOrigin) != CONTENTS_EMPTY)
+				continue;
+
+			TraceResult tr;
+			UTIL_TraceLine(pEntity->v.origin, vecOrigin, ignore_monsters, ignore_glass, pEntity, &tr);
+			if (tr.flFraction < 1.0f)	// not visible.
+				continue;
+
+			MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, vecOrigin);
+			WRITE_BYTE(TE_SPRITE);
+			WRITE_COORD(vecOrigin[0]);
+			WRITE_COORD(vecOrigin[1]);
+			WRITE_COORD(vecOrigin[2] + RANDOM_FLOAT(75.0f, 95.0f));
+			WRITE_SHORT(FLAME_SPR);
+			WRITE_BYTE(RANDOM_LONG(9, 11));
+			WRITE_BYTE(100);
+			MESSAGE_END();
+		}
+
+		pEntity->v.flags |= FL_KILLME;
+	}
 }
 
 const float gBurningDOTMgr::MAX_DAMAGE = 14.0f;
@@ -572,6 +708,9 @@ void gBurningDOTMgr::Think(CBasePlayer* pPlayer)
 {
 	if (pPlayer->m_flBurningTimeUp <= 0.0f)	// not burning.
 		return;
+
+	if (pPlayer->m_flFrozenNextThink > 0.0)	// melt
+		gFrozenDOTMgr::Free(pPlayer);
 
 	if (pPlayer->m_flBurningTimeUp < gpGlobals->time)	// quench.
 	{

@@ -845,6 +845,29 @@ void CGrenade::FrostTouch(CBaseEntity* pOther)
 	pev->flags |= FL_KILLME;
 }
 
+void CGrenade::IncendiaryTouch(CBaseEntity* pOther)
+{
+	if (!ENT_IS_ON_FLOOR(edict()))
+	{
+		DROP_TO_FLOOR(edict());
+		return;
+	}
+
+	CIncendiaryGrenadeCentre::Create(pev->origin, CBasePlayer::Instance(pev->owner));
+	pev->flags |= FL_KILLME;
+}
+
+void CGrenade::IncendiaryThink()
+{
+	if (POINT_CONTENTS(pev->origin) == CONTENT_WATER)	// this cannot be in water, right?
+	{
+		pev->flags |= FL_KILLME;
+		return;
+	}
+
+	pev->nextthink = gpGlobals->time + 0.1f;
+}
+
 CGrenade* CGrenade::HealingGrenade(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity, float time, unsigned short usEvent)
 {
 	CGrenade* pGrenade = ShootSmokeGrenade(pevOwner, vecStart, vecVelocity, time, usEvent);
@@ -857,6 +880,51 @@ CGrenade* CGrenade::NerveGasGrenade(entvars_t* pevOwner, Vector vecStart, Vector
 {
 	CGrenade* pGrenade = ShootSmokeGrenade(pevOwner, vecStart, vecVelocity, time, usEvent);
 	pGrenade->m_bPoisoned = true;
+
+	return pGrenade;
+}
+
+CGrenade* CGrenade::IncendiaryGrenade(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity)
+{
+	CGrenade* pGrenade = GetClassPtr((CGrenade*)nullptr);
+	pGrenade->Spawn();
+
+	UTIL_SetOrigin(pGrenade->pev, vecStart);
+	pGrenade->pev->velocity = vecVelocity;
+	pGrenade->pev->angles = pevOwner->angles;
+	pGrenade->pev->owner = ENT(pevOwner);
+
+	pGrenade->pev->nextthink = gpGlobals->time + 0.1f;
+
+	pGrenade->pev->sequence = RANDOM_LONG(3, 6);
+	pGrenade->pev->framerate = 1.0f;
+
+	pGrenade->pev->gravity = 0.55f;
+	pGrenade->pev->friction = 0.7f;
+
+	pGrenade->SetTouch(&CGrenade::IncendiaryTouch);
+	pGrenade->SetThink(&CGrenade::IncendiaryThink);
+
+	SET_MODEL(ENT(pGrenade->pev), "models/w_hegrenade.mdl");
+
+	// Give it a glow
+	pGrenade->pev->renderfx = kRenderFxGlowShell;
+	pGrenade->pev->rendercolor = Vector(255, 117, 26);
+	pGrenade->pev->rendermode = kRenderNormal;
+	pGrenade->pev->renderamt = 16.0f;
+
+	// And a colored trail
+	MESSAGE_BEGIN(MSG_ALL, SVC_TEMPENTITY);
+	WRITE_BYTE(TE_BEAMFOLLOW); // TE id
+	WRITE_SHORT(pGrenade->entindex()); // entity
+	WRITE_SHORT(MODEL_INDEX("sprites/lgtning.spr")); // sprite
+	WRITE_BYTE(10); // life
+	WRITE_BYTE(10); // width
+	WRITE_BYTE(255); // r
+	WRITE_BYTE(117); // g
+	WRITE_BYTE(26); // b
+	WRITE_BYTE(200); // brightness
+	MESSAGE_END();
 
 	return pGrenade;
 }

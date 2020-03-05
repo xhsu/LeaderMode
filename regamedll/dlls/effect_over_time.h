@@ -110,6 +110,9 @@ public:
 	EntityHandle<CBasePlayer> m_pPlayer;
 	float m_flTimeRemoved;
 	float m_flRadius;
+	float m_flNextDamageCheck;
+	float m_flNextFireLoopSFX;
+	float m_flNextFlameSpr;
 
 public:
 	void Precache();

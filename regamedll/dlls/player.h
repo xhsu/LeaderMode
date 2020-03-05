@@ -34,6 +34,7 @@
 #include "unisignals.h"
 #include "player_classes.h"
 #include <list>
+#include <array>
 #include "effect_over_time.h"
 
 #define SOUND_FLASHLIGHT_ON  "items/flashlight1.wav"
@@ -525,6 +526,7 @@ public:
 	void OnFireBuckshotsPreTraceAttack(float& flDamage, TraceResult& tr);
 	void OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr);
 	void OnPlayerKills(CBasePlayer* pVictim);
+	void OnHurtingAnotherPlayer(CBasePlayer* pVictim, entvars_t* pevInflictor, float& flDamage, int& bitsDamageTypes);
 	void OnGrenadeThrew(WeaponIdType iId, CGrenade* pGrenade);
 	bool OnBlind();
 	void OnAddToFullPack(entity_state_s* pState, edict_t* pEnt, BOOL FIsPlayer);
@@ -770,7 +772,7 @@ public:
 	float m_flRespawnPending;
 	float m_flSpawnProtectionEndTime;
 	RoleTypes m_iRoleType;
-	CBaseSkill *m_rgpSkills[SKILLTYPE_COUNT];
+	std::array<CBaseSkill*, SKILLTYPE_COUNT> m_rgpSkills;
 	char m_szHudText[512];
 	char m_szClientHudText[512];
 	std::list<WeaponIdType> m_lstRebuy;

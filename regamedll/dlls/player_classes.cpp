@@ -51,6 +51,9 @@ void CBaseSkill::Precache()
 
 	CSkillHealingShot::m_idHealingSpr = PRECACHE_MODEL("sprites/leadermode/heal.spr");
 
+	CSkillIncendiaryAmmo::m_idSmokeTail = PRECACHE_MODEL("sprites/leadermode/FireSmoke.spr");
+	CSkillIncendiaryAmmo::m_idSpark = PRECACHE_MODEL("sprites/xspark4.spr");
+
 	m_idBulletTrace = PRECACHE_MODEL("sprites/leadermode/FireSmoke.spr");
 }
 
@@ -2074,7 +2077,7 @@ void CSkillCriticalHit::OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr)
 //
 
 const float CSkillRadarScan2::DURATION = 10.0f;
-const float CSkillRadarScan2::COOLDOWN = 6.0f;
+const float CSkillRadarScan2::COOLDOWN = 65.0f;
 const float CSkillRadarScan2::UPDATE_DISTANCE_INTERVAL = 150.0f;
 
 bool CSkillRadarScan2::Execute()
@@ -2275,4 +2278,158 @@ bool CSkillRadarScan2::Terminate()
 	m_flTimeCooldownOver = gpGlobals->time + GetCooldown() * Q_clamp((gpGlobals->time - m_flTimeLastUsed) / GetDuration(), 0.0f, 1.0f);	// return the unused time.
 
 	return true;
+}
+
+//
+// Role_Arsonist: Dragon's Breath
+//
+
+const float CSkillIncendiaryAmmo::DURATION = 15.0f;
+const float CSkillIncendiaryAmmo::COOLDOWN = 45.0f;
+const char* CSkillIncendiaryAmmo::ACTIVATION_SFX = "leadermode/burn_colony.wav";
+const char* CSkillIncendiaryAmmo::CLOSURE_SFX = "leadermode/engage_enemy_02.wav";
+const float CSkillIncendiaryAmmo::IGNITE_DURATION = 5.0f;
+const float CSkillIncendiaryAmmo::DRAGING_MODIFIER = 0.3f;
+int CSkillIncendiaryAmmo::m_idSmokeTail = 0;
+int CSkillIncendiaryAmmo::m_idSpark = 0;
+
+bool CSkillIncendiaryAmmo::Execute()
+{
+	if (!m_pPlayer || !m_pPlayer->IsAlive() || !CSGameRules()->CanSkillBeUsed())	// skill is not allowed in freezing phase.
+		return false;
+
+	if (m_bUsingSkill)
+	{
+		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently activated!", GetName());
+		return false;
+	}
+
+	if (!m_bAllowSkill)
+	{
+		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently cooling down!", GetName());
+		return false;
+	}
+
+	EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, ACTIVATION_SFX, VOL_NORM, ATTN_NORM);
+	UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/gAll /yof your weapons are loaded with /tincendiary ammo/y now.");
+
+	m_bUsingSkill = true;
+	m_bAllowSkill = false;
+	m_flTimeLastUsed = gpGlobals->time;
+
+	return true;
+}
+
+void CSkillIncendiaryAmmo::Think()
+{
+	// A. it's time up!
+	if (m_bUsingSkill && m_flTimeLastUsed + GetDuration() < gpGlobals->time)
+	{
+		UTIL_PlayEarSound(m_pPlayer, CLOSURE_SFX);
+		UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is over!", GetName());
+
+		m_bUsingSkill = false;
+		m_flTimeCooldownOver = gpGlobals->time + GetCooldown();
+	}
+
+	// B. it's active!
+
+
+	// C. the CD is over!
+	else if (!m_bUsingSkill && !m_bAllowSkill && m_flTimeCooldownOver <= gpGlobals->time)
+	{
+		m_bAllowSkill = true;
+
+		UTIL_PrintChatColor(m_pPlayer, GREENCHAT, "/g%s is ready again!", GetName());
+		UTIL_PlayEarSound(m_pPlayer, COOLDOWN_COMPLETE_SFX);
+	}
+}
+
+bool CSkillIncendiaryAmmo::Terminate()
+{
+	UTIL_PlayEarSound(m_pPlayer, CLOSURE_SFX);
+	UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is terminated in advanced!", GetName());
+
+	m_bUsingSkill = false;
+	m_flTimeCooldownOver = gpGlobals->time + GetCooldown() * Q_clamp((gpGlobals->time - m_flTimeLastUsed) / GetDuration(), 0.0f, 1.0f);	// return the unused time.
+
+	return true;
+}
+
+void CSkillIncendiaryAmmo::OnHurtingAnotherPlayer(CBasePlayer* pVictim, entvars_t* pevInflictor, float& flDamage, int& bitsDamageTypes)
+{
+	if (!m_bUsingSkill || !(bitsDamageTypes & (DMG_BURN | DMG_SLOWBURN)))
+		return;
+
+	if (pVictim->m_iRoleType == Role_SWAT && pVictim->IsUsingPrimarySkill())
+		pVictim->m_flVelocityModifier = (pVictim->m_flVelocityModifier + DRAGING_MODIFIER) / 2.0f;	// resist to the slow effect.
+	else
+		pVictim->m_flVelocityModifier = DRAGING_MODIFIER;
+}
+
+void CSkillIncendiaryAmmo::OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr)
+{
+	WeaponIdType iId = m_pPlayer->m_pActiveItem->m_iId;
+
+	if (!m_bUsingSkill && (iId != WEAPON_KSG12 && iId != WEAPON_STRIKER))
+		return;
+
+	// at least we have VFX here.
+	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
+
+	Vector vecOrigin;
+	if (m_pPlayer->m_iFOV >= 90.0f)
+		vecOrigin = m_pPlayer->GetGunPosition() + gpGlobals->v_forward * 16.0f + gpGlobals->v_right * 3.0f + gpGlobals->v_up * -3.0f;
+	else
+		vecOrigin = m_pPlayer->GetGunPosition();
+
+	MESSAGE_BEGIN(MSG_ALL, SVC_TEMPENTITY);
+	WRITE_BYTE(TE_BEAMPOINTS);
+	WRITE_COORD(vecOrigin[0]);
+	WRITE_COORD(vecOrigin[1]);
+	WRITE_COORD(vecOrigin[2]);
+	WRITE_COORD(tr.vecEndPos[0]);
+	WRITE_COORD(tr.vecEndPos[1]);
+	WRITE_COORD(tr.vecEndPos[2]);
+	WRITE_SHORT(m_idSmokeTail);
+	WRITE_BYTE(1);
+	WRITE_BYTE(10);
+	WRITE_BYTE(15);
+	WRITE_BYTE(6);
+	WRITE_BYTE(0);
+	WRITE_BYTE(255);
+	WRITE_BYTE(255);
+	WRITE_BYTE(255);
+	WRITE_BYTE(10);
+	WRITE_BYTE(10);
+	MESSAGE_END();
+
+	if (POINT_CONTENTS(tr.vecEndPos) == CONTENTS_SKY || POINT_CONTENTS(tr.vecEndPos) == CONTENTS_WATER)
+		return;
+
+	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, tr.vecEndPos);
+	WRITE_BYTE(TE_SPRITE);
+	WRITE_COORD(tr.vecEndPos[0]);
+	WRITE_COORD(tr.vecEndPos[1]);
+	WRITE_COORD(tr.vecEndPos[2]);
+	WRITE_SHORT(m_idSpark);
+	WRITE_BYTE(3);
+	WRITE_BYTE(180);
+	MESSAGE_END();
+
+	if (FNullEnt(tr.pHit))
+		return;
+
+	if (!CBaseEntity::Instance(tr.pHit)->IsPlayer())
+		return;
+
+	CBasePlayer* pPlayer = CBasePlayer::Instance(tr.pHit);
+
+	if (pPlayer->m_flFrozenNextThink > 0.0f)
+	{
+		gFrozenDOTMgr::Free(pPlayer);
+		return;	// leave him this time.
+	}
+
+	gBurningDOTMgr::Set(pPlayer, m_pPlayer, IGNITE_DURATION);
 }

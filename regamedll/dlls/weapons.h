@@ -128,6 +128,7 @@ public:
 	static CGrenade* FrostGrenade(CBasePlayer* pPlayer);
 	static CGrenade* HealingGrenade(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity, float time, unsigned short usEvent);
 	static CGrenade* NerveGasGrenade(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity, float time, unsigned short usEvent);
+	static CGrenade* IncendiaryGrenade(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity);
 
 public:
 	void Explode(Vector vecSrc, Vector vecAim);
@@ -153,6 +154,8 @@ public:
 	void EXPORT SG_TumbleThink();
 
 	void EXPORT FrostTouch(CBaseEntity* pOther);
+	void EXPORT IncendiaryTouch(CBaseEntity* pOther);
+	void EXPORT IncendiaryThink();
 
 public:
 	static TYPEDESCRIPTION m_SaveData[];

@@ -73,10 +73,10 @@ enum RoleTypes
 	// Auxiliary:		CSkillRadarScan2
 
 	Role_Arsonist,
-	// WeaponEnhance:	
-	// Attack:			
+	// WeaponEnhance:	CSkillIncendiaryAmmo
+	// Attack:			-
 	// Defense:			CSkillReduceDamage
-	// Auxiliary:		
+	// Auxiliary:		-
 
 	ROLE_COUNT
 };
@@ -177,6 +177,7 @@ public:	// skill action
 	virtual void OnFireBullets3PreDamage(float& flDamage, TraceResult& tr) { }
 	virtual void OnFireBuckshotsPreTraceAttack(float& flDamage, TraceResult& tr) { }
 	virtual void OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr) { }
+	virtual void OnHurtingAnotherPlayer(CBasePlayer* pVictim, entvars_t* pevInflictor, float& flDamage, int& bitsDamageTypes) { }
 
 	// passive skill: death
 	virtual void OnPlayerDeath(CBasePlayer* pKiller) { if (m_bUsingSkill) Terminate(); }
@@ -628,4 +629,31 @@ public:
 	virtual SkillType Classify() const { return Skill_Auxiliary; }
 	virtual float GetDuration() const { return DURATION; }
 	virtual float GetCooldown() const { return COOLDOWN; }
+};
+
+// Role_Arsonist: Dragon's Breath
+class CSkillIncendiaryAmmo : public CBaseSkill
+{
+public:
+	static const float DURATION;
+	static const float COOLDOWN;
+	static const char* ACTIVATION_SFX;
+	static const char* CLOSURE_SFX;
+	static const float IGNITE_DURATION;
+	static const float DRAGING_MODIFIER;
+	static int m_idSmokeTail;
+	static int m_idSpark;
+
+public:
+	bool Execute();
+	void Think();
+	bool Terminate();
+
+	const char* GetName() const { return "Dragon's Breath"; }
+	SkillType Classify() const { return Skill_WeaponEnhance; }
+	float GetDuration() const { return DURATION; }
+	float GetCooldown() const { return COOLDOWN; }
+
+	void OnHurtingAnotherPlayer(CBasePlayer* pVictim, entvars_t* pevInflictor, float& flDamage, int& bitsDamageTypes);
+	void OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr);
 };

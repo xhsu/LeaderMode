@@ -516,7 +516,6 @@ BOOL EXT_FUNC CBasePlayer::TakeHealth(float flHealth, int bitsDamageType)
 
 	if (bitsDamageType & HEALING_REMOVE_DOT)
 	{
-		// UNDONE
 		if (m_flFrozenNextThink > 0.0f)
 			gFrozenDOTMgr::Free(this);
 
@@ -525,6 +524,9 @@ BOOL EXT_FUNC CBasePlayer::TakeHealth(float flHealth, int bitsDamageType)
 
 		if (m_flPoisonedTimeUp > 0.0f)
 			gPoisonDOTMgr::Free(this);
+
+		if (m_flBurningTimeUp > 0.0f)
+			gBurningDOTMgr::Free(this);
 	}
 
 	if (bitsDamageType & HEALING_NO_OH)
@@ -928,6 +930,9 @@ BOOL CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 
 		OnPlayerDamagedPre(pevInflictor, pevAttacker, flDamage, bitsDamageType);	// skills should hook on here.
 
+		if (!FNullEnt(pAttack))
+			pAttack->OnHurtingAnotherPlayer(this, pevInflictor, flDamage, bitsDamageType);
+
 		LogAttack(pAttack, this, bTeamAttack, int(flDamage), armorHit, pev->health - flDamage, pev->armorvalue, GetWeaponName(pevInflictor, pevAttacker));
 		bTookDamage = CBaseMonster::TakeDamage(pevInflictor, pevAttacker, int(flDamage), bitsDamageType);
 
@@ -1163,6 +1168,9 @@ BOOL CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 	}
 
 	OnPlayerDamagedPre(pevInflictor, pevAttacker, flDamage, bitsDamageType);	// skills should hook on here.
+
+	if (!FNullEnt(pAttack))
+		pAttack->OnHurtingAnotherPlayer(this, pevInflictor, flDamage, bitsDamageType);
 
 	LogAttack(pAttack, this, bTeamAttack, flDamage, armorHit, pev->health - flDamage, pev->armorvalue, GetWeaponName(pevInflictor, pevAttacker));
 
@@ -1608,6 +1616,9 @@ void EXT_FUNC CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 
 	if (m_flPoisonedTimeUp > 0.0f)
 		gPoisonDOTMgr::Free(this);
+
+	if (m_flBurningTimeUp > 0.0f)
+		gBurningDOTMgr::Free(this);
 
 	if (CSGameRules()->IsCareer())
 	{
@@ -2775,6 +2786,10 @@ CGrenade *CBasePlayer::ThrowGrenade(CBasePlayerWeapon *pWeapon, Vector vecSrc, V
 	else if (pWeapon->m_iId == WEAPON_SMOKEGRENADE && m_iRoleType == Role_MadScientist)
 	{
 		pGrenade = CGrenade::NerveGasGrenade(pev, vecSrc, vecThrow, time, usEvent);
+	}
+	else if (pWeapon->m_iId == WEAPON_HEGRENADE && m_iRoleType == Role_Arsonist)
+	{
+		pGrenade = CGrenade::IncendiaryGrenade(pev, vecSrc, vecThrow);
 	}
 	else
 	{
@@ -4816,6 +4831,7 @@ void EXT_FUNC CBasePlayer::Spawn()
 	m_flFrozenNextThink = 0.0f;
 	gElectrifiedDOTMgr::Free(this);
 	gPoisonDOTMgr::Free(this);
+	gBurningDOTMgr::Free(this);
 
 	// everything that comes after this, this spawn of the player a the game.
 	if (m_bJustConnected)
@@ -8058,6 +8074,7 @@ void CBasePlayer::AssignRole(RoleTypes iNewRole)
 
 	case Role_Arsonist:
 		CBaseSkill::Grand<CSkillReduceDamage>(this);
+		CBaseSkill::Grand<CSkillIncendiaryAmmo>(this);
 		break;
 
 	case Role_UNASSIGNED:
@@ -8345,6 +8362,15 @@ void CBasePlayer::OnPlayerKills(CBasePlayer* pVictim)
 	{
 		if (m_rgpSkills[i])
 			m_rgpSkills[i]->OnPlayerKills(pVictim);
+	}
+}
+
+void CBasePlayer::OnHurtingAnotherPlayer(CBasePlayer* pVictim, entvars_t* pevInflictor, float& flDamage, int& bitsDamageTypes)
+{
+	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	{
+		if (m_rgpSkills[i])
+			m_rgpSkills[i]->OnHurtingAnotherPlayer(pVictim, pevInflictor, flDamage, bitsDamageTypes);	// the active or not is determind in the function itself.
 	}
 }
 
