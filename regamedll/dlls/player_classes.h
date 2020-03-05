@@ -615,10 +615,12 @@ public:
 	static const float DURATION;
 	static const float COOLDOWN;
 	static const float UPDATE_DISTANCE_INTERVAL;
+	static const float FORCE_TO_REMOVE_TIME;
 
 public:
 	EntityHandle<CBasePlayer> m_pTracing;
 	Vector m_vecLastPosition;
+	float m_flForcedToRemove;
 
 public:
 	virtual bool Execute();

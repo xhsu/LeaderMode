@@ -633,7 +633,7 @@ void CIncendiaryGrenadeCentre::Think()
 				gBurningDOTMgr::Scream(pPlayer);	// scream SFX CD is included in function.
 			}
 
-			float flDamage = Q_max(DAMAGE * ((m_flRadius - (pev->origin - pEntity->pev->origin).Length()) / m_flRadius), 0.0);
+			float flDamage = Q_max(float(DAMAGE * ((m_flRadius - (pev->origin - pEntity->pev->origin).Length()) / m_flRadius)), 0.0f);
 
 			if (flDamage <= 1.0)
 				continue;

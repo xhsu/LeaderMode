@@ -2079,6 +2079,7 @@ void CSkillCriticalHit::OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr)
 const float CSkillRadarScan2::DURATION = 10.0f;
 const float CSkillRadarScan2::COOLDOWN = 65.0f;
 const float CSkillRadarScan2::UPDATE_DISTANCE_INTERVAL = 150.0f;
+const float CSkillRadarScan2::FORCE_TO_REMOVE_TIME = 2.5f;
 
 bool CSkillRadarScan2::Execute()
 {
@@ -2142,6 +2143,8 @@ bool CSkillRadarScan2::Execute()
 		WRITE_BYTE(0);
 		MESSAGE_END();
 
+		m_flForcedToRemove = gpGlobals->time + FORCE_TO_REMOVE_TIME;
+
 		UTIL_PlayEarSound(pTeammate, RADAR_BEEP_SFX);
 
 		if (m_pTracing == THE_COMMANDER)
@@ -2196,9 +2199,6 @@ void CSkillRadarScan2::Think()
 			return;
 		}
 
-		if ((m_vecLastPosition - m_pTracing->pev->origin).Length() < UPDATE_DISTANCE_INTERVAL)	// minor move won't trigger.
-			return;
-
 		if (!m_pTracing->IsAlive())
 		{
 			if (m_pTracing->entindex() != THE_COMMANDER->entindex())	// we have to specify the != operator.
@@ -2222,6 +2222,28 @@ void CSkillRadarScan2::Think()
 			return;
 		}
 
+		if (m_flForcedToRemove < gpGlobals->time)	// the commander hasn't moving for a while.
+		{
+			for (int i = 1; i <= gpGlobals->maxClients; i++)
+			{
+				CBasePlayer* pTeammate = UTIL_PlayerByIndex(i);
+
+				if (!pTeammate || !pTeammate->IsAlive() || pTeammate->IsBot())
+					continue;
+
+				if (m_pPlayer->m_iTeam != pTeammate->m_iTeam)
+					continue;
+
+				MESSAGE_BEGIN(MSG_ONE, gmsgBombPickup, g_vecZero, pTeammate->pev);
+				MESSAGE_END();
+			}
+
+			m_flForcedToRemove = gpGlobals->time + DURATION;	// this message only needs to send once. unless some others changee it again.
+		}
+
+		if ((m_vecLastPosition - m_pTracing->pev->origin).Length2D() < UPDATE_DISTANCE_INTERVAL)	// minor or vertical move won't trigger.
+			return;
+
 		// update to the current location.
 		m_vecLastPosition = m_pTracing->pev->origin;
 
@@ -2241,6 +2263,8 @@ void CSkillRadarScan2::Think()
 			WRITE_COORD(m_pTracing->pev->origin[2]);
 			WRITE_BYTE(0);
 			MESSAGE_END();
+
+			m_flForcedToRemove = gpGlobals->time + FORCE_TO_REMOVE_TIME;
 
 			UTIL_PlayEarSound(pTeammate, RADAR_BEEP_SFX);
 		}
