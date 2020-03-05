@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="cl_dll">
+      <UniqueIdentifier>{9621a544-906b-4535-a164-75acd64b7ba2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cl_dll\Client">
+      <UniqueIdentifier>{92d6d26b-7f85-41e3-8617-b54562f5974a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\cdll_int.cpp">
+      <Filter>cl_dll</Filter>
+    </ClCompile>
+    <ClCompile Include="..\entity.cpp">
+      <Filter>cl_dll</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\cdll_int.h">
+      <Filter>cl_dll</Filter>
+    </ClInclude>
+    <ClInclude Include="..\cl_base.h">
+      <Filter>cl_dll</Filter>
+    </ClInclude>
+    <ClInclude Include="..\entity.h">
+      <Filter>cl_dll</Filter>
+    </ClInclude>
+    <ClInclude Include="..\cl_util.h">
+      <Filter>cl_dll</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="export.def">
+      <Filter>cl_dll\Client</Filter>
+    </None>
+  </ItemGroup>
+</Project>
