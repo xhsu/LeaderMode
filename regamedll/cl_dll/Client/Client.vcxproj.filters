@@ -7,12 +7,51 @@
     <Filter Include="cl_dll\Client">
       <UniqueIdentifier>{92d6d26b-7f85-41e3-8617-b54562f5974a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="pm_shared">
+      <UniqueIdentifier>{4b08bc65-9b20-4224-a668-97ee8d720cef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cl_dll\hud">
+      <UniqueIdentifier>{8d35b26b-86bc-4932-a315-97465148eb04}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\cdll_int.cpp">
       <Filter>cl_dll</Filter>
     </ClCompile>
     <ClCompile Include="..\entity.cpp">
+      <Filter>cl_dll</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\pm_shared\pm_debug.cpp">
+      <Filter>pm_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\pm_shared\pm_math.cpp">
+      <Filter>pm_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\pm_shared\pm_shared.cpp">
+      <Filter>pm_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\view.cpp">
+      <Filter>cl_dll</Filter>
+    </ClCompile>
+    <ClCompile Include="..\input.cpp">
+      <Filter>cl_dll</Filter>
+    </ClCompile>
+    <ClCompile Include="..\input_mouse.cpp">
+      <Filter>cl_dll</Filter>
+    </ClCompile>
+    <ClCompile Include="..\in_camera.cpp">
+      <Filter>cl_dll</Filter>
+    </ClCompile>
+    <ClCompile Include="..\StudioModelRenderer.cpp">
+      <Filter>cl_dll</Filter>
+    </ClCompile>
+    <ClCompile Include="..\StudioModelRenderer_CS.cpp">
+      <Filter>cl_dll</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hud\hud.cpp">
+      <Filter>cl_dll\hud</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cl_util.cpp">
       <Filter>cl_dll</Filter>
     </ClCompile>
   </ItemGroup>
@@ -28,6 +67,45 @@
     </ClInclude>
     <ClInclude Include="..\cl_util.h">
       <Filter>cl_dll</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\pm_shared\pm_debug.h">
+      <Filter>pm_shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\pm_shared\pm_defs.h">
+      <Filter>pm_shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\pm_shared\pm_info.h">
+      <Filter>pm_shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\pm_shared\pm_materials.h">
+      <Filter>pm_shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\pm_shared\pm_math.h">
+      <Filter>pm_shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\pm_shared\pm_movevars.h">
+      <Filter>pm_shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\pm_shared\pm_shared.h">
+      <Filter>pm_shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\view.h">
+      <Filter>cl_dll</Filter>
+    </ClInclude>
+    <ClInclude Include="..\input.h">
+      <Filter>cl_dll</Filter>
+    </ClInclude>
+    <ClInclude Include="..\input_mouse.h">
+      <Filter>cl_dll</Filter>
+    </ClInclude>
+    <ClInclude Include="..\in_camera.h">
+      <Filter>cl_dll</Filter>
+    </ClInclude>
+    <ClInclude Include="..\StudioModelRenderer.h">
+      <Filter>cl_dll</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hud\hud.h">
+      <Filter>cl_dll\hud</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

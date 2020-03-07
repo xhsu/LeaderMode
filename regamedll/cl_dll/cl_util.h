@@ -29,3 +29,23 @@ template<class VectorTypeA, class ScaleType, class VectorTypeB, class VectorType
 template<class VectorTypeA, class ScaleType, class VectorTypeB> void VectorScale(const VectorTypeA& in, ScaleType scale, VectorTypeB& out) { ((out)[0] = (in)[0] * (scale), (out)[1] = (in)[1] * (scale), (out)[2] = (in)[2] * (scale)); }
 template<class VectorTypeA> void VectorInverse(VectorTypeA& x) { ((x)[0] = -(x)[0], (x)[1] = -(x)[1], (x)[2] = -(x)[2]); }
 template<class VectorTypeA> void AngleVectors(const VectorTypeA& vecAngles, float* forward, float* right, float* up) { return gEngfuncs.pfnAngleVectors(vecAngles, forward, right, up); }
+
+// FIXME, UNDONE
+#define ScreenWidth 1024
+#define ScreenHeight 768
+
+// Use this to set any co-ords in 640x480 space
+inline int XRES(float x) { return static_cast<int>(x * (static_cast<float>(ScreenWidth) / 640.0f) + 0.5f); }
+inline int YRES(float y) { return static_cast<int>(y * (static_cast<float>(ScreenHeight) / 480.0f) + 0.5f); }
+
+inline float CVAR_GET_FLOAT(const char* x) { return gEngfuncs.pfnGetCvarFloat((char*)x); }
+inline char* CVAR_GET_STRING(const char* x) { return gEngfuncs.pfnGetCvarString((char*)x); }
+inline cvar_s* CVAR_CREATE(const char* cv, const char* val, const int flags) { return gEngfuncs.pfnRegisterVariable((char*)cv, (char*)val, flags); }
+
+// StudioModelRenderer utils.
+void ConcatTransforms(float in1[3][4], float in2[3][4], float out[3][4]);
+void QuaternionMatrix(vec4_t quaternion, float (*matrix)[4]);
+inline void MatrixCopy(float in[3][4], float out[3][4]) { Q_memcpy(out, in, sizeof(float) * 3 * 4); }
+void VectorTransform(const float* in1, float in2[3][4], float* out);
+void QuaternionSlerp(vec4_t p, vec4_t q, float t, vec4_t qt);
+void AngleQuaternion(float* angles, vec4_t quaternion);

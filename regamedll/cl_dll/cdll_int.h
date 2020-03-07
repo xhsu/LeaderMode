@@ -15,3 +15,6 @@ Created Date: 05 Mar 2020
 
 // core of cores
 extern cl_enginefunc_t gEngfuncs;
+
+// function list.
+BOOL CL_DLLEXPORT CL_IsThirdPerson(void);

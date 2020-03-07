@@ -94,11 +94,11 @@ struct cl_entity_s
 	float					lastmove;
 
 	// Actual render position and angles
-	vec3_t					origin;
-	vec3_t					angles;
+	Vector					origin;
+	Vector					angles;
 
 	// Attachment points
-	vec3_t					attachment[4];
+	Vector					attachment[4];
 
 	// Other entity local information
 	int						trivial_accept;

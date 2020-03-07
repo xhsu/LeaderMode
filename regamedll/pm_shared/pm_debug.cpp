@@ -1,5 +1,9 @@
 #include "precompiled.h"
 
+#ifdef _CLIENT_DLL
+#include "../cl_dll/cl_base.h"
+#endif
+
 #undef vec3_t
 
 // Expand debugging BBOX particle hulls by this many units.

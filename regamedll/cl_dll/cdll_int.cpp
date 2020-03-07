@@ -10,19 +10,22 @@ cl_enginefunc_t gEngfuncs;
 
 void CL_DLLEXPORT CAM_Think(void)
 {
+	CAM_Think2();
 }
 
 void CL_DLLEXPORT CL_CameraOffset(float* ofs)
 {
+	CL_CameraOffset2(ofs);
 }
 
-void CL_DLLEXPORT CL_CreateMove (float frametime, struct usercmd_s* cmd, int active)
+void CL_DLLEXPORT CL_CreateMove(float frametime, usercmd_s* cmd, int active)
 {
+	CL_CreateMove2(frametime, cmd, active);
 }
 
 BOOL CL_DLLEXPORT CL_IsThirdPerson(void)
 {
-	return FALSE;
+	return (cam_thirdperson ? 1 : 0) || (g_iUser1 && (g_iUser2 == gEngfuncs.GetLocalPlayer()->index));
 }
 
 void* CL_DLLEXPORT ClientFactory(void)
@@ -34,9 +37,9 @@ void CL_DLLEXPORT Demo_ReadBuffer(int size, unsigned char* buffer)
 {
 }
 
-BOOL CL_DLLEXPORT HUD_AddEntity(int type, struct cl_entity_s* ent, const char* modelname)
+BOOL CL_DLLEXPORT HUD_AddEntity(int type, cl_entity_s* ent, const char* modelname)
 {
-	return TRUE;
+	return HUD_AddEntity2(type, ent, modelname);
 }
 
 void CL_DLLEXPORT HUD_ChatInputPosition(int* x, int* y)
@@ -50,6 +53,7 @@ BOOL CL_DLLEXPORT HUD_ConnectionlessPacket(const struct netadr_s* net_from, cons
 
 void CL_DLLEXPORT HUD_CreateEntities(void)
 {
+	HUD_CreateEntities2();
 }
 
 void CL_DLLEXPORT HUD_DirectorMessage(int iSize, void* pbuf)
@@ -101,44 +105,49 @@ int CL_DLLEXPORT HUD_GetPlayerTeam(int iParam)	// useless & unknown.
 	return 0;
 }
 
-BOOL CL_DLLEXPORT HUD_GetStudioModelInterface(int version, struct r_studio_interface_s** ppinterface, struct engine_studio_api_s* pstudio)
+BOOL CL_DLLEXPORT HUD_GetStudioModelInterface(int version, r_studio_interface_s** ppinterface, engine_studio_api_s* pstudio)
 {
-	return FALSE;
+	return HUD_GetStudioModelInterface2(version, ppinterface, pstudio);
 }
 
 cl_entity_t CL_DLLEXPORT* HUD_GetUserEntity(int index)
 {
-	return nullptr;
+	return HUD_GetUserEntity2(index);
 }
 
 void CL_DLLEXPORT HUD_Init(void)
 {
+	InitInput();
+	V_Init();	// Initialize view system
 }
 
 BOOL CL_DLLEXPORT HUD_Key_Event(int down, int keynum, const char* pszCurrentBinding)
 {
-	return TRUE;
+	return HUD_Key_Event2(down, keynum, pszCurrentBinding);
 }
 
-void CL_DLLEXPORT HUD_PlayerMove(struct playermove_s* ppmove, int server)
+void CL_DLLEXPORT HUD_PlayerMove(playermove_s* ppmove, int server)
 {
+	PM_Move(ppmove, server);
 }
 
-void CL_DLLEXPORT HUD_PlayerMoveInit(struct playermove_s* ppmove)
+void CL_DLLEXPORT HUD_PlayerMoveInit(playermove_s* ppmove)
 {
+	PM_Init(ppmove);
 }
 
 char CL_DLLEXPORT HUD_PlayerMoveTexture(char* name)
 {
-	return '\0';
+	return PM_FindTextureType(name);
 }
 
 void CL_DLLEXPORT HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct usercmd_s* cmd, int runfuncs, double time, unsigned int random_seed)
 {
 }
 
-void CL_DLLEXPORT HUD_ProcessPlayerState(struct entity_state_s* dst, const struct entity_state_s* src)
+void CL_DLLEXPORT HUD_ProcessPlayerState(entity_state_s* dst, const entity_state_s* src)
 {
+	HUD_ProcessPlayerState2(dst, src);
 }
 
 BOOL CL_DLLEXPORT HUD_Redraw(float time, int intermission)
@@ -154,20 +163,24 @@ void CL_DLLEXPORT HUD_Shutdown(void)
 {
 }
 
-void CL_DLLEXPORT HUD_StudioEvent(const struct mstudioevent_s* event, const struct cl_entity_s* entity)
+void CL_DLLEXPORT HUD_StudioEvent(const mstudioevent_s* event, const cl_entity_s* entity)
 {
+	HUD_StudioEvent2(event, entity);
 }
 
-void CL_DLLEXPORT HUD_TempEntUpdate(double frametime, double client_time, double cl_gravity, struct tempent_s** ppTempEntFree, struct tempent_s** ppTempEntActive, int (*Callback_AddVisibleEntity)(struct cl_entity_s* pEntity), void (*Callback_TempEntPlaySound)(struct tempent_s* pTemp, float damp))
+void CL_DLLEXPORT HUD_TempEntUpdate(double frametime, double client_time, double cl_gravity, tempent_s** ppTempEntFree, tempent_s** ppTempEntActive, int (*Callback_AddVisibleEntity)(struct cl_entity_s* pEntity), void (*Callback_TempEntPlaySound)(struct tempent_s* pTemp, float damp))
 {
+	HUD_TempEntUpdate2(frametime, client_time, cl_gravity, ppTempEntFree, ppTempEntActive, Callback_AddVisibleEntity, Callback_TempEntPlaySound);
 }
 
-void CL_DLLEXPORT HUD_TxferLocalOverrides(struct entity_state_s* state, const struct clientdata_s* client)
+void CL_DLLEXPORT HUD_TxferLocalOverrides(entity_state_s* state, const clientdata_s* client)
 {
+	HUD_TxferLocalOverrides2(state, client);
 }
 
-void CL_DLLEXPORT HUD_TxferPredictionData(struct entity_state_s* ps, const struct entity_state_s* pps, struct clientdata_s* pcd, const struct clientdata_s* ppcd, struct weapon_data_s* wd, const struct weapon_data_s* pwd)
+void CL_DLLEXPORT HUD_TxferPredictionData(entity_state_s* ps, const entity_state_s* pps, clientdata_s* pcd, const clientdata_s* ppcd, weapon_data_s* wd, const weapon_data_s* pwd)
 {
+	HUD_TxferPredictionData2(ps, pps, pcd, ppcd, wd, pwd);
 }
 
 BOOL CL_DLLEXPORT HUD_UpdateClientData(struct client_data_t* pcldata, float flTime)
@@ -186,22 +199,27 @@ void CL_DLLEXPORT HUD_VoiceStatus(int entindex, BOOL bTalking)
 
 void CL_DLLEXPORT IN_Accumulate(void)
 {
+	IN_Accumulate2();
 }
 
 void CL_DLLEXPORT IN_ActivateMouse(void)
 {
+	IN_ActivateMouse2();
 }
 
 void CL_DLLEXPORT IN_ClearStates(void)
 {
+	IN_ClearStates2();
 }
 
 void CL_DLLEXPORT IN_DeactivateMouse(void)
 {
+	IN_DeactivateMouse2();
 }
 
 void CL_DLLEXPORT IN_MouseEvent(int mstate)
 {
+	IN_MouseEvent2(mstate);
 }
 
 BOOL CL_DLLEXPORT Initialize(cl_enginefunc_t* pEnginefuncs, int iVersion)
@@ -221,11 +239,28 @@ BOOL CL_DLLEXPORT Initialize(cl_enginefunc_t* pEnginefuncs, int iVersion)
 	return TRUE;
 }
 
-struct kbutton_s CL_DLLEXPORT* KB_Find(const char* name)
+kbutton_s CL_DLLEXPORT* KB_Find(const char* name)
 {
-	return nullptr;
+	return KB_Find2(name);
 }
 
-void CL_DLLEXPORT V_CalcRefdef(struct ref_params_s* pparams)
+void CL_DLLEXPORT V_CalcRefdef(ref_params_s* pparams)
 {
+	// intermission / finale rendering
+	if (pparams->intermission)
+	{
+		V_CalcIntermissionRefdef(pparams);
+	}
+	else if (pparams->spectator || g_iUser1)	// g_iUser true if in spectator mode
+	{
+		V_CalcSpectatorRefdef(pparams);
+	}
+	else if (CL_IsThirdPerson())
+	{
+		V_CalcThirdPersonRefdef(pparams);
+	}
+	else
+	{
+		V_CalcNormalRefdef(pparams);
+	}
 }

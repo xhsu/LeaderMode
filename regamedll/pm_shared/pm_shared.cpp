@@ -1,5 +1,10 @@
 #include "precompiled.h"
 
+#ifdef _CLIENT_DLL
+#include "../cl_dll/cl_base.h"
+const float HalfHumanHeight = 36.0f;	// came from nav.h of ReGameDLL-CS
+#endif
+
 BOOL pm_shared_initialized = FALSE;
 
 vec3_t rgv3tStuckTable[54];
@@ -78,7 +83,7 @@ void PM_InitTextureTypes()
 	pm_gcTextures = 0;
 	Q_memset(buffer, 0, sizeof(buffer));
 
-	pMemFile = pmove->COM_LoadFile("sound/materials.txt", 5, &fileSize);
+	pMemFile = pmove->COM_LoadFile((char *)"sound/materials.txt", 5, &fileSize);
 	if (!pMemFile)
 		return;
 
@@ -507,7 +512,7 @@ qboolean PM_AddToTouched(pmtrace_t tr, vec_t *impactvelocity)
 
 	if (pmove->numtouch >= MAX_PHYSENTS)
 	{
-		pmove->Con_DPrintf("Too many entities were touched!\n");
+		pmove->Con_DPrintf((char*)"Too many entities were touched!\n");
 	}
 
 	pmove->touchindex[pmove->numtouch++] = tr;
@@ -524,25 +529,25 @@ void PM_CheckVelocity()
 		// See if it's bogus.
 		if (IS_NAN(pmove->velocity[i]))
 		{
-			pmove->Con_Printf("PM  Got a NaN velocity %i\n", i);
+			pmove->Con_Printf((char*)"PM  Got a NaN velocity %i\n", i);
 			pmove->velocity[i] = 0;
 		}
 
 		if (IS_NAN(pmove->origin[i]))
 		{
-			pmove->Con_Printf("PM  Got a NaN origin on %i\n", i);
+			pmove->Con_Printf((char*)"PM  Got a NaN origin on %i\n", i);
 			pmove->origin[i] = 0;
 		}
 
 		// Bound it.
 		if (pmove->velocity[i] > pmove->movevars->maxvelocity)
 		{
-			pmove->Con_DPrintf("PM  Got a velocity too high on %i\n", i);
+			pmove->Con_DPrintf((char*)"PM  Got a velocity too high on %i\n", i);
 			pmove->velocity[i] = pmove->movevars->maxvelocity;
 		}
 		else if (pmove->velocity[i] < -pmove->movevars->maxvelocity)
 		{
-			pmove->Con_DPrintf("PM  Got a velocity too low on %i\n", i);
+			pmove->Con_DPrintf((char*)"PM  Got a velocity too low on %i\n", i);
 			pmove->velocity[i] = -pmove->movevars->maxvelocity;
 		}
 	}
@@ -1789,8 +1794,10 @@ void PM_FixPlayerCrouchStuck(int direction)
 
 void PM_UnDuck()
 {
+#ifndef _CLIENT_DLL
 	if (unduck_method.value)
 	{
+#endif
 		// if ducking isn't finished yet, so don't unduck
 		if (pmove->bInDuck || !(pmove->flags & FL_DUCKING))
 		{
@@ -1800,7 +1807,9 @@ void PM_UnDuck()
 			pmove->view_ofs[2] = PM_VEC_VIEW;
 			return;
 		}
+#ifndef _CLIENT_DLL
 	}
+#endif
 
 	pmtrace_t trace;
 	vec3_t newOrigin;
@@ -2861,7 +2870,7 @@ void PM_PlayerMove(qboolean server)
 	switch (pmove->movetype)
 	{
 	default:
-		pmove->Con_DPrintf("Bogus pmove player movetype %i on (%i) 0=cl 1=sv\n", pmove->movetype, pmove->server);
+		pmove->Con_DPrintf((char*)"Bogus pmove player movetype %i on (%i) 0=cl 1=sv\n", pmove->movetype, pmove->server);
 		break;
 
 	case MOVETYPE_NONE:
@@ -3175,7 +3184,7 @@ void EXT_FUNC PM_Move(struct playermove_s *ppmove, int server)
 	}
 }
 
-NOXREF int PM_GetVisEntInfo(int ent)
+int PM_GetVisEntInfo(int ent)
 {
 	if (ent >= 0 && ent <= pmove->numvisent)
 	{
@@ -3185,7 +3194,7 @@ NOXREF int PM_GetVisEntInfo(int ent)
 	return -1;
 }
 
-NOXREF int PM_GetPhysEntInfo(int ent)
+int PM_GetPhysEntInfo(int ent)
 {
 	if (ent >= 0 && ent <= pmove->numphysent)
 	{

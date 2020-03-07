@@ -79,4 +79,7 @@ char PM_FindTextureType(char *name);
 void PM_AirMove_internal();
 void PM_AirMove(int playerIndex = 0);
 
+int PM_GetVisEntInfo(int ent);
+int PM_GetPhysEntInfo(int ent);
+
 extern struct playermove_s *pmove;
