@@ -229,17 +229,16 @@ void CAM_Think2(void)
 
 			//set old mouse coordinates to current mouse coordinates
 			//since we are done with the mouse
-			// UNDONE
-			/*if ((flSensitivity = gHUD.GetSensitivity()) != 0)
+			if ((flSensitivity = gHUD::GetSensitivity()) != 0)
 			{
 				cam_old_mouse_x = cam_mouse.x * flSensitivity;
 				cam_old_mouse_y = cam_mouse.y * flSensitivity;
 			}
 			else
-			{*/
+			{
 				cam_old_mouse_x = cam_mouse.x;
 				cam_old_mouse_y = cam_mouse.y;
-			//}
+			}
 			SetCursorPos (gEngfuncs.GetWindowCenterX(), gEngfuncs.GetWindowCenterY());
 		}
 	}
@@ -296,9 +295,8 @@ void CAM_Think2(void)
 		}
 		//set old mouse coordinates to current mouse coordinates
 		//since we are done with the mouse
-		// UNDONE
-		//cam_old_mouse_x = cam_mouse.x * gHUD.GetSensitivity();
-		//cam_old_mouse_y = cam_mouse.y * gHUD.GetSensitivity();
+		cam_old_mouse_x = cam_mouse.x * gHUD::GetSensitivity();
+		cam_old_mouse_y = cam_mouse.y * gHUD::GetSensitivity();
 		SetCursorPos (gEngfuncs.GetWindowCenterX(), gEngfuncs.GetWindowCenterY());
 	}
 
@@ -369,18 +367,16 @@ void CAM_StartMouseMove(void)
 			iMouseInUse = 1;
 			GetCursorPos (&cam_mouse);
 
-			// UNDONE
-			/*
-			if ((flSensitivity = gHUD.GetSensitivity()) != 0)
+			if ((flSensitivity = gHUD::GetSensitivity()) != 0)
 			{
 				cam_old_mouse_x = cam_mouse.x * flSensitivity;
 				cam_old_mouse_y = cam_mouse.y * flSensitivity;
 			}
 			else
-			{*/
+			{
 				cam_old_mouse_x = cam_mouse.x;
 				cam_old_mouse_y = cam_mouse.y;
-			//}
+			}
 		}
 	}
 	//we are not in 3rd person view..therefore do not allow camera movement
@@ -416,9 +412,9 @@ void CAM_StartDistance(void)
 			cam_mousemove = 1;
 			iMouseInUse = 1;
 			GetCursorPos (&cam_mouse);
-			// UNDONE
-			//cam_old_mouse_x = cam_mouse.x * gHUD.GetSensitivity();
-			//cam_old_mouse_y = cam_mouse.y * gHUD.GetSensitivity();
+
+			cam_old_mouse_x = cam_mouse.x * gHUD::GetSensitivity();
+			cam_old_mouse_y = cam_mouse.y * gHUD::GetSensitivity();
 		}
 	}
 	//we are not in 3rd person view..therefore do not allow camera movement

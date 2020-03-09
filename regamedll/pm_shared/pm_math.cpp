@@ -215,13 +215,6 @@ float AngleBetweenVectors(const vec_t *v1, const vec_t *v2)
 	return angle;
 }
 
-void VectorTransform(const vec_t *in1, float (*in2)[4], vec_t *out)
-{
-	out[0] = DotProduct(in1, in2[0]) + in2[0][3];
-	out[1] = DotProduct(in1, in2[1]) + in2[1][3];
-	out[2] = DotProduct(in1, in2[2]) + in2[2][3];
-}
-
 int VectorCompare(const vec_t *v1, const vec_t *v2)
 {
 	for (int i = 0; i < 3; i++)

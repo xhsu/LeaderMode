@@ -33,6 +33,9 @@ struct extra_player_info_t
 	bool showhealth;
 	int health;
 	char location[32];
+
+	// LUNA: my add.
+	int m_iAccount;
 };
 
 extern int iOnTrain[MAX_PLAYERS];

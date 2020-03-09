@@ -1021,9 +1021,8 @@ void V_CalcNormalRefdef(ref_params_s* pparams)
 	}
 
 	// Don't allow viewmodel, if we are in sniper scope
-	// UNDONE
-	/*if (gHUD.m_iFOV <= 40)
-		view->model = NULL;*/
+	if (gHUD::m_iFOV <= 40)
+		view->model = NULL;
 
 	// Add in the punchangle, if any
 	pparams->viewangles = pparams->viewangles + pparams->punchangle;

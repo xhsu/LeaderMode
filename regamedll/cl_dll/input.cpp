@@ -58,8 +58,6 @@ int	in_cancel = 0;
 
 int g_weaponselect = 0;	// MOVEME: ammo.cpp
 
-cvar_t* in_joystick;	// MOVEME: inputwin32.cpp
-
 /*
 ============
 CL_IsDead
@@ -307,12 +305,11 @@ int CL_ButtonBits(int bResetState)
 		bits |= IN_SCORE;
 	}
 
-	// UNDONE
 	// Dead or in intermission? Shore scoreboard, too
-	/*if (CL_IsDead() || gHUD.m_iIntermission)
+	if (CL_IsDead() || gHUD::m_iIntermission)
 	{
 		bits |= IN_SCORE;
-	}*/
+	}
 
 	if (bResetState)
 	{
@@ -428,19 +425,6 @@ void CL_CreateMove2(float frametime, usercmd_s* cmd, int active)
 	//
 	cmd->buttons = CL_ButtonBits(1);
 
-	// Using joystick?
-	if (in_joystick->value)
-	{
-		if (cmd->forwardmove > 0)
-		{
-			cmd->buttons |= IN_FORWARD;
-		}
-		else if (cmd->forwardmove < 0)
-		{
-			cmd->buttons |= IN_BACK;
-		}
-	}
-
 	gEngfuncs.GetViewAngles(viewangles);
 	// Set current view angles.
 
@@ -452,6 +436,30 @@ void CL_CreateMove2(float frametime, usercmd_s* cmd, int active)
 	{
 		VectorCopy(viewangles, cmd->viewangles);
 		VectorCopy(viewangles, oldangles);
+	}
+}
+
+/*
+================
+CL_ResetButtonBits
+
+Used in hud.cpp
+================
+*/
+void CL_ResetButtonBits(int bits)
+{
+	int bitsNew = CL_ButtonBits(0) ^ bits;
+
+	if (bitsNew & IN_ATTACK)
+	{
+		if (bits & IN_ATTACK)
+		{
+			KeyDown(&in_attack);
+		}
+		else
+		{
+			in_attack.state &= ~7;
+		}
 	}
 }
 
@@ -749,4 +757,47 @@ void InitInput(void)
 	m_yaw = gEngfuncs.pfnRegisterVariable ("m_yaw", "0.022", FCVAR_ARCHIVE);
 	m_forward = gEngfuncs.pfnRegisterVariable ("m_forward", "1", FCVAR_ARCHIVE);
 	m_side = gEngfuncs.pfnRegisterVariable ("m_side", "0.8", FCVAR_ARCHIVE);
+}
+
+/*
+============
+KB_Add
+
+Add a kbutton_t * to the list of pointers the engine can retrieve via KB_Find
+============
+*/
+void KB_Add(const char* name, kbutton_t* pkb)
+{
+	kblist_t* p;
+	kbutton_t* kb;
+
+	kb = KB_Find(name);
+
+	if (kb)
+		return;
+
+	p = (kblist_t*)malloc(sizeof(kblist_t));
+	Q_memset(p, 0, sizeof(*p));
+
+	Q_strlcpy(p->name, name);
+	p->pkey = pkb;
+
+	p->next = g_kbkeys;
+	g_kbkeys = p;
+}
+
+/*
+============
+KB_Init
+
+Add kbutton_t definitions that the engine can query if needed
+============
+*/
+void KB_Init(void)
+{
+	g_kbkeys = NULL;
+
+	KB_Add("in_graph", &in_graph);
+	KB_Add("in_mlook", &in_mlook);
+	KB_Add("in_jlook", &in_jlook);
 }

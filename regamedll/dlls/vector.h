@@ -136,7 +136,7 @@ class Vector
 {
 public:
 	// Construction/destruction
-	Vector() : x(), y(), z() {}
+	Vector() : x(0), y(0), z(0) {}
 	Vector(float X, float Y, float Z) : x(X), y(Y), z(Z) {}
 	Vector(const Vector &v) { *(int *)&x = *(int *)&v.x; *(int *)&y = *(int *)&v.y; *(int *)&z = *(int *)&v.z; }
 	Vector(const float rgfl[3]) { *(int *)&x = *(int *)&rgfl[0]; *(int *)&y = *(int *)&rgfl[1]; *(int *)&z = *(int *)&rgfl[2]; }

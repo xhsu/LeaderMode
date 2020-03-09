@@ -6,6 +6,8 @@ Created Date: 07 Mar 2020
 
 #include "cl_base.h"
 
+int CStudioModelRenderer::s_iShadowSprite = 0;
+
 // ===================== CStudioModelRenderer =====================
 
 CStudioModelRenderer::CStudioModelRenderer(void)
@@ -50,9 +52,8 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 {
 	m_pCurrentEntity = IEngineStudio.GetCurrentEntity();
 
-	// UNDONE
-	/*
-	if (gHUD.m_iFOV < 90)
+	// TODO : hide VMDL here.
+	if (gHUD::m_iFOV < 90)
 	{
 		if (m_pCurrentEntity->model)
 		{
@@ -69,7 +70,6 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 				return 0;
 		}
 	}
-	*/
 
 	IEngineStudio.GetTimes(&m_nFrameCount, &m_clTime, &m_clOldTime);
 	IEngineStudio.GetViewInfo(m_vRenderOrigin, m_vUp, m_vRight, m_vNormal);

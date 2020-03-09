@@ -27,6 +27,9 @@ Created Date: 05 Mar 2020
 // offers triangleapi_s
 #include "../common/triangleapi.h"
 
+// offers demo_api_s
+#include "../common/demo_api.h"
+
 // offers cl_entity_s
 #include "../common/cl_entity.h"
 #include "../common/entity_types.h"
@@ -72,6 +75,9 @@ Created Date: 05 Mar 2020
 // for mstudioanim_t
 #include "../engine/studio.h"
 
+// for msg reading.
+#include "../common/parsemsg.h"
+
 // custom header starts from here.
 #include "cdll_int.h"
 #include "entity.h"
@@ -81,6 +87,8 @@ Created Date: 05 Mar 2020
 #include "input_mouse.h"
 #include "in_camera.h"
 #include "StudioModelRenderer.h"
+#include "message.h"
+#include "events.h"
 
 // hud
 #include "hud/hud.h"

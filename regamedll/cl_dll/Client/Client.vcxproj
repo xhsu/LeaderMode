@@ -71,6 +71,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>E:\SteamLibrary\steamapps\common\Half-Life\czero\cl_dlls\</OutDir>
+    <TargetName>client</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -149,21 +151,25 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\common\parsemsg.cpp" />
     <ClCompile Include="..\..\pm_shared\pm_debug.cpp" />
     <ClCompile Include="..\..\pm_shared\pm_math.cpp" />
     <ClCompile Include="..\..\pm_shared\pm_shared.cpp" />
     <ClCompile Include="..\cdll_int.cpp" />
     <ClCompile Include="..\cl_util.cpp" />
     <ClCompile Include="..\entity.cpp" />
+    <ClCompile Include="..\events.cpp" />
     <ClCompile Include="..\hud\hud.cpp" />
     <ClCompile Include="..\input.cpp" />
     <ClCompile Include="..\input_mouse.cpp" />
     <ClCompile Include="..\in_camera.cpp" />
+    <ClCompile Include="..\message.cpp" />
     <ClCompile Include="..\StudioModelRenderer.cpp" />
     <ClCompile Include="..\StudioModelRenderer_CS.cpp" />
     <ClCompile Include="..\view.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\common\parsemsg.h" />
     <ClInclude Include="..\..\pm_shared\pm_debug.h" />
     <ClInclude Include="..\..\pm_shared\pm_defs.h" />
     <ClInclude Include="..\..\pm_shared\pm_info.h" />
@@ -175,10 +181,12 @@
     <ClInclude Include="..\cl_base.h" />
     <ClInclude Include="..\cl_util.h" />
     <ClInclude Include="..\entity.h" />
+    <ClInclude Include="..\events.h" />
     <ClInclude Include="..\hud\hud.h" />
     <ClInclude Include="..\input.h" />
     <ClInclude Include="..\input_mouse.h" />
     <ClInclude Include="..\in_camera.h" />
+    <ClInclude Include="..\message.h" />
     <ClInclude Include="..\StudioModelRenderer.h" />
     <ClInclude Include="..\view.h" />
   </ItemGroup>

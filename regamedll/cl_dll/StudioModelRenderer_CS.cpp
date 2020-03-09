@@ -145,6 +145,20 @@ float StudioFrameAdvance(client_anim_state_t* st, float framerate, float flInter
 	return flInterval;
 }
 
+bool WeaponHasAttachments(entity_state_t* pplayer)
+{
+	studiohdr_t* modelheader = NULL;
+	model_t* pweaponmodel;
+
+	if (!pplayer)
+		return false;
+
+	pweaponmodel = IEngineStudio.GetModelByIndex(pplayer->weaponmodel);
+	modelheader = (studiohdr_t*)IEngineStudio.Mod_Extradata(pweaponmodel);
+
+	return (modelheader->numattachments != 0);
+}
+
 // ===================== CGameStudioModelRenderer =====================
 
 CGameStudioModelRenderer::CGameStudioModelRenderer(void)

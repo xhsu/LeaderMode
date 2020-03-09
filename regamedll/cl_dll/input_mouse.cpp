@@ -32,6 +32,7 @@ static bool		m_bMouseThread = false;
 // mouse variables
 cvar_t* m_filter;
 cvar_t* sensitivity;
+cvar_t* m_rawinput;
 
 // Custom mouse acceleration (0 disable, 1 to enable, 2 enable with separate yaw/pitch rescale)
 static cvar_t* m_customaccel;
@@ -45,6 +46,12 @@ static cvar_t* m_customaccel_max;
 static cvar_t* m_customaccel_exponent;
 // if threaded mouse is enabled then the time to sleep between polls
 static cvar_t* m_mousethread_sleep;
+
+// WIN32 vars
+DWORD	s_hMouseThreadId = 0;
+HANDLE	s_hMouseThread = 0;
+HANDLE	s_hMouseQuitEvent = 0;
+HANDLE	s_hMouseDoneQuitEvent = 0;
 
 /*
 ===========
@@ -92,6 +99,43 @@ long ThreadInterlockedExchange(long* pDest, long value)
 	return InterlockedExchange(pDest, value);
 }
 
+/*
+===========
+MousePos_ThreadFunction
+===========
+*/
+DWORD WINAPI MousePos_ThreadFunction(LPVOID p)
+{
+	s_hMouseDoneQuitEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+
+	while (1)
+	{
+		if (WaitForSingleObject(s_hMouseQuitEvent, (int)m_mousethread_sleep->value) == WAIT_OBJECT_0)
+		{
+			return 0;
+		}
+
+		if (mouseactive)
+		{
+			POINT		mouse_pos;
+			GetCursorPos(&mouse_pos);
+
+			volatile int mx = mouse_pos.x - old_mouse_pos.x + s_mouseDeltaX;
+			volatile int my = mouse_pos.y - old_mouse_pos.y + s_mouseDeltaY;
+
+			ThreadInterlockedExchange(&old_mouse_pos.x, mouse_pos.x);
+			ThreadInterlockedExchange(&old_mouse_pos.y, mouse_pos.y);
+
+			ThreadInterlockedExchange(&s_mouseDeltaX, mx);
+			ThreadInterlockedExchange(&s_mouseDeltaY, my);
+		}
+	}
+
+	SetEvent(s_hMouseDoneQuitEvent);
+
+	return 0;
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: Allows modulation of mouse scaling/senstivity value and application
 //  of custom algorithms.
@@ -104,8 +148,7 @@ void IN_ScaleMouse(float* x, float* y)
 	float my = *y;
 
 	// This is the default sensitivity
-	// UNDONE
-	float mouse_senstivity = /*(gHUD.GetSensitivity() != 0) ? gHUD.GetSensitivity() : */sensitivity->value;
+	float mouse_senstivity = (gHUD::GetSensitivity() != 0) ? gHUD::GetSensitivity() : sensitivity->value;
 
 	// Using special accleration values
 	if (m_customaccel->value != 0)
@@ -185,8 +228,7 @@ void IN_MouseMove (float frametime, usercmd_t* cmd)
 
 	//jjb - this disbles normal mouse control if the user is trying to 
 	//      move the camera, or if the mouse cursor is visible or if we're in intermission
-	// UNDONE
-	if (!iMouseInUse /*&& !gHUD.m_iIntermission*/ && !g_iVisibleMouse)
+	if (!iMouseInUse && !gHUD::m_iIntermission && !g_iVisibleMouse)
 	{
 		int deltaX, deltaY;
 		if (!m_bRawInput)
@@ -310,6 +352,74 @@ void IN_Move(float frametime, usercmd_t* cmd)
 	}
 
 	// LUNA: joystick was removed.
+}
+
+/*
+===========
+IN_StartupMouse
+===========
+*/
+void IN_StartupMouse (void)
+{
+	if (gEngfuncs.CheckParm ("-nomouse", NULL))
+		return;
+
+	mouseinitialized = 1;
+	mouseparmsvalid = SystemParametersInfo (SPI_GETMOUSE, 0, originalmouseparms, 0);
+
+	if (mouseparmsvalid)
+	{
+		if (gEngfuncs.CheckParm ("-noforcemspd", NULL))
+			newmouseparms[2] = originalmouseparms[2];
+
+		if (gEngfuncs.CheckParm ("-noforcemaccel", NULL))
+		{
+			newmouseparms[0] = originalmouseparms[0];
+			newmouseparms[1] = originalmouseparms[1];
+		}
+
+		if (gEngfuncs.CheckParm ("-noforcemparms", NULL))
+		{
+			newmouseparms[0] = originalmouseparms[0];
+			newmouseparms[1] = originalmouseparms[1];
+			newmouseparms[2] = originalmouseparms[2];
+		}
+	}
+
+	mouse_buttons = MOUSE_BUTTON_COUNT;
+}
+
+/*
+===========
+IN_Init
+===========
+*/
+void IN_Init(void)
+{
+	m_filter = gEngfuncs.pfnRegisterVariable ("m_filter", "0", FCVAR_ARCHIVE);
+	sensitivity = gEngfuncs.pfnRegisterVariable ("sensitivity", "3", FCVAR_ARCHIVE); // user mouse sensitivity setting.
+
+	m_customaccel = gEngfuncs.pfnRegisterVariable ("m_customaccel", "0", FCVAR_ARCHIVE);
+	m_customaccel_scale = gEngfuncs.pfnRegisterVariable ("m_customaccel_scale", "0.04", FCVAR_ARCHIVE);
+	m_customaccel_max = gEngfuncs.pfnRegisterVariable ("m_customaccel_max", "0", FCVAR_ARCHIVE);
+	m_customaccel_exponent = gEngfuncs.pfnRegisterVariable ("m_customaccel_exponent", "1", FCVAR_ARCHIVE);
+
+	m_bRawInput = CVAR_GET_FLOAT("m_rawinput") > 0;
+	m_bMouseThread = gEngfuncs.CheckParm ("-mousethread", NULL) != NULL;
+	m_mousethread_sleep = gEngfuncs.pfnRegisterVariable ("m_mousethread_sleep", "10", FCVAR_ARCHIVE);
+
+	if (!m_bRawInput && m_bMouseThread && m_mousethread_sleep)
+	{
+		s_mouseDeltaX = s_mouseDeltaY = 0;
+
+		s_hMouseQuitEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+		if (s_hMouseQuitEvent)
+		{
+			s_hMouseThread = CreateThread(NULL, 0, MousePos_ThreadFunction, NULL, 0, &s_hMouseThreadId);
+		}
+	}
+
+	IN_StartupMouse();
 }
 
 /*

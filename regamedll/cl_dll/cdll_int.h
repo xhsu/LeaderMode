@@ -18,3 +18,4 @@ extern cl_enginefunc_t gEngfuncs;
 
 // function list.
 BOOL CL_DLLEXPORT CL_IsThirdPerson(void);
+kbutton_s CL_DLLEXPORT* KB_Find(const char* name);

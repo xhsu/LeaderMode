@@ -21,7 +21,7 @@ public:
 
 public:
 	virtual int StudioDrawModel(int flags);
-	virtual int StudioDrawPlayer(int flags, struct entity_state_s* pplayer) { }	// LUNA: both BTE and MoE are empty here. check its derived class.
+	virtual int StudioDrawPlayer(int flags, struct entity_state_s* pplayer) { return FALSE; }	// LUNA: both BTE and MoE are empty here. check its derived class.
 
 public:
 	virtual mstudioanim_t* StudioGetAnim(model_t* m_pSubModel, mstudioseqdesc_t* pseqdesc);
@@ -157,3 +157,5 @@ private:
 	int m_boneIndexCache[BONE_MAX];
 	bool m_isBoneCacheValid;
 };
+
+extern CGameStudioModelRenderer g_StudioRenderer;

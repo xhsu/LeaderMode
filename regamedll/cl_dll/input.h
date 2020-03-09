@@ -42,8 +42,11 @@ extern cvar_t* cl_anglespeedkey;
 extern cvar_t* cl_vsmoothing;
 
 void InitInput(void);
+void KB_Init(void);
 
 float CL_KeyState(kbutton_t* key);
+int CL_ButtonBits(int bResetState);
+void CL_ResetButtonBits(int bits);
 
 void KeyDown(kbutton_t* b);
 void KeyUp(kbutton_t* b);

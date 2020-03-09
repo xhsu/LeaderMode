@@ -10,5 +10,7 @@ extern int iMouseInUse;
 
 extern int cam_thirdperson;
 
+void CAM_Init(void);
+
 void CAM_Think2(void);
 void CL_CameraOffset2(float* ofs);

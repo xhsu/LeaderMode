@@ -54,6 +54,15 @@
     <ClCompile Include="..\cl_util.cpp">
       <Filter>cl_dll</Filter>
     </ClCompile>
+    <ClCompile Include="..\message.cpp">
+      <Filter>cl_dll</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\parsemsg.cpp">
+      <Filter>cl_dll</Filter>
+    </ClCompile>
+    <ClCompile Include="..\events.cpp">
+      <Filter>cl_dll</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\cdll_int.h">
@@ -106,6 +115,15 @@
     </ClInclude>
     <ClInclude Include="..\hud\hud.h">
       <Filter>cl_dll\hud</Filter>
+    </ClInclude>
+    <ClInclude Include="..\message.h">
+      <Filter>cl_dll</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\parsemsg.h">
+      <Filter>cl_dll</Filter>
+    </ClInclude>
+    <ClInclude Include="..\events.h">
+      <Filter>cl_dll</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

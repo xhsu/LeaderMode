@@ -118,7 +118,13 @@ cl_entity_t CL_DLLEXPORT* HUD_GetUserEntity(int index)
 void CL_DLLEXPORT HUD_Init(void)
 {
 	InitInput();
+
 	V_Init();	// Initialize view system
+	CAM_Init();
+	IN_Init();
+	KB_Init();
+	Msg_Init();
+	gHUD::Init();
 }
 
 BOOL CL_DLLEXPORT HUD_Key_Event(int down, int keynum, const char* pszCurrentBinding)
@@ -152,6 +158,7 @@ void CL_DLLEXPORT HUD_ProcessPlayerState(entity_state_s* dst, const entity_state
 
 BOOL CL_DLLEXPORT HUD_Redraw(float time, int intermission)
 {
+	gHUD::Redraw(time, intermission);
 	return TRUE;
 }
 
@@ -161,6 +168,7 @@ void CL_DLLEXPORT HUD_Reset(void)
 
 void CL_DLLEXPORT HUD_Shutdown(void)
 {
+	gHUD::Shutdown();
 }
 
 void CL_DLLEXPORT HUD_StudioEvent(const mstudioevent_s* event, const cl_entity_s* entity)
@@ -183,13 +191,14 @@ void CL_DLLEXPORT HUD_TxferPredictionData(entity_state_s* ps, const entity_state
 	HUD_TxferPredictionData2(ps, pps, pcd, ppcd, wd, pwd);
 }
 
-BOOL CL_DLLEXPORT HUD_UpdateClientData(struct client_data_t* pcldata, float flTime)
+BOOL CL_DLLEXPORT HUD_UpdateClientData(client_data_t* pcldata, float flTime)
 {
-	return FALSE;
+	return gHUD::UpdateClientData(pcldata, flTime);
 }
 
 BOOL CL_DLLEXPORT HUD_VidInit(void)
 {
+	gHUD::VidInit();
 	return TRUE;
 }
 
@@ -232,7 +241,7 @@ BOOL CL_DLLEXPORT Initialize(cl_enginefunc_t* pEnginefuncs, int iVersion)
 	Q_memcpy(&gEngfuncs, pEnginefuncs, sizeof(cl_enginefunc_t));
 
 	// LUNA: UNDONE, crsky told me to do it later.
-	//EV_HookEvents();
+	Events_Init();
 	//CL_LoadParticleMan();
 
 	// get tracker interface, if any
@@ -263,4 +272,6 @@ void CL_DLLEXPORT V_CalcRefdef(ref_params_s* pparams)
 	{
 		V_CalcNormalRefdef(pparams);
 	}
+
+	gHUD::CalcRefdef(pparams);
 }
