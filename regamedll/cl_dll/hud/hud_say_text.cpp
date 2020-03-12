@@ -54,14 +54,13 @@ void SayTextLine::Clear(void)
 
 void SayTextLine::Draw(int x, int y, float r, float g, float b)
 {
-	/* UNDONE
-	int rangeIndex;
+	unsigned int rangeIndex;
 	TextRange* range;
 	wchar_t ch;
 
-	if (m_textRanges.Size() != 0)
+	if (!m_textRanges.empty())
 	{
-		for (rangeIndex = 0; rangeIndex < m_textRanges.Size(); rangeIndex++)
+		for (rangeIndex = 0; rangeIndex < m_textRanges.size(); rangeIndex++)
 		{
 			range = &m_textRanges[rangeIndex];
 
@@ -80,7 +79,7 @@ void SayTextLine::Draw(int x, int y, float r, float g, float b)
 	{
 		gHUD::m_VGUI2Print.DrawVGUI2String(m_line, x, y, r, g, b);
 		return;
-	}*/
+	}
 }
 
 SayTextLine& SayTextLine::operator = (SayTextLine& other)
@@ -156,8 +155,7 @@ void SayTextLine::Colorize(void)
 		wchar_t wName[128];
 		char* pName = g_PlayerInfoList[m_clientIndex].name;
 
-		// UNDONE
-		//vgui::localize()->ConvertANSIToUnicode(pName, wName, sizeof(wName));
+		VGUI_LOCALISE->ConvertANSIToUnicode(pName, wName, sizeof(wName));
 
 		if (pName)
 		{
@@ -396,8 +394,8 @@ void CHudSayText::SayTextPrint(const char* pszBuf, int iBufSize, int clientIndex
 	{
 		ConsolePrint(pszBuf);
 		return;
-	}
-
+	}*/
+	
 	int lineNum;
 	wchar_t finalBuffer[MAX_CHARS_PER_LINE];
 	const char* localized;
@@ -436,7 +434,7 @@ void CHudSayText::SayTextPrint(const char* pszBuf, int iBufSize, int clientIndex
 		localized = buf;
 	}
 
-	msg = vgui::localize()->Find(localized);
+	msg = VGUI_LOCALISE->Find(localized);
 
 	if (!msg)
 	{
@@ -451,7 +449,7 @@ void CHudSayText::SayTextPrint(const char* pszBuf, int iBufSize, int clientIndex
 		wchar_t* localizedTerm;
 		int num;
 
-		vgui::localize()->ConvertANSIToUnicode(localized, temp, sizeof(temp));
+		VGUI_LOCALISE->ConvertANSIToUnicode(localized, temp, sizeof(temp));
 
 		if (temp[0])
 		{
@@ -477,12 +475,12 @@ void CHudSayText::SayTextPrint(const char* pszBuf, int iBufSize, int clientIndex
 						else
 							locTerm[wordLen] = 0;
 
-						if (vgui::localize()->ConvertUnicodeToANSI(locTerm, buf, sizeof(buf)))
-							localizedTerm = vgui::localize()->Find(buf);
+						if (VGUI_LOCALISE->ConvertUnicodeToANSI(locTerm, buf, sizeof(buf)))
+							localizedTerm = VGUI_LOCALISE->Find(buf);
 						else
 							localizedTerm = locTerm;
 
-						num = min((int)wcslen(localizedTerm), MAX_CHARS_PER_LINE - outPos);
+						num = Q_min((int)wcslen(localizedTerm), MAX_CHARS_PER_LINE - outPos);
 						wcsncpy(&out[outPos], localizedTerm, num);
 						outPos += num;
 
@@ -546,12 +544,12 @@ void CHudSayText::SayTextPrint(const char* pszBuf, int iBufSize, int clientIndex
 	{
 		if (sptrs[j][0] == '#')
 		{
-			w[j] = vgui::localize()->Find(sptrs[j]);
+			w[j] = VGUI_LOCALISE->Find(sptrs[j]);
 		}
 
 		if (!w[j])
 		{
-			vgui::localize()->ConvertANSIToUnicode(sptrs[j], wstr[j], sizeof(wstr[j]));
+			VGUI_LOCALISE->ConvertANSIToUnicode(sptrs[j], wstr[j], sizeof(wstr[j]));
 			w[j] = wstr[j];
 		}
 	}
@@ -565,7 +563,7 @@ void CHudSayText::SayTextPrint(const char* pszBuf, int iBufSize, int clientIndex
 	}
 	else
 	{
-		vgui::localize()->ConstructString(finalBuffer, sizeof(finalBuffer), msg, 4, w[0], w[1], w[2], w[3]);
+		VGUI_LOCALISE->ConstructString(finalBuffer, sizeof(finalBuffer), msg, 4, w[0], w[1], w[2], w[3]);
 	}
 
 	g_sayTextLine[lineNum].SetText(finalBuffer, clientIndex);
@@ -577,13 +575,11 @@ void CHudSayText::SayTextPrint(const char* pszBuf, int iBufSize, int clientIndex
 
 	m_bitsFlags |= HUD_ACTIVE;
 
-	Y_START = GetTextPrintY();*/
+	Y_START = GetTextPrintY();
 }
 
 void CHudSayText::EnsureTextFitsInOneLineAndWrapIfHaveTo(int line)
 {
-	// UNDONE
-	/*
 	int line_width = 0;
 	gHUD::m_VGUI2Print.GetStringSize(g_sayTextLine[line].m_line, &line_width, &line_height);
 
@@ -674,5 +670,4 @@ void CHudSayText::EnsureTextFitsInOneLineAndWrapIfHaveTo(int line)
 			}
 		}
 	}
-	*/
 }

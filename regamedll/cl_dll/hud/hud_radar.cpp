@@ -400,8 +400,7 @@ void CHudRadar::DrawRadar(float flTime)
 
 void CHudRadar::DrawPlayerLocation(void)
 {
-	// UNDONE
-	/*wchar_t* locString;
+	wchar_t* locString;
 	int center_x, center_y;
 	int string_width, string_height;
 	int x, y;
@@ -409,12 +408,12 @@ void CHudRadar::DrawPlayerLocation(void)
 	if (g_PlayerExtraInfo[gHUD::m_iPlayerNum].location[0] != '#')
 	{
 		static wchar_t locBuffer[512];
-		vgui::localize()->ConvertANSIToUnicode(g_PlayerExtraInfo[gHUD::m_iPlayerNum].location, locBuffer, sizeof(locBuffer));
+		VGUI_LOCALISE->ConvertANSIToUnicode(g_PlayerExtraInfo[gHUD::m_iPlayerNum].location, locBuffer, sizeof(locBuffer));
 		locString = locBuffer;
 	}
 	else
 	{
-		locString = vgui::localize()->Find(g_PlayerExtraInfo[gHUD::m_iPlayerNum].location);
+		locString = VGUI_LOCALISE->Find(g_PlayerExtraInfo[gHUD::m_iPlayerNum].location);
 	}
 
 	if (!locString)
@@ -435,7 +434,7 @@ void CHudRadar::DrawPlayerLocation(void)
 	y = center_y + (string_height / 2);
 
 	if (wcslen(locString) > 0)
-		gHUD::m_VGUI2Print.DrawVGUI2String(locString, x, y, g_LocationColor[0], g_LocationColor[1], g_LocationColor[2]);*/
+		gHUD::m_VGUI2Print.DrawVGUI2String(locString, x, y, g_LocationColor[0], g_LocationColor[1], g_LocationColor[2]);
 }
 
 int CHudRadar::GetRadarSize(void)

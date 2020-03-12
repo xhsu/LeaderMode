@@ -87,6 +87,23 @@ Created Date: 05 Mar 2020
 // for ISurface
 #include "../common/interface.h"
 
+// for local_state_s
+#include "../common/entity_state.h"
+
+// sync the weapon data between cl and sv.
+#include "../dlls/ammo.h"
+#include "../dlls/weapontype.h"
+
+// Ahh.. we are finally here, VGUI.
+#include <VGUI/VGUI.h>
+#include <VGUI/ISurface.h>
+#include <VGUI/IPanel.h>
+#include <VGUI/IVGui.h>
+#include <VGUI/IInput.h>
+#include <VGUI/IScheme.h>
+#include <VGUI/ISystem.h>
+#include <VGUI/ILocalize.h>
+
 // custom header starts from here.
 #include "cdll_int.h"
 #include "entity.h"
@@ -100,6 +117,8 @@ Created Date: 05 Mar 2020
 #include "events.h"
 #include "interpolation.h"	// UTIL from CSBTE.
 #include "corpse.h"
+#include "viewport_interface.h"
+#include "weapons.h"
 
 // hud
 #include "hud/hud.h"
@@ -125,3 +144,4 @@ Created Date: 05 Mar 2020
 #include "hud/hud_status_icons.h"
 #include "hud/hud_scenario_status.h"
 #include "hud/hud_progress_bar.h"
+#include "hud/hud_vgui2print.h"

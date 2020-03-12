@@ -6,8 +6,6 @@
 #endif
 
 #include <vgui/VGUI.h>
-#include "tier1/interface.h"
-#include <tier0/dbg.h>
 
 class Color;
 

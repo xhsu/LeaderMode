@@ -22,7 +22,7 @@
 #endif /* not __MINGW32__ */
 #endif
 
-#include "const.h"
+#include "../common/const.h"
 
 #define MAX_QPATH 64    // Must match value in quakedefs.h
 
@@ -59,7 +59,7 @@ typedef struct resourceinfo_s
 #define RES_REQUESTED	   (1<<3)	// Already requested a download of this one
 #define RES_PRECACHED	   (1<<4)	// Already precached
 
-#include "crc.h"
+#include "../common/crc.h"
 
 typedef struct resource_s
 {

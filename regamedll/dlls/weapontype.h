@@ -28,6 +28,8 @@
 
 #pragma once
 
+#define MAX_WEAPONS			32
+
 #define SLOT_NO				0
 #define PRIMARY_WEAPON_SLOT	1
 #define PISTOL_SLOT			2

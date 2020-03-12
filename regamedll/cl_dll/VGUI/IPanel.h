@@ -6,7 +6,6 @@
 #endif
 
 #include <vgui/VGUI.h>
-#include "tier1/interface.h"
 
 #ifdef SendMessage
 #undef SendMessage

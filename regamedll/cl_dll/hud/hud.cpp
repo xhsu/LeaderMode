@@ -103,7 +103,7 @@ namespace gHUD
 	CHudStatusIcons m_StatusIcons;
 	CHudScenarioStatus m_scenarioStatus;
 	CHudProgressBar m_progressBar;
-	//CHudVGUI2Print m_VGUI2Print;	// UNDONE
+	CHudVGUI2Print m_VGUI2Print;
 };
 
 void gHUD::Init(void)
@@ -129,6 +129,7 @@ void gHUD::Init(void)
 	// instead, we should:
 	m_Ammo.Init();
 	m_Health.Init();
+	m_SayText.Init();	// m_SayText should place before m_Spectator, since m_Spectator.init() is calling some vars from m_SayText.Init().
 	m_Spectator.Init();
 	m_Geiger.Init();
 	m_Battery.Init();
@@ -137,7 +138,6 @@ void gHUD::Init(void)
 	m_Message.Init();
 	m_StatusBar.Init();
 	m_DeathNotice.Init();
-	m_SayText.Init();
 	m_Menu.Init();
 	m_NightVision.Init();
 	m_TextMessage.Init();
@@ -148,6 +148,7 @@ void gHUD::Init(void)
 	m_StatusIcons.Init();
 	m_scenarioStatus.Init();
 	m_progressBar.Init();
+	m_VGUI2Print.Init();
 
 	// UNDONE
 	//GetClientVoice()->Init(&g_VoiceStatusHelper);
@@ -184,9 +185,9 @@ void gHUD::Init(void)
 
 	default_fov = CVAR_CREATE("default_fov", "90", 0);
 
-	/* UNDONE
-	m_iFontEngineHeight = vgui::surface()->GetFontTall(font);
+	m_iFontEngineHeight = VGUI_SURFACE->GetFontTall(font);
 
+	/* UNDONE
 	if (gConfigs.bEnableClientUI)
 		g_pViewPort->Init();
 	*/
@@ -306,8 +307,9 @@ void gHUD::VidInit(void)
 	// UNDONE
 	//GetClientVoiceHud()->VidInit();
 
-	//m_iFontEngineHeight = vgui::surface()->GetFontTall(font);
+	m_iFontEngineHeight = VGUI_SURFACE->GetFontTall(font);
 
+	// UNDONE
 	//if (gConfigs.bEnableClientUI)
 		//g_pViewPort->VidInit();
 }
@@ -446,9 +448,6 @@ int gHUD::UpdateClientData(client_data_t* cdata, float time)
 
 void gHUD::CalcRefdef(ref_params_s* pparams)
 {
-	// UNDONE
-	//m_ThirdPerson.CalcRefdef(pparams);
-	//m_ViewModel.CalcRefdef(pparams);
 }
 
 int gHUD::GetSpriteIndex(const char* SpriteName)

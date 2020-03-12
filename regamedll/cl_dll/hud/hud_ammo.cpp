@@ -5,7 +5,6 @@ Created Date: Mar 11 2020
 */
 
 #include "cl_base.h"
-#include "../dlls/weapontype.h"
 
 int g_iShotsFired;
 
@@ -355,8 +354,7 @@ int CHudAmmo::DrawWList(float flTime)
 	else
 		iActiveSlot = gpActiveSel->iSlot;
 
-	// UNDONE : UNDONE_RADAR
-	x = /*gHUD::m_Radar.GetRadarSize() + */10;
+	x = gHUD::m_Radar.GetRadarSize() + 10;
 	y = 10;
 
 	if (iActiveSlot > 0)
@@ -398,9 +396,8 @@ int CHudAmmo::DrawWList(float flTime)
 		x += iWidth + 5;
 	}
 
-	// UNDONE : UNDONE_RADAR
 	a = 128;
-	x = /*gHUD::m_Radar.GetRadarSize() + */10;
+	x = gHUD::m_Radar.GetRadarSize() + 10;
 
 	for (i = 0; i < MAX_WEAPON_SLOTS; i++)
 	{
@@ -885,11 +882,10 @@ int CHudAmmo::DrawCrosshair(float flTime, int weaponid)
 		iBarSize = (float)(ScreenWidth * iBarSize) / m_iCrosshairScaleBase;
 	}
 
-	// UNDONE : NVG
-	/*if (gHUD::m_NightVision.m_fOn)
+	if (gHUD::m_NightVision.m_fOn)
 		DrawCrosshairEx(flTime, weaponid, iBarSize, flCrosshairDistance, false, 250, 50, 50, m_iAlpha);
 	else
-		DrawCrosshairEx(flTime, weaponid, iBarSize, flCrosshairDistance, m_bAdditive, m_R, m_G, m_B, m_iAlpha);*/
+		DrawCrosshairEx(flTime, weaponid, iBarSize, flCrosshairDistance, m_bAdditive, m_R, m_G, m_B, m_iAlpha);
 
 	return 1;
 }

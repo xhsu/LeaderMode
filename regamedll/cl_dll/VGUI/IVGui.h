@@ -5,7 +5,6 @@
 #pragma once
 #endif
 
-#include "tier1/interface.h"
 #include <vgui/VGUI.h>
 
 class KeyValues;

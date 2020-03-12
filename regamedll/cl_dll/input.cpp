@@ -65,7 +65,7 @@ Returns 1 if health is <= 0
 */
 bool CL_IsDead(void)
 {
-	return false;//(gHUD::m_Health.m_iHealth <= 0) ? 1 : 0;	// UNDONE
+	return (gHUD::m_Health.m_iHealth <= 0) ? 1 : 0;
 }
 
 /*
@@ -99,6 +99,10 @@ Return 1 to allow engine to process the key, otherwise, act on it as needed
 BOOL HUD_Key_Event2(int down, int keynum, const char* pszCurrentBinding)
 {
 	// UNDONE: VGUI2 here!
+
+	//if (gViewPortInterface)
+		//return gViewPortInterface->KeyInput(down, keynum, pszCurrentBinding);
+
 	return TRUE;
 }
 

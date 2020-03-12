@@ -74,3 +74,6 @@ private:
 	int m_HUD_title_life;
 	int m_HUD_title_half;
 };
+
+extern vgui::HFont Newfont;
+extern vgui::HFont font;

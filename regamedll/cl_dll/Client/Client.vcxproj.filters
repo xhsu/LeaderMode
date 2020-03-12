@@ -153,6 +153,12 @@
     <ClCompile Include="..\cl_base.cpp">
       <Filter>cl_dll</Filter>
     </ClCompile>
+    <ClCompile Include="..\hud\hud_vgui2print.cpp">
+      <Filter>cl_dll\hud</Filter>
+    </ClCompile>
+    <ClCompile Include="..\weapons.cpp">
+      <Filter>cl_dll</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\cdll_int.h">
@@ -294,6 +300,12 @@
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\viewport_interface.h">
+      <Filter>cl_dll</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hud\hud_vgui2print.h">
+      <Filter>cl_dll\hud</Filter>
+    </ClInclude>
+    <ClInclude Include="..\weapons.h">
       <Filter>cl_dll</Filter>
     </ClInclude>
   </ItemGroup>

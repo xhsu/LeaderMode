@@ -79,8 +79,7 @@ void CHudSpectator::CheckSettings(void)
 	if (gHUD::m_iIntermission)
 		m_pip->value = INSET_OFF;
 
-	// UNDONE
-	/*if (m_chatEnabled != (gHUD::m_SayText.m_HUD_saytext->value != 0))
+	if (m_chatEnabled != (gHUD::m_SayText.m_HUD_saytext->value != 0))
 	{
 		m_chatEnabled = (gHUD::m_SayText.m_HUD_saytext->value != 0);
 
@@ -90,14 +89,13 @@ void CHudSpectator::CheckSettings(void)
 			Q_snprintf(chatcmd, sizeof(chatcmd) - 1, "ignoremsg %i", m_chatEnabled ? 0 : 1);
 			gEngfuncs.pfnServerCmd(chatcmd);
 		}
-	}*/
+	}
 
 	if (((g_iTeamNumber == TEAM_TERRORIST) || (g_iTeamNumber == TEAM_CT)) && (g_iUser1 == OBS_IN_EYE))
 	{
 		if (m_pip->value != INSET_OFF)
 		{
-			// UNDONE
-			//gHUD::VGUI2HudPrint("#Spec_No_PIP", -1, ScreenHeight * 0.35, 1.0, 0.705, 0.118);
+			gHUD::m_VGUI2Print.VGUI2HudPrint("#Spec_No_PIP", -1, ScreenHeight * 0.35, 1.0, 0.705, 0.118);
 			m_pip->value = INSET_OFF;
 		}
 	}
@@ -836,8 +834,7 @@ void CHudSpectator::SetModes(int iNewMainMode, int iNewInsetMode)
 		{
 			if (gEngfuncs.pfnGetCvarFloat("cl_observercrosshair") != 0.0)
 			{
-				// UNDONE
-				//gEngfuncs.pfnSetCrosshair(gHUD::m_Ammo.m_hObserverCrosshair, gHUD::m_Ammo.m_rcObserverCrosshair, 255, 255, 255);
+				gEngfuncs.pfnSetCrosshair(gHUD::m_Ammo.m_hObserverCrosshair, gHUD::m_Ammo.m_rcObserverCrosshair, 255, 255, 255);
 			}
 			else
 			{
@@ -912,7 +909,7 @@ void CHudSpectator::HandleButtonsDown(int ButtonPressed)
 			{
 				gEngfuncs.SetViewAngles(vJumpAngles);
 				iJumpSpectator = 1;
-				//gHUD::m_Radar.m_iPlayerLastPointedAt = g_iUser2;	// UNDONE
+				gHUD::m_Radar.m_iPlayerLastPointedAt = g_iUser2;
 				g_PlayerExtraInfo[g_iUser2].showhealth = gHUD::m_flTime = 3;
 			}
 
@@ -1110,8 +1107,7 @@ bool CHudSpectator::DirectorMessage(int iSize, void* pbuf)
 		tst.holdtime = 6.0;
 		tst.pMessage = tempString;
 
-		// UNDONE
-		//gHUD::m_Message.MessageAdd(&tst);
+		gHUD::m_Message.MessageAdd(&tst);
 		break;
 	}
 
@@ -1192,8 +1188,7 @@ bool CHudSpectator::DirectorMessage(int iSize, void* pbuf)
 		msg->pMessage = m_HUDMessageText[m_lastHudMessage];
 		msg->pName = "HUD_MESSAGE";
 
-		// UNDONE
-		//gHUD::m_Message.MessageAdd(msg);
+		gHUD::m_Message.MessageAdd(msg);
 
 		m_lastHudMessage++;
 		m_lastHudMessage %= MAX_SPEC_HUD_MESSAGES;

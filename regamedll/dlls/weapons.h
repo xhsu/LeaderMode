@@ -33,8 +33,6 @@ class CBasePlayer;
 const float MAX_NORMAL_BATTERY    = 100.0f;
 const float MAX_DIST_RELOAD_SOUND = 512.0f;
 
-#define MAX_WEAPONS                 32
-
 #define ITEM_FLAG_NONE				0
 #define ITEM_FLAG_SELECTONEMPTY     1
 #define ITEM_FLAG_NOAUTORELOAD      2
@@ -67,16 +65,6 @@ const float MAX_DIST_RELOAD_SOUND = 512.0f;
 #define ARMOR_NONE		0.0f	// No armor
 #define ARMOR_KEVLAR	1.0f	// Body vest only
 #define ARMOR_VESTHELM	2.0f	// Vest and helmet
-
-struct AmmoInfo
-{
-	AmmoIdType m_iId;
-	const char* m_pszName;
-	int m_iMax;
-	int m_iCountPerBox;
-	int m_iCostPerBox;
-	int m_iBulletBehavior;
-};
 
 struct MULTIDAMAGE
 {

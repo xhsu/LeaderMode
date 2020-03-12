@@ -44,9 +44,9 @@
 	#define NOSERVICE
 	#define NOMCX
 	#define NOIME
-	#include "winsani_in.h"
+	#include "../common/winsani_in.h"
 	#include "windows.h"
-	#include "winsani_out.h"
+	#include "../common/winsani_out.h"
 	#undef PlaySound
 #else
 	#include <limits.h>
@@ -74,7 +74,7 @@ typedef float vec_t;					// needed before including progdefs.h
 #include "qstring.h"
 
 // Shared engine/DLL constants
-#include "const.h"
+#include "../common/const.h"
 #include "edict.h"
 
 // Shared header describing protocol between engine and DLLs

@@ -29,13 +29,13 @@
 #pragma once
 
 #include "pm_info.h"
-#include "pmtrace.h"
+#include "../common/pmtrace.h"
 
 #ifndef USERCMD_H
-#include "usercmd.h"
+#include "../common/usercmd.h"
 #endif
 
-#include "const.h"
+#include "../common/const.h"
 
 #define MAX_PHYSENTS 600 		  		// Must have room for all entities in the world.
 #define MAX_MOVEENTS 64

@@ -159,3 +159,7 @@ private:
 };
 
 extern CGameStudioModelRenderer g_StudioRenderer;
+
+// for EXPORTFUNC HUD_PostRunCmd
+void CounterStrike_SetSequence(int seq, int gaitseq);
+void CounterStrike_SetOrientation(float* o, float* a);

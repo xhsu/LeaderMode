@@ -159,6 +159,7 @@ class CHudRadar;
 class CHudStatusIcons;
 class CHudScenarioStatus;
 class CHudProgressBar;
+class CHudVGUI2Print;
 
 namespace gHUD
 {
@@ -247,7 +248,7 @@ namespace gHUD
 	extern CHudStatusIcons m_StatusIcons;
 	extern CHudScenarioStatus m_scenarioStatus;
 	extern CHudProgressBar m_progressBar;
-	//extern CHudVGUI2Print m_VGUI2Print;	UNDONE
+	extern CHudVGUI2Print m_VGUI2Print;
 };
 
 extern hud_player_info_t g_PlayerInfoList[MAX_PLAYERS + 1];
@@ -279,3 +280,6 @@ void CommandFunc_Adjust_Crosshair(void);
 // Use this to set any co-ords in 640x480 space
 inline int XRES(float x) { return static_cast<int>(x * (static_cast<float>(ScreenWidth) / 640.0f) + 0.5f); }
 inline int YRES(float y) { return static_cast<int>(y * (static_cast<float>(ScreenHeight) / 480.0f) + 0.5f); }
+
+// for HUD_PostRunCmd
+extern float g_lastFOV;

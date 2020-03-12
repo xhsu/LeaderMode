@@ -63,7 +63,7 @@ private:
 #define string_t QString
 #endif
 
-#include "const.h"
+#include "../common/const.h"
 #include "edict.h"
 #include "eiface.h"
 #include "enginecallback.h"

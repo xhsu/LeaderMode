@@ -28,8 +28,8 @@
 
 #pragma once
 
-#include "const.h"
-#include "qlimits.h"
+#include "../common/const.h"
+#include "../common/qlimits.h"
 
 // Don't allow overflow
 #define SIZEBUF_CHECK_OVERFLOW		0

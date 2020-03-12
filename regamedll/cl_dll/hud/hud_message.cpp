@@ -6,10 +6,8 @@ Created Date: Mar 11 2020
 
 #include "cl_base.h"
 
-/* UNDONE
 vgui::HFont Newfont;
 vgui::HFont font;
-*/
 
 int CHudMessage::Init(void)
 {
@@ -24,8 +22,7 @@ int CHudMessage::VidInit(void)
 	m_HUD_title_half = gHUD::GetSpriteIndex("title_half");
 	m_HUD_title_life = gHUD::GetSpriteIndex("title_life");
 
-	// UNDONE
-	/*vgui::IScheme* pScheme = vgui::scheme()->GetIScheme(vgui::scheme()->GetDefaultScheme());
+	vgui::IScheme* pScheme = VGUI_SCHEME->GetIScheme(VGUI_SCHEME->GetDefaultScheme());
 
 	if (pScheme)
 	{
@@ -34,7 +31,7 @@ int CHudMessage::VidInit(void)
 
 		if (!Newfont)
 			Newfont = pScheme->GetFont("CreditsFont", true);
-	}*/
+	}
 
 	return 1;
 }
@@ -147,8 +144,7 @@ void CHudMessage::Reset(void)
 
 void CHudMessage::MsgFunc_HudText(const char* pString, BOOL& hintMessage)
 {
-	// UNDONE
-	//MessageAdd(pString, gHUD::m_flTime, hintMessage, font);
+	MessageAdd(pString, gHUD::m_flTime, hintMessage, font);
 	m_parms.time = gHUD::m_flTime;
 
 	if (!(m_bitsFlags & HUD_ACTIVE))
@@ -157,8 +153,7 @@ void CHudMessage::MsgFunc_HudText(const char* pString, BOOL& hintMessage)
 
 void CHudMessage::MsgFunc_HudTextPro(const char* pString, BOOL& hintMessage)
 {
-	// UNDONE
-	//MessageAdd(pString, gHUD::m_flTime, hintMessage, Newfont);
+	MessageAdd(pString, gHUD::m_flTime, hintMessage, Newfont);
 	m_parms.time = gHUD::m_flTime;
 
 	if (!(m_bitsFlags & HUD_ACTIVE))
@@ -167,8 +162,6 @@ void CHudMessage::MsgFunc_HudTextPro(const char* pString, BOOL& hintMessage)
 
 void CHudMessage::MsgFunc_HudTextArgs(int iSize, void* pbuf)
 {
-	// UNDONE
-	/*
 	BEGIN_READ(pbuf, iSize);
 
 	char* pString = READ_STRING();
@@ -187,7 +180,7 @@ void CHudMessage::MsgFunc_HudTextArgs(int iSize, void* pbuf)
 			if (!tmp)
 				tmp = "";
 
-			vgui::localize()->ConvertANSIToUnicode(tmp, m_pMessages[slotNum].args[i], MESSAGE_ARG_LEN);
+			VGUI_LOCALISE->ConvertANSIToUnicode(tmp, m_pMessages[slotNum].args[i], MESSAGE_ARG_LEN);
 		}
 	}
 
@@ -195,7 +188,6 @@ void CHudMessage::MsgFunc_HudTextArgs(int iSize, void* pbuf)
 
 	if (!(m_bitsFlags & HUD_ACTIVE))
 		m_bitsFlags |= HUD_ACTIVE;
-	*/
 }
 
 void CHudMessage::MsgFunc_GameTitle(void)
@@ -293,8 +285,7 @@ void CHudMessage::MessageAdd(client_textmessage_t* newMessage)
 
 	if (!Q_strcmp(newMessage->pName, "Spec_Duck"))
 	{
-		// UNDONE
-		//MessageAdd(newMessage->pName, gHUD::m_flTime, 1, Newfont);
+		MessageAdd(newMessage->pName, gHUD::m_flTime, 1, Newfont);
 		return;
 	}
 
@@ -303,7 +294,7 @@ void CHudMessage::MessageAdd(client_textmessage_t* newMessage)
 		if (!m_pMessages[i].pMessage)
 		{
 			m_pMessages[i].pMessage = newMessage;
-			//m_pMessages[i].font = Newfont;	// UNDONE
+			m_pMessages[i].font = Newfont;
 			m_startTime[i] = gHUD::m_flTime;
 			return;
 		}
@@ -496,8 +487,6 @@ void CHudMessage::MessageScanStart(void)
 
 void CHudMessage::MessageDrawScan(client_message_t* pClientMessage, float time, unsigned int font)
 {
-	// UNDONE
-	/*
 	int i, j, length, width;
 	wchar_t* pText;
 	wchar_t line[256];
@@ -533,11 +522,11 @@ void CHudMessage::MessageDrawScan(client_message_t* pClientMessage, float time, 
 				szTempMessage[iMessageLength - 1] = 0;
 		}
 
-		pFullText = vgui::localize()->Find(szTempMessage);
+		pFullText = VGUI_LOCALISE->Find(szTempMessage);
 
 		if (pClientMessage->numArgs)
 		{
-			vgui::localize()->ConstructString(textBuf, sizeof(textBuf), pFullText, pClientMessage->numArgs, pClientMessage->args[0], pClientMessage->args[1], pClientMessage->args[2], pClientMessage->args[3]);
+			VGUI_LOCALISE->ConstructString(textBuf, sizeof(textBuf), pFullText, pClientMessage->numArgs, pClientMessage->args[0], pClientMessage->args[1], pClientMessage->args[2], pClientMessage->args[3]);
 			pFullText = textBuf;
 		}
 
@@ -549,7 +538,7 @@ void CHudMessage::MessageDrawScan(client_message_t* pClientMessage, float time, 
 	}
 	else
 	{
-		vgui::localize()->ConvertANSIToUnicode(pMessage->pMessage, textBuf, sizeof(textBuf));
+		VGUI_LOCALISE->ConvertANSIToUnicode(pMessage->pMessage, textBuf, sizeof(textBuf));
 		pFullText = textBuf;
 	}
 
@@ -568,7 +557,7 @@ void CHudMessage::MessageDrawScan(client_message_t* pClientMessage, float time, 
 		}
 		else
 		{
-			vgui::surface()->GetCharABCwide(font, *pFullText, a, b, c);
+			VGUI_SURFACE->GetCharABCwide(font, *pFullText, a, b, c);
 			width += a + b + c;
 		}
 
@@ -577,7 +566,7 @@ void CHudMessage::MessageDrawScan(client_message_t* pClientMessage, float time, 
 	}
 
 	m_parms.length = length;
-	m_parms.totalHeight = vgui::surface()->GetFontTall(font) * m_parms.lines;
+	m_parms.totalHeight = VGUI_SURFACE->GetFontTall(font) * m_parms.lines;
 
 	m_parms.y = YPosition(pMessage->y, m_parms.totalHeight);
 	pText = pFullText;
@@ -595,7 +584,7 @@ void CHudMessage::MessageDrawScan(client_message_t* pClientMessage, float time, 
 		{
 			line[m_parms.lineLength] = *pText;
 
-			vgui::surface()->GetCharABCwide(font, *pText, a, b, c);
+			VGUI_SURFACE->GetCharABCwide(font, *pText, a, b, c);
 			m_parms.width += a + b + c;
 			m_parms.lineLength++;
 			pText++;
@@ -613,7 +602,7 @@ void CHudMessage::MessageDrawScan(client_message_t* pClientMessage, float time, 
 		{
 			m_parms.text = line[j];
 
-			vgui::surface()->GetCharABCwide(font, m_parms.text, a, b, c);
+			VGUI_SURFACE->GetCharABCwide(font, m_parms.text, a, b, c);
 
 			int next = m_parms.x + a + b + c;
 
@@ -625,7 +614,6 @@ void CHudMessage::MessageDrawScan(client_message_t* pClientMessage, float time, 
 			m_parms.x = next;
 		}
 
-		m_parms.y += vgui::surface()->GetFontTall(font);
+		m_parms.y += VGUI_SURFACE->GetFontTall(font);
 	}
-	*/
 }

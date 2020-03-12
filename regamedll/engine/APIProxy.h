@@ -2,8 +2,8 @@
 #define __APIPROXY__
 
 #include "archtypes.h"     // DAL
-#include "netadr.h"
-#include "Sequence.h"
+#include "../common/netadr.h"
+#include "../common/Sequence.h"
 
 #ifndef _WIN32
 #include "enums.h"

@@ -33,7 +33,7 @@
 #endif
 
 #include "osconfig.h"
-#include "mathlib.h"
+#include "../common/mathlib.h"
 
 // Has no references on multiplayer library CS.
 #define NOXREF

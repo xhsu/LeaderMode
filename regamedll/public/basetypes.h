@@ -35,7 +35,7 @@
 #include "osconfig.h"
 #include "commonmacros.h"
 
-#include "mathlib.h"
+#include "../common/mathlib.h"
 
 // For backward compatibilty only...
 #include "tier0/platform.h"

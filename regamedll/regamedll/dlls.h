@@ -37,13 +37,13 @@ using FloatRef = float;
 
 #include "archtypes.h"
 #include "enginecallback.h"
-#include "entity_state.h"
-#include "screenfade.h"
+#include "../common/entity_state.h"
+#include "../common/screenfade.h"
 #include "utlvector.h"
 
 // SDK
-#include "usercmd.h"
-#include "weaponinfo.h"
+#include "../common/usercmd.h"
+#include "../common/weaponinfo.h"
 #include "customentity.h"
 
 // Globals vars
@@ -62,7 +62,7 @@ using FloatRef = float;
 #include "pm_shared/pm_math.h"
 
 #include "decals.h"
-#include "hltv.h"
+#include "../common/hltv.h"
 #include "cbase.h"
 
 #include "sound.h"
@@ -144,8 +144,8 @@ using FloatRef = float;
 #include "talkmonster.h"
 #include "animation.h"
 
-#include "com_model.h"
+#include "../common/com_model.h"
 #include "studio.h"
-#include "r_studioint.h"
+#include "../common/r_studioint.h"
 
 #include "shake.h"

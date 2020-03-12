@@ -150,6 +150,7 @@ char CL_DLLEXPORT HUD_PlayerMoveTexture(char* name)
 
 void CL_DLLEXPORT HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct usercmd_s* cmd, int runfuncs, double time, unsigned int random_seed)
 {
+	HUD_PostRunCmd2(from, to, cmd, runfuncs, time, random_seed);
 }
 
 void CL_DLLEXPORT HUD_ProcessPlayerState(entity_state_s* dst, const entity_state_s* src)

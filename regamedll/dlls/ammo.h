@@ -51,6 +51,16 @@ enum AmmoIdType
 	AMMO_MAXTYPE
 };
 
+struct AmmoInfo
+{
+	AmmoIdType m_iId;
+	const char* m_pszName;
+	int m_iMax;
+	int m_iCountPerBox;
+	int m_iCostPerBox;
+	int m_iBulletBehavior;
+};
+
 #define BULLET_NONE				0
 #define BULLET_PLAYER_9MM		1
 #define BULLET_PLAYER_BUCKSHOT	4

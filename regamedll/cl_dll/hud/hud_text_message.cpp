@@ -172,36 +172,32 @@ void CHudTextMessage::MsgFunc_TextMsg(int iSize, void* pbuf)
 		{
 			Q_snprintf(szNewBuf[1], MSG_BUF_SIZE, "#%s", sstr1);
 
-			// UNDONE
-			//if (vgui::localize()->Find(szNewBuf[1]))
-				//sstr1 = szNewBuf[1];
+			if (VGUI_LOCALISE->Find(szNewBuf[1]))
+				sstr1 = szNewBuf[1];
 		}
 
 		if (strlen(sstr2) > 0)
 		{
 			Q_snprintf(szNewBuf[2], MSG_BUF_SIZE, "#%s", sstr2);
 
-			// UNDONE
-			//if (vgui::localize()->Find(szNewBuf[2]))
-				//sstr2 = szNewBuf[2];
+			if (VGUI_LOCALISE->Find(szNewBuf[2]))
+				sstr2 = szNewBuf[2];
 		}
 
 		if (strlen(sstr3) > 0)
 		{
 			Q_snprintf(szNewBuf[3], MSG_BUF_SIZE, "#%s", sstr3);
 
-			// UNDONE
-			//if (vgui::localize()->Find(szNewBuf[3]))
-				//sstr3 = szNewBuf[3];
+			if (VGUI_LOCALISE->Find(szNewBuf[3]))
+				sstr3 = szNewBuf[3];
 		}
 
 		if (strlen(sstr4) > 0)
 		{
 			Q_snprintf(szNewBuf[4], MSG_BUF_SIZE, "#%s", sstr4);
 
-			// UNDONE
-			//if (vgui::localize()->Find(szNewBuf[4]))
-				//sstr4 = szNewBuf[4];
+			if (VGUI_LOCALISE->Find(szNewBuf[4]))
+				sstr4 = szNewBuf[4];
 		}
 
 		gHUD::m_SayText.SayTextPrint(msg_text, MSG_BUF_SIZE, playerIndex, sstr1, sstr2, sstr3, sstr4);
@@ -211,8 +207,7 @@ void CHudTextMessage::MsgFunc_TextMsg(int iSize, void* pbuf)
 	case HUD_PRINTCENTER:
 	{
 		StripEndNewlineFromString(msg_text);
-		// UNDONE
-		//gHUD::m_VGUI2Print.VGUI2HudPrintArgs(msg_text, sstr1, sstr2, sstr3, sstr4, -1, ScreenHeight * 0.35, 1.0, 0.705, 0.118);
+		gHUD::m_VGUI2Print.VGUI2HudPrintArgs(msg_text, sstr1, sstr2, sstr3, sstr4, -1, ScreenHeight * 0.35, 1.0, 0.705, 0.118);
 		break;
 	}
 

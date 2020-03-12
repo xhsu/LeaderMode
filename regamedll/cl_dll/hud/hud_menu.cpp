@@ -50,6 +50,7 @@ int CHudMenu::Draw(float flTime)
 		}
 	}
 
+	// UNDONE
 	/*if (gViewPortInterface && gViewPortInterface->IsScoreBoardVisible())
 		return 1;*/
 

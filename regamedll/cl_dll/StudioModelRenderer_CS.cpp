@@ -61,10 +61,22 @@ void CounterStrike_GetSequence(int* seq, int* gaitseq)
 	*gaitseq = g_gaitseq;
 }
 
+void CounterStrike_SetSequence(int seq, int gaitseq)
+{
+	g_rseq = seq;
+	g_gaitseq = gaitseq;
+}
+
 void CounterStrike_GetOrientation(float* o, float* a)
 {
 	VectorCopy(g_clorg, o);
 	VectorCopy(g_clang, a);
+}
+
+void CounterStrike_SetOrientation(float* o, float* a)
+{
+	VectorCopy(o, g_clorg);
+	VectorCopy(a, g_clang);
 }
 
 void GetSequenceInfo(void* pmodel, client_anim_state_t* pev, float* pflFrameRate, float* pflGroundSpeed)

@@ -29,5 +29,5 @@
 #include "precompiled.h"
 
 #ifndef BUILD_STATIC_LIBSTDC // don't include to build if build with static libstdc++
-#include "stdc++compat.cpp"
+#include "../common/stdc++compat.cpp"
 #endif

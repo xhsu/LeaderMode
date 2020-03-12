@@ -7,7 +7,6 @@
 
 #include <vgui/VGUI.h>
 #include <vgui/IHTML.h>
-#include "tier1/interface.h"
 
 #ifdef CreateFont
 #undef CreateFont

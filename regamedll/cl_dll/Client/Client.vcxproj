@@ -90,7 +90,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;_CLIENT_DLL;CLIENT_DLL;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\;$(ProjectDir)..\..\pm_shared;$(ProjectDir)..\..\common;$(ProjectDir)..\..\engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\;$(ProjectDir)..\..\pm_shared;$(ProjectDir)..\..\engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/Zc:strictStrings- %(AdditionalOptions)</AdditionalOptions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>cl_base.h</PrecompiledHeaderFile>
@@ -197,6 +197,7 @@
     <ClCompile Include="..\hud\hud_status_bar.cpp" />
     <ClCompile Include="..\hud\hud_text_message.cpp" />
     <ClCompile Include="..\hud\hud_train.cpp" />
+    <ClCompile Include="..\hud\hud_vgui2print.cpp" />
     <ClCompile Include="..\input.cpp" />
     <ClCompile Include="..\input_mouse.cpp" />
     <ClCompile Include="..\interpolation.cpp" />
@@ -206,6 +207,7 @@
     <ClCompile Include="..\StudioModelRenderer_CS.cpp" />
     <ClCompile Include="..\view.cpp" />
     <ClCompile Include="..\viewport_interface.cpp" />
+    <ClCompile Include="..\weapons.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\common\interface.h" />
@@ -247,6 +249,7 @@
     <ClInclude Include="..\hud\hud_status_bar.h" />
     <ClInclude Include="..\hud\hud_text_message.h" />
     <ClInclude Include="..\hud\hud_train.h" />
+    <ClInclude Include="..\hud\hud_vgui2print.h" />
     <ClInclude Include="..\input.h" />
     <ClInclude Include="..\input_mouse.h" />
     <ClInclude Include="..\interpolation.h" />
@@ -255,6 +258,7 @@
     <ClInclude Include="..\StudioModelRenderer.h" />
     <ClInclude Include="..\view.h" />
     <ClInclude Include="..\viewport_interface.h" />
+    <ClInclude Include="..\weapons.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="export.def" />

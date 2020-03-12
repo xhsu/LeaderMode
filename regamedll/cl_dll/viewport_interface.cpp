@@ -27,9 +27,26 @@ IClientVGUI* g_pClientVGUI;
 
 EXPOSE_SINGLE_INTERFACE(CClientVGUI, IClientVGUI, CLIENTVGUI_INTERFACE_VERSION);
 
-void CClientVGUI::Initialize(CreateInterfaceFn* factories, int count)
+// LUNA: all these vars are temperory. the true one is on the way, VGUI/Controls.cpp.
+vgui::ISurface* g_pVGuiSurface;
+vgui::IPanel* g_pVGuiPanel;
+vgui::IInput* g_pVGuiInput;
+vgui::IVGui* g_pVGui;
+vgui::ISystem* g_pVGuiSystem;
+vgui::ISchemeManager* g_pVGuiSchemeManager;
+vgui::ILocalize* g_pVGuiLocalize;
+
+void CClientVGUI::Initialize(CreateInterfaceFn* factoryList, int count)
 {
-	CreateInterfaceFn vguiFactory = factories[1];
+	//CreateInterfaceFn vguiFactory = factories[1];
+
+	g_pVGuiSurface = (vgui::ISurface*)factoryList[0](VGUI_SURFACE_INTERFACE_VERSION, NULL);
+	g_pVGuiPanel = (vgui::IPanel*)factoryList[1](VGUI_PANEL_INTERFACE_VERSION, NULL);
+	g_pVGuiInput = (vgui::IInput*)factoryList[1](VGUI_INPUT_INTERFACE_VERSION, NULL);
+	g_pVGui = (vgui::IVGui*)factoryList[1](VGUI_IVGUI_INTERFACE_VERSION, NULL);
+	g_pVGuiSystem = (vgui::ISystem*)factoryList[1](VGUI_SYSTEM_INTERFACE_VERSION, NULL);
+	g_pVGuiSchemeManager = (vgui::ISchemeManager*)factoryList[1](VGUI_SCHEME_INTERFACE_VERSION, NULL);
+	g_pVGuiLocalize = (vgui::ILocalize*)factoryList[1](VGUI_LOCALIZE_INTERFACE_VERSION, NULL);
 
 	/* UNDONE
 	if (!vgui::VGui_InitInterfacesList("ClientUI", factories, count))

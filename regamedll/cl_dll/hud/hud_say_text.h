@@ -11,7 +11,6 @@ Created Date: Mar 11 2020
 #define TEXTCOLOR_PLAYERNAME	3
 #define TEXTCOLOR_LOCATION		4
 
-// TODO, UNDONE : mostly undone due to [namespace vgui].
 class CHudSayText : public CBaseHUDElement
 {
 public:
