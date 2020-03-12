@@ -45,6 +45,10 @@ extern int g_iUser1;
 extern int g_iUser2;
 extern int g_iUser3;
 extern int g_iTeamNumber;
+extern int g_iPlayerClass;
+extern int g_iPlayerFlags;
+extern float g_flPlayerSpeed;
+extern int g_iWeaponFlags;
 
 extern extra_player_info_t	g_PlayerExtraInfo[MAX_PLAYERS + 1]; // additional player info sent directly to the client dll
 

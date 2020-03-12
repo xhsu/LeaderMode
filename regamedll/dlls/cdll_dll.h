@@ -88,6 +88,11 @@ const int DEFAULT_FOV      = 90;	// the default field of view
 #define WEAPON_SUIT       31
 #define WEAPON_ALLWEAPONS (~(1<<WEAPON_SUIT))
 
+#define HEADNAME_HIDE		0
+#define HEADNAME_TEAMMATE	1
+#define HEADNAME_ZOMBIE		2
+#define HEADNAME_ALL		3
+
 // custom enum
 enum VGUIMenu
 {

@@ -17,8 +17,10 @@ float  v_cameraFocusAngle = 35.0f;
 int	   v_cameraMode = CAM_MODE_FOCUS;
 bool   v_resetCamera = true;
 
-float	vJumpOrigin[3];
-float	vJumpAngles[3];
+// from PM_Shared.cpp
+extern int iJumpSpectator;
+extern float vJumpOrigin[3];
+extern float vJumpAngles[3];
 
 cvar_t* cl_bobcycle;
 cvar_t* cl_bob;
@@ -85,10 +87,9 @@ void V_CalcIntermissionRefdef(ref_params_s* pparams)
 
 	if (gEngfuncs.IsSpectateOnly())
 	{
-		// UNDONE
 		// in HLTV we must go to 'intermission' position by ourself
-		//VectorCopy(gHUD.m_Spectator.m_cameraOrigin, pparams->vieworg);
-		//VectorCopy(gHUD.m_Spectator.m_cameraAngles, pparams->viewangles);
+		VectorCopy(gHUD::m_Spectator.m_cameraOrigin, pparams->vieworg);
+		VectorCopy(gHUD::m_Spectator.m_cameraAngles, pparams->viewangles);
 	}
 
 	v_idlescale = old;
@@ -371,8 +372,7 @@ void V_GetChasePos(int target, float* cl_angles, float* origin, float* angles)
 			V_GetDeathCam(ent, NULL,
 				angles, origin);
 	}
-	// UNDONE
-	/*else if (gHUD.m_Spectator.m_autoDirector->value)
+	else if (gHUD::m_Spectator.m_autoDirector->value)
 	{
 		if (g_iUser3 && g_iUser3 != 1)
 			V_GetDirectedChasePosition(ent, gEngfuncs.GetEntityByIndex(g_iUser3),
@@ -380,7 +380,7 @@ void V_GetChasePos(int target, float* cl_angles, float* origin, float* angles)
 		else
 			V_GetDirectedChasePosition(ent, (cl_entity_t*)BAD_ENT_PTR,
 				angles, origin);
-	}*/
+	}
 	else
 	{
 		if (cl_angles == NULL)	// no mouse angles given, use entity angles ( locked mode )
@@ -416,16 +416,16 @@ void V_GetMapFreePosition(float* cl_angles, float* origin, float* angles)
 
 	// modify angles since we don't wanna see map's bottom
 	angles[0] = 51.25f + 38.75f * (angles[0] / 90.0f);
-	/* UNDONE
-	zScaledTarget[0] = gHUD.m_Spectator.m_mapOrigin[0];
-	zScaledTarget[1] = gHUD.m_Spectator.m_mapOrigin[1];
-	zScaledTarget[2] = gHUD.m_Spectator.m_mapOrigin[2] * ((90.0f - angles[0]) / 90.0f);
-	*/
+
+	zScaledTarget[0] = gHUD::m_Spectator.m_mapOrigin[0];
+	zScaledTarget[1] = gHUD::m_Spectator.m_mapOrigin[1];
+	zScaledTarget[2] = gHUD::m_Spectator.m_mapOrigin[2] * ((90.0f - angles[0]) / 90.0f);
+
 	AngleVectors(angles, forward, NULL, NULL);
 
 	VectorNormalize(forward);
 
-	//VectorMA(zScaledTarget, -(4096.0f / gHUD.m_Spectator.m_mapZoom), forward, origin); UNDONE
+	VectorMA(zScaledTarget, -(4096.0f / gHUD::m_Spectator.m_mapZoom), forward, origin);
 }
 
 /*
@@ -441,8 +441,7 @@ void V_GetMapChasePosition(int target, float* cl_angles, float* origin, float* a
 	{
 		cl_entity_t* ent = gEngfuncs.GetEntityByIndex(target);
 
-		// UNDONE
-		/*if (gHUD.m_Spectator.m_autoDirector->value)
+		if (gHUD::m_Spectator.m_autoDirector->value)
 		{
 			// this is done to get the angles made by director mode
 			V_GetChasePos(target, cl_angles, origin, angles);
@@ -452,13 +451,13 @@ void V_GetMapChasePosition(int target, float* cl_angles, float* origin, float* a
 			angles[0] = 45.0f;
 		}
 		else
-		{*/
+		{
 			VectorCopy(cl_angles, angles);
 			VectorCopy(ent->origin, origin);
 
 			// modify angles since we don't wanna see map's bottom
 			angles[0] = 51.25f + 38.75f * (angles[0] / 90.0f);
-		//}
+		}
 	}
 	else
 	{
@@ -501,7 +500,7 @@ void V_CalcSpectatorRefdef(ref_params_s* pparams)
 	VectorCopy (pparams->viewangles, v_angles);
 	VectorCopy (pparams->vieworg, v_origin);
 
-	if ((g_iUser1 == OBS_IN_EYE/* || gHUD.m_Spectator.m_pip->value == INSET_IN_EYE*/) && ent)	// UNDONE
+	if ((g_iUser1 == OBS_IN_EYE || gHUD::m_Spectator.m_pip->value == INSET_IN_EYE) && ent)
 	{
 		// calculate player velocity
 		float timeDiff = ent->curstate.msg_time - ent->prevstate.msg_time;
@@ -603,27 +602,24 @@ void V_CalcSpectatorRefdef(ref_params_s* pparams)
 			break;
 		}
 
-		// UNDONE
-		/*
-		if (gHUD.m_Spectator.m_pip->value)
+		if (gHUD::m_Spectator.m_pip->value)
 			pparams->nextView = 1;	// force a second renderer view
 
-		gHUD.m_Spectator.m_iDrawCycle = 0;
-		*/
+		gHUD::m_Spectator.m_iDrawCycle = 0;
 	}
-	else // UNDONE
+	else
 	{
 		// second renderer cycle, inset window
 
 		// set inset parameters
-		/*pparams->viewport[0] = XRES(gHUD.m_Spectator.m_OverviewData.insetWindowX);	// change viewport to inset window
-		pparams->viewport[1] = YRES(gHUD.m_Spectator.m_OverviewData.insetWindowY);
-		pparams->viewport[2] = XRES(gHUD.m_Spectator.m_OverviewData.insetWindowWidth);
-		pparams->viewport[3] = YRES(gHUD.m_Spectator.m_OverviewData.insetWindowHeight);
+		pparams->viewport[0] = XRES(gHUD::m_Spectator.m_OverviewData.insetWindowX);	// change viewport to inset window
+		pparams->viewport[1] = YRES(gHUD::m_Spectator.m_OverviewData.insetWindowY);
+		pparams->viewport[2] = XRES(gHUD::m_Spectator.m_OverviewData.insetWindowWidth);
+		pparams->viewport[3] = YRES(gHUD::m_Spectator.m_OverviewData.insetWindowHeight);
 		pparams->nextView = 0;	// on further view
 
 		// override some settings in certain modes
-		switch ((int)gHUD.m_Spectator.m_pip->value)
+		switch ((int)gHUD::m_Spectator.m_pip->value)
 		{
 		case INSET_CHASE_FREE:
 			V_GetChasePos(g_iUser2, v_cl_angles, v_origin, v_angles);
@@ -649,7 +645,7 @@ void V_CalcSpectatorRefdef(ref_params_s* pparams)
 			break;
 		}
 
-		gHUD.m_Spectator.m_iDrawCycle = 1;*/
+		gHUD::m_Spectator.m_iDrawCycle = 1;
 	}
 
 	// write back new values into pparams
@@ -715,7 +711,7 @@ V_CalcRoll
 Used by view and sv_user
 ===============
 */
-float V_CalcRoll (Vector angles, Vector velocity, float rollangle, float rollspeed)
+float V_CalcRoll(Vector angles, Vector velocity, float rollangle, float rollspeed)
 {
 	float   sign;
 	float   side;
@@ -748,7 +744,7 @@ V_CalcViewRoll
 Roll is induced by movement and damage
 ==============
 */
-void V_CalcViewRoll (ref_params_s* pparams)
+void V_CalcViewRoll(ref_params_s* pparams)
 {
 	float		side;
 	cl_entity_t* viewentity;
@@ -775,7 +771,7 @@ void V_CalcViewRoll (ref_params_s* pparams)
 V_CalcGunAngle
 ==================
 */
-void V_CalcGunAngle (ref_params_s* pparams)
+void V_CalcGunAngle(ref_params_s* pparams)
 {
 	cl_entity_t* viewent;
 
@@ -1260,4 +1256,230 @@ void V_Init(void)
 	cl_bobup = gEngfuncs.pfnRegisterVariable("cl_bobup", "0.5", 0);
 	cl_waterdist = gEngfuncs.pfnRegisterVariable("cl_waterdist", "4", 0);
 	cl_chasedist = gEngfuncs.pfnRegisterVariable("cl_chasedist", "112", 0);
+}
+
+
+// called from other cpps.
+
+
+void V_ResetChaseCam(void)
+{
+	v_resetCamera = true;
+}
+
+void V_GetSingleTargetCam(cl_entity_t* ent1, float* angle, float* origin)
+{
+	float newAngle[3]; float newOrigin[3];
+
+	int flags = gHUD::m_Spectator.m_iObserverFlags;
+	qboolean deadPlayer = ent1->player && (ent1->curstate.solid == SOLID_NOT);
+
+	float dfactor = (flags & DRC_FLAG_DRAMATIC) ? -1.0f : 1.0f;
+	float distance = 112.0f + (16.0f * dfactor);
+
+	if (flags & DRC_FLAG_FINAL)
+		distance *= 2.0f;
+	else if (deadPlayer)
+		distance *= 1.5f;
+
+	v_lastDistance += v_frametime * 32.0f;
+
+	if (distance > v_lastDistance)
+		distance = v_lastDistance;
+
+	VectorCopy(ent1->origin, newOrigin);
+
+	if (ent1->player)
+	{
+		if (deadPlayer)
+			newOrigin[2] += 2;
+		else
+			newOrigin[2] += 17;
+	}
+	else
+		newOrigin[2] += 8;
+
+	VectorCopy(ent1->angles, newAngle);
+
+	if (flags & DRC_FLAG_FACEPLAYER)
+		newAngle[1] += 180.0f;
+
+	newAngle[0] += 12.5f * dfactor;
+
+	if (flags & DRC_FLAG_FINAL)
+		newAngle[0] = 22.5f;
+
+	if (flags & DRC_FLAG_SIDE)
+		newAngle[1] += 22.5f;
+	else
+		newAngle[1] -= 22.5f;
+
+	V_SmoothInterpolateAngles(v_lastAngles, newAngle, angle, 120.0f);
+	V_GetChaseOrigin(angle, newOrigin, distance, origin);
+}
+
+float MaxAngleBetweenAngles(float* a1, float* a2)
+{
+	float d, maxd = 0.0f;
+
+	NormalizeAngles(a1);
+	NormalizeAngles(a2);
+
+	for (int i = 0; i < 3; i++)
+	{
+		d = a2[i] - a1[i];
+		if (d > 180)
+		{
+			d -= 360;
+		}
+		else if (d < -180)
+		{
+			d += 360;
+		}
+
+		d = Q_fabs(d);
+
+		if (d > maxd)
+			maxd = d;
+	}
+
+	return maxd;
+}
+
+void V_GetDoubleTargetsCam(cl_entity_t* ent1, cl_entity_t* ent2, float* angle, float* origin)
+{
+	float newAngle[3]; float newOrigin[3]; float tempVec[3];
+
+	int flags = gHUD::m_Spectator.m_iObserverFlags;
+
+	float dfactor = (flags & DRC_FLAG_DRAMATIC) ? -1.0f : 1.0f;
+
+	float distance = 112.0f + (16.0f * dfactor); // get close if dramatic;
+
+	// go away in final scenes or if player just died
+	if (flags & DRC_FLAG_FINAL)
+		distance *= 2.0f;
+
+	// let v_lastDistance float smoothly away
+	v_lastDistance += v_frametime * 32.0f;	// move unit per seconds back
+
+	if (distance > v_lastDistance)
+		distance = v_lastDistance;
+
+	VectorCopy(ent1->origin, newOrigin);
+
+	if (ent1->player)
+		newOrigin[2] += PM_VEC_VIEW; // head level of living player
+	else
+		newOrigin[2] += 8;	// object, tricky, must be above bomb in CS
+
+	// get new angle towards second target
+	VectorSubtract(ent2->origin, ent1->origin, newAngle);
+
+	VectorAngles(newAngle, newAngle);
+	newAngle[0] = -newAngle[0];
+
+	// set angle different in Dramtaic scenes
+	newAngle[0] += 12.5f * dfactor; // lower angle if dramatic
+
+	if (flags & DRC_FLAG_SIDE)
+		newAngle[1] += 22.5f;
+	else
+		newAngle[1] -= 22.5f;
+
+	float d = MaxAngleBetweenAngles(v_lastAngles, newAngle);
+
+	if ((d < v_cameraFocusAngle) && (v_cameraMode == CAM_MODE_RELAX))
+	{
+		// difference is to small and we are in relax camera mode, keep viewangles
+		VectorCopy(v_lastAngles, newAngle);
+	}
+	else if ((d < v_cameraRelaxAngle) && (v_cameraMode == CAM_MODE_FOCUS))
+	{
+		// we catched up with our target, relax again
+		v_cameraMode = CAM_MODE_RELAX;
+	}
+	else
+	{
+		// target move too far away, focus camera again
+		v_cameraMode = CAM_MODE_FOCUS;
+	}
+
+	// and smooth view, if not a scene cut
+	if (v_resetCamera || (v_cameraMode == CAM_MODE_RELAX))
+	{
+		VectorCopy(newAngle, angle);
+	}
+	else
+	{
+		V_SmoothInterpolateAngles(v_lastAngles, newAngle, angle, 180.0f);
+	}
+
+	V_GetChaseOrigin(newAngle, newOrigin, distance, origin);
+
+	// move position up, if very close at target
+	if (v_lastDistance < 64.0f)
+		origin[2] += 16.0f * (1.0f - (v_lastDistance / 64.0f));
+
+	// calculate angle to second target
+	VectorSubtract(ent2->origin, origin, tempVec);
+	VectorAngles(tempVec, tempVec);
+	tempVec[0] = -tempVec[0];
+
+	/* take middle between two viewangles
+	InterpolateAngles( newAngle, tempVec, newAngle, 0.5f); */
+}
+
+void V_GetDirectedChasePosition(cl_entity_t* ent1, cl_entity_t* ent2, float* angle, float* origin)
+{
+	if (v_resetCamera)
+	{
+		v_lastDistance = 4096.0f;
+		// v_cameraMode = CAM_MODE_FOCUS;
+	}
+
+	if ((ent2 == (cl_entity_t*)BAD_ENT_PTR) || (ent1->player && (ent1->curstate.solid == SOLID_NOT)))
+	{
+		// we have no second target or player just died
+		V_GetSingleTargetCam(ent1, angle, origin);
+	}
+	else if (ent2)
+	{
+		// keep both target in view
+		V_GetDoubleTargetsCam(ent1, ent2, angle, origin);
+	}
+	else
+	{
+		// second target disappeard somehow (dead)
+
+		// keep last good viewangle
+		float newOrigin[3];
+
+		int flags = gHUD::m_Spectator.m_iObserverFlags;
+
+		float dfactor = (flags & DRC_FLAG_DRAMATIC) ? -1.0f : 1.0f;
+
+		float distance = 112.0f + (16.0f * dfactor); // get close if dramatic;
+
+		// go away in final scenes or if player just died
+		if (flags & DRC_FLAG_FINAL)
+			distance *= 2.0f;
+
+		// let v_lastDistance float smoothly away
+		v_lastDistance += v_frametime * 32.0f;	// move unit per seconds back
+
+		if (distance > v_lastDistance)
+			distance = v_lastDistance;
+
+		VectorCopy(ent1->origin, newOrigin);
+
+		if (ent1->player)
+			newOrigin[2] += 17; // head level of living player
+		else
+			newOrigin[2] += 8;	// object, tricky, must be above bomb in CS
+
+		V_GetChaseOrigin(angle, newOrigin, distance, origin);
+	}
+
+	VectorCopy(angle, v_lastAngles);
 }

@@ -87,12 +87,12 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_CLIENT_DLL;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_CLIENT_DLL;CLIENT_DLL;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)..\;$(ProjectDir)..\..\pm_shared;$(ProjectDir)..\..\common;$(ProjectDir)..\..\engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/Zc:strictStrings- %(AdditionalOptions)</AdditionalOptions>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>cl_base.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
@@ -101,6 +101,7 @@
       <ModuleDefinitionFile>export.def</ModuleDefinitionFile>
       <AdditionalLibraryDirectories>$(ProjectDir)..\..\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateMapFile>true</GenerateMapFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -151,25 +152,65 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\common\interface.cpp" />
     <ClCompile Include="..\..\common\parsemsg.cpp" />
-    <ClCompile Include="..\..\pm_shared\pm_debug.cpp" />
-    <ClCompile Include="..\..\pm_shared\pm_math.cpp" />
-    <ClCompile Include="..\..\pm_shared\pm_shared.cpp" />
+    <ClCompile Include="..\..\game_shared\shared_util.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\pm_shared\pm_debug.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\pm_shared\pm_math.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\pm_shared\pm_shared.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\cdll_int.cpp" />
+    <ClCompile Include="..\cl_base.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\cl_util.cpp" />
+    <ClCompile Include="..\corpse.cpp" />
     <ClCompile Include="..\entity.cpp" />
     <ClCompile Include="..\events.cpp" />
+    <ClCompile Include="..\hud\history.cpp" />
     <ClCompile Include="..\hud\hud.cpp" />
+    <ClCompile Include="..\hud\hud_ammo.cpp" />
+    <ClCompile Include="..\hud\hud_battery.cpp" />
+    <ClCompile Include="..\hud\hud_death_notice.cpp" />
+    <ClCompile Include="..\hud\hud_flashlight.cpp" />
+    <ClCompile Include="..\hud\hud_geiger.cpp" />
+    <ClCompile Include="..\hud\hud_head_name.cpp" />
+    <ClCompile Include="..\hud\hud_health.cpp" />
+    <ClCompile Include="..\hud\hud_menu.cpp" />
+    <ClCompile Include="..\hud\hud_message.cpp" />
+    <ClCompile Include="..\hud\hud_money.cpp" />
+    <ClCompile Include="..\hud\hud_nightvision.cpp" />
+    <ClCompile Include="..\hud\hud_progress_bar.cpp" />
+    <ClCompile Include="..\hud\hud_radar.cpp" />
+    <ClCompile Include="..\hud\hud_round_timer.cpp" />
+    <ClCompile Include="..\hud\hud_say_text.cpp" />
+    <ClCompile Include="..\hud\hud_scenario_status.cpp" />
+    <ClCompile Include="..\hud\hud_status_icons.cpp" />
+    <ClCompile Include="..\hud\hud_spectator.cpp" />
+    <ClCompile Include="..\hud\hud_status_bar.cpp" />
+    <ClCompile Include="..\hud\hud_text_message.cpp" />
+    <ClCompile Include="..\hud\hud_train.cpp" />
     <ClCompile Include="..\input.cpp" />
     <ClCompile Include="..\input_mouse.cpp" />
+    <ClCompile Include="..\interpolation.cpp" />
     <ClCompile Include="..\in_camera.cpp" />
     <ClCompile Include="..\message.cpp" />
     <ClCompile Include="..\StudioModelRenderer.cpp" />
     <ClCompile Include="..\StudioModelRenderer_CS.cpp" />
     <ClCompile Include="..\view.cpp" />
+    <ClCompile Include="..\viewport_interface.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\common\interface.h" />
     <ClInclude Include="..\..\common\parsemsg.h" />
+    <ClInclude Include="..\..\game_shared\shared_util.h" />
     <ClInclude Include="..\..\pm_shared\pm_debug.h" />
     <ClInclude Include="..\..\pm_shared\pm_defs.h" />
     <ClInclude Include="..\..\pm_shared\pm_info.h" />
@@ -180,15 +221,40 @@
     <ClInclude Include="..\cdll_int.h" />
     <ClInclude Include="..\cl_base.h" />
     <ClInclude Include="..\cl_util.h" />
+    <ClInclude Include="..\corpse.h" />
     <ClInclude Include="..\entity.h" />
     <ClInclude Include="..\events.h" />
+    <ClInclude Include="..\hud\history.h" />
     <ClInclude Include="..\hud\hud.h" />
+    <ClInclude Include="..\hud\hud_ammo.h" />
+    <ClInclude Include="..\hud\hud_battery.h" />
+    <ClInclude Include="..\hud\hud_death_notice.h" />
+    <ClInclude Include="..\hud\hud_flashlight.h" />
+    <ClInclude Include="..\hud\hud_geiger.h" />
+    <ClInclude Include="..\hud\hud_head_name.h" />
+    <ClInclude Include="..\hud\hud_health.h" />
+    <ClInclude Include="..\hud\hud_menu.h" />
+    <ClInclude Include="..\hud\hud_message.h" />
+    <ClInclude Include="..\hud\hud_money.h" />
+    <ClInclude Include="..\hud\hud_nightvision.h" />
+    <ClInclude Include="..\hud\hud_progress_bar.h" />
+    <ClInclude Include="..\hud\hud_radar.h" />
+    <ClInclude Include="..\hud\hud_round_timer.h" />
+    <ClInclude Include="..\hud\hud_say_text.h" />
+    <ClInclude Include="..\hud\hud_scenario_status.h" />
+    <ClInclude Include="..\hud\hud_status_icons.h" />
+    <ClInclude Include="..\hud\hud_spectator.h" />
+    <ClInclude Include="..\hud\hud_status_bar.h" />
+    <ClInclude Include="..\hud\hud_text_message.h" />
+    <ClInclude Include="..\hud\hud_train.h" />
     <ClInclude Include="..\input.h" />
     <ClInclude Include="..\input_mouse.h" />
+    <ClInclude Include="..\interpolation.h" />
     <ClInclude Include="..\in_camera.h" />
     <ClInclude Include="..\message.h" />
     <ClInclude Include="..\StudioModelRenderer.h" />
     <ClInclude Include="..\view.h" />
+    <ClInclude Include="..\viewport_interface.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="export.def" />

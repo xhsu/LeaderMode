@@ -30,7 +30,7 @@ BOOL CL_DLLEXPORT CL_IsThirdPerson(void)
 
 void* CL_DLLEXPORT ClientFactory(void)
 {
-	return nullptr;
+	return Sys_GetFactoryThis();
 }
 
 void CL_DLLEXPORT Demo_ReadBuffer(int size, unsigned char* buffer)
@@ -58,6 +58,7 @@ void CL_DLLEXPORT HUD_CreateEntities(void)
 
 void CL_DLLEXPORT HUD_DirectorMessage(int iSize, void* pbuf)
 {
+	gHUD::m_Spectator.DirectorMessage(iSize, pbuf);
 }
 
 void CL_DLLEXPORT HUD_DrawNormalTriangles(void)
@@ -231,7 +232,7 @@ void CL_DLLEXPORT IN_MouseEvent(int mstate)
 	IN_MouseEvent2(mstate);
 }
 
-BOOL CL_DLLEXPORT Initialize(cl_enginefunc_t* pEnginefuncs, int iVersion)
+BOOL CL_DLLEXPORT Initialize_(cl_enginefunc_t* pEnginefuncs, int iVersion)	// LUNA: this has to be renamed because so many other functions are using the same name.
 {
 	gEngfuncs = *pEnginefuncs;
 

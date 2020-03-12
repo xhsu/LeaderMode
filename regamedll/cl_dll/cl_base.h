@@ -78,6 +78,15 @@ Created Date: 05 Mar 2020
 // for msg reading.
 #include "../common/parsemsg.h"
 
+// LUNA: why do I even need this?
+#include "../common/hltv.h"
+
+// some stuff I don't even know.
+#include "../game_shared/shared_util.h"
+
+// for ISurface
+#include "../common/interface.h"
+
 // custom header starts from here.
 #include "cdll_int.h"
 #include "entity.h"
@@ -89,6 +98,30 @@ Created Date: 05 Mar 2020
 #include "StudioModelRenderer.h"
 #include "message.h"
 #include "events.h"
+#include "interpolation.h"	// UTIL from CSBTE.
+#include "corpse.h"
 
 // hud
 #include "hud/hud.h"
+#include "hud/history.h"
+#include "hud/hud_ammo.h"
+#include "hud/hud_health.h"
+#include "hud/hud_spectator.h"
+#include "hud/hud_geiger.h"
+#include "hud/hud_battery.h"
+#include "hud/hud_train.h"
+#include "hud/hud_flashlight.h"
+#include "hud/hud_message.h"
+#include "hud/hud_status_bar.h"
+#include "hud/hud_death_notice.h"
+#include "hud/hud_say_text.h"
+#include "hud/hud_menu.h"
+#include "hud/hud_nightvision.h"
+#include "hud/hud_text_message.h"
+#include "hud/hud_round_timer.h"
+#include "hud/hud_money.h"
+#include "hud/hud_head_name.h"
+#include "hud/hud_radar.h"
+#include "hud/hud_status_icons.h"
+#include "hud/hud_scenario_status.h"
+#include "hud/hud_progress_bar.h"

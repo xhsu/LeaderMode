@@ -43,6 +43,7 @@ extern cvar_t* cl_vsmoothing;
 
 void InitInput(void);
 void KB_Init(void);
+int KB_ConvertString(char* in, char** ppout);
 
 float CL_KeyState(kbutton_t* key);
 int CL_ButtonBits(int bResetState);

@@ -25,6 +25,11 @@ Created Date: 07 Mar 2020
 #define HUD_ACTIVE			BIT(0)
 #define HUD_INTERMISSION	BIT(1)
 
+#define MAX_PLAYER_NAME_LENGTH 128
+#define MAX_MOTD_LENGTH 1536
+
+#define FADE_TIME 100
+
 extern cvar_t* cl_lw;
 extern cvar_t* cl_righthand;
 extern cvar_t* cl_radartype;
@@ -54,6 +59,8 @@ extern cvar_t* cl_min_t;
 extern cvar_t* cl_min_ct;
 extern cvar_t* cl_corpsestay;
 extern cvar_t* cl_corpsefade;
+
+extern Vector g_LocationColor;
 
 typedef struct client_sprite_s
 {
@@ -130,8 +137,32 @@ public:
 	virtual void Shutdown(void) {}
 };
 
+// dummy classes derived from CBaseHUDElement.
+class CHudAmmo;
+class CHudHealth;
+class CHudSpectator;
+class CHudGeiger;
+class CHudBattery;
+class CHudTrain;
+class CHudFlashlight;
+class CHudMessage;
+class CHudStatusBar;
+class CHudDeathNotice;
+class CHudSayText;
+class CHudMenu;
+class CHudNightVision;
+class CHudTextMessage;
+class CHudRoundTimer;
+class CHudAccountBalance;
+class CHudHeadName;
+class CHudRadar;
+class CHudStatusIcons;
+class CHudScenarioStatus;
+class CHudProgressBar;
+
 namespace gHUD
 {
+	// HUD exports
 	void Init(void);
 	void Shutdown(void);
 	void VidInit(void);
@@ -139,6 +170,8 @@ namespace gHUD
 	void Think(void);
 	int UpdateClientData(client_data_t* cdata, float time);
 	void CalcRefdef(ref_params_s* pparams);
+
+	// HUD utils
 	int GetSpriteIndex(const char* SpriteName);
 	int DrawHudString(int xpos, int ypos, int iMaxX, const char* szIt, int r, int g, int b);
 	int DrawHudNumberString(int xpos, int ypos, int iMinX, int iNumber, int r, int g, int b);
@@ -151,8 +184,14 @@ namespace gHUD
 	float GetSensitivity(void);
 	hSprite GetSprite(int index);
 	wrect_t& GetSpriteRect(int index);
+	client_sprite_t* GetSpriteList(client_sprite_t* pList, const char* psz, int iRes, int iCount);
+
+	// HUD bridges
+	void SlotInput(int iSlot);
 
 	// VARs
+	extern std::list<CBaseHUDElement*> m_lstAllHUDElems;
+
 	extern cvar_s* m_pCvarDraw;
 	extern cvar_s* default_fov;
 
@@ -171,7 +210,8 @@ namespace gHUD
 	extern char m_szGameMode[32];
 	extern int m_HUD_number_0;
 	extern int m_iFontHeight;
-	extern int m_iIntermission;
+	extern int m_iFontEngineHeight;
+	extern bool m_iIntermission;
 	extern char m_szMOTD[2048];
 	extern float m_flTimeLeft;
 	extern int m_bitsHideHUDDisplay;
@@ -181,12 +221,60 @@ namespace gHUD
 	extern Vector m_vecAngles;
 	extern int m_iKeyBits;
 	extern int m_iWeaponBits;
+	extern bool m_fPlayerDead;
 
 	extern SCREENINFO m_scrinfo;
+
+	// HUD elements.
+	extern CHudAmmo m_Ammo;
+	extern CHudHealth m_Health;
+	extern CHudSpectator m_Spectator;
+	extern CHudGeiger m_Geiger;
+	extern CHudBattery m_Battery;
+	extern CHudTrain m_Train;
+	extern CHudFlashlight m_Flash;
+	extern CHudMessage m_Message;
+	extern CHudStatusBar m_StatusBar;
+	extern CHudDeathNotice m_DeathNotice;
+	extern CHudSayText m_SayText;
+	extern CHudMenu m_Menu;
+	extern CHudNightVision m_NightVision;
+	extern CHudTextMessage m_TextMessage;
+	extern CHudRoundTimer m_roundTimer;
+	extern CHudAccountBalance m_accountBalance;
+	extern CHudHeadName m_headName;
+	extern CHudRadar m_Radar;
+	extern CHudStatusIcons m_StatusIcons;
+	extern CHudScenarioStatus m_scenarioStatus;
+	extern CHudProgressBar m_progressBar;
+	//extern CHudVGUI2Print m_VGUI2Print;	UNDONE
 };
+
+extern hud_player_info_t g_PlayerInfoList[MAX_PLAYERS + 1];
+extern int g_PlayerScoreAttrib[MAX_PLAYERS + 1];
+extern TEMPENTITY* g_DeadPlayerModels[MAX_PLAYERS + 1];
+
+// HUD command funcs
+void CommandFunc_Slot1(void);
+void CommandFunc_Slot2(void);
+void CommandFunc_Slot3(void);
+void CommandFunc_Slot4(void);
+void CommandFunc_Slot5(void);
+void CommandFunc_Slot6(void);
+void CommandFunc_Slot7(void);
+void CommandFunc_Slot8(void);
+void CommandFunc_Slot9(void);
+void CommandFunc_Slot10(void);
+void CommandFunc_Close(void);
+void CommandFunc_NextWeapon(void);
+void CommandFunc_PrevWeapon(void);
+void CommandFunc_Adjust_Crosshair(void);
 
 #define ScreenHeight (gHUD::m_scrinfo.iHeight)
 #define ScreenWidth (gHUD::m_scrinfo.iWidth)
+
+#define XPROJECT(x)	((1.0f + (x)) * ScreenWidth * 0.5f)
+#define YPROJECT(y) ((1.0f - (y)) * ScreenHeight * 0.5f)
 
 // Use this to set any co-ords in 640x480 space
 inline int XRES(float x) { return static_cast<int>(x * (static_cast<float>(ScreenWidth) / 640.0f) + 0.5f); }

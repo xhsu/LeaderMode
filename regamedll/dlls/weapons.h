@@ -68,19 +68,6 @@ const float MAX_DIST_RELOAD_SOUND = 512.0f;
 #define ARMOR_KEVLAR	1.0f	// Body vest only
 #define ARMOR_VESTHELM	2.0f	// Vest and helmet
 
-struct ItemInfo
-{
-	WeaponIdType m_iId;
-	const char* m_pszClassName;
-	AmmoIdType m_iAmmoType;
-	int m_iMaxClip;
-	int m_iSlot;
-	int m_iPosition;
-	int m_bitsFlags;
-	int m_iWeight;
-	int m_iCost;
-};
-
 struct AmmoInfo
 {
 	AmmoIdType m_iId;

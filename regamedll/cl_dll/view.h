@@ -35,3 +35,11 @@ void V_CalcIntermissionRefdef(ref_params_s* pparams);
 void V_CalcSpectatorRefdef(ref_params_s* pparams);
 void V_CalcNormalRefdef(ref_params_s* pparams);
 void V_CalcThirdPersonRefdef(ref_params_t* pparams);
+
+// for other cpps
+void V_ResetChaseCam(void);
+void V_GetInEyePos(int target, float* origin, float* angles);
+void V_GetChasePos(int target, float* cl_angles, float* origin, float* angles);
+void V_GetDirectedChasePosition(cl_entity_t* ent1, cl_entity_t* ent2, float* angle, float* origin);
+void V_GetInEyePos(int target, float* origin, float* angles);
+void V_GetChasePos(int target, float* cl_angles, float* origin, float* angles);

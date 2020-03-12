@@ -166,6 +166,23 @@ enum shieldgren_e
 	SHIELDREN_DOWN
 };
 
+// dummy.
+enum AmmoIdType;
+
+// one of the core data structure.
+struct ItemInfo
+{
+	WeaponIdType m_iId;
+	const char* m_pszClassName;
+	AmmoIdType m_iAmmoType;
+	int m_iMaxClip;
+	int m_iSlot;
+	int m_iPosition;
+	int m_bitsFlags;
+	int m_iWeight;
+	int m_iCost;
+};
+
 extern const char* g_rgszWeaponAlias[MAX_WEAPONS];
 
 WeaponIdType AliasToWeaponID(const char* alias);

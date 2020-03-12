@@ -6,6 +6,9 @@ Created Date: 08 Mar 2020
 
 #include "cl_base.h"
 
+bool g_bHasDefuser = false;
+bool g_bHasNightvision = false;
+
 // client.cpp
 MSG_FUNC(CurWeapon)
 {
@@ -15,6 +18,7 @@ MSG_FUNC(CurWeapon)
 	int iId = READ_BYTE();
 	int iClip = READ_BYTE();
 
+	gHUD::m_Ammo.MsgFunc_CurWeapon(iState, iId, iClip);
 	return TRUE;
 }
 
@@ -24,6 +28,7 @@ MSG_FUNC(Geiger)
 
 	int iRange = READ_BYTE();
 
+	gHUD::m_Geiger.MsgFunc_Geiger(iRange);
 	return TRUE;
 }
 
@@ -34,6 +39,7 @@ MSG_FUNC(Flashlight)
 	BOOL FOn = READ_BYTE();
 	int iBattery = READ_BYTE();
 
+	gHUD::m_Flash.MsgFunc_Flashlight(FOn, iBattery);
 	return TRUE;
 }
 
@@ -43,6 +49,7 @@ MSG_FUNC(FlashBat)
 
 	int iBattery = READ_BYTE();
 
+	gHUD::m_Flash.MsgFunc_FlashBat(iBattery);
 	return TRUE;
 }
 
@@ -50,8 +57,21 @@ MSG_FUNC(Health)
 {
 	BEGIN_READ(pbuf, iSize);
 
-	int iHealth = READ_BYTE();
+	int x = READ_BYTE();
 
+	if (!READ_OK())
+	{
+		BEGIN_READ(pbuf, iSize);
+		x = READ_SHORT();
+	}
+
+	if (!READ_OK())
+	{
+		BEGIN_READ(pbuf, iSize);
+		x = READ_LONG();
+	}
+
+	gHUD::m_Health.MsgFunc_Health(x);
 	return TRUE;
 }
 
@@ -68,6 +88,7 @@ MSG_FUNC(Damage)
 	vecDamageSrc.y = READ_COORD();
 	vecDamageSrc.z = READ_COORD();
 
+	gHUD::m_Health.MsgFunc_Damage(iArmor, iDmgTaken, bitsDamageTypes, vecDamageSrc);
 	return TRUE;
 }
 
@@ -77,6 +98,7 @@ MSG_FUNC(Battery)
 
 	int iArmour = READ_SHORT();
 
+	gHUD::m_Battery.MsgFunc_Battery(iArmour);
 	return TRUE;
 }
 
@@ -86,6 +108,7 @@ MSG_FUNC(Train)
 
 	int iSpeedLevel = READ_BYTE();
 
+	gHUD::m_Train.MsgFunc_Train(iSpeedLevel);
 	return TRUE;
 }
 
@@ -93,11 +116,10 @@ MSG_FUNC(HudTextPro)
 {
 	BEGIN_READ(pbuf, iSize);
 
-	char szTextCode[192];
-	Q_strlcpy(szTextCode, READ_STRING());
+	char* pString = READ_STRING();
+	BOOL hintMessage = READ_BYTE();
 
-	BOOL FIsHint = READ_BYTE();
-
+	gHUD::m_Message.MsgFunc_HudText(pString, hintMessage);
 	return TRUE;
 }
 
@@ -105,43 +127,25 @@ MSG_FUNC(HudText)
 {
 	BEGIN_READ(pbuf, iSize);
 
-	char szTextCode[192];
-	Q_strlcpy(szTextCode, READ_STRING());
+	char* pString = READ_STRING();
+	BOOL hintMessage = READ_BYTE();
 
-	BOOL FIsHint = READ_BYTE();
+	if (!READ_OK())
+		hintMessage = FALSE;
 
+	gHUD::m_Message.MsgFunc_HudText(pString, hintMessage);
 	return TRUE;
 }
 
 MSG_FUNC(SayText)
 {
-	BEGIN_READ(pbuf, iSize);
-
-	int iClient = READ_BYTE();
-
-	char szText1[192], szText2[192], szText3[192];
-	Q_strlcpy(szText1, READ_STRING());
-	Q_strlcpy(szText2, READ_STRING());
-	Q_strlcpy(szText3, READ_STRING());
-
+	gHUD::m_SayText.MsgFunc_SayText(iSize, pbuf);
 	return TRUE;
 }
 
 MSG_FUNC(TextMsg)
 {
-	BEGIN_READ(pbuf, iSize);
-
-	int iMsgDest = READ_BYTE();
-
-	char szMsgName[192];
-	Q_strlcpy(szMsgName, READ_STRING());
-
-	char szParam1[192], szParam2[192], szParam3[192], szParam4[192];
-	Q_strlcpy(szParam1, READ_STRING());
-	Q_strlcpy(szParam2, READ_STRING());
-	Q_strlcpy(szParam3, READ_STRING());
-	Q_strlcpy(szParam4, READ_STRING());
-
+	gHUD::m_TextMessage.MsgFunc_TextMsg(iSize, pbuf);
 	return TRUE;
 }
 
@@ -149,19 +153,28 @@ MSG_FUNC(WeaponList)
 {
 	BEGIN_READ(pbuf, iSize);
 
-	char szName[192];
-	Q_strlcpy(szName, READ_STRING());
+	WEAPON Weapon;
+	Q_strlcpy(Weapon.szName, READ_STRING());
+	Weapon.iAmmoType = (int)READ_CHAR();
+	Weapon.iMax1 = READ_BYTE();
 
-	int iPrimAmmoType = READ_BYTE();
-	int iPrimAmmoMax = READ_BYTE();
-	int iSedAmmoType = READ_BYTE();
-	int iSedAmmoMax = READ_BYTE();
+	if (Weapon.iMax1 == 255)
+		Weapon.iMax1 = -1;
 
-	int iSlot = READ_BYTE();
-	int iPosition = READ_BYTE();
-	int iId = READ_BYTE();
-	int bitsFlags = READ_BYTE();
+	Weapon.iAmmo2Type = READ_CHAR();
+	Weapon.iMax2 = READ_BYTE();
 
+	if (Weapon.iMax2 == 255)
+		Weapon.iMax2 = -1;
+
+	Weapon.iSlot = READ_CHAR();
+	Weapon.iSlotPos = READ_CHAR();
+	Weapon.iId = READ_CHAR();
+	Weapon.iFlags = READ_BYTE();
+	Weapon.iClip = 0;
+	Weapon.szExtraName[0] = '\0';
+
+	gWR.AddWeapon(&Weapon);
 	return TRUE;
 }
 
@@ -169,13 +182,58 @@ MSG_FUNC(ResetHUD)
 {
 	// this msg have no arguments.
 
+	for (auto pHudElem : gHUD::m_lstAllHUDElems)
+	{
+		pHudElem->Reset();
+	}
+
+	gHUD::m_flMouseSensitivity = 0;
+
+	for (int i = 1; i <= MAX_PLAYERS; i++)
+		g_PlayerScoreAttrib[i] = 0;
+
+	// UNDONE
+	//if (gConfigs.bEnableClientUI)
+		//g_pViewPort->Reset();
+
 	return TRUE;
 }
+
+int g_iFreezeTimeOver = 0;	// MOVEME : hud_scoreboard.cpp
 
 MSG_FUNC(InitHUD)
 {
 	// this msg have no arguments.
 
+	for (auto pHudElem : gHUD::m_lstAllHUDElems)
+	{
+		pHudElem->InitHUDData();
+	}
+
+	g_iFreezeTimeOver = 0;
+
+	/* UNDONE : Fog
+	g_FogParameters.density = 0;
+	g_FogParameters.affectsSkyBox = false;
+	g_FogParameters.color[0] = 0;
+	g_FogParameters.color[1] = 0;
+	g_FogParameters.color[2] = 0;
+
+	if (cl_fog_skybox)
+		gEngfuncs.Cvar_SetValue(cl_fog_skybox->name, g_FogParameters.affectsSkyBox);
+
+	if (cl_fog_density)
+		gEngfuncs.Cvar_SetValue(cl_fog_density->name, g_FogParameters.density);
+
+	if (cl_fog_r)
+		gEngfuncs.Cvar_SetValue(cl_fog_r->name, g_FogParameters.color[0]);
+
+	if (cl_fog_g)
+		gEngfuncs.Cvar_SetValue(cl_fog_g->name, g_FogParameters.color[1]);
+
+	if (cl_fog_b)
+		gEngfuncs.Cvar_SetValue(cl_fog_b->name, g_FogParameters.color[2]);
+	*/
 	return TRUE;
 }
 
@@ -191,6 +249,9 @@ MSG_FUNC(GameTitle)
 	BEGIN_READ(pbuf, iSize);
 
 	int iUnknown = READ_BYTE();	// LUNA: what's this???
+
+	// although this message has one argument, but it just remains unused.
+	gHUD::m_Message.MsgFunc_GameTitle();
 
 	return TRUE;
 }
@@ -303,6 +364,7 @@ MSG_FUNC(AmmoPickup)
 	int iAmmoId = READ_BYTE();
 	int iAmount = READ_BYTE();
 
+	gHR.AddToHistory(HISTSLOT_AMMO, iAmmoId, Q_abs(iAmount));
 	return TRUE;
 }
 
@@ -312,6 +374,7 @@ MSG_FUNC(WeapPickup)
 
 	int iWeaponId = READ_BYTE();
 
+	gHR.AddToHistory(HISTSLOT_WEAP, iWeaponId);
 	return TRUE;
 }
 
@@ -322,6 +385,7 @@ MSG_FUNC(ItemPickup)
 	char szItemName[192];
 	Q_strlcpy(szItemName, READ_STRING());
 
+	gHR.AddToHistory(HISTSLOT_ITEM, szItemName);
 	return TRUE;
 }
 
@@ -331,6 +395,7 @@ MSG_FUNC(HideWeapon)
 
 	int bitsWhat = READ_BYTE();
 
+	gHUD::m_Ammo.MsgFunc_HideWeapon(bitsWhat);
 	return TRUE;
 }
 
@@ -343,26 +408,9 @@ MSG_FUNC(SetFOV)
 	return TRUE;
 }
 
-static char s_szMenu[1024] = "";
-
 MSG_FUNC(ShowMenu)
 {
-	BEGIN_READ(pbuf, iSize);
-
-	int bitsValidSlots = READ_SHORT();
-	int iDisplayTime = READ_CHAR();
-	BOOL FNeedMore = READ_BYTE();
-
-	Q_strlcat(s_szMenu, READ_STRING());
-
-	if (!FNeedMore)
-	{
-		// UNDONE: display menu.
-
-		// clear buffer.
-		Q_memset(s_szMenu, NULL, sizeof(s_szMenu));
-	}
-
+	gHUD::m_Menu.MsgFunc_ShowMenu(iSize, pbuf);
 	return TRUE;
 }
 
@@ -390,6 +438,7 @@ MSG_FUNC(AmmoX)
 	int iAmmoId = READ_BYTE();
 	int iAmount = READ_BYTE();
 
+	gWR.SetAmmo(iAmmoId, Q_abs(iAmount));
 	return TRUE;
 }
 
@@ -443,6 +492,7 @@ MSG_FUNC(RoundTime)
 
 	int iRoundTime = READ_SHORT();
 
+	gHUD::m_roundTimer.MsgFunc_RoundTime(iRoundTime);
 	return TRUE;
 }
 
@@ -453,6 +503,7 @@ MSG_FUNC(Money)
 	int iAccount = READ_LONG();
 	BOOL FTrackChange = READ_BYTE();
 
+	gHUD::m_accountBalance.MsgFunc_Money(iAccount, FTrackChange);
 	return TRUE;
 }
 
@@ -462,6 +513,7 @@ MSG_FUNC(ArmorType)
 
 	int iArmourType = READ_BYTE();
 
+	gHUD::m_Battery.MsgFunc_ArmorType(iArmourType);
 	return TRUE;
 }
 
@@ -471,6 +523,7 @@ MSG_FUNC(BlinkAcct)
 
 	int iNumBlinks = READ_BYTE();
 
+	gHUD::m_accountBalance.MsgFunc_BlinkAcct(iNumBlinks);
 	return TRUE;
 }
 
@@ -481,6 +534,7 @@ MSG_FUNC(StatusValue)
 	int iType = READ_BYTE();
 	int iValue = READ_SHORT();
 
+	gHUD::m_StatusBar.MsgFunc_StatusValue(iType, iValue);
 	return TRUE;
 }
 
@@ -493,24 +547,13 @@ MSG_FUNC(StatusText)
 	char szText[192];
 	Q_strlcpy(szText, READ_STRING());
 
+	gHUD::m_StatusBar.MsgFunc_StatusText(iLine, szText);
 	return TRUE;
 }
 
 MSG_FUNC(StatusIcon)
 {
-	BEGIN_READ(pbuf, iSize);
-
-	BOOL FShouldEnable = READ_BYTE();
-
-	char szIcon[192];
-	Q_strlcpy(szIcon, READ_STRING());
-
-	if (FShouldEnable)
-	{
-		int r = READ_BYTE();
-		int g = READ_BYTE();
-		int b = READ_BYTE();
-	}
+	gHUD::m_StatusIcons.MsgFunc_StatusIcon(iSize, pbuf);
 
 	return TRUE;
 }
@@ -521,6 +564,7 @@ MSG_FUNC(BarTime)
 
 	int iTime = READ_SHORT();
 
+	gHUD::m_progressBar.MsgFunc_BarTime(iTime);
 	return TRUE;
 }
 
@@ -548,6 +592,7 @@ MSG_FUNC(Crosshair)
 
 	BOOL FDrawn = READ_BYTE();
 
+	gHUD::m_Ammo.MsgFunc_Crosshair(FDrawn);
 	return TRUE;
 }
 
@@ -557,6 +602,7 @@ MSG_FUNC(NVGToggle)
 
 	BOOL FOn = READ_BYTE();
 
+	gHUD::m_NightVision.MsgFunc_NVGToggle(FOn);
 	return TRUE;
 }
 
@@ -591,6 +637,12 @@ MSG_FUNC(VGUIMenu)
 	int iTime = READ_BYTE();	// unsure, unused(BTE & MoE), according to HL enging Wiki.
 	BOOL FMultipart = READ_BYTE();	// unsure, unused(BTE & MoE), according to HL enging Wiki.
 	char* pszMenuName = READ_STRING();		// unsure, unused(BTE & MoE), according to HL enging Wiki.
+
+	// UNDONE
+	/*if (gConfigs.bEnableClientUI)
+	{
+		g_pViewPort->ShowVGUIMenu(iMenuType);
+	}*/
 
 	return TRUE;
 }
@@ -672,24 +724,43 @@ MSG_FUNC(BombPickup)
 
 MSG_FUNC(ClCorpse)
 {
+	char szModel[64];
+	Vector vOrigin;
+	Vector vAngles;
+	float flAnimTime;
+	int iSequence;
+	int iBody;
+	int iTeam;
+	int iIndex;
+	char* pModel;
+	cl_entity_t* pEntity;
+
 	BEGIN_READ(pbuf, iSize);
 
-	char* pModel = READ_STRING();
+	pModel = READ_STRING();
+	vOrigin.x = READ_LONG() / 128.0;
+	vOrigin.y = READ_LONG() / 128.0;
+	vOrigin.z = READ_LONG() / 128.0;
+	vAngles.x = READ_COORD();
+	vAngles.y = READ_COORD();
+	vAngles.z = READ_COORD();
+	flAnimTime = gEngfuncs.GetClientTime() + READ_LONG() / 100.0;
+	iSequence = READ_BYTE();
+	iBody = READ_BYTE();
+	iTeam = READ_BYTE();
+	iIndex = READ_BYTE();
 
-	Vector vecOrigin, vecAngles;
-	vecOrigin.x = READ_LONG() / 128.0;
-	vecOrigin.y = READ_LONG() / 128.0;
-	vecOrigin.z = READ_LONG() / 128.0;
-	vecAngles.x = READ_COORD();
-	vecAngles.y = READ_COORD();
-	vecAngles.z = READ_COORD();
+	Q_snprintf(szModel, sizeof(szModel), "models/player/%s/%s.mdl", pModel, pModel);
+	szModel[sizeof(szModel) - 1] = '\0';
 
-	float flAnimTime = gEngfuncs.GetClientTime() + READ_LONG() / 100.0;
-	int iSequence = READ_BYTE();
-	int iBody = READ_BYTE();
-	int iTeam = READ_BYTE();
-	int iIndex = READ_BYTE();
+	pEntity = gEngfuncs.GetEntityByIndex(iIndex);
 
+	if (pEntity)
+	{
+		vOrigin = pEntity->curstate.origin;
+	}
+
+	CreateCorpse(vOrigin, vAngles, szModel, flAnimTime, iSequence, iBody);
 	return TRUE;
 }
 
@@ -813,19 +884,7 @@ MSG_FUNC(TaskTime)
 
 MSG_FUNC(Scenario)
 {
-	BEGIN_READ(pbuf, iSize);
-
-	BOOL FActive = READ_BYTE();
-
-	if (!FActive)
-		return TRUE;
-
-	char szIcon[192];
-	Q_strlcpy(szIcon, READ_STRING());
-
-	int iAlpha = READ_BYTE();
-	float flFlashInterval = READ_SHORT() * 0.01;
-	float flNextFlash = /* GET_GAME_TIME + */READ_SHORT() * 0.01;	// UNDONE
+	gHUD::m_scenarioStatus.MsgFunc_Scenario(iSize, pbuf);
 
 	return TRUE;
 }
@@ -864,6 +923,7 @@ MSG_FUNC(BarTime2)
 	int iTime = READ_SHORT();
 	float flStartPercent = (float)READ_SHORT() / 100.0f;
 
+	gHUD::m_progressBar.MsgFunc_BarTime2(iTime, flStartPercent);
 	return TRUE;
 }
 
@@ -873,6 +933,8 @@ MSG_FUNC(ItemStatus)
 
 	int bitsItemStatus = READ_BYTE();
 
+	g_bHasDefuser = bitsItemStatus & ITEM_STATUS_DEFUSER;
+	g_bHasNightvision = bitsItemStatus & ITEM_STATUS_NIGHTVISION;
 	return TRUE;
 }
 
@@ -969,12 +1031,12 @@ MSG_FUNC(ShowTimer)
 
 MSG_FUNC(HudTextArgs)
 {
-	BEGIN_READ(pbuf, iSize);
-
-	// this stuff have a indetermind arguments.
+	// this stuff have a indetermind argument number.
 	// in MoE this is a empty func.
 	// in BTE it has a full function.
 
+	// LUNA: I choose BTE to copy.
+	gHUD::m_Message.MsgFunc_HudTextArgs(iSize, pbuf);
 	return TRUE;
 }
 

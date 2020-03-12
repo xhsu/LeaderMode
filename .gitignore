@@ -19,6 +19,9 @@
 **/msvc/.vs
 **/msvc/ipch
 
+**/Client/Debug*
+**/Client/Release*
+
 regamedll/version/appversion.h
 regamedll/msvc/PublishPath*.txt
 regamedll/_regamedllTestImg

@@ -40,6 +40,6 @@ EXPORTS
 	IN_ClearStates					@38
 	IN_DeactivateMouse				@39
 	IN_MouseEvent					@40
-	Initialize						@41
+	Initialize=Initialize_			@41
 	KB_Find							@42
 	V_CalcRefdef					@43

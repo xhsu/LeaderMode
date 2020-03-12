@@ -300,8 +300,64 @@ public:
 			z > -tolerance && z < tolerance);
 	}
 
+	Vector MakeVector() const
+	{
+		vec_t rad_pitch = (x * M_PI / 180.0f);
+		vec_t rad_yaw = (y * M_PI / 180.0f);
+		vec_t tmp = Q_cos(rad_pitch);
+
+		return Vector(	(-tmp * -Q_cos(rad_yaw)),	// x
+						(Q_sin(rad_yaw) * tmp),		// y
+						-Q_sin(rad_pitch)			// z
+		);
+	}
+
+	Vector RotateX(float angle) const
+	{
+		float a, c, s;
+
+		a = (angle * M_PI / 180.0);
+		c = Q_cos(a);
+		s = Q_sin(a);
+
+		return Vector(	x,
+						c * y - s * z,
+						s * y + c * z
+		);
+	}
+
+	Vector RotateY(float angle) const
+	{
+		float a, c, s;
+
+		a = (angle * M_PI / 180.0);
+		c = Q_cos(a);
+		s = Q_sin(a);
+
+		return Vector(	c * x + s * z,
+						y,
+						-s * x + c * z
+		);
+	}
+
+	Vector RotateZ(float angle) const
+	{
+		float a, c, s;
+
+		a = (angle * M_PI / 180.0);
+		c = Q_cos(a);
+		s = Q_sin(a);
+
+		return Vector(	c * x - s * y,
+						s * x + c * y,
+						z
+		);
+	}
+
 	// Members
-	vec_t x, y, z;
+	union { vec_t x; vec_t pitch; };
+	union { vec_t y; vec_t yaw; };
+	union { vec_t z; vec_t roll; };
 };
 
 inline Vector operator*(float fl, const Vector &v)
@@ -322,6 +378,16 @@ inline real_t DotProduct2D(const Vector &a, const Vector &b)
 inline Vector CrossProduct(const Vector &a, const Vector &b)
 {
 	return Vector(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
+}
+
+inline float operator^(const Vector& a, const Vector& b)
+{
+	float length_ab = a.Length() * b.Length();
+
+	if (length_ab == 0.0)
+		return 0.0;
+
+	return (double)(Q_acos(DotProduct(a, b) / length_ab) * (180.0 / M_PI));
 }
 
 template<

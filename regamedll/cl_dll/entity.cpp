@@ -20,10 +20,15 @@ HUD_GetUserEntity
 
 int iOnTrain[MAX_PLAYERS];
 
+// MOVEME : hud_scoreboard.cpp
 int g_iUser1;
 int g_iUser2;
 int g_iUser3;
 int g_iTeamNumber;
+int g_iPlayerClass;
+int g_iPlayerFlags;
+float g_flPlayerSpeed;
+int g_iWeaponFlags;
 
 extra_player_info_t	g_PlayerExtraInfo[MAX_PLAYERS + 1]; // additional player info sent directly to the client dll
 
@@ -59,10 +64,9 @@ int HUD_AddEntity2(int iType, cl_entity_s* pEntity, const char* szModelName)
 
 	if (g_iUser1)
 	{
-		// LUNA: crsky said leave a marker. come back later! UNDONE
-		//gHUD.m_Spectator.AddOverviewEntity(iType, pEntity, szModelName);
+		gHUD::m_Spectator.AddOverviewEntity(iType, pEntity, szModelName);
 
-		if ((g_iUser1 == OBS_IN_EYE/* || gHUD.m_Spectator.m_pip->value == INSET_IN_EYE*/) &&
+		if ((g_iUser1 == OBS_IN_EYE || gHUD::m_Spectator.m_pip->value == INSET_IN_EYE) &&
 			pEntity->index == g_iUser2)
 			return 0;	// don't draw the player we are following in eye
 

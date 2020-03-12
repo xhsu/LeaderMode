@@ -6,6 +6,14 @@ Created Date: 05 Mar 2020
 
 #pragma once
 
+#define charsmax(x)	(sizeof(x) - 1)
+
+// some constants from MP
+#define TEAM_UNASSIGNED	0
+#define TEAM_TERRORIST	1
+#define TEAM_CT			2
+#define TEAM_SPECTATOR	3
+
 #ifdef VectorSubtract
 #undef VectorSubtract
 #endif
@@ -41,3 +49,30 @@ inline void MatrixCopy(float in[3][4], float out[3][4]) { Q_memcpy(out, in, size
 void VectorTransform(const float* in1, float in2[3][4], float* out);
 void QuaternionSlerp(vec4_t p, vec4_t q, float t, vec4_t qt);
 void AngleQuaternion(float* angles, vec4_t quaternion);
+
+inline void UnpackRGB(int& r, int& g, int& b, unsigned long ulRGB)
+{
+	r = (ulRGB & 0xFF0000) >> 16;
+	g = (ulRGB & 0xFF00) >> 8;
+	b = ulRGB & 0xFF;
+}
+
+inline void ScaleColors(int& r, int& g, int& b, int a)
+{
+	float x = (float)a / 255;
+
+	r = (int)(r * x);
+	g = (int)(g * x);
+	b = (int)(b * x);
+}
+
+void UTIL_StringToVector(float* pVector, const char* pString);
+int UTIL_FindEntityInMap(char* name, float* origin, float* angle);
+extern Vector g_ColorBlue;
+extern Vector g_ColorRed;
+extern Vector g_ColorGreen;
+extern Vector g_ColorYellow;
+extern Vector g_ColorGrey;
+float* GetClientColor(int clientIndex);
+hSprite LoadSprite(const char* pszName);
+bool CalcScreen(Vector& in, Vector2D& out);	// a.k.a. WorldToScreen

@@ -11,3 +11,5 @@ However, I decide to do neither, but create a dummy for CL side.
 */
 
 #pragma once
+
+#include "cl_base.h"

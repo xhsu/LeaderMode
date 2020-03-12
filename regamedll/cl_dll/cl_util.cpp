@@ -118,3 +118,212 @@ void AngleQuaternion(float* angles, vec4_t quaternion)
 	quaternion[2] = cr * cp * sy - sr * sp * cy;
 	quaternion[3] = cr * cp * cy + sr * sp * sy;
 }
+
+void UTIL_StringToVector(float* pVector, const char* pString)
+{
+	char* pstr, * pfront, tempString[128];
+	int j;
+
+	Q_strlcpy(tempString, pString);
+	pstr = pfront = tempString;
+
+	for (j = 0; j < 3; j++)
+	{
+		pVector[j] = Q_atof(pfront);
+
+		while (*pstr && *pstr != ' ')
+			pstr++;
+
+		if (!*pstr)
+			break;
+
+		pstr++;
+		pfront = pstr;
+	}
+
+	if (j < 2)
+	{
+		for (j = j + 1; j < 3; j++)
+			pVector[j] = 0;
+	}
+}
+
+int UTIL_FindEntityInMap(char* name, float* origin, float* angle)
+{
+	int n, found = 0;
+	char keyname[256];
+	char token[1024];
+
+	cl_entity_t* pEnt = gEngfuncs.GetEntityByIndex(0);
+
+	if (!pEnt)
+		return 0;
+
+	if (!pEnt->model)
+		return 0;
+
+	char* data = pEnt->model->entities;
+
+	while (data)
+	{
+		data = gEngfuncs.COM_ParseFile(data, token);
+
+		if ((token[0] == '}') || (token[0] == 0))
+			break;
+
+		if (!data)
+		{
+			gEngfuncs.Con_DPrintf("UTIL_FindEntityInMap: EOF without closing brace\n");
+			return 0;
+		}
+
+		if (token[0] != '{')
+		{
+			gEngfuncs.Con_DPrintf("UTIL_FindEntityInMap: expected {\n");
+			return 0;
+		}
+
+		while (1)
+		{
+			data = gEngfuncs.COM_ParseFile(data, token);
+
+			if (token[0] == '}')
+				break;
+
+			if (!data)
+			{
+				gEngfuncs.Con_DPrintf("UTIL_FindEntityInMap: EOF without closing brace\n");
+				return 0;
+			}
+
+			Q_strlcpy(keyname, token);
+
+			n = Q_strlen(keyname);
+
+			while (n && keyname[n - 1] == ' ')
+			{
+				keyname[n - 1] = 0;
+				n--;
+			}
+
+			data = gEngfuncs.COM_ParseFile(data, token);
+
+			if (!data)
+			{
+				gEngfuncs.Con_DPrintf("UTIL_FindEntityInMap: EOF without closing brace\n");
+				return 0;
+			}
+
+			if (token[0] == '}')
+			{
+				gEngfuncs.Con_DPrintf("UTIL_FindEntityInMap: closing brace without data");
+				return 0;
+			}
+
+			if (!Q_stricmp(keyname, "classname"))
+			{
+				if (!Q_stricmp(token, name))
+					found = 1;
+			}
+
+			if (!Q_stricmp(keyname, "angle"))
+			{
+				float y = Q_atof(token);
+
+				if (y >= 0)
+				{
+					angle[0] = 0.0f;
+					angle[1] = y;
+				}
+				else if ((int)y == -1)
+				{
+					angle[0] = -90.0f;
+					angle[1] = 0.0f;;
+				}
+				else
+				{
+					angle[0] = 90.0f;
+					angle[1] = 0.0f;
+				}
+
+				angle[2] = 0.0f;
+			}
+
+			if (!Q_stricmp(keyname, "angles"))
+			{
+				UTIL_StringToVector(angle, token);
+			}
+
+			if (!Q_stricmp(keyname, "origin"))
+			{
+				UTIL_StringToVector(origin, token);
+			}
+		}
+
+		if (found)
+			return 1;
+	}
+
+	return 0;
+}
+
+Vector g_ColorBlue = Vector(0.6, 0.8, 1.0);
+Vector g_ColorRed = Vector(1.0, 0.25, 0.25);
+Vector g_ColorGreen = Vector(0.6, 1.0, 0.6);
+Vector g_ColorYellow = Vector(1.0, 0.7, 0.0);
+Vector g_ColorGrey = Vector(0.8, 0.8, 0.8);
+
+float* GetClientColor(int clientIndex)
+{
+	switch (g_PlayerExtraInfo[clientIndex].teamnumber)
+	{
+	case TEAM_TERRORIST:  return g_ColorRed;
+	case TEAM_CT:         return g_ColorBlue;
+	case TEAM_SPECTATOR:
+	case TEAM_UNASSIGNED: return g_ColorYellow;
+	case 4:               return g_ColorGreen;
+	default:              return g_ColorGrey;
+	}
+}
+
+hSprite LoadSprite(const char* pszName)
+{
+	int i;
+	char sz[256];
+
+	if (ScreenWidth < 640)
+		i = 320;
+	else
+		i = 640;
+
+	Q_snprintf(sz, charsmax(sz), pszName, i);
+	return gEngfuncs.pfnSPR_Load(sz);
+}
+
+// from view.cpp
+extern Vector v_origin, v_angles;
+
+bool CalcScreen(Vector& in, Vector2D& out)
+{
+	Vector aim = in - v_origin;
+	Vector view = v_angles.MakeVector();
+	float num;
+
+	if ((view ^ aim) > (gHUD::m_iFOV / 1.8))	// LUNA: where did this 1.8 came from?
+		return false;
+
+	Vector newaim = aim.RotateZ(-v_angles.yaw);
+	Vector tmp = newaim.RotateY(-v_angles.pitch);
+	newaim = tmp.RotateX(-v_angles.roll);
+
+	if (gHUD::m_iFOV == 0.0f)
+		return false;
+
+	num = (((ScreenWidth / 2) / newaim[0]) * (120.0 / gHUD::m_iFOV - 1.0 / 3.0));
+	out[0] = (ScreenWidth / 2) - num * newaim[1];
+	out[1] = (ScreenHeight / 2) - num * newaim[2];
+
+	Q_clamp(out[0], 0.0f, float(ScreenWidth));
+	Q_clamp(out[1], 0.0f, float(ScreenHeight));
+	return true;
+}
