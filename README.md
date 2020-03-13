@@ -1,15 +1,14 @@
 # Leader Mod
-AMX Version: https://github.com/ShingekiNoRex/CS1.6-LeaderMode
-AMX Version is totally playable, with BOT support.
+Try [AMX Version](https://github.com/ShingekiNoRex/CS1.6-LeaderMode) before you decide to download this. The AMX version is utterly playable with almost same content.
 
 ## What is this?
-A gameplay mod originally wrote in Pawn(AmxModX).
-Assign roles to both CT and T, including skills.
+A gameplay mod originally wrote in Pawn(AmxModX).<br/>
+Assign roles to both CT and T, including skills.<br/>
 The goal is eliminate the other team. However, due to the redeployment mechanism, having their team leader killed is a quicker way.
 
-## How can use it?
-You must buy a CS:CZ copy from Valve.
-Download the resource pack from AMX version. In addition, you have to download the view model pack of WeaponSight.amxx which currently not avaliable.
+## How to install?
+You must buy a CS:CZ copy from Valve.<br/>
+Download the resource pack from AMX version. In addition, you have to download the view model pack of WeaponSight.amxx which currently not avaliable.<br/>
 Compile both client.dll and mp.dll, replace the corresponding file in czero/. Make yourself a backup.
 
 ## Commands
