@@ -840,15 +840,6 @@ int CBasePlayerItem::AddToPlayer(CBasePlayer *pPlayer)
 	return TRUE;
 }
 
-int CBasePlayerItem::GetItemInfo(ItemInfo* p)
-{
-	if (m_iId < 1 || m_iId >= LAST_WEAPON)
-		return FALSE;
-
-	Q_memcpy(p, &m_rgItemInfo[m_iId], sizeof(ItemInfo));
-	return TRUE;
-}
-
 void CBasePlayerItem::Drop()
 {
 	SetTouch(nullptr);

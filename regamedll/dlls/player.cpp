@@ -1358,24 +1358,20 @@ void CBasePlayer::PackDeadPlayerItems()
 
 			while (pPlayerItem)
 			{
-				ItemInfo info;
-				Q_memset(&info, NULL, sizeof(info));
-				pPlayerItem->GetItemInfo(&info);
-
-				if (info.m_iId && info.m_iSlot < KNIFE_SLOT && !bShieldDropped)
+				if (pPlayerItem->m_iId && pPlayerItem->iinfo()->m_iSlot < KNIFE_SLOT && !bShieldDropped)
 				{
-					if (info.m_iWeight > nBestWeight)
+					if (pPlayerItem->iinfo()->m_iWeight > nBestWeight)
 					{
-						nBestWeight = info.m_iWeight;
+						nBestWeight = pPlayerItem->iinfo()->m_iWeight;
 						pBestItem = pPlayerItem;
 					}
 				}
 				// drop a grenade after death
-				else if (info.m_iSlot == GRENADE_SLOT)
+				else if (pPlayerItem->iinfo()->m_iSlot == GRENADE_SLOT)
 				{
 					if (AreRunningCZero())
 					{
-						if (pPlayerItem->m_flStartThrow == 0.0f && m_rgAmmo[info.m_iAmmoType] > 0)
+						if (pPlayerItem->m_flStartThrow == 0.0f && m_rgAmmo[pPlayerItem->iinfo()->m_iAmmoType] > 0)
 						{
 							PackPlayerItem(this, pPlayerItem, true);
 						}

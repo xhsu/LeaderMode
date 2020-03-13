@@ -4055,7 +4055,7 @@ int EXT_FUNC GetWeaponData(edict_t *pEdict, struct weapon_data_s *info)
 			{
 				// Get The ID
 				ItemInfo II;
-				weapon->GetItemInfo(&II);
+				Q_memcpy(&II, weapon->iinfo(), sizeof(ItemInfo));
 
 				if (II.m_iId >= 0 && II.m_iId < MAX_WEAPONS)
 				{
@@ -4183,13 +4183,11 @@ void EXT_FUNC UpdateClientData(const edict_t *ent, int sendweapons, struct clien
 
 		if (pPlayer->m_pActiveItem)
 		{
-			ItemInfo II;
-			Q_memset(&II, 0, sizeof(II));
-
 			CBasePlayerWeapon* weapon = (CBasePlayerWeapon*)pPlayer->m_pActiveItem;
-			if (weapon && weapon->UseDecrement() && weapon->GetItemInfo(&II))
+
+			if (weapon && weapon->UseDecrement())
 			{
-				cd->m_iId = II.m_iId;
+				cd->m_iId = weapon->m_iId;
 
 				if ((unsigned int)weapon->m_iPrimaryAmmoType < MAX_AMMO_SLOTS)
 				{

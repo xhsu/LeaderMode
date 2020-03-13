@@ -159,7 +159,6 @@ public:
 	virtual void SetObjectCollisionBox();
 	virtual int AddToPlayer(CBasePlayer *pPlayer);							// return TRUE if the item you want the item added to the player inventory
 	virtual int AddDuplicate(CBasePlayerItem *pItem) { return FALSE; }		// return TRUE if you want your duplicate removed from world
-	virtual int GetItemInfo(ItemInfo* p);									// returns 0 if struct not filled out
 	virtual BOOL CanDeploy() { return TRUE; }
 	virtual BOOL CanDrop() { return TRUE; }									// returns is deploy was successful
 	virtual BOOL Deploy() { return TRUE; }
