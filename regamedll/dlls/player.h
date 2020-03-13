@@ -28,7 +28,10 @@
 
 #pragma once
 
+#include "ggrenade.h"
 #include "weapons.h"
+#include "weaponbox.h"
+#include "items.h"
 #include "pm_materials.h"
 #include "hintmessage.h"
 #include "unisignals.h"
@@ -332,8 +335,8 @@ public:
 	virtual void Killed(entvars_t *pevAttacker, int iGib);
 	virtual void AddPoints(int score, BOOL bAllowNegativeScore);
 	virtual void AddPointsToTeam(int score, BOOL bAllowNegativeScore);
-	virtual BOOL AddPlayerItem(CBasePlayerItem *pItem);
-	virtual BOOL RemovePlayerItem(CBasePlayerItem *pItem);
+	virtual BOOL AddPlayerItem(CBaseWeapon* pItem);
+	virtual BOOL RemovePlayerItem(CBaseWeapon* pItem);
 	virtual bool GiveAmmo(int iAmount, AmmoIdType iId);
 
 	virtual BOOL IsAlive() { return (pev->deadflag == DEAD_NO && pev->health > 0.0f); }
@@ -379,9 +382,7 @@ public:
 	void Radio(const char *msg_id, const char *msg_verbose = nullptr, short pitch = 100, bool showIcon = true);
 	CBasePlayer *GetNextRadioRecipient(CBasePlayer *pStartPlayer);
 	void SmartRadio();
-	void ThrowWeapon(char *pszItemName);
-	void ThrowPrimary();
-	CGrenade *ThrowGrenade(CBasePlayerWeapon *pWeapon, Vector vecSrc, Vector vecThrow, float time, unsigned short usEvent = 0);
+	CGrenade *ThrowGrenade(WeaponIdType iId, Vector& vecSrc, Vector& vecThrow, float time, unsigned short usEvent = 0);
 	void AddAccount(int amount, RewardType type = RT_NONE, bool bTrackChange = true);
 	void Disappear();
 	bool CanSwitchTeam(TeamName teamToSwap);
@@ -398,7 +399,7 @@ public:
 	bool SetClientUserInfoName(char *infobuffer, char *szNewName);
 	void SetClientUserInfoModel(char *infobuffer, char *szNewModel);
 	void SetNewPlayerModel(const char *modelName);
-	BOOL SwitchWeapon(CBasePlayerItem *pWeapon);
+	BOOL SwitchWeapon(CBaseWeapon *pWeapon);
 	void CheckPowerups();
 	BOOL IsOnLadder();
 	BOOL FlashlightIsOn();
@@ -412,12 +413,9 @@ public:
 	void StartDeathCam();
 	void StartObserver(Vector &vecPosition, Vector &vecViewAngle);
 	void HandleSignals();
-	CBaseEntity *DropPlayerItem(const char *pszItemName);
+	CBaseEntity *DropPlayerItem(WeaponIdType iId);
 	bool HasPlayerItem(WeaponIdType iId);
-	bool HasNamedPlayerItem(const char *pszItemName);
 	bool HasWeapons();
-	void SelectPrevItem(int iItem);
-	void SelectNextItem(int iItem);
 	void SelectLastItem();
 	void SelectItem(const char *pstr);
 	void ItemPreFrame();
@@ -487,7 +485,7 @@ public:
 	void SendItemStatus();
 	edict_t *EntSelectSpawnPoint();
 	void SetScoreAttrib(CBasePlayer *dest);
-	void ReloadWeapons(CBasePlayerItem *pWeapon = nullptr, bool bForceReload = false, bool bForceRefill = false);
+	void ReloadWeapons(CBaseWeapon *pWeapon = nullptr, bool bForceReload = false, bool bForceRefill = false);
 	void TeamChangeUpdate();
 	bool HasRestrictItem(ItemID item, ItemRestType type);
 	void DropSecondary();
@@ -498,8 +496,7 @@ public:
 	bool ShouldToShowAccount(CBasePlayer *pReceiver) const;
 	bool ShouldToShowHealthInfo(CBasePlayer *pReceiver) const;
 
-	CBasePlayerItem *GetItemByName(const char *itemName);
-	CBasePlayerItem *GetItemById(WeaponIdType weaponID);
+	CBaseWeapon* GetItemById(WeaponIdType weaponID);
 
 	void SetSpawnProtection(float flProtectionTime);
 	void RemoveSpawnProtection();
@@ -517,7 +514,7 @@ public:
 	void DischargePrimarySkill(CBasePlayer* pCause);	// due to this player, I have to stop my skill.
 
 	// passive skill calculation hub
-	float WeaponFireIntervalModifier(CBasePlayerWeapon* pWeapon);
+	float WeaponFireIntervalModifier(CBaseWeapon* pWeapon);
 	float PlayerDamageSufferedModifier(int bitsDamageTypes);
 	float PlayerDamageDealtModifier(int bitsDamageTypes);
 	void OnPlayerDamagedPre(entvars_t* pevInflictor, entvars_t* pevAttacker, float& flDamage, int& bitsDamageTypes);
@@ -532,61 +529,6 @@ public:
 	void OnAddToFullPack(entity_state_s* pState, edict_t* pEnt, BOOL FIsPlayer);
 	void OnBeingAddToFullPack(entity_state_s* pState, CBasePlayer* pHost);
 	void OnResetPlayerMaxspeed(float& flSpeed);
-
-	// templates
-	template<typename T = CBasePlayerItem, typename Functor>
-	T *ForEachItem(int slot, const Functor &func) const
-	{
-		auto item = m_rgpPlayerItems[slot];
-		while (item)
-		{
-			if (func(static_cast<T *>(item)))
-				return static_cast<T *>(item);
-
-			item = item->m_pNext;
-		}
-
-		return nullptr;
-	}
-
-	template<typename T = CBasePlayerItem, typename Functor>
-	T *ForEachItem(const Functor &func) const
-	{
-		for (auto item : m_rgpPlayerItems)
-		{
-			while (item)
-			{
-				if (func(static_cast<T *>(item)))
-					return static_cast<T *>(item);
-
-				item = item->m_pNext;
-			}
-		}
-
-		return nullptr;
-	}
-
-	template<typename T = CBasePlayerItem, typename Functor>
-	T *ForEachItem(const char *pszItemName, const Functor &func) const
-	{
-		if (!pszItemName) {
-			return nullptr;
-		}
-
-		for (auto item : m_rgpPlayerItems)
-		{
-			while (item)
-			{
-				if (FClassnameIs(item->pev, pszItemName) && func(static_cast<T *>(item))) {
-					return static_cast<T *>(item);
-				}
-
-				item = item->m_pNext;
-			}
-		}
-
-		return nullptr;
-	}
 
 public:
 	enum { MaxLocationLen = 32 };
@@ -695,7 +637,7 @@ public:
 	BOOL m_fInitHUD;
 	BOOL m_fGameHUDInitialized;
 	int m_iTrain;
-	BOOL m_fWeapon;
+	bool m_bClientWeaponUpToDate;
 	EHANDLE m_pTank;
 	float m_fDeadTime;
 	BOOL m_fNoPlayerSound;
@@ -708,10 +650,10 @@ public:
 	int m_iFOV;
 	int m_iClientFOV;
 	int m_iNumSpawns;
-	CBasePlayerItem *m_rgpPlayerItems[MAX_ITEM_TYPES];
-	CBasePlayerItem *m_pActiveItem;
-	CBasePlayerItem *m_pClientActiveItem;
-	CBasePlayerItem *m_pLastItem;
+	CBaseWeapon* m_rgpPlayerItems[MAX_ITEM_TYPES];
+	CBaseWeapon* m_pActiveItem;
+	CBaseWeapon* m_pClientActiveItem;
+	CBaseWeapon* m_pLastItem;
 	int m_rgAmmo[MAX_AMMO_SLOTS];
 	int m_rgAmmoLast[MAX_AMMO_SLOTS];
 	Vector m_vecAutoAim;
@@ -837,8 +779,8 @@ public:
 
 inline bool CBasePlayer::IsReloading() const
 {
-	CBasePlayerWeapon *pCurrentWeapon = static_cast<CBasePlayerWeapon *>(m_pActiveItem);
-	if (pCurrentWeapon && pCurrentWeapon->m_fInReload)
+	CBaseWeapon *pCurrentWeapon = static_cast<CBaseWeapon*>(m_pActiveItem);
+	if (pCurrentWeapon && pCurrentWeapon->m_bInReload)
 	{
 		return true;
 	}
@@ -889,4 +831,4 @@ bool IsPrimaryWeaponId(int id);
 bool IsSecondaryWeaponClass(int classId);
 bool IsSecondaryWeaponId(int id);
 const char *GetWeaponAliasFromName(const char *weaponName);
-bool CurrentWeaponSatisfies(CBasePlayerWeapon *pWeapon, int id, int classId);
+bool CurrentWeaponSatisfies(CBaseWeapon* pWeapon, int id, int classId);

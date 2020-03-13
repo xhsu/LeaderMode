@@ -155,7 +155,7 @@ void AttackState::OnUpdate(CCSBot *me)
 	me->ResetStuckMonitor();
 	me->StopRapidFire();
 
-	CBasePlayerWeapon *pWeapon = me->GetActiveWeapon();
+	auto *pWeapon = me->m_pActiveItem;
 	if (pWeapon)
 	{
 		if (pWeapon->m_iId == WEAPON_C4 ||

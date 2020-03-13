@@ -23,6 +23,25 @@ const char* g_rgszRoleNames[ROLE_COUNT] =
 	"Arsonist"
 };
 
+const int g_rgRoleWeaponsAccessibility[ROLE_COUNT][LAST_WEAPON] =
+{
+	//					      0                                  5                                  10                                 15                                 20                                 25                                 30
+	//					      NONE   ANACO  UNUSED M200   HE     M1014  C4     PM9    ACR    S_GR   P99    FN57   UMP45  M14    CM901  QBZ95  USP    G18C   AWP    MP5    MK46   KSG    M4A1   MP7A1  SVD    FBang  DEAGLE SCARL  AK74   KNIFE  P90
+	/*Role_UNASSIGNED*/		{ WPN_F, WPN_A, WPN_F, WPN_A, WPN_A, WPN_A, WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_F, WPN_A },
+
+	/*Role_Commander = 1*/	{ WPN_F, WPN_A, WPN_F, WPN_A, WPN_A, WPN_A, WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_P, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_P, WPN_A, WPN_A, WPN_A, WPN_P, WPN_A, WPN_A, WPN_A, WPN_A, WPN_F, WPN_A },
+	/*Role_SWAT*/			{ WPN_F, WPN_A, WPN_F, WPN_F, WPN_F, WPN_D, WPN_F, WPN_D, WPN_A, WPN_D, WPN_A, WPN_A, WPN_D, WPN_F, WPN_F, WPN_F, WPN_A, WPN_A, WPN_F, WPN_D, WPN_F, WPN_D, WPN_F, WPN_D, WPN_F, WPN_D, WPN_A, WPN_A, WPN_F, WPN_F, WPN_D },
+	/*Role_Blaster*/		{ WPN_F, WPN_A, WPN_F, WPN_F, WPN_D, WPN_D, WPN_F, WPN_A, WPN_F, WPN_D, WPN_A, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_A, WPN_A, WPN_F, WPN_A, WPN_F, WPN_D, WPN_F, WPN_A, WPN_F, WPN_D, WPN_A, WPN_F, WPN_F, WPN_F, WPN_D },
+	/*Role_Sharpshooter*/	{ WPN_F, WPN_D, WPN_F, WPN_D, WPN_P, WPN_F, WPN_F, WPN_F, WPN_P, WPN_A, WPN_A, WPN_A, WPN_F, WPN_A, WPN_P, WPN_P, WPN_A, WPN_A, WPN_D, WPN_F, WPN_F, WPN_F, WPN_P, WPN_F, WPN_A, WPN_A, WPN_D, WPN_P, WPN_P, WPN_F, WPN_F },
+	/*Role_Medic = 5*/		{ WPN_F, WPN_A, WPN_F, WPN_F, WPN_F, WPN_A, WPN_F, WPN_D, WPN_A, WPN_P, WPN_A, WPN_A, WPN_D, WPN_F, WPN_F, WPN_F, WPN_A, WPN_A, WPN_F, WPN_D, WPN_F, WPN_A, WPN_A, WPN_D, WPN_F, WPN_F, WPN_A, WPN_F, WPN_F, WPN_F, WPN_D },
+
+	/*Role_Godfather = 6*/	{ WPN_F, WPN_D, WPN_F, WPN_A, WPN_A, WPN_A, WPN_F, WPN_A, WPN_A, WPN_A, WPN_D, WPN_D, WPN_A, WPN_P, WPN_A, WPN_A, WPN_D, WPN_D, WPN_A, WPN_A, WPN_P, WPN_A, WPN_A, WPN_A, WPN_P, WPN_A, WPN_D, WPN_A, WPN_A, WPN_F, WPN_A },
+	/*Role_LeadEnforcer*/	{ WPN_F, WPN_A, WPN_F, WPN_F, WPN_F, WPN_D, WPN_F, WPN_D, WPN_D, WPN_F, WPN_A, WPN_A, WPN_D, WPN_F, WPN_D, WPN_D, WPN_A, WPN_A, WPN_F, WPN_D, WPN_A, WPN_D, WPN_D, WPN_D, WPN_F, WPN_F, WPN_A, WPN_D, WPN_D, WPN_F, WPN_D },
+	/*Role_MadScientist*/	{ WPN_F, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_P, WPN_F, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F },
+	/*Role_Assassin*/		{ WPN_F, WPN_A, WPN_F, WPN_D, WPN_F, WPN_F, WPN_F, WPN_A, WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_P, WPN_F, WPN_F, WPN_D, WPN_A, WPN_F, WPN_A, WPN_F, WPN_F, WPN_F, WPN_D, WPN_F, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_A },
+	/*Role_Arsonist = 10*/	{ WPN_F, WPN_A, WPN_F, WPN_F, WPN_P, WPN_D, WPN_F, WPN_F, WPN_F, WPN_F, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_D, WPN_A, WPN_F, WPN_F, WPN_F, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F }
+};
+
 const char* CBaseSkill::RADAR_BEEP_SFX = "leadermode/nes_8bit_alien3_radar_beep1.wav";
 const char* CBaseSkill::RADAR_TARGET_DEAD_SFX = "leadermode/sfx_event_duel_win_01.wav";
 const char* CBaseSkill::COOLDOWN_COMPLETE_SFX = "leadermode/pope_accepts_crusade_arrived.wav";
@@ -491,17 +510,15 @@ bool CSkillBulletproof::Execute()
 	m_pPlayer->GiveNamedItem("item_assaultsuit");
 
 	// reload all weapons
-	for (int i = 0; i < MAX_ITEM_TYPES; i++)
+	for (auto pWeapon : CBaseWeapon::m_lstWeapons)
 	{
-		CBasePlayerWeapon* pWeapon = (CBasePlayerWeapon*)m_pPlayer->m_rgpPlayerItems[i];
+		if (pWeapon->m_pPlayer->entindex() != m_pPlayer->entindex())
+			continue;
 
-		while (pWeapon)
-		{
-			if (pWeapon->m_iId != WEAPON_KNIFE)
-				pWeapon->AddPrimaryAmmo(pWeapon->iinfo()->m_iMaxClip + pWeapon->ainfo()->m_iMax);
+		if (pWeapon->IsDead())
+			continue;
 
-			pWeapon = (CBasePlayerWeapon*)pWeapon->m_pNext;
-		}
+		pWeapon->AddPrimaryAmmo(pWeapon->m_pItemInfo->m_iMaxClip + pWeapon->m_pAmmoInfo->m_iMax);	// fill up all ammunition!
 	}
 
 	CBasePlayer* pPlayer = nullptr;
@@ -513,17 +530,16 @@ bool CSkillBulletproof::Execute()
 		if (pPlayer == m_pPlayer)	// not again...
 			continue;
 
-		for (int i = 0; i < MAX_ITEM_TYPES; i++)
+		for (auto pWeapon : CBaseWeapon::m_lstWeapons)
 		{
-			CBasePlayerWeapon* pWeapon = (CBasePlayerWeapon*)pPlayer->m_rgpPlayerItems[i];
+			if (pWeapon->m_pPlayer->entindex() != m_pPlayer->entindex())
+				continue;
 
-			while (pWeapon)
-			{
-				if (pWeapon->iinfo()->m_iMaxClip > 0)	// weapon use a clip.
-					pWeapon->AddPrimaryAmmo(pWeapon->iinfo()->m_iMaxClip);	// give your teammate a clip.
+			if (pWeapon->IsDead())
+				continue;
 
-				pWeapon = (CBasePlayerWeapon*)pWeapon->m_pNext;
-			}
+			if (pWeapon->m_pItemInfo->m_iMaxClip > 0)	// this weapon is using a clip!
+				pWeapon->AddPrimaryAmmo(pWeapon->m_pItemInfo->m_iMaxClip);
 		}
 	}
 
@@ -832,7 +848,7 @@ void CSkillExplosiveBullets::OnPlayerFiringTraceLine(int& iDamage, TraceResult& 
 		if (flDamage <= 0.0f)
 			continue;
 
-		pEntity->TakeDamage(m_pPlayer->m_pActiveItem->pev, m_pPlayer->pev, flDamage, DMG_EXPLOSION);
+		pEntity->TakeDamage(m_pPlayer->pev, m_pPlayer->pev, flDamage, DMG_EXPLOSION);
 
 		if (pEntity->IsPlayer())
 		{
@@ -947,20 +963,10 @@ bool CSkillInfiniteGrenade::Execute()
 		return false;
 	}
 
-	// give grenades
-	m_pPlayer->GiveNamedItem(GetWeaponInfo(WEAPON_HEGRENADE)->m_pszClassName);
-	m_pPlayer->GiveNamedItem(GetWeaponInfo(WEAPON_FLASHBANG)->m_pszClassName);
-	m_pPlayer->GiveNamedItem(GetWeaponInfo(WEAPON_SMOKEGRENADE)->m_pszClassName);
-
 	// fill up grenades
-	CBasePlayerWeapon* pWeapon = (CBasePlayerWeapon*)m_pPlayer->m_rgpPlayerItems[GRENADE_SLOT];
-	while (pWeapon)
-	{
-		if (pWeapon->ainfo()->m_iId > AMMO_NONE)
-			pWeapon->AddPrimaryAmmo(pWeapon->ainfo()->m_iMax);
-
-		pWeapon = (CBasePlayerWeapon*)pWeapon->m_pNext;
-	}
+	m_pPlayer->GiveAmmo(g_rgAmmoInfo[AMMO_HEGrenade].m_iMax, AMMO_HEGrenade);
+	m_pPlayer->GiveAmmo(g_rgAmmoInfo[AMMO_Flashbang].m_iMax, AMMO_Flashbang);
+	m_pPlayer->GiveAmmo(g_rgAmmoInfo[AMMO_SmokeGrenade].m_iMax, AMMO_SmokeGrenade);
 
 	CBasePlayer* pPlayer = nullptr;
 	while ((pPlayer = UTIL_FindEntityInSphere(pPlayer, m_pPlayer->pev->origin, GIFT_RADIUS)))
@@ -980,14 +986,9 @@ bool CSkillInfiniteGrenade::Execute()
 		if (g_rgRoleWeaponsAccessibility[pPlayer->m_iRoleType][WEAPON_SMOKEGRENADE] != WPN_F)
 			pPlayer->GiveNamedItem(GetWeaponInfo(WEAPON_SMOKEGRENADE)->m_pszClassName);
 
-		pWeapon = (CBasePlayerWeapon*)pPlayer->m_rgpPlayerItems[GRENADE_SLOT];
-		while (pWeapon)
-		{
-			if (pWeapon->ainfo()->m_iId > AMMO_NONE)
-				pWeapon->AddPrimaryAmmo(pWeapon->ainfo()->m_iMax);
-
-			pWeapon = (CBasePlayerWeapon*)pWeapon->m_pNext;
-		}
+		pPlayer->GiveAmmo(1, AMMO_HEGrenade);
+		pPlayer->GiveAmmo(1, AMMO_Flashbang);
+		pPlayer->GiveAmmo(1, AMMO_SmokeGrenade);
 	}
 
 	EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, ACTIVATION_SFX, VOL_NORM, ATTN_NONE);
@@ -1774,7 +1775,7 @@ bool CSkillTaserGun::Terminate()
 	return true;
 }
 
-float CSkillTaserGun::WeaponFireIntervalModifier(CBasePlayerWeapon* pWeapon)
+float CSkillTaserGun::WeaponFireIntervalModifier(CBaseWeapon* pWeapon)
 {
 	// play the shooting sfx here.
 	// if I place it at trace line, the shotgun would freaking out.
@@ -1782,7 +1783,7 @@ float CSkillTaserGun::WeaponFireIntervalModifier(CBasePlayerWeapon* pWeapon)
 	if (!m_bUsingSkill)
 		return CBaseSkill::WeaponFireIntervalModifier(pWeapon);
 
-	EMIT_SOUND(pWeapon->edict(), CHAN_AUTO, ELECTROBULLETS_SFX, VOL_NORM, ATTN_NONE);
+	EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, ELECTROBULLETS_SFX, VOL_NORM, ATTN_NONE);
 
 	return CBaseSkill::WeaponFireIntervalModifier(pWeapon);
 }
@@ -1865,7 +1866,7 @@ void CSkillRetribution::OnPlayerDamagedPre(entvars_t* pevInflictor, entvars_t* p
 	gElectrifiedDOTMgr::VFX(m_pPlayer);
 	EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, CSkillTaserGun::ELECTROBULLETS_SFX, VOL_NORM, ATTN_STATIC);
 
-	pAttacker->TakeDamage(m_pPlayer->m_pActiveItem->pev, m_pPlayer->pev, flDamage * RETRIBUTION_RATIO, DMG_SHOCK | DMG_NEVERGIB);
+	pAttacker->TakeDamage(m_pPlayer->pev, m_pPlayer->pev, flDamage * RETRIBUTION_RATIO, DMG_SHOCK | DMG_NEVERGIB);
 }
 
 //

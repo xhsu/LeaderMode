@@ -180,7 +180,7 @@ public:
 	bool AllowTacticalShield()     const { return cv_bot_allow_shield.value != 0.0f; }
 	bool AllowFriendlyFireDamage() const { return friendlyfire.value != 0.0f; }
 
-	bool IsWeaponUseable(CBasePlayerItem *item) const;						// return true if the bot can use this weapon
+	bool IsWeaponUseable(CBaseWeapon *item) const;						// return true if the bot can use this weapon
 	bool IsWeaponUseable(WeaponIdType item) const;
 
 	bool IsDefenseRushing() const { return m_isDefenseRushing; }			// returns true if defense team has "decided" to rush this round

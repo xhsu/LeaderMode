@@ -93,22 +93,6 @@ public:
 	vec3_t m_rendercolor;
 };
 
-class CWeaponCycler: public CBasePlayerWeapon
-{
-public:
-	virtual void Spawn();
-	virtual int GetItemInfo(ItemInfo *p) { return 0; }
-	virtual BOOL Deploy();
-	virtual void Holster(int skiplocal = 0);
-	virtual int iItemSlot() { return 1; }
-	virtual void PrimaryAttack();
-	virtual void SecondaryAttack();
-
-public:
-	int m_iszModel;
-	int m_iModel;
-};
-
 // Flaming Wreakage
 class CWreckage: public CBaseMonster
 {

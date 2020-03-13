@@ -200,17 +200,11 @@ enum ChatColor
 
 class CBaseEntity;
 class CBasePlayer;
-class CBasePlayerItem;
+class CBaseWeapon;	// LUNA: this is NOT a derived class of CBaseEntity anymore!
 
-float UTIL_WeaponTimeBase();
-unsigned int U_Random();
-void U_Srand(unsigned int seed);
-int UTIL_SharedRandomLong(unsigned int seed, int low, int high);
-float UTIL_SharedRandomFloat(unsigned int seed, float low, float high);
 void UTIL_ParametricRocket(entvars_t *pev, Vector vecOrigin, Vector vecAngles, edict_t *owner);
 void UTIL_SetGroupTrace(int groupmask, int op);
 void UTIL_UnsetGroupTrace();
-BOOL UTIL_GetNextBestWeapon(CBasePlayer *pPlayer, CBasePlayerItem *pCurrentWeapon);
 float UTIL_AngleMod(float a);
 float UTIL_AngleDiff(float destAngle, float srcAngle);
 Vector UTIL_VecToAngles(const Vector &vec);

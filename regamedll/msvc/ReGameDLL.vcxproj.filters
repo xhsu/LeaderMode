@@ -53,17 +53,14 @@
     <Filter Include="dlls\bot\states">
       <UniqueIdentifier>{638174c7-80d2-415c-a335-54a8149d6add}</UniqueIdentifier>
     </Filter>
-    <Filter Include="public\regamedll">
-      <UniqueIdentifier>{8f5a4004-ab6b-4802-a23b-091948576ad0}</UniqueIdentifier>
-    </Filter>
     <Filter Include="public\tier0">
       <UniqueIdentifier>{00d15c50-66d7-4210-9239-e8cd8fb9f052}</UniqueIdentifier>
     </Filter>
     <Filter Include="dlls\addons">
       <UniqueIdentifier>{cc40695f-5d17-4ee9-b410-1be65c49c099}</UniqueIdentifier>
     </Filter>
-    <Filter Include="public\regamedll\API">
-      <UniqueIdentifier>{46ec2f1d-1feb-46e2-a801-0c87d1212c5c}</UniqueIdentifier>
+    <Filter Include="public\regamedll">
+      <UniqueIdentifier>{e3b054d5-1065-49f1-95c2-71085ebaa6a9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -433,14 +430,8 @@
     <ClCompile Include="..\dlls\lights.cpp">
       <Filter>dlls</Filter>
     </ClCompile>
-    <ClCompile Include="..\regamedll\hookchains_impl.cpp">
-      <Filter>regamedll</Filter>
-    </ClCompile>
     <ClCompile Include="..\public\tier0\dbg.cpp">
       <Filter>public\tier0</Filter>
-    </ClCompile>
-    <ClCompile Include="..\regamedll\classes_dummy.cpp">
-      <Filter>regamedll</Filter>
     </ClCompile>
     <ClCompile Include="..\regamedll\regamedll.cpp">
       <Filter>regamedll</Filter>
@@ -491,6 +482,9 @@
       <Filter>dlls</Filter>
     </ClCompile>
     <ClCompile Include="..\dlls\effect_over_time.cpp">
+      <Filter>dlls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dlls\weaponbox.cpp">
       <Filter>dlls</Filter>
     </ClCompile>
   </ItemGroup>
@@ -888,15 +882,6 @@
     <ClInclude Include="..\dlls\scriptevent.h">
       <Filter>dlls</Filter>
     </ClInclude>
-    <ClInclude Include="..\regamedll\hookchains_impl.h">
-      <Filter>regamedll</Filter>
-    </ClInclude>
-    <ClInclude Include="..\public\regamedll\hookchains.h">
-      <Filter>public\regamedll</Filter>
-    </ClInclude>
-    <ClInclude Include="..\public\regamedll\regamedll_api.h">
-      <Filter>public\regamedll</Filter>
-    </ClInclude>
     <ClInclude Include="..\public\tier0\dbg.h">
       <Filter>public\tier0</Filter>
     </ClInclude>
@@ -945,18 +930,6 @@
     <ClInclude Include="..\dlls\bot\cs_bot_init.h">
       <Filter>dlls\bot</Filter>
     </ClInclude>
-    <ClInclude Include="..\public\regamedll\API\CSEntity.h">
-      <Filter>public\regamedll\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\public\regamedll\API\CSInterfaces.h">
-      <Filter>public\regamedll\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\public\regamedll\API\CSPlayer.h">
-      <Filter>public\regamedll\API</Filter>
-    </ClInclude>
-    <ClInclude Include="..\public\regamedll\API\CSPlayerItem.h">
-      <Filter>public\regamedll\API</Filter>
-    </ClInclude>
     <ClInclude Include="..\dlls\addons\trigger_random.h">
       <Filter>dlls\addons</Filter>
     </ClInclude>
@@ -973,6 +946,15 @@
       <Filter>dlls</Filter>
     </ClInclude>
     <ClInclude Include="..\dlls\effect_over_time.h">
+      <Filter>dlls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\public\regamedll\regamedll_const.h">
+      <Filter>public\regamedll</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dlls\ggrenade.h">
+      <Filter>dlls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dlls\weaponbox.h">
       <Filter>dlls</Filter>
     </ClInclude>
   </ItemGroup>

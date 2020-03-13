@@ -1252,8 +1252,7 @@ void CCSTutor::HandleWeaponFiredOnEmpty(CBaseEntity *pEntity, CBaseEntity *pOthe
 	CBasePlayer *pPlayer = static_cast<CBasePlayer *>(pEntity);
 	if (pPlayer && pPlayer->IsPlayer() && pPlayer == pLocalPlayer)
 	{
-		CBasePlayerWeapon *pCurrentWeapon = static_cast<CBasePlayerWeapon *>(pPlayer->m_pActiveItem);
-		if (pCurrentWeapon && pPlayer->m_rgAmmo[pCurrentWeapon->m_iPrimaryAmmoType] <= 0)
+		if (pPlayer->m_pActiveItem && pPlayer->m_rgAmmo[pPlayer->m_pActiveItem->m_iPrimaryAmmoType] <= 0)
 		{
 			TutorMessage *message = GetTutorMessageDefinition(YOU_ARE_OUT_OF_AMMO);
 			if (message)
@@ -1991,25 +1990,24 @@ void CCSTutor::CheckForNeedToReload(bool isPassiveCheck)
 	if (!pLocalPlayer || !pLocalPlayer->IsPlayer())
 		return;
 
-	CBasePlayerWeapon *pCurrentWeapon = static_cast<CBasePlayerWeapon *>(pLocalPlayer->m_pActiveItem);
-	if (!pCurrentWeapon || !pCurrentWeapon->IsWeapon())
+	if (!pLocalPlayer->m_pActiveItem)
 		return;
 
-	if (pCurrentWeapon->iinfo()->m_iSlot && pCurrentWeapon->iinfo()->m_iSlot != 1)
+	if (pLocalPlayer->m_pActiveItem->m_pItemInfo->m_iSlot && pLocalPlayer->m_pActiveItem->m_pItemInfo->m_iSlot != PRIMARY_WEAPON_SLOT)
 		return;
 
-	if (pLocalPlayer->m_rgAmmo[pCurrentWeapon->m_iPrimaryAmmoType])
+	if (pLocalPlayer->m_rgAmmo[pLocalPlayer->m_pActiveItem->m_iPrimaryAmmoType])
 	{
 		if (isPassiveCheck)
 		{
-			if ((2 * pCurrentWeapon->m_iClip) < pCurrentWeapon->iinfo()->m_iMaxClip && !pCurrentWeapon->m_fInReload)
+			if ((2 * pLocalPlayer->m_pActiveItem->m_iClip) < pLocalPlayer->m_pActiveItem->m_pItemInfo->m_iMaxClip && !pLocalPlayer->m_pActiveItem->m_bInReload)
 			{
 				CreateAndAddEventToList(YOU_SHOULD_RELOAD);
 			}
 		}
 		else
 		{
-			if ((5 * pCurrentWeapon->m_iClip) < pCurrentWeapon->iinfo()->m_iMaxClip && !pCurrentWeapon->m_fInReload)
+			if ((5 * pLocalPlayer->m_pActiveItem->m_iClip) < pLocalPlayer->m_pActiveItem->m_pItemInfo->m_iMaxClip && !pLocalPlayer->m_pActiveItem->m_bInReload)
 			{
 				TutorMessage *message = GetTutorMessageDefinition(YOU_SHOULD_RELOAD);
 				if (message)
@@ -2029,7 +2027,7 @@ void CCSTutor::CheckForNeedToReload(bool isPassiveCheck)
 			}
 		}
 	}
-	else if (!pCurrentWeapon->m_iClip)
+	else if (!pLocalPlayer->m_pActiveItem->m_iClip)
 	{
 		if (!isPassiveCheck)
 		{
@@ -2142,13 +2140,13 @@ void CCSTutor::CheckBuyZoneMessages()
 	if (!pLocalPlayer || m_currentlyShownMessageID == BUY_TIME_BEGIN)
 		return;
 
-	CBasePlayerWeapon *pPrimaryWeapon = static_cast<CBasePlayerWeapon *>(pLocalPlayer->m_rgpPlayerItems[PRIMARY_WEAPON_SLOT]);
-	CBasePlayerWeapon *pSecondaryWeapon = static_cast<CBasePlayerWeapon *>(pLocalPlayer->m_rgpPlayerItems[PISTOL_SLOT]);
+	CBaseWeapon *pPrimaryWeapon = pLocalPlayer->m_rgpPlayerItems[PRIMARY_WEAPON_SLOT];
+	CBaseWeapon*pSecondaryWeapon = pLocalPlayer->m_rgpPlayerItems[PISTOL_SLOT];
 
 	if (pPrimaryWeapon)
 	{
-		if (pLocalPlayer->m_rgAmmo[pPrimaryWeapon->iinfo()->m_iAmmoType] < pPrimaryWeapon->ainfo()->m_iMax
-			&& pLocalPlayer->m_iAccount >= pPrimaryWeapon->ainfo()->m_iCostPerBox)
+		if (pLocalPlayer->m_rgAmmo[pPrimaryWeapon->m_iPrimaryAmmoType] < pPrimaryWeapon->m_pAmmoInfo->m_iMax
+			&& pLocalPlayer->m_iAccount >= pPrimaryWeapon->m_pAmmoInfo->m_iCostPerBox)
 		{
 			TheTutor->OnEvent(EVENT_TUTOR_NEED_TO_BUY_PRIMARY_AMMO);
 			return;
@@ -2164,9 +2162,9 @@ void CCSTutor::CheckBuyZoneMessages()
 		}
 	}
 
-	if (!FNullEnt(pSecondaryWeapon)
-		&& pLocalPlayer->m_rgAmmo[pSecondaryWeapon->iinfo()->m_iAmmoType] < pSecondaryWeapon->ainfo()->m_iMax
-		&& pLocalPlayer->m_iAccount >= pSecondaryWeapon->ainfo()->m_iCostPerBox)
+	if (pSecondaryWeapon
+		&& pLocalPlayer->m_rgAmmo[pSecondaryWeapon->m_iPrimaryAmmoType] < pSecondaryWeapon->m_pAmmoInfo->m_iMax
+		&& pLocalPlayer->m_iAccount >= pSecondaryWeapon->m_pAmmoInfo->m_iCostPerBox)
 	{
 		TheTutor->OnEvent(EVENT_TUTOR_NEED_TO_BUY_SECONDARY_AMMO);
 	}
@@ -2175,7 +2173,7 @@ void CCSTutor::CheckBuyZoneMessages()
 	{
 		TheTutor->OnEvent(EVENT_TUTOR_NEED_TO_BUY_ARMOR);
 	}
-	else if (FNullEnt(pLocalPlayer->m_rgpPlayerItems[GRENADE_SLOT]) && pLocalPlayer->m_iAccount > 5000)	// you are rich, you should get better stuff.
+	else if (!pLocalPlayer->m_rgpPlayerItems[GRENADE_SLOT] && pLocalPlayer->m_iAccount > 5000)	// you are rich, you should get better stuff.
 	{
 		TheTutor->OnEvent(EVENT_TUTOR_NEED_TO_BUY_GRENADE);
 	}

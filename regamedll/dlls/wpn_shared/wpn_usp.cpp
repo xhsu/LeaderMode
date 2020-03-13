@@ -1,88 +1,57 @@
 #include "precompiled.h"
 
-LINK_ENTITY_TO_CLASS(weapon_usp, CUSP)
-
-void CUSP::Spawn()
-{
-	Precache();
-
-	m_iId = WEAPON_USP;
-	SET_MODEL(ENT(pev), "models/w_usp.mdl");
-
-	m_iWeaponState &= ~WPNSTATE_SHIELD_DRAWN;
-	m_iDefaultAmmo = iinfo()->m_iMaxClip;
-	m_flAccuracy = 0.92f;
-
-	// Get ready to fall down
-	FallInit();
-
-	// extend
-	CBasePlayerWeapon::Spawn();
-}
+#ifndef CLIENT_DLL
+unsigned short CUSP::m_usEvent = 0;
+int CUSP::m_iShell = 0;
 
 void CUSP::Precache()
 {
 	PRECACHE_MODEL("models/v_usp.mdl");
 	PRECACHE_MODEL("models/w_usp.mdl");
-	PRECACHE_MODEL("models/shield/v_shield_usp.mdl");
-
-	PRECACHE_SOUND("weapons/usp1.wav");
-	PRECACHE_SOUND("weapons/usp2.wav");
-	PRECACHE_SOUND("weapons/usp_unsil-1.wav");
-	PRECACHE_SOUND("weapons/usp_clipout.wav");
-	PRECACHE_SOUND("weapons/usp_clipin.wav");
-	PRECACHE_SOUND("weapons/usp_silencer_on.wav");
-	PRECACHE_SOUND("weapons/usp_silencer_off.wav");
-	PRECACHE_SOUND("weapons/usp_sliderelease.wav");
-	PRECACHE_SOUND("weapons/usp_slideback.wav");
+	PRECACHE_MODEL("models/p_usp.mdl");
 
 	m_iShell = PRECACHE_MODEL("models/pshell.mdl");
-	m_usFireUSP = PRECACHE_EVENT(1, "events/usp.sc");
+	m_usEvent = PRECACHE_EVENT(1, "events/usp.sc");
 }
+#endif
 
-BOOL CUSP::Deploy()
+bool CUSP::Deploy()
 {
-	m_iWeaponState &= ~WPNSTATE_SHIELD_DRAWN;
 	m_flAccuracy = 0.92f;
-	m_fMaxSpeed = USP_MAX_SPEED;
-	m_pPlayer->m_bShieldDrawn = false;
 
-	if (m_pPlayer->HasShield())
-	{
-		return DefaultDeploy("models/shield/v_shield_usp.mdl", "models/shield/p_shield_usp.mdl", USP_SHIELD_DRAW, "shieldgun", UseDecrement());
-	}
-
-	return DefaultDeploy("models/v_usp.mdl", "models/p_usp.mdl", USP_UNSIL_DRAW, "onehanded", UseDecrement());
+	return DefaultDeploy("models/v_usp.mdl", "models/p_usp.mdl", USP_UNSIL_DRAW, "onehanded");
 }
 
 void CUSP::SecondaryAttack()
 {
-	ShieldSecondaryFire(USP_SHIELD_UP, USP_SHIELD_DOWN);
+#ifdef CLIENT_DLL
+	// TODO: client should have the zoom now.
+#endif
 }
 
 void CUSP::PrimaryAttack()
 {
 	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
 	{
-		USPFire(1.2 * (1 - m_flAccuracy), 0.225, FALSE);
+		USPFire(1.2f * (1.0f - m_flAccuracy), 0.225f);
 	}
 	else if (m_pPlayer->pev->velocity.Length2D() > 0)
 	{
-		USPFire(0.225 * (1 - m_flAccuracy), 0.225, FALSE);
+		USPFire(0.225f * (1.0f - m_flAccuracy), 0.225f);
 	}
 	else if (m_pPlayer->pev->flags & FL_DUCKING)
 	{
-		USPFire(0.08 * (1 - m_flAccuracy), 0.225, FALSE);
+		USPFire(0.08f * (1.0f - m_flAccuracy), 0.225f);
 	}
 	else
 	{
-		USPFire(0.1 * (1 - m_flAccuracy), 0.225, FALSE);
+		USPFire(0.1f * (1.0f - m_flAccuracy), 0.225f);
 	}
 }
 
-void CUSP::USPFire(float flSpread, float flCycleTime, BOOL fUseSemi)
+void CUSP::USPFire(float flSpread, float flCycleTime)
 {
-	int flag;
+	int flag = 0;
 	Vector vecAiming, vecSrc, vecDir;
 
 	flCycleTime -= 0.075f;
@@ -110,11 +79,8 @@ void CUSP::USPFire(float flSpread, float flCycleTime, BOOL fUseSemi)
 
 	if (m_iClip <= 0)
 	{
-		if (m_fFireOnEmpty)
-		{
-			PlayEmptySound();
-			m_flNextPrimaryAttack = GetNextAttackDelay(0.2);
-		}
+		PlayEmptySound();
+		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.2f;
 
 		if (TheBots)
 		{
@@ -124,13 +90,12 @@ void CUSP::USPFire(float flSpread, float flCycleTime, BOOL fUseSemi)
 		return;
 	}
 
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = GetNextAttackDelay(flCycleTime);
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
 
 	m_iClip--;
-	SetPlayerShieldAnim();
 
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
-	m_pPlayer->m_iWeaponVolume = BIG_EXPLOSION_VOLUME;
+	m_pPlayer->m_iWeaponVolume = QUIET_GUN_VOLUME;	// due to the silencer
 	m_pPlayer->m_iWeaponFlash = DIM_GUN_FLASH;
 
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
@@ -148,7 +113,7 @@ void CUSP::USPFire(float flSpread, float flCycleTime, BOOL fUseSemi)
 	flag = 0;
 #endif // CLIENT_WEAPONS
 
-	PLAYBACK_EVENT_FULL(flag, m_pPlayer->edict(), m_usFireUSP, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 100), 0, m_iClip == 0, FALSE);
+	PLAYBACK_EVENT_FULL(flag, m_pPlayer->edict(), m_usEvent, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 100), 0, m_iClip == 0, FALSE);
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 	{
@@ -157,46 +122,27 @@ void CUSP::USPFire(float flSpread, float flCycleTime, BOOL fUseSemi)
 
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.0f;
 	m_pPlayer->pev->punchangle.x -= 2.0f;
-	ResetPlayerShieldAnim();
 }
 
-void CUSP::Reload()
+bool CUSP::Reload()
 {
-	int iAnim;
-	if (m_pPlayer->HasShield())
-		iAnim = USP_SHIELD_RELOAD;
-	else
-		iAnim = USP_UNSIL_RELOAD;
-
-	if (DefaultReload(iinfo()->m_iMaxClip, iAnim, USP_RELOAD_TIME))
+	if (DefaultReload(m_pItemInfo->m_iMaxClip, USP_UNSIL_RELOAD, USP_RELOAD_TIME))
 	{
 		m_pPlayer->SetAnimation(PLAYER_RELOAD);
 		m_flAccuracy = 0.92f;
+		return true;
 	}
+
+	return false;
 }
 
 void CUSP::WeaponIdle()
 {
-	ResetEmptySound();
 	m_pPlayer->GetAutoaimVector(AUTOAIM_10DEGREES);
 
-	if (m_flTimeWeaponIdle > 0)
-	{
-		return;
-	}
-
-	if (m_pPlayer->HasShield())
-	{
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
-
-		if (m_iWeaponState & WPNSTATE_SHIELD_DRAWN)
-		{
-			SendWeaponAnim(USP_DRAW, UseDecrement());
-		}
-	}
-	else if (m_iClip)
+	if (m_iClip)
 	{
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 60.0f;
-		SendWeaponAnim(USP_UNSIL_IDLE, UseDecrement());
+		SendWeaponAnim(USP_UNSIL_IDLE);
 	}
 }

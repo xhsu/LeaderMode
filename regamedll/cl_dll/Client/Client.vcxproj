@@ -154,6 +154,12 @@
   <ItemGroup>
     <ClCompile Include="..\..\common\interface.cpp" />
     <ClCompile Include="..\..\common\parsemsg.cpp" />
+    <ClCompile Include="..\..\dlls\ammo.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\dlls\weapontype.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\..\game_shared\shared_util.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
@@ -212,6 +218,9 @@
   <ItemGroup>
     <ClInclude Include="..\..\common\interface.h" />
     <ClInclude Include="..\..\common\parsemsg.h" />
+    <ClInclude Include="..\..\dlls\ammo.h" />
+    <ClInclude Include="..\..\dlls\cdll_dll.h" />
+    <ClInclude Include="..\..\dlls\weapontype.h" />
     <ClInclude Include="..\..\game_shared\shared_util.h" />
     <ClInclude Include="..\..\pm_shared\pm_debug.h" />
     <ClInclude Include="..\..\pm_shared\pm_defs.h" />

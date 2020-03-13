@@ -2169,13 +2169,14 @@ BOOL CHalfLifeMultiplay::IsCoOp()
 	return gpGlobals->coop;
 }
 
-BOOL EXT_FUNC CHalfLifeMultiplay::FShouldSwitchWeapon(CBasePlayer *pPlayer, CBasePlayerItem *pWeapon)
+BOOL EXT_FUNC CHalfLifeMultiplay::FShouldSwitchWeapon(CBasePlayer *pPlayer, CBaseWeapon *pWeapon)
 {
-	if (!pWeapon->CanDeploy())
+	// TODO: maybe reuse this ?
+	/*if (!pWeapon->CanDeploy())
 	{
 		// that weapon can't deploy anyway.
 		return FALSE;
-	}
+	}*/
 
 	if (!pPlayer->m_pActiveItem)
 	{
@@ -2186,30 +2187,32 @@ BOOL EXT_FUNC CHalfLifeMultiplay::FShouldSwitchWeapon(CBasePlayer *pPlayer, CBas
 	if (!pPlayer->m_iAutoWepSwitch)
 		return FALSE;
 
-	if (!pPlayer->m_pActiveItem->CanHolster())
+	// TODO: maybe reuse this?
+	/*if (!pPlayer->m_pActiveItem->CanHolster())
 	{
 		// can't put away the active item.
 		return FALSE;
-	}
+	}*/
 
-	if (CBasePlayerItem::m_rgItemInfo[pWeapon->m_iId].m_iWeight > CBasePlayerItem::m_rgItemInfo[pPlayer->m_pActiveItem->m_iId].m_iWeight)
+	if (pWeapon->m_pItemInfo->m_iWeight > pPlayer->m_pActiveItem->m_pItemInfo->m_iWeight)
 		return TRUE;
 
 	return FALSE;
 }
 
-BOOL EXT_FUNC CHalfLifeMultiplay::GetNextBestWeapon(CBasePlayer *pPlayer, CBasePlayerItem *pCurrentWeapon)
+BOOL EXT_FUNC CHalfLifeMultiplay::GetNextBestWeapon(CBasePlayer *pPlayer, CBaseWeapon *pCurrentWeapon)
 {
-	CBasePlayerItem *pCheck;
-	CBasePlayerItem *pBest; // this will be used in the event that we don't find a weapon in the same category.
+	CBaseWeapon *pCheck;
+	CBaseWeapon *pBest; // this will be used in the event that we don't find a weapon in the same category.
 	int iBestWeight;
 	int i;
 
-	if (!pCurrentWeapon->CanHolster())
+	// TODO
+	/*if (!pCurrentWeapon->CanHolster())
 	{
 		// can't put this gun away right now, so can't switch.
 		return FALSE;
-	}
+	}*/
 
 	iBestWeight = -1; // no weapon lower than -1 can be autoswitched to
 	pBest = nullptr;
@@ -2218,24 +2221,26 @@ BOOL EXT_FUNC CHalfLifeMultiplay::GetNextBestWeapon(CBasePlayer *pPlayer, CBaseP
 	{
 		pCheck = pPlayer->m_rgpPlayerItems[i];
 
-		while (pCheck)
+		if (pCheck)
 		{
 			// don't reselect the weapon we're trying to get rid of
-			if (CBasePlayerItem::m_rgItemInfo[pCheck->m_iId].m_iWeight > iBestWeight && pCheck != pCurrentWeapon)
+			if (pCheck->m_pItemInfo->m_iWeight > iBestWeight && pCheck != pCurrentWeapon)
 			{
 				//ALERT (at_console, "Considering %s\n", STRING(pCheck->pev->classname));
 				// we keep updating the 'best' weapon just in case we can't find a weapon of the same weight
 				// that the player was using. This will end up leaving the player with his heaviest-weighted weapon.
 
-				if (pCheck->CanDeploy())
-				{
+				// TODO
+				//if (pCheck->CanDeploy())
+				//{
 					// if this weapon is useable, flag it as the best
-					iBestWeight = CBasePlayerItem::m_rgItemInfo[pCheck->m_iId].m_iWeight;
+					iBestWeight = pCheck->m_pItemInfo->m_iWeight;
 					pBest = pCheck;
-				}
+				//}
 			}
 
-			pCheck = pCheck->m_pNext;
+			// this is for original CBasePlayerItem.
+			//pCheck = pCheck->m_pNext;
 		}
 	}
 
@@ -2529,11 +2534,9 @@ void CHalfLifeMultiplay::PlayerThink(CBasePlayer *pPlayer)
 		pPlayer->m_bCanShoot = true;
 	}
 
-	if (pPlayer->m_pActiveItem && pPlayer->m_pActiveItem->IsWeapon())
+	if (pPlayer->m_pActiveItem)
 	{
-		CBasePlayerWeapon* pWeapon = static_cast<CBasePlayerWeapon*>(pPlayer->m_pActiveItem);
-
-		if (pWeapon->m_iWeaponState & WPNSTATE_SHIELD_DRAWN)
+		if (pPlayer->m_pActiveItem->m_bitsFlags & WPNSTATE_SHIELD_DRAWN)
 		{
 			pPlayer->m_bCanShoot = false;
 		}
@@ -2545,23 +2548,23 @@ void CHalfLifeMultiplay::PlayerThink(CBasePlayer *pPlayer)
 
 			int iClipAdd = 0; //int(float(pWeapon->iinfo()->m_iMaxClip) * 0.04f)
 
-			if (pWeapon->iinfo()->m_iMaxClip >= 113)	// 4.5 / 0.04
+			if (pPlayer->m_pActiveItem->m_pItemInfo->m_iMaxClip >= 113)	// 4.5 / 0.04
 				iClipAdd = 5;
-			else if (pWeapon->iinfo()->m_iMaxClip >= 88)
+			else if (pPlayer->m_pActiveItem->m_pItemInfo->m_iMaxClip >= 88)
 				iClipAdd = 4;
-			else if (pWeapon->iinfo()->m_iMaxClip >= 63)
+			else if (pPlayer->m_pActiveItem->m_pItemInfo->m_iMaxClip >= 63)
 				iClipAdd = 3;
-			else if (pWeapon->iinfo()->m_iMaxClip >= 38)
+			else if (pPlayer->m_pActiveItem->m_pItemInfo->m_iMaxClip >= 38)
 				iClipAdd = 2;
-			else if (pWeapon->iinfo()->m_iMaxClip >= 13 && pWeapon->m_iId != WEAPON_M14EBR)	// nerf the stupit semi-auto sharpshooter rifle.
+			else if (pPlayer->m_pActiveItem->m_pItemInfo->m_iMaxClip >= 13 && pPlayer->m_pActiveItem->m_iId != WEAPON_M14EBR)	// nerf the stupit semi-auto sharpshooter rifle.
 				iClipAdd = 1;
 
-			if (iClipAdd > 0 && pWeapon->m_iClip < 127)
+			if (iClipAdd > 0 && pPlayer->m_pActiveItem->m_iClip < 127)
 			{
-				pWeapon->m_iClip += iClipAdd;
+				pPlayer->m_pActiveItem->m_iClip += iClipAdd;
 
-				if (pWeapon->m_iClip > 127)
-					pWeapon->m_iClip = 127;
+				if (pPlayer->m_pActiveItem->m_iClip > 127)
+					pPlayer->m_pActiveItem->m_iClip = 127;
 
 				if (!RANDOM_LONG(0, 3))	// if you play it constantly, it IS annoying.
 				{
@@ -2902,7 +2905,7 @@ void EXT_FUNC CHalfLifeMultiplay::DeathNotice(CBasePlayer *pVictim, entvars_t *p
 				{
 					if (pAttacker->m_pActiveItem)
 					{
-						killer_weapon_name = STRING(pAttacker->m_pActiveItem->pev->classname);
+						killer_weapon_name = pAttacker->m_pActiveItem->m_pItemInfo->m_pszClassName;
 					}
 				}
 			}
@@ -2992,9 +2995,8 @@ void EXT_FUNC CHalfLifeMultiplay::DeathNotice(CBasePlayer *pVictim, entvars_t *p
 }
 
 // Player has grabbed a weapon that was sitting in the world
-void CHalfLifeMultiplay::PlayerGotWeapon(CBasePlayer *pPlayer, CBasePlayerItem *pWeapon)
+void CHalfLifeMultiplay::PlayerGotWeapon(CBasePlayer *pPlayer, CBaseWeapon *pWeapon)
 {
-	;
 }
 
 bool CHalfLifeMultiplay::CanHaveAmmo(CBasePlayer* pPlayer, AmmoIdType iId)
@@ -3056,9 +3058,9 @@ bool CHalfLifeMultiplay::CanHavePlayerItem(CBasePlayer* pPlayer, WeaponIdType iI
 		return false;
 	}
 
-	if (CBasePlayerItem::m_rgItemInfo[iId].m_iAmmoType > 0)
+	if (g_rgItemInfo[iId].m_iAmmoType > 0)
 	{
-		if (!CanHaveAmmo(pPlayer, AmmoIdType(CBasePlayerItem::m_rgItemInfo[iId].m_iAmmoType)))
+		if (!CanHaveAmmo(pPlayer, g_rgItemInfo[iId].m_iAmmoType))
 		{
 			// we can't carry anymore ammo for this gun. We can only
 			// have the gun if we aren't already carrying one of this type
@@ -4181,8 +4183,7 @@ void CHalfLifeMultiplay::GiveDefaultItems(CBasePlayer* pPlayer)
 {
 	pPlayer->RemoveAllItems(FALSE);
 
-	pPlayer->GiveNamedItem("weapon_knife");
-	pPlayer->GiveNamedItem("weapon_usp");
+	pPlayer->AddPlayerItem(CBaseWeapon::Give(WEAPON_USP, pPlayer));
 	pPlayer->GiveAmmo(24, AMMO_45acp);
 
 	if (m_rgTeamTacticalScheme[pPlayer->m_iTeam] != Doctrine_GrandBattleplan)
@@ -4194,13 +4195,13 @@ void CHalfLifeMultiplay::GiveDefaultItems(CBasePlayer* pPlayer)
 	pPlayer->SendItemStatus();
 
 	if (g_rgRoleWeaponsAccessibility[pPlayer->m_iRoleType][WEAPON_HEGRENADE] != WPN_F)
-		pPlayer->GiveNamedItem("weapon_hegrenade");
+		pPlayer->GiveAmmo(1, AMMO_HEGrenade);
 
 	if (g_rgRoleWeaponsAccessibility[pPlayer->m_iRoleType][WEAPON_FLASHBANG] != WPN_F)
-		pPlayer->GiveNamedItem("weapon_flashbang");
+		pPlayer->GiveAmmo(1, AMMO_Flashbang);
 
 	if (g_rgRoleWeaponsAccessibility[pPlayer->m_iRoleType][WEAPON_SMOKEGRENADE] != WPN_F)
-		pPlayer->GiveNamedItem("weapon_smokegrenade");
+		pPlayer->GiveAmmo(1, AMMO_SmokeGrenade);
 }
 
 float CHalfLifeMultiplay::PlayerMaxArmour(CBasePlayer* pPlayer)
@@ -4211,9 +4212,12 @@ float CHalfLifeMultiplay::PlayerMaxArmour(CBasePlayer* pPlayer)
 	return MAX_NORMAL_BATTERY;
 }
 
-CBasePlayerWeapon* CHalfLifeMultiplay::SelectProperGrenade(CBasePlayer* pPlayer)
+CBaseWeapon* CHalfLifeMultiplay::SelectProperGrenade(CBasePlayer* pPlayer)
 {
-	if (FNullEnt(pPlayer->m_rgpPlayerItems[GRENADE_SLOT]))
+	return pPlayer->m_rgpPlayerItems[GRENADE_SLOT];
+
+	// WPN_UNDONE
+	/*if (FNullEnt(pPlayer->m_rgpPlayerItems[GRENADE_SLOT]))
 		return nullptr;
 
 	char* pGrenadeName = nullptr;
@@ -4250,5 +4254,5 @@ CBasePlayerWeapon* CHalfLifeMultiplay::SelectProperGrenade(CBasePlayer* pPlayer)
 		return pWeapon;
 	}
 
-	return nullptr;
+	return nullptr;*/
 }

@@ -73,3 +73,9 @@ inline wchar_t *CloneWString(const wchar_t *str)
 	wcscpy(cloneStr, str);
 	return cloneStr;
 }
+
+float UTIL_WeaponTimeBase();
+unsigned int U_Random();
+void U_Srand(unsigned int seed);
+int UTIL_SharedRandomLong(unsigned int seed, int low, int high);
+float UTIL_SharedRandomFloat(unsigned int seed, float low, float high);

@@ -30,15 +30,12 @@
 
 bool HasDefaultPistol(CCSBot *me)
 {
-	CBasePlayerWeapon *pSecondary = static_cast<CBasePlayerWeapon *>(me->m_rgpPlayerItems[PISTOL_SLOT]);
+	auto *pSecondary = me->m_rgpPlayerItems[PISTOL_SLOT];
 
 	if (!pSecondary)
 		return false;
 
-	if (me->m_iTeam == TERRORIST && pSecondary->m_iId == WEAPON_GLOCK18)
-		return true;
-
-	if (me->m_iTeam == CT && pSecondary->m_iId == WEAPON_USP)
+	if (pSecondary->m_iId == WEAPON_USP)	// LUNA: now this is the default starter weapon.
 		return true;
 
 	return false;
@@ -88,7 +85,7 @@ void BuyState::OnEnter(CCSBot *me)
 
 	if (TheCSBots()->AllowPistols())
 	{
-		CBasePlayerWeapon *pSecondary = static_cast<CBasePlayerWeapon *>(me->m_rgpPlayerItems[PISTOL_SLOT]);
+		auto *pSecondary = me->m_rgpPlayerItems[PISTOL_SLOT];
 
 		// check if we have a pistol
 		if (pSecondary)
@@ -264,8 +261,7 @@ void BuyState::OnUpdate(CCSBot *me)
 			int weaponPreference = me->GetProfile()->GetWeaponPreference(m_prefIndex);
 
 			// don't buy it again if we still have one from last round
-			CBasePlayerWeapon *pCurrentWeapon = me->GetActiveWeapon();
-			if (pCurrentWeapon && pCurrentWeapon->m_iId == weaponPreference)
+			if (me->m_pActiveItem && me->m_pActiveItem->m_iId == weaponPreference)
 			{
 				// done with buying preferred weapon
 				m_prefIndex = 9999;

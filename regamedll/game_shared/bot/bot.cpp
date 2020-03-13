@@ -207,22 +207,20 @@ void CBot::Reload()
 // Returns ratio of ammo left to max ammo (1 = full clip, 0 = empty)
 float CBot::GetActiveWeaponAmmoRatio() const
 {
-	CBasePlayerWeapon *pCurrentWeapon = GetActiveWeapon();
-	if (!pCurrentWeapon)
+	if (!m_pActiveItem)
 		return 0.0f;
 
 	// Weapons with no ammo are always full
-	if (pCurrentWeapon->m_iClip < 0)
+	if (m_pActiveItem->m_iClip < 0)
 		return 1.0f;
 
-	return float(pCurrentWeapon->m_iClip) / float(pCurrentWeapon->iinfo()->m_iMaxClip);
+	return float(m_pActiveItem->m_iClip) / float(m_pActiveItem->m_pItemInfo->m_iMaxClip);
 }
 
 // Return true if active weapon has an empty clip
 bool CBot::IsActiveWeaponClipEmpty() const
 {
-	CBasePlayerWeapon *pCurrentWeapon = GetActiveWeapon();
-	if (pCurrentWeapon && pCurrentWeapon->m_iClip == 0)
+	if (m_pActiveItem && m_pActiveItem->m_iClip == 0)
 		return true;
 
 	return false;
@@ -231,14 +229,13 @@ bool CBot::IsActiveWeaponClipEmpty() const
 // Return true if active weapon has no ammo at all
 bool CBot::IsActiveWeaponOutOfAmmo() const
 {
-	CBasePlayerWeapon *pCurrentWeapon = GetActiveWeapon();
-	if (!pCurrentWeapon)
+	if (!m_pActiveItem)
 		return true;
 
-	if (pCurrentWeapon->m_iClip < 0)
+	if (m_pActiveItem->m_iClip < 0)
 		return false;
 
-	if (pCurrentWeapon->m_iClip == 0 && m_rgAmmo[pCurrentWeapon->m_iPrimaryAmmoType] <= 0)
+	if (m_pActiveItem->m_iClip == 0 && m_rgAmmo[m_pActiveItem->m_iPrimaryAmmoType] <= 0)
 		return true;
 
 	return false;

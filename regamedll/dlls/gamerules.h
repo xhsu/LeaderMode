@@ -188,8 +188,8 @@ public:
 	virtual BOOL IsAllowedToSpawn(CBaseEntity *pEntity);
 	virtual BOOL FAllowFlashlight();
 
-	virtual BOOL FShouldSwitchWeapon(CBasePlayer *pPlayer, CBasePlayerItem *pWeapon);
-	virtual BOOL GetNextBestWeapon(CBasePlayer *pPlayer, CBasePlayerItem *pCurrentWeapon);
+	virtual BOOL FShouldSwitchWeapon(CBasePlayer *pPlayer, CBaseWeapon *pWeapon);
+	virtual BOOL GetNextBestWeapon(CBasePlayer *pPlayer, CBaseWeapon* pCurrentWeapon);
 
 	virtual BOOL IsMultiplayer();
 	virtual BOOL IsDeathmatch();
@@ -228,7 +228,7 @@ public:
 
 	// Weapon retrieval
 	virtual bool CanHavePlayerItem(CBasePlayer* pPlayer, WeaponIdType iId, bool bPrintHint);	// The player is touching an CBasePlayerItem, do I give it to him?
-	virtual void PlayerGotWeapon(CBasePlayer *pPlayer, CBasePlayerItem *pWeapon);
+	virtual void PlayerGotWeapon(CBasePlayer *pPlayer, CBaseWeapon *pWeapon);
 
 	// Ammo retrieval
 	virtual bool CanHaveAmmo(CBasePlayer* pPlayer, AmmoIdType iId);		// can this player take more of this ammo?
@@ -389,7 +389,7 @@ public:
 	void GetTSVoteDetail(TeamName iTeam, int* rgiBallotBoxes);
 	void GiveDefaultItems(CBasePlayer* pPlayer);
 	float PlayerMaxArmour(CBasePlayer* pPlayer);
-	CBasePlayerWeapon* SelectProperGrenade(CBasePlayer* pPlayer);
+	CBaseWeapon* SelectProperGrenade(CBasePlayer* pPlayer);
 
 private:
 	void MarkLivingPlayersOnTeamAsNotReceivingMoneyNextRound(int iTeam);

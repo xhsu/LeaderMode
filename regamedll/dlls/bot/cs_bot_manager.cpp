@@ -147,9 +147,9 @@ void CCSBotManager::StartFrame()
 }
 
 // Return true if the bot can use this weapon
-bool CCSBotManager::IsWeaponUseable(CBasePlayerItem *item) const
+bool CCSBotManager::IsWeaponUseable(CBaseWeapon *item) const
 {
-	if (FNullEnt(item))
+	if (item->IsDead())
 	{
 		return false;
 	}

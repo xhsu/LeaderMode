@@ -61,6 +61,8 @@ struct AmmoInfo
 	int m_iBulletBehavior;
 };
 
+extern const AmmoInfo g_rgAmmoInfo[AMMO_MAXTYPE];
+
 #define BULLET_NONE				0
 #define BULLET_PLAYER_9MM		1
 #define BULLET_PLAYER_BUCKSHOT	4

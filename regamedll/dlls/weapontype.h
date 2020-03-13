@@ -95,6 +95,7 @@ enum ItemCostType
 
 enum WeaponState
 {
+	WPNSTATE_DEAD				= BIT(0),	// mark for remove.
 	WPNSTATE_ELITE_LEFT         = BIT(3),
 	WPNSTATE_FAMAS_BURST_MODE   = BIT(4),
 	WPNSTATE_SHIELD_DRAWN       = BIT(5),
@@ -185,12 +186,14 @@ struct ItemInfo
 	int m_iCost;
 };
 
-extern const char* g_rgszWeaponAlias[MAX_WEAPONS];
+extern const ItemInfo g_rgItemInfo[LAST_WEAPON];
+extern const char* g_rgszWeaponAlias[LAST_WEAPON];
 
 WeaponIdType AliasToWeaponID(const char* alias);
 const char* WeaponIDToAlias(int id);	// Given a weapon ID, return its alias
 const char* AliasToWeaponClassname(const char* alias);
-const char* WeaponIDToWeaponClassname(int id);
+const char* WeaponIDToWeaponClassname(WeaponIdType id);
+WeaponIdType WeaponClassnameToID(const char* classname);
 WeaponClassType WeaponIDToWeaponClass(WeaponIdType id);
 bool IsPrimaryWeapon(int id);	// Return true if given weapon ID is a primary weapon
 bool IsSecondaryWeapon(int id);	// Return true if given weapon ID is a secondary weapon

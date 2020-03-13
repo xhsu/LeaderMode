@@ -39,7 +39,7 @@ class CRestore;
 class CBasePlayer;
 class CBaseEntity;
 class CBaseMonster;
-class CBasePlayerItem;
+class CBaseWeapon;	// LUNA: this is NOT a derived class of CBaseEntity anymore!
 class CSquadMonster;
 
 enum AmmoIdType;
@@ -94,8 +94,6 @@ public:
 	virtual int GetToggleState() { return TS_AT_TOP; }
 	virtual void AddPoints(int score, BOOL bAllowNegativeScore) {}
 	virtual void AddPointsToTeam(int score, BOOL bAllowNegativeScore) {}
-	virtual BOOL AddPlayerItem(CBasePlayerItem *pItem) { return FALSE; }
-	virtual BOOL RemovePlayerItem(CBasePlayerItem *pItem) { return FALSE; }
 	virtual bool GiveAmmo(int iAmount, AmmoIdType iId) { return false; }
 	virtual float GetDelay() { return 0.0f; }
 	virtual int IsMoving() { return (pev->velocity != g_vecZero); }
@@ -201,9 +199,9 @@ public:
 		return nullptr;
 	}
 	static CBaseEntity *Create(const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner = nullptr);
-	edict_t *edict() { return ENT(pev); }
-	EOFFSET eoffset() { return OFFSET(pev); }
-	int entindex() { return ENTINDEX(edict()); }
+	edict_t *edict() const { return ENT(pev); }
+	EOFFSET eoffset() const { return OFFSET(pev); }
+	int entindex() const { return ENTINDEX(edict()); }
 
 public:
 	// Constructor. Set engine to use C/C++ callback functions

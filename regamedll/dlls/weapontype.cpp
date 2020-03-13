@@ -1,6 +1,6 @@
 #include "precompiled.h"
 
-const ItemInfo CBasePlayerItem::m_rgItemInfo[MAX_WEAPONS] =
+const ItemInfo g_rgItemInfo[LAST_WEAPON] =
 {
 	{WEAPON_NONE, nullptr, AMMO_NONE, WEAPON_NOCLIP, SLOT_NO, -1, ITEM_FLAG_NONE, -1, 0},
 	{WEAPON_ANACONDA,		"weapon_p228",			AMMO_357SIG,		6,	PISTOL_SLOT,			1,	ITEM_FLAG_NONE,									P228_WEIGHT,			600},
@@ -33,10 +33,10 @@ const ItemInfo CBasePlayerItem::m_rgItemInfo[MAX_WEAPONS] =
 	{WEAPON_AK47,			"weapon_ak47",			AMMO_762Nato,		30,	PRIMARY_WEAPON_SLOT,	17,	ITEM_FLAG_NONE,									AK47_WEIGHT,			2500},
 	{WEAPON_KNIFE,			"weapon_knife",			AMMO_NONE,			-1,	KNIFE_SLOT,				1,	ITEM_FLAG_NONE,									KNIFE_WEIGHT,			0},
 	{WEAPON_P90,			"weapon_p90",			AMMO_57mm,			50,	PRIMARY_WEAPON_SLOT,	18,	ITEM_FLAG_NONE,									P90_WEIGHT,				2350},
-	{LAST_WEAPON, nullptr, AMMO_NONE, WEAPON_NOCLIP, SLOT_NO, -1, ITEM_FLAG_NONE, -1, 0},	// vest, should never use it.
+	//{LAST_WEAPON, nullptr, AMMO_NONE, WEAPON_NOCLIP, SLOT_NO, -1, ITEM_FLAG_NONE, -1, 0},	// vest, should never use it.
 };
 
-const char* g_rgszWeaponAlias[MAX_WEAPONS] =
+const char* g_rgszWeaponAlias[LAST_WEAPON] =
 {
 	"",
 	"Colt Anaconda",
@@ -69,26 +69,7 @@ const char* g_rgszWeaponAlias[MAX_WEAPONS] =
 	"Kalashnikov AK-47",
 	"Seal Knife",
 	"FN P90",
-	""
-};
-
-const int g_rgRoleWeaponsAccessibility[ROLE_COUNT][LAST_WEAPON] =
-{
-	//					      0                                  5                                  10                                 15                                 20                                 25                                 30
-	//					      NONE   ANACO  UNUSED M200   HE     M1014  C4     PM9    ACR    S_GR   P99    FN57   UMP45  M14    CM901  QBZ95  USP    G18C   AWP    MP5    MK46   KSG    M4A1   MP7A1  SVD    FBang  DEAGLE SCARL  AK74   KNIFE  P90
-	/*Role_UNASSIGNED*/		{ WPN_F, WPN_A, WPN_F, WPN_A, WPN_A, WPN_A, WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_F, WPN_A },
-
-	/*Role_Commander = 1*/	{ WPN_F, WPN_A, WPN_F, WPN_A, WPN_A, WPN_A, WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_P, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_P, WPN_A, WPN_A, WPN_A, WPN_P, WPN_A, WPN_A, WPN_A, WPN_A, WPN_F, WPN_A },
-	/*Role_SWAT*/			{ WPN_F, WPN_A, WPN_F, WPN_F, WPN_F, WPN_D, WPN_F, WPN_D, WPN_A, WPN_D, WPN_A, WPN_A, WPN_D, WPN_F, WPN_F, WPN_F, WPN_A, WPN_A, WPN_F, WPN_D, WPN_F, WPN_D, WPN_F, WPN_D, WPN_F, WPN_D, WPN_A, WPN_A, WPN_F, WPN_F, WPN_D },
-	/*Role_Blaster*/		{ WPN_F, WPN_A, WPN_F, WPN_F, WPN_D, WPN_D, WPN_F, WPN_A, WPN_F, WPN_D, WPN_A, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_A, WPN_A, WPN_F, WPN_A, WPN_F, WPN_D, WPN_F, WPN_A, WPN_F, WPN_D, WPN_A, WPN_F, WPN_F, WPN_F, WPN_D },
-	/*Role_Sharpshooter*/	{ WPN_F, WPN_D, WPN_F, WPN_D, WPN_P, WPN_F, WPN_F, WPN_F, WPN_P, WPN_A, WPN_A, WPN_A, WPN_F, WPN_A, WPN_P, WPN_P, WPN_A, WPN_A, WPN_D, WPN_F, WPN_F, WPN_F, WPN_P, WPN_F, WPN_A, WPN_A, WPN_D, WPN_P, WPN_P, WPN_F, WPN_F },
-	/*Role_Medic = 5*/		{ WPN_F, WPN_A, WPN_F, WPN_F, WPN_F, WPN_A, WPN_F, WPN_D, WPN_A, WPN_P, WPN_A, WPN_A, WPN_D, WPN_F, WPN_F, WPN_F, WPN_A, WPN_A, WPN_F, WPN_D, WPN_F, WPN_A, WPN_A, WPN_D, WPN_F, WPN_F, WPN_A, WPN_F, WPN_F, WPN_F, WPN_D },
-
-	/*Role_Godfather = 6*/	{ WPN_F, WPN_D, WPN_F, WPN_A, WPN_A, WPN_A, WPN_F, WPN_A, WPN_A, WPN_A, WPN_D, WPN_D, WPN_A, WPN_P, WPN_A, WPN_A, WPN_D, WPN_D, WPN_A, WPN_A, WPN_P, WPN_A, WPN_A, WPN_A, WPN_P, WPN_A, WPN_D, WPN_A, WPN_A, WPN_F, WPN_A },
-	/*Role_LeadEnforcer*/	{ WPN_F, WPN_A, WPN_F, WPN_F, WPN_F, WPN_D, WPN_F, WPN_D, WPN_D, WPN_F, WPN_A, WPN_A, WPN_D, WPN_F, WPN_D, WPN_D, WPN_A, WPN_A, WPN_F, WPN_D, WPN_A, WPN_D, WPN_D, WPN_D, WPN_F, WPN_F, WPN_A, WPN_D, WPN_D, WPN_F, WPN_D },
-	/*Role_MadScientist*/	{ WPN_F, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_P, WPN_F, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F },
-	/*Role_Assassin*/		{ WPN_F, WPN_A, WPN_F, WPN_D, WPN_F, WPN_F, WPN_F, WPN_A, WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_P, WPN_F, WPN_F, WPN_D, WPN_A, WPN_F, WPN_A, WPN_F, WPN_F, WPN_F, WPN_D, WPN_F, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_A },
-	/*Role_Arsonist = 10*/	{ WPN_F, WPN_A, WPN_F, WPN_F, WPN_P, WPN_D, WPN_F, WPN_F, WPN_F, WPN_F, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_D, WPN_A, WPN_F, WPN_F, WPN_F, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F }
+	// "HL suit"
 };
 
 // Given an alias, return the associated weapon ID
@@ -96,7 +77,7 @@ WeaponIdType AliasToWeaponID(const char *alias)
 {
 	if (alias)
 	{
-		for (int i = 0; i < MAX_WEAPONS; i++)
+		for (int i = 0; i < LAST_WEAPON; i++)
 		{
 			if (!Q_stricmp(alias, g_rgszWeaponAlias[i]))
 				return WeaponIdType(i);
@@ -116,19 +97,33 @@ const char* AliasToWeaponClassname(const char* alias)
 {
 	if (alias)
 	{
-		for (int i = 0; i < MAX_WEAPONS; i++)
+		for (int i = 0; i < LAST_WEAPON; i++)
 		{
 			if (!Q_stricmp(alias, g_rgszWeaponAlias[i]))
-				return CBasePlayerItem::m_rgItemInfo[i].m_pszClassName;
+				return g_rgItemInfo[i].m_pszClassName;
 		}
 	}
 
 	return nullptr;
 }
 
-const char* WeaponIDToWeaponClassname(int id)
+const char* WeaponIDToWeaponClassname(WeaponIdType id)
 {
-	return CBasePlayerItem::m_rgItemInfo[id].m_pszClassName;
+	return g_rgItemInfo[id].m_pszClassName;
+}
+
+WeaponIdType WeaponClassnameToID(const char* classname)
+{
+	if (classname)
+	{
+		for (int i = 0; i < LAST_WEAPON; i++)
+		{
+			if (g_rgItemInfo[i].m_pszClassName && !Q_stricmp(classname, g_rgItemInfo[i].m_pszClassName))
+				return g_rgItemInfo[i].m_iId;
+		}
+	}
+
+	return WEAPON_NONE;
 }
 
 WeaponClassType WeaponIDToWeaponClass(WeaponIdType id)
@@ -186,34 +181,34 @@ WeaponClassType WeaponIDToWeaponClass(WeaponIdType id)
 // Return true if given weapon ID is a primary weapon
 bool IsPrimaryWeapon(int id)
 {
-	return CBasePlayerItem::m_rgItemInfo[id].m_iSlot == PRIMARY_WEAPON_SLOT;
+	return g_rgItemInfo[id].m_iSlot == PRIMARY_WEAPON_SLOT;
 }
 
 // Return true if given weapon ID is a secondary weapon
 bool IsSecondaryWeapon(int id)
 {
-	return CBasePlayerItem::m_rgItemInfo[id].m_iSlot == PISTOL_SLOT;
+	return g_rgItemInfo[id].m_iSlot == PISTOL_SLOT;
 }
 
 // Return true if given weapon ID is a grenade
 bool IsGrenadeWeapon(int id)
 {
-	return CBasePlayerItem::m_rgItemInfo[id].m_iSlot == GRENADE_SLOT;
+	return g_rgItemInfo[id].m_iSlot == GRENADE_SLOT;
 }
 
 const ItemInfo* GetWeaponInfo(int weaponID)
 {
-	return (weaponID > 0 && weaponID < MAX_WEAPONS) ? &CBasePlayerItem::m_rgItemInfo[weaponID] : nullptr;
+	return (weaponID > 0 && weaponID < LAST_WEAPON) ? &g_rgItemInfo[weaponID] : nullptr;
 }
 
 const ItemInfo* GetWeaponInfo(const char* weaponName)
 {
 	if (weaponName)
 	{
-		for (int i = 0; i < MAX_WEAPONS; i++)
+		for (int i = 0; i < LAST_WEAPON; i++)
 		{
-			if (CBasePlayerItem::m_rgItemInfo[i].m_pszClassName && !Q_stricmp(weaponName, CBasePlayerItem::m_rgItemInfo[i].m_pszClassName))
-				return &CBasePlayerItem::m_rgItemInfo[i];
+			if (g_rgItemInfo[i].m_pszClassName && !Q_stricmp(weaponName, g_rgItemInfo[i].m_pszClassName))
+				return &g_rgItemInfo[i];
 		}
 	}
 

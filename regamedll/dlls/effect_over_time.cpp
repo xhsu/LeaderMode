@@ -334,9 +334,9 @@ void gElectrifiedDOTMgr::Think(CBasePlayer* pPlayer)
 
 	if (gpGlobals->time - pPlayer->m_flElectrifyStarts > 6.0f)	// drop primary weapon.
 	{
-		if (!FNullEnt(pPlayer->m_rgpPlayerItems[PRIMARY_WEAPON_SLOT]))
+		if (pPlayer->m_rgpPlayerItems[PRIMARY_WEAPON_SLOT])
 		{
-			pPlayer->DropPlayerItem(pPlayer->m_rgpPlayerItems[PRIMARY_WEAPON_SLOT]->pev->classname);
+			pPlayer->DropPlayerItem(pPlayer->m_rgpPlayerItems[PRIMARY_WEAPON_SLOT]->m_iId);
 		}
 	}
 

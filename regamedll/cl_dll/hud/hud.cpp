@@ -726,7 +726,7 @@ void gHUD::SlotInput(int iSlot)
 
 	if (m_Menu.m_fMenuDisplayed)
 	{
-		m_Menu.SelectMenuItem(iSlot + 1);
+		m_Menu.SelectMenuItem(iSlot);	// never -1 over here.
 		return;
 	}
 

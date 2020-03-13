@@ -190,9 +190,6 @@ public:
 	// return true if active weapon's bullet spray has become large and inaccurate
 	bool IsActiveWeaponRecoilHigh() const;
 
-	// return the weapon the bot is currently using
-	CBasePlayerWeapon *GetActiveWeapon() const;
-
 	// return true if looking thru weapon's scope
 	bool IsUsingScope() const;
 
@@ -301,28 +298,22 @@ inline void CBot::Walk()
 	m_isRunning = false;
 }
 
-inline CBasePlayerWeapon *CBot::GetActiveWeapon() const
-{
-	return static_cast<CBasePlayerWeapon *>(m_pActiveItem);
-}
-
 inline bool CBot::IsActiveWeaponReloading() const
 {
-	CBasePlayerWeapon *pCurrentWeapon = GetActiveWeapon();
-	if (!pCurrentWeapon)
+	if (!m_pActiveItem)
 		return false;
 
-	return (pCurrentWeapon->m_fInReload || pCurrentWeapon->m_fInSpecialReload) != 0;
+	return m_pActiveItem->m_bInReload;
 }
 
 inline bool CBot::IsActiveWeaponRecoilHigh() const
 {
-	CBasePlayerWeapon *pCurrentWeapon = GetActiveWeapon();
-	if (pCurrentWeapon)
+	// WPN_UNDONE
+	/*if (m_pActiveItem)
 	{
 		const float highRecoil = 0.4f;
-		return (pCurrentWeapon->m_flAccuracy > highRecoil) != 0;
-	}
+		return (m_pActiveItem->m_flAccuracy > highRecoil) != 0;
+	}*/
 
 	return false;
 }

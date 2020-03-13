@@ -231,7 +231,7 @@ void WriteSigonMessages()
 {
 	for (int i = 0; i < MAX_WEAPONS; i++)
 	{
-		const ItemInfo &info = CBasePlayerItem::m_rgItemInfo[i];
+		const ItemInfo &info = g_rgItemInfo[i];
 		if (!info.m_iId)
 			continue;
 
@@ -242,7 +242,7 @@ void WriteSigonMessages()
 		MESSAGE_BEGIN(MSG_INIT, gmsgWeaponList);
 			WRITE_STRING(pszName);
 			WRITE_BYTE(info.m_iAmmoType);
-			WRITE_BYTE(info.m_iAmmoType > 0 ? CBasePlayerItem::m_rgAmmoInfo[info.m_iAmmoType].m_iMax : -1);	// avoid knife bug.
+			WRITE_BYTE(info.m_iAmmoType > 0 ? g_rgAmmoInfo[info.m_iAmmoType].m_iMax : -1);	// avoid knife bug.
 			WRITE_BYTE(-1);
 			WRITE_BYTE(-1);
 			WRITE_BYTE(info.m_iSlot - 1);	// slot 1 in clinet is marked as 0
@@ -1081,7 +1081,7 @@ void BuyItem(CBasePlayer *pPlayer, int iSlot)
 			if (CSGameRules()->CanHavePlayerItem(pPlayer, WEAPON_FLASHBANG, true))
 				return;
 
-			if (pPlayer->m_rgAmmo[AMMO_Flashbang] >= CBasePlayerItem::m_rgAmmoInfo[AMMO_Flashbang].m_iMax)
+			if (pPlayer->m_rgAmmo[AMMO_Flashbang] >= g_rgAmmoInfo[AMMO_Flashbang].m_iMax)
 			{
 				if (g_bClientPrintEnable)
 				{
@@ -1105,7 +1105,7 @@ void BuyItem(CBasePlayer *pPlayer, int iSlot)
 			if (CSGameRules()->CanHavePlayerItem(pPlayer, WEAPON_HEGRENADE, true))
 				return;
 
-			if (pPlayer->m_rgAmmo[AMMO_HEGrenade] >= CBasePlayerItem::m_rgAmmoInfo[AMMO_HEGrenade].m_iMax)
+			if (pPlayer->m_rgAmmo[AMMO_HEGrenade] >= g_rgAmmoInfo[AMMO_HEGrenade].m_iMax)
 			{
 				if (g_bClientPrintEnable)
 				{
@@ -1128,7 +1128,7 @@ void BuyItem(CBasePlayer *pPlayer, int iSlot)
 			if (CSGameRules()->CanHavePlayerItem(pPlayer, WEAPON_SMOKEGRENADE, true))
 				return;
 
-			if (pPlayer->m_rgAmmo[AMMO_SmokeGrenade] >= CBasePlayerItem::m_rgAmmoInfo[AMMO_SmokeGrenade].m_iMax)
+			if (pPlayer->m_rgAmmo[AMMO_SmokeGrenade] >= g_rgAmmoInfo[AMMO_SmokeGrenade].m_iMax)
 			{
 				if (g_bClientPrintEnable)
 				{
@@ -1222,7 +1222,7 @@ void BuyItem(CBasePlayer *pPlayer, int iSlot)
 	}
 }
 
-CBaseEntity *BuyWeapon(CBasePlayer *pPlayer, WeaponIdType weaponID)
+CBaseWeapon*BuyWeapon(CBasePlayer *pPlayer, WeaponIdType weaponID)
 {
 	if (weaponID <= 0 || weaponID >= LAST_WEAPON)
 		return nullptr;
@@ -1230,7 +1230,7 @@ CBaseEntity *BuyWeapon(CBasePlayer *pPlayer, WeaponIdType weaponID)
 	if (!CSGameRules()->CanHavePlayerItem(pPlayer, weaponID, true))
 		return nullptr;
 
-	const ItemInfo *info = &CBasePlayerItem::m_rgItemInfo[weaponID];
+	const ItemInfo *info = &g_rgItemInfo[weaponID];
 	if (!info || !Q_strlen(info->m_pszClassName))
 		return nullptr;
 
@@ -1256,17 +1256,13 @@ CBaseEntity *BuyWeapon(CBasePlayer *pPlayer, WeaponIdType weaponID)
 		pPlayer->DropSecondary();
 	}
 
-	auto pEntity = pPlayer->GiveNamedItem(info->m_pszClassName);
+	auto pWeapon = CBaseWeapon::Give(weaponID, pPlayer);
+	pPlayer->AddPlayerItem(pWeapon);
 	pPlayer->AddAccount(-iCost, RT_PLAYER_BOUGHT_SOMETHING);
 
 	if (refill_bpammo_weapons.value > 1)
 	{
-		CBasePlayerItem *pItem = static_cast<CBasePlayerItem *>(pEntity);
-
-		if (pItem)
-		{
-			pPlayer->GiveAmmo(CBasePlayerItem::m_rgAmmoInfo[info->m_iAmmoType].m_iCountPerBox, (AmmoIdType)info->m_iAmmoType);
-		}
+		pPlayer->GiveAmmo(g_rgAmmoInfo[info->m_iAmmoType].m_iCountPerBox, info->m_iAmmoType);
 	}
 
 	if (TheTutor)
@@ -1274,7 +1270,7 @@ CBaseEntity *BuyWeapon(CBasePlayer *pPlayer, WeaponIdType weaponID)
 		TheTutor->OnEvent(EVENT_PLAYER_BOUGHT_SOMETHING, pPlayer);
 	}
 
-	return pEntity;
+	return pWeapon;
 }
 
 void EXT_FUNC HandleMenu_ChooseAppearance(CBasePlayer *pPlayer, int slot)
@@ -1846,25 +1842,25 @@ void Radio3(CBasePlayer *pPlayer, int slot)
 	}
 }
 
-bool EXT_FUNC BuyGunAmmo(CBasePlayer *pPlayer, CBasePlayerItem *weapon, bool bBlinkMoney)
+bool EXT_FUNC BuyGunAmmo(CBasePlayer *pPlayer, CBaseWeapon *weapon, bool bBlinkMoney)
 {
 	// Ensure that the weapon uses ammo
-	if (weapon->ainfo()->m_iId <= 0 && weapon->ainfo()->m_iId >= AMMO_MAXTYPE)
+	if (weapon->m_iPrimaryAmmoType <= 0 || weapon->m_iPrimaryAmmoType >= AMMO_MAXTYPE)
 		return false;
 
 	// Can only buy if the player does not already have full ammo
-	if (!CSGameRules()->CanHaveAmmo(pPlayer, (AmmoIdType)weapon->ainfo()->m_iId))
+	if (!CSGameRules()->CanHaveAmmo(pPlayer, weapon->m_iPrimaryAmmoType))
 		return false;
 
 	// Purchase the ammo if the player has enough money
-	if (pPlayer->m_iAccount >= weapon->ainfo()->m_iCostPerBox)
+	if (pPlayer->m_iAccount >= weapon->m_pAmmoInfo->m_iCostPerBox)
 	{
-		if (!pPlayer->GiveAmmo(weapon->ainfo()->m_iCountPerBox, (AmmoIdType)weapon->ainfo()->m_iId))
+		if (!pPlayer->GiveAmmo(weapon->m_pAmmoInfo->m_iCountPerBox, weapon->m_iPrimaryAmmoType))
 			return false;
 
-		EMIT_SOUND(ENT(weapon->pev), CHAN_ITEM, "items/9mmclip1.wav", VOL_NORM, ATTN_NORM);
+		EMIT_SOUND(pPlayer->edict(), CHAN_ITEM, "items/9mmclip1.wav", VOL_NORM, ATTN_NORM);
 
-		pPlayer->AddAccount(-weapon->ainfo()->m_iCostPerBox, RT_PLAYER_BOUGHT_SOMETHING);
+		pPlayer->AddAccount(-weapon->m_pAmmoInfo->m_iCostPerBox, RT_PLAYER_BOUGHT_SOMETHING);
 		return true;
 	}
 
@@ -1891,7 +1887,7 @@ bool BuyAmmo(CBasePlayer *pPlayer, int nSlot, bool bBlinkMoney)
 	// nSlot == 1 : Primary weapons
 	// nSlot == 2 : Secondary weapons
 
-	CBasePlayerItem *pItem = pPlayer->m_rgpPlayerItems[nSlot];
+	CBaseWeapon *pItem = pPlayer->m_rgpPlayerItems[nSlot];
 
 	if (pPlayer->HasShield())
 	{
@@ -1903,12 +1899,14 @@ bool BuyAmmo(CBasePlayer *pPlayer, int nSlot, bool bBlinkMoney)
 	{
 		while (BuyGunAmmo(pPlayer, pItem, bBlinkMoney))
 		{
+			/* this is for original CBasePlayerItem
 			pItem = pItem->m_pNext;
 
 			if (!pItem)
 			{
 				return true;
 			}
+			*/
 		}
 	}
 
@@ -2628,7 +2626,7 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 					pPlayer->DropShield();
 				}
 				else
-					pPlayer->DropPlayerItem(parg1);
+					pPlayer->DropPlayerItem(WeaponClassnameToID(parg1));
 			}
 			else if (FStrEq(pcmd, "fov"))
 			{
@@ -2710,7 +2708,8 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 					const auto pInfo = GetWeaponInfo(parg1);
 					if (pInfo)
 					{
-						pPlayer->GiveNamedItem(pInfo->m_pszClassName);
+						//pPlayer->GiveNamedItem(pInfo->m_pszClassName);
+						pPlayer->AddPlayerItem(CBaseWeapon::Give(pInfo->m_iId, pPlayer));
 					}
 				}
 			}
@@ -3019,6 +3018,11 @@ void EXT_FUNC StartFrame()
 	if (TheTutor)
 	{
 		TheTutor->StartFrame(gpGlobals->time);
+	}
+
+	if (!CBaseWeapon::m_lstWeapons.empty())
+	{
+		CBaseWeapon::TheWeaponsThink();
 	}
 
 	EndFrame();
@@ -4046,39 +4050,35 @@ int EXT_FUNC GetWeaponData(edict_t *pEdict, struct weapon_data_s *info)
 	// go through all of the weapons and make a list of the ones to pack
 	for (int i = 0; i < MAX_ITEM_TYPES; i++)
 	{
-		auto pPlayerItem = pPlayer->m_rgpPlayerItems[i];
-		while (pPlayerItem)
+		auto pWeapon = pPlayer->m_rgpPlayerItems[i];
+		if (pWeapon)	// there's a weapon here. Should I pack it?
 		{
-			// there's a weapon here. Should I pack it?
-			auto weapon = (CBasePlayerWeapon*)pPlayerItem;
-			if (weapon && weapon->IsWeapon() && weapon->UseDecrement())
+				// Get The basic data
+			ItemInfo II;
+			Q_memcpy(&II, pWeapon->m_pItemInfo, sizeof(ItemInfo));
+
+			if (II.m_iId >= 0 && II.m_iId < MAX_WEAPONS)
 			{
-				// Get The ID
-				ItemInfo II;
-				Q_memcpy(&II, weapon->iinfo(), sizeof(ItemInfo));
+				auto item = &info[II.m_iId];
 
-				if (II.m_iId >= 0 && II.m_iId < MAX_WEAPONS)
-				{
-					auto item = &info[II.m_iId];
-
-					item->m_iId = II.m_iId;
-					item->m_iClip = weapon->m_iClip;
-					item->m_flTimeWeaponIdle = Q_max(weapon->m_flTimeWeaponIdle, -0.001f);
-					item->m_flNextPrimaryAttack = Q_max(weapon->m_flNextPrimaryAttack, -0.001f);
-					item->m_flNextSecondaryAttack = Q_max(weapon->m_flNextSecondaryAttack, -0.001f);
-					item->m_flNextReload = Q_max(weapon->m_flNextReload, -0.001f);
-					item->m_fInReload = weapon->m_fInReload;
-					item->m_fInSpecialReload = weapon->m_fInSpecialReload;
-					item->m_fInZoom = weapon->m_iShotsFired;
-					item->m_fAimedDamage = weapon->m_flLastFire;
-					item->m_iWeaponState = weapon->m_iWeaponState;
-					item->fuser2 = weapon->m_flStartThrow;
-					item->fuser3 = weapon->m_flReleaseThrow;
-					item->iuser1 = weapon->m_iSwing;
-				}
+				item->m_iId = II.m_iId;
+				item->m_iClip = pWeapon->m_iClip;
+				item->m_flTimeWeaponIdle = Q_max(pWeapon->m_flTimeWeaponIdle, -0.001f);
+				item->m_flNextPrimaryAttack = Q_max(pWeapon->m_flNextPrimaryAttack, -0.001f);
+				item->m_flNextSecondaryAttack = Q_max(pWeapon->m_flNextSecondaryAttack, -0.001f);
+				//item->m_flNextReload = Q_max(pWeapon->m_flNextReload, -0.001f); // TODO: what is this???
+				item->m_fInReload = pWeapon->m_bInReload;
+				//item->m_fInSpecialReload = weapon->m_fInSpecialReload;
+				item->m_fInZoom = pWeapon->m_iShotsFired;
+				//item->m_fAimedDamage = pWeapon->m_flLastFire;
+				item->m_iWeaponState = pWeapon->m_bitsFlags;
+				//item->fuser2 = weapon->m_flStartThrow;
+				//item->fuser3 = weapon->m_flReleaseThrow;
+				//item->iuser1 = weapon->m_iSwing;
 			}
 
-			pPlayerItem = pPlayerItem->m_pNext;
+			// this is for original CBasePlayerItem.
+			//pPlayerItem = pPlayerItem->m_pNext;
 		}
 	}
 #else
@@ -4183,22 +4183,17 @@ void EXT_FUNC UpdateClientData(const edict_t *ent, int sendweapons, struct clien
 
 		if (pPlayer->m_pActiveItem)
 		{
-			CBasePlayerWeapon* weapon = (CBasePlayerWeapon*)pPlayer->m_pActiveItem;
+			cd->m_iId = pPlayer->m_pActiveItem->m_iId;
 
-			if (weapon && weapon->UseDecrement())
+			if ((unsigned int)pPlayer->m_pActiveItem->m_iPrimaryAmmoType < MAX_AMMO_SLOTS)
 			{
-				cd->m_iId = weapon->m_iId;
-
-				if ((unsigned int)weapon->m_iPrimaryAmmoType < MAX_AMMO_SLOTS)
-				{
-					cd->vuser4.x = weapon->m_iPrimaryAmmoType;
-					cd->vuser4.y = pPlayer->m_rgAmmo[weapon->m_iPrimaryAmmoType];
-				}
-				else
-				{
-					cd->vuser4.x = -1.0;
-					cd->vuser4.y = 0;
-				}
+				cd->vuser4.x = pPlayer->m_pActiveItem->m_iPrimaryAmmoType;
+				cd->vuser4.y = pPlayer->m_rgAmmo[pPlayer->m_pActiveItem->m_iPrimaryAmmoType];
+			}
+			else
+			{
+				cd->vuser4.x = -1.0;
+				cd->vuser4.y = 0;
 			}
 		}
 	}

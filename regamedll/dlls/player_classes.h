@@ -166,7 +166,7 @@ public:	// skill action
 	virtual float GetHudPercentage() const;
 
 	// passive skill: weapons
-	virtual float WeaponFireIntervalModifier(CBasePlayerWeapon* pWeapon) { return 1.0f; }
+	virtual float WeaponFireIntervalModifier(CBaseWeapon* pWeapon) { return 1.0f; }
 	virtual void OnGrenadeThrew(WeaponIdType iId, CGrenade* pGrenade) { }
 
 	// passive skill: damage
@@ -236,7 +236,7 @@ public:
 	float GetDuration() const { return DURATION; }
 	float GetCooldown() const { return COOLDOWN; }
 
-	float WeaponFireIntervalModifier(CBasePlayerWeapon* pWeapon) { return m_bUsingSkill ? FIREINTERVAL_MODIFIER : 1.0f; }
+	float WeaponFireIntervalModifier(CBaseWeapon* pWeapon) { return m_bUsingSkill ? FIREINTERVAL_MODIFIER : 1.0f; }
 };
 
 // Role_Commander: Stainless Steel
@@ -546,7 +546,7 @@ public:
 	float GetDuration() const { return DURATION; }
 	float GetCooldown() const { return COOLDOWN; }
 
-	float WeaponFireIntervalModifier(CBasePlayerWeapon* pWeapon);
+	float WeaponFireIntervalModifier(CBaseWeapon* pWeapon);
 	void OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr);
 };
 

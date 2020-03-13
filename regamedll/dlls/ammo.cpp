@@ -1,6 +1,6 @@
 #include "precompiled.h"
 
-const AmmoInfo CBasePlayerItem::m_rgAmmoInfo[MAX_AMMO_SLOTS] =
+const AmmoInfo g_rgAmmoInfo[AMMO_MAXTYPE] =
 {
 	{AMMO_NONE, "", 0, 0, 0, 0},
 	{AMMO_338Magnum,	"338Magnum",	30,		10,		125,	BULLET_PLAYER_338MAG},
@@ -27,8 +27,8 @@ const AmmoInfo* GetAmmoInfo(const char* ammoName)
 	{
 		for (int i = 0; i < MAX_WEAPONS; i++)
 		{
-			if (!Q_stricmp(ammoName, CBasePlayerItem::m_rgAmmoInfo[i].m_pszName))
-				return &CBasePlayerItem::m_rgAmmoInfo[i];
+			if (!Q_stricmp(ammoName, g_rgAmmoInfo[i].m_pszName))
+				return &g_rgAmmoInfo[i];
 		}
 	}
 
@@ -37,5 +37,5 @@ const AmmoInfo* GetAmmoInfo(const char* ammoName)
 
 const AmmoInfo* GetAmmoInfo(int iId)
 {
-	return (iId > 0 && iId < AMMO_MAXTYPE) ? &CBasePlayerItem::m_rgAmmoInfo[iId] : nullptr;
+	return (iId > 0 && iId < AMMO_MAXTYPE) ? &g_rgAmmoInfo[iId] : nullptr;
 }

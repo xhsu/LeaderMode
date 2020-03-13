@@ -19,6 +19,9 @@
     <Filter Include="common">
       <UniqueIdentifier>{655dd62b-0c1c-4c19-98eb-ba803425fda7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="dlls">
+      <UniqueIdentifier>{242a3c40-d0ca-42f1-808c-74f82efcf1e6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\cdll_int.cpp">
@@ -158,6 +161,12 @@
     </ClCompile>
     <ClCompile Include="..\weapons.cpp">
       <Filter>cl_dll</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\dlls\ammo.cpp">
+      <Filter>dlls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\dlls\weapontype.cpp">
+      <Filter>dlls</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -307,6 +316,15 @@
     </ClInclude>
     <ClInclude Include="..\weapons.h">
       <Filter>cl_dll</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\dlls\ammo.h">
+      <Filter>dlls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\dlls\cdll_dll.h">
+      <Filter>dlls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\dlls\weapontype.h">
+      <Filter>dlls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
