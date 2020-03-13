@@ -27,6 +27,7 @@ int g_iUser3;
 int g_iTeamNumber;
 int g_iPlayerClass;
 int g_iPlayerFlags;
+Vector g_vPlayerVelocity;
 float g_flPlayerSpeed;
 int g_iWeaponFlags;
 

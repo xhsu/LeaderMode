@@ -129,6 +129,9 @@ public:	// SV exclusive variables.
 	EntityHandle<CWeaponBox>	m_pWeaponBox;
 	int		m_iClientClip;
 	int		m_iClientWeaponState;
+#else
+public:	// CL exclusive variables.
+	CBasePlayer*	m_pPlayer;	// local pseudo-player
 #endif
 
 public:	// basic logic funcs
@@ -166,11 +169,10 @@ public:	// util funcs
 
 
 constexpr float USP_MAX_SPEED       = 250.0f;
-constexpr float USP_DAMAGE          = 34.0f;
-constexpr float USP_DAMAGE_SIL      = 30.0f;
+constexpr float USP_DAMAGE          = 30.0f;
 constexpr float USP_RANGE_MODIFER   = 0.79f;
-constexpr float USP_RELOAD_TIME     = 2.7f;
-constexpr float USP_ADJUST_SIL_TIME = 3.13f;
+constexpr float USP_RELOAD_TIME     = 2.66f;	// TODO: model needs to adjust.
+constexpr float USP_FIRE_INTERVAL	= 0.15f;
 
 enum usp_e
 {

@@ -4066,11 +4066,11 @@ int EXT_FUNC GetWeaponData(edict_t *pEdict, struct weapon_data_s *info)
 				item->m_flTimeWeaponIdle = Q_max(pWeapon->m_flTimeWeaponIdle, -0.001f);
 				item->m_flNextPrimaryAttack = Q_max(pWeapon->m_flNextPrimaryAttack, -0.001f);
 				item->m_flNextSecondaryAttack = Q_max(pWeapon->m_flNextSecondaryAttack, -0.001f);
-				//item->m_flNextReload = Q_max(pWeapon->m_flNextReload, -0.001f); // TODO: what is this???
+				//item->m_flNextReload = Q_max(pWeapon->m_flNextReload, -0.001f); // TODO: what are these???
 				item->m_fInReload = pWeapon->m_bInReload;
 				//item->m_fInSpecialReload = weapon->m_fInSpecialReload;
 				item->m_fInZoom = pWeapon->m_iShotsFired;
-				//item->m_fAimedDamage = pWeapon->m_flLastFire;
+				item->m_fAimedDamage = pWeapon->m_flLastFire;
 				item->m_iWeaponState = pWeapon->m_bitsFlags;
 				//item->fuser2 = weapon->m_flStartThrow;
 				//item->fuser3 = weapon->m_flReleaseThrow;

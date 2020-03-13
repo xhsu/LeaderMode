@@ -45,6 +45,7 @@ void InitInput(void);
 void KB_Init(void);
 int KB_ConvertString(char* in, char** ppout);
 
+bool CL_IsDead(void);	// why is it here??
 float CL_KeyState(kbutton_t* key);
 int CL_ButtonBits(int bResetState);
 void CL_ResetButtonBits(int bits);

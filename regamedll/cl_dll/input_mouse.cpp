@@ -7,8 +7,6 @@ Created Date: 06 Mar 2020
 #include "cl_base.h"
 #include "../external/SDL2/SDL_mouse.h"
 
-globalvars_t* gpGlobals;	// MOVEME: hl_weapons.cpp
-
 int	g_iVisibleMouse = 0;
 
 int			mouse_buttons;

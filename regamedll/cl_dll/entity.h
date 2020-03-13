@@ -47,6 +47,7 @@ extern int g_iUser3;
 extern int g_iTeamNumber;
 extern int g_iPlayerClass;
 extern int g_iPlayerFlags;
+extern Vector g_vPlayerVelocity;
 extern float g_flPlayerSpeed;
 extern int g_iWeaponFlags;
 

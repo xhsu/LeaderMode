@@ -22,6 +22,9 @@
     <Filter Include="dlls">
       <UniqueIdentifier>{242a3c40-d0ca-42f1-808c-74f82efcf1e6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="dlls\wpn_shared">
+      <UniqueIdentifier>{9080ac44-de2b-4d54-a24a-46ca03f9994e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\cdll_int.cpp">
@@ -167,6 +170,9 @@
     </ClCompile>
     <ClCompile Include="..\..\dlls\weapontype.cpp">
       <Filter>dlls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\dlls\wpn_shared\wpn_usp.cpp">
+      <Filter>dlls\wpn_shared</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,7 @@
 #include "precompiled.h"
 
 #ifndef CLIENT_DLL
+
 unsigned short CUSP::m_usEvent = 0;
 int CUSP::m_iShell = 0;
 
@@ -13,6 +14,10 @@ void CUSP::Precache()
 	m_iShell = PRECACHE_MODEL("models/pshell.mdl");
 	m_usEvent = PRECACHE_EVENT(1, "events/usp.sc");
 }
+
+#else
+
+
 #endif
 
 bool CUSP::Deploy()
@@ -33,29 +38,24 @@ void CUSP::PrimaryAttack()
 {
 	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
 	{
-		USPFire(1.2f * (1.0f - m_flAccuracy), 0.225f);
+		USPFire(1.2f * (1.0f - m_flAccuracy), USP_FIRE_INTERVAL);
 	}
 	else if (m_pPlayer->pev->velocity.Length2D() > 0)
 	{
-		USPFire(0.225f * (1.0f - m_flAccuracy), 0.225f);
+		USPFire(0.225f * (1.0f - m_flAccuracy), USP_FIRE_INTERVAL);
 	}
 	else if (m_pPlayer->pev->flags & FL_DUCKING)
 	{
-		USPFire(0.08f * (1.0f - m_flAccuracy), 0.225f);
+		USPFire(0.08f * (1.0f - m_flAccuracy), USP_FIRE_INTERVAL);
 	}
 	else
 	{
-		USPFire(0.1f * (1.0f - m_flAccuracy), 0.225f);
+		USPFire(0.1f * (1.0f - m_flAccuracy), USP_FIRE_INTERVAL);
 	}
 }
 
 void CUSP::USPFire(float flSpread, float flCycleTime)
 {
-	int flag = 0;
-	Vector vecAiming, vecSrc, vecDir;
-
-	flCycleTime -= 0.075f;
-
 	if (++m_iShotsFired > 1)
 	{
 		return;
@@ -82,10 +82,12 @@ void CUSP::USPFire(float flSpread, float flCycleTime)
 		PlayEmptySound();
 		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.2f;
 
+#ifndef CLIENT_DLL
 		if (TheBots)
 		{
 			TheBots->OnEvent(EVENT_WEAPON_FIRED_ON_EMPTY, m_pPlayer);
 		}
+#endif
 
 		return;
 	}
@@ -102,23 +104,25 @@ void CUSP::USPFire(float flSpread, float flCycleTime)
 
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 
-	vecSrc = m_pPlayer->GetGunPosition();
-	vecAiming = gpGlobals->v_forward;
+	Vector vecSrc = m_pPlayer->GetGunPosition();
+	Vector vecAiming = gpGlobals->v_forward;
 
-	vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, 4096, 1, BULLET_PLAYER_45ACP, USP_DAMAGE, USP_RANGE_MODIFER, m_pPlayer->pev, true, m_pPlayer->random_seed);
+	Vector vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, 4096, 1, BULLET_PLAYER_45ACP, USP_DAMAGE, USP_RANGE_MODIFER, m_pPlayer->pev, true, m_pPlayer->random_seed);
 
 #ifdef CLIENT_WEAPONS
-	flag = FEV_NOTHOST;
+	int flag = FEV_NOTHOST;
 #else
-	flag = 0;
+	int flag = 0;
 #endif // CLIENT_WEAPONS
 
+#ifndef CLIENT_DLL
 	PLAYBACK_EVENT_FULL(flag, m_pPlayer->edict(), m_usEvent, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 100), 0, m_iClip == 0, FALSE);
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 	{
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", SUIT_SENTENCE, SUIT_REPEAT_OK);
 	}
+#endif
 
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.0f;
 	m_pPlayer->pev->punchangle.x -= 2.0f;
@@ -138,8 +142,6 @@ bool CUSP::Reload()
 
 void CUSP::WeaponIdle()
 {
-	m_pPlayer->GetAutoaimVector(AUTOAIM_10DEGREES);
-
 	if (m_iClip)
 	{
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 60.0f;
