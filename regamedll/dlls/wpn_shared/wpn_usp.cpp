@@ -1,3 +1,9 @@
+/*
+
+Remastered Date: Mar 13 2020
+
+*/
+
 #include "precompiled.h"
 
 #ifndef CLIENT_DLL
@@ -107,21 +113,33 @@ void CUSP::USPFire(float flSpread, float flCycleTime)
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecAiming = gpGlobals->v_forward;
 
-	Vector vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, 4096, 1, BULLET_PLAYER_45ACP, USP_DAMAGE, USP_RANGE_MODIFER, m_pPlayer->pev, true, m_pPlayer->random_seed);
-
-#ifdef CLIENT_WEAPONS
-	int flag = FEV_NOTHOST;
-#else
-	int flag = 0;
-#endif // CLIENT_WEAPONS
+	Vector vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, USP_EFFECTIVE_RANGE, USP_PENETRATION, BULLET_PLAYER_45ACP, USP_DAMAGE, USP_RANGE_MODIFER, m_pPlayer->pev, true, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
-	PLAYBACK_EVENT_FULL(flag, m_pPlayer->edict(), m_usEvent, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 100), 0, m_iClip == 0, FALSE);
+	PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER, m_pPlayer->edict(), m_usEvent, 0, (float*)&g_vecZero, (float*)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 100), 0, m_iClip == 0, FALSE);
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 	{
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", SUIT_SENTENCE, SUIT_REPEAT_OK);
 	}
+#else
+	static event_args_t args;
+	Q_memset(&args, NULL, sizeof(args));
+
+	args.angles = m_pPlayer->pev->v_angle;
+	args.bparam1 = m_iClip == 0;
+	args.bparam2 = false;	// silencer
+	args.ducking = gEngfuncs.pEventAPI->EV_LocalPlayerDucking();
+	args.entindex = gEngfuncs.GetLocalPlayer()->index;
+	args.flags = FEV_NOTHOST | FEV_RELIABLE | FEV_CLIENT;
+	args.fparam1 = vecDir.x;
+	args.fparam2 = vecDir.y;
+	args.iparam1 = int(m_pPlayer->pev->punchangle.x * 100.0f);
+	args.iparam2 = 0;	// should be punchangle.y. but in USP, it's unused.
+	args.origin = m_pPlayer->pev->origin;
+	args.velocity = m_pPlayer->pev->velocity;
+
+	EV_FireUSP(&args);
 #endif
 
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.0f;

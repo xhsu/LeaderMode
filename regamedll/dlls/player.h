@@ -545,6 +545,7 @@ public:
 	int m_iLastZoom;
 	bool m_bResumeZoom;
 	float m_flEjectBrass;
+	int	m_iShellModelIndex;
 	bool m_bNotKilled;
 	TeamName m_iTeam;
 	int m_iAccount;

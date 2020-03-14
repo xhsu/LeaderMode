@@ -59,3 +59,5 @@ public:
 	char m_szLastCrosshairColor[32];
 	float m_flLastCalcTime;
 };
+
+extern int g_iShotsFired;

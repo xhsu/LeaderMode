@@ -42,8 +42,8 @@ int CHudAccountBalance::Draw(float flTime)
 	int r, g, b, a;
 	UnpackRGB(r, g, b, RGB_YELLOWISH);
 
-	int r1, g1, b1, a1;
-	int x, y;
+	int r1 = 0, g1 = 0, b1 = 0, a1 = 0;
+	int x = 0, y = 0;
 
 	if (m_fFade)
 	{

@@ -308,12 +308,11 @@ inline bool CBot::IsActiveWeaponReloading() const
 
 inline bool CBot::IsActiveWeaponRecoilHigh() const
 {
-	// WPN_UNDONE
-	/*if (m_pActiveItem)
+	if (m_pActiveItem)
 	{
 		const float highRecoil = 0.4f;
 		return (m_pActiveItem->m_flAccuracy > highRecoil) != 0;
-	}*/
+	}
 
 	return false;
 }

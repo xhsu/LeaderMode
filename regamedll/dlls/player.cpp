@@ -2688,7 +2688,7 @@ CBaseEntity *EXT_FUNC CBasePlayer::DropShield(bool bDeploy)
 	{
 		// WPN_UNDONE
 		//if (m_pActiveItem->m_flStartThrow != 0.0f)
-			m_pActiveItem->Holster();
+			//m_pActiveItem->Holster();
 	}
 
 	if (IsReloading())

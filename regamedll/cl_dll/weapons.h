@@ -77,6 +77,7 @@ public:
 	int		m_iFOV;
 	int		m_iLastZoom;
 	float	m_flEjectBrass;
+	int		m_iShellModelIndex;
 	float	m_flNextAttack;
 	bool	m_bCanShoot;
 	char	m_szAnimExtention[128];
@@ -90,6 +91,7 @@ public:
 	void	SetAnimation(PLAYER_ANIM playerAnim)	{}
 	Vector	GetGunPosition(void);
 	Vector	FireBullets3(Vector vecSrc, Vector vecDirShooting, float flSpread, float flDistance, int iPenetration, int iBulletType, int iDamage, float flRangeModifier, std::shared_ptr<pseudo_ent_var_s> pevAttacker, bool bPistol, int shared_rand);
+	int		FireBuckshots(ULONG cShots, const Vector& vecSrc, const Vector& vecDirShooting, const Vector& vecSpread, float flDistance, int iDamage, int shared_rand);	// returns the offset of shared_rand.
 };
 
 extern int g_runfuncs;

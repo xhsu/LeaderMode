@@ -49,8 +49,8 @@ struct entity_state_s
 	int number;			// Index into cl_entities array for this entity.
 	float msg_time;
 	int messagenum;			// Message number last time the player/entity state was updated.
-	vec3_t origin;			// Fields which can be transitted and reconstructed over the network stream
-	vec3_t angles;
+	Vector origin;			// Fields which can be transitted and reconstructed over the network stream
+	Vector angles;
 	int modelindex;
 	int sequence;
 	float frame;
@@ -70,9 +70,9 @@ struct entity_state_s
 	int body;
 	byte controller[4];
 	byte blending[4];
-	vec3_t velocity;
-	vec3_t mins;			// Send bbox down to client for use during prediction.
-	vec3_t maxs;
+	Vector velocity;
+	Vector mins;			// Send bbox down to client for use during prediction.
+	Vector maxs;
 	int aiment;
 	int owner; 			// If owned by a player, the index of that player ( for projectiles ).
 	float friction;			// Friction, for prediction.
@@ -83,7 +83,7 @@ struct entity_state_s
 	qboolean spectator;
 	int weaponmodel;
 	int gaitsequence;
-	vec3_t basevelocity;		// If standing on conveyor, e.g.
+	Vector basevelocity;		// If standing on conveyor, e.g.
 	int usehull;			// Use the crouched hull, or the regular player hull.
 	int oldbuttons;			// Latched buttons last time state updated.
 	int onground;			// -1 = in air, else pmove entity number
@@ -91,8 +91,8 @@ struct entity_state_s
 	float flFallVelocity;		// How fast we are falling
 	float fov;
 	int weaponanim;
-	vec3_t startpos;		// Parametric movement overrides
-	vec3_t endpos;
+	Vector startpos;		// Parametric movement overrides
+	Vector endpos;
 	float impacttime;
 	float starttime;
 	int iuser1;
@@ -103,10 +103,10 @@ struct entity_state_s
 	float fuser2;
 	float fuser3;
 	float fuser4;
-	vec3_t vuser1;
-	vec3_t vuser2;
-	vec3_t vuser3;
-	vec3_t vuser4;
+	Vector vuser1;
+	Vector vuser2;
+	Vector vuser3;
+	Vector vuser4;
 };
 
 typedef struct clientdata_s

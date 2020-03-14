@@ -1,75 +1,102 @@
+/*
+
+Remastered Date: Mar 13 2020
+
+*/
+
 #include "precompiled.h"
+#include "..\weapons.h"
 
-LINK_ENTITY_TO_CLASS(weapon_m3, CM3)
+#ifndef CLIENT_DLL
 
-void CM3::Spawn()
-{
-	Precache();
-
-	m_iId = WEAPON_KSG12;
-	SET_MODEL(edict(), "models/w_m3.mdl");
-
-	m_iDefaultAmmo = iinfo()->m_iMaxClip;
-
-	// Get ready to fall down
-	FallInit();
-
-	// extend
-	CBasePlayerWeapon::Spawn();
-}
+unsigned short CM3::m_usEvent = 0;
+int CM3::m_iShell = 0;
 
 void CM3::Precache()
 {
 	PRECACHE_MODEL("models/v_m3.mdl");
 	PRECACHE_MODEL("models/w_m3.mdl");
+	PRECACHE_MODEL("models/p_m3.mdl");
 
-	m_iShellId = m_iShell = PRECACHE_MODEL("models/shotgunshell.mdl");
-
-	PRECACHE_SOUND("weapons/m3-1.wav");
 	PRECACHE_SOUND("weapons/m3_insertshell.wav");
 	PRECACHE_SOUND("weapons/m3_pump.wav");
 	PRECACHE_SOUND("weapons/reload1.wav");
 	PRECACHE_SOUND("weapons/reload3.wav");
 
-	m_usFireM3 = PRECACHE_EVENT(1, "events/m3.sc");
+	m_usEvent = PRECACHE_EVENT(1, "events/m3.sc");
+	m_iShell = PRECACHE_MODEL("models/shotgunshell.mdl");
 }
 
-BOOL CM3::Deploy()
+#endif
+
+void CM3::Think(void)
 {
-	return DefaultDeploy("models/v_m3.mdl", "models/p_m3.mdl", M3_DRAW, "shotgun", UseDecrement() != FALSE);
+	if (m_pPlayer->m_afButtonReleased & IN_ATTACK)
+		m_bAllowNextEmptySound = true;	// only one empty sound per time.
 }
 
-BOOL CM3::PlayEmptySound()
+bool CM3::Deploy()
 {
-	BOOL result = CBasePlayerWeapon::PlayEmptySound();
-	m_iPlayEmptySound = 0;
-	return result;
+	m_bAllowNextEmptySound = true;
+
+	return DefaultDeploy("models/v_m3.mdl", "models/p_m3.mdl", M3_DRAW, "shotgun");
+}
+
+void CM3::PostFrame(void)
+{
+	if (m_bInReload)
+	{
+		if (m_flNextInsertAnim <= gpGlobals->time && m_iClip < m_pItemInfo->m_iMaxClip)
+		{
+			SendWeaponAnim(M3_RELOAD);
+			m_pPlayer->SetAnimation(PLAYER_RELOAD);
+
+			m_flNextInsertAnim = gpGlobals->time + KSG12_TIME_INSERT;
+		}
+
+		if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] > 0 && m_flNextAddAmmo <= gpGlobals->time && m_iClip < m_pItemInfo->m_iMaxClip)
+		{
+			m_iClip++;
+			m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
+
+			m_flNextAddAmmo = gpGlobals->time + KSG12_TIME_INSERT;	// yeah, that's right, not KSG12_TIME_ADD_AMMO.
+			// TODO: reload sfx.
+		}
+
+		if (((m_iClip >= m_pItemInfo->m_iMaxClip || m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0) && m_flNextInsertAnim <= gpGlobals->time)
+			|| m_bSetForceStopReload || m_pPlayer->pev->button & (IN_ATTACK | IN_RUN))
+		{
+			SendWeaponAnim(M3_PUMP);
+			m_pPlayer->m_flNextAttack = KSG12_TIME_AFTER_RELOAD;
+			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + KSG12_TIME_AFTER_RELOAD;
+
+			m_bInReload = false;
+		}
+	}
+	else
+		CBaseWeapon::PostFrame();	// for emergency.
 }
 
 void CM3::PrimaryAttack()
 {
-	Vector vecAiming, vecSrc, vecDir;
-	int flag;
-
 	// don't fire underwater
 	if (m_pPlayer->pev->waterlevel == 3)
 	{
 		PlayEmptySound();
-		m_flNextPrimaryAttack = GetNextAttackDelay(0.15);
+		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.15f;
 		return;
 	}
 
 	if (m_iClip <= 0)
 	{
-		if (!m_fInSpecialReload)
-		{
-			PlayEmptySound();
+		PlayEmptySound();
 
-			if (TheBots)
-			{
-				TheBots->OnEvent(EVENT_WEAPON_FIRED_ON_EMPTY, m_pPlayer);
-			}
+#ifndef CLIENT_DLL
+		if (TheBots)
+		{
+			TheBots->OnEvent(EVENT_WEAPON_FIRED_ON_EMPTY, m_pPlayer);
 		}
+#endif
 
 		Reload();
 		return;
@@ -85,19 +112,10 @@ void CM3::PrimaryAttack()
 
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 
-	vecSrc = m_pPlayer->GetGunPosition();
-	vecAiming = gpGlobals->v_forward;
+	int iSeedOfs = m_pPlayer->FireBuckshots(KSG12_PROJECTILE_COUNT, m_pPlayer->GetGunPosition(), gpGlobals->v_forward, KSG12_CONE_VECTOR, KSG12_EFFECTIVE_RANGE, KSG12_DAMAGE, m_pPlayer->random_seed);
 
-	float flBaseDamage = M3_DAMAGE;
-	m_pPlayer->FireBuckshots(9, vecSrc, vecAiming, M3_CONE_VECTOR, 3000, 0, flBaseDamage);
-
-#ifdef CLIENT_WEAPONS
-	flag = FEV_NOTHOST;
-#else
-	flag = 0;
-#endif
-
-	PLAYBACK_EVENT_FULL(flag, m_pPlayer->edict(), m_usFireM3, 0, (float *)&g_vecZero, (float *)&g_vecZero, 0, 0, 0, 0, FALSE, FALSE);
+#ifndef CLIENT_DLL
+	PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER, m_pPlayer->edict(), m_usEvent, 0, (float *)&g_vecZero, (float *)&g_vecZero, 0, 0, int(m_pPlayer->pev->punchangle.x * 100.0f), m_pPlayer->random_seed, FALSE, FALSE);
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 	{
@@ -105,61 +123,75 @@ void CM3::PrimaryAttack()
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", SUIT_SENTENCE, SUIT_REPEAT_OK);
 	}
 
-	m_flNextPrimaryAttack = GetNextAttackDelay(0.875);
-	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.875f;
+	// shell should be placed at SV side.
+	m_pPlayer->m_flEjectBrass = gpGlobals->time + KSG12_SHELL_EJECT;
+	m_pPlayer->m_iShellModelIndex = m_iShell;
+#else
+	static event_args_t args;
+	Q_memset(&args, NULL, sizeof(args));
+
+	args.angles = m_pPlayer->pev->v_angle;
+	args.bparam1 = false;
+	args.bparam2 = false;
+	args.ducking = gEngfuncs.pEventAPI->EV_LocalPlayerDucking();
+	args.entindex = gEngfuncs.GetLocalPlayer()->index;
+	args.flags = FEV_NOTHOST | FEV_RELIABLE | FEV_CLIENT;
+	args.fparam1 = 0;
+	args.fparam2 = 0;
+	args.iparam1 = int(m_pPlayer->pev->punchangle.x * 100.0f);
+	args.iparam2 = m_pPlayer->random_seed;
+	args.origin = m_pPlayer->pev->origin;
+	args.velocity = m_pPlayer->pev->velocity;
+
+	EV_FireM3(&args);
+#endif
+
+	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + KSG12_FIRE_INTERVAL;
 
 	if (m_iClip != 0)
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.5f;
 	else
-		m_flTimeWeaponIdle = 0.875f;
-
-	m_fInSpecialReload = 0;
+		m_flTimeWeaponIdle = KSG12_FIRE_INTERVAL;
 
 	if (m_pPlayer->pev->flags & FL_ONGROUND)
-		m_pPlayer->pev->punchangle.x -= UTIL_SharedRandomLong(m_pPlayer->random_seed + 1, 4, 6);
+		m_pPlayer->pev->punchangle.x -= UTIL_SharedRandomLong(m_pPlayer->random_seed + iSeedOfs, 4, 6);
 	else
-		m_pPlayer->pev->punchangle.x -= UTIL_SharedRandomLong(m_pPlayer->random_seed + 1, 8, 11);
-
-	m_pPlayer->m_flEjectBrass = gpGlobals->time + 0.45f;
+		m_pPlayer->pev->punchangle.x -= UTIL_SharedRandomLong(m_pPlayer->random_seed + iSeedOfs, 8, 11);
 }
 
-void CM3::Reload()
+void CM3::SecondaryAttack(void)
 {
-	if (!DefaultShotgunReload(M3_RELOAD, M3_START_RELOAD, 0.45f, 0.55f))
-	{
-		/* do nothing */
-	}
+#ifdef CLIENT_DLL
+	// TODO: client should have the zoom now.
+#endif
 }
 
-void CM3::WeaponIdle()
+void CM3::WeaponIdle(void)
 {
-	ResetEmptySound();
-	m_pPlayer->GetAutoaimVector(AUTOAIM_5DEGREES);
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.7f;	// this KSG12 model has looping vfx.
+	SendWeaponAnim(M3_IDLE);
+}
 
-	if (m_flTimeWeaponIdle < UTIL_WeaponTimeBase())
-	{
-		if (m_iClip == 0 && m_fInSpecialReload == 0 && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType])
-		{
-			Reload();
-		}
-		else if (m_fInSpecialReload != 0)
-		{
-			if (m_iClip != iinfo()->m_iMaxClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType])
-			{
-				Reload();
-			}
-			else
-			{
-				// reload debounce has timed out
-				SendWeaponAnim(M3_PUMP, UseDecrement() != FALSE);
+bool CM3::Reload(void)
+{
+	if (m_iClip >= m_pItemInfo->m_iMaxClip || m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
+		return false;
 
-				m_fInSpecialReload = 0;
-				m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.5f;
-			}
-		}
-		else
-		{
-			SendWeaponAnim(M3_IDLE, UseDecrement() != FALSE);
-		}
-	}
+	m_iShotsFired = 0;
+	m_bInReload = true;
+	m_pPlayer->m_flNextAttack = KSG12_TIME_START_RELOAD;
+	m_flNextInsertAnim = gpGlobals->time + KSG12_TIME_START_RELOAD;
+	m_flNextAddAmmo = gpGlobals->time + KSG12_TIME_ADD_AMMO + KSG12_TIME_START_RELOAD;
+
+	SendWeaponAnim(M3_START_RELOAD);
+	return true;
+}
+
+void CM3::PlayEmptySound(void)
+{
+	if (!m_bAllowNextEmptySound)
+		return;
+
+	m_bAllowNextEmptySound = false;
+	CBaseWeapon::PlayEmptySound();
 }

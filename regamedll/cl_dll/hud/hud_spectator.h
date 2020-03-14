@@ -19,6 +19,9 @@ Created Date: 10 Mar 2020
 #define OVERVIEW_TILE_SIZE 128
 #define OVERVIEW_MAX_LAYERS 1
 
+// defaults for clientinfo messages
+#define IS_FIRSTPERSON_SPEC ( g_iUser1 == OBS_IN_EYE || (g_iUser1 && (gHUD::m_Spectator.m_pip->value == INSET_IN_EYE)) )
+
 typedef struct cameraWayPoint_s
 {
 	float time;

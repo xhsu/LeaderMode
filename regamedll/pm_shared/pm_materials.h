@@ -28,20 +28,20 @@
 
 #pragma once
 
-const int MAX_TEXTURES           = 1024; // max number of textures loaded
-const int MAX_TEXTURENAME_LENGHT = 17;   // only load first n chars of name
+constexpr int MAX_TEXTURES           = 1024; // max number of textures loaded
+constexpr int MAX_TEXTURENAME_LENGHT = 17;   // only load first n chars of name
 
 // Texture types
-const char CHAR_TEX_CONCRETE = 'C'; // Cinder block
-const char CHAR_TEX_METAL    = 'M'; // Metal
-const char CHAR_TEX_DIRT     = 'D';
-const char CHAR_TEX_VENT     = 'V';
-const char CHAR_TEX_GRATE    = 'G';
-const char CHAR_TEX_TILE     = 'T'; // Ceiling tile
-const char CHAR_TEX_SLOSH    = 'S';
-const char CHAR_TEX_WOOD     = 'W';
-const char CHAR_TEX_COMPUTER = 'P';
-const char CHAR_TEX_GRASS    = 'X';
-const char CHAR_TEX_GLASS    = 'Y';
-const char CHAR_TEX_FLESH    = 'F';
-const char CHAR_TEX_SNOW     = 'N';
+constexpr char CHAR_TEX_CONCRETE = 'C'; // Cinder block
+constexpr char CHAR_TEX_METAL    = 'M'; // Metal
+constexpr char CHAR_TEX_DIRT     = 'D';
+constexpr char CHAR_TEX_VENT     = 'V';
+constexpr char CHAR_TEX_GRATE    = 'G';
+constexpr char CHAR_TEX_TILE     = 'T'; // Ceiling tile
+constexpr char CHAR_TEX_SLOSH    = 'S';
+constexpr char CHAR_TEX_WOOD     = 'W';
+constexpr char CHAR_TEX_COMPUTER = 'P';
+constexpr char CHAR_TEX_GRASS    = 'X';
+constexpr char CHAR_TEX_GLASS    = 'Y';
+constexpr char CHAR_TEX_FLESH    = 'F';
+constexpr char CHAR_TEX_SNOW     = 'N';

@@ -31,9 +31,9 @@ typedef struct event_args_s
 	// Transmitted
 	int		entindex;
 
-	float	origin[3];
-	float	angles[3];
-	float	velocity[3];
+	Vector	origin;
+	Vector	angles;
+	Vector	velocity;
 
 	int		ducking;
 

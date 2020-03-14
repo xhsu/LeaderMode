@@ -199,8 +199,6 @@ MSG_FUNC(ResetHUD)
 	return TRUE;
 }
 
-int g_iFreezeTimeOver = 0;	// MOVEME : hud_scoreboard.cpp
-
 MSG_FUNC(InitHUD)
 {
 	// this msg have no arguments.
@@ -210,7 +208,22 @@ MSG_FUNC(InitHUD)
 		pHudElem->InitHUDData();
 	}
 
-	g_iFreezeTimeOver = 0;
+	g_bFreezeTimeOver = false;
+
+	Q_memset(g_PlayerExtraInfo, NULL, sizeof(g_PlayerExtraInfo));
+
+	// UNDONE: rain
+	//ResetRain();
+
+	// reset round time
+	int iTime = 0;
+	gHUD::m_roundTimer.MsgFunc_RoundTime(iTime);
+
+	// reinitialize models. We assume that server already precached all models.
+	g_iRShell = gEngfuncs.pEventAPI->EV_FindModelIndex("models/rshell.mdl");
+	g_iPShell = gEngfuncs.pEventAPI->EV_FindModelIndex("models/pshell.mdl");
+	g_iShotgunShell = gEngfuncs.pEventAPI->EV_FindModelIndex("models/shotgunshell.mdl");
+	g_iBlackSmoke = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/black_smoke4.spr");
 
 	/* UNDONE : Fog
 	g_FogParameters.density = 0;
@@ -1002,6 +1015,17 @@ MSG_FUNC(Brass)
 	//READ_BYTE();	// unused, lifetime. by default it's 2.5sec.
 	int iPlayerId = READ_BYTE();
 
+	if (EV_IsLocal(iPlayerId))
+	{
+		if (!cl_righthand->value)
+			vecVelocity *= -1.0f;
+
+		vecOrigin = gEngfuncs.GetViewModel()->attachment[1];	// use the weapon attachment instead.
+		vecVelocity *= 1.5f;
+		vecVelocity.z += 45.0f;
+	}
+
+	EV_EjectBrass(vecOrigin, vecVelocity, flRotation, iModelIndex, iSoundType);
 	return TRUE;
 }
 

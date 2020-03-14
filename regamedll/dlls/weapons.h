@@ -173,6 +173,8 @@ constexpr float USP_DAMAGE          = 30.0f;
 constexpr float USP_RANGE_MODIFER   = 0.79f;
 constexpr float USP_RELOAD_TIME     = 2.66f;	// TODO: model needs to adjust.
 constexpr float USP_FIRE_INTERVAL	= 0.15f;
+constexpr float	USP_EFFECTIVE_RANGE = 4096.0f;
+constexpr int	USP_PENETRATION		= 1;	// 1 means it can't penetrate anything.
 
 enum usp_e
 {
@@ -401,9 +403,17 @@ enum m249_e
 	M249_DRAW,
 };
 
-const float M3_MAX_SPEED   = 230.0f;
-const float M3_DAMAGE      = 20.0f;
-const Vector M3_CONE_VECTOR = Vector(0.0675, 0.0675, 0.0); // special shotgun spreads
+constexpr float KSG12_MAX_SPEED			= 230.0f;
+constexpr float KSG12_DAMAGE			= 20.0f;
+constexpr int	KSG12_PROJECTILE_COUNT	= 9;
+constexpr float	KSG12_EFFECTIVE_RANGE	= 3000.0f;
+constexpr float KSG12_FIRE_INTERVAL		= 0.9f;
+constexpr float KSG12_SHELL_EJECT		= 0.66f;
+constexpr float KSG12_TIME_START_RELOAD = 0.566f;
+constexpr float KSG12_TIME_INSERT		= 0.5f;
+constexpr float KSG12_TIME_ADD_AMMO		= 0.45f;
+constexpr float KSG12_TIME_AFTER_RELOAD = 1.033f;
+const Vector KSG12_CONE_VECTOR = Vector(0.0675f, 0.0675f, 0.0f); // special shotgun spreads
 
 enum m3_e
 {
@@ -415,6 +425,37 @@ enum m3_e
 	M3_START_RELOAD,
 	M3_DRAW,
 	M3_HOLSTER,
+};
+
+class CM3 : public CBaseWeapon
+{
+#ifndef CLIENT_DLL
+public:	// SV exclusive variables.
+	static unsigned short m_usEvent;
+	static int m_iShell;
+
+public:	// SV exclusive functions.
+	virtual void	Precache		(void);
+#endif
+
+public:
+	bool	m_bAllowNextEmptySound;
+	float	m_flNextInsertAnim;
+	float	m_flNextAddAmmo;
+	bool	m_bSetForceStopReload;
+
+public:	// basic logic funcs
+	virtual void	Think			(void);
+	virtual bool	Deploy			(void);
+	virtual void	PostFrame		(void);
+	virtual void	PrimaryAttack	(void);
+	virtual void	SecondaryAttack	(void);
+	virtual void	WeaponIdle		(void);
+	virtual	bool	Reload			(void);
+
+public:	// util funcs
+	virtual	float	GetMaxSpeed		(void) { return KSG12_MAX_SPEED; }
+	virtual	void	PlayEmptySound	(void);
 };
 
 const float M4A1_MAX_SPEED         = 230.0f;
@@ -676,8 +717,7 @@ void AddMultiDamage(entvars_t *pevInflictor, CBaseEntity *pEntity, float flDamag
 void SpawnBlood(Vector vecSpot, int bloodColor, float flDamage);
 int DamageDecal(CBaseEntity *pEntity, int bitsDamageType);
 void DecalGunshot(TraceResult *pTrace, int iBulletType, bool ClientOnly, entvars_t *pShooter, bool bHitMetal);
-void EjectBrass(const Vector &vecOrigin, const Vector &vecLeft, const Vector &vecVelocity, float rotation, int model, int soundtype, int entityIndex);
-void EjectBrass2(const Vector &vecOrigin, const Vector &vecVelocity, float rotation, int model, int soundtype, entvars_t *pev);
+void EjectBrass(const Vector &vecOrigin, const Vector &vecVelocity, float rotation, int model, int soundtype, int entityIndex);
 void UTIL_PrecacheOtherWeapon(WeaponIdType iId);
 BOOL CanAttack(float attack_time, float curtime, BOOL isPredicted);
 #endif

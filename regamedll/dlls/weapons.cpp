@@ -78,38 +78,18 @@ void DecalGunshot(TraceResult *pTrace, int iBulletType, bool ClientOnly, entvars
 }
 
 // EjectBrass - tosses a brass shell from passed origin at passed velocity
-void EjectBrass(const Vector &vecOrigin, const Vector &vecLeft, const Vector &vecVelocity, float rotation, int model, int soundtype, int entityIndex)
+void EjectBrass(const Vector &vecOrigin, const Vector &vecVelocity, float rotation, int model, int soundtype, int entityIndex)
 {
-	bool useNewBehavior = AreRunningCZero();
-
 	MESSAGE_BEGIN(MSG_PVS, gmsgBrass, vecOrigin);
-		if (!useNewBehavior)
-		{
-			// noxref
-			WRITE_BYTE(TE_MODEL);
-		}
 		WRITE_COORD(vecOrigin.x);	// origin
 		WRITE_COORD(vecOrigin.y);
 		WRITE_COORD(vecOrigin.z);
-		if (!useNewBehavior)
-		{
-			// noxref
-			// it parses the client side, but does not use it
-			WRITE_COORD(vecLeft.x);
-			WRITE_COORD(vecLeft.y);
-			WRITE_COORD(vecLeft.z);
-		}
 		WRITE_COORD(vecVelocity.x);	// velocity
 		WRITE_COORD(vecVelocity.y);
 		WRITE_COORD(vecVelocity.z);
 		WRITE_ANGLE(rotation);
 		WRITE_SHORT(model);
 		WRITE_BYTE(soundtype);
-		if (!useNewBehavior)
-		{
-			// noxref
-			WRITE_BYTE(25);// 2.5 seconds
-		}
 		WRITE_BYTE(entityIndex);
 	MESSAGE_END();
 }
@@ -299,6 +279,10 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 		p = new CUSP;
 		break;
 
+	case WEAPON_KSG12:
+		p = new CM3;
+		break;
+
 	default:
 		return nullptr;
 	}
@@ -357,7 +341,17 @@ void CBaseWeapon::PostFrame()
 	if (m_pPlayer->m_flEjectBrass != 0 && m_pPlayer->m_flEjectBrass <= gpGlobals->time)
 	{
 		m_pPlayer->m_flEjectBrass = 0;
-		//EjectBrassLate(); WPN_UNDONE
+
+		UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
+
+		Vector vecUp = RANDOM_FLOAT(100, 150) * gpGlobals->v_up;
+		Vector vecRight = RANDOM_FLOAT(50, 70) * gpGlobals->v_right;
+
+		Vector vecShellVelocity = (m_pPlayer->pev->velocity + vecRight + vecUp) + gpGlobals->v_forward * 25;
+		int soundType = (m_iId == WEAPON_STRIKER || m_iId == WEAPON_KSG12) ? 2 : 1;
+
+		EjectBrass(m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs + gpGlobals->v_up * -9 + gpGlobals->v_forward * 16,
+			vecShellVelocity, m_pPlayer->pev->angles.yaw, m_pPlayer->m_iShellModelIndex, soundType, m_pPlayer->entindex());
 	}
 
 	if (m_bInReload && m_pPlayer->m_flNextAttack <= UTIL_WeaponTimeBase())
@@ -439,8 +433,12 @@ void CBaseWeapon::PostFrame()
 bool CBaseWeapon::Holster(void)
 {
 	m_bInReload = false;
+
 	m_pPlayer->pev->viewmodel = 0;
 	m_pPlayer->pev->weaponmodel = 0;
+
+	m_pPlayer->m_flEjectBrass = 0;	// prevents famous AWP bug.
+
 	return true;
 }
 
@@ -633,7 +631,7 @@ void CBaseWeapon::ReloadSound()
 		if (pPlayer == m_pPlayer)
 			continue;
 
-		if (pPlayer->m_hObserverTarget->entindex() == m_pPlayer->entindex() && pPlayer->m_iObserverLastMode == OBS_IN_EYE)	// avoid the sfx send to the observer.
+		if (pPlayer->m_iObserverLastMode == OBS_IN_EYE && pPlayer->m_hObserverTarget.IsValid() && pPlayer->m_hObserverTarget->entindex() == m_pPlayer->entindex())	// avoid the sfx send to the observer.
 			continue;
 
 		float distance = (m_pPlayer->pev->origin - pPlayer->pev->origin).Length();

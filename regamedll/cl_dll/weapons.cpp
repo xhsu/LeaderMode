@@ -16,8 +16,6 @@ std::shared_ptr<pseudo_global_vars_s> gpGlobals;
 
 CBaseWeapon* g_rgpClientWeapons[LAST_WEAPON];
 
-static CUSP* g_USP = (CUSP*)CBaseWeapon::Give(WEAPON_USP, &gPseudoPlayer);
-
 //
 // PSEUDO-PLAYER
 //
@@ -61,6 +59,30 @@ Vector CBasePlayer::FireBullets3(Vector vecSrc, Vector vecDirShooting, float flS
 	return Vector(x * flSpread, y * flSpread, 0);
 }
 
+int CBasePlayer::FireBuckshots(ULONG cShots, const Vector& vecSrc, const Vector& vecDirShooting, const Vector& vecSpread, float flDistance, int iDamage, int shared_rand)
+{
+	int iSeedOfs = 0;	// keep track how many times we used the shared_rand.
+
+	for (ULONG iShot = 1; iShot <= cShots; iShot++)
+	{
+		// get circular gaussian spread
+		float x, y, z;
+
+		do
+		{
+			x = UTIL_SharedRandomFloat(shared_rand + iSeedOfs, -0.5, 0.5) + UTIL_SharedRandomFloat(shared_rand + iSeedOfs + 1, -0.5, 0.5);
+			y = UTIL_SharedRandomFloat(shared_rand + iSeedOfs + 2, -0.5, 0.5) + UTIL_SharedRandomFloat(shared_rand + iSeedOfs + 3, -0.5, 0.5);
+			z = x * x + y * y;
+
+			// we used 4 times, thus we plus 4.
+			iSeedOfs += 4;
+		}
+		while (z > 1);
+	}
+
+	return iSeedOfs;
+}
+
 //
 // PSEUDO-WEAPON
 //
@@ -88,6 +110,10 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 	{
 	case WEAPON_USP:
 		p = new CUSP;
+		break;
+
+	case WEAPON_KSG12:
+		p = new CM3;
 		break;
 
 	default:
@@ -336,6 +362,7 @@ void HUD_InitClientWeapons(void)
 
 	Q_memset(&g_rgpClientWeapons, NULL, sizeof(g_rgpClientWeapons));
 
+	g_rgpClientWeapons[WEAPON_KSG12] = CBaseWeapon::Give(WEAPON_KSG12, &gPseudoPlayer);
 	g_rgpClientWeapons[WEAPON_USP] = CBaseWeapon::Give(WEAPON_USP, &gPseudoPlayer);
 }
 
@@ -395,7 +422,7 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 
 	for (i = 0; i < LAST_WEAPON; i++)
 	{
-		if (pWeapon->m_iId != i)
+		if (!g_rgpClientWeapons[i] || g_rgpClientWeapons[i]->m_iId != i)	// something wrong with this pointer..?
 			continue;
 
 		auto pCurrent = pWeapon;
@@ -480,6 +507,9 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	// Or if we don't have a weapon model deployed
 	if ((gPseudoPlayer.pev->deadflag != (DEAD_DISCARDBODY + 1)) && !CL_IsDead() && gPseudoPlayer.pev->viewmodel && !g_iUser1)
 	{
+		// LUNA: the weapon think would be called anyway.
+		pWeapon->Think();
+
 		if (g_bHoldingShield && pWeapon->m_bInReload && gPseudoPlayer.pev->button & IN_ATTACK2)	// fixed by referencing IDA.
 		{
 			gPseudoPlayer.m_flNextAttack = 0;
