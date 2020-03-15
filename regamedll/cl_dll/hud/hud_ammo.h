@@ -6,6 +6,12 @@ Created Date: Mar 11 2020
 
 #pragma once
 
+#define ACCURACY_AIR				(1 << 0) // accuracy depends on FL_ONGROUND
+#define ACCURACY_SPEED				(1 << 1)
+#define ACCURACY_DUCK				(1 << 2) // more accurate when ducking
+#define ACCURACY_MULTIPLY_BY_14		(1 << 3) // accuracy multiply to 1.4
+#define ACCURACY_MULTIPLY_BY_14_2	(1 << 4) // accuracy multiply to 1.4
+
 typedef struct
 {
 	unsigned char r, g, b, a;

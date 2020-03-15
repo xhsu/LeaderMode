@@ -4,7 +4,7 @@ Created Date: 08 Mar 2020
 
 */
 
-#include "cl_base.h"
+#include "precompiled.h"
 
 bool g_bHasDefuser = false;
 bool g_bHasNightvision = false;
@@ -57,21 +57,14 @@ MSG_FUNC(Health)
 {
 	BEGIN_READ(pbuf, iSize);
 
-	int x = READ_BYTE();
+	int iClient = READ_BYTE();
+	int iHealth = READ_SHORT();
 
-	if (!READ_OK())
-	{
-		BEGIN_READ(pbuf, iSize);
-		x = READ_SHORT();
-	}
+	g_PlayerExtraInfo[iClient].health = iHealth;
 
-	if (!READ_OK())
-	{
-		BEGIN_READ(pbuf, iSize);
-		x = READ_LONG();
-	}
+	if (iClient == gEngfuncs.GetLocalPlayer()->index)
+		gHUD::m_Health.MsgFunc_Health(iHealth);
 
-	gHUD::m_Health.MsgFunc_Health(x);
 	return TRUE;
 }
 
@@ -416,8 +409,7 @@ MSG_FUNC(SetFOV)
 {
 	BEGIN_READ(pbuf, iSize);
 
-	int iFOV = READ_BYTE();
-
+	gHUD::m_iFOV = READ_BYTE();
 	return TRUE;
 }
 

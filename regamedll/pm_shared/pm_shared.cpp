@@ -1,8 +1,7 @@
 #include "precompiled.h"
 
 #ifdef _CLIENT_DLL
-#include "../cl_dll/cl_base.h"
-const float HalfHumanHeight = 36.0f;	// came from nav.h of ReGameDLL-CS
+constexpr float HalfHumanHeight = 36.0f;	// came from nav.h of ReGameDLL-CS
 #endif
 
 BOOL pm_shared_initialized = FALSE;

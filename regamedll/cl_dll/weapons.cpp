@@ -4,7 +4,7 @@ Created Date: Mar 12 2020
 
 */
 
-#include "cl_base.h"
+#include "precompiled.h"
 
 int g_runfuncs = 0;
 double g_flGameTime = 0;
@@ -113,7 +113,7 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 		break;
 
 	case WEAPON_KSG12:
-		p = new CM3;
+		p = new CKSG12;
 		break;
 
 	default:
@@ -150,14 +150,9 @@ void CBaseWeapon::PostFrame()
 	{
 		if (m_pPlayer->m_bResumeZoom)
 		{
-			m_pPlayer->m_iFOV = m_pPlayer->m_iLastZoom;
-			m_pPlayer->pev->fov = m_pPlayer->m_iFOV;
-
-			if (m_pPlayer->m_iFOV == m_pPlayer->m_iLastZoom)
-			{
-				// return the fade level in zoom.
-				m_pPlayer->m_bResumeZoom = false;
-			}
+			// return the fade level in zoom.
+			m_pPlayer->pev->fov = m_pPlayer->m_iLastZoom;
+			m_pPlayer->m_bResumeZoom = false;
 		}
 	}
 
@@ -179,7 +174,7 @@ void CBaseWeapon::PostFrame()
 		m_bInReload = false;
 	}
 
-	if ((usableButtons & IN_ATTACK2) && CanAttack(m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), TRUE))	// UseDecrement()
+	if ((usableButtons & IN_ATTACK2) && m_flNextSecondaryAttack <= UTIL_WeaponTimeBase())	// UseDecrement()
 	{
 		SecondaryAttack();
 		m_pPlayer->pev->button &= ~IN_ATTACK2;
@@ -244,6 +239,10 @@ void CBaseWeapon::PostFrame()
 
 bool CBaseWeapon::Holster(void)
 {
+	m_bInZoom = false;
+	g_vecGunOfsGoal = g_vecZero;
+	g_flGunOfsMovingSpeed = 10.0f;
+
 	m_bInReload = false;
 	m_pPlayer->pev->viewmodel = 0;
 	m_pPlayer->pev->weaponmodel = 0;
@@ -276,7 +275,6 @@ bool CBaseWeapon::DefaultDeploy(const char* szViewModel, const char* szWeaponMod
 	m_flTimeWeaponIdle = 1.5f;
 	m_flDecreaseShotsFired = gpGlobals->time;
 
-	m_pPlayer->m_iFOV = DEFAULT_FOV;
 	m_pPlayer->pev->fov = DEFAULT_FOV;
 	m_pPlayer->m_iLastZoom = DEFAULT_FOV;
 	m_pPlayer->m_bResumeZoom = false;
@@ -307,6 +305,9 @@ bool CBaseWeapon::DefaultReload(int iClipSize, int iAnim, float fDelay)
 	{
 		return false;
 	}
+
+	if (m_bInZoom)
+		SecondaryAttack();	// close scope when we reload.
 
 	m_pPlayer->m_flNextAttack = fDelay;
 
@@ -425,11 +426,11 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		if (!g_rgpClientWeapons[i] || g_rgpClientWeapons[i]->m_iId != i)	// something wrong with this pointer..?
 			continue;
 
-		auto pCurrent = pWeapon;
+		auto pCurrent = g_rgpClientWeapons[i];
 		weapon_data_t* pfrom = from->weapondata + i;
 
 		pCurrent->m_bInReload = pfrom->m_fInReload;
-		//pCurrent->m_fInSpecialReload = pfrom->m_fInSpecialReload;
+		pCurrent->m_bInZoom = pfrom->m_fInSpecialReload;
 		pCurrent->m_iClip = pfrom->m_iClip;
 		pCurrent->m_flNextPrimaryAttack = pfrom->m_flNextPrimaryAttack;
 		pCurrent->m_flNextSecondaryAttack = pfrom->m_flNextSecondaryAttack;
@@ -598,7 +599,7 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		pto->m_flTimeWeaponIdle = pCurrent->m_flTimeWeaponIdle;
 
 		pto->m_fInReload = pCurrent->m_bInReload;
-		//pto->m_fInSpecialReload = pCurrent->m_fInSpecialReload;
+		pto->m_fInSpecialReload = pCurrent->m_bInZoom;
 		//pto->m_flNextReload = pCurrent->m_flNextReload / 1s;
 		//pto->fuser2 = pCurrent->m_flStartThrow.time_since_epoch() / 1s;
 		//pto->fuser3 = pCurrent->m_flReleaseThrow.time_since_epoch() / 1s;

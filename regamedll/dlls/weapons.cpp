@@ -169,11 +169,8 @@ void WeaponsPrecache()
 	UTIL_PrecacheOtherWeapon(WEAPON_HEGRENADE);
 	UTIL_PrecacheOtherWeapon(WEAPON_SMOKEGRENADE);
 
-	if (g_pGameRules->IsDeathmatch())
-	{
-		// container for dropped deathmatch weapons
-		UTIL_PrecacheOther("weaponbox");
-	}
+	// container for dropped deathmatch weapons
+	UTIL_PrecacheOther("weaponbox");
 
 	g_sModelIndexFireball   = PRECACHE_MODEL("sprites/zerogxplode.spr");	// fireball
 	g_sModelIndexWExplosion = PRECACHE_MODEL("sprites/WXplo1.spr");			// underwater fireball
@@ -212,6 +209,9 @@ void WeaponsPrecache()
 
 	PRECACHE_SOUND("items/weapondrop1.wav");	// weapon falls to the ground
 	PRECACHE_SOUND("weapons/generic_reload.wav");
+
+	PRECACHE_SOUND("weapons/steelsight_in.wav");	// as its name indecates, steelsight.
+	PRECACHE_SOUND("weapons/steelsight_out.wav");
 }
 
 BOOL CanAttack(float attack_time, float curtime, BOOL isPredicted)
@@ -280,7 +280,7 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 		break;
 
 	case WEAPON_KSG12:
-		p = new CM3;
+		p = new CKSG12;
 		break;
 
 	default:
@@ -327,14 +327,9 @@ void CBaseWeapon::PostFrame()
 	{
 		if (m_pPlayer->m_bResumeZoom)
 		{
-			m_pPlayer->m_iFOV = m_pPlayer->m_iLastZoom;
-			m_pPlayer->pev->fov = m_pPlayer->m_iFOV;
-
-			if (m_pPlayer->m_iFOV == m_pPlayer->m_iLastZoom)
-			{
-				// return the fade level in zoom.
-				m_pPlayer->m_bResumeZoom = false;
-			}
+			// return the fade level in zoom.
+			m_pPlayer->pev->fov = m_pPlayer->m_iLastZoom;
+			m_pPlayer->m_bResumeZoom = false;
 		}
 	}
 
@@ -366,7 +361,7 @@ void CBaseWeapon::PostFrame()
 		m_bInReload = false;
 	}
 
-	if ((usableButtons & IN_ATTACK2) && CanAttack(m_flNextSecondaryAttack, UTIL_WeaponTimeBase(), TRUE))	// UseDecrement()
+	if ((usableButtons & IN_ATTACK2) && m_flNextSecondaryAttack <= UTIL_WeaponTimeBase())	// UseDecrement()
 	{
 		SecondaryAttack();
 		m_pPlayer->pev->button &= ~IN_ATTACK2;
@@ -433,6 +428,7 @@ void CBaseWeapon::PostFrame()
 bool CBaseWeapon::Holster(void)
 {
 	m_bInReload = false;
+	m_bInZoom = false;
 
 	m_pPlayer->pev->viewmodel = 0;
 	m_pPlayer->pev->weaponmodel = 0;
@@ -475,7 +471,7 @@ void CBaseWeapon::UpdateClientData(void)
 			bSend = true;
 	}
 
-	if (m_iClip != m_iClientClip || state != m_iClientWeaponState || m_pPlayer->m_iFOV != m_pPlayer->m_iClientFOV)
+	if (m_iClip != m_iClientClip || state != m_iClientWeaponState || int(m_pPlayer->pev->fov) != m_pPlayer->m_iClientFOV)
 		bSend = true;
 
 	if (bSend)
@@ -557,7 +553,6 @@ bool CBaseWeapon::DefaultDeploy(const char* szViewModel, const char* szWeaponMod
 	m_flTimeWeaponIdle = 1.5f;
 	m_flDecreaseShotsFired = gpGlobals->time;
 
-	m_pPlayer->m_iFOV = DEFAULT_FOV;
 	m_pPlayer->pev->fov = DEFAULT_FOV;
 	m_pPlayer->m_iLastZoom = DEFAULT_FOV;
 	m_pPlayer->m_bResumeZoom = false;
@@ -608,6 +603,9 @@ bool CBaseWeapon::DefaultReload(int iClipSize, int iAnim, float fDelay)
 	{
 		return false;
 	}
+
+	if (m_bInZoom)
+		SecondaryAttack();	// close scope when we reload.
 
 	m_pPlayer->m_flNextAttack = fDelay;
 

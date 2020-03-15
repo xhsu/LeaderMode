@@ -202,6 +202,7 @@ namespace gHUD
 	extern float m_fOldTime;
 	extern double m_flTimeDelta;
 	extern int m_iFOV;
+	extern float m_flDisplayedFOV;
 	extern int m_iSpriteCount;
 	extern int m_iSpriteCountAllRes;
 	extern int m_iRes;

@@ -4,18 +4,22 @@ Created Date: 06 Mar 2020
 
 */
 
-#include "cl_base.h"
+#include "precompiled.h"
 
 float	v_idlescale;  // used by TFC for concussion grenade effect
 
-Vector v_origin, v_angles, v_cl_angles, v_sim_org, v_lastAngles, ev_punchangle;
+Vector	v_origin, v_angles, v_cl_angles, v_sim_org, v_lastAngles, ev_punchangle;
 
-Vector dead_viewangles(0, 0, 0); // fake viewangles, for fixing
-float  v_frametime, v_lastDistance;
-float  v_cameraRelaxAngle = 5.0f;
-float  v_cameraFocusAngle = 35.0f;
-int	   v_cameraMode = CAM_MODE_FOCUS;
-bool   v_resetCamera = true;
+Vector	dead_viewangles(0, 0, 0); // fake viewangles, for fixing
+float	v_frametime, v_lastDistance;
+float	v_cameraRelaxAngle = 5.0f;
+float	v_cameraFocusAngle = 35.0f;
+int		v_cameraMode = CAM_MODE_FOCUS;
+bool	v_resetCamera = true;
+Vector	g_vecGunCurOfs = Vector();
+Vector	g_vecGunOfsGoal = Vector();
+Vector	g_vecTranslatedCurGunOfs = Vector();
+float	g_flGunOfsMovingSpeed = 5.0f;
 
 // from PM_Shared.cpp
 extern int iJumpSpectator;
@@ -34,6 +38,8 @@ cvar_t* v_centerspeed;
 cvar_t* scr_ofsx;
 cvar_t* scr_ofsy;
 cvar_t* scr_ofsz;
+
+cvar_t* cl_gun_ofs[3];	// allow player to calibrate their guns.
 
 // These cvars are not registered (so users can't cheat), so set the ->value field directly
 // Register these cvars in V_Init() if needed for easy tweaking
@@ -781,14 +787,34 @@ void V_CalcGunAngle(ref_params_s* pparams)
 
 	viewent->angles[YAW] = pparams->viewangles[YAW] + pparams->crosshairangle[YAW];
 	viewent->angles[PITCH] = -pparams->viewangles[PITCH] + pparams->crosshairangle[PITCH] * 0.25;
-	viewent->angles[ROLL] -= v_idlescale * sin(pparams->time * v_iroll_cycle.value) * v_iroll_level.value;
+	viewent->angles[ROLL] -= v_idlescale * Q_sin(pparams->time * v_iroll_cycle.value) * v_iroll_level.value;
 
 	// don't apply all of the v_ipitch to prevent normally unseen parts of viewmodel from coming into view.
-	viewent->angles[PITCH] -= v_idlescale * sin(pparams->time * v_ipitch_cycle.value) * (v_ipitch_level.value * 0.5);
-	viewent->angles[YAW] -= v_idlescale * sin(pparams->time * v_iyaw_cycle.value) * v_iyaw_level.value;
+	viewent->angles[PITCH] -= v_idlescale * Q_sin(pparams->time * v_ipitch_cycle.value) * (v_ipitch_level.value * 0.5);
+	viewent->angles[YAW] -= v_idlescale * Q_sin(pparams->time * v_iyaw_cycle.value) * v_iyaw_level.value;
 
 	VectorCopy(viewent->angles, viewent->curstate.angles);
 	VectorCopy(viewent->angles, viewent->latched.prevangles);
+}
+
+/*
+==================
+V_CalcGunAimingOfs
+
+Provide an option for steel sight.
+==================
+*/
+void V_CalcGunAimingOfs(ref_params_s* pparams)
+{
+	// get ofs from cvar. (assuming player is calibrating)
+	if (cl_gun_ofs[0]->value || cl_gun_ofs[1]->value || cl_gun_ofs[2]->value)
+		g_vecGunOfsGoal = Vector(cl_gun_ofs[0]->value, cl_gun_ofs[1]->value, cl_gun_ofs[2]->value);
+
+	// move by dx.
+	g_vecGunCurOfs += (g_vecGunOfsGoal - g_vecGunCurOfs) * pparams->frametime * g_flGunOfsMovingSpeed;
+
+	// by this point, pparams->fwd, up and right are calculated.
+	g_vecTranslatedCurGunOfs = g_vecGunCurOfs.x * pparams->right + g_vecGunCurOfs.y * pparams->forward + g_vecGunCurOfs.z * pparams->up;
 }
 
 /*
@@ -798,7 +824,7 @@ V_CalcNormalRefdef
 */
 void V_CalcNormalRefdef(ref_params_s* pparams)
 {
-	cl_entity_t* ent, * view;
+	cl_entity_t* pPlayer, * pViewModel;
 	int				i;
 	Vector			angles;
 	float			bob, waterOffset;
@@ -814,16 +840,16 @@ void V_CalcNormalRefdef(ref_params_s* pparams)
 
 	if (gEngfuncs.IsSpectateOnly())
 	{
-		ent = gEngfuncs.GetEntityByIndex(g_iUser2);
+		pPlayer = gEngfuncs.GetEntityByIndex(g_iUser2);
 	}
 	else
 	{
-		// ent is the player model ( visible when out of body )
-		ent = gEngfuncs.GetLocalPlayer();
+		// pPlayer is the player model ( visible when out of body )
+		pPlayer = gEngfuncs.GetLocalPlayer();
 	}
 
 	// view is the weapon model (only visible from inside body)
-	view = gEngfuncs.GetViewModel();
+	pViewModel = gEngfuncs.GetViewModel();
 
 	// transform the view offset by the model's matrix to get the offset from
 	// model origin for the view
@@ -963,74 +989,47 @@ void V_CalcNormalRefdef(ref_params_s* pparams)
 	// Give gun our viewangles
 	if (pparams->health <= 0)
 	{
-		VectorCopy(dead_viewangles, view->angles);
+		VectorCopy(dead_viewangles, pViewModel->angles);
 	}
 	else
 	{
-		VectorCopy (pparams->cl_viewangles, view->angles);
+		VectorCopy (pparams->cl_viewangles, pViewModel->angles);
 	}
 
 	// set up gun position
 	V_CalcGunAngle(pparams);
 
 	// Use predicted origin as view origin.
-	VectorCopy (pparams->simorg, view->origin);
-	view->origin[2] += (waterOffset);
-	VectorAdd(view->origin, pparams->viewheight, view->origin);
+	VectorCopy (pparams->simorg, pViewModel->origin);
+	pViewModel->origin[2] += (waterOffset);
+	VectorAdd(pViewModel->origin, pparams->viewheight, pViewModel->origin);
 
 	// Let the viewmodel shake at about 10% of the amplitude
-	gEngfuncs.V_ApplyShake(view->origin, view->angles, 0.9);
+	gEngfuncs.V_ApplyShake(pViewModel->origin, pViewModel->angles, 0.9);
 
 	for (i = 0; i < 3; i++)
 	{
-		view->origin[i] += bob * 0.4 * pparams->forward[i];
+		pViewModel->origin[i] += bob * 0.4 * pparams->forward[i];
 	}
-	view->origin[2] += bob;
+	pViewModel->origin[2] += bob;
 
 	// throw in a little tilt.
-	view->angles[YAW] -= bob * 0.5;
-	view->angles[ROLL] -= bob * 1;
-	view->angles[PITCH] -= bob * 0.3;
+	pViewModel->angles.yaw -= bob * 0.5;
+	pViewModel->angles.roll -= bob * 1;
+	pViewModel->angles.pitch -= bob * 0.3;
 
-	// pushing the view origin down off of the same X/Z plane as the ent's origin will give the
-	// gun a very nice 'shifting' effect when the player looks up/down. If there is a problem
-	// with view model distortion, this may be a cause. (SJB).
-	view->origin[2] -= 1;
-
-	// fudge position around to keep amount of weapon visible
-	// roughly equal with different FOV
-	if (pparams->viewsize == 110)
-	{
-		view->origin[2] += 1;
-	}
-	else if (pparams->viewsize == 100)
-	{
-		view->origin[2] += 2;
-	}
-	else if (pparams->viewsize == 90)
-	{
-		view->origin[2] += 1;
-	}
-	else if (pparams->viewsize == 80)
-	{
-		view->origin[2] += 0.5;
-	}
+	// calc the gun steel sight ofs.
+	V_CalcGunAimingOfs(pparams);
+	pViewModel->origin += g_vecTranslatedCurGunOfs;
 
 	// Don't allow viewmodel, if we are in sniper scope
 	if (gHUD::m_iFOV <= 40)
-		view->model = NULL;
+		pViewModel->model = NULL;
 
 	// Add in the punchangle, if any
 	pparams->viewangles = pparams->viewangles + pparams->punchangle;
 
-#if 0
-	// Include client side punch, too
-	VectorAdd (pparams->viewangles, (float*)&ev_punchangle, pparams->viewangles);
-
-	V_DropPunchAngle (pparams->frametime, (float*)&ev_punchangle);
-#endif
 	// smooth out stair step ups
-#if 1
 	if (!pparams->smoothing && pparams->onground && pparams->simorg[2] - oldz > 0)
 	{
 		float steptime;
@@ -1046,13 +1045,12 @@ void V_CalcNormalRefdef(ref_params_s* pparams)
 		if (pparams->simorg[2] - oldz > 18)
 			oldz = pparams->simorg[2] - 18;
 		pparams->vieworg[2] += oldz - pparams->simorg[2];
-		view->origin[2] += oldz - pparams->simorg[2];
+		pViewModel->origin[2] += oldz - pparams->simorg[2];
 	}
 	else
 	{
 		oldz = pparams->simorg[2];
 	}
-#endif
 
 	static float lastorg[3];
 	Vector delta;
@@ -1113,7 +1111,7 @@ void V_CalcNormalRefdef(ref_params_s* pparams)
 
 					VectorAdd(pparams->simorg, delta, pparams->simorg);
 					VectorAdd(pparams->vieworg, delta, pparams->vieworg);
-					VectorAdd(view->origin, delta, view->origin);
+					VectorAdd(pViewModel->origin, delta, pViewModel->origin);
 
 				}
 			}
@@ -1139,10 +1137,10 @@ void V_CalcNormalRefdef(ref_params_s* pparams)
 		pitch /= -3.0;
 
 		// Slam local player's pitch value
-		ent->angles[0] = pitch;
-		ent->curstate.angles[0] = pitch;
-		ent->prevstate.angles[0] = pitch;
-		ent->latched.prevangles[0] = pitch;
+		pPlayer->angles[0] = pitch;
+		pPlayer->curstate.angles[0] = pitch;
+		pPlayer->prevstate.angles[0] = pitch;
+		pPlayer->latched.prevangles[0] = pitch;
 	}
 
 	// override all previous settings if the viewent isn't the client
@@ -1256,6 +1254,10 @@ void V_Init(void)
 	cl_bobup = gEngfuncs.pfnRegisterVariable("cl_bobup", "0.5", 0);
 	cl_waterdist = gEngfuncs.pfnRegisterVariable("cl_waterdist", "4", 0);
 	cl_chasedist = gEngfuncs.pfnRegisterVariable("cl_chasedist", "112", 0);
+
+	cl_gun_ofs[0] = gEngfuncs.pfnRegisterVariable("cl_gun_ofs_x", "0", 0);
+	cl_gun_ofs[1] = gEngfuncs.pfnRegisterVariable("cl_gun_ofs_y", "0", 0);
+	cl_gun_ofs[2] = gEngfuncs.pfnRegisterVariable("cl_gun_ofs_z", "0", 0);
 }
 
 

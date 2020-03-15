@@ -1267,10 +1267,10 @@ inline void CCSBot::StopRapidFire()
 
 inline CCSBot::ZoomType CCSBot::GetZoomLevel() const
 {
-	if (m_iFOV > 60.0f)
+	if (pev->fov > 60.0f)
 		return NO_ZOOM;
 
-	if (m_iFOV > 25.0f)
+	if (pev->fov > 25.0f)
 		return LOW_ZOOM;
 
 	return HIGH_ZOOM;

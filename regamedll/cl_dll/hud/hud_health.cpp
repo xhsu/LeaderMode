@@ -4,7 +4,7 @@ Created Date: Mar 11 2020
 
 */
 
-#include "cl_base.h"
+#include "precompiled.h"
 
 #define PAIN_NAME "sprites/%d_pain.spr"
 #define DAMAGE_NAME "sprites/%d_dmg.spr"
@@ -101,7 +101,7 @@ int CHudHealth::Draw(float flTime)
 		gEngfuncs.pfnSPR_DrawAdditive(0, x, y, &gHUD::GetSpriteRect(m_HUD_cross));
 
 		x = CrossWidth + HealthWidth / 2;
-		x = gHUD::DrawHudNumber(x, y, DHN_3DIGITS | DHN_DRAWZERO, m_iHealth, r, g, b);
+		x = gHUD::DrawHudNumber(x, y, DHN_4DIGITS | DHN_DRAWZERO, m_iHealth, r, g, b);
 		x += HealthWidth / 2;
 	}
 

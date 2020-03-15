@@ -245,7 +245,7 @@ bool CBot::IsActiveWeaponOutOfAmmo() const
 bool CBot::IsUsingScope() const
 {
 	// if our field of view is less than 90, we're looking thru a scope (maybe only true for CS...)
-	if (m_iFOV < 90.0f)
+	if (pev->fov < 90.0f)
 		return true;
 
 	return false;

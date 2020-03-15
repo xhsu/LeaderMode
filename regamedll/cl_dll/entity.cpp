@@ -16,7 +16,7 @@ HUD_GetUserEntity
 
 */
 
-#include "cl_base.h"
+#include "precompiled.h"
 
 int iOnTrain[MAX_PLAYERS];
 

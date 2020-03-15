@@ -2403,7 +2403,7 @@ void CSkillIncendiaryAmmo::OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 
 	Vector vecOrigin;
-	if (m_pPlayer->m_iFOV >= 90.0f)
+	if (m_pPlayer->pev->fov >= 90.0f)
 		vecOrigin = m_pPlayer->GetGunPosition() + gpGlobals->v_forward * 16.0f + gpGlobals->v_right * 3.0f + gpGlobals->v_up * -3.0f;
 	else
 		vecOrigin = m_pPlayer->GetGunPosition();

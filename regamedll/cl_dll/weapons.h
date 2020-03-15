@@ -74,7 +74,6 @@ public:
 	int		random_seed;
 	int		m_rgAmmo[AMMO_MAXTYPE];
 	bool	m_bResumeZoom;
-	int		m_iFOV;
 	int		m_iLastZoom;
 	float	m_flEjectBrass;
 	int		m_iShellModelIndex;

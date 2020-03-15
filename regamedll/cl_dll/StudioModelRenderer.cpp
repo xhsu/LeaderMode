@@ -4,7 +4,7 @@ Created Date: 07 Mar 2020
 
 */
 
-#include "cl_base.h"
+#include "precompiled.h"
 
 int CStudioModelRenderer::s_iShadowSprite = 0;
 

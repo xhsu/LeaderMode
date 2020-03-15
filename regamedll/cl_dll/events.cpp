@@ -4,7 +4,7 @@ Created Date: 08 Mar 2020
 
 */
 
-#include "cl_base.h"
+#include "precompiled.h"
 
 int g_iRShell = 0;
 int g_iPShell = 0;
@@ -1110,7 +1110,7 @@ DECLARE_EVENT(FireM3)
 	{
 		g_iShotsFired++;
 		EV_MuzzleFlash();
-		gEngfuncs.pEventAPI->EV_WeaponAnimation(M3_FIRE1 + gEngfuncs.pfnRandomLong(0, 1), 2);
+		gEngfuncs.pEventAPI->EV_WeaponAnimation(KSG12_FIRE1 + gEngfuncs.pfnRandomLong(0, 1), 2);
 
 		// first personal smoke VFX.
 		EV_HLDM_CreateSmoke(ent->attachment[0], forward, 3, 0.5, 25, 25, 25, EV_PISTOL_SMOKE, velocity, false, 35);

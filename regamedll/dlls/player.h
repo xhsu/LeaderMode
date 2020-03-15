@@ -648,8 +648,7 @@ public:
 	int m_iClientBattery;
 	int m_iHideHUD;
 	int m_iClientHideHUD;
-	int m_iFOV;
-	int m_iClientFOV;
+	int m_iClientFOV;	// m_iFOV is now merged with pev->fov.
 	int m_iNumSpawns;
 	CBaseWeapon* m_rgpPlayerItems[MAX_ITEM_TYPES];
 	CBaseWeapon* m_pActiveItem;

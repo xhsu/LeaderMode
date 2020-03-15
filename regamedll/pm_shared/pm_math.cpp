@@ -1,8 +1,5 @@
 #include "precompiled.h"
 
-#ifdef _CLIENT_DLL
-#include "../cl_dll/cl_base.h"
-#endif
 
 vec3_t vec3_origin = { 0, 0, 0 };
 const int nanmask = 255 << 23;

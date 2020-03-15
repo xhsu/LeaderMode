@@ -66,7 +66,6 @@ TYPEDESCRIPTION CBasePlayer::m_playerSaveData[] =
 	DEFINE_FIELD(CBasePlayer, m_tbdPrev, FIELD_TIME),
 	DEFINE_FIELD(CBasePlayer, m_pTank, FIELD_EHANDLE),
 	DEFINE_FIELD(CBasePlayer, m_iHideHUD, FIELD_INTEGER),
-	DEFINE_FIELD(CBasePlayer, m_iFOV, FIELD_INTEGER),
 	DEFINE_FIELD(CBasePlayer, m_flDisplayHistory, FIELD_INTEGER),
 	DEFINE_FIELD(CBasePlayer, m_iJoiningState, FIELD_INTEGER),
 };
@@ -1578,7 +1577,6 @@ void CBasePlayer::SendFOV(int fov)
 {
 	pev->fov = real_t(fov);
 	m_iClientFOV = fov;
-	m_iFOV = fov;
 
 	MESSAGE_BEGIN(MSG_ONE, gmsgSetFOV, nullptr, pev);
 		WRITE_BYTE(fov);
@@ -1855,8 +1853,9 @@ void EXT_FUNC CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 	SetSuitUpdate(nullptr, SUIT_SENTENCE, SUIT_REPEAT_OK);
 	m_iClientHealth = 0;
 
-	MESSAGE_BEGIN(MSG_ONE, gmsgHealth, nullptr, pev);
-		WRITE_BYTE(m_iClientHealth);
+	MESSAGE_BEGIN(MSG_ALL, gmsgHealth);
+		WRITE_BYTE(entindex());
+		WRITE_SHORT(m_iClientHealth);
 	MESSAGE_END();
 
 	MESSAGE_BEGIN(MSG_ONE, gmsgCurWeapon, nullptr, pev);
@@ -3027,8 +3026,9 @@ void EXT_FUNC CBasePlayer::Disappear()
 	SetSuitUpdate(nullptr, SUIT_SENTENCE, SUIT_REPEAT_OK);
 
 	m_iClientHealth = 0;
-	MESSAGE_BEGIN(MSG_ONE, gmsgHealth, nullptr, pev);
-		WRITE_BYTE(m_iClientHealth);
+	MESSAGE_BEGIN(MSG_ALL, gmsgHealth);
+		WRITE_BYTE(entindex());
+		WRITE_SHORT(m_iClientHealth);
 	MESSAGE_END();
 
 	MESSAGE_BEGIN(MSG_ONE, gmsgCurWeapon, nullptr, pev);
@@ -4611,7 +4611,7 @@ void EXT_FUNC CBasePlayer::Spawn()
 		}
 	}
 
-	m_iFOV = DEFAULT_FOV;
+	pev->fov = DEFAULT_FOV;
 	m_flNextDecalTime = 0;
 	m_flTimeStepSound = 0;
 	m_iStepLeft = 0;
@@ -5790,18 +5790,17 @@ void EXT_FUNC CBasePlayer::UpdateClientData()
 		m_iClientHideHUD = m_iHideHUD;
 	}
 
-	if (m_iFOV != m_iClientFOV)
+	if (int(pev->fov) != m_iClientFOV)
 	{
 		// cache FOV change at end of function, so weapon updates can see that FOV has changed
-		pev->fov = m_iFOV;
 
 		MESSAGE_BEGIN(MSG_ONE, gmsgSetFOV, nullptr, pev);
-			WRITE_BYTE(m_iFOV);
+			WRITE_BYTE(int(pev->fov));
 		MESSAGE_END();
 
 		MESSAGE_BEGIN(MSG_SPEC, gmsgHLTV);
 			WRITE_BYTE(ENTINDEX(edict()));
-			WRITE_BYTE(m_iFOV);
+			WRITE_BYTE(int(pev->fov));
 		MESSAGE_END();
 	}
 
@@ -5817,14 +5816,14 @@ void EXT_FUNC CBasePlayer::UpdateClientData()
 
 	if (int(pev->health) != m_iClientHealth)
 	{
-		int iHealth = clamp(int(pev->health), 0, 255);
-
-		if (pev->health > 0.0f && pev->health <= 1.0f)
+		int iHealth = int(pev->health);
+		if (pev->health > 0.0f && pev->health <= 1.0f)	// prevent display bug.
 			iHealth = 1;
 
 		// send "health" update message
-		MESSAGE_BEGIN(MSG_ONE, gmsgHealth, nullptr, pev);
-			WRITE_BYTE(iHealth);
+		MESSAGE_BEGIN(MSG_ALL, gmsgHealth);
+			WRITE_BYTE(entindex());
+			WRITE_SHORT(iHealth);
 		MESSAGE_END();
 
 		m_iClientHealth = int(pev->health);
@@ -5938,7 +5937,7 @@ void EXT_FUNC CBasePlayer::UpdateClientData()
 
 	// Cache and client weapon change
 	m_pClientActiveItem = m_pActiveItem;
-	m_iClientFOV = m_iFOV;
+	m_iClientFOV = int(pev->fov);
 
 	// Update Status Bar
 	if (m_flNextSBarUpdateTime < gpGlobals->time)
@@ -7640,7 +7639,7 @@ bool EXT_FUNC CBasePlayer::GetIntoGame()
 	m_iIgnoreGlobalChat = IGNOREMSG_NONE;
 
 	m_iTeamKills = 0;
-	m_iFOV = DEFAULT_FOV;
+	pev->fov = DEFAULT_FOV;
 
 	m_bJustConnected = false;
 	m_fLastMovement = gpGlobals->time;

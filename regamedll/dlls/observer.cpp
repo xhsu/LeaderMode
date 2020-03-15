@@ -306,13 +306,13 @@ void CBasePlayer::Observer_CheckProperties()
 		int weapon = target->m_pActiveItem ? target->m_pActiveItem->m_iId : 0;
 
 		// use fov of tracked client
-		if (m_iFOV != target->m_iFOV || m_iObserverWeapon != weapon)
+		if (pev->fov != target->pev->fov || m_iObserverWeapon != weapon)
 		{
-			m_iClientFOV = m_iFOV = target->m_iFOV;
+			m_iClientFOV = pev->fov = target->pev->fov;
 
 			// write fov before wepon data, so zoomed crosshair is set correctly
 			MESSAGE_BEGIN(MSG_ONE, gmsgSetFOV, nullptr, pev);
-				WRITE_BYTE(m_iFOV);
+				WRITE_BYTE(int(pev->fov));
 			MESSAGE_END();
 
 			m_iObserverWeapon = weapon;
@@ -327,7 +327,7 @@ void CBasePlayer::Observer_CheckProperties()
 	}
 	else
 	{
-		m_iFOV = DEFAULT_FOV;
+		pev->fov = DEFAULT_FOV;
 
 		if (m_iObserverWeapon)
 		{

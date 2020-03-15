@@ -5,14 +5,13 @@ Remastered Date: Mar 13 2020
 */
 
 #include "precompiled.h"
-#include "..\weapons.h"
 
 #ifndef CLIENT_DLL
 
-unsigned short CM3::m_usEvent = 0;
-int CM3::m_iShell = 0;
+unsigned short CKSG12::m_usEvent = 0;
+int CKSG12::m_iShell = 0;
 
-void CM3::Precache()
+void CKSG12::Precache()
 {
 	PRECACHE_MODEL("models/v_m3.mdl");
 	PRECACHE_MODEL("models/w_m3.mdl");
@@ -29,26 +28,26 @@ void CM3::Precache()
 
 #endif
 
-void CM3::Think(void)
+void CKSG12::Think(void)
 {
 	if (m_pPlayer->m_afButtonReleased & IN_ATTACK)
 		m_bAllowNextEmptySound = true;	// only one empty sound per time.
 }
 
-bool CM3::Deploy()
+bool CKSG12::Deploy()
 {
 	m_bAllowNextEmptySound = true;
 
-	return DefaultDeploy("models/v_m3.mdl", "models/p_m3.mdl", M3_DRAW, "shotgun");
+	return DefaultDeploy("models/v_m3.mdl", "models/p_m3.mdl", KSG12_DRAW, "shotgun");
 }
 
-void CM3::PostFrame(void)
+void CKSG12::PostFrame(void)
 {
 	if (m_bInReload)
 	{
 		if (m_flNextInsertAnim <= gpGlobals->time && m_iClip < m_pItemInfo->m_iMaxClip)
 		{
-			SendWeaponAnim(M3_RELOAD);
+			SendWeaponAnim(KSG12_INSERT);
 			m_pPlayer->SetAnimation(PLAYER_RELOAD);
 
 			m_flNextInsertAnim = gpGlobals->time + KSG12_TIME_INSERT;
@@ -66,7 +65,7 @@ void CM3::PostFrame(void)
 		if (((m_iClip >= m_pItemInfo->m_iMaxClip || m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0) && m_flNextInsertAnim <= gpGlobals->time)
 			|| m_bSetForceStopReload || m_pPlayer->pev->button & (IN_ATTACK | IN_RUN))
 		{
-			SendWeaponAnim(M3_PUMP);
+			SendWeaponAnim(KSG12_AFTER_RELOAD);
 			m_pPlayer->m_flNextAttack = KSG12_TIME_AFTER_RELOAD;
 			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + KSG12_TIME_AFTER_RELOAD;
 
@@ -77,7 +76,7 @@ void CM3::PostFrame(void)
 		CBaseWeapon::PostFrame();	// for emergency.
 }
 
-void CM3::PrimaryAttack()
+void CKSG12::PrimaryAttack()
 {
 	// don't fire underwater
 	if (m_pPlayer->pev->waterlevel == 3)
@@ -115,7 +114,7 @@ void CM3::PrimaryAttack()
 	int iSeedOfs = m_pPlayer->FireBuckshots(KSG12_PROJECTILE_COUNT, m_pPlayer->GetGunPosition(), gpGlobals->v_forward, KSG12_CONE_VECTOR, KSG12_EFFECTIVE_RANGE, KSG12_DAMAGE, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
-	PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER, m_pPlayer->edict(), m_usEvent, 0, (float *)&g_vecZero, (float *)&g_vecZero, 0, 0, int(m_pPlayer->pev->punchangle.x * 100.0f), m_pPlayer->random_seed, FALSE, FALSE);
+	PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL, m_pPlayer->edict(), m_usEvent, 0, (float *)&g_vecZero, (float *)&g_vecZero, 0, 0, int(m_pPlayer->pev->punchangle.x * 100.0f), m_pPlayer->random_seed, FALSE, FALSE);
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 	{
@@ -135,7 +134,7 @@ void CM3::PrimaryAttack()
 	args.bparam2 = false;
 	args.ducking = gEngfuncs.pEventAPI->EV_LocalPlayerDucking();
 	args.entindex = gEngfuncs.GetLocalPlayer()->index;
-	args.flags = FEV_NOTHOST | FEV_RELIABLE | FEV_CLIENT;
+	args.flags = FEV_NOTHOST | FEV_RELIABLE | FEV_CLIENT | FEV_GLOBAL;
 	args.fparam1 = 0;
 	args.fparam2 = 0;
 	args.iparam1 = int(m_pPlayer->pev->punchangle.x * 100.0f);
@@ -159,23 +158,60 @@ void CM3::PrimaryAttack()
 		m_pPlayer->pev->punchangle.x -= UTIL_SharedRandomLong(m_pPlayer->random_seed + iSeedOfs, 8, 11);
 }
 
-void CM3::SecondaryAttack(void)
+void CKSG12::SecondaryAttack(void)
 {
+	m_bInZoom = !m_bInZoom;
+	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.3f;
+
 #ifdef CLIENT_DLL
-	// TODO: client should have the zoom now.
+	// due to some logic problem, we actually cannot use m_bInZoom here.
+	// it would be override.
+
+	if (!g_vecGunOfsGoal.Length())
+	{
+		g_vecGunOfsGoal = Vector(-10.15f, -7.5f, 3.1f);
+		gHUD::m_iFOV = 85;	// allow clients to predict the zoom.
+	}
+	else
+	{
+		g_vecGunOfsGoal = g_vecZero;
+		gHUD::m_iFOV = 90;
+	}
+
+	// this model needs faster.
+	g_flGunOfsMovingSpeed = 12.0f;
+#else
+	// just zoom a liiiiittle bit.
+	// this doesn't suffer from the same bug where the gunofs does, since the FOV was actually sent from SV.
+	if (m_bInZoom)
+	{
+		m_pPlayer->pev->fov = 85;
+		EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, "weapons/steelsight_in.wav", 0.75f, ATTN_STATIC);
+	}
+	else
+	{
+		m_pPlayer->pev->fov = 90;
+		EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, "weapons/steelsight_out.wav", 0.75f, ATTN_STATIC);
+	}
 #endif
 }
 
-void CM3::WeaponIdle(void)
+void CKSG12::WeaponIdle(void)
 {
+	if (m_bInZoom)	// the idle anim would sabortage steel sight.
+		return;
+
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.7f;	// this KSG12 model has looping vfx.
-	SendWeaponAnim(M3_IDLE);
+	SendWeaponAnim(KSG12_IDLE);
 }
 
-bool CM3::Reload(void)
+bool CKSG12::Reload(void)
 {
 	if (m_iClip >= m_pItemInfo->m_iMaxClip || m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		return false;
+
+	if (m_bInZoom)
+		SecondaryAttack();	// close scope when we reload.
 
 	m_iShotsFired = 0;
 	m_bInReload = true;
@@ -183,11 +219,11 @@ bool CM3::Reload(void)
 	m_flNextInsertAnim = gpGlobals->time + KSG12_TIME_START_RELOAD;
 	m_flNextAddAmmo = gpGlobals->time + KSG12_TIME_ADD_AMMO + KSG12_TIME_START_RELOAD;
 
-	SendWeaponAnim(M3_START_RELOAD);
+	SendWeaponAnim(KSG12_START_RELOAD);
 	return true;
 }
 
-void CM3::PlayEmptySound(void)
+void CKSG12::PlayEmptySound(void)
 {
 	if (!m_bAllowNextEmptySound)
 		return;

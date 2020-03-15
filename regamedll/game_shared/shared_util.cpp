@@ -1,8 +1,5 @@
 #include "precompiled.h"
 
-#ifdef _CLIENT_DLL
-#include "../cl_dll/cl_base.h"
-#endif
 
 char s_shared_token[1500];
 char s_shared_quote = '\"';

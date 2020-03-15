@@ -4,7 +4,7 @@ Created Date: Mar 11 2020
 
 */
 
-#include "cl_base.h"
+#include "precompiled.h"
 
 int g_iShotsFired;
 
@@ -618,57 +618,49 @@ void CHudAmmo::CalculateCrosshairSize(void)
 	}
 }
 
-int GetWeaponAccuracyFlags(int iWeaponID)
+int GetWeaponAccuracyFlags(int weaponid)
 {
-	int flags;
+	int result = 0;
 
-	switch (iWeaponID)
+	if (weaponid <= WEAPON_P90)
 	{
-	case WEAPON_PM9:
-	case WEAPON_UMP45:
-	case WEAPON_MP5N:
-	case WEAPON_MP7A1:
-	{
-		flags = 1;
-		break;
+		switch (weaponid)
+		{
+		case WEAPON_ACR:
+		case WEAPON_CM901:
+		case WEAPON_MK46:
+		case WEAPON_SCARL:
+		case WEAPON_AK47:
+		case WEAPON_P90:
+			result = ACCURACY_AIR | ACCURACY_SPEED;
+			break;
+
+		case WEAPON_GLOCK18:
+		case WEAPON_USP:
+		case WEAPON_ANACONDA:
+		case WEAPON_FIVESEVEN:
+		case WEAPON_DEAGLE:
+			result = ACCURACY_AIR | ACCURACY_SPEED | ACCURACY_DUCK;
+			break;
+
+		case WEAPON_PM9:
+		case WEAPON_UMP45:
+		case WEAPON_MP5N:
+		case WEAPON_MP7A1:
+			result = ACCURACY_AIR;
+			break;
+
+		case WEAPON_M4A1:
+			result = ACCURACY_AIR | ACCURACY_SPEED | ACCURACY_MULTIPLY_BY_14;
+			break;
+
+		case WEAPON_QBZ95:
+			result = ACCURACY_AIR | ACCURACY_SPEED | ACCURACY_MULTIPLY_BY_14_2;
+			break;
+		}
 	}
 
-	case WEAPON_ACR:
-	case WEAPON_CM901:
-	case WEAPON_MK46:
-	case WEAPON_SCARL:
-	case WEAPON_M4A1:
-	case WEAPON_AK47:
-	case WEAPON_P90:
-	{
-		flags = 3;
-		break;
-	}
-
-	case WEAPON_USP:
-	case WEAPON_GLOCK18:
-	case WEAPON_ANACONDA:
-	case WEAPON_FIVESEVEN:
-	case WEAPON_DEAGLE:
-	{
-		flags = 7;
-		break;
-	}
-
-	case WEAPON_QBZ95:
-	{
-		flags = (g_iWeaponFlags & 0x10) < 1 ? 3 : 19;
-		break;
-	}
-
-	default:
-	{
-		flags = 0;
-		break;
-	}
-	}
-
-	return flags;
+	return result;
 }
 
 int CHudAmmo::DrawCrosshair(float flTime, int weaponid)
@@ -784,9 +776,9 @@ int CHudAmmo::DrawCrosshair(float flTime, int weaponid)
 
 	if (iWeaponAccuracyFlags != 0 && cl_dynamiccrosshair && cl_dynamiccrosshair->value != 0.0 && !(gHUD::m_bitsHideHUDDisplay & HIDEHUD_CROSSHAIR))
 	{
-		if ((g_iPlayerFlags & FL_ONGROUND) || !(iWeaponAccuracyFlags & 1))
+		if ((g_iPlayerFlags & FL_ONGROUND) || !(iWeaponAccuracyFlags & ACCURACY_AIR))
 		{
-			if ((g_iPlayerFlags & FL_DUCKING) && (iWeaponAccuracyFlags & 4))
+			if ((g_iPlayerFlags & FL_DUCKING) && (iWeaponAccuracyFlags & ACCURACY_DUCK))
 			{
 				iDistance *= 0.5;
 			}
@@ -828,10 +820,10 @@ int CHudAmmo::DrawCrosshair(float flTime, int weaponid)
 		else
 			iDistance *= 2;
 
-		if (iWeaponAccuracyFlags & 8)
+		if (iWeaponAccuracyFlags & ACCURACY_MULTIPLY_BY_14)
 			iDistance *= 1.4;
 
-		if (iWeaponAccuracyFlags & 0x10)
+		if (iWeaponAccuracyFlags & ACCURACY_MULTIPLY_BY_14_2)
 			iDistance *= 1.4;
 	}
 
@@ -860,9 +852,6 @@ int CHudAmmo::DrawCrosshair(float flTime, int weaponid)
 	if (iDistance > m_flCrosshairDistance)
 		m_flCrosshairDistance = iDistance;
 
-	if (m_iAlpha > 255)
-		m_iAlpha = 255;
-
 	iBarSize = (int)((m_flCrosshairDistance - (float)iDistance) * 0.5) + 5;
 
 	if (gHUD::m_flTime > m_flLastCalcTime + 1)
@@ -881,6 +870,23 @@ int CHudAmmo::DrawCrosshair(float flTime, int weaponid)
 		flCrosshairDistance *= (float)(ScreenWidth) / m_iCrosshairScaleBase;
 		iBarSize = (float)(ScreenWidth * iBarSize) / m_iCrosshairScaleBase;
 	}
+
+	// when we scope in, remove the crosshair.
+	if (gHUD::m_iFOV <= 40)
+		m_iAlpha = 0;	// hide crosshair when we using sniper scope.
+	else
+	{
+		if (gHUD::m_iFOV >= 90)	// steelsight out.
+		{
+			m_iAlpha = float(m_iAlpha) * gHUD::m_flDisplayedFOV / float(gHUD::m_iFOV);
+		}
+		else
+		{
+			m_iAlpha = float(m_iAlpha) * (1.0f - gHUD::m_flDisplayedFOV / float(gHUD::m_iFOV));
+		}
+	}
+
+	m_iAlpha = Q_clamp(m_iAlpha, 0, 255);
 
 	if (gHUD::m_NightVision.m_fOn)
 		DrawCrosshairEx(flTime, weaponid, iBarSize, flCrosshairDistance, false, 250, 50, 50, m_iAlpha);

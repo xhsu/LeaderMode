@@ -147,7 +147,7 @@ void LinkUserMessages()
 	gmsgGeigerRange   = REG_USER_MSG("Geiger", 1);
 	gmsgFlashlight    = REG_USER_MSG("Flashlight", 2);
 	gmsgFlashBattery  = REG_USER_MSG("FlashBat", 1);
-	gmsgHealth        = REG_USER_MSG("Health", 1);
+	gmsgHealth        = REG_USER_MSG("Health", 3);
 	gmsgDamage        = REG_USER_MSG("Damage", 12);
 	gmsgBattery       = REG_USER_MSG("Battery", 2);
 	gmsgTrain         = REG_USER_MSG("Train", 1);
@@ -4068,7 +4068,7 @@ int EXT_FUNC GetWeaponData(edict_t *pEdict, struct weapon_data_s *info)
 				item->m_flNextSecondaryAttack = Q_max(pWeapon->m_flNextSecondaryAttack, -0.001f);
 				//item->m_flNextReload = Q_max(pWeapon->m_flNextReload, -0.001f); // TODO: what are these???
 				item->m_fInReload = pWeapon->m_bInReload;
-				//item->m_fInSpecialReload = weapon->m_fInSpecialReload;
+				item->m_fInSpecialReload = pWeapon->m_bInZoom;
 				item->m_fInZoom = pWeapon->m_iShotsFired;
 				item->m_fAimedDamage = pWeapon->m_flLastFire;
 				item->m_iWeaponState = pWeapon->m_bitsFlags;

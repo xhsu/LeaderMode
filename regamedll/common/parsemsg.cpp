@@ -16,7 +16,7 @@
 //  parsemsg.cpp
 //
 //--------------------------------------------------------------------------------------------------------------
-#include "cl_base.h"
+#include "precompiled.h"
 
 typedef unsigned char byte;
 #define true 1

@@ -28,6 +28,12 @@ struct viewinterp_t
 
 extern cvar_t* v_centermove;
 extern cvar_t* v_centerspeed;
+extern cvar_t* cl_gun_ofs[3];
+
+extern Vector g_vecGunCurOfs;
+extern Vector g_vecGunOfsGoal;
+extern Vector g_vecTranslatedCurGunOfs;
+extern float  g_flGunOfsMovingSpeed;
 
 void V_Init(void);
 

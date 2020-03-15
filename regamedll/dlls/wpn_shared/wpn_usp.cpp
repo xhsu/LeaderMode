@@ -35,8 +35,39 @@ bool CUSP::Deploy()
 
 void CUSP::SecondaryAttack()
 {
+	m_bInZoom = !m_bInZoom;
+	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.3f;
+
 #ifdef CLIENT_DLL
-	// TODO: client should have the zoom now.
+	// due to some logic problem, we actually cannot use m_bInZoom here.
+	// it would be override.
+
+	if (!g_vecGunOfsGoal.Length())
+	{
+		g_vecGunOfsGoal = Vector(-4.6f, -10.0f, 2.4f);
+		gHUD::m_iFOV = 85;	// allow clients to predict the zoom.
+	}
+	else
+	{
+		g_vecGunOfsGoal = g_vecZero;
+		gHUD::m_iFOV = 90;
+	}
+
+	// this model needs faster.
+	g_flGunOfsMovingSpeed = 10.0f;
+#else
+	// just zoom a liiiiittle bit.
+	// this doesn't suffer from the same bug where the gunofs does, since the FOV was actually sent from SV.
+	if (m_bInZoom)
+	{
+		m_pPlayer->pev->fov = 85;
+		EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, "weapons/steelsight_in.wav", 0.75f, ATTN_STATIC);
+	}
+	else
+	{
+		m_pPlayer->pev->fov = 90;
+		EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, "weapons/steelsight_out.wav", 0.75f, ATTN_STATIC);
+	}
 #endif
 }
 
@@ -116,7 +147,7 @@ void CUSP::USPFire(float flSpread, float flCycleTime)
 	Vector vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, USP_EFFECTIVE_RANGE, USP_PENETRATION, BULLET_PLAYER_45ACP, USP_DAMAGE, USP_RANGE_MODIFER, m_pPlayer->pev, true, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
-	PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER, m_pPlayer->edict(), m_usEvent, 0, (float*)&g_vecZero, (float*)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 100), 0, m_iClip == 0, FALSE);
+	PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL, m_pPlayer->edict(), m_usEvent, 0, (float*)&g_vecZero, (float*)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 100), 0, m_iClip == 0, FALSE);
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 	{
@@ -131,7 +162,7 @@ void CUSP::USPFire(float flSpread, float flCycleTime)
 	args.bparam2 = false;	// silencer
 	args.ducking = gEngfuncs.pEventAPI->EV_LocalPlayerDucking();
 	args.entindex = gEngfuncs.GetLocalPlayer()->index;
-	args.flags = FEV_NOTHOST | FEV_RELIABLE | FEV_CLIENT;
+	args.flags = FEV_NOTHOST | FEV_RELIABLE | FEV_CLIENT | FEV_GLOBAL;
 	args.fparam1 = vecDir.x;
 	args.fparam2 = vecDir.y;
 	args.iparam1 = int(m_pPlayer->pev->punchangle.x * 100.0f);

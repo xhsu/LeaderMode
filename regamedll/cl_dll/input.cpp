@@ -4,7 +4,7 @@ Created Date: 06 Mar 2020
 
 */
 
-#include "cl_base.h"
+#include "precompiled.h"
 
 cvar_t* m_pitch;
 cvar_t* m_yaw;

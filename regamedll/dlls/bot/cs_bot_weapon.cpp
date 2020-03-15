@@ -205,7 +205,7 @@ void CCSBot::SetAimOffset(float accuracy)
 	PrintIfWatched("Accuracy = %4.3f\n", accuracy);
 
 	float range = (m_lastEnemyPosition - pev->origin).Length();
-	const real_t maxOffset = range * (real_t(m_iFOV) / DEFAULT_FOV) * 0.1;
+	const real_t maxOffset = range * (real_t(pev->fov) / DEFAULT_FOV) * 0.1;
 	float error = maxOffset * (1 - accuracy);
 
 	m_aimOffsetGoal[0] = RANDOM_FLOAT(-error, error);

@@ -122,6 +122,7 @@ public:
 	float			m_flLastFire;
 	AmmoIdType		m_iPrimaryAmmoType;			// "primary" ammo index into players m_rgAmmo[]
 	AmmoIdType		m_iSecondaryAmmoType;		// "secondary" ammo index into players m_rgAmmo[]
+	bool			m_bInZoom;
 
 #ifndef CLIENT_DLL
 public:	// SV exclusive variables.
@@ -413,21 +414,21 @@ constexpr float KSG12_TIME_START_RELOAD = 0.566f;
 constexpr float KSG12_TIME_INSERT		= 0.5f;
 constexpr float KSG12_TIME_ADD_AMMO		= 0.45f;
 constexpr float KSG12_TIME_AFTER_RELOAD = 1.033f;
-const Vector KSG12_CONE_VECTOR = Vector(0.0675f, 0.0675f, 0.0f); // special shotgun spreads
+const	Vector	KSG12_CONE_VECTOR		= Vector(0.0675f, 0.0675f, 0.0f); // special shotgun spreads
 
-enum m3_e
+enum ksg12_e
 {
-	M3_IDLE,
-	M3_FIRE1,
-	M3_FIRE2,
-	M3_RELOAD,
-	M3_PUMP,
-	M3_START_RELOAD,
-	M3_DRAW,
-	M3_HOLSTER,
+	KSG12_IDLE,
+	KSG12_FIRE1,
+	KSG12_FIRE2,
+	KSG12_INSERT,
+	KSG12_AFTER_RELOAD,
+	KSG12_START_RELOAD,
+	KSG12_DRAW,
+	KSG12_HOLSTER,
 };
 
-class CM3 : public CBaseWeapon
+class CKSG12 : public CBaseWeapon
 {
 #ifndef CLIENT_DLL
 public:	// SV exclusive variables.

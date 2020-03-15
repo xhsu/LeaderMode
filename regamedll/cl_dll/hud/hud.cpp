@@ -4,7 +4,7 @@ Created Date: 07 Mar 2020
 
 */
 
-#include "cl_base.h"
+#include "precompiled.h"
 
 hud_player_info_t g_PlayerInfoList[MAX_PLAYERS + 1];
 int g_PlayerScoreAttrib[MAX_PLAYERS + 1];
@@ -57,6 +57,7 @@ namespace gHUD
 	float m_fOldTime = 0;
 	double m_flTimeDelta = 1;
 	int m_iFOV = 90;
+	float m_flDisplayedFOV = 90.0f;
 	int m_iSpriteCount = 0;
 	int m_iSpriteCountAllRes = 0;
 	int m_iRes = 640;
@@ -401,17 +402,17 @@ void gHUD::Think(void)
 			pHudElements->Think();
 	}
 
-	int newfov = HUD_GetFOV();
+	/*int newfov = HUD_GetFOV();
 
 	if (newfov == 0)
 		m_iFOV = default_fov->value;
 	else
-		m_iFOV = newfov;
+		m_iFOV = newfov;*/
 
 	if (m_iFOV == default_fov->value)
 		m_flMouseSensitivity = 0;
 	else
-		m_flMouseSensitivity = sensitivity->value * ((float)newfov / (float)default_fov->value) * CVAR_GET_FLOAT("zoom_sensitivity_ratio");
+		m_flMouseSensitivity = sensitivity->value * (m_flDisplayedFOV / (float)default_fov->value) * CVAR_GET_FLOAT("zoom_sensitivity_ratio");
 
 	if (m_iFOV == 0)
 		m_iFOV = Q_max(default_fov->value, 90.0f);
@@ -428,6 +429,9 @@ void gHUD::Think(void)
 		else
 			m_iFOV = m_Spectator.GetFOV();
 	}
+
+	// make FOV transition nice and smooth.
+	m_flDisplayedFOV += (float(m_iFOV) - m_flDisplayedFOV) * m_flTimeDelta * 7.0f;	// this 7.0 is the transition speed.
 }
 
 int gHUD::UpdateClientData(client_data_t* cdata, float time)
@@ -440,7 +444,9 @@ int gHUD::UpdateClientData(client_data_t* cdata, float time)
 
 	Think();
 
-	cdata->fov = m_iFOV;
+	// this is how m_iFOV have its effect.
+	// however, we use m_flDisplayedFOV to make a Source-liked effect.
+	cdata->fov = m_flDisplayedFOV;
 
 	CL_ResetButtonBits(m_iKeyBits);
 	return 1;
