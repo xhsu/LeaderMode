@@ -18,4 +18,6 @@ extern cl_enginefunc_t gEngfuncs;
 
 // function list.
 BOOL CL_DLLEXPORT CL_IsThirdPerson(void);
+void CL_DLLEXPORT IN_ActivateMouse(void);
+void CL_DLLEXPORT IN_DeactivateMouse(void);
 kbutton_s CL_DLLEXPORT* KB_Find(const char* name);

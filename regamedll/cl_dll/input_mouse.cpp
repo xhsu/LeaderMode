@@ -195,7 +195,7 @@ void IN_ResetMouse(void)
 	if (!m_bRawInput && mouseactive && gEngfuncs.GetWindowCenterX && gEngfuncs.GetWindowCenterY)
 	{
 
-		SetCursorPos (gEngfuncs.GetWindowCenterX(), gEngfuncs.GetWindowCenterY());
+		SetCursorPos(gEngfuncs.GetWindowCenterX(), gEngfuncs.GetWindowCenterY());
 		ThreadInterlockedExchange(&old_mouse_pos.x, gEngfuncs.GetWindowCenterX());
 		ThreadInterlockedExchange(&old_mouse_pos.y, gEngfuncs.GetWindowCenterY());
 	}
@@ -433,6 +433,9 @@ void IN_ActivateMouse2(void)
 			restore_spi = SystemParametersInfo (SPI_SETMOUSE, 0, newmouseparms, 0);
 
 		mouseactive = 1;
+
+		// this reset prevents instant v_angle change due to cursor movement in intermission screen.
+		IN_ResetMouse();
 	}
 }
 
