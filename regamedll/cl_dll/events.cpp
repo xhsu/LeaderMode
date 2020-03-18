@@ -1281,6 +1281,87 @@ DECLARE_EVENT(Vehicle)
 
 }
 
+DECLARE_EVENT(FireCM901)
+{
+	Vector ShellVelocity;
+	Vector ShellOrigin;
+
+	bool silencer_on = !args->bparam2;
+	bool empty = !args->bparam1;
+	int    idx = args->entindex;
+	Vector origin(args->origin);
+	Vector angles(
+		args->iparam1 / 100.0f + args->angles[0],
+		args->iparam2 / 100.0f + args->angles[1],
+		args->angles[2]
+	);
+	Vector velocity(args->velocity);
+	Vector forward, right, up;
+
+	AngleVectors(angles, forward, right, up);
+
+	if (EV_IsLocal(idx))
+	{
+		++g_iShotsFired;
+
+		int seq;
+		if (silencer_on)
+		{
+			if (!empty)
+				seq = RANDOM_LONG(CM901_SHOOT1, CM901_SHOOT1);
+			else seq = CM901_SHOOT1;
+		}
+		else
+		{
+			EV_MuzzleFlash();
+			if (!empty)
+				seq = RANDOM_LONG(CM901_SHOOT1, CM901_SHOOT1);
+			else seq = CM901_SHOOT1;
+		}
+
+		// first personal gun smoke.
+		auto ent = gEngfuncs.GetViewModel();
+
+		Vector smoke_origin = ent->attachment[0] - forward * 3.0f;
+		float base_scale = RANDOM_FLOAT(0.1, 0.25);
+
+		EV_HLDM_CreateSmoke(smoke_origin, forward, 0, base_scale, 7, 7, 7, EV_RIFLE_SMOKE, velocity, false, 35);
+		EV_HLDM_CreateSmoke(ent->attachment[0], forward, 20, base_scale + 0.1, 10, 10, 10, EV_WALL_PUFF, velocity, false, 35);
+		EV_HLDM_CreateSmoke(ent->attachment[0], forward, 40, base_scale, 13, 13, 13, EV_WALL_PUFF, velocity, false, 35);
+
+		// shoot anim.
+		gEngfuncs.pEventAPI->EV_WeaponAnimation(seq, 2);
+
+		if (!cl_righthand->value)
+			EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 36.0, -14.0, -14.0);
+		else
+			EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 36.0, -14.0, 14.0);
+
+		ShellOrigin = ent->attachment[1];	// use the weapon attachment instead.
+		VectorScale(ShellVelocity, 0.5, ShellVelocity);
+		ShellVelocity[2] += 45.0;
+	}
+	else
+		EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -12.0, 4.0);
+
+	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iPShell, TE_BOUNCE_SHELL);
+
+	// gunshot sound.
+	if (!silencer_on)
+		gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/cm901-1.wav", 1.0, ATTN_NORM, 0, 87 + gEngfuncs.pfnRandomLong(0, 0x12));
+	else
+		gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/cm901-1.wav", 1.0, 2.0, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
+
+	Vector vecSrc = EV_GetGunPosition(args, origin);
+	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
+
+	EV_HLDM_FireBullets(idx,
+		forward, right, up,
+		1, vecSrc, forward,
+		vSpread, CM901_EFFECTIVE_RANGE, BULLET_PLAYER_556MM,
+		CM901_PENETRATION);
+}
+
 void Events_Init(void)
 {
 	HOOK_EVENT(ak47, FireAK47);

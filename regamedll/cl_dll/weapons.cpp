@@ -116,6 +116,10 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 		p = new CKSG12;
 		break;
 
+	case WEAPON_CM901:
+		p = new CCM901;
+		break;
+
 	default:
 		return nullptr;
 	}

@@ -671,6 +671,50 @@ enum galil_e
 	GALIL_SHOOT3,
 };
 
+const float CM901_FIRE_INTERVAL = 0.0857f;
+const float CM901_EFFECTIVE_RANGE = 8000.0f;
+const float CM901_PENETRATION = 0.2f;
+const float CM901_MAX_SPEED = 240.0f;
+const float CM901_DAMAGE = 30.0f;
+const float CM901_RANGE_MODIFER = 0.98f;
+const float CM901_RELOAD_TIME = 2.459;
+
+
+enum cm901_e
+{
+	CM901_IDLE,
+	CM901_RELOAD,
+	CM901_DRAW,
+	CM901_SHOOT1,
+	CM901_SHOOT2,
+	CM901_SHOOT3,
+};
+
+class CCM901 : public CBaseWeapon
+{
+#ifndef CLIENT_DLL
+public:	// SV exclusive variables.
+	static unsigned short m_usEvent;
+	static int m_iShell;
+
+public:	// SV exclusive functions.
+	virtual void	Precache(void);
+#endif
+
+public:	// basic logic funcs
+	virtual bool	Deploy(void);
+	virtual void	PrimaryAttack(void);
+	virtual void	SecondaryAttack(void);
+	virtual	bool	Reload(void);
+	virtual void	WeaponIdle(void);
+
+public:	// util funcs
+	virtual	float	GetMaxSpeed(void) { return CM901_MAX_SPEED; }
+
+public:	// new functions
+	void CM901Fire(float flSpread, float flCycleTime);
+};
+
 const float FAMAS_MAX_SPEED     = 240.0f;
 const float FAMAS_RELOAD_TIME   = 3.3f;
 const float FAMAS_DAMAGE        = 30.0f;

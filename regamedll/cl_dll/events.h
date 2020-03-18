@@ -30,3 +30,4 @@ void Events_Init(void);
 // weapons
 DECLARE_EVENT(FireM3);
 DECLARE_EVENT(FireUSP);
+DECLARE_EVENT(FireCM901);
