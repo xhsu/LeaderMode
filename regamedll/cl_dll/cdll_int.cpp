@@ -276,4 +276,7 @@ void CL_DLLEXPORT V_CalcRefdef(ref_params_s* pparams)
 	}
 
 	gHUD::CalcRefdef(pparams);
+
+	// copy the result and save them for our own use.
+	Q_memcpy(&g_pparams, pparams, sizeof(ref_params_s));
 }

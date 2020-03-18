@@ -2782,7 +2782,8 @@ void EXT_FUNC CBasePlayer::AddAccount(int amount, RewardType type, bool bTrackCh
 		m_iAccount = clamp<int>(m_iAccount, 0, maxmoney.value);
 
 		// Send money update to HUD
-		MESSAGE_BEGIN(MSG_ONE, gmsgMoney, nullptr, pev);
+		MESSAGE_BEGIN(MSG_ALL, gmsgMoney);
+			WRITE_BYTE(entindex());
 			WRITE_LONG(m_iAccount);
 			WRITE_BYTE(bTrackChange);
 		MESSAGE_END();
@@ -4544,7 +4545,6 @@ void EXT_FUNC CBasePlayer::Spawn()
 	m_fCamSwitch = 0;
 	m_iChaseTarget = 1;
 	m_tmNextRadarUpdate = gpGlobals->time;
-	m_tmNextAccountHealthUpdate = gpGlobals->time;
 
 	m_vLastOrigin = Vector(0, 0, 0);
 	m_iCurrentKickVote = 0;
@@ -4734,7 +4734,7 @@ void EXT_FUNC CBasePlayer::Spawn()
 
 	MESSAGE_BEGIN(MSG_ALL, gmsgTeamInfo);
 		WRITE_BYTE(entindex());
-		WRITE_STRING(GetTeamName(m_iTeam));
+		WRITE_BYTE(m_iTeam);
 	MESSAGE_END();
 
 	UpdateLocation(true);
@@ -4884,9 +4884,10 @@ void CBasePlayer::Reset()
 	pev->frags = 0;
 	m_iDeaths = 0;
 
-	MESSAGE_BEGIN(MSG_ONE, gmsgMoney, nullptr, pev);
+	MESSAGE_BEGIN(MSG_ALL, gmsgMoney);
+		WRITE_BYTE(entindex());
 		WRITE_LONG(m_iAccount);
-		WRITE_BYTE(0);
+		WRITE_BYTE(FALSE);
 	MESSAGE_END();
 
 	m_bNotKilled = false;
@@ -5737,6 +5738,7 @@ void EXT_FUNC CBasePlayer::UpdateClientData()
 		}
 
 		MESSAGE_BEGIN(MSG_ONE, gmsgMoney, nullptr, pev);
+			WRITE_BYTE(entindex());
 			WRITE_LONG(m_iAccount);
 			WRITE_BYTE(0);
 		MESSAGE_END();
@@ -6003,45 +6005,6 @@ void EXT_FUNC CBasePlayer::UpdateClientData()
 		}
 
 		m_vLastOrigin = pev->origin;
-	}
-
-	if ((scoreboard_showmoney.value != -1.0f || scoreboard_showhealth.value != -1.0f) &&
-		(m_iTeam == CT || m_iTeam == TERRORIST) &&
-		(m_iLastAccount != m_iAccount || m_iLastClientHealth != m_iClientHealth || m_tmNextAccountHealthUpdate < gpGlobals->time))
-	{
-		m_tmNextAccountHealthUpdate = gpGlobals->time + 5.0f;
-
-		for (int playerIndex = 1; playerIndex <= gpGlobals->maxClients; playerIndex++)
-		{
-			CBaseEntity *pEntity = UTIL_PlayerByIndex(playerIndex);
-
-			if (!pEntity)
-				continue;
-
-			CBasePlayer *pPlayer = GetClassPtr((CBasePlayer *)pEntity->pev);
-
-			if (pPlayer->IsDormant())
-				continue;
-
-			if (scoreboard_showmoney.value != -1.0f)
-			{
-				MESSAGE_BEGIN(MSG_ONE, gmsgHealthInfo, nullptr, pPlayer->edict());
-					WRITE_BYTE(entindex());
-					WRITE_LONG(ShouldToShowHealthInfo(pPlayer) ? m_iClientHealth : -1 /* means that 'HP' field will be hidden */);
-				MESSAGE_END();
-			}
-
-			if (scoreboard_showhealth.value != -1.0f)
-			{
-				MESSAGE_BEGIN(MSG_ONE, gmsgAccount, nullptr, pPlayer->edict());
-					WRITE_BYTE(entindex());
-					WRITE_LONG(ShouldToShowAccount(pPlayer) ? m_iAccount : -1 /* means that this 'Money' will be hidden */);
-				MESSAGE_END();
-			}
-		}
-
-		m_iLastAccount = m_iAccount;
-		m_iLastClientHealth = m_iClientHealth;
 	}
 }
 
@@ -6556,7 +6519,7 @@ void CBasePlayer::SwitchTeam()
 
 	MESSAGE_BEGIN(MSG_ALL, gmsgTeamInfo);
 		WRITE_BYTE(entindex());
-		WRITE_STRING(GetTeamName(m_iTeam));
+		WRITE_BYTE(m_iTeam);
 	MESSAGE_END();
 
 	if (TheBots)
@@ -7528,7 +7491,7 @@ void CBasePlayer::TeamChangeUpdate()
 {
 	MESSAGE_BEGIN(MSG_ALL, gmsgTeamInfo);
 		WRITE_BYTE(entindex());
-		WRITE_STRING(GetTeamName(m_iTeam));
+		WRITE_BYTE(m_iTeam);
 	MESSAGE_END();
 
 	if (m_iTeam != UNASSIGNED)
@@ -7668,7 +7631,7 @@ bool EXT_FUNC CBasePlayer::GetIntoGame()
 
 		MESSAGE_BEGIN(MSG_ALL, gmsgTeamInfo);
 			WRITE_BYTE(entindex());
-			WRITE_STRING(GetTeamName(m_iTeam));
+			WRITE_BYTE(m_iTeam);
 		MESSAGE_END();
 
 		MESSAGE_BEGIN(MSG_ALL, gmsgLocation);
@@ -7915,6 +7878,12 @@ void CBasePlayer::AssignRole(RoleTypes iNewRole)
 	// is all weapon you have okay now?
 	// remember, this must be used after m_iRoleType be renewed.
 	CheckItemAccessibility();
+
+	// tell client the fact.
+	MESSAGE_BEGIN(MSG_ALL, gmsgRole);
+	WRITE_BYTE(entindex());
+	WRITE_BYTE(iNewRole);
+	MESSAGE_END();
 }
 
 void CBasePlayer::UpdateHudText()

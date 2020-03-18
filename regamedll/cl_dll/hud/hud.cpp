@@ -57,6 +57,7 @@ namespace gHUD
 	float m_fOldTime = 0;
 	double m_flTimeDelta = 1;
 	int m_iFOV = 90;
+	int m_iLastFOVDiff = 90;
 	float m_flDisplayedFOV = 90.0f;
 	int m_iSpriteCount = 0;
 	int m_iSpriteCountAllRes = 0;

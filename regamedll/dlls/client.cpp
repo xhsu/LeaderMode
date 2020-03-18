@@ -59,10 +59,6 @@ int gmsgShadowIdx = 0;
 int gmsgTutorState = 0;
 int gmsgTutorClose = 0;
 int gmsgAllowSpec = 0;
-int gmsgBombDrop = 0;
-int gmsgBombPickup = 0;
-int gmsgHostagePos = 0;
-int gmsgHostageK = 0;
 int gmsgGeigerRange = 0;
 int gmsgSendCorpse = 0;
 int gmsgHLTV = 0;
@@ -81,8 +77,9 @@ int gmsgBotProgress = 0;
 int gmsgBrass = 0;
 int gmsgFog = 0;
 int gmsgShowTimer = 0;
-int gmsgAccount = 0;
-int gmsgHealthInfo = 0;
+int gmsgRole = 0;
+int gmsgRadarPoint = 0;
+int gmsgRadarRP = 0;
 bool g_bClientPrintEnable = true;
 
 char *sPlayerModelFiles[] =
@@ -163,7 +160,7 @@ void LinkUserMessages()
 	gmsgDeathMsg      = REG_USER_MSG("DeathMsg", -1);
 	gmsgScoreAttrib   = REG_USER_MSG("ScoreAttrib", 2);
 	gmsgScoreInfo     = REG_USER_MSG("ScoreInfo", 9);
-	gmsgTeamInfo      = REG_USER_MSG("TeamInfo", -1);
+	gmsgTeamInfo      = REG_USER_MSG("TeamInfo", 2);
 	gmsgTeamScore     = REG_USER_MSG("TeamScore", -1);
 	gmsgGameMode      = REG_USER_MSG("GameMode", 1);
 	gmsgMOTD          = REG_USER_MSG("MOTD", -1);
@@ -179,7 +176,7 @@ void LinkUserMessages()
 	gmsgAmmoX         = REG_USER_MSG("AmmoX", 2);
 	gmsgSendAudio     = REG_USER_MSG("SendAudio", -1);
 	gmsgRoundTime     = REG_USER_MSG("RoundTime", 2);
-	gmsgMoney         = REG_USER_MSG("Money", 5);
+	gmsgMoney         = REG_USER_MSG("Money", 6);
 	gmsgArmorType     = REG_USER_MSG("ArmorType", 1);
 	gmsgBlinkAcct     = REG_USER_MSG("BlinkAcct", 1);
 	gmsgStatusValue   = REG_USER_MSG("StatusValue", -1);
@@ -197,11 +194,7 @@ void LinkUserMessages()
 	gmsgTutorState    = REG_USER_MSG("TutorState", -1);
 	gmsgTutorClose    = REG_USER_MSG("TutorClose", -1);
 	gmsgAllowSpec     = REG_USER_MSG("AllowSpec", 1);
-	gmsgBombDrop      = REG_USER_MSG("BombDrop", 7);
-	gmsgBombPickup    = REG_USER_MSG("BombPickup", 0);
 	gmsgSendCorpse    = REG_USER_MSG("ClCorpse", -1);
-	gmsgHostagePos    = REG_USER_MSG("HostagePos", 8);
-	gmsgHostageK      = REG_USER_MSG("HostageK", 1);
 	gmsgHLTV          = REG_USER_MSG("HLTV", 2);
 	gmsgSpecHealth    = REG_USER_MSG("SpecHealth", 1);
 	gmsgForceCam      = REG_USER_MSG("ForceCam", 3);
@@ -223,8 +216,9 @@ void LinkUserMessages()
 	gmsgFog           = REG_USER_MSG("Fog", 7);
 	gmsgShowTimer     = REG_USER_MSG("ShowTimer", 0);
 	gmsgHudTextArgs   = REG_USER_MSG("HudTextArgs", -1);
-	gmsgAccount       = REG_USER_MSG("Account", 5);
-	gmsgHealthInfo    = REG_USER_MSG("HealthInfo", 5);
+	gmsgRole		  = REG_USER_MSG("Role", 2);
+	gmsgRadarPoint	  = REG_USER_MSG("RadarPoint", 8);
+	gmsgRadarRP		  = REG_USER_MSG("RadarRP", 1);
 }
 
 void WriteSigonMessages()
@@ -2653,7 +2647,8 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 			{
 				if (pPlayer->m_signals.GetState() & SIGNAL_BUY)
 				{
-					BuyAmmo(pPlayer, PRIMARY_WEAPON_SLOT, true);
+					if (pPlayer->m_rgpPlayerItems[PRIMARY_WEAPON_SLOT])
+						BuyGunAmmo(pPlayer, pPlayer->m_rgpPlayerItems[PRIMARY_WEAPON_SLOT]);	// buy only 1 box of ammo.
 
 					if (TheTutor)
 					{
@@ -2665,7 +2660,32 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 			{
 				if (pPlayer->m_signals.GetState() & SIGNAL_BUY)
 				{
-					BuyAmmo(pPlayer, PISTOL_SLOT, true);
+					if (pPlayer->m_rgpPlayerItems[PISTOL_SLOT])
+						BuyGunAmmo(pPlayer, pPlayer->m_rgpPlayerItems[PISTOL_SLOT]);	// buy only 1 box of ammo.
+
+					if (TheTutor)
+					{
+						TheTutor->OnEvent(EVENT_PLAYER_BOUGHT_SOMETHING, pPlayer);
+					}
+				}
+			}
+			else if (FStrEq(pcmd, "primammo"))
+			{
+				if (pPlayer->m_signals.GetState() & SIGNAL_BUY)
+				{
+					BuyAmmo(pPlayer, PRIMARY_WEAPON_SLOT);	// buy full ammo.
+
+					if (TheTutor)
+					{
+						TheTutor->OnEvent(EVENT_PLAYER_BOUGHT_SOMETHING, pPlayer);
+					}
+				}
+			}
+			else if (FStrEq(pcmd, "secammo"))
+			{
+				if (pPlayer->m_signals.GetState() & SIGNAL_BUY)
+				{
+					BuyAmmo(pPlayer, PISTOL_SLOT);	// buy full ammo.
 
 					if (TheTutor)
 					{

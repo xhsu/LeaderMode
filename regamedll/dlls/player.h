@@ -707,9 +707,6 @@ public:
 	float m_silentTimestamp;
 	MusicState m_musicState;
 	float m_flLastCommandTime[COMMANDS_TO_TRACK];
-	int m_iLastAccount;
-	int m_iLastClientHealth;
-	float m_tmNextAccountHealthUpdate;
 	Vector m_vecOldvAngle;
 	float m_flRespawnPending;
 	float m_flSpawnProtectionEndTime;

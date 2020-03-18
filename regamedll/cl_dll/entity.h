@@ -9,33 +9,52 @@ Created Date: 05 Mar 2020
 // MOVEME
 enum
 {
-	MAX_PLAYERS = 33, // including the bomb
+	MAX_PLAYERS = 32, // including the bomb
 	MAX_TEAMS = 3,
 	MAX_TEAM_NAME = 16,
 	MAX_HOSTAGES = 24,
 };
 
+enum RoleTypes
+{
+	Role_UNASSIGNED = 0,
+
+	Role_Commander = 1,
+	Role_SWAT,
+	Role_Breacher,
+	Role_Sharpshooter,
+	Role_Medic,
+
+	Role_Godfather = 6,
+	Role_LeadEnforcer,
+	Role_MadScientist,
+	Role_Assassin,
+	Role_Arsonist,
+
+	ROLE_COUNT
+};
+
 struct extra_player_info_t
 {
-	short frags;
-	short deaths;
-	short team_id;
+	short		m_iKills;
+	short		m_iDeaths;
+	short		m_iTeam;
+	Vector		m_vecOrigin;
+	RoleTypes	m_iRoleType;
+	int			m_iHealth;
+	int			m_iAccount;
+
 	bool has_c4;
 	bool vip;
-	Vector origin;
-	float radarflash;
-	float radarflashon;
-	float radarflashes;
-	short playerclass;
-	short teamnumber;
-	char teamname[16];
-	bool dead;
-	bool showhealth;
-	int health;
-	char location[32];
 
-	// LUNA: my add.
-	int m_iAccount;
+	float	m_flTimeNextRadarFlash;
+	bool	m_bRadarFlashing;
+	float	m_iRadarFlashRemains;
+	bool	m_bBeingTracking;	// assassin's skill & commander's skill.
+	
+	bool dead;
+	
+	char location[32];
 };
 
 extern int iOnTrain[MAX_PLAYERS];
@@ -51,7 +70,7 @@ extern Vector g_vPlayerVelocity;
 extern float g_flPlayerSpeed;
 extern int g_iWeaponFlags;
 
-extern extra_player_info_t	g_PlayerExtraInfo[MAX_PLAYERS + 1]; // additional player info sent directly to the client dll
+extern extra_player_info_t	g_PlayerExtraInfo[MAX_PLAYERS]; // additional player info sent directly to the client.dll
 
 int HUD_AddEntity2(int iType, cl_entity_s* pEntity, const char* szModelName);
 void HUD_TxferLocalOverrides2(entity_state_s* pState, const clientdata_s* pClient);

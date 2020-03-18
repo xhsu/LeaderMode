@@ -50,6 +50,9 @@ cvar_t	v_iyaw_level = { "v_iyaw_level", "0.3", 0, 0.3, NULL };
 cvar_t	v_iroll_level = { "v_iroll_level", "0.1", 0, 0.1, NULL };
 cvar_t	v_ipitch_level = { "v_ipitch_level", "0.3", 0, 0.3, NULL };
 
+// export the core ref_params_s structure.
+ref_params_s g_pparams;
+
 /*
 ==============
 V_AddIdle

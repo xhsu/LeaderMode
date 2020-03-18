@@ -49,3 +49,6 @@ void V_GetChasePos(int target, float* cl_angles, float* origin, float* angles);
 void V_GetDirectedChasePosition(cl_entity_t* ent1, cl_entity_t* ent2, float* angle, float* origin);
 void V_GetInEyePos(int target, float* origin, float* angles);
 void V_GetChasePos(int target, float* cl_angles, float* origin, float* angles);
+
+// exporting this to make other cpp make use of it.
+extern ref_params_s g_pparams;

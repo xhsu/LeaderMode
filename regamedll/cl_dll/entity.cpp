@@ -31,7 +31,7 @@ Vector g_vPlayerVelocity;
 float g_flPlayerSpeed;
 int g_iWeaponFlags;
 
-extra_player_info_t	g_PlayerExtraInfo[MAX_PLAYERS + 1]; // additional player info sent directly to the client dll
+extra_player_info_t	g_PlayerExtraInfo[MAX_PLAYERS]; // additional player info sent directly to the client.dll
 
 /*
 ========================
@@ -155,7 +155,7 @@ void HUD_ProcessPlayerState2(entity_state_s* pDestination, const entity_state_s*
 	cl_entity_t* pPlayer = gEngfuncs.GetLocalPlayer();	// Get the local player's index
 	if (pDestination->number == pPlayer->index)
 	{
-		g_iTeamNumber = g_PlayerExtraInfo[pDestination->number].teamnumber;
+		g_iTeamNumber = g_PlayerExtraInfo[pDestination->number].m_iTeam;
 
 		pDestination->iuser1 = g_iUser1 = pSource->iuser1;
 		pDestination->iuser2 = g_iUser2 = pSource->iuser2;
