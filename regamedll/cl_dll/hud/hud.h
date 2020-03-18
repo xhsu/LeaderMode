@@ -184,7 +184,7 @@ namespace gHUD
 	void AddHudElem(CBaseHUDElement* phudelem);
 	float GetSensitivity(void);
 	hSprite GetSprite(int index);
-	wrect_t& GetSpriteRect(int index);
+	wrect_t GetSpriteRect(int index);
 	client_sprite_t* GetSpriteList(client_sprite_t* pList, const char* psz, int iRes, int iCount);
 
 	// HUD bridges

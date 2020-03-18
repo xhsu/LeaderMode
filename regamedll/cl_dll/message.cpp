@@ -270,8 +270,7 @@ MSG_FUNC(DeathMsg)
 	int iVictimId = READ_BYTE();
 	BOOL FHeadShot = READ_BYTE();
 
-	char szWeapon[192];
-	Q_strlcpy(szWeapon, READ_STRING());
+	gHUD::m_DeathNotice.MsgFunc_DeathMsg(iKillId, iVictimId, FHeadShot, READ_STRING());	// STRING: weapon name.
 
 	return TRUE;
 }

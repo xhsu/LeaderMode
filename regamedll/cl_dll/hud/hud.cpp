@@ -698,7 +698,7 @@ hSprite gHUD::GetSprite(int index)
 	return (index < 0) ? 0 : m_rghSprites[index];
 }
 
-wrect_t& gHUD::GetSpriteRect(int index)
+wrect_t gHUD::GetSpriteRect(int index)
 {
 	return m_rgrcRects[index];
 }
