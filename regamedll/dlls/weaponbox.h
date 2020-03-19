@@ -6,6 +6,12 @@ Created Date: Mar 13 2020
 
 #pragma once
 
+/*
+LUNA:	The concept here is quite simple:
+		CWeaponBox is a extension and projection of CBaseWeapon for the GoldSrc engine due to the detachment of CBasePlayerItem from CBaseEntity.
+		Thus, ONLY a CBaseWeapon function can call and/or create CWeaponBox entity.
+*/
+
 class CWeaponBox : public CBaseEntity
 {
 	static const float THROWING_FORCE;

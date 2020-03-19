@@ -159,6 +159,7 @@ void WeaponsPrecache()
 
 	// knife
 	UTIL_PrecacheOtherWeapon(WEAPON_KNIFE);
+	BasicKnife::Precache();
 
 	UTIL_PrecacheOtherWeapon(WEAPON_GLOCK18);
 	UTIL_PrecacheOtherWeapon(WEAPON_MP5N);
@@ -321,6 +322,34 @@ void CBaseWeapon::PostFrame()
 {
 	int usableButtons = m_pPlayer->pev->button;
 
+	// since the call of BasicKnife::Swing() block the normal PostFrame() calls, this must be afterwards.
+	// so the only thing we need to do here is to resume everything back to normal.
+	if (m_bitsFlags & WPNSTATE_MELEE)
+	{
+		// we can't used a Holster() function for namespace BasicKnife{}, because it is used by all players.
+		// we should just remove the melee flag for our weapon.
+		m_bitsFlags &= ~WPNSTATE_MELEE;
+
+		// if the player was reloading, then we should back to reload.
+		if (m_bInReload)
+		{
+			Holster();	// the default Holster() would remove m_bInReload flag. Thus we have to do this.
+			Deploy();
+
+			PopAnim();
+			m_bInReload = true;
+		}
+		else
+		{
+			// or, holster & re-deploy our gun.
+			Holster();
+			Deploy();
+		}
+
+		// wait for at least one frame.
+		return;
+	}
+
 	// Return zoom level back to previous zoom level before we fired a shot.
 	// This is used only for the AWP and Scout
 	if (m_flNextPrimaryAttack <= UTIL_WeaponTimeBase())
@@ -425,8 +454,30 @@ void CBaseWeapon::PostFrame()
 	}
 }
 
-bool CBaseWeapon::Holster(void)
+bool CBaseWeapon::Melee(void)
 {
+	// you just.. can't do this.
+	if (m_iId == WEAPON_KNIFE || m_bitsFlags & WPNSTATE_MELEE)
+		return false;
+
+	// save what we are doing right now.
+	PushAnim();
+
+	// then, swing the knife.
+	BasicKnife::Deploy(this);
+	BasicKnife::Swing();
+	return true;
+}
+
+bool CBaseWeapon::Holster(bool bTrial)
+{
+	if (m_bitsFlags & WPNSTATE_MELEE)	// you can't holster while meleeing.
+		return false;
+
+	// if this is only a trial like original CanHolster(), let's finish here.
+	if (bTrial)
+		return true;
+
 	m_bInReload = false;
 	m_bInZoom = false;
 
@@ -438,11 +489,72 @@ bool CBaseWeapon::Holster(void)
 	return true;
 }
 
+bool CBaseWeapon::Drop(void** ppWeaponBoxReturned)
+{
+	// LUNA: you cannot reject drop request here. it depents on player/other functions.
+
+	// LUNA: you can't call it here. You have to wait it called in pWeaponBox->PackWeapon(). or this would result in packing weapon failure.
+	//RemovePlayerItem(pWeapon);
+
+	UTIL_MakeVectors(m_pPlayer->pev->angles);
+
+	CWeaponBox* pWeaponBox = (CWeaponBox*)CBaseEntity::Create("weaponbox", m_pPlayer->pev->origin + gpGlobals->v_forward * 10, m_pPlayer->pev->angles, m_pPlayer->edict());
+	pWeaponBox->pev->angles.x = 0;
+	pWeaponBox->pev->angles.z = 0;
+	pWeaponBox->SetThink(&CWeaponBox::Kill);
+	pWeaponBox->pev->nextthink = gpGlobals->time + item_staytime.value;
+	pWeaponBox->PackWeapon(this);	// !this call would detach weapon from CBasePlayer databse and attack it to CWeaponBox database.
+
+	if (m_pPlayer->IsAlive())	// drop by intense
+		pWeaponBox->pev->velocity = m_pPlayer->pev->velocity + gpGlobals->v_forward * 300 + gpGlobals->v_forward * 100;	// this velocity would be override soon.
+	else
+	{
+		pWeaponBox->pev->velocity = m_pPlayer->pev->velocity * 0.85f;	// drop due to death.
+	}
+
+	// if this item is using bpammo instead of magzine, we should pack all player bpammo.
+	if (m_pItemInfo->m_bitsFlags & ITEM_FLAG_EXHAUSTIBLE)
+	{
+		if (m_iPrimaryAmmoType > AMMO_NONE && m_iPrimaryAmmoType < AMMO_MAXTYPE)
+		{
+			pWeaponBox->GiveAmmo(m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType], m_iPrimaryAmmoType);
+			m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] = 0;
+		}
+	}
+
+	const char* modelname = GetCSModelName(m_iId);
+	if (modelname)
+	{
+		pWeaponBox->SetModel(modelname);
+	}
+
+	// if the caller is inquiring CWeaponBox, give it to him.
+	if (ppWeaponBoxReturned != nullptr)
+	{
+		(*ppWeaponBoxReturned) = pWeaponBox;
+	}
+
+	// have to re-zero m_pPlayer.
+	// otherwise, since CBasePlayer::RemovePlayerItem() had it removed from m_rgpPlayerItems[], CBaseWeapons::WeaponsThink() would consider this is an error weapon.
+	m_pPlayer = nullptr;
+
+	return true;
+}
+
 bool CBaseWeapon::Kill(void)
 {
 	if (m_pPlayer.IsValid())
 	{
 		m_pPlayer->RemovePlayerItem(this);
+		m_pPlayer = nullptr;
+	}
+
+	if (m_pWeaponBox.IsValid())
+	{
+		if (m_pWeaponBox->m_rgpPlayerItems[m_pItemInfo->m_iSlot] == this)
+			m_pWeaponBox->m_rgpPlayerItems[m_pItemInfo->m_iSlot] = nullptr;
+
+		m_pWeaponBox = nullptr;
 	}
 
 	m_bitsFlags |= WPNSTATE_DEAD;
@@ -644,4 +756,37 @@ void CBaseWeapon::ReloadSound()
 			MESSAGE_END();
 		}
 	}
+}
+
+void CBaseWeapon::PushAnim(void)
+{
+	m_Stack.m_flEjectBrass			= m_pPlayer->m_flEjectBrass;
+	m_Stack.m_flNextAttack			= m_pPlayer->m_flNextAttack;
+	m_Stack.m_flNextPrimaryAttack	= m_flNextPrimaryAttack;
+	m_Stack.m_flNextSecondaryAttack	= m_flNextSecondaryAttack;
+	m_Stack.m_flTimeWeaponIdle		= m_flTimeWeaponIdle;
+	m_Stack.m_iSequence				= m_pPlayer->pev->weaponanim;
+	m_Stack.m_iShellModelIndex		= m_pPlayer->m_iShellModelIndex;
+}
+
+void CBaseWeapon::PopAnim(void)
+{
+	// invalid pop.
+	if (m_Stack.m_iSequence < 0)
+		return;
+
+	m_pPlayer->m_flEjectBrass		= m_Stack.m_flEjectBrass;
+	m_pPlayer->m_flNextAttack		= m_Stack.m_flNextAttack;
+	m_flNextPrimaryAttack			= m_Stack.m_flNextPrimaryAttack;
+	m_flNextSecondaryAttack			= m_Stack.m_flNextSecondaryAttack;
+	m_flTimeWeaponIdle				= m_Stack.m_flTimeWeaponIdle;
+	m_pPlayer->pev->weaponanim		= m_Stack.m_iSequence;
+	m_pPlayer->m_iShellModelIndex	= m_Stack.m_iShellModelIndex;
+
+	// LUNA: I don't know why, but execute this can prevent anim-restart over. This has to be done on both side.
+	SendWeaponAnim(m_Stack.m_iSequence);
+
+	// clear old data, mark for invalid.
+	Q_memset(&m_Stack, NULL, sizeof(m_Stack));
+	m_Stack.m_iSequence = -1;
 }

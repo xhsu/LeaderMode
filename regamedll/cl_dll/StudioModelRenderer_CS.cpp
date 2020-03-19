@@ -10,9 +10,11 @@ engine_studio_api_t IEngineStudio;
 
 CGameStudioModelRenderer g_StudioRenderer;
 
+float g_flTimeViewModelAnimStart = 0.0f;	// LUNA: stupit engine. You can't just override g_pViewEnt->curstate.animtime anywhere, you must override it right before it's render.
 float g_flStartScaleTime;
 int iPrevRenderState;
 int iRenderStateChanged;
+cl_entity_t* g_pViewEnt = nullptr;
 
 typedef struct
 {
@@ -1105,6 +1107,14 @@ int R_StudioDrawPlayer(int flags, entity_state_t* pplayer)
 
 int R_StudioDrawModel(int flags)
 {
+	if (IEngineStudio.GetCurrentEntity() == g_pViewEnt)
+	{
+		// LUNA: fucking engine. when you apply anim via gEngfuncs.pfnWeaponAnim(), it secretly save a time without letting you know.
+		// then before the VMDL gets rendered, the engine suddenly re-apply this value back.
+		// this makes you cannot play VMDL anim halfway.
+		g_pViewEnt->curstate.animtime = g_flTimeViewModelAnimStart;
+	}
+
 	return g_StudioRenderer.StudioDrawModel(flags);
 }
 

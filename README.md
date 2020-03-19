@@ -15,6 +15,7 @@ Compile both client.dll and mp.dll, replace the corresponding file in czero/. Ma
 | Command                             | Description                                     |
 | :---------------------------------- | :---------------------------------------------- |
 | +qtg                                | Throw grenade. It works just like R6:S. |
+| melee                               | Swing the default knife for emergency attack. This won't cancel reload but pause it. |
 | executeskill                        | Args:<br/> 1~4 for different character skill. This would be improve later. |
 | declarerole                         | Open a menu with which you may choose your role. |
 | votescheme                          | Vote the tactical scheme for your team. |

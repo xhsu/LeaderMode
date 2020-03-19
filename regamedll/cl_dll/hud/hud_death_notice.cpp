@@ -36,9 +36,6 @@ int CHudDeathNotice::VidInit(void)
 
 int CHudDeathNotice::Draw(float flTime)
 {
-	if (m_lstQueue.empty())
-		return FALSE;
-
 	int x, y = DEATHNOTICE_Y_BASE_OFS;
 	int TextHeight, TextWidth;
 
@@ -107,6 +104,9 @@ void CHudDeathNotice::Think(void)
 			++i;
 		}
 	}
+
+	if (m_lstQueue.empty())
+		m_bitsFlags &= ~HUD_ACTIVE;
 }
 
 void CHudDeathNotice::MsgFunc_DeathMsg(int iKillerIndex, int iVictimIndex, bool bHeadshot, const char* szWeaponName)

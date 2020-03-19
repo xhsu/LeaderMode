@@ -126,6 +126,7 @@ void CL_DLLEXPORT HUD_Init(void)
 	KB_Init();
 	Msg_Init();
 	gHUD::Init();
+	Wpn_Init();
 }
 
 BOOL CL_DLLEXPORT HUD_Key_Event(int down, int keynum, const char* pszCurrentBinding)
@@ -200,6 +201,8 @@ BOOL CL_DLLEXPORT HUD_UpdateClientData(client_data_t* pcldata, float flTime)
 
 BOOL CL_DLLEXPORT HUD_VidInit(void)
 {
+	g_pViewEnt = gEngfuncs.GetViewModel();
+
 	gHUD::VidInit();
 	return TRUE;
 }

@@ -96,6 +96,7 @@ enum ItemCostType
 enum WeaponState
 {
 	WPNSTATE_DEAD				= BIT(0),	// mark for remove.
+	WPNSTATE_MELEE				= BIT(1),
 	WPNSTATE_ELITE_LEFT         = BIT(3),
 	WPNSTATE_FAMAS_BURST_MODE   = BIT(4),
 	WPNSTATE_SHIELD_DRAWN       = BIT(5),

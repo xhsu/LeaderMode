@@ -2187,12 +2187,11 @@ BOOL EXT_FUNC CHalfLifeMultiplay::FShouldSwitchWeapon(CBasePlayer *pPlayer, CBas
 	if (!pPlayer->m_iAutoWepSwitch)
 		return FALSE;
 
-	// TODO: maybe reuse this?
-	/*if (!pPlayer->m_pActiveItem->CanHolster())
+	if (!pPlayer->m_pActiveItem->CanHolster())
 	{
 		// can't put away the active item.
 		return FALSE;
-	}*/
+	}
 
 	if (pWeapon->m_pItemInfo->m_iWeight > pPlayer->m_pActiveItem->m_pItemInfo->m_iWeight)
 		return TRUE;
@@ -2207,12 +2206,11 @@ BOOL EXT_FUNC CHalfLifeMultiplay::GetNextBestWeapon(CBasePlayer *pPlayer, CBaseW
 	int iBestWeight;
 	int i;
 
-	// TODO
-	/*if (!pCurrentWeapon->CanHolster())
+	if (!pCurrentWeapon->CanHolster())
 	{
 		// can't put this gun away right now, so can't switch.
 		return FALSE;
-	}*/
+	}
 
 	iBestWeight = -1; // no weapon lower than -1 can be autoswitched to
 	pBest = nullptr;

@@ -2830,6 +2830,23 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 			{
 				gBurningDOTMgr::Set(pPlayer, pPlayer, atoi(parg1));
 			}
+			else if (FStrEq(pcmd, "melee"))
+			{
+				if (pPlayer->m_pActiveItem)
+					pPlayer->m_pActiveItem->Melee();
+			}
+			else if (FStrEq(pcmd, "showallweapons"))
+			{
+				for (auto pWeapon : CBaseWeapon::m_lstWeapons)
+				{
+					if (pWeapon->m_pPlayer.IsValid())
+						SERVER_PRINT(SharedVarArgs("Wpn: %s, Owner: %s\n", g_rgszWeaponAlias[pWeapon->m_iId], STRING(pWeapon->m_pPlayer->pev->netname)));
+					else
+					{
+						SERVER_PRINT(SharedVarArgs("Wpn: %s, Owner: CWeaponBox\n", g_rgszWeaponAlias[pWeapon->m_iId]));
+					}
+				}
+			}
 			else
 			{
 				if (HandleRadioAliasCommands(pPlayer, pcmd))

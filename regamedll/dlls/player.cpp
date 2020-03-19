@@ -1248,88 +1248,6 @@ BOOL CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 	return bTookDamage;
 }
 
-void PackPlayerItem(CBasePlayer *pPlayer, CBaseWeapon *pItem, bool packAmmo)
-{
-	if (!pItem)
-		return;
-
-	const char *modelName = GetCSModelName(pItem->m_iId);
-	if (modelName)
-	{
-		// create a box to pack the stuff into.
-		CWeaponBox *pWeaponBox = (CWeaponBox *)CBaseEntity::Create("weaponbox", pPlayer->pev->origin, pPlayer->pev->angles, ENT(pPlayer->pev));
-
-		// don't let weaponbox tilt.
-		pWeaponBox->pev->angles.x = 0;
-		pWeaponBox->pev->angles.z = 0;
-		pWeaponBox->pev->velocity = pPlayer->pev->velocity * 0.75f;
-		pWeaponBox->SetThink(&CWeaponBox::Kill);
-		pWeaponBox->pev->nextthink = gpGlobals->time + item_staytime.value;
-		pWeaponBox->PackWeapon(pItem); // now pack all of the items in the lists
-
-		// pack the ammo
-		if (packAmmo)
-		{
-			pWeaponBox->GiveAmmo(pPlayer->m_rgAmmo[pItem->m_iPrimaryAmmoType], pItem->m_iPrimaryAmmoType);
-		}
-
-		pWeaponBox->SetModel(modelName);
-	}
-}
-
-void PackPlayerNade(CBasePlayer *pPlayer, CBaseWeapon *pItem, bool packAmmo)
-{
-	if (!pItem)
-		return;
-
-	// WPN_UNDONE
-	if (/*pItem->m_flStartThrow != 0.0f || */pPlayer->m_rgAmmo[pItem->m_iPrimaryAmmoType] <= 0)
-		return;
-
-	const char *modelName = GetCSModelName(pItem->m_iId);
-	if (modelName)
-	{
-		float flOffset = 0.0f;
-		switch (pItem->m_iId)
-		{
-		case WEAPON_HEGRENADE:
-			flOffset = 14.0f;
-			break;
-		case WEAPON_FLASHBANG:
-			flOffset = 0.0f;
-			break;
-		case WEAPON_SMOKEGRENADE:
-			flOffset = -14.0f;
-			break;
-		}
-
-		Vector vecAngles = pPlayer->pev->angles;
-		Vector dir(Q_cos(vecAngles.y) * flOffset, Q_sin(vecAngles.y) * flOffset, 0.0f);
-
-		vecAngles.x = 0.0f;
-		vecAngles.y += 45.0f;
-
-		// create a box to pack the stuff into.
-		CWeaponBox *pWeaponBox = (CWeaponBox *)CBaseEntity::Create("weaponbox", pPlayer->pev->origin + dir, vecAngles, ENT(pPlayer->pev));
-
-		// don't let weaponbox tilt.
-		pWeaponBox->pev->angles.x = 0;
-		pWeaponBox->pev->angles.z = 0;
-		pWeaponBox->pev->velocity = pPlayer->pev->velocity * 0.75f;
-		pWeaponBox->SetThink(&CWeaponBox::Kill);
-		pWeaponBox->pev->nextthink = gpGlobals->time + item_staytime.value;
-		pWeaponBox->PackWeapon(pItem); // now pack all of the items in the lists
-
-		// pack the ammo
-		if (packAmmo)
-		{
-			pWeaponBox->GiveAmmo(pPlayer->m_rgAmmo[GetWeaponInfo(pItem->m_iId)->m_iAmmoType], (AmmoIdType)GetWeaponInfo(pItem->m_iId)->m_iAmmoType);
-		}
-
-		pWeaponBox->SetModel(modelName);
-	}
-}
-
 // PackDeadPlayerItems - call this when a player dies to
 // pack up the appropriate weapons and ammo items, and to
 // destroy anything that shouldn't be packed.
@@ -1348,58 +1266,33 @@ void CBasePlayer::PackDeadPlayerItems()
 			bShieldDropped = true;
 		}
 
-		int nBestWeight = 0;
-		CBaseWeapon *pBestItem = nullptr;
+		CWeaponBox* pWeaponBox = nullptr;
+		AmmoIdType iAmmoId = AMMO_NONE;
 
-		for (int n = 0; n < MAX_ITEM_TYPES; n++)
+		for (int i = 0; i < MAX_ITEM_TYPES; i++)
 		{
-			// there's a weapon here. Should I pack it?
-			auto *pPlayerItem = m_rgpPlayerItems[n];
+			// LUNA: in LeaderMod, we pack all weapons.
 
-			if (pPlayerItem)
+			if (!m_rgpPlayerItems[i] || !m_rgpPlayerItems[i]->CanDrop())
+				continue;
+
+			// save this value. we don't have any access to it after we pack it into CWeaponBox.
+			iAmmoId = m_rgpPlayerItems[i]->m_iPrimaryAmmoType;
+
+			if (!m_rgpPlayerItems[i]->Drop((void**)&pWeaponBox))
+				continue;
+
+			// drop randomly around player.
+			pWeaponBox->pev->origin += Vector(RANDOM_FLOAT(-10, 10), RANDOM_FLOAT(-10, 10), 0);
+
+			// pack some ammo into this weaponbox.
+			if (bPackAmmo && iAmmoId != AMMO_NONE)
 			{
-				if (pPlayerItem->m_iId && pPlayerItem->m_pItemInfo->m_iSlot < KNIFE_SLOT && !bShieldDropped)
-				{
-					if (pPlayerItem->m_pItemInfo->m_iWeight > nBestWeight)
-					{
-						nBestWeight = pPlayerItem->m_pItemInfo->m_iWeight;
-						pBestItem = pPlayerItem;
-					}
-				}
-				// WPN_UNDONE
-				// drop a grenade after death
-				/*else if (pPlayerItem->iinfo()->m_iSlot == GRENADE_SLOT)
-				{
-					if (AreRunningCZero())
-					{
-						if (pPlayerItem->m_flStartThrow == 0.0f && m_rgAmmo[pPlayerItem->iinfo()->m_iAmmoType] > 0)
-						{
-							PackPlayerItem(this, pPlayerItem, true);
-						}
-					}
-					else
-					{
-						switch ((int)nadedrops.value)
-						{
-						case 1:
-							PackPlayerNade(this, pPlayerItem, true);
-							break;
-						case 2:
-						{
-							CBasePlayerItem *pNext = pPlayerItem->m_pNext;
-							PackPlayerNade(this, pPlayerItem, true);
-							pPlayerItem = pNext;
-							continue;
-						}
-						}
-					}
-				}*/
-
-				//pPlayerItem = pPlayerItem->m_pNext;
+				pWeaponBox->GiveAmmo(m_rgAmmo[iAmmoId], iAmmoId);
+				m_rgAmmo[iAmmoId] = 0;
 			}
-		}
 
-		PackPlayerItem(this, pBestItem, bPackAmmo);
+		}
 	}
 
 	RemoveAllItems(TRUE);
@@ -2613,12 +2506,11 @@ void CWShield::Touch(CBaseEntity *pOther)
 
 	if (!pPlayer->m_bHasPrimary)
 	{
-		// TODO
-		/*if (pPlayer->m_pActiveItem)
+		if (pPlayer->m_pActiveItem)
 		{
 			if (!pPlayer->m_pActiveItem->CanHolster())
 				return;
-		}*/
+		}
 
 		if (CSGameRules()->CanHavePlayerItem(pPlayer, WEAPON_SHIELDGUN, false))
 			return;
@@ -2670,9 +2562,8 @@ CBaseEntity *EXT_FUNC CBasePlayer::DropShield(bool bDeploy)
 	if (!HasShield())
 		return nullptr;
 
-	// TODO
-	/*if (m_pActiveItem && !m_pActiveItem->CanHolster())
-		return nullptr;*/
+	if (m_pActiveItem && !m_pActiveItem->CanHolster())
+		return nullptr;
 
 	if (m_pActiveItem)
 	{
@@ -4920,9 +4811,8 @@ void CBasePlayer::SelectItem(const char *pstr)
 		return;
 	}
 
-	// TODO
-	/*if (m_pActiveItem && !m_pActiveItem->CanHolster())
-		return;*/
+	if (m_pActiveItem && !m_pActiveItem->CanHolster())
+		return;
 
 	auto pItem = GetItemById(WeaponClassnameToID(pstr));
 	if (!pItem || pItem == m_pActiveItem)
@@ -4956,9 +4846,8 @@ void CBasePlayer::SelectItem(const char *pstr)
 
 void CBasePlayer::SelectLastItem()
 {
-	// TODO
-	/*if (m_pActiveItem && !m_pActiveItem->CanHolster())
-		return;*/
+	if (m_pActiveItem && !m_pActiveItem->CanHolster())
+		return;
 
 	if (!m_pLastItem || m_pLastItem == m_pActiveItem)
 	{
@@ -5538,6 +5427,8 @@ BOOL EXT_FUNC CBasePlayer::RemovePlayerItem(CBaseWeapon *pItem)	// this should b
 		pev->weaponmodel = 0;
 	}
 
+	// if item being removed is the last weapon, we should clear the record.
+	// because the SelectLastItem() won't check the ownership of last item.
 	if (m_pLastItem == pItem)
 		m_pLastItem = nullptr;
 
@@ -6370,15 +6261,11 @@ CBaseEntity *EXT_FUNC CBasePlayer::DropPlayerItem(WeaponIdType iId)
 
 	if (pWeapon)
 	{
-		// TODO
-		/*if (!pWeapon->CanDrop())
+		if (!pWeapon->CanDrop() && IsAlive())
 		{
 			ClientPrint(pev, HUD_PRINTCENTER, "#Weapon_Cannot_Be_Dropped");
-			return nullptr;
-		}*/
-
-		// take item off hand
-		RemovePlayerItem(pWeapon);
+			return false;
+		}
 
 		// No more weapon
 		if ((pev->weapons & ~(1 << WEAPON_SUIT)) == 0)
@@ -6390,30 +6277,10 @@ CBaseEntity *EXT_FUNC CBasePlayer::DropPlayerItem(WeaponIdType iId)
 		if (pWeapon->m_pItemInfo->m_iSlot == PRIMARY_WEAPON_SLOT)
 			m_bHasPrimary = false;
 
-		CWeaponBox *pWeaponBox = (CWeaponBox *)CBaseEntity::Create("weaponbox", pev->origin + gpGlobals->v_forward * 10, pev->angles, edict());
-		pWeaponBox->pev->angles.x = 0;
-		pWeaponBox->pev->angles.z = 0;
-		pWeaponBox->SetThink(&CWeaponBox::Kill);
-		pWeaponBox->pev->nextthink = gpGlobals->time + item_staytime.value;
-		pWeaponBox->PackWeapon(pWeapon);
-		pWeaponBox->pev->velocity = gpGlobals->v_forward * 300 + gpGlobals->v_forward * 100;	// this velocity would be override soon.
-
-		if (pWeapon->m_pItemInfo->m_bitsFlags & ITEM_FLAG_EXHAUSTIBLE)
-		{
-			if (pWeapon->m_iPrimaryAmmoType > AMMO_NONE)
-			{
-				// why not pack the ammo more than one?
-				pWeaponBox->GiveAmmo(m_rgAmmo[pWeapon->m_iPrimaryAmmoType], pWeapon->m_iPrimaryAmmoType);
-
-				m_rgAmmo[pWeapon->m_iPrimaryAmmoType] = 0;
-			}
-		}
-
-		const char *modelname = GetCSModelName(pWeapon->m_iId);
-		if (modelname)
-		{
-			pWeaponBox->SetModel(modelname);
-		}
+		// the actual drop.
+		CWeaponBox* pWeaponBox = nullptr;
+		if (!pWeapon->Drop((void**)&pWeaponBox))
+			return nullptr;
 
 		return pWeaponBox;
 	}
@@ -6593,7 +6460,7 @@ BOOL CBasePlayer::SwitchWeapon(CBaseWeapon *pWeapon)
 
 	ResetAutoaim();
 
-	if (m_pActiveItem)
+	if (m_pActiveItem && m_pActiveItem->m_pPlayer == this)
 	{
 		m_pActiveItem->Holster();
 	}
