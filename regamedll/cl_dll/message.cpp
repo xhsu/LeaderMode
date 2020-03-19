@@ -60,7 +60,7 @@ MSG_FUNC(Health)
 	int iClient = READ_BYTE();
 	int iHealth = READ_SHORT();
 
-	g_PlayerExtraInfo[iClient].health = iHealth;
+	g_PlayerExtraInfo[iClient].m_iHealth = iHealth;
 
 	if (iClient == gEngfuncs.GetLocalPlayer()->index)
 		gHUD::m_Health.MsgFunc_Health(iHealth);
@@ -270,8 +270,7 @@ MSG_FUNC(DeathMsg)
 	int iVictimId = READ_BYTE();
 	BOOL FHeadShot = READ_BYTE();
 
-	char szWeapon[192];
-	Q_strlcpy(szWeapon, READ_STRING());
+	gHUD::m_DeathNotice.MsgFunc_DeathMsg(iKillId, iVictimId, FHeadShot, READ_STRING());	// STRING: weapon name.
 
 	return TRUE;
 }
@@ -304,9 +303,12 @@ MSG_FUNC(TeamInfo)
 	BEGIN_READ(pbuf, iSize);
 
 	int iPlayerId = READ_BYTE();
+	int iTeam = READ_BYTE();
+	
+	g_PlayerExtraInfo[iPlayerId].m_iTeam = iTeam;
 
-	char szTeamName[192];
-	Q_strlcpy(szTeamName, READ_STRING());
+	if (iPlayerId == gHUD::m_iPlayerNum)
+		g_iTeamNumber = iTeam;
 
 	return TRUE;
 }
@@ -409,7 +411,12 @@ MSG_FUNC(SetFOV)
 {
 	BEGIN_READ(pbuf, iSize);
 
-	gHUD::m_iFOV = READ_BYTE();
+	static int iLastFOV = DEFAULT_FOV;
+
+	int iFOV = READ_BYTE();
+
+	gHUD::m_iLastFOVDiff = Q_abs(iLastFOV - iFOV);
+	gHUD::m_iFOV = iLastFOV = iFOV;
 	return TRUE;
 }
 
@@ -484,9 +491,9 @@ MSG_FUNC(SendAudio)
 		gEngfuncs.pfnPlaySoundByNameAtPitch(code, 1.0, pitch);
 	}
 
-	g_PlayerExtraInfo[client].radarflashes = 22;
-	g_PlayerExtraInfo[client].radarflash = gHUD::m_flTime;
-	g_PlayerExtraInfo[client].radarflashon = 1;
+	g_PlayerExtraInfo[client].m_iRadarFlashRemains = 22;
+	g_PlayerExtraInfo[client].m_flTimeNextRadarFlash = gHUD::m_flTime;
+	g_PlayerExtraInfo[client].m_bRadarFlashing = 1;
 
 	return TRUE;
 }
@@ -505,10 +512,16 @@ MSG_FUNC(Money)
 {
 	BEGIN_READ(pbuf, iSize);
 
+	int iPlayerId = READ_BYTE();
 	int iAccount = READ_LONG();
 	BOOL FTrackChange = READ_BYTE();
 
-	gHUD::m_accountBalance.MsgFunc_Money(iAccount, FTrackChange);
+	g_PlayerExtraInfo[iPlayerId].m_iAccount = iAccount;
+
+	// if it is the local player, call the HUD func.
+	if (iPlayerId == gEngfuncs.GetLocalPlayer()->index)
+		gHUD::m_accountBalance.MsgFunc_Money(iAccount, FTrackChange);
+
 	return TRUE;
 }
 
@@ -616,9 +629,9 @@ MSG_FUNC(Radar)
 	BEGIN_READ(pbuf, iSize);
 
 	int cl = READ_BYTE();
-	g_PlayerExtraInfo[cl].origin[0] = READ_COORD();
-	g_PlayerExtraInfo[cl].origin[1] = READ_COORD();
-	g_PlayerExtraInfo[cl].origin[2] = READ_COORD();
+	g_PlayerExtraInfo[cl].m_vecOrigin[0] = READ_COORD();
+	g_PlayerExtraInfo[cl].m_vecOrigin[1] = READ_COORD();
+	g_PlayerExtraInfo[cl].m_vecOrigin[2] = READ_COORD();
 
 	return TRUE;
 }
@@ -706,27 +719,6 @@ MSG_FUNC(AllowSpec)
 	return TRUE;
 }
 
-MSG_FUNC(BombDrop)
-{
-	BEGIN_READ(pbuf, iSize);
-
-	Vector vecOrigin;
-	vecOrigin.x = READ_COORD();
-	vecOrigin.y = READ_COORD();
-	vecOrigin.z = READ_COORD();
-
-	BOOL FBombPlanted = READ_BYTE();
-
-	return TRUE;
-}
-
-MSG_FUNC(BombPickup)
-{
-	// this msg have no arguments.
-
-	return TRUE;
-}
-
 MSG_FUNC(ClCorpse)
 {
 	char szModel[64];
@@ -766,30 +758,6 @@ MSG_FUNC(ClCorpse)
 	}
 
 	CreateCorpse(vOrigin, vAngles, szModel, flAnimTime, iSequence, iBody);
-	return TRUE;
-}
-
-MSG_FUNC(HostagePos)
-{
-	BEGIN_READ(pbuf, iSize);
-
-	BOOL FInitiation = READ_BYTE();
-	int iHostageId = READ_BYTE();
-
-	Vector vecOrigin;
-	vecOrigin.x = READ_COORD();
-	vecOrigin.y = READ_COORD();
-	vecOrigin.z = READ_COORD();
-
-	return TRUE;
-}
-
-MSG_FUNC(HostageK)
-{
-	BEGIN_READ(pbuf, iSize);
-
-	int iHostageId = READ_BYTE();
-
 	return TRUE;
 }
 
@@ -1056,24 +1024,46 @@ MSG_FUNC(HudTextArgs)
 	return TRUE;
 }
 
-MSG_FUNC(Account)
+MSG_FUNC(Role)
 {
 	BEGIN_READ(pbuf, iSize);
 
 	int iPlayerId = READ_BYTE();
+	int iRole = READ_BYTE();
 
-	g_PlayerExtraInfo[iPlayerId].m_iAccount = READ_LONG();
+	g_PlayerExtraInfo[iPlayerId].m_iRoleType = (RoleTypes)iRole;
+	return TRUE;
+}
+
+MSG_FUNC(RadarPoint)
+{
+	BEGIN_READ(pbuf, iSize);
+
+	int iIndex = READ_BYTE();
+	gHUD::m_Radar.m_rgCustomPoints[iIndex].m_bGlobalOn = true;
+	gHUD::m_Radar.m_rgCustomPoints[iIndex].m_bPhase = true;	// switch to drawing phase.
+	gHUD::m_Radar.m_rgCustomPoints[iIndex].m_flTimeSwitchPhase = 0.15f;
+	gHUD::m_Radar.m_rgCustomPoints[iIndex].m_color.r = 250;
+	gHUD::m_Radar.m_rgCustomPoints[iIndex].m_color.g = 0;
+	gHUD::m_Radar.m_rgCustomPoints[iIndex].m_color.b = 0;
+	gHUD::m_Radar.m_rgCustomPoints[iIndex].m_color.a = 245;
+	gHUD::m_Radar.m_rgCustomPoints[iIndex].m_vecCoord.x = READ_COORD();
+	gHUD::m_Radar.m_rgCustomPoints[iIndex].m_vecCoord.y = READ_COORD();
+	gHUD::m_Radar.m_rgCustomPoints[iIndex].m_vecCoord.z = READ_COORD();
+	gHUD::m_Radar.m_rgCustomPoints[iIndex].m_flFlashInterval = 0.15f;
+	gHUD::m_Radar.m_rgCustomPoints[iIndex].m_iFlashCounts = READ_BYTE();
+	gHUD::m_Radar.m_rgCustomPoints[iIndex].m_bitsFlags = RADAR_DOT_NORMAL;
+	gHUD::m_Radar.m_rgCustomPoints[iIndex].m_iDotSize = 1;
 
 	return TRUE;
 }
 
-MSG_FUNC(HealthInfo)
+MSG_FUNC(RadarRP)	// Radar remove point.
 {
 	BEGIN_READ(pbuf, iSize);
 
-	int iPlayerId = READ_BYTE();
-
-	g_PlayerExtraInfo[iPlayerId].health = READ_LONG();
+	int iIndex = READ_BYTE();
+	gHUD::m_Radar.m_rgCustomPoints[iIndex].m_bGlobalOn = false;
 
 	return TRUE;
 }
@@ -1167,11 +1157,7 @@ void Msg_Init(void)
 	HOOK_USER_MSG(TutorState);
 	HOOK_USER_MSG(TutorClose);
 	HOOK_USER_MSG(AllowSpec);
-	HOOK_USER_MSG(BombDrop);
-	HOOK_USER_MSG(BombPickup);
 	HOOK_USER_MSG(ClCorpse);
-	HOOK_USER_MSG(HostagePos);
-	HOOK_USER_MSG(HostageK);
 	HOOK_USER_MSG(HLTV);
 	HOOK_USER_MSG(SpecHealth);
 	HOOK_USER_MSG(ForceCam);
@@ -1193,8 +1179,9 @@ void Msg_Init(void)
 	HOOK_USER_MSG(Fog);
 	HOOK_USER_MSG(ShowTimer);
 	HOOK_USER_MSG(HudTextArgs);
-	HOOK_USER_MSG(Account);
-	HOOK_USER_MSG(HealthInfo);
+	HOOK_USER_MSG(Role);
+	HOOK_USER_MSG(RadarPoint);
+	HOOK_USER_MSG(RadarRP);
 
 	// player.cpp
 	HOOK_USER_MSG(Logo);

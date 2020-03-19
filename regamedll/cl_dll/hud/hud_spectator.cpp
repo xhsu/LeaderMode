@@ -175,7 +175,7 @@ bool CHudSpectator::AddOverviewEntity(int type, cl_entity_s* ent, const char* mo
 	{
 		if (ent->curstate.solid != SOLID_NOT)
 		{
-			switch (g_PlayerExtraInfo[ent->index].teamnumber)
+			switch (g_PlayerExtraInfo[ent->index].m_iTeam)
 			{
 			case TEAM_TERRORIST: hSprite = m_hsprPlayerRed; break;
 			case TEAM_CT: hSprite = m_hsprPlayerBlue; break;
@@ -910,7 +910,6 @@ void CHudSpectator::HandleButtonsDown(int ButtonPressed)
 				gEngfuncs.SetViewAngles(vJumpAngles);
 				iJumpSpectator = 1;
 				gHUD::m_Radar.m_iPlayerLastPointedAt = g_iUser2;
-				g_PlayerExtraInfo[g_iUser2].showhealth = gHUD::m_flTime = 3;
 			}
 
 			m_autoDirector->value = 0.0f;

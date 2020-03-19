@@ -10,6 +10,7 @@ int g_runfuncs = 0;
 double g_flGameTime = 0;
 const Vector g_vecZero = Vector(0, 0, 0);
 int g_iCurViewModelAnim = 0;
+CBaseWeapon* g_pCurWeapon = nullptr;
 
 CBasePlayer gPseudoPlayer;
 std::shared_ptr<pseudo_global_vars_s> gpGlobals;
@@ -148,6 +149,34 @@ void CBaseWeapon::PostFrame()
 {
 	int usableButtons = m_pPlayer->pev->button;
 
+	// since the call of BasicKnife::Swing() block the normal PostFrame() calls, this must be afterwards.
+	// so the only thing we need to do here is to resume everything back to normal.
+	if (m_bitsFlags & WPNSTATE_MELEE)
+	{
+		// we can't used a Holster() function for namespace BasicKnife{}, because it is used by all players.
+		// we should just remove the melee flag for our weapon.
+		m_bitsFlags &= ~WPNSTATE_MELEE;
+
+		// if the player was reloading, then we should back to reload.
+		if (m_bInReload)
+		{
+			Holster();	// the default Holster() would remove m_bInReload flag. Thus we have to do this.
+			Deploy();
+
+			PopAnim();
+			m_bInReload = true;
+		}
+		else
+		{
+			// or, holster & re-deploy our gun.
+			Holster();
+			Deploy();
+		}
+
+		// wait for at least one frame.
+		return;
+	}
+
 	// Return zoom level back to previous zoom level before we fired a shot.
 	// This is used only for the AWP and Scout
 	if (m_flNextPrimaryAttack <= UTIL_WeaponTimeBase())
@@ -241,8 +270,29 @@ void CBaseWeapon::PostFrame()
 	}
 }
 
-bool CBaseWeapon::Holster(void)
+bool CBaseWeapon::Melee(void)
 {
+	// you just.. can't do this.
+	if (m_iId == WEAPON_KNIFE || m_bitsFlags & WPNSTATE_MELEE)
+		return false;
+
+	// do nothing melee-ish action on client side.
+	// this has to be executed from SV.
+
+	// but we should push-pop anims.
+	PushAnim();
+	return true;
+}
+
+bool CBaseWeapon::Holster(bool bTrial)
+{
+	if (m_bitsFlags & WPNSTATE_MELEE)	// you can't holster while meleeing.
+		return false;
+
+	// if this is only a trial like original CanHolster(), let's finish here.
+	if (bTrial)
+		return true;
+
 	m_bInZoom = false;
 	g_vecGunOfsGoal = g_vecZero;
 	g_flGunOfsMovingSpeed = 10.0f;
@@ -250,6 +300,19 @@ bool CBaseWeapon::Holster(void)
 	m_bInReload = false;
 	m_pPlayer->pev->viewmodel = 0;
 	m_pPlayer->pev->weaponmodel = 0;
+
+	return true;
+}
+
+bool CBaseWeapon::Drop(void** ppWeaponBoxReturned)
+{
+	// the client site have no CWeaponBox.
+	if (ppWeaponBoxReturned)
+		(*ppWeaponBoxReturned) = nullptr;
+
+	// we have nothing to do on client side.
+	// you can't set m_pPlayer to be null here. since only one player existed at client.dll.
+
 	return true;
 }
 
@@ -292,6 +355,9 @@ void CBaseWeapon::SendWeaponAnim(int iAnim, int iBody, bool bSkipLocal)
 
 	m_pPlayer->pev->weaponanim = iAnim;
 	gEngfuncs.pfnWeaponAnim(iAnim, iBody);
+
+	// save the time for the renderer.
+	g_flTimeViewModelAnimStart = gEngfuncs.GetClientTime();
 }
 
 void CBaseWeapon::PlayEmptySound()
@@ -327,6 +393,51 @@ bool CBaseWeapon::DefaultReload(int iClipSize, int iAnim, float fDelay)
 void CBaseWeapon::ReloadSound()
 {
 	// this should be playered by Server.
+}
+
+void CBaseWeapon::PushAnim(void)
+{
+	cl_entity_t* pViewEntity = gEngfuncs.GetViewModel();
+
+	m_Stack.m_flEjectBrass			= m_pPlayer->m_flEjectBrass;
+	m_Stack.m_flFrame				= pViewEntity->curstate.frame;
+	m_Stack.m_flFramerate			= pViewEntity->curstate.framerate;
+	m_Stack.m_flNextAttack			= m_pPlayer->m_flNextAttack;
+	m_Stack.m_flNextPrimaryAttack	= m_flNextPrimaryAttack;
+	m_Stack.m_flNextSecondaryAttack	= m_flNextSecondaryAttack;
+	m_Stack.m_flTimeAnimStarted		= gEngfuncs.GetClientTime() - g_flTimeViewModelAnimStart;
+	m_Stack.m_flTimeWeaponIdle		= m_flTimeWeaponIdle;
+	m_Stack.m_iSequence				= pViewEntity->curstate.sequence;
+	m_Stack.m_iShellModelIndex		= m_pPlayer->m_iShellModelIndex;
+}
+
+void CBaseWeapon::PopAnim(void)
+{
+	// invalid pop.
+	if (m_Stack.m_iSequence < 0)
+		return;
+
+	cl_entity_t* pViewEntity = gEngfuncs.GetViewModel();
+
+	m_pPlayer->m_flEjectBrass		= m_Stack.m_flEjectBrass;
+	pViewEntity->curstate.frame		= m_Stack.m_flFrame;
+	pViewEntity->curstate.framerate	= m_Stack.m_flFramerate;
+	m_pPlayer->m_flNextAttack		= m_Stack.m_flNextAttack;
+	m_flNextPrimaryAttack			= m_Stack.m_flNextPrimaryAttack;
+	m_flNextSecondaryAttack			= m_Stack.m_flNextSecondaryAttack;
+	g_flTimeViewModelAnimStart		= gEngfuncs.GetClientTime() - m_Stack.m_flTimeAnimStarted;
+	m_flTimeWeaponIdle				= m_Stack.m_flTimeWeaponIdle;
+	pViewEntity->curstate.sequence	= m_Stack.m_iSequence;	// you have to set all these 3 places at CL side.
+	m_pPlayer->pev->weaponanim		= m_Stack.m_iSequence;
+	g_iCurViewModelAnim				= m_Stack.m_iSequence;
+	m_pPlayer->m_iShellModelIndex	= m_Stack.m_iShellModelIndex;
+
+	// LUNA: I don't know why, but execute this can prevent anim-restart over. This has to be done on both side.
+	gEngfuncs.pfnWeaponAnim(m_Stack.m_iSequence, 0);
+
+	// clear old data, mark for invalid.
+	Q_memset(&m_Stack, NULL, sizeof(m_Stack));
+	m_Stack.m_iSequence = -1;
 }
 
 //
@@ -390,7 +501,6 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 {
 	int i;
 	int buttonsChanged;
-	CBaseWeapon* pWeapon = nullptr;
 	static int lasthealth;
 	int flags;
 
@@ -402,14 +512,14 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 
 	// Fill in data based on selected weapon
 	if (from->client.m_iId > WEAPON_NONE && from->client.m_iId < LAST_WEAPON)
-		pWeapon = g_rgpClientWeapons[from->client.m_iId];
+		g_pCurWeapon = g_rgpClientWeapons[from->client.m_iId];
 
 	// Store pointer to our destination entity_state_t so we can get our origin, etc. from it
 	//  for setting up events on the client
 	g_finalstate = to;
 
 	// We are not predicting the current weapon, just bow out here.
-	if (!pWeapon)
+	if (!g_pCurWeapon)
 		return;
 
 	// If we are running events/etc. go ahead and see if we
@@ -418,9 +528,9 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	if (g_runfuncs)
 	{
 		if (to->client.health <= 0 && lasthealth > 0)
-			pWeapon->Holster();	// killed
+			g_pCurWeapon->Holster();	// killed
 		else if (to->client.health > 0 && lasthealth <= 0)
-			pWeapon->Deploy();	// spawned
+			g_pCurWeapon->Deploy();	// spawned
 
 		lasthealth = to->client.health;
 	}
@@ -448,15 +558,15 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	}
 
 	if (from->client.vuser4.x < AMMO_NONE || from->client.vuser4.x > AMMO_MAXTYPE)
-		pWeapon->m_iPrimaryAmmoType = AMMO_NONE;
+		g_pCurWeapon->m_iPrimaryAmmoType = AMMO_NONE;
 	else
 	{
-		pWeapon->m_iPrimaryAmmoType = (AmmoIdType)int(from->client.vuser4.x);
-		gPseudoPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType] = (int)from->client.vuser4.y;
+		g_pCurWeapon->m_iPrimaryAmmoType = (AmmoIdType)int(from->client.vuser4.x);
+		gPseudoPlayer.m_rgAmmo[g_pCurWeapon->m_iPrimaryAmmoType] = (int)from->client.vuser4.y;
 	}
 
 
-	g_iWeaponFlags = pWeapon->m_bitsFlags;
+	g_iWeaponFlags = g_pCurWeapon->m_bitsFlags;
 
 	// For random weapon events, use this seed to seed random # generator
 	gPseudoPlayer.random_seed = random_seed;
@@ -498,7 +608,7 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	}
 
 	flags = from->client.iuser3;
-	g_bHoldingKnife = pWeapon->m_iId == WEAPON_KNIFE;
+	g_bHoldingKnife = g_pCurWeapon->m_iId == WEAPON_KNIFE;
 	gPseudoPlayer.m_bCanShoot = (flags & PLAYER_CAN_SHOOT) != 0;
 	g_bFreezeTimeOver = !(flags & PLAYER_FREEZE_TIME_OVER);
 	g_bInBombZone = (flags & PLAYER_IN_BOMB_ZONE) != 0;
@@ -506,22 +616,22 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 
 	// Point to current weapon object
 	if (from->client.m_iId)
-		gPseudoPlayer.m_pActiveItem = pWeapon;
+		gPseudoPlayer.m_pActiveItem = g_pCurWeapon;
 
 	// Don't go firing anything if we have died.
 	// Or if we don't have a weapon model deployed
 	if ((gPseudoPlayer.pev->deadflag != (DEAD_DISCARDBODY + 1)) && !CL_IsDead() && gPseudoPlayer.pev->viewmodel && !g_iUser1)
 	{
 		// LUNA: the weapon think would be called anyway.
-		pWeapon->Think();
+		g_pCurWeapon->Think();
 
-		if (g_bHoldingShield && pWeapon->m_bInReload && gPseudoPlayer.pev->button & IN_ATTACK2)	// fixed by referencing IDA.
+		if (g_bHoldingShield && g_pCurWeapon->m_bInReload && gPseudoPlayer.pev->button & IN_ATTACK2)	// fixed by referencing IDA.
 		{
 			gPseudoPlayer.m_flNextAttack = 0;
 		}
 		else if (gPseudoPlayer.m_flNextAttack <= 0.0f)
 		{
-			pWeapon->PostFrame();
+			g_pCurWeapon->PostFrame();
 		}
 	}
 
@@ -535,7 +645,7 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		if (from->weapondata[cmd->weaponselect].m_iId == cmd->weaponselect)
 		{
 			CBaseWeapon* pNew = g_rgpClientWeapons[cmd->weaponselect];
-			if (pNew && (pNew != pWeapon))
+			if (pNew && (pNew != g_pCurWeapon))
 			{
 				// Put away old weapon
 				if (gPseudoPlayer.m_pActiveItem)
@@ -566,17 +676,17 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 
 	to->client.iuser3 = flags;
 
-
+	// FIXME: this was working fine until the push-pop anim comes out. Why my predict code being override right on next frame?
 	// Make sure that weapon animation matches what the game .dll is telling us
 	//  over the wire ( fixes some animation glitches )
 	if (g_runfuncs && (g_iCurViewModelAnim != to->client.weaponanim))
 		// Force a fixed anim down to viewmodel. LUNA: FIXME: wired, how did that happens? it seems impossible.
-		pWeapon->SendWeaponAnim(to->client.weaponanim);
+		g_pCurWeapon->SendWeaponAnim(to->client.weaponanim);
 
-	if (pWeapon->m_iPrimaryAmmoType < MAX_AMMO_TYPES)
+	if (g_pCurWeapon->m_iPrimaryAmmoType < MAX_AMMO_TYPES)
 	{
-		to->client.vuser4.x = pWeapon->m_iPrimaryAmmoType;
-		to->client.vuser4.y = gPseudoPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType];
+		to->client.vuser4.x = g_pCurWeapon->m_iPrimaryAmmoType;
+		to->client.vuser4.y = gPseudoPlayer.m_rgAmmo[g_pCurWeapon->m_iPrimaryAmmoType];
 	}
 	else
 	{
@@ -694,4 +804,30 @@ void HUD_PostRunCmd2(local_state_t* from, local_state_t* to, usercmd_s* cmd, int
 		CounterStrike_SetSequence(to->playerstate.sequence, to->playerstate.gaitsequence);
 		CounterStrike_SetOrientation(to->playerstate.origin, cmd->viewangles);
 	}
+}
+
+/*
+=====================
+CommandFunc_Melee
+
+We are not doing SV stuff here. It just allow us to predict the anim push-pop.
+=====================
+*/
+void CommandFunc_Melee(void)
+{
+	if (!CL_IsDead() && g_pCurWeapon)
+	{
+		g_pCurWeapon->Melee();
+		gEngfuncs.pfnServerCmd("melee\n");	// forward this msg to SV for further action.
+	}
+}
+
+/*
+=====================
+Wpn_Init
+=====================
+*/
+void Wpn_Init()
+{
+	gEngfuncs.pfnAddCommand("melee", CommandFunc_Melee);
 }

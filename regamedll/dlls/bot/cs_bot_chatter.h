@@ -72,7 +72,7 @@ public:
 class BotDefendHereMeme: public BotMeme
 {
 public:
-	BotDefendHereMeme(const Vector &pos = nullptr)
+	BotDefendHereMeme(const Vector &pos = g_vecZero)
 	{
 		m_pos = pos;
 	}

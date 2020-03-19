@@ -57,6 +57,7 @@ namespace gHUD
 	float m_fOldTime = 0;
 	double m_flTimeDelta = 1;
 	int m_iFOV = 90;
+	int m_iLastFOVDiff = 90;
 	float m_flDisplayedFOV = 90.0f;
 	int m_iSpriteCount = 0;
 	int m_iSpriteCountAllRes = 0;
@@ -697,7 +698,7 @@ hSprite gHUD::GetSprite(int index)
 	return (index < 0) ? 0 : m_rghSprites[index];
 }
 
-wrect_t& gHUD::GetSpriteRect(int index)
+wrect_t gHUD::GetSpriteRect(int index)
 {
 	return m_rgrcRects[index];
 }

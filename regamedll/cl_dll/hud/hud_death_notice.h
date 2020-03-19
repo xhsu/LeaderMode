@@ -8,24 +8,24 @@ Created Date: Mar 11 2020
 
 struct DeathNoticeItem
 {
-	char szKiller[MAX_PLAYER_NAME_LENGTH * 2];
-	char szVictim[MAX_PLAYER_NAME_LENGTH * 2];
-	int iId;
-	int iHeadShotId;
-	int iSuicide;
-	int iTeamKill;
-	int iNonPlayerKill;
-	float flDisplayTime;
-	float* KillerColor;
-	float* VictimColor;
-	//vgui::IImage** DrawBg; // UNDONE: this is what BTE use to simulate CSOL.
+	char	m_szVictim[64];
+	char	m_szKiller[64];
+	bool	m_bHeadshot;
+	bool	m_bGhostKill;
+	hSprite	m_hWeaponSprite;
+	wrect_t m_pWeaponSpriteInfo;
+	float	m_flTimeToRemove;
+	float*	m_rgflVictimColour;
+	float*	m_rgflKillerColour;
 };
 
 #define MAX_DEATHNOTICES		8
 #define MAX_DRAWDEATHNOTICES	4
 
 #define DEATHNOTICE_DISPLAY_TIME	6
-#define KILLICON_DISPLAY_TIME		1
+#define DEATHNOTICE_X_BASE_OFS		24
+#define DEATHNOTICE_Y_BASE_OFS		24	// below flashlight hud.
+#define DEATHNOTICE_INTERSPACE		5
 
 // TODO, UNDONE : this entire class needs to reconstruct due to both CSBTE and CSMoE are sabortaging this class via implanting tons of CSOL code.
 class CHudDeathNotice : public CBaseHUDElement
@@ -36,17 +36,15 @@ public:
 	void Reset(void);
 	int VidInit(void);
 	int Draw(float flTime);
-	int GetDeathNoticeY(void);
+	void Think(void);
 
 public:
-	int MsgFunc_DeathMsg(const char* pszName, int iSize, void* pbuf);
+	void MsgFunc_DeathMsg(int iKillerIndex, int iVictimIndex, bool bHeadshot, const char *szWeaponName);
 
 private:
 	int m_HUD_d_skull;
-	float m_lastKillTime;
-	int m_headSprite, m_headWidth;
-	bool m_showIcon, m_showKill;
-	int m_iconIndex;
-	float m_killEffectTime, m_killIconTime;
+	int m_headSprite;
+	int m_headWidth;
 	int m_iFontHeight;
+	std::list<DeathNoticeItem> m_lstQueue;	// we should not use std::quene, because we need 4 items per time.
 };

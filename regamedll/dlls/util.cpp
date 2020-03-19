@@ -1806,7 +1806,7 @@ void UTIL_PrintChatColor(CBasePlayer* player, ChatColor color, const char* szMes
 	{
 		MESSAGE_BEGIN(bAll ? MSG_ALL : MSG_ONE, gmsgTeamInfo, g_vecZero, bAll ? nullptr : player->edict());
 		WRITE_BYTE(player->entindex());
-		WRITE_STRING(g_rgszTeamName[color]);
+		WRITE_BYTE(color);
 		MESSAGE_END();
 	}
 
@@ -1819,7 +1819,7 @@ void UTIL_PrintChatColor(CBasePlayer* player, ChatColor color, const char* szMes
 	{
 		MESSAGE_BEGIN(bAll ? MSG_ALL : MSG_ONE, gmsgTeamInfo, g_vecZero, bAll ? nullptr : player->edict());
 		WRITE_BYTE(player->entindex());
-		WRITE_STRING(g_rgszTeamName[player->m_iTeam]);
+		WRITE_BYTE(player->m_iTeam);
 		MESSAGE_END();
 	}
 }

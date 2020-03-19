@@ -332,7 +332,8 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Play|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Play|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Play|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tests|Win32'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\dlls\wpn_shared\wpn_ksg12.cpp" />
     <ClCompile Include="..\dlls\wpn_shared\wpn_m249.cpp">
@@ -831,6 +832,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
+      <DisableSpecificWarnings>4244;26402;26429;26430;26433;26440;26446;26461;26462;26481;26482;26485;26486;26489;26493;26496;26812;26814;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -873,6 +875,7 @@
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <WholeProgramOptimization>true</WholeProgramOptimization>
+      <DisableSpecificWarnings>4244;26402;26429;26430;26433;26440;26446;26461;26462;26481;26482;26485;26486;26489;26493;26496;26812;26814;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -918,6 +921,7 @@
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <WholeProgramOptimization>true</WholeProgramOptimization>
+      <DisableSpecificWarnings>4244;26402;26429;26430;26433;26440;26446;26461;26462;26481;26482;26485;26486;26489;26493;26496;26812;26814;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -957,7 +961,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
-      <DisableSpecificWarnings>26402;26429;26430;26433;26440;26446;26461;26462;26481;26482;26485;26486;26489;26493;26496;26812;26814;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4244;26402;26429;26430;26433;26440;26446;26461;26462;26481;26482;26485;26486;26489;26493;26496;26812;26814;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -993,6 +997,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
       <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
+      <DisableSpecificWarnings>4244;26402;26429;26430;26433;26440;26446;26461;26462;26481;26482;26485;26486;26489;26493;26496;26812;26814;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

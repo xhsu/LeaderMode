@@ -124,6 +124,28 @@ public:
 	AmmoIdType		m_iSecondaryAmmoType;		// "secondary" ammo index into players m_rgAmmo[]
 	bool			m_bInZoom;
 
+	struct	// this structure is for anim push and pop. it save & restore weapon state.
+	{
+		// on player.
+		int		m_iSequence;
+		float	m_flNextAttack;
+		float	m_flEjectBrass;
+		int		m_iShellModelIndex;
+
+		// on weapon.
+		float	m_flNextPrimaryAttack;
+		float	m_flNextSecondaryAttack;
+		float	m_flTimeWeaponIdle;
+
+#ifdef CLIENT_DLL
+		// for model. these will be applied on g_pViewEnt.
+		float	m_flTimeAnimStarted;
+		float	m_flFramerate;
+		float	m_flFrame;
+#endif
+	}
+	m_Stack;
+
 #ifndef CLIENT_DLL
 public:	// SV exclusive variables.
 	EntityHandle<CBasePlayer>	m_pPlayer;		// one of these two must be valid. or this weapon will be removed.
@@ -144,8 +166,10 @@ public:	// basic logic funcs
 	virtual void	SecondaryAttack	(void) {}	// IN_MOUSE2
 	virtual void	WeaponIdle		(void) {}	// constantly called when nothing else to do.
 	virtual bool	Reload			(void) { return false; }	// you know what it is, right?
-	virtual bool	Holster			(void);		// called when attempting to put it off.
-	virtual bool	Drop			(void) { return false; }	// called when attempting to drop it on ground.
+	virtual bool	Melee			(void);		// quick knife.
+	virtual bool	QuickThrow		(WeaponIdType iId) { return false; };	// quick grenade (maybe something else in the future?).
+	virtual bool	Holster			(bool bTrial = false);		// called when attempting to put it off. bTrial means only testing whether weapon can be holster.
+	virtual bool	Drop			(void **ppWeaponBoxReturned = nullptr);		// called when attempting to drop it on ground. ppWeaponBoxReturned is the CWeaponBox to be returned. (NOT avaliable on client side.)
 	virtual bool	Kill			(void);		// called when attempting to remove it from your inventory.
 
 #ifndef CLIENT_DLL
@@ -164,6 +188,10 @@ public:	// util funcs
 	virtual	void	PlayEmptySound	(void);
 	virtual	bool	DefaultReload	(int iClipSize, int iAnim, float fDelay);
 	virtual	void	ReloadSound		(void);
+	virtual void	PushAnim		(void);
+	virtual void	PopAnim			(void);
+	inline	bool	CanHolster		(void) { return Holster(true); }	// smells, looks and tastes like a duck...
+	virtual	bool	CanDrop			(void) { return true; }
 };
 
 
@@ -373,21 +401,33 @@ enum hegrenade_e
 	HEGRENADE_DRAW,
 };
 
-const float KNIFE_BODYHIT_VOLUME   = 128.0f;
-const float KNIFE_WALLHIT_VOLUME   = 512.0f;
-const float KNIFE_MAX_SPEED        = 250.0f;
-const float KNIFE_MAX_SPEED_SHIELD = 180.0f;
+constexpr float KNIFE_BODYHIT_VOLUME   = 128.0f;
+constexpr float KNIFE_WALLHIT_VOLUME   = 512.0f;
+constexpr float KNIFE_MAX_SPEED        = 250.0f;
+constexpr float KNIFE_MAX_SPEED_SHIELD = 180.0f;
+constexpr float KNIFE_QUICK_SLASH_TIME = 0.939f;
+constexpr float KNIFE_QUICK_SLASH_DMG  = 55.0f;
 
 enum knife_e
 {
 	KNIFE_IDLE,
-	KNIFE_ATTACK1HIT,
-	KNIFE_ATTACK2HIT,
-	KNIFE_DRAW,
-	KNIFE_STABHIT,
-	KNIFE_STABMISS,
-	KNIFE_MIDATTACK1HIT,
-	KNIFE_MIDATTACK2HIT,
+	KNIFE_QUICK_SLASH = 22,	// model from HLMW.
+};
+
+namespace BasicKnife
+{
+#ifndef CLIENT_DLL	// SV exclusive namespace.
+
+	// player currently running this code.
+	extern EntityHandle<CBasePlayer>	m_pPlayer;
+
+	// the weapon which calling quick slash.
+	extern CBaseWeapon* m_pWeapon;
+
+	void Precache();
+	bool Deploy(CBaseWeapon* pWeapon);
+	void Swing();
+#endif
 };
 
 const float M249_MAX_SPEED     = 220.0f;
@@ -445,6 +485,13 @@ public:
 	float	m_flNextAddAmmo;
 	bool	m_bSetForceStopReload;
 
+	struct	// shotgun needs to expand these push-pop stuff a little bit.
+	{
+		float	m_flNextInsertAnim;
+		float	m_flNextAddAmmo;
+	}
+	m_Stack2;
+
 public:	// basic logic funcs
 	virtual void	Think			(void);
 	virtual bool	Deploy			(void);
@@ -457,6 +504,8 @@ public:	// basic logic funcs
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void) { return KSG12_MAX_SPEED; }
 	virtual	void	PlayEmptySound	(void);
+	virtual void	PushAnim		(void);
+	virtual void	PopAnim			(void);
 };
 
 const float M4A1_MAX_SPEED         = 230.0f;

@@ -275,7 +275,7 @@ Vector g_ColorGrey = Vector(0.8, 0.8, 0.8);
 
 float* GetClientColor(int clientIndex)
 {
-	switch (g_PlayerExtraInfo[clientIndex].teamnumber)
+	switch (g_PlayerExtraInfo[clientIndex].m_iTeam)
 	{
 	case TEAM_TERRORIST:  return g_ColorRed;
 	case TEAM_CT:         return g_ColorBlue;
@@ -307,19 +307,19 @@ bool CalcScreen(Vector& in, Vector2D& out)
 {
 	Vector aim = in - v_origin;
 	Vector view = v_angles.MakeVector();
-	float num;
 
-	if ((view ^ aim) > (gHUD::m_iFOV / 1.8))	// LUNA: where did this 1.8 came from?
+	if ((view ^ aim) > (gHUD::m_flDisplayedFOV / 1.8f))	// LUNA: where did this 1.8 came from?
 		return false;
 
 	Vector newaim = aim.RotateZ(-v_angles.yaw);
 	Vector tmp = newaim.RotateY(-v_angles.pitch);
 	newaim = tmp.RotateX(-v_angles.roll);
 
-	if (gHUD::m_iFOV == 0.0f)
+	if (gHUD::m_flDisplayedFOV == 0.0f)
 		return false;
 
-	num = (((ScreenWidth / 2) / newaim[0]) * (120.0 / gHUD::m_iFOV - 1.0 / 3.0));
+	// we have to use current FOV instead of target FOV.
+	float num = (((ScreenWidth / 2) / newaim[0]) * (120.0 / gHUD::m_flDisplayedFOV - 1.0 / 3.0));
 	out[0] = (ScreenWidth / 2) - num * newaim[1];
 	out[1] = (ScreenHeight / 2) - num * newaim[2];
 

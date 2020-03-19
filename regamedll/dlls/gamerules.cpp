@@ -2187,12 +2187,11 @@ BOOL EXT_FUNC CHalfLifeMultiplay::FShouldSwitchWeapon(CBasePlayer *pPlayer, CBas
 	if (!pPlayer->m_iAutoWepSwitch)
 		return FALSE;
 
-	// TODO: maybe reuse this?
-	/*if (!pPlayer->m_pActiveItem->CanHolster())
+	if (!pPlayer->m_pActiveItem->CanHolster())
 	{
 		// can't put away the active item.
 		return FALSE;
-	}*/
+	}
 
 	if (pWeapon->m_pItemInfo->m_iWeight > pPlayer->m_pActiveItem->m_pItemInfo->m_iWeight)
 		return TRUE;
@@ -2207,12 +2206,11 @@ BOOL EXT_FUNC CHalfLifeMultiplay::GetNextBestWeapon(CBasePlayer *pPlayer, CBaseW
 	int iBestWeight;
 	int i;
 
-	// TODO
-	/*if (!pCurrentWeapon->CanHolster())
+	if (!pCurrentWeapon->CanHolster())
 	{
 		// can't put this gun away right now, so can't switch.
 		return FALSE;
-	}*/
+	}
 
 	iBestWeight = -1; // no weapon lower than -1 can be autoswitched to
 	pBest = nullptr;
@@ -2386,7 +2384,7 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer *pl)
 
 		MESSAGE_BEGIN(MSG_ONE, gmsgTeamInfo, nullptr, pl->edict());
 			WRITE_BYTE(plr->entindex());
-			WRITE_STRING(GetTeamName(plr->m_iTeam));
+			WRITE_BYTE(plr->m_iTeam);
 		MESSAGE_END();
 
 		plr->SetScoreboardAttributes(pl);
@@ -2404,14 +2402,20 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer *pl)
 			}
 		}
 
-		MESSAGE_BEGIN(MSG_ONE, gmsgHealthInfo, nullptr, pl->edict());
+		MESSAGE_BEGIN(MSG_ONE, gmsgHealth, nullptr, pl->edict());
 			WRITE_BYTE(plr->entindex());
-			WRITE_LONG(plr->ShouldToShowHealthInfo(pl) ? plr->m_iClientHealth : -1 /* means that 'HP' field will be hidden */);
+			WRITE_SHORT(plr->ShouldToShowHealthInfo(pl) ? plr->m_iClientHealth : -1 /* means that this 'Health' will be hidden */);
 		MESSAGE_END();
 
-		MESSAGE_BEGIN(MSG_ONE, gmsgAccount, nullptr, pl->edict());
+		MESSAGE_BEGIN(MSG_ONE, gmsgMoney, nullptr, pl->edict());
 			WRITE_BYTE(plr->entindex());
 			WRITE_LONG(plr->ShouldToShowAccount(pl) ? plr->m_iAccount : -1 /* means that this 'Money' will be hidden */);
+			WRITE_BYTE(FALSE);
+		MESSAGE_END();
+
+		MESSAGE_BEGIN(MSG_ONE, gmsgRole, nullptr, pl->edict());	// tell him who is who. (?)
+			WRITE_BYTE(plr->entindex());
+			WRITE_BYTE(plr->m_iRoleType);
 		MESSAGE_END();
 	}
 
@@ -2452,7 +2456,7 @@ void CHalfLifeMultiplay::ClientDisconnected(edict_t *pClient)
 
 			MESSAGE_BEGIN(MSG_ALL, gmsgTeamInfo);
 				WRITE_BYTE(ENTINDEX(pClient));
-				WRITE_STRING("UNASSIGNED");
+				WRITE_BYTE(pPlayer->m_iTeam);
 			MESSAGE_END();
 
 			MESSAGE_BEGIN(MSG_ALL, gmsgLocation);

@@ -27,21 +27,13 @@ int CHudStatusBar::Draw(float fTime)
 		m_bReparseString = FALSE;
 	}
 
-	int Y_START = ScreenHeight - 52;
-
 	for (int i = 0; i < MAX_STATUSBAR_LINES; i++)
 	{
 		int TextHeight, TextWidth;
 		gEngfuncs.pfnDrawConsoleStringLen(m_szStatusBar[i], &TextWidth, &TextHeight);
 
-		int x = 10;
-		int y = Y_START - gHUD::m_iFontHeight;
-
-		if (CVAR_GET_FLOAT("hud_centerid"))
-		{
-			x = Q_max(0, Q_max(2, (ScreenWidth - TextWidth)) / 2);
-			y = (ScreenHeight / 2) + (TextHeight * CVAR_GET_FLOAT("hud_centerid"));
-		}
+		int x = Q_max(0, Q_max(2, (ScreenWidth - TextWidth)) / 2);
+		int y = (ScreenHeight / 2) + (TextHeight);
 
 		if (m_pflNameColors[i])
 			gEngfuncs.pfnDrawSetTextColor(m_pflNameColors[i][0], m_pflNameColors[i][1], m_pflNameColors[i][2]);
@@ -64,9 +56,6 @@ void CHudStatusBar::Reset(void)
 	Q_memset(m_iStatusValues, 0, sizeof m_iStatusValues);
 
 	m_iStatusValues[0] = 1;
-
-	for (i = 0; i < MAX_PLAYERS; i++)
-		g_PlayerExtraInfo[i].showhealth = 0;
 
 	for (i = 0; i < MAX_STATUSBAR_LINES; i++)
 		m_pflNameColors[i] = g_ColorYellow;
@@ -154,8 +143,6 @@ void CHudStatusBar::ParseStatusString(int line_num)
 
 						case 'i':
 						{
-							g_PlayerExtraInfo[gHUD::m_Radar.m_iPlayerLastPointedAt].showhealth = gHUD::m_flTime + 5;
-							g_PlayerExtraInfo[gHUD::m_Radar.m_iPlayerLastPointedAt].health = indexval;
 							Q_snprintf(szRepString, charsmax(szRepString), "%d", indexval);
 							break;
 						}

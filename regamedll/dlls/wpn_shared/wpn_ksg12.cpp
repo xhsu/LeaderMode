@@ -43,7 +43,7 @@ bool CKSG12::Deploy()
 
 void CKSG12::PostFrame(void)
 {
-	if (m_bInReload)
+	if (m_bInReload && !(m_bitsFlags & WPNSTATE_MELEE))
 	{
 		if (m_flNextInsertAnim <= gpGlobals->time && m_iClip < m_pItemInfo->m_iMaxClip)
 		{
@@ -114,6 +114,7 @@ void CKSG12::PrimaryAttack()
 	int iSeedOfs = m_pPlayer->FireBuckshots(KSG12_PROJECTILE_COUNT, m_pPlayer->GetGunPosition(), gpGlobals->v_forward, KSG12_CONE_VECTOR, KSG12_EFFECTIVE_RANGE, KSG12_DAMAGE, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
+	SendWeaponAnim(UTIL_SharedRandomLong(m_pPlayer->random_seed, KSG12_FIRE1, KSG12_FIRE2));	// LUNA: I don't know why, but this has to be done on SV side, or client fire anim would be override.
 	PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL, m_pPlayer->edict(), m_usEvent, 0, (float *)&g_vecZero, (float *)&g_vecZero, 0, 0, int(m_pPlayer->pev->punchangle.x * 100.0f), m_pPlayer->random_seed, FALSE, FALSE);
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
@@ -230,4 +231,22 @@ void CKSG12::PlayEmptySound(void)
 
 	m_bAllowNextEmptySound = false;
 	CBaseWeapon::PlayEmptySound();
+}
+
+void CKSG12::PushAnim(void)
+{
+	CBaseWeapon::PushAnim();
+
+	// the way that time being store is a little bit different.
+	m_Stack2.m_flNextAddAmmo	= gpGlobals->time - m_flNextAddAmmo;
+	m_Stack2.m_flNextInsertAnim	= gpGlobals->time - m_flNextInsertAnim;
+}
+
+void CKSG12::PopAnim(void)
+{
+	CBaseWeapon::PopAnim();
+
+	// by this, the time will look like "freezed" during the push-pop time frame.
+	m_flNextAddAmmo		= gpGlobals->time - m_Stack2.m_flNextAddAmmo;
+	m_flNextInsertAnim	= gpGlobals->time - m_Stack2.m_flNextInsertAnim;
 }

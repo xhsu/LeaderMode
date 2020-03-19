@@ -1110,7 +1110,10 @@ DECLARE_EVENT(FireM3)
 	{
 		g_iShotsFired++;
 		EV_MuzzleFlash();
-		gEngfuncs.pEventAPI->EV_WeaponAnimation(KSG12_FIRE1 + gEngfuncs.pfnRandomLong(0, 1), 2);
+
+		// shoot anim.
+		if (g_pCurWeapon)
+			g_pCurWeapon->SendWeaponAnim(KSG12_FIRE1 + UTIL_SharedRandomLong(gPseudoPlayer.random_seed, 0, 1), 2);
 
 		// first personal smoke VFX.
 		EV_HLDM_CreateSmoke(ent->attachment[0], forward, 3, 0.5, 25, 25, 25, EV_PISTOL_SMOKE, velocity, false, 35);
@@ -1202,15 +1205,17 @@ DECLARE_EVENT(FireUSP)
 		if (silencer_on)
 		{
 			if (!empty)
-				seq = RANDOM_LONG(USP_UNSIL_SHOOT1, USP_UNSIL_SHOOT3);
-			else seq = USP_UNSIL_SHOOT_EMPTY;
+				seq = UTIL_SharedRandomLong(gPseudoPlayer.random_seed, USP_UNSIL_SHOOT1, USP_UNSIL_SHOOT3);
+			else
+				seq = USP_UNSIL_SHOOT_EMPTY;
 		}
 		else
 		{
 			EV_MuzzleFlash();
 			if (!empty)
-				seq = RANDOM_LONG(USP_SHOOT1, USP_SHOOT3);
-			else seq = USP_SHOOT_EMPTY;
+				seq = UTIL_SharedRandomLong(gPseudoPlayer.random_seed, USP_SHOOT1, USP_SHOOT3);
+			else
+				seq = USP_SHOOT_EMPTY;
 		}
 
 		// first personal gun smoke.
@@ -1224,7 +1229,8 @@ DECLARE_EVENT(FireUSP)
 		EV_HLDM_CreateSmoke(ent->attachment[0], forward, 40, base_scale, 13, 13, 13, EV_WALL_PUFF, velocity, false, 35);
 
 		// shoot anim.
-		gEngfuncs.pEventAPI->EV_WeaponAnimation(seq, 2);
+		if (g_pCurWeapon)
+			g_pCurWeapon->SendWeaponAnim(seq, 2);
 
 		if (!cl_righthand->value)
 			EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 36.0, -14.0, -14.0);

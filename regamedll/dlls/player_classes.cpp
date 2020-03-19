@@ -155,12 +155,12 @@ bool CSkillRadarScan::Execute()
 		if (m_pPlayer->m_iTeam != pTeammate->m_iTeam)
 			continue;
 
-		MESSAGE_BEGIN(MSG_ONE, gmsgHostagePos, m_pTracing->pev->origin, pTeammate->edict());
-		WRITE_BYTE(1);	// flags
-		WRITE_BYTE(m_pPlayer->entindex());	// hostage index
+		MESSAGE_BEGIN(MSG_ONE, gmsgRadarPoint, nullptr, pTeammate->pev);
+		WRITE_BYTE(m_pPlayer->entindex());
 		WRITE_COORD(m_pTracing->pev->origin.x);
 		WRITE_COORD(m_pTracing->pev->origin.y);
 		WRITE_COORD(m_pTracing->pev->origin.z);
+		WRITE_BYTE(UPDATE_INTERVAL / 0.15f);	// 0.15f is written in client.dll::message.cpp
 		MESSAGE_END();
 
 		UTIL_PlayEarSound(pTeammate, ACTIVATION_SFX);
@@ -191,10 +191,7 @@ void CSkillRadarScan::Think()
 			if (m_pPlayer->m_iTeam != pTeammate->m_iTeam)
 				continue;
 
-			MESSAGE_BEGIN(MSG_ONE, gmsgHostageK, m_pTracing->pev->origin, pTeammate->edict());
-			WRITE_BYTE(m_pPlayer->entindex());	// hostage index
-			MESSAGE_END();
-
+			// on the other hand, the radar dot will automatically disappear.
 			UTIL_PlayEarSound(pTeammate, CLOSURE_SFX);
 		}
 
@@ -252,16 +249,12 @@ void CSkillRadarScan::Think()
 			if (m_pPlayer->m_iTeam != pTeammate->m_iTeam)
 				continue;
 
-			MESSAGE_BEGIN(MSG_ONE, gmsgHostagePos, m_pTracing->pev->origin, pTeammate->edict());
-			WRITE_BYTE(0);	// flags
-			WRITE_BYTE(m_pPlayer->entindex());	// hostage index
+			MESSAGE_BEGIN(MSG_ONE, gmsgRadarPoint, nullptr, pTeammate->pev);
+			WRITE_BYTE(m_pPlayer->entindex());
 			WRITE_COORD(m_pTracing->pev->origin.x);
 			WRITE_COORD(m_pTracing->pev->origin.y);
 			WRITE_COORD(m_pTracing->pev->origin.z);
-			MESSAGE_END();
-
-			MESSAGE_BEGIN(MSG_ONE, gmsgHostageK, m_pTracing->pev->origin, pTeammate->edict());
-			WRITE_BYTE(m_pPlayer->entindex());	// hostage index
+			WRITE_BYTE(UPDATE_INTERVAL / 0.15f);	// 0.15f is written in client.dll::message.cpp
 			MESSAGE_END();
 
 			UTIL_PlayEarSound(pTeammate, RADAR_BEEP_SFX);
@@ -290,10 +283,7 @@ bool CSkillRadarScan::Terminate()
 		if (m_pPlayer->m_iTeam != pTeammate->m_iTeam)
 			continue;
 
-		MESSAGE_BEGIN(MSG_ONE, gmsgHostageK, g_vecZero, pTeammate->edict());
-		WRITE_BYTE(m_pPlayer->entindex());	// hostage index
-		MESSAGE_END();
-
+		// on the other hand, the radar dot will automatically disappear.
 		UTIL_PlayEarSound(pTeammate, CLOSURE_SFX);
 	}
 
@@ -2137,11 +2127,12 @@ bool CSkillRadarScan2::Execute()
 		if (m_pPlayer->m_iTeam != pTeammate->m_iTeam)
 			continue;
 
-		MESSAGE_BEGIN(MSG_ONE, gmsgBombDrop, g_vecZero, pTeammate->pev);
-		WRITE_COORD(m_pTracing->pev->origin[0]);
-		WRITE_COORD(m_pTracing->pev->origin[1]);
-		WRITE_COORD(m_pTracing->pev->origin[2]);
-		WRITE_BYTE(0);
+		MESSAGE_BEGIN(MSG_ONE, gmsgRadarPoint, nullptr, pTeammate->pev);
+		WRITE_BYTE(m_pPlayer->entindex());
+		WRITE_COORD(m_pTracing->pev->origin.x);
+		WRITE_COORD(m_pTracing->pev->origin.y);
+		WRITE_COORD(m_pTracing->pev->origin.z);
+		WRITE_BYTE(FORCE_TO_REMOVE_TIME / 0.15f);	// 0.15f is written in client.dll::message.cpp
 		MESSAGE_END();
 
 		m_flForcedToRemove = gpGlobals->time + FORCE_TO_REMOVE_TIME;
@@ -2177,7 +2168,8 @@ void CSkillRadarScan2::Think()
 			if (m_pPlayer->m_iTeam != pTeammate->m_iTeam)
 				continue;
 
-			MESSAGE_BEGIN(MSG_ONE, gmsgBombPickup, g_vecZero, pTeammate->pev);
+			MESSAGE_BEGIN(MSG_ONE, gmsgRadarRP, nullptr, pTeammate->pev);
+			WRITE_BYTE(m_pPlayer->entindex());
 			MESSAGE_END();
 		}
 
@@ -2235,7 +2227,8 @@ void CSkillRadarScan2::Think()
 				if (m_pPlayer->m_iTeam != pTeammate->m_iTeam)
 					continue;
 
-				MESSAGE_BEGIN(MSG_ONE, gmsgBombPickup, g_vecZero, pTeammate->pev);
+				MESSAGE_BEGIN(MSG_ONE, gmsgRadarRP, nullptr, pTeammate->pev);
+				WRITE_BYTE(m_pPlayer->entindex());
 				MESSAGE_END();
 			}
 
@@ -2258,11 +2251,12 @@ void CSkillRadarScan2::Think()
 			if (m_pPlayer->m_iTeam != pTeammate->m_iTeam)
 				continue;
 
-			MESSAGE_BEGIN(MSG_ONE, gmsgBombDrop, g_vecZero, pTeammate->pev);
-			WRITE_COORD(m_pTracing->pev->origin[0]);
-			WRITE_COORD(m_pTracing->pev->origin[1]);
-			WRITE_COORD(m_pTracing->pev->origin[2]);
-			WRITE_BYTE(0);
+			MESSAGE_BEGIN(MSG_ONE, gmsgRadarPoint, nullptr, pTeammate->pev);
+			WRITE_BYTE(m_pPlayer->entindex());
+			WRITE_COORD(m_pTracing->pev->origin.x);
+			WRITE_COORD(m_pTracing->pev->origin.y);
+			WRITE_COORD(m_pTracing->pev->origin.z);
+			WRITE_BYTE(FORCE_TO_REMOVE_TIME / 0.15f);	// 0.15f is written in client.dll::message.cpp
 			MESSAGE_END();
 
 			m_flForcedToRemove = gpGlobals->time + FORCE_TO_REMOVE_TIME;
@@ -2293,7 +2287,8 @@ bool CSkillRadarScan2::Terminate()
 		if (m_pPlayer->m_iTeam != pTeammate->m_iTeam)
 			continue;
 
-		MESSAGE_BEGIN(MSG_ONE, gmsgBombPickup, g_vecZero, pTeammate->pev);
+		MESSAGE_BEGIN(MSG_ONE, gmsgRadarRP, nullptr, pTeammate->pev);
+		WRITE_BYTE(m_pPlayer->entindex());
 		MESSAGE_END();
 	}
 

@@ -141,23 +141,24 @@ void CHudRadar::DrawRadar(float flTime)
 	/*if (gConfigs.bEnableClientUI && cl_newradar->value)
 		return;*/
 
-	Vector vPlayer;
-	char szTeamName[MAX_TEAM_NAME];
-	float x_diff;
-	float y_diff;
-	float z_diff;
-	float flOffset;
-	float xnew_diff;
-	float ynew_diff;
 	float fRange;
 	int iRadarRadius;
 	int iBaseDotSize;
-	int x, y, r, g, b;
-	float flDelay;
-	float flScale;
+	int r, g, b;
+	Vector vecTranslated;
 
-	vPlayer = gHUD::m_vecOrigin;
-	Q_strlcpy(szTeamName, g_PlayerExtraInfo[gHUD::m_iPlayerNum].teamname);
+	if (ScreenWidth >= 640)
+	{
+		fRange = 2048;
+		iRadarRadius = 128;
+		iBaseDotSize = 2;
+	}
+	else
+	{
+		fRange = 1024;
+		iRadarRadius = 64;
+		iBaseDotSize = 1;
+	}
 
 	if (g_PlayerExtraInfo[gHUD::m_iPlayerNum].dead == true)
 		return;
@@ -173,67 +174,18 @@ void CHudRadar::DrawRadar(float flTime)
 		gEngfuncs.pfnSPR_DrawAdditive(0, 0, 0, m_hrad);
 	}
 
-	for (int i = 0; i < MAX_CLIENTS + 1; i++)
+	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if (i != 32 && (!g_PlayerInfoList[i].name || !g_PlayerInfoList[i].name[0]))
+		if (!g_PlayerInfoList[i].name || !g_PlayerInfoList[i].name[0])
 			continue;
 
-		if (gHUD::m_iPlayerNum == i || strcmp(szTeamName, g_PlayerExtraInfo[i].teamname) || g_PlayerExtraInfo[i].dead)
+		if (gHUD::m_iPlayerNum == i || g_PlayerExtraInfo[i].m_iTeam != g_iTeamNumber || g_PlayerExtraInfo[i].dead)
 			continue;
 
-		x_diff = g_PlayerExtraInfo[i].origin[0] - vPlayer[0];
-		y_diff = g_PlayerExtraInfo[i].origin[1] - vPlayer[1];
-		z_diff = g_PlayerExtraInfo[i].origin[2] - vPlayer[2];
+		// translate the location we received to radar coord.
+		vecTranslated = Translate(g_PlayerExtraInfo[i].m_vecOrigin, fRange, iRadarRadius);
 
-		flOffset = atan(y_diff / x_diff);
-		flOffset *= 180;
-		flOffset /= M_PI;
-
-		if ((x_diff < 0) && (y_diff >= 0))
-			flOffset = 180 + flOffset;
-		else if ((x_diff < 0) && (y_diff < 0))
-			flOffset = 180 + flOffset;
-		else if ((x_diff >= 0) && (y_diff < 0))
-			flOffset = 360 + flOffset;
-
-		y_diff = -1 * sqrt((x_diff * x_diff) + (y_diff * y_diff));
-		x_diff = 0;
-
-		flOffset = gHUD::m_vecAngles[1] - flOffset;
-		flOffset *= M_PI;
-		flOffset /= 180.0f;
-
-		xnew_diff = x_diff * cos(flOffset) - y_diff * sin(flOffset);
-		ynew_diff = x_diff * sin(flOffset) + y_diff * cos(flOffset);
-
-		if (ScreenWidth >= 640)
-		{
-			fRange = 2048;
-			iRadarRadius = 128;
-			iBaseDotSize = 2;
-		}
-		else
-		{
-			fRange = 1024;
-			iRadarRadius = 64;
-			iBaseDotSize = 1;
-		}
-
-		if ((-1 * y_diff) > fRange)
-		{
-			flScale = (-1 * y_diff) / fRange;
-
-			xnew_diff /= flScale;
-			ynew_diff /= flScale;
-		}
-
-		xnew_diff /= 32;
-		ynew_diff /= 32;
-
-		x = (iRadarRadius / 2) + (int)xnew_diff;
-		y = (iRadarRadius / 2) + (int)ynew_diff;
-
-		if (x < 0 || x > iRadarRadius || y < 0 || y > iRadarRadius)
+		if (vecTranslated.x < 0 || vecTranslated.x > iRadarRadius || vecTranslated.y < 0 || vecTranslated.y > iRadarRadius)
 			continue;
 
 		if ((g_PlayerExtraInfo[i].has_c4 && (g_iTeamNumber == TEAM_TERRORIST || g_iTeamNumber == TEAM_UNASSIGNED)) || (g_PlayerExtraInfo[i].vip && (g_iTeamNumber == TEAM_CT || g_iTeamNumber == TEAM_UNASSIGNED)))
@@ -259,142 +211,51 @@ void CHudRadar::DrawRadar(float flTime)
 			}
 		}
 
-		if (i != 32)
-			DrawRadarDot(x, y, z_diff, iBaseDotSize, RADAR_DOT_NORMAL, r, g, b, 235);
+		DrawRadarDot(vecTranslated, iBaseDotSize, RADAR_DOT_NORMAL, r, g, b, 235);
 
-		if (g_PlayerExtraInfo[i].radarflash != -1.0 && flTime > g_PlayerExtraInfo[i].radarflash&& g_PlayerExtraInfo[i].radarflashes > 0)
+		if (g_PlayerExtraInfo[i].m_flTimeNextRadarFlash != -1.0 && flTime > g_PlayerExtraInfo[i].m_flTimeNextRadarFlash && g_PlayerExtraInfo[i].m_iRadarFlashRemains > 0)
 		{
-			if (i == 32)
-			{
-				flDelay = 0.35;
-
-				if (g_PlayerExtraInfo[i].playerclass == 1)
-					flDelay = 0.15;
-			}
-			else
-			{
-				flDelay = 0.15;
-			}
-
-			g_PlayerExtraInfo[i].radarflash = flTime + flDelay;
-			g_PlayerExtraInfo[i].radarflashes--;
-			g_PlayerExtraInfo[i].radarflashon = 1 - g_PlayerExtraInfo[i].radarflashon;
+			g_PlayerExtraInfo[i].m_flTimeNextRadarFlash = flTime + 0.15f;
+			g_PlayerExtraInfo[i].m_iRadarFlashRemains--;
+			g_PlayerExtraInfo[i].m_bRadarFlashing = !g_PlayerExtraInfo[i].m_bRadarFlashing;
 		}
 
-		if (g_PlayerExtraInfo[i].radarflashon == 1 && g_PlayerExtraInfo[i].radarflashes > 0)
+		if (g_PlayerExtraInfo[i].m_bRadarFlashing && g_PlayerExtraInfo[i].m_iRadarFlashRemains > 0)
 		{
-			if (i == 32)
-			{
-				if (g_iTeamNumber == TEAM_TERRORIST)
-				{
-					r = 250;
-					g = 0;
-					b = 0;
+			r = 230;
+			g = 110;
+			b = 25;
 
-					DrawRadarDot(x, y, z_diff, iBaseDotSize, (g_PlayerExtraInfo[i].playerclass == 1) ? (RADAR_DOT_BOMB | RADAR_DOT_BOMB_PLANTED) : RADAR_DOT_BOMB, r, g, b, 245);
-				}
-			}
-			else
-			{
-				r = 230;
-				g = 110;
-				b = 25;
-
-				DrawRadarDot(x, y, z_diff, iBaseDotSize, RADAR_DOT_BOMBCARRIER, r, g, b, 245);
-			}
+			DrawRadarDot(vecTranslated.x, vecTranslated.y, vecTranslated.z, iBaseDotSize, RADAR_DOT_BOMBCARRIER, r, g, b, 245);
 		}
 	}
 
-	// TODO replace hostage with truly tracking stuff. COMMANDER's and HITMAN's skill.
-	/*for (int i = 0; i <= MAX_HOSTAGES; i++)
+	for (int i = 0; i < MAX_POINTS; i++)	// for the tracking skills
 	{
-		if ((Q_strcmp(szTeamName, g_HostageInfo[i].teamname) || g_HostageInfo[i].dead) && (g_HostageInfo[i].dead != true || g_HostageInfo[i].radarflash == -1))
+		if (!m_rgCustomPoints[i].m_bGlobalOn)
 			continue;
 
-		x_diff = g_HostageInfo[i].origin[0] - vPlayer[0];
-		y_diff = g_HostageInfo[i].origin[1] - vPlayer[1];
-		z_diff = g_HostageInfo[i].origin[2] - vPlayer[2];
-
-		flOffset = atan(y_diff / x_diff);
-		flOffset *= 180;
-		flOffset /= M_PI;
-
-		if ((x_diff < 0) && (y_diff >= 0))
-			flOffset = 180 + flOffset;
-		else if ((x_diff < 0) && (y_diff < 0))
-			flOffset = 180 + flOffset;
-		else if ((x_diff >= 0) && (y_diff < 0))
-			flOffset = 360 + flOffset;
-
-		y_diff = -1 * sqrt((x_diff * x_diff) + (y_diff * y_diff));
-		x_diff = 0;
-
-		flOffset = gHUD::m_vecAngles[1] - flOffset;
-		flOffset *= M_PI;
-		flOffset /= 180;
-
-		xnew_diff = x_diff * cos(flOffset) - y_diff * sin(flOffset);
-		ynew_diff = x_diff * sin(flOffset) + y_diff * cos(flOffset);
-
-		if (ScreenWidth >= 640)
+		if (m_rgCustomPoints[i].m_iFlashCounts <= 0 && m_rgCustomPoints[i].m_flTimeSwitchPhase <= gEngfuncs.GetClientTime())	// the last flash.
 		{
-			fRange = 2048;
-			iRadarRadius = 128;
-			iBaseDotSize = 2;
-		}
-		else
-		{
-			fRange = 1024;
-			iRadarRadius = 64;
-			iBaseDotSize = 1;
-		}
-
-		if ((-1 * y_diff) > fRange)
-		{
-			flScale = (-1 * y_diff) / fRange;
-
-			xnew_diff /= flScale;
-			ynew_diff /= flScale;
-		}
-
-		xnew_diff /= 32;
-		ynew_diff /= 32;
-
-		x = (iRadarRadius / 2) + (int)xnew_diff;
-		y = (iRadarRadius / 2) + (int)ynew_diff;
-
-		if (x < 0 || x > iRadarRadius || y < 0 || y > iRadarRadius)
+			m_rgCustomPoints[i].m_bGlobalOn = false;
 			continue;
-
-		if (g_HostageInfo[i].radarflash != -1.0 && flTime > g_HostageInfo[i].radarflash&& g_HostageInfo[i].radarflashes > 0)
-		{
-			flDelay = 0.35;
-
-			if (g_HostageInfo[i].dead == true)
-				flDelay = 0.15;
-
-			g_HostageInfo[i].radarflash = flTime + flDelay;
-			g_HostageInfo[i].radarflashes--;
-			g_HostageInfo[i].radarflashon = 1 - g_HostageInfo[i].radarflashon;
 		}
 
-		if (g_HostageInfo[i].radarflashon == 1 && g_HostageInfo[i].radarflashes > 0)
+		if (m_rgCustomPoints[i].m_flTimeSwitchPhase <= gEngfuncs.GetClientTime())
 		{
-			r = 50;
-			g = 50;
-			b = 255;
-
-			if (g_HostageInfo[i].dead)
-			{
-				r = 250;
-				g = 25;
-				b = 25;
-			}
-
-			DrawRadarDot(x, y, z_diff, iBaseDotSize, RADAR_DOT_HOSTAGE, r, g, b, 245);
+			m_rgCustomPoints[i].m_flTimeSwitchPhase = gEngfuncs.GetClientTime() + m_rgCustomPoints[i].m_flFlashInterval;
+			m_rgCustomPoints[i].m_bPhase = !m_rgCustomPoints[i].m_bPhase;
+			m_rgCustomPoints[i].m_iFlashCounts--;
 		}
-	}*/
 
+		if (m_rgCustomPoints[i].m_bPhase)
+		{
+			Vector vec = Translate(m_rgCustomPoints[i].m_vecCoord, fRange, iRadarRadius);
+			DrawRadarDot(vec, iBaseDotSize * m_rgCustomPoints[i].m_iDotSize, m_rgCustomPoints[i].m_bitsFlags, m_rgCustomPoints[i].m_color);
+		}
+	}
+
+	// the text indicates where player is.
 	DrawPlayerLocation();
 }
 
@@ -447,4 +308,55 @@ int CHudRadar::GetRadarSize(void)
 		return 128;
 	else
 		return 64;
+}
+
+Vector CHudRadar::Translate(const Vector& vecOrigin, float flRange, float flRadarRadius)
+{
+	float x_diff, y_diff, z_diff;
+	float flOffset;
+	float xnew_diff, ynew_diff;
+	float flScale;
+
+	x_diff = vecOrigin.x - gHUD::m_vecOrigin.x;
+	y_diff = vecOrigin.y - gHUD::m_vecOrigin.y;
+	z_diff = vecOrigin.z - gHUD::m_vecOrigin.z;
+
+	flOffset = Q_atan(y_diff / x_diff);
+	flOffset *= 180.0f;
+	flOffset /= M_PI;
+
+	if ((x_diff < 0) && (y_diff >= 0))
+		flOffset = 180.0f + flOffset;
+	else if ((x_diff < 0) && (y_diff < 0))
+		flOffset = 180.0f + flOffset;
+	else if ((x_diff >= 0) && (y_diff < 0))
+		flOffset = 360.0f + flOffset;
+
+	y_diff = -1.0f * Q_sqrt((x_diff * x_diff) + (y_diff * y_diff));
+	x_diff = 0;
+
+	flOffset = gHUD::m_vecAngles.yaw - flOffset;
+	flOffset *= M_PI;
+	flOffset /= 180.0f;
+
+	xnew_diff = x_diff * Q_cos(flOffset) - y_diff * Q_sin(flOffset);
+	ynew_diff = x_diff * Q_sin(flOffset) + y_diff * Q_cos(flOffset);
+
+	if ((-1.0f * y_diff) > flRange)
+	{
+		flScale = (-1.0f * y_diff) / flRange;
+
+		xnew_diff /= flScale;
+		ynew_diff /= flScale;
+	}
+
+	xnew_diff /= 32;
+	ynew_diff /= 32;
+
+	Vector vecResult;
+	vecResult.x = (flRadarRadius / 2) + (int)xnew_diff;
+	vecResult.y = (flRadarRadius / 2) + (int)ynew_diff;
+	vecResult.z = z_diff;
+
+	return vecResult;
 }

@@ -27,10 +27,10 @@ int CHudFlashlight::VidInit(void)
 	m_hSprite1 = gHUD::GetSprite(HUD_flash_empty);
 	m_hSprite2 = gHUD::GetSprite(HUD_flash_full);
 	m_hBeam = gHUD::GetSprite(HUD_flash_beam);
-	m_prc1 = &gHUD::GetSpriteRect(HUD_flash_empty);
-	m_prc2 = &gHUD::GetSpriteRect(HUD_flash_full);
-	m_prcBeam = &gHUD::GetSpriteRect(HUD_flash_beam);
-	m_iWidth = m_prc2->right - m_prc2->left;
+	m_prc1 = gHUD::GetSpriteRect(HUD_flash_empty);
+	m_prc2 = gHUD::GetSpriteRect(HUD_flash_full);
+	m_prcBeam = gHUD::GetSpriteRect(HUD_flash_beam);
+	m_iWidth = m_prc2.right - m_prc2.left;
 
 	return 1;
 }
@@ -58,18 +58,18 @@ int CHudFlashlight::Draw(float flTime)
 
 	ScaleColors(r, g, b, a);
 
-	y = (m_prc1->bottom - m_prc2->top) / 2;
+	y = (m_prc1.bottom - m_prc2.top) / 2;
 	x = ScreenWidth - m_iWidth - m_iWidth / 2;
 
 	gEngfuncs.pfnSPR_Set(m_hSprite1, r, g, b);
-	gEngfuncs.pfnSPR_DrawAdditive(0, x, y, m_prc1);
+	gEngfuncs.pfnSPR_DrawAdditive(0, x, y, &m_prc1);
 
 	if (m_fOn)
 	{
 		x = ScreenWidth - m_iWidth / 2;
 
 		gEngfuncs.pfnSPR_Set(m_hBeam, r, g, b);
-		gEngfuncs.pfnSPR_DrawAdditive(0, x, y, m_prcBeam);
+		gEngfuncs.pfnSPR_DrawAdditive(0, x, y, &m_prcBeam);
 	}
 
 	x = ScreenWidth - m_iWidth - m_iWidth / 2;
@@ -78,7 +78,7 @@ int CHudFlashlight::Draw(float flTime)
 
 	if (iOffset < m_iWidth)
 	{
-		rc = *m_prc2;
+		rc = m_prc2;
 		rc.left += iOffset;
 
 		gEngfuncs.pfnSPR_Set(m_hSprite2, r, g, b);

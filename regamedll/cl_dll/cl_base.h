@@ -12,6 +12,11 @@ Created Date: 05 Mar 2020
 #include "../public/strtools.h"
 #include "../dlls/vector.h"
 
+// std stuff. some commonly used vectors.
+#include <list>
+#include <vector>
+#include <array>
+
 // const, OH, why you are const!
 #include "../common/const.h"
 

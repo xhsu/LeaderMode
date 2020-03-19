@@ -24,6 +24,6 @@ public:
 private:
 	wchar_t m_sUnicodes[MAX_CLIENTS][32];
 	float m_flNextBuild;
-	//vgui::HFont m_hHeadFont;	// TODO
+	vgui::HFont m_hHeadFont;
 	int m_iDrawType;
 };

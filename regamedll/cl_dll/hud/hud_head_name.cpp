@@ -8,11 +8,10 @@ Created Date: Mar 11 2020
 
 int CHudHeadName::Draw(float flTime)
 {
-	// TODO
-	/*if (m_iDrawType == HEADNAME_HIDE)
+	if (m_iDrawType == HEADNAME_HIDE)
 		return 1;
 
-	if ((gHUD::m_iHideHUDDisplay & HIDEHUD_ALL) || g_iUser1)
+	if ((gHUD::m_bitsHideHUDDisplay & HIDEHUD_ALL) || g_iUser1)
 		return 1;
 
 	if (gHUD::m_flTime > m_flNextBuild)
@@ -21,8 +20,6 @@ int CHudHeadName::Draw(float flTime)
 		m_flNextBuild = gHUD::m_flTime + 1.0;
 	}
 
-	bool isZombie = (g_PlayerScoreAttrib[gHUD::m_iPlayerNum] & SCOREATTRIB_ZOMBIE);
-
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if (!m_sUnicodes[i][0])
@@ -30,7 +27,7 @@ int CHudHeadName::Draw(float flTime)
 			if (!g_PlayerInfoList[i].name || !g_PlayerInfoList[i].name[0])
 				continue;
 
-			vgui::localize()->ConvertANSIToUnicode(g_PlayerInfoList[i].name, m_sUnicodes[i], sizeof(m_sUnicodes[i]));
+			VGUI_LOCALISE->ConvertANSIToUnicode(g_PlayerInfoList[i].name, m_sUnicodes[i], sizeof(m_sUnicodes[i]));
 		}
 
 		if (g_PlayerExtraInfo[i].dead)
@@ -38,12 +35,7 @@ int CHudHeadName::Draw(float flTime)
 
 		if (m_iDrawType == HEADNAME_TEAMMATE)
 		{
-			if (g_PlayerExtraInfo[i].teamnumber != g_PlayerExtraInfo[gHUD::m_iPlayerNum].teamnumber)
-				continue;
-		}
-		else if (m_iDrawType == HEADNAME_ZOMBIE)
-		{
-			if (isZombie != ((bool)(g_PlayerScoreAttrib[i] & SCOREATTRIB_ZOMBIE)))
+			if (g_PlayerExtraInfo[i].m_iTeam != g_PlayerExtraInfo[gHUD::m_iPlayerNum].m_iTeam)
 				continue;
 		}
 
@@ -55,31 +47,54 @@ int CHudHeadName::Draw(float flTime)
 				continue;
 
 			model_t* model = ent->model;
-			vec3_t origin = ent->origin;
+			Vector origin = ent->origin;
 
 			if (model)
-				origin.z += max((model->maxs.z - model->mins.z), 35.0);
+				origin.z += Q_max((model->maxs.z - model->mins.z), 35.0f);
 			else
 				origin.z += 35.0;
 
 			if (cl_headname->value)
 			{
-				float screenPos[2];
+				Vector2D screenPos;
 
 				if (!CalcScreen(origin, screenPos))
 					continue;
 
+				// default alpha.
+				int iAlpha = 128;
+
+				// when we scope in, remove the headname.
+				if (gHUD::m_iFOV <= 40)
+					iAlpha = 0;	// hide headname when we are using sniper scope.
+				else if (gHUD::m_iLastFOVDiff > 0)
+				{
+					if (gHUD::m_iFOV >= 90)	// scoping out
+						iAlpha = float(iAlpha) * (1.0f - Q_abs(gHUD::m_flDisplayedFOV - float(gHUD::m_iFOV)) / float(gHUD::m_iLastFOVDiff));
+					else
+						iAlpha = float(iAlpha) * (Q_abs(gHUD::m_flDisplayedFOV - float(gHUD::m_iFOV)) / float(gHUD::m_iLastFOVDiff));
+				}
+
+				// make sure the value won't overflow.
+				iAlpha = Q_clamp(iAlpha, 0, 255);
+
 				int textWide, textTall;
-				vgui::surface()->GetTextSize(m_hHeadFont, m_sUnicodes[i], textWide, textTall);
-				vgui::surface()->DrawSetTextPos(screenPos[0] - ((textWide) / 2), screenPos[1] - ((textTall) / 2));
-				vgui::surface()->DrawSetTextColor(255, 255, 255, 128);
+				VGUI_SURFACE->GetTextSize(m_hHeadFont, m_sUnicodes[i], textWide, textTall);
+				VGUI_SURFACE->DrawSetTextPos(screenPos.x - ((textWide) / 2), screenPos.y - ((textTall) / 2));
+
+				if (g_PlayerExtraInfo[i].m_iRoleType == Role_Commander)
+					VGUI_SURFACE->DrawSetTextColor(0, 153, 255, float(iAlpha) * 1.5f);	// a little bit more obvious.
+				else if (g_PlayerExtraInfo[i].m_iRoleType == Role_Godfather)
+					VGUI_SURFACE->DrawSetTextColor(255, 51, 0, float(iAlpha) * 1.5f);
+				else
+					VGUI_SURFACE->DrawSetTextColor(255, 255, 255, iAlpha);
 
 				for (size_t j = 0; j < wcslen(m_sUnicodes[i]); j++)
-					vgui::surface()->DrawUnicodeCharAdd(m_sUnicodes[i][j]);
+					VGUI_SURFACE->DrawUnicodeCharAdd(m_sUnicodes[i][j]);
 			}
 		}
 	}
-	*/
+	
 	return 1;
 }
 
@@ -94,10 +109,9 @@ int CHudHeadName::VidInit(void)
 	m_bitsFlags |= HUD_ACTIVE;
 	m_iDrawType = HEADNAME_TEAMMATE;
 
-	// TODO
-	/*if (!m_hHeadFont)
+	if (!m_hHeadFont)
 	{
-		vgui::IScheme* pScheme = vgui::scheme()->GetIScheme(vgui::scheme()->GetScheme("ClientScheme"));
+		vgui::IScheme* pScheme = VGUI_SCHEME->GetIScheme(VGUI_SCHEME->GetScheme("ClientScheme"));
 
 		if (pScheme)
 		{
@@ -105,13 +119,13 @@ int CHudHeadName::VidInit(void)
 
 			if (!m_hHeadFont)
 			{
-				pScheme = vgui::scheme()->GetIScheme(vgui::scheme()->GetDefaultScheme());
+				pScheme = VGUI_SCHEME->GetIScheme(VGUI_SCHEME->GetDefaultScheme());
 
 				if (pScheme)
 					m_hHeadFont = pScheme->GetFont("CreditsFont");
 			}
 		}
-	}*/
+	}
 
 	return 1;
 }
@@ -132,8 +146,7 @@ void CHudHeadName::BuildUnicodeList(void)
 			continue;
 		}
 
-		// TODO
-		//vgui::localize()->ConvertANSIToUnicode(g_PlayerInfoList[i].name, m_sUnicodes[i], sizeof(m_sUnicodes[i]));
+		VGUI_LOCALISE->ConvertANSIToUnicode(g_PlayerInfoList[i].name, m_sUnicodes[i], sizeof(m_sUnicodes[i]));
 	}
 }
 

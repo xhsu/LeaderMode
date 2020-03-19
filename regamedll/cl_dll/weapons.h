@@ -98,6 +98,8 @@ extern double g_flGameTime;
 extern std::shared_ptr<pseudo_global_vars_s> gpGlobals;
 extern const Vector g_vecZero;
 extern CBaseWeapon* g_rgpClientWeapons[LAST_WEAPON];
+extern CBaseWeapon* g_pCurWeapon;
+extern CBasePlayer gPseudoPlayer;
 
 extern bool g_bHoldingKnife;
 extern bool g_bFreezeTimeOver;
@@ -109,3 +111,4 @@ void UTIL_MakeVectors(const Vector& vec);
 
 // export func
 void HUD_PostRunCmd2(local_state_t* from, local_state_t* to, usercmd_s* cmd, int runfuncs, double time, unsigned int random_seed);
+void Wpn_Init();

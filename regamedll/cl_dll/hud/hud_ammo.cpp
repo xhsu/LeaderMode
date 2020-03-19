@@ -873,17 +873,13 @@ int CHudAmmo::DrawCrosshair(float flTime, int weaponid)
 
 	// when we scope in, remove the crosshair.
 	if (gHUD::m_iFOV <= 40)
-		m_iAlpha = 0;	// hide crosshair when we using sniper scope.
-	else
+		m_iAlpha = 0;	// hide crosshair when we are using sniper scope.
+	else if (gHUD::m_iLastFOVDiff > 0)
 	{
-		if (gHUD::m_iFOV >= 90)	// steelsight out.
-		{
-			m_iAlpha = float(m_iAlpha) * gHUD::m_flDisplayedFOV / float(gHUD::m_iFOV);
-		}
+		if (gHUD::m_iFOV >= 90)	// scoping out
+			m_iAlpha = float(m_iAlpha) * (1.0f - Q_abs(gHUD::m_flDisplayedFOV - float(gHUD::m_iFOV)) / float(gHUD::m_iLastFOVDiff));
 		else
-		{
-			m_iAlpha = float(m_iAlpha) * (1.0f - gHUD::m_flDisplayedFOV / float(gHUD::m_iFOV));
-		}
+			m_iAlpha = float(m_iAlpha) * (Q_abs(gHUD::m_flDisplayedFOV - float(gHUD::m_iFOV)) / float(gHUD::m_iLastFOVDiff));
 	}
 
 	m_iAlpha = Q_clamp(m_iAlpha, 0, 255);

@@ -33,9 +33,10 @@ class Vector2D
 {
 public:
 	// Construction/destruction
-	Vector2D() : x(), y() {}
-	Vector2D(float X, float Y) : x(X), y(Y) {}
+	constexpr Vector2D() : x(0), y(0) {}
+	constexpr Vector2D(float X, float Y) : x(X), y(Y) {}
 	Vector2D(const Vector2D &v) { *(int *)&x = *(int *)&v.x; *(int *)&y = *(int *)&v.y; }
+	explicit Vector2D(const float rgfl[2]) { *(int*)&x = *(int*)&rgfl[0]; *(int*)&y = *(int*)&rgfl[1]; }
 
 	// Operators
 	decltype(auto) operator-()         const { return Vector2D(-x, -y); }
@@ -114,6 +115,19 @@ public:
 	{
 		return (x > -tolerance && x < tolerance &&
 			y > -tolerance && y < tolerance);
+	}
+
+	Vector2D Rotate(float angle) const
+	{
+		float a, c, s;
+
+		a = (angle * M_PI / 180.0);
+		c = Q_cos(a);
+		s = Q_sin(a);
+
+		return Vector2D(c * x - s * y,
+						s * x + c * y
+		);
 	}
 
 	// Members
@@ -370,7 +384,12 @@ inline real_t DotProduct(const Vector &a, const Vector &b)
 	return (a.x * b.x + a.y * b.y + a.z * b.z);
 }
 
-inline real_t DotProduct2D(const Vector &a, const Vector &b)
+inline real_t DotProduct2D(const Vector& a, const Vector& b)
+{
+	return (a.x * b.x + a.y * b.y);
+}
+
+inline real_t DotProduct2D(const Vector2D &a, const Vector2D &b)
 {
 	return (a.x * b.x + a.y * b.y);
 }
@@ -388,6 +407,16 @@ inline float operator^(const Vector& a, const Vector& b)
 		return 0.0;
 
 	return (double)(Q_acos(DotProduct(a, b) / length_ab) * (180.0 / M_PI));
+}
+
+inline float operator^(const Vector2D& a, const Vector2D& b)
+{
+	float length_ab = a.Length() * b.Length();
+
+	if (length_ab == 0.0)
+		return 0.0;
+
+	return (double)(Q_acos(DotProduct2D(a, b) / length_ab) * (180.0 / M_PI));
 }
 
 template<
