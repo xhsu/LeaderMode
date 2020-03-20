@@ -12,7 +12,6 @@ int gmsgResetHUD = 0;
 int gmsgInitHUD = 0;
 int gmsgViewMode = 0;
 int gmsgShowGameTitle = 0;
-int gmsgCurWeapon = 0;
 int gmsgHealth = 0;
 int gmsgDamage = 0;
 int gmsgBattery = 0;
@@ -138,10 +137,9 @@ unsigned short g_iShadowSprite;
 
 void LinkUserMessages()
 {
-	if (gmsgCurWeapon)
+	if (gmsgGeigerRange)
 		return;
 
-	gmsgCurWeapon     = REG_USER_MSG("CurWeapon", 3);
 	gmsgGeigerRange   = REG_USER_MSG("Geiger", 1);
 	gmsgFlashlight    = REG_USER_MSG("Flashlight", 2);
 	gmsgFlashBattery  = REG_USER_MSG("FlashBat", 1);

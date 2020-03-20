@@ -11,6 +11,7 @@ double g_flGameTime = 0;
 const Vector g_vecZero = Vector(0, 0, 0);
 int g_iCurViewModelAnim = 0;
 CBaseWeapon* g_pCurWeapon = nullptr;
+WeaponIdType g_iSelectedWeapon = WEAPON_NONE;
 
 CBasePlayer gPseudoPlayer;
 std::shared_ptr<pseudo_global_vars_s> gpGlobals;
@@ -214,6 +215,9 @@ void CBaseWeapon::PostFrame()
 			// return the fade level in zoom.
 			m_pPlayer->pev->fov = m_pPlayer->m_iLastZoom;
 			m_pPlayer->m_bResumeZoom = false;
+
+			// we have additional thing to do on client site.
+			gHUD::m_SniperScope.SetFadeFromBlack(5.0f);
 		}
 	}
 

@@ -204,7 +204,6 @@ extern int gmsgResetHUD;
 extern int gmsgInitHUD;
 extern int gmsgViewMode;
 extern int gmsgShowGameTitle;
-extern int gmsgCurWeapon;
 extern int gmsgHealth;
 extern int gmsgDamage;
 extern int gmsgBattery;

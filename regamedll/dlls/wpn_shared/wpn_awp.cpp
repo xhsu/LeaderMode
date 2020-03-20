@@ -58,11 +58,31 @@ bool CAWP::Deploy()
 
 void CAWP::SecondaryAttack()
 {
-	switch (int(m_pPlayer->pev->fov))
+	// this is the delay for the m_bResumeZoom.
+	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.25f;
+
+	if (int(m_pPlayer->pev->fov) < 90)
 	{
-	case 90: m_pPlayer->pev->fov = 40; break;
-	case 40: m_pPlayer->pev->fov = 10; break;
-	default: m_pPlayer->pev->fov = 90; break;
+		m_pPlayer->pev->fov = 90;
+
+#ifdef CLIENT_DLL
+		// zoom out anim.
+		g_vecGunOfsGoal = Vector();
+
+		// manually set fade.
+		gHUD::m_SniperScope.SetFadeFromBlack(5.0f, 0);
+#endif
+	}
+	else
+	{
+		// get ready to zoom in.
+		m_pPlayer->m_iLastZoom = 40;
+		m_pPlayer->m_bResumeZoom = true;
+
+#ifdef CLIENT_DLL
+		// zoom out anim.
+		g_vecGunOfsGoal = Vector(-6.3f, -5.0f, 1.6f);
+#endif
 	}
 
 #ifndef CLIENT_DLL
@@ -73,6 +93,8 @@ void CAWP::SecondaryAttack()
 
 	// SFX only emitted from SV.
 	EMIT_SOUND(m_pPlayer->edict(), CHAN_ITEM, "weapons/zoom.wav", 0.2, 2.4);
+#else
+	g_flGunOfsMovingSpeed = 10.0f;
 #endif
 
 	// slow down while we zooming.

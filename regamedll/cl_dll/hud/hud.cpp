@@ -9,6 +9,7 @@ Created Date: 07 Mar 2020
 hud_player_info_t g_PlayerInfoList[MAX_PLAYERS + 1];
 int g_PlayerScoreAttrib[MAX_PLAYERS + 1];
 TEMPENTITY* g_DeadPlayerModels[MAX_PLAYERS + 1];
+CScreenFade gScreenFadeMgr;
 
 Vector g_LocationColor = Vector(0.0, 0.8, 0.0);
 
@@ -386,6 +387,8 @@ int gHUD::Redraw(float flTime, int intermission)
 	//if (gConfigs.bEnableClientUI)
 		//g_pViewPort->SetPaintEnabled(m_pCvarDraw->value);
 
+	gScreenFadeMgr.Think();
+	gScreenFadeMgr.Draw();
 	return 1;
 }
 
@@ -755,6 +758,7 @@ void gHUD::SlotInput(int iSlot)
 		char sz[128];
 		Q_strlcpy(sz, psz);
 		gEngfuncs.pfnServerCmd(sz);
+		g_iSelectedWeapon = gHUD::m_WeaponList.m_rgiWeapons[iSlot];
 
 		gEngfuncs.pfnPlaySoundByName(WEAPONLIST_SELECT_SFX, VOL_NORM);
 	}
@@ -817,6 +821,7 @@ void CommandFunc_NextWeapon(void)
 			char sz[128];
 			Q_strlcpy(sz, psz);
 			gEngfuncs.pfnServerCmd(sz);
+			g_iSelectedWeapon = iId;
 
 			gEngfuncs.pfnPlaySoundByName(WEAPONLIST_WHEEL_SFX, VOL_NORM);
 			return;
@@ -868,6 +873,7 @@ void CommandFunc_PrevWeapon(void)
 			char sz[128];
 			Q_strlcpy(sz, psz);
 			gEngfuncs.pfnServerCmd(sz);
+			g_iSelectedWeapon = iId;
 
 			gEngfuncs.pfnPlaySoundByName(WEAPONLIST_WHEEL_SFX, VOL_NORM);
 			return;
@@ -881,4 +887,79 @@ void CommandFunc_Adjust_Crosshair(void)
 {
 	// forward this call, since most of this command is reagarding changing the variables in m_Ammo.
 	gHUD::m_Crosshair.Adjust_Crosshair();
+}
+
+/*
+=====================
+CScreenFade::Draw
+=====================
+*/
+void CScreenFade::Draw(void)
+{
+	if (m_flAlpha < 3)
+		return;
+
+	// LUNA: DONT use gEngfuncs.pfnFillRGBA here!
+
+	glDisable(GL_TEXTURE_2D);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glColor4f(m_sColor.r / 255.0, m_sColor.g / 255.0, m_sColor.b / 255.0, m_flAlpha / 255.0);
+
+	glBegin(GL_POLYGON);
+	glVertex2f(0, 0);
+	glVertex2f(0, ScreenHeight);
+	glVertex2f(ScreenWidth, ScreenHeight);
+	glVertex2f(ScreenWidth, 0);
+	glEnd();
+
+	glDisable(GL_BLEND);
+	glEnable(GL_TEXTURE_2D);
+}
+
+/*
+=====================
+CScreenFade::Think
+=====================
+*/
+void CScreenFade::Think(void)
+{
+	if (memcmp(&m_sColor, &m_sTargetColor, sizeof(color24)))
+	{
+		m_sColor.r += (m_sTargetColor.r - m_sColor.r) * gHUD::m_flTimeDelta * 4;
+		m_sColor.g += (m_sTargetColor.g - m_sColor.g) * gHUD::m_flTimeDelta * 4;
+		m_sColor.b += (m_sTargetColor.b - m_sColor.b) * gHUD::m_flTimeDelta * 4;
+	}
+
+	if (m_iPhase == SF_FADEIN)
+	{
+		if (m_flFadeSpeed > 0)
+			m_flAlpha = fmin(m_flAlpha + m_flFadeSpeed * gHUD::m_flTimeDelta, 255.0f);
+		else if (m_flFadeSpeed < 0)
+			m_flAlpha = fmin(m_flAlpha + (m_flTargetAlpha - m_flAlpha) * gHUD::m_flTimeDelta * Q_fabs(m_flFadeSpeed), 255);
+		else
+			m_flAlpha = fmin(m_flAlpha + (m_flTargetAlpha - m_flAlpha) * gHUD::m_flTimeDelta, 255);
+
+		if (m_flAlpha >= m_flTargetAlpha)
+		{
+			m_flTimeThink = gEngfuncs.GetClientTime() + m_flStayLength;
+			m_iPhase = SF_STAY;
+		}
+	}
+	else if (m_iPhase == SF_STAY)
+	{
+		if (m_flTimeThink < gEngfuncs.GetClientTime())
+			m_iPhase = SF_FADEOUT;
+	}
+	else if (m_iPhase == SF_FADEOUT)
+	{
+		if (m_flFadeSpeed > 0)
+			m_flAlpha = fmax(m_flAlpha - m_flFadeSpeed * gHUD::m_flTimeDelta, 0);
+		else if (m_flFadeSpeed < 0)
+			m_flAlpha = fmax(m_flAlpha + (0 - m_flAlpha) * gHUD::m_flTimeDelta * m_flFadeSpeed, 0);
+		else
+			m_flAlpha = fmax(m_flAlpha + (0 - m_flAlpha) * gHUD::m_flTimeDelta, 0);
+
+		// then ... it's simply done.. nothing to do else.
+	}
 }

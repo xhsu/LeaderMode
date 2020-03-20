@@ -599,11 +599,7 @@ void CBaseWeapon::UpdateClientData(void)
 
 	if (bSend)
 	{
-		MESSAGE_BEGIN(MSG_ONE, gmsgCurWeapon, NULL, m_pPlayer->pev);
-		WRITE_BYTE(state);
-		WRITE_BYTE(m_iId);
-		WRITE_BYTE(m_iClip);
-		MESSAGE_END();
+		// deleted by LUNA: gmsgCurWeapon
 
 		m_iClientClip = m_iClip;
 		m_iClientWeaponState = state;

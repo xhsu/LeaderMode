@@ -1315,13 +1315,6 @@ void CBasePlayer::RemoveAllItems(BOOL removeSuit)
 
 	m_bHasNightVision = false;
 	SendItemStatus();
-
-	// send Selected Weapon Message to our client
-	MESSAGE_BEGIN(MSG_ONE, gmsgCurWeapon, nullptr, pev);
-		WRITE_BYTE(0);
-		WRITE_BYTE(0);
-		WRITE_BYTE(0);
-	MESSAGE_END();
 }
 
 void CBasePlayer::SetProgressBarTime(int time)
@@ -1708,12 +1701,6 @@ void EXT_FUNC CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 	MESSAGE_BEGIN(MSG_ALL, gmsgHealth);
 		WRITE_BYTE(entindex());
 		WRITE_SHORT(m_iClientHealth);
-	MESSAGE_END();
-
-	MESSAGE_BEGIN(MSG_ONE, gmsgCurWeapon, nullptr, pev);
-		WRITE_BYTE(0);
-		WRITE_BYTE(0xFF);
-		WRITE_BYTE(0xFF);
 	MESSAGE_END();
 
 	SendFOV(0);
@@ -2882,12 +2869,6 @@ void EXT_FUNC CBasePlayer::Disappear()
 		WRITE_SHORT(m_iClientHealth);
 	MESSAGE_END();
 
-	MESSAGE_BEGIN(MSG_ONE, gmsgCurWeapon, nullptr, pev);
-		WRITE_BYTE(0);
-		WRITE_BYTE(0xFF);
-		WRITE_BYTE(0xFF);
-	MESSAGE_END();
-
 	SendFOV(0);
 
 	CSGameRules()->CheckWinConditions();
@@ -3056,11 +3037,7 @@ void EXT_FUNC CBasePlayer::StartObserver(Vector &vecPosition, Vector &vecViewAng
 	SetSuitUpdate(nullptr, SUIT_SENTENCE, SUIT_REPEAT_OK);
 
 	// Tell Ammo Hud that the player is dead
-	MESSAGE_BEGIN(MSG_ONE, gmsgCurWeapon, nullptr, pev);
-		WRITE_BYTE(0);
-		WRITE_BYTE(0xFF);
-		WRITE_BYTE(0xFF);
-	MESSAGE_END();
+	// deleted by LUNA: gmsgCurWeapon
 
 	// reset FOV
 	SendFOV(0);

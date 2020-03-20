@@ -420,9 +420,9 @@ void CL_CreateMove2(float frametime, usercmd_s* cmd, int active)
 	cmd->impulse = in_impulse;
 	in_impulse = 0;
 
-	// LUNA: since the old weaponlist has been abolished, this is no longer in used.
-	//cmd->weaponselect = g_weaponselect;
-	//g_weaponselect = 0;
+	// LUNA: this is needed for the Holster() & Deploy() prediction.
+	cmd->weaponselect = g_iSelectedWeapon;
+	g_iSelectedWeapon = WEAPON_NONE;
 
 	//
 	// set button and flag bits

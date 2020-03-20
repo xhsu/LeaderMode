@@ -10,18 +10,6 @@ bool g_bHasDefuser = false;
 bool g_bHasNightvision = false;
 
 // client.cpp
-MSG_FUNC(CurWeapon)
-{
-	BEGIN_READ(pbuf, iSize);
-
-	int iState = READ_BYTE();
-	int iId = READ_BYTE();
-	int iClip = READ_BYTE();
-
-	//gHUD::m_Ammo.MsgFunc_CurWeapon(iState, iId, iClip);
-	return TRUE;
-}
-
 MSG_FUNC(Geiger)
 {
 	BEGIN_READ(pbuf, iSize);
@@ -353,7 +341,8 @@ MSG_FUNC(WeapPickup)
 
 	int iWeaponId = READ_BYTE();
 
-	// UNDONE
+	// recenter the card, make some VFX.
+	gHUD::m_WeaponList.m_rgvecCurCoord[g_rgItemInfo[iWeaponId].m_iSlot] = Vector2D(ScreenWidth / 2, ScreenHeight / 2);
 	return TRUE;
 }
 
@@ -1084,7 +1073,6 @@ MSG_FUNC(ReqState)
 void Msg_Init(void)
 {
 	// client.cpp
-	HOOK_USER_MSG(CurWeapon);
 	HOOK_USER_MSG(Geiger);
 	HOOK_USER_MSG(Flashlight);
 	HOOK_USER_MSG(FlashBat);

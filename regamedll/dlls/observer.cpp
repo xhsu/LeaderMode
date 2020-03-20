@@ -317,12 +317,8 @@ void CBasePlayer::Observer_CheckProperties()
 
 			m_iObserverWeapon = weapon;
 
-			//send weapon update
-			MESSAGE_BEGIN(MSG_ONE, gmsgCurWeapon, nullptr, pev);
-				WRITE_BYTE(1);	// 1 = current weapon, not on target
-				WRITE_BYTE(m_iObserverWeapon);
-				WRITE_BYTE(0);	// clip
-			MESSAGE_END();
+			// send weapon update
+			// deleted by LUNA: gmsgCurWeapon
 		}
 	}
 	else
@@ -333,11 +329,7 @@ void CBasePlayer::Observer_CheckProperties()
 		{
 			m_iObserverWeapon = 0;
 
-			MESSAGE_BEGIN(MSG_ONE, gmsgCurWeapon, nullptr, pev);
-				WRITE_BYTE(1);	// 1 = current weapon
-				WRITE_BYTE(m_iObserverWeapon);
-				WRITE_BYTE(0);	// clip
-			MESSAGE_END();
+			// deleted by LUNA: gmsgCurWeapon
 		}
 	}
 }

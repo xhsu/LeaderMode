@@ -274,6 +274,49 @@ namespace gHUD
 	extern CHudWeaponList m_WeaponList;
 };
 
+class CScreenFade
+{
+public:	// avoid the complex memset();
+	void* operator new(size_t size)
+	{
+		return calloc(1, size);
+	}
+	void operator delete(void* ptr)
+	{
+		free(ptr);
+	}
+
+	enum SF_PHASE
+	{
+		SF_FADEIN = 1,
+		SF_STAY,
+		SF_FADEOUT
+
+	};
+
+public:
+	color24		m_sColor;
+	float		m_flAlpha;
+	SF_PHASE	m_iPhase;
+	float		m_flTimeThink;
+	float		m_flStayLength;
+	float		m_flFadeSpeed;
+	color24		m_sTargetColor;
+	float		m_flTargetAlpha;
+
+	void		Draw	(void);
+	void		Think	(void);
+
+	inline void	SetTargetColor(int r, int g, int b) { m_sTargetColor.r = r; m_sTargetColor.g = g; m_sTargetColor.b = b; }
+	inline void	SetCurrentColor(int r, int g, int b) { m_sColor.r = r; m_sColor.g = g; m_sColor.b = b; }
+	inline void	SetAlpha(float flTarget, float flCur = -1) { m_flTargetAlpha = Q_clamp(flTarget, 0.0f, 255.0f); m_flAlpha = Q_clamp(flCur, 0.0f, 255.0f); }
+	inline void	Start(SF_PHASE phase = SF_FADEIN) { m_flTimeThink = 0; m_iPhase = phase; }
+	inline void	SetFadeSpeed(float flSpeed) { m_flFadeSpeed = flSpeed; }
+	inline void SetStayLength(float flLength = 0) { m_flStayLength = flLength; }
+};
+
+extern CScreenFade gScreenFadeMgr;
+
 extern hud_player_info_t g_PlayerInfoList[MAX_PLAYERS + 1];
 extern int g_PlayerScoreAttrib[MAX_PLAYERS + 1];
 extern TEMPENTITY* g_DeadPlayerModels[MAX_PLAYERS + 1];

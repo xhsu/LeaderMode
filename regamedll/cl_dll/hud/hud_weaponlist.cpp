@@ -70,6 +70,8 @@ int CHudWeaponList::VidInit(void)
 		}
 	}
 
+	// only reset this when join a new server.
+	Q_memset(&m_rgiWeapons, NULL, sizeof(m_rgiWeapons));
 	return 1;
 }
 
@@ -236,7 +238,6 @@ void CHudWeaponList::Reset(void)
 	Q_memset(&m_rgprcList, NULL, sizeof(m_rgprcList));
 	Q_memset(&m_rgvecCurCoord, NULL, sizeof(m_rgvecCurCoord));
 	Q_memset(&m_rgvecDestCoord, NULL, sizeof(m_rgvecDestCoord));
-	Q_memset(&m_rgiWeapons, NULL, sizeof(m_rgiWeapons));
 
 	m_bitsFlags &= ~HUD_ACTIVE;
 

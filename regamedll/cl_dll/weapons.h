@@ -101,6 +101,7 @@ extern const Vector g_vecZero;
 extern CBaseWeapon* g_rgpClientWeapons[LAST_WEAPON];
 extern CBaseWeapon* g_pCurWeapon;
 extern CBasePlayer gPseudoPlayer;
+extern WeaponIdType g_iSelectedWeapon;	// this is for prediction!
 
 extern bool g_bHoldingKnife;
 extern bool g_bFreezeTimeOver;
