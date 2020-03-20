@@ -5355,6 +5355,12 @@ BOOL EXT_FUNC CBasePlayer::AddPlayerItem(CBaseWeapon *pItem)
 		WRITE_BYTE(pItem->m_iId);
 		MESSAGE_END();
 
+		// Slot info for HUD.
+		MESSAGE_BEGIN(MSG_ONE, gmsgSetSlot, nullptr, pev);
+		WRITE_BYTE(pItem->m_iId);
+		WRITE_BYTE(pItem->m_pItemInfo->m_iSlot);
+		MESSAGE_END();
+
 		if (HasShield())
 			pev->gamestate = HITGROUP_SHIELD_ENABLED;
 
@@ -5393,6 +5399,10 @@ BOOL EXT_FUNC CBasePlayer::RemovePlayerItem(CBaseWeapon *pItem)	// this should b
 
 	// remove from client display.
 	pev->weapons &= ~(1 << pItem->m_iId);
+	MESSAGE_BEGIN(MSG_ONE, gmsgSetSlot, nullptr, pev);
+	WRITE_BYTE(0);
+	WRITE_BYTE(pItem->m_pItemInfo->m_iSlot);
+	MESSAGE_END();
 
 	// remove from server inventory.
 	if (m_rgpPlayerItems[pItem->m_pItemInfo->m_iSlot] == pItem)

@@ -308,7 +308,7 @@ int CL_ButtonBits(int bResetState)
 	}
 
 	// Dead or in intermission? Shore scoreboard, too
-	if (CL_IsDead() || gHUD::m_iIntermission)
+	if (CL_IsDead() || gHUD::m_bIntermission)
 	{
 		bits |= IN_SCORE;
 	}
@@ -420,16 +420,17 @@ void CL_CreateMove2(float frametime, usercmd_s* cmd, int active)
 	cmd->impulse = in_impulse;
 	in_impulse = 0;
 
-	cmd->weaponselect = g_weaponselect;
-	g_weaponselect = 0;
+	// LUNA: since the old weaponlist has been abolished, this is no longer in used.
+	//cmd->weaponselect = g_weaponselect;
+	//g_weaponselect = 0;
+
 	//
 	// set button and flag bits
 	//
 	cmd->buttons = CL_ButtonBits(1);
 
-	gEngfuncs.GetViewAngles(viewangles);
 	// Set current view angles.
-
+	gEngfuncs.GetViewAngles(viewangles);
 	if (CL_IsDead())
 	{
 		VectorCopy(oldangles, cmd->viewangles);

@@ -18,7 +18,6 @@ int gmsgDamage = 0;
 int gmsgBattery = 0;
 int gmsgTrain = 0;
 int gmsgLogo = 0;
-int gmsgWeaponList = 0;
 int gmsgAmmoX = 0;
 int gmsgDeathMsg = 0;
 int gmsgScoreAttrib = 0;
@@ -80,6 +79,8 @@ int gmsgShowTimer = 0;
 int gmsgRole = 0;
 int gmsgRadarPoint = 0;
 int gmsgRadarRP = 0;
+int gmsgSetSlot = 0;
+
 bool g_bClientPrintEnable = true;
 
 char *sPlayerModelFiles[] =
@@ -152,7 +153,6 @@ void LinkUserMessages()
 	gmsgHudText       = REG_USER_MSG("HudText", -1);
 	gmsgSayText       = REG_USER_MSG("SayText", -1);
 	gmsgTextMsg       = REG_USER_MSG("TextMsg", -1);
-	gmsgWeaponList    = REG_USER_MSG("WeaponList", -1);
 	gmsgResetHUD      = REG_USER_MSG("ResetHUD", 0);
 	gmsgInitHUD       = REG_USER_MSG("InitHUD", 0);
 	gmsgViewMode      = REG_USER_MSG("ViewMode", 0);
@@ -219,32 +219,13 @@ void LinkUserMessages()
 	gmsgRole		  = REG_USER_MSG("Role", 2);
 	gmsgRadarPoint	  = REG_USER_MSG("RadarPoint", 8);
 	gmsgRadarRP		  = REG_USER_MSG("RadarRP", 1);
+	gmsgSetSlot		  = REG_USER_MSG("SetSlot", 2);
 }
 
 void WriteSigonMessages()
 {
-	for (int i = 0; i < MAX_WEAPONS; i++)
-	{
-		const ItemInfo &info = g_rgItemInfo[i];
-		if (!info.m_iId)
-			continue;
-
-		const char *pszName = info.m_pszClassName;
-		if (!pszName)
-			pszName = "Empty";
-
-		MESSAGE_BEGIN(MSG_INIT, gmsgWeaponList);
-			WRITE_STRING(pszName);
-			WRITE_BYTE(info.m_iAmmoType);
-			WRITE_BYTE(info.m_iAmmoType > 0 ? g_rgAmmoInfo[info.m_iAmmoType].m_iMax : -1);	// avoid knife bug.
-			WRITE_BYTE(-1);
-			WRITE_BYTE(-1);
-			WRITE_BYTE(info.m_iSlot - 1);	// slot 1 in clinet is marked as 0
-			WRITE_BYTE(info.m_iPosition);
-			WRITE_BYTE(info.m_iId);
-			WRITE_BYTE(info.m_bitsFlags);
-		MESSAGE_END();
-	}
+	// send some MSG_INIT stuff.
+	// abolished.
 }
 
 int CMD_ARGC_()

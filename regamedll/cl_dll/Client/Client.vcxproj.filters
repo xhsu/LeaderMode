@@ -84,9 +84,6 @@
     <ClCompile Include="..\hud\hud_ammo.cpp">
       <Filter>cl_dll\hud</Filter>
     </ClCompile>
-    <ClCompile Include="..\hud\history.cpp">
-      <Filter>cl_dll\hud</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\game_shared\shared_util.cpp">
       <Filter>game_shared</Filter>
     </ClCompile>
@@ -195,6 +192,12 @@
     <ClCompile Include="..\hud\hud_sniperscope.cpp">
       <Filter>cl_dll\hud</Filter>
     </ClCompile>
+    <ClCompile Include="..\hud\hud_crosshair.cpp">
+      <Filter>cl_dll\hud</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hud\hud_weaponlist.cpp">
+      <Filter>cl_dll\hud</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\cdll_int.h">
@@ -261,9 +264,6 @@
       <Filter>cl_dll</Filter>
     </ClInclude>
     <ClInclude Include="..\hud\hud_ammo.h">
-      <Filter>cl_dll\hud</Filter>
-    </ClInclude>
-    <ClInclude Include="..\hud\history.h">
       <Filter>cl_dll\hud</Filter>
     </ClInclude>
     <ClInclude Include="..\..\game_shared\shared_util.h">
@@ -360,6 +360,12 @@
       <Filter>cl_dll\Graph</Filter>
     </ClInclude>
     <ClInclude Include="..\hud\hud_sniperscope.h">
+      <Filter>cl_dll\hud</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hud\hud_crosshair.h">
+      <Filter>cl_dll\hud</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hud\hud_weaponlist.h">
       <Filter>cl_dll\hud</Filter>
     </ClInclude>
   </ItemGroup>

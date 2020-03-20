@@ -79,7 +79,7 @@ void WeaponsResource::LoadWeaponSprites(WEAPON* pWeapon)
 	if (!pList)
 		return;
 
-	client_sprite_t* p = gHUD::GetSpriteList(pList, "crosshair", iRes, i);
+	client_sprite_t* p = gHUD::GetSpriteFromList(pList, "crosshair", iRes, i);
 
 	if (p)
 	{
@@ -90,7 +90,7 @@ void WeaponsResource::LoadWeaponSprites(WEAPON* pWeapon)
 	else
 		pWeapon->hCrosshair = NULL;
 
-	p = gHUD::GetSpriteList(pList, "autoaim", iRes, i);
+	p = gHUD::GetSpriteFromList(pList, "autoaim", iRes, i);
 
 	if (p)
 	{
@@ -101,7 +101,7 @@ void WeaponsResource::LoadWeaponSprites(WEAPON* pWeapon)
 	else
 		pWeapon->hAutoaim = 0;
 
-	p = gHUD::GetSpriteList(pList, "zoom", iRes, i);
+	p = gHUD::GetSpriteFromList(pList, "zoom", iRes, i);
 
 	if (p)
 	{
@@ -115,7 +115,7 @@ void WeaponsResource::LoadWeaponSprites(WEAPON* pWeapon)
 		pWeapon->rcZoomedCrosshair = pWeapon->rcCrosshair;
 	}
 
-	p = gHUD::GetSpriteList(pList, "zoom_autoaim", iRes, i);
+	p = gHUD::GetSpriteFromList(pList, "zoom_autoaim", iRes, i);
 
 	if (p)
 	{
@@ -129,7 +129,7 @@ void WeaponsResource::LoadWeaponSprites(WEAPON* pWeapon)
 		pWeapon->rcZoomedAutoaim = pWeapon->rcZoomedCrosshair;
 	}
 
-	p = gHUD::GetSpriteList(pList, "weapon", iRes, i);
+	p = gHUD::GetSpriteFromList(pList, "weapon", iRes, i);
 
 	if (p)
 	{
@@ -142,7 +142,7 @@ void WeaponsResource::LoadWeaponSprites(WEAPON* pWeapon)
 	else
 		pWeapon->hInactive = 0;
 
-	p = gHUD::GetSpriteList(pList, "weapon_s", iRes, i);
+	p = gHUD::GetSpriteFromList(pList, "weapon_s", iRes, i);
 
 	if (p)
 	{
@@ -153,7 +153,7 @@ void WeaponsResource::LoadWeaponSprites(WEAPON* pWeapon)
 	else
 		pWeapon->hActive = 0;
 
-	p = gHUD::GetSpriteList(pList, "ammo", iRes, i);
+	p = gHUD::GetSpriteFromList(pList, "ammo", iRes, i);
 
 	if (p)
 	{
@@ -166,7 +166,7 @@ void WeaponsResource::LoadWeaponSprites(WEAPON* pWeapon)
 	else
 		pWeapon->hAmmo = 0;
 
-	p = gHUD::GetSpriteList(pList, "ammo2", iRes, i);
+	p = gHUD::GetSpriteFromList(pList, "ammo2", iRes, i);
 
 	if (p)
 	{
@@ -233,7 +233,7 @@ void WeaponsResource::SelectSlot(int iSlot)
 	if (iSlot > MAX_WEAPON_SLOTS)
 		return;
 
-	if (gHUD::m_fPlayerDead || gHUD::m_bitsHideHUDDisplay & (HIDEHUD_WEAPONS | HIDEHUD_ALL))
+	if (gHUD::m_bPlayerDead || gHUD::m_bitsHideHUDDisplay & (HIDEHUD_WEAPONS | HIDEHUD_ALL))
 		return;
 
 	if (!(gHUD::m_iWeaponBits & (1 << (WEAPON_SUIT))))

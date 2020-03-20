@@ -96,7 +96,7 @@
       <AdditionalOptions>/Zc:strictStrings- %(AdditionalOptions)</AdditionalOptions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
-      <DisableSpecificWarnings>4244;26402;26429;26430;26433;26440;26446;26461;26462;26481;26482;26485;26486;26489;26493;26496;26812;26814;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4244;26402;26429;26430;26433;26440;26446;26451;26461;26462;26481;26482;26485;26486;26489;26493;26496;26812;26814;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -128,7 +128,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;_CLIENT_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <DisableSpecificWarnings>4244;26402;26429;26430;26433;26440;26446;26461;26462;26481;26482;26485;26486;26489;26493;26496;26812;26814;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4244;26402;26429;26430;26433;26440;26446;26451;26461;26462;26481;26482;26485;26486;26489;26493;26496;26812;26814;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -195,10 +195,10 @@
     <ClCompile Include="..\entity.cpp" />
     <ClCompile Include="..\events.cpp" />
     <ClCompile Include="..\Graph\dxt.cpp" />
-    <ClCompile Include="..\hud\history.cpp" />
     <ClCompile Include="..\hud\hud.cpp" />
     <ClCompile Include="..\hud\hud_ammo.cpp" />
     <ClCompile Include="..\hud\hud_battery.cpp" />
+    <ClCompile Include="..\hud\hud_crosshair.cpp" />
     <ClCompile Include="..\hud\hud_death_notice.cpp" />
     <ClCompile Include="..\hud\hud_flashlight.cpp" />
     <ClCompile Include="..\hud\hud_geiger.cpp" />
@@ -220,6 +220,7 @@
     <ClCompile Include="..\hud\hud_text_message.cpp" />
     <ClCompile Include="..\hud\hud_train.cpp" />
     <ClCompile Include="..\hud\hud_vgui2print.cpp" />
+    <ClCompile Include="..\hud\hud_weaponlist.cpp" />
     <ClCompile Include="..\input.cpp" />
     <ClCompile Include="..\input_mouse.cpp" />
     <ClCompile Include="..\interpolation.cpp" />
@@ -253,10 +254,10 @@
     <ClInclude Include="..\entity.h" />
     <ClInclude Include="..\events.h" />
     <ClInclude Include="..\Graph\dxt.h" />
-    <ClInclude Include="..\hud\history.h" />
     <ClInclude Include="..\hud\hud.h" />
     <ClInclude Include="..\hud\hud_ammo.h" />
     <ClInclude Include="..\hud\hud_battery.h" />
+    <ClInclude Include="..\hud\hud_crosshair.h" />
     <ClInclude Include="..\hud\hud_death_notice.h" />
     <ClInclude Include="..\hud\hud_flashlight.h" />
     <ClInclude Include="..\hud\hud_geiger.h" />
@@ -278,6 +279,7 @@
     <ClInclude Include="..\hud\hud_text_message.h" />
     <ClInclude Include="..\hud\hud_train.h" />
     <ClInclude Include="..\hud\hud_vgui2print.h" />
+    <ClInclude Include="..\hud\hud_weaponlist.h" />
     <ClInclude Include="..\input.h" />
     <ClInclude Include="..\input_mouse.h" />
     <ClInclude Include="..\interpolation.h" />

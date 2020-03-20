@@ -230,7 +230,7 @@ void MessageMode(void)
 	if (!gHUD::m_pCvarDraw->value || g_pViewPort->IsScoreBoardVisible())
 		return g_pfnMessageMode();
 
-	if (!gHUD::m_iIntermission && gEngfuncs.Cmd_Argc() == 1 && cl_newchat->value)
+	if (!gHUD::m_bIntermission && gEngfuncs.Cmd_Argc() == 1 && cl_newchat->value)
 		return g_pViewPort->StartMessageMode();
 
 	return g_pfnMessageMode();*/
@@ -245,7 +245,7 @@ void MessageMode2(void)
 	if (!gHUD::m_pCvarDraw->value || g_pViewPort->IsScoreBoardVisible())
 		return g_pfnMessageMode2();
 
-	if (!gHUD::m_iIntermission && gEngfuncs.Cmd_Argc() == 1 && cl_newchat->value)
+	if (!gHUD::m_bIntermission && gEngfuncs.Cmd_Argc() == 1 && cl_newchat->value)
 		return g_pViewPort->StartMessageMode2();
 
 	return g_pfnMessageMode2();*/

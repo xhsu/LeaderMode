@@ -18,7 +18,7 @@ MSG_FUNC(CurWeapon)
 	int iId = READ_BYTE();
 	int iClip = READ_BYTE();
 
-	gHUD::m_Ammo.MsgFunc_CurWeapon(iState, iId, iClip);
+	//gHUD::m_Ammo.MsgFunc_CurWeapon(iState, iId, iClip);
 	return TRUE;
 }
 
@@ -139,35 +139,6 @@ MSG_FUNC(SayText)
 MSG_FUNC(TextMsg)
 {
 	gHUD::m_TextMessage.MsgFunc_TextMsg(iSize, pbuf);
-	return TRUE;
-}
-
-MSG_FUNC(WeaponList)
-{
-	BEGIN_READ(pbuf, iSize);
-
-	WEAPON Weapon;
-	Q_strlcpy(Weapon.szName, READ_STRING());
-	Weapon.iAmmoType = (int)READ_CHAR();
-	Weapon.iMax1 = READ_BYTE();
-
-	if (Weapon.iMax1 == 255)
-		Weapon.iMax1 = -1;
-
-	Weapon.iAmmo2Type = READ_CHAR();
-	Weapon.iMax2 = READ_BYTE();
-
-	if (Weapon.iMax2 == 255)
-		Weapon.iMax2 = -1;
-
-	Weapon.iSlot = READ_CHAR();
-	Weapon.iSlotPos = READ_CHAR();
-	Weapon.iId = READ_CHAR();
-	Weapon.iFlags = READ_BYTE();
-	Weapon.iClip = 0;
-	Weapon.szExtraName[0] = '\0';
-
-	gWR.AddWeapon(&Weapon);
 	return TRUE;
 }
 
@@ -372,7 +343,7 @@ MSG_FUNC(AmmoPickup)
 	int iAmmoId = READ_BYTE();
 	int iAmount = READ_BYTE();
 
-	gHR.AddToHistory(HISTSLOT_AMMO, iAmmoId, Q_abs(iAmount));
+	// UNDONE
 	return TRUE;
 }
 
@@ -382,7 +353,7 @@ MSG_FUNC(WeapPickup)
 
 	int iWeaponId = READ_BYTE();
 
-	gHR.AddToHistory(HISTSLOT_WEAP, iWeaponId);
+	// UNDONE
 	return TRUE;
 }
 
@@ -393,7 +364,7 @@ MSG_FUNC(ItemPickup)
 	char szItemName[192];
 	Q_strlcpy(szItemName, READ_STRING());
 
-	gHR.AddToHistory(HISTSLOT_ITEM, szItemName);
+	// UNDONE
 	return TRUE;
 }
 
@@ -403,7 +374,7 @@ MSG_FUNC(HideWeapon)
 
 	int bitsWhat = READ_BYTE();
 
-	gHUD::m_Ammo.MsgFunc_HideWeapon(bitsWhat);
+	gHUD::m_Crosshair.MsgFunc_HideWeapon(bitsWhat);
 	return TRUE;
 }
 
@@ -450,7 +421,7 @@ MSG_FUNC(AmmoX)
 	int iAmmoId = READ_BYTE();
 	int iAmount = READ_BYTE();
 
-	gWR.SetAmmo(iAmmoId, Q_abs(iAmount));
+	gPseudoPlayer.m_rgAmmo[iAmmoId] = Q_abs(iAmount);
 	return TRUE;
 }
 
@@ -610,7 +581,7 @@ MSG_FUNC(Crosshair)
 
 	BOOL FDrawn = READ_BYTE();
 
-	gHUD::m_Ammo.MsgFunc_Crosshair(FDrawn);
+	gHUD::m_Crosshair.MsgFunc_Crosshair(FDrawn);
 	return TRUE;
 }
 
@@ -1067,6 +1038,17 @@ MSG_FUNC(RadarRP)	// Radar remove point.
 	return TRUE;
 }
 
+MSG_FUNC(SetSlot)
+{
+	BEGIN_READ(pbuf, iSize);
+
+	WeaponIdType iId = (WeaponIdType)READ_BYTE();
+	int iSlot = READ_BYTE();
+
+	gHUD::m_WeaponList.MsgFunc_SetSlot(iId, iSlot);
+	return TRUE;
+}
+
 
 // player.cpp
 MSG_FUNC(Logo)
@@ -1114,7 +1096,6 @@ void Msg_Init(void)
 	HOOK_USER_MSG(HudText);
 	HOOK_USER_MSG(SayText);
 	HOOK_USER_MSG(TextMsg);
-	HOOK_USER_MSG(WeaponList);
 	HOOK_USER_MSG(ResetHUD);
 	HOOK_USER_MSG(InitHUD);
 	HOOK_USER_MSG(ViewMode);
@@ -1181,6 +1162,7 @@ void Msg_Init(void)
 	HOOK_USER_MSG(Role);
 	HOOK_USER_MSG(RadarPoint);
 	HOOK_USER_MSG(RadarRP);
+	HOOK_USER_MSG(SetSlot);
 
 	// player.cpp
 	HOOK_USER_MSG(Logo);

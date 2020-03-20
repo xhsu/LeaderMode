@@ -69,7 +69,7 @@ namespace gHUD
 	int m_HUD_number_0 = 0;
 	int m_iFontHeight = 0;
 	int m_iFontEngineHeight = 0;
-	bool m_iIntermission = false;
+	bool m_bIntermission = false;
 	char m_szMOTD[2048] = "\0";
 	float m_flTimeLeft = 0;
 	int m_bitsHideHUDDisplay = 0;
@@ -79,7 +79,7 @@ namespace gHUD
 	Vector m_vecAngles = Vector();
 	int m_iKeyBits = 0;
 	int m_iWeaponBits = 0;
-	bool m_fPlayerDead = true;
+	bool m_bPlayerDead = true;
 
 	SCREENINFO m_scrinfo;
 
@@ -107,6 +107,8 @@ namespace gHUD
 	CHudProgressBar m_progressBar;
 	CHudVGUI2Print m_VGUI2Print;
 	CHudSniperScope m_SniperScope;
+	CHudCrosshair m_Crosshair;
+	CHudWeaponList m_WeaponList;
 };
 
 void gHUD::Init(void)
@@ -153,6 +155,8 @@ void gHUD::Init(void)
 	m_progressBar.Init();
 	m_VGUI2Print.Init();
 	m_SniperScope.Init();
+	m_Crosshair.Init();
+	m_WeaponList.Init();
 
 	// UNDONE
 	//GetClientVoice()->Init(&g_VoiceStatusHelper);
@@ -206,7 +210,6 @@ void gHUD::Init(void)
 	gEngfuncs.pfnAddCommand("slot8", CommandFunc_Slot8);
 	gEngfuncs.pfnAddCommand("slot9", CommandFunc_Slot9);
 	gEngfuncs.pfnAddCommand("slot10", CommandFunc_Slot10);
-	gEngfuncs.pfnAddCommand("cancelselect", CommandFunc_Close);
 	gEngfuncs.pfnAddCommand("invnext", CommandFunc_NextWeapon);
 	gEngfuncs.pfnAddCommand("invprev", CommandFunc_PrevWeapon);
 	gEngfuncs.pfnAddCommand("adjust_crosshair", CommandFunc_Adjust_Crosshair);
@@ -299,7 +302,7 @@ void gHUD::VidInit(void)
 	m_szGameMode[0] = '\0';
 	m_HUD_number_0 = GetSpriteIndex("number_0");
 	m_iFontHeight = m_rgrcRects[m_HUD_number_0].bottom - m_rgrcRects[m_HUD_number_0].top;
-	m_iIntermission = 0;
+	m_bIntermission = 0;
 	m_szMOTD[0] = 0;
 	m_flTimeLeft = 0;
 
@@ -340,16 +343,16 @@ int gHUD::Redraw(float flTime, int intermission)
 	/* UNDONE
 	if (gConfigs.bEnableClientUI)
 	{
-		if (m_iIntermission && !intermission)
+		if (m_bIntermission && !intermission)
 		{
-			m_iIntermission = intermission;
+			m_bIntermission = intermission;
 
 			g_pViewPort->HideAllVGUIMenu();
 			g_pViewPort->UpdateSpectatorPanel();
 		}
-		else if (!m_iIntermission && intermission)
+		else if (!m_bIntermission && intermission)
 		{
-			m_iIntermission = intermission;
+			m_bIntermission = intermission;
 
 			g_pViewPort->HideAllVGUIMenu();
 			g_pViewPort->ShowScoreBoard();
@@ -357,7 +360,7 @@ int gHUD::Redraw(float flTime, int intermission)
 		}
 	}
 	*/
-	m_iIntermission = intermission;
+	m_bIntermission = intermission;
 
 	if (m_pCvarDraw->value)
 	{
@@ -399,11 +402,15 @@ float HUD_GetFOV(void)
 
 void gHUD::Think(void)
 {
+	// draw or not, you must think.
 	for (auto pHudElements : m_lstAllHUDElems)
 	{
 		if (pHudElements->m_bitsFlags & HUD_ACTIVE)
 			pHudElements->Think();
 	}
+
+	// Is Player Dead??
+	m_bPlayerDead = CL_IsDead();
 
 	/*int newfov = HUD_GetFOV();
 
@@ -705,7 +712,7 @@ wrect_t gHUD::GetSpriteRect(int index)
 	return m_rgrcRects[index];
 }
 
-client_sprite_t* gHUD::GetSpriteList(client_sprite_t* pList, const char* psz, int iRes, int iCount)
+client_sprite_t* gHUD::GetSpriteFromList(client_sprite_t* pList, const char* psz, int iRes, int iCount)
 {
 	if (!pList)
 		return NULL;
@@ -715,7 +722,7 @@ client_sprite_t* gHUD::GetSpriteList(client_sprite_t* pList, const char* psz, in
 
 	while (i--)
 	{
-		if ((!Q_stricmp(psz, p->szName)) && (p->iRes == iRes))
+		if (!Q_stricmp(psz, p->szName) && p->iRes == iRes)
 			return p;
 
 		p++;
@@ -726,7 +733,7 @@ client_sprite_t* gHUD::GetSpriteList(client_sprite_t* pList, const char* psz, in
 
 void gHUD::SlotInput(int iSlot)
 {
-	if (m_iIntermission)
+	if (m_bIntermission)
 		return;
 
 	// UNDONE
@@ -739,7 +746,22 @@ void gHUD::SlotInput(int iSlot)
 		return;
 	}
 
-	gWR.SelectSlot(iSlot);
+	if (iSlot <= SLOT_NO || iSlot >= MAX_ITEM_TYPES)
+		return;
+
+	const char* psz = g_rgItemInfo[gHUD::m_WeaponList.m_rgiWeapons[iSlot]].m_pszClassName;
+	if (psz && Q_strlen(psz))
+	{
+		char sz[128];
+		Q_strlcpy(sz, psz);
+		gEngfuncs.pfnServerCmd(sz);
+
+		gEngfuncs.pfnPlaySoundByName(WEAPONLIST_SELECT_SFX, VOL_NORM);
+	}
+	else
+	{
+		gEngfuncs.pfnPlaySoundByName(WEAPONLIST_EMPTY_SFX, VOL_NORM);
+	}
 }
 
 void CommandFunc_Slot1(void) { gHUD::SlotInput(1); }
@@ -753,104 +775,110 @@ void CommandFunc_Slot8(void) { gHUD::SlotInput(8); }
 void CommandFunc_Slot9(void) { gHUD::SlotInput(9); }
 void CommandFunc_Slot10(void) { gHUD::SlotInput(10); }
 
-void CommandFunc_Close(void)
-{
-	if (gpActiveSel)
-	{
-		gpLastSel = gpActiveSel;
-		gpActiveSel = NULL;
-		gEngfuncs.pfnPlaySoundByName("common/wpn_hudoff.wav", 1);
-	}
-	else
-	{
-		gEngfuncs.pfnClientCmd("escape");
-	}
-}
-
 void CommandFunc_NextWeapon(void)
 {
-	if (gHUD::m_fPlayerDead || (gHUD::m_bitsHideHUDDisplay & (HIDEHUD_WEAPONS | HIDEHUD_ALL)))
+	if (gHUD::m_bPlayerDead)
 		return;
 
-	if (!gpActiveSel || gpActiveSel == (WEAPON*)1)
-		gpActiveSel = gHUD::m_Ammo.m_pWeapon;
+	if (!g_pCurWeapon)
+		return;
 
-	int pos = 0;
-	int slot = 0;
+	bool bFound = false;
+	WeaponIdType iId = WEAPON_NONE;
 
-	if (gpActiveSel)
+	for (int i = g_pCurWeapon->m_pItemInfo->m_iSlot + 1; i < MAX_ITEM_TYPES; i++)
 	{
-		pos = gpActiveSel->iSlotPos + 1;
-		slot = gpActiveSel->iSlot;
-	}
-
-	for (int loop = 0; loop <= 1; loop++)
-	{
-		for (; slot < MAX_WEAPON_SLOTS; slot++)
+		if (gHUD::m_WeaponList.m_rgiWeapons[i] > WEAPON_NONE && gHUD::m_WeaponList.m_rgiWeapons[i] < LAST_WEAPON)
 		{
-			for (; pos < MAX_WEAPON_POSITIONS; pos++)
-			{
-				WEAPON* wsp = gWR.GetWeaponSlot(slot, pos);
-
-				if (wsp)
-				{
-					gpActiveSel = wsp;
-					return;
-				}
-			}
-
-			pos = 0;
+			bFound = true;
+			iId = gHUD::m_WeaponList.m_rgiWeapons[i];
+			break;
 		}
-
-		slot = 0;
 	}
 
-	gpActiveSel = NULL;
+	if (!bFound)
+	{
+		for (int i = PRIMARY_WEAPON_SLOT; i < MAX_ITEM_TYPES; i++)
+		{
+			if (gHUD::m_WeaponList.m_rgiWeapons[i] > WEAPON_NONE && gHUD::m_WeaponList.m_rgiWeapons[i] < LAST_WEAPON)
+			{
+				bFound = true;
+				iId = gHUD::m_WeaponList.m_rgiWeapons[i];
+				break;
+			}
+		}
+	}
+
+	if (bFound)
+	{
+		const char* psz = g_rgItemInfo[iId].m_pszClassName;
+		if (psz && Q_strlen(psz))
+		{
+			char sz[128];
+			Q_strlcpy(sz, psz);
+			gEngfuncs.pfnServerCmd(sz);
+
+			gEngfuncs.pfnPlaySoundByName(WEAPONLIST_WHEEL_SFX, VOL_NORM);
+			return;
+		}
+	}
+
+	gEngfuncs.pfnPlaySoundByName(WEAPONLIST_EMPTY_SFX, VOL_NORM);
 }
 
 void CommandFunc_PrevWeapon(void)
 {
-	if (gHUD::m_fPlayerDead || (gHUD::m_bitsHideHUDDisplay & (HIDEHUD_WEAPONS | HIDEHUD_ALL)))
+	if (gHUD::m_bPlayerDead)
 		return;
 
-	if (!gpActiveSel || gpActiveSel == (WEAPON*)1)
-		gpActiveSel = gHUD::m_Ammo.m_pWeapon;
+	if (!g_pCurWeapon)
+		return;
 
-	int pos = MAX_WEAPON_POSITIONS - 1;
-	int slot = MAX_WEAPON_SLOTS - 1;
+	bool bFound = false;
+	WeaponIdType iId = WEAPON_NONE;
 
-	if (gpActiveSel)
+	for (int i = g_pCurWeapon->m_pItemInfo->m_iSlot - 1; i > SLOT_NO; i--)
 	{
-		pos = gpActiveSel->iSlotPos - 1;
-		slot = gpActiveSel->iSlot;
-	}
-
-	for (int loop = 0; loop <= 1; loop++)
-	{
-		for (; slot >= 0; slot--)
+		if (gHUD::m_WeaponList.m_rgiWeapons[i] > WEAPON_NONE&& gHUD::m_WeaponList.m_rgiWeapons[i] < LAST_WEAPON)
 		{
-			for (; pos >= 0; pos--)
-			{
-				WEAPON* wsp = gWR.GetWeaponSlot(slot, pos);
-
-				if (wsp)
-				{
-					gpActiveSel = wsp;
-					return;
-				}
-			}
-
-			pos = MAX_WEAPON_POSITIONS - 1;
+			bFound = true;
+			iId = gHUD::m_WeaponList.m_rgiWeapons[i];
+			break;
 		}
-
-		slot = MAX_WEAPON_SLOTS - 1;
 	}
 
-	gpActiveSel = NULL;
+	if (!bFound)
+	{
+		for (int i = EQUIPMENT_SLOT; i > SLOT_NO; i--)
+		{
+			if (gHUD::m_WeaponList.m_rgiWeapons[i] > WEAPON_NONE&& gHUD::m_WeaponList.m_rgiWeapons[i] < LAST_WEAPON)
+			{
+				bFound = true;
+				iId = gHUD::m_WeaponList.m_rgiWeapons[i];
+				break;
+			}
+		}
+	}
+
+	if (bFound)
+	{
+		const char* psz = g_rgItemInfo[iId].m_pszClassName;
+		if (psz && Q_strlen(psz))
+		{
+			char sz[128];
+			Q_strlcpy(sz, psz);
+			gEngfuncs.pfnServerCmd(sz);
+
+			gEngfuncs.pfnPlaySoundByName(WEAPONLIST_WHEEL_SFX, VOL_NORM);
+			return;
+		}
+	}
+
+	gEngfuncs.pfnPlaySoundByName(WEAPONLIST_EMPTY_SFX, VOL_NORM);
 }
 
 void CommandFunc_Adjust_Crosshair(void)
 {
 	// forward this call, since most of this command is reagarding changing the variables in m_Ammo.
-	gHUD::m_Ammo.Adjust_Crosshair();
+	gHUD::m_Crosshair.Adjust_Crosshair();
 }

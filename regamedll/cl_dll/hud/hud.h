@@ -8,9 +8,9 @@ Created Date: 07 Mar 2020
 
 #include <list>
 
-#define RGB_YELLOWISH 0x00FFA000
-#define RGB_REDISH 0x00FF1010
-#define RGB_GREENISH 0x0000A000
+#define RGB_YELLOWISH	0x00FFA000
+#define RGB_REDISH		0x00FF1010
+#define RGB_GREENISH	0x0000A000
 
 #define DHN_DRAWZERO	BIT(0)
 #define DHN_2DIGITS		BIT(1)
@@ -18,7 +18,8 @@ Created Date: 07 Mar 2020
 #define DHN_FILLZERO	BIT(3)
 #define DHN_4DIGITS		BIT(4)
 #define DHN_5DIGITS		BIT(5)
-#define MIN_ALPHA 100
+
+#define MIN_ALPHA		100
 
 #define MAX_SPRITE_NAME_LENGTH 24
 
@@ -137,6 +138,20 @@ public:
 	virtual void Shutdown(void) {}
 };
 
+/*
+class CHudExample : public CBaseHUDElement
+{
+public:
+	virtual int Init(void) { return 0; }
+	virtual int VidInit(void) { return 0; }
+	virtual int Draw(float flTime) { return 0; }
+	virtual void Think(void) {}
+	virtual void Reset(void) {}
+	virtual void InitHUDData(void) {}
+	virtual void Shutdown(void) {}
+};
+*/
+
 // dummy classes derived from CBaseHUDElement.
 class CHudAmmo;
 class CHudHealth;
@@ -161,6 +176,8 @@ class CHudScenarioStatus;
 class CHudProgressBar;
 class CHudVGUI2Print;
 class CHudSniperScope;
+class CHudCrosshair;
+class CHudWeaponList;
 
 namespace gHUD
 {
@@ -186,7 +203,7 @@ namespace gHUD
 	float GetSensitivity(void);
 	hSprite GetSprite(int index);
 	wrect_t GetSpriteRect(int index);
-	client_sprite_t* GetSpriteList(client_sprite_t* pList, const char* psz, int iRes, int iCount);
+	client_sprite_t* GetSpriteFromList(client_sprite_t* pList, const char* psz, int iRes, int iCount);
 
 	// HUD bridges
 	void SlotInput(int iSlot);
@@ -215,7 +232,7 @@ namespace gHUD
 	extern int m_HUD_number_0;
 	extern int m_iFontHeight;
 	extern int m_iFontEngineHeight;
-	extern bool m_iIntermission;
+	extern bool m_bIntermission;
 	extern char m_szMOTD[2048];
 	extern float m_flTimeLeft;
 	extern int m_bitsHideHUDDisplay;
@@ -225,7 +242,7 @@ namespace gHUD
 	extern Vector m_vecAngles;
 	extern int m_iKeyBits;
 	extern int m_iWeaponBits;
-	extern bool m_fPlayerDead;
+	extern bool m_bPlayerDead;
 
 	extern SCREENINFO m_scrinfo;
 
@@ -253,6 +270,8 @@ namespace gHUD
 	extern CHudProgressBar m_progressBar;
 	extern CHudVGUI2Print m_VGUI2Print;
 	extern CHudSniperScope m_SniperScope;
+	extern CHudCrosshair m_Crosshair;
+	extern CHudWeaponList m_WeaponList;
 };
 
 extern hud_player_info_t g_PlayerInfoList[MAX_PLAYERS + 1];
@@ -270,7 +289,6 @@ void CommandFunc_Slot7(void);
 void CommandFunc_Slot8(void);
 void CommandFunc_Slot9(void);
 void CommandFunc_Slot10(void);
-void CommandFunc_Close(void);
 void CommandFunc_NextWeapon(void);
 void CommandFunc_PrevWeapon(void);
 void CommandFunc_Adjust_Crosshair(void);

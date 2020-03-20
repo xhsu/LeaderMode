@@ -13,9 +13,9 @@ int CKSG12::m_iShell = 0;
 
 void CKSG12::Precache()
 {
-	PRECACHE_MODEL("models/v_m3.mdl");
-	PRECACHE_MODEL("models/w_m3.mdl");
-	PRECACHE_MODEL("models/p_m3.mdl");
+	PRECACHE_MODEL("models/weapons/v_ksg12.mdl");
+	PRECACHE_MODEL("models/weapons/w_ksg12.mdl");
+	PRECACHE_MODEL("models/weapons/p_ksg12.mdl");
 
 	PRECACHE_SOUND("weapons/m3_insertshell.wav");
 	PRECACHE_SOUND("weapons/m3_pump.wav");
@@ -40,7 +40,7 @@ bool CKSG12::Deploy()
 {
 	m_bAllowNextEmptySound = true;
 
-	return DefaultDeploy("models/v_m3.mdl", "models/p_m3.mdl", KSG12_DRAW, "shotgun");
+	return DefaultDeploy("models/weapons/v_ksg12.mdl", "models/weapons/p_ksg12.mdl", KSG12_DRAW, "shotgun");
 }
 
 void CKSG12::PostFrame(void)

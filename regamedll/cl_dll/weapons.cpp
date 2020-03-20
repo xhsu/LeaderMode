@@ -709,7 +709,7 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		// Force a fixed anim down to viewmodel. LUNA: FIXME: wired, how did that happens? it seems impossible.
 		g_pCurWeapon->SendWeaponAnim(to->client.weaponanim);
 
-	if (g_pCurWeapon->m_iPrimaryAmmoType < MAX_AMMO_TYPES)
+	if (g_pCurWeapon->m_iPrimaryAmmoType < AMMO_MAXTYPE)
 	{
 		to->client.vuser4.x = g_pCurWeapon->m_iPrimaryAmmoType;
 		to->client.vuser4.y = gPseudoPlayer.m_rgAmmo[g_pCurWeapon->m_iPrimaryAmmoType];

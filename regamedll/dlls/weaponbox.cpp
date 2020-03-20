@@ -366,12 +366,12 @@ const char* CWeaponBox::GetCSModelName(WeaponIdType iId)
 	case WEAPON_M14EBR:			modelName = "models/w_sg550.mdl"; break;
 	case WEAPON_CM901:			modelName = "models/weapons/w_cm901.mdl"; break;
 	case WEAPON_QBZ95:			modelName = "models/w_famas.mdl"; break;
-	case WEAPON_USP:			modelName = "models/w_usp.mdl"; break;
+	case WEAPON_USP:			modelName = "models/weapons/w_usp.mdl"; break;
 	case WEAPON_GLOCK18:		modelName = "models/w_glock18.mdl"; break;
 	case WEAPON_AWP:			modelName = "models/weapons/w_awp.mdl"; break;
 	case WEAPON_MP5N:			modelName = "models/w_mp5.mdl"; break;
 	case WEAPON_MK46:			modelName = "models/w_m249.mdl"; break;
-	case WEAPON_KSG12:			modelName = "models/w_m3.mdl"; break;
+	case WEAPON_KSG12:			modelName = "models/weapons/w_ksg12.mdl"; break;
 	case WEAPON_M4A1:			modelName = "models/w_m4a1.mdl"; break;
 	case WEAPON_MP7A1:			modelName = "models/w_tmp.mdl"; break;
 	case WEAPON_SVD:			modelName = "models/w_g3sg1.mdl"; break;

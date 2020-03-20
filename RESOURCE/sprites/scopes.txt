@@ -1,0 +1,5 @@
+4
+weapon_svd		640 sniper_scope	0	0	256	256
+weapon_awp		640 sniper_scope	0	0	256	256
+weapon_m200		640 sniper_scope	0	0	256	256
+weapon_m14ebr	640 sniper_scope	0	0	256	256

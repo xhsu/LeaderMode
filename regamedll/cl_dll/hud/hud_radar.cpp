@@ -73,7 +73,7 @@ int CHudRadar::Draw(float flTime)
 	if ((gHUD::m_bitsHideHUDDisplay & HIDEHUD_HEALTH) || g_iUser1)	// TODO: maybe add an independent flag to turn radar off?
 		return 1;
 
-	if (!gHUD::m_fPlayerDead && m_bDrawRadar == true)
+	if (!gHUD::m_bPlayerDead && m_bDrawRadar == true)
 		DrawRadar(flTime);
 
 	return 1;

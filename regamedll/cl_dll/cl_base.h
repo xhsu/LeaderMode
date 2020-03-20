@@ -138,7 +138,6 @@ Created Date: 05 Mar 2020
 
 // hud
 #include "hud/hud.h"
-#include "hud/history.h"
 #include "hud/hud_ammo.h"
 #include "hud/hud_health.h"
 #include "hud/hud_spectator.h"
@@ -162,3 +161,5 @@ Created Date: 05 Mar 2020
 #include "hud/hud_progress_bar.h"
 #include "hud/hud_vgui2print.h"
 #include "hud/hud_sniperscope.h"
+#include "hud/hud_crosshair.h"
+#include "hud/hud_weaponlist.h"

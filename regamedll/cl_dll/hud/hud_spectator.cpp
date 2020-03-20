@@ -76,7 +76,7 @@ void CHudSpectator::CheckSettings(void)
 		m_pip->value = INSET_CHASE_FREE;
 	}
 
-	if (gHUD::m_iIntermission)
+	if (gHUD::m_bIntermission)
 		m_pip->value = INSET_OFF;
 
 	if (m_chatEnabled != (gHUD::m_SayText.m_HUD_saytext->value != 0))
@@ -834,7 +834,7 @@ void CHudSpectator::SetModes(int iNewMainMode, int iNewInsetMode)
 		{
 			if (gEngfuncs.pfnGetCvarFloat("cl_observercrosshair") != 0.0)
 			{
-				gEngfuncs.pfnSetCrosshair(gHUD::m_Ammo.m_hObserverCrosshair, gHUD::m_Ammo.m_rcObserverCrosshair, 255, 255, 255);
+				gEngfuncs.pfnSetCrosshair(gHUD::m_Crosshair.m_hObserverCrosshair, gHUD::m_Crosshair.m_rcObserverCrosshair, 255, 255, 255);
 			}
 			else
 			{
@@ -859,7 +859,7 @@ void CHudSpectator::HandleButtonsDown(int ButtonPressed)
 	//if (!gViewPortInterface)
 		//return;
 
-	if (gHUD::m_iIntermission)
+	if (gHUD::m_bIntermission)
 		return;
 
 	if (!g_iUser1)
