@@ -63,10 +63,12 @@ void CL_DLLEXPORT HUD_DirectorMessage(int iSize, void* pbuf)
 
 void CL_DLLEXPORT HUD_DrawNormalTriangles(void)
 {
+	HUD_DrawNormalTriangles2();
 }
 
 void CL_DLLEXPORT HUD_DrawTransparentTriangles(void)
 {
+	HUD_DrawTransparentTriangles2();
 }
 
 void CL_DLLEXPORT HUD_Frame(double time)
@@ -245,8 +247,10 @@ BOOL CL_DLLEXPORT Initialize_(cl_enginefunc_t* pEnginefuncs, int iVersion)	// LU
 
 	Q_memcpy(&gEngfuncs, pEnginefuncs, sizeof(cl_enginefunc_t));
 
-	// LUNA: UNDONE, crsky told me to do it later.
+	Dxt_Initialization();
 	Events_Init();
+
+	// LUNA: UNDONE, crsky told me to do it later.
 	//CL_LoadParticleMan();
 
 	// get tracker interface, if any

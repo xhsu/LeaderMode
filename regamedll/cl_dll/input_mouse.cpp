@@ -30,6 +30,7 @@ static bool		m_bMouseThread = false;
 // mouse variables
 cvar_t* m_filter;
 cvar_t* sensitivity;
+cvar_t* zoom_sensitivity_ratio;
 cvar_t* m_rawinput;
 
 // Custom mouse acceleration (0 disable, 1 to enable, 2 enable with separate yaw/pitch rescale)
@@ -396,6 +397,7 @@ void IN_Init(void)
 {
 	m_filter = gEngfuncs.pfnRegisterVariable ("m_filter", "0", FCVAR_ARCHIVE);
 	sensitivity = gEngfuncs.pfnRegisterVariable ("sensitivity", "3", FCVAR_ARCHIVE); // user mouse sensitivity setting.
+	zoom_sensitivity_ratio = gEngfuncs.pfnRegisterVariable ("zoom_sensitivity_ratio", "1.2", FCVAR_ARCHIVE);
 
 	m_customaccel = gEngfuncs.pfnRegisterVariable ("m_customaccel", "0", FCVAR_ARCHIVE);
 	m_customaccel_scale = gEngfuncs.pfnRegisterVariable ("m_customaccel_scale", "0.04", FCVAR_ARCHIVE);

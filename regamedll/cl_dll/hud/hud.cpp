@@ -106,6 +106,7 @@ namespace gHUD
 	CHudScenarioStatus m_scenarioStatus;
 	CHudProgressBar m_progressBar;
 	CHudVGUI2Print m_VGUI2Print;
+	CHudSniperScope m_SniperScope;
 };
 
 void gHUD::Init(void)
@@ -151,6 +152,7 @@ void gHUD::Init(void)
 	m_scenarioStatus.Init();
 	m_progressBar.Init();
 	m_VGUI2Print.Init();
+	m_SniperScope.Init();
 
 	// UNDONE
 	//GetClientVoice()->Init(&g_VoiceStatusHelper);
@@ -413,7 +415,7 @@ void gHUD::Think(void)
 	if (m_iFOV == default_fov->value)
 		m_flMouseSensitivity = 0;
 	else
-		m_flMouseSensitivity = sensitivity->value * (m_flDisplayedFOV / (float)default_fov->value) * CVAR_GET_FLOAT("zoom_sensitivity_ratio");
+		m_flMouseSensitivity = sensitivity->value * (m_flDisplayedFOV / (float)default_fov->value) * zoom_sensitivity_ratio->value;
 
 	if (m_iFOV == 0)
 		m_iFOV = Q_max(default_fov->value, 90.0f);

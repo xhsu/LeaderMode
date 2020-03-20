@@ -32,7 +32,7 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -79,6 +79,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>E:\SteamLibrary\steamapps\common\Half-Life\czero\cl_dlls\</OutDir>
+    <TargetName>client</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -101,7 +103,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>export.def</ModuleDefinitionFile>
       <AdditionalLibraryDirectories>$(ProjectDir)..\..\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateMapFile>true</GenerateMapFile>
     </Link>
   </ItemDefinitionGroup>
@@ -135,6 +137,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>export.def</ModuleDefinitionFile>
+      <AdditionalDependencies>SDL2.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -163,6 +166,8 @@
     <ClCompile Include="..\..\dlls\weapontype.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\dlls\wpn_shared\wpn_awp.cpp" />
+    <ClCompile Include="..\..\dlls\wpn_shared\wpn_cm901.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_ksg12.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
     </ClCompile>
@@ -189,6 +194,7 @@
     <ClCompile Include="..\corpse.cpp" />
     <ClCompile Include="..\entity.cpp" />
     <ClCompile Include="..\events.cpp" />
+    <ClCompile Include="..\Graph\dxt.cpp" />
     <ClCompile Include="..\hud\history.cpp" />
     <ClCompile Include="..\hud\hud.cpp" />
     <ClCompile Include="..\hud\hud_ammo.cpp" />
@@ -207,6 +213,7 @@
     <ClCompile Include="..\hud\hud_round_timer.cpp" />
     <ClCompile Include="..\hud\hud_say_text.cpp" />
     <ClCompile Include="..\hud\hud_scenario_status.cpp" />
+    <ClCompile Include="..\hud\hud_sniperscope.cpp" />
     <ClCompile Include="..\hud\hud_status_icons.cpp" />
     <ClCompile Include="..\hud\hud_spectator.cpp" />
     <ClCompile Include="..\hud\hud_status_bar.cpp" />
@@ -220,6 +227,7 @@
     <ClCompile Include="..\message.cpp" />
     <ClCompile Include="..\StudioModelRenderer.cpp" />
     <ClCompile Include="..\StudioModelRenderer_CS.cpp" />
+    <ClCompile Include="..\tri.cpp" />
     <ClCompile Include="..\view.cpp" />
     <ClCompile Include="..\viewport_interface.cpp" />
     <ClCompile Include="..\weapons.cpp" />
@@ -244,6 +252,7 @@
     <ClInclude Include="..\corpse.h" />
     <ClInclude Include="..\entity.h" />
     <ClInclude Include="..\events.h" />
+    <ClInclude Include="..\Graph\dxt.h" />
     <ClInclude Include="..\hud\history.h" />
     <ClInclude Include="..\hud\hud.h" />
     <ClInclude Include="..\hud\hud_ammo.h" />
@@ -262,6 +271,7 @@
     <ClInclude Include="..\hud\hud_round_timer.h" />
     <ClInclude Include="..\hud\hud_say_text.h" />
     <ClInclude Include="..\hud\hud_scenario_status.h" />
+    <ClInclude Include="..\hud\hud_sniperscope.h" />
     <ClInclude Include="..\hud\hud_status_icons.h" />
     <ClInclude Include="..\hud\hud_spectator.h" />
     <ClInclude Include="..\hud\hud_status_bar.h" />
@@ -274,6 +284,7 @@
     <ClInclude Include="..\in_camera.h" />
     <ClInclude Include="..\message.h" />
     <ClInclude Include="..\StudioModelRenderer.h" />
+    <ClInclude Include="..\tri.h" />
     <ClInclude Include="..\view.h" />
     <ClInclude Include="..\viewport_interface.h" />
     <ClInclude Include="..\weapons.h" />

@@ -147,7 +147,11 @@ void CUSP::USPFire(float flSpread, float flCycleTime)
 	Vector vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, USP_EFFECTIVE_RANGE, USP_PENETRATION, BULLET_PLAYER_45ACP, USP_DAMAGE, USP_RANGE_MODIFER, m_pPlayer->pev, true, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
-	SendWeaponAnim(UTIL_SharedRandomLong(m_pPlayer->random_seed, USP_UNSIL_SHOOT1, USP_UNSIL_SHOOT3));	// LUNA: I don't know why, but this has to be done on SV side, or client fire anim would be override.
+	int seq = UTIL_SharedRandomFloat(m_pPlayer->random_seed, USP_UNSIL_SHOOT1, USP_UNSIL_SHOOT3);
+	if (m_iClip == 0)
+		seq = USP_UNSIL_SHOOT_EMPTY;
+
+	SendWeaponAnim(seq);	// LUNA: I don't know why, but this has to be done on SV side, or client fire anim would be override.
 	PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL, m_pPlayer->edict(), m_usEvent, 0, (float*)&g_vecZero, (float*)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 100), 0, m_iClip == 0, FALSE);
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)

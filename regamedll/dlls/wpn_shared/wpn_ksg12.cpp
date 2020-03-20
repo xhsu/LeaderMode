@@ -30,6 +30,8 @@ void CKSG12::Precache()
 
 void CKSG12::Think(void)
 {
+	CBaseWeapon::Think();
+
 	if (m_pPlayer->m_afButtonReleased & IN_ATTACK)
 		m_bAllowNextEmptySound = true;	// only one empty sound per time.
 }

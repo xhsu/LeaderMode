@@ -35,6 +35,31 @@ vgui::IVGui* g_pVGui;
 vgui::ISystem* g_pVGuiSystem;
 vgui::ISchemeManager* g_pVGuiSchemeManager;
 vgui::ILocalize* g_pVGuiLocalize;
+IFileSystem* g_pFileSystemInterface;
+
+//-----------------------------------------------------------------------------
+// Purpose: finds a particular interface in the factory set
+//-----------------------------------------------------------------------------
+static void* InitializeInterface(char const* interfaceName, CreateInterfaceFn* factoryList, int numFactories)
+{
+	void* retval;
+
+	for (int i = 0; i < numFactories; i++)
+	{
+		CreateInterfaceFn factory = factoryList[i];
+		if (!factory)
+			continue;
+
+		retval = factory(interfaceName, NULL);
+		if (retval)
+			return retval;
+	}
+
+	// No provider for requested interface!!!
+	// Assert( !"No provider for requested interface!!!" );
+
+	return NULL;
+}
 
 void CClientVGUI::Initialize(CreateInterfaceFn* factoryList, int count)
 {
@@ -47,6 +72,7 @@ void CClientVGUI::Initialize(CreateInterfaceFn* factoryList, int count)
 	g_pVGuiSystem = (vgui::ISystem*)factoryList[1](VGUI_SYSTEM_INTERFACE_VERSION, NULL);
 	g_pVGuiSchemeManager = (vgui::ISchemeManager*)factoryList[1](VGUI_SCHEME_INTERFACE_VERSION, NULL);
 	g_pVGuiLocalize = (vgui::ILocalize*)factoryList[1](VGUI_LOCALIZE_INTERFACE_VERSION, NULL);
+	g_pFileSystemInterface = (IFileSystem*)InitializeInterface(FILESYSTEM_INTERFACE_VERSION, factoryList, count);
 
 	/* UNDONE
 	if (!vgui::VGui_InitInterfacesList("ClientUI", factories, count))

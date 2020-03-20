@@ -28,6 +28,7 @@ extern int g_iBlackSmoke;
 void Events_Init(void);
 
 // weapons
+DECLARE_EVENT(FireAWP);
 DECLARE_EVENT(FireM3);
 DECLARE_EVENT(FireUSP);
 DECLARE_EVENT(FireCM901);

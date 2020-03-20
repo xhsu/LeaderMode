@@ -25,6 +25,9 @@
     <Filter Include="dlls\wpn_shared">
       <UniqueIdentifier>{9080ac44-de2b-4d54-a24a-46ca03f9994e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="cl_dll\Graph">
+      <UniqueIdentifier>{73ee3683-7138-4eb4-a873-bafc41d8319b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\cdll_int.cpp">
@@ -176,6 +179,21 @@
     </ClCompile>
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_ksg12.cpp">
       <Filter>dlls\wpn_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\dlls\wpn_shared\wpn_cm901.cpp">
+      <Filter>dlls\wpn_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\dlls\wpn_shared\wpn_awp.cpp">
+      <Filter>dlls\wpn_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\tri.cpp">
+      <Filter>cl_dll</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Graph\dxt.cpp">
+      <Filter>cl_dll\Graph</Filter>
+    </ClCompile>
+    <ClCompile Include="..\hud\hud_sniperscope.cpp">
+      <Filter>cl_dll\hud</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -334,6 +352,15 @@
     </ClInclude>
     <ClInclude Include="..\..\dlls\weapontype.h">
       <Filter>dlls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\tri.h">
+      <Filter>cl_dll</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Graph\dxt.h">
+      <Filter>cl_dll\Graph</Filter>
+    </ClInclude>
+    <ClInclude Include="..\hud\hud_sniperscope.h">
+      <Filter>cl_dll\hud</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

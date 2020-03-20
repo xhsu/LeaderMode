@@ -276,6 +276,10 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 
 	switch (iId)
 	{
+	case WEAPON_AWP:
+		p = new CAWP;
+		break;
+
 	case WEAPON_USP:
 		p = new CUSP;
 		break;
@@ -306,6 +310,25 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 	// no call of AddToPlayer() here. it should be called from CBasePlayer::AddPlayerItem.
 
 	return p;
+}
+
+void CBaseWeapon::Think(void)
+{
+	if (m_pPlayer->m_flEjectBrass != 0 && m_pPlayer->m_flEjectBrass <= gpGlobals->time)
+	{
+		m_pPlayer->m_flEjectBrass = 0;
+
+		UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
+
+		Vector vecUp = RANDOM_FLOAT(100, 150) * gpGlobals->v_up;
+		Vector vecRight = RANDOM_FLOAT(50, 70) * gpGlobals->v_right;
+
+		Vector vecShellVelocity = (m_pPlayer->pev->velocity + vecRight + vecUp) + gpGlobals->v_forward * 25;
+		int soundType = (m_iId == WEAPON_STRIKER || m_iId == WEAPON_KSG12) ? 2 : 1;
+
+		EjectBrass(m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs + gpGlobals->v_up * -9 + gpGlobals->v_forward * 16,
+			vecShellVelocity, m_pPlayer->pev->angles.yaw, m_pPlayer->m_iShellModelIndex, soundType, m_pPlayer->entindex());
+	}
 }
 
 bool CBaseWeapon::AddToPlayer(CBasePlayer* pPlayer)
@@ -364,22 +387,6 @@ void CBaseWeapon::PostFrame()
 			m_pPlayer->pev->fov = m_pPlayer->m_iLastZoom;
 			m_pPlayer->m_bResumeZoom = false;
 		}
-	}
-
-	if (m_pPlayer->m_flEjectBrass != 0 && m_pPlayer->m_flEjectBrass <= gpGlobals->time)
-	{
-		m_pPlayer->m_flEjectBrass = 0;
-
-		UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
-
-		Vector vecUp = RANDOM_FLOAT(100, 150) * gpGlobals->v_up;
-		Vector vecRight = RANDOM_FLOAT(50, 70) * gpGlobals->v_right;
-
-		Vector vecShellVelocity = (m_pPlayer->pev->velocity + vecRight + vecUp) + gpGlobals->v_forward * 25;
-		int soundType = (m_iId == WEAPON_STRIKER || m_iId == WEAPON_KSG12) ? 2 : 1;
-
-		EjectBrass(m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs + gpGlobals->v_up * -9 + gpGlobals->v_forward * 16,
-			vecShellVelocity, m_pPlayer->pev->angles.yaw, m_pPlayer->m_iShellModelIndex, soundType, m_pPlayer->entindex());
 	}
 
 	if (m_bInReload && m_pPlayer->m_flNextAttack <= UTIL_WeaponTimeBase())
@@ -526,7 +533,7 @@ bool CBaseWeapon::Drop(void** ppWeaponBoxReturned)
 		}
 	}
 
-	const char* modelname = GetCSModelName(m_iId);
+	const char* modelname = CWeaponBox::GetCSModelName(m_iId);
 	if (modelname)
 	{
 		pWeaponBox->SetModel(modelname);
@@ -764,7 +771,7 @@ void CBaseWeapon::ReloadSound()
 
 void CBaseWeapon::PushAnim(void)
 {
-	m_Stack.m_flEjectBrass			= m_pPlayer->m_flEjectBrass;
+	m_Stack.m_flEjectBrass			= m_pPlayer->m_flEjectBrass - gpGlobals->time;
 	m_Stack.m_flNextAttack			= m_pPlayer->m_flNextAttack;
 	m_Stack.m_flNextPrimaryAttack	= m_flNextPrimaryAttack;
 	m_Stack.m_flNextSecondaryAttack	= m_flNextSecondaryAttack;
@@ -779,7 +786,7 @@ void CBaseWeapon::PopAnim(void)
 	if (m_Stack.m_iSequence < 0)
 		return;
 
-	m_pPlayer->m_flEjectBrass		= m_Stack.m_flEjectBrass;
+	m_pPlayer->m_flEjectBrass		= m_Stack.m_flEjectBrass + gpGlobals->time;
 	m_pPlayer->m_flNextAttack		= m_Stack.m_flNextAttack;
 	m_flNextPrimaryAttack			= m_Stack.m_flNextPrimaryAttack;
 	m_flNextSecondaryAttack			= m_Stack.m_flNextSecondaryAttack;

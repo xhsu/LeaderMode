@@ -338,7 +338,7 @@ bool CCSBot::IsSniper() const
 {
 	for (auto pWeapon : CBaseWeapon::m_lstWeapons)
 	{
-		if (pWeapon->m_pPlayer->entindex() != this->entindex())
+		if (pWeapon->m_pPlayer.IsValid() && pWeapon->m_pPlayer->entindex() != this->entindex())
 			continue;
 
 		if (pWeapon->IsDead())

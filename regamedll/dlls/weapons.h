@@ -158,7 +158,7 @@ public:	// CL exclusive variables.
 #endif
 
 public:	// basic logic funcs
-	virtual void	Think			(void) {}	// called by PlayerPreThink.
+	virtual void	Think			(void);		// called by PlayerPreThink.
 	virtual bool	AddToPlayer		(CBasePlayer* pPlayer);	// should only be called by CBasePlayer::AddPlayerItem();
 	virtual bool	Deploy			(void) { return false; }	// called when attempting to take it out.
 	virtual void	PostFrame		(void);		// called by PlayerPostThink.
@@ -311,20 +311,50 @@ enum aug_e
 	AUG_SHOOT3,
 };
 
-const float AWP_MAX_SPEED      = 210.0f;
-const float AWP_MAX_SPEED_ZOOM = 150.0f;
-const float AWP_DAMAGE         = 115.0f;
-const float AWP_RANGE_MODIFER  = 0.99f;
-const float AWP_RELOAD_TIME    = 2.5f;
+constexpr float AWP_MAX_SPEED		= 210.0f;
+constexpr float AWP_MAX_SPEED_ZOOM	= 150.0f;
+constexpr float AWP_DAMAGE			= 115.0f;
+constexpr float AWP_RANGE_MODIFER	= 0.99f;
+constexpr float	AWP_RELOAD_TIME		= 2.48f;
+constexpr float	AWP_DEPLOY_TIME		= 1.39f;
+constexpr float AWP_FIRE_INTERVAL	= 1.5f;
+constexpr float AWP_TIME_SHELL_EJ	= 0.85f;
+constexpr int	AWP_PENETRATION		= 3;
+constexpr float	AWP_EFFECTIVE_RANGE = 8192.0f;
 
 enum awp_e
 {
 	AWP_IDLE,
-	AWP_SHOOT,
+	AWP_SHOOT1,
 	AWP_SHOOT2,
 	AWP_SHOOT3,
 	AWP_RELOAD,
 	AWP_DRAW,
+};
+
+class CAWP : public CBaseWeapon
+{
+#ifndef CLIENT_DLL
+public:	// SV exclusive variables.
+	static unsigned short m_usEvent;
+	static int m_iShell;
+
+public:	// SV exclusive functions.
+	virtual void	Precache		(void);
+#endif
+
+public:	// basic logic funcs
+	virtual bool	Deploy			(void);
+	virtual void	PrimaryAttack	(void);
+	virtual void	SecondaryAttack	(void);
+	virtual bool	Reload			(void);
+	virtual void	WeaponIdle		(void);
+
+public:	// util funcs
+	virtual float GetMaxSpeed		(void);
+
+public:	// new funcs
+	void AWPFire(float flSpread, float flCycleTime);
 };
 
 const float DEAGLE_MAX_SPEED     = 250.0f;
@@ -727,7 +757,6 @@ const float CM901_MAX_SPEED = 240.0f;
 const float CM901_DAMAGE = 30.0f;
 const float CM901_RANGE_MODIFER = 0.98f;
 const float CM901_RELOAD_TIME = 2.459;
-
 
 enum cm901_e
 {

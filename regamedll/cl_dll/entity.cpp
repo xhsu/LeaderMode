@@ -30,6 +30,7 @@ int g_iPlayerFlags;
 Vector g_vPlayerVelocity;
 float g_flPlayerSpeed;
 int g_iWeaponFlags;
+int g_iWaterLevel;
 
 extra_player_info_t	g_PlayerExtraInfo[MAX_PLAYERS]; // additional player info sent directly to the client.dll
 

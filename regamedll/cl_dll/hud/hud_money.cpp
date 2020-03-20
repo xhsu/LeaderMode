@@ -194,5 +194,5 @@ void CHudAccountBalance::MsgFunc_Money(int& iNewMoney, bool bShowDelta)
 void CHudAccountBalance::MsgFunc_BlinkAcct(int& iValue)
 {
 	m_fBlinkTime = 0;
-	m_iBlinkCount = READ_BYTE() * 2;
+	m_iBlinkCount = iValue * 2;
 }

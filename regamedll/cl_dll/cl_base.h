@@ -109,6 +109,13 @@ Created Date: 05 Mar 2020
 #include <VGUI/ISystem.h>
 #include <VGUI/ILocalize.h>
 
+// file system. for the file override and usage of other mods' res.
+#include <Interface/IFileSystem.h>
+
+// OpenGL
+#include <gl/GL.h>
+#include <gl/GLU.h>
+
 // custom header starts from here.
 #include "cdll_int.h"
 #include "entity.h"
@@ -124,6 +131,10 @@ Created Date: 05 Mar 2020
 #include "corpse.h"
 #include "viewport_interface.h"
 #include "weapons.h"
+#include "tri.h"
+
+// graphic stuff
+#include "Graph/dxt.h"
 
 // hud
 #include "hud/hud.h"
@@ -150,3 +161,4 @@ Created Date: 05 Mar 2020
 #include "hud/hud_scenario_status.h"
 #include "hud/hud_progress_bar.h"
 #include "hud/hud_vgui2print.h"
+#include "hud/hud_sniperscope.h"

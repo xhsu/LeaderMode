@@ -5,7 +5,7 @@
 #pragma once
 #endif
 
-typedef void *FileHandle_t;
+typedef FILE* FileHandle_t;
 typedef int FileFindHandle_t;
 typedef int WaitForResourcesHandle_t;
 
@@ -34,6 +34,10 @@ enum FileWarningLevel_t
 };
 
 #define FILESYSTEM_INVALID_HANDLE (FileHandle_t)NULL
+
+#ifdef GetCurrentDirectory
+#undef GetCurrentDirectory
+#endif
 
 class IFileSystem : public IBaseInterface
 {

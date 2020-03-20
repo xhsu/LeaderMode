@@ -810,7 +810,6 @@ extern cvar_t *sv_aim;
 
 void OLD_CheckBuyZone(CBasePlayer *pPlayer);
 
-const char *GetCSModelName(int item_id);
 Vector VecVelocityForDamage(float flDamage);
 int TrainSpeed(int iSpeed, int iMax);
 const char *GetWeaponName(entvars_t *pevInflictor, entvars_t *pKiller);

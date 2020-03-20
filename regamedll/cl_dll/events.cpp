@@ -1036,7 +1036,40 @@ DECLARE_EVENT(FireAUG)
 
 DECLARE_EVENT(FireAWP)
 {
+	int idx;
+	Vector origin;
+	Vector angles;
+	Vector velocity;
+	Vector up, right, forward;
 
+	idx = args->entindex;
+
+	VectorCopy(args->origin, origin);
+	VectorCopy(args->angles, angles);
+	VectorCopy(args->velocity, velocity);
+
+	angles.pitch += args->iparam1 / 100.0;
+	angles.yaw += args->iparam2 / 100.0;
+
+	gEngfuncs.pfnAngleVectors(angles, forward, right, up);
+
+	if (EV_IsLocal(idx))
+	{
+		g_iShotsFired++;
+		EV_MuzzleFlash();
+		gEngfuncs.pEventAPI->EV_WeaponAnimation(AWP_SHOOT1 + UTIL_SharedRandomLong(gPseudoPlayer.random_seed, 0, 2), 2);
+
+		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 3, 0.5, 20, 20, 20, EV_PISTOL_SMOKE, velocity, false, 35);
+		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 40, 0.5, 15, 15, 15, EV_WALL_PUFF, velocity, false, 35);
+		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 80, 0.5, 10, 10, 10, EV_WALL_PUFF, velocity, false, 35);
+	}
+
+	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/awp1.wav", 1.0, 0.28, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
+
+	Vector vecSrc = EV_GetGunPosition(args, origin);
+	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
+
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, AWP_EFFECTIVE_RANGE, BULLET_PLAYER_338MAG, AWP_PENETRATION);
 }
 
 DECLARE_EVENT(FireDEAGLE)
@@ -1205,7 +1238,7 @@ DECLARE_EVENT(FireUSP)
 		if (silencer_on)
 		{
 			if (!empty)
-				seq = UTIL_SharedRandomLong(gPseudoPlayer.random_seed, USP_UNSIL_SHOOT1, USP_UNSIL_SHOOT3);
+				seq = UTIL_SharedRandomFloat(gPseudoPlayer.random_seed, USP_UNSIL_SHOOT1, USP_UNSIL_SHOOT3);
 			else
 				seq = USP_UNSIL_SHOOT_EMPTY;
 		}
@@ -1213,20 +1246,18 @@ DECLARE_EVENT(FireUSP)
 		{
 			EV_MuzzleFlash();
 			if (!empty)
-				seq = UTIL_SharedRandomLong(gPseudoPlayer.random_seed, USP_SHOOT1, USP_SHOOT3);
+				seq = UTIL_SharedRandomFloat(gPseudoPlayer.random_seed, USP_SHOOT1, USP_SHOOT3);
 			else
 				seq = USP_SHOOT_EMPTY;
 		}
 
 		// first personal gun smoke.
-		auto ent = gEngfuncs.GetViewModel();
-
-		Vector smoke_origin = ent->attachment[0] - forward * 3.0f;
+		Vector smoke_origin = g_pViewEnt->attachment[0] - forward * 3.0f;
 		float base_scale = RANDOM_FLOAT(0.1, 0.25);
 
 		EV_HLDM_CreateSmoke(smoke_origin, forward, 0, base_scale, 7, 7, 7, EV_PISTOL_SMOKE, velocity, false, 35);
-		EV_HLDM_CreateSmoke(ent->attachment[0], forward, 20, base_scale + 0.1, 10, 10, 10, EV_WALL_PUFF, velocity, false, 35);
-		EV_HLDM_CreateSmoke(ent->attachment[0], forward, 40, base_scale, 13, 13, 13, EV_WALL_PUFF, velocity, false, 35);
+		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 20, base_scale + 0.1, 10, 10, 10, EV_WALL_PUFF, velocity, false, 35);
+		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 40, base_scale, 13, 13, 13, EV_WALL_PUFF, velocity, false, 35);
 
 		// shoot anim.
 		if (g_pCurWeapon)
@@ -1237,7 +1268,7 @@ DECLARE_EVENT(FireUSP)
 		else
 			EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 36.0, -14.0, 14.0);
 
-		ShellOrigin = ent->attachment[1];	// use the weapon attachment instead.
+		ShellOrigin = g_pViewEnt->attachment[1];	// use the weapon attachment instead.
 		VectorScale(ShellVelocity, 0.5, ShellVelocity);
 		ShellVelocity[2] += 45.0;
 	}

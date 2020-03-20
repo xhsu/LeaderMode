@@ -160,6 +160,7 @@ class CHudStatusIcons;
 class CHudScenarioStatus;
 class CHudProgressBar;
 class CHudVGUI2Print;
+class CHudSniperScope;
 
 namespace gHUD
 {
@@ -251,6 +252,7 @@ namespace gHUD
 	extern CHudScenarioStatus m_scenarioStatus;
 	extern CHudProgressBar m_progressBar;
 	extern CHudVGUI2Print m_VGUI2Print;
+	extern CHudSniperScope m_SniperScope;
 };
 
 extern hud_player_info_t g_PlayerInfoList[MAX_PLAYERS + 1];

@@ -84,6 +84,20 @@ int CBasePlayer::FireBuckshots(ULONG cShots, const Vector& vecSrc, const Vector&
 	return iSeedOfs;
 }
 
+void CBasePlayer::ResetMaxSpeed()
+{
+	// default speed.
+	float speed = 240;
+
+	if (m_pActiveItem)
+	{
+		// Get player speed from selected weapon
+		speed = m_pActiveItem->GetMaxSpeed();
+	}
+
+	pev->maxspeed = speed;
+}
+
 //
 // PSEUDO-WEAPON
 //
@@ -109,6 +123,10 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 
 	switch (iId)
 	{
+	case WEAPON_AWP:
+		p = new CAWP;
+		break;
+
 	case WEAPON_USP:
 		p = new CUSP;
 		break;
@@ -137,6 +155,16 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 	// no call of AddToPlayer() here. it should be called from CBasePlayer::AddPlayerItem.
 
 	return p;
+}
+
+void CBaseWeapon::Think(void)
+{
+	if (m_pPlayer->m_flEjectBrass != 0 && m_pPlayer->m_flEjectBrass <= gpGlobals->time)
+	{
+		m_pPlayer->m_flEjectBrass = 0;
+		// we do nothing on client side.
+		// that's because the brass ejected is visible globally, thus, it should be managed by SV.
+	}
 }
 
 bool CBaseWeapon::AddToPlayer(CBasePlayer* pPlayer)
@@ -187,12 +215,6 @@ void CBaseWeapon::PostFrame()
 			m_pPlayer->pev->fov = m_pPlayer->m_iLastZoom;
 			m_pPlayer->m_bResumeZoom = false;
 		}
-	}
-
-	if (m_pPlayer->m_flEjectBrass != 0 && m_pPlayer->m_flEjectBrass <= gpGlobals->time)
-	{
-		m_pPlayer->m_flEjectBrass = 0;
-		//EjectBrassLate(); WPN_UNDONE
 	}
 
 	if (m_bInReload && m_pPlayer->m_flNextAttack <= UTIL_WeaponTimeBase())
@@ -399,7 +421,7 @@ void CBaseWeapon::PushAnim(void)
 {
 	cl_entity_t* pViewEntity = gEngfuncs.GetViewModel();
 
-	m_Stack.m_flEjectBrass			= m_pPlayer->m_flEjectBrass;
+	m_Stack.m_flEjectBrass			= m_pPlayer->m_flEjectBrass - gpGlobals->time;
 	m_Stack.m_flFrame				= pViewEntity->curstate.frame;
 	m_Stack.m_flFramerate			= pViewEntity->curstate.framerate;
 	m_Stack.m_flNextAttack			= m_pPlayer->m_flNextAttack;
@@ -419,7 +441,7 @@ void CBaseWeapon::PopAnim(void)
 
 	cl_entity_t* pViewEntity = gEngfuncs.GetViewModel();
 
-	m_pPlayer->m_flEjectBrass		= m_Stack.m_flEjectBrass;
+	m_pPlayer->m_flEjectBrass		= m_Stack.m_flEjectBrass + gpGlobals->time;
 	pViewEntity->curstate.frame		= m_Stack.m_flFrame;
 	pViewEntity->curstate.framerate	= m_Stack.m_flFramerate;
 	m_pPlayer->m_flNextAttack		= m_Stack.m_flNextAttack;
@@ -478,6 +500,8 @@ void HUD_InitClientWeapons(void)
 
 	Q_memset(&g_rgpClientWeapons, NULL, sizeof(g_rgpClientWeapons));
 
+	g_rgpClientWeapons[WEAPON_AWP] = CBaseWeapon::Give(WEAPON_AWP, &gPseudoPlayer);
+	g_rgpClientWeapons[WEAPON_CM901] = CBaseWeapon::Give(WEAPON_CM901, &gPseudoPlayer);
 	g_rgpClientWeapons[WEAPON_KSG12] = CBaseWeapon::Give(WEAPON_KSG12, &gPseudoPlayer);
 	g_rgpClientWeapons[WEAPON_USP] = CBaseWeapon::Give(WEAPON_USP, &gPseudoPlayer);
 }
@@ -517,6 +541,9 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	// Store pointer to our destination entity_state_t so we can get our origin, etc. from it
 	//  for setting up events on the client
 	g_finalstate = to;
+
+	// these vars have to be obtained nomatter what.
+	g_iWaterLevel = from->client.waterlevel;
 
 	// We are not predicting the current weapon, just bow out here.
 	if (!g_pCurWeapon)
@@ -564,7 +591,6 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		g_pCurWeapon->m_iPrimaryAmmoType = (AmmoIdType)int(from->client.vuser4.x);
 		gPseudoPlayer.m_rgAmmo[g_pCurWeapon->m_iPrimaryAmmoType] = (int)from->client.vuser4.y;
 	}
-
 
 	g_iWeaponFlags = g_pCurWeapon->m_bitsFlags;
 

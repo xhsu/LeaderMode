@@ -982,7 +982,6 @@ MSG_FUNC(Brass)
 
 		vecOrigin = gEngfuncs.GetViewModel()->attachment[1];	// use the weapon attachment instead.
 		vecVelocity *= 1.5f;
-		vecVelocity.z += 45.0f;
 	}
 
 	EV_EjectBrass(vecOrigin, vecVelocity, flRotation, iModelIndex, iSoundType);
