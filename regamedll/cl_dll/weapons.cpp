@@ -129,6 +129,10 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 
 	switch (iId)
 	{
+	case WEAPON_AK47:
+		p = new CAK47;
+		break;
+
 	case WEAPON_ANACONDA:
 		p = new CAnaconda;
 		break;
@@ -147,6 +151,10 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 
 	case WEAPON_MP7A1:
 		p = new CMP7A1;
+		break;
+
+	case WEAPON_QBZ95:
+		p = new CQBZ95;
 		break;
 
 	case WEAPON_USP:
@@ -319,6 +327,9 @@ bool CBaseWeapon::Melee(void)
 	// you just.. can't do this.
 	if (m_iId == WEAPON_KNIFE || m_bitsFlags & WPNSTATE_MELEE)
 		return false;
+
+	if (m_bInZoom)
+		SecondaryAttack();
 
 	// do nothing melee-ish action on client side.
 	// this has to be executed from SV.

@@ -287,10 +287,13 @@ enum sg552_e
 	SG552_SHOOT3,
 };
 
-const float AK47_MAX_SPEED     = 221.0f;
-const float AK47_DAMAGE        = 36.0f;
-const float AK47_RANGE_MODIFER = 0.98f;
-const float AK47_RELOAD_TIME   = 2.45f;
+constexpr float AK47_MAX_SPEED			= 221.0f;
+constexpr float AK47_DAMAGE				= 36.0f;
+constexpr float AK47_RANGE_MODIFER		= 0.98f;
+constexpr float AK47_RELOAD_TIME		= 2.44f;
+constexpr float AK47_RPM				= 600.0f;
+constexpr float	AK47_EFFECTIVE_RANGE	= 8192.0f;
+constexpr int	AK47_PENETRATION		= 2;
 
 enum ak47_e
 {
@@ -300,6 +303,31 @@ enum ak47_e
 	AK47_SHOOT1,
 	AK47_SHOOT2,
 	AK47_SHOOT3,
+};
+
+class CAK47 : public CBaseWeapon
+{
+#ifndef CLIENT_DLL
+public:	// SV exclusive variables.
+	static unsigned short m_usEvent;
+	static int m_iShell;
+
+public:	// SV exclusive functions.
+	virtual void	Precache		(void);
+#endif
+
+public:	// basic logic funcs
+	virtual bool	Deploy			(void);
+	virtual void	PrimaryAttack	(void);
+	virtual void	SecondaryAttack	(void);
+	virtual bool	Reload			(void);
+	virtual void	WeaponIdle		(void);
+
+public:	// util funcs
+	virtual	float	GetMaxSpeed		(void) { return AK47_MAX_SPEED; }
+
+public:	// new functions
+	void AK47Fire(float flSpread, float flCycleTime);
 };
 
 const float AUG_MAX_SPEED     = 240.0f;
@@ -862,20 +890,47 @@ public:	// new functions
 	void CM901Fire(float flSpread, float flCycleTime);
 };
 
-const float FAMAS_MAX_SPEED     = 240.0f;
-const float FAMAS_RELOAD_TIME   = 3.3f;
-const float FAMAS_DAMAGE        = 30.0f;
-const float FAMAS_DAMAGE_BURST  = 34.0f;
-const float FAMAS_RANGE_MODIFER = 0.96f;
+constexpr float QBZ95_MAX_SPEED			= 240.0f;
+constexpr float QBZ95_RELOAD_TIME		= 3.311f;
+constexpr float QBZ95_DAMAGE			= 30.0f;
+constexpr float QBZ95_RANGE_MODIFER		= 0.96f;
+constexpr float QBZ95_RPM				= 600.0f;
+constexpr float	QBZ95_EFFECTIVE_RANGE	= 8192.0f;
+constexpr int	QBZ95_PENETRATION		= 2;
 
-enum famas_e
+enum qbz95_e
 {
-	FAMAS_IDLE1,
-	FAMAS_RELOAD,
-	FAMAS_DRAW,
-	FAMAS_SHOOT1,
-	FAMAS_SHOOT2,
-	FAMAS_SHOOT3,
+	QBZ95_IDLE1,
+	QBZ95_RELOAD,
+	QBZ95_DRAW,
+	QBZ95_SHOOT1,
+	QBZ95_SHOOT2,
+	QBZ95_SHOOT3,
+};
+
+class CQBZ95 : public CBaseWeapon
+{
+#ifndef CLIENT_DLL
+public:	// SV exclusive variables.
+	static unsigned short m_usEvent;
+	static int m_iShell;
+
+public:	// SV exclusive functions.
+	virtual void	Precache		(void);
+#endif
+
+public:	// basic logic funcs
+	virtual bool	Deploy			(void);
+	virtual void	PrimaryAttack	(void);
+	virtual void	SecondaryAttack	(void);
+	virtual bool	Reload			(void);
+	virtual void	WeaponIdle		(void);
+
+public:	// util funcs
+	virtual	float	GetMaxSpeed		(void) { return QBZ95_MAX_SPEED; }
+
+public:	// new functions
+	void QBZ95Fire(float flSpread, float flCycleTime);
 };
 
 #ifndef CLIENT_DLL

@@ -25,7 +25,7 @@ bool CMP7A1::Deploy()
 	m_flAccuracy = 0.2f;
 	m_iShotsFired = 0;
 
-	return DefaultDeploy("models/weapons/v_mp7a1.mdl", "models/weapons/p_mp7a1.mdl", MP7A1_DRAW, "carbine");
+	return DefaultDeploy("models/weapons/v_mp7a1.mdl", "models/weapons/p_mp7a1.mdl", MP7A1_DRAW, "onehanded");
 }
 
 void CMP7A1::PrimaryAttack()
@@ -130,19 +130,19 @@ void CMP7A1::MP7A1Fire(float flSpread, float flCycleTime)
 	Q_memset(&args, NULL, sizeof(args));
 
 	args.angles = m_pPlayer->pev->v_angle;
-	args.bparam1 = m_iClip == 0;
-	args.bparam2 = false;	// silencer
+	args.bparam1 = 5;		// ???
+	args.bparam2 = false;	// unused
 	args.ducking = gEngfuncs.pEventAPI->EV_LocalPlayerDucking();
 	args.entindex = gEngfuncs.GetLocalPlayer()->index;
 	args.flags = FEV_NOTHOST | FEV_RELIABLE | FEV_CLIENT | FEV_GLOBAL;
 	args.fparam1 = vecDir.x;
 	args.fparam2 = vecDir.y;
 	args.iparam1 = int(m_pPlayer->pev->punchangle.x * 100.0f);
-	args.iparam2 = 0;	// should be punchangle.y. but in USP, it's unused.
+	args.iparam2 = int(m_pPlayer->pev->punchangle.y * 100.0f);
 	args.origin = m_pPlayer->pev->origin;
 	args.velocity = m_pPlayer->pev->velocity;
 
-	EV_FireUSP(&args);
+	EV_FireMP7A1(&args);
 	//gEngfuncs.pfnConsolePrint(SharedVarArgs("CL: [seed: %d] v_angle: %f, %f, %f\n", m_pPlayer->random_seed, m_pPlayer->pev->v_angle.x, m_pPlayer->pev->v_angle.y, m_pPlayer->pev->v_angle.z));
 #endif
 
