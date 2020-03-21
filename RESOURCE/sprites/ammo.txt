@@ -1,0 +1,19 @@
+32
+338Magnum		640 640hud7			24	96	24	24
+408CheyTac		640 640hud7			72	72	24	24
+50BMG			640	ammo_csol		192	205	24	24
+762Nato			640 640hud7			72	72	24	24
+556NatoBox		640 640hud7			0	96	24	24
+556Nato			640 640hud7			0	96	24	24
+58mmCN			640 ammo_5.8mm		0	232	24	24
+buckshot		640 640hud7			0	72	24	24
+45acp			640 640hud7			96	72	24	24
+57mm			640 640hud7			120	96	24	24
+50AE			640 640hud7			24	72	24	24
+44Magnum		640 ammo_.44_Magnum	1	231	24	24
+9mm				640 640hud7			48	72	24	24
+46pdw			640 ammo_csol		230	72	24	24
+Flashbang		640 battery_frag1	0	180	25	24
+HEGrenade		640 battery_frag1	64	180	18	17
+SmokeGrenade	640 battery_frag1	128	180	28	23
+C4				640 icon_c4			0	45	170	45

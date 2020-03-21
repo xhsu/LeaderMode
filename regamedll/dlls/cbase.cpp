@@ -1133,6 +1133,11 @@ Vector CBaseEntity::FireBullets3(Vector vecSrc, Vector vecDirShooting, float vec
 		// get circular gaussian spread
 		x = UTIL_SharedRandomFloat(shared_rand, -0.5, 0.5) + UTIL_SharedRandomFloat(shared_rand + 1, -0.5, 0.5);
 		y = UTIL_SharedRandomFloat(shared_rand + 2, -0.5, 0.5) + UTIL_SharedRandomFloat(shared_rand + 3, -0.5, 0.5);
+
+		// debug
+#ifdef RANDOM_SEED_CALIBRATION
+		SERVER_PRINT(SharedVarArgs("SV:[seed: %d] x: %f, y: %f\n", shared_rand, x, y));
+#endif
 	}
 	else
 	{

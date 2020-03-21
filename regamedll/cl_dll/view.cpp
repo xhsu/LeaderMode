@@ -796,6 +796,11 @@ void V_CalcGunAngle(ref_params_s* pparams)
 	viewent->angles[PITCH] -= v_idlescale * Q_sin(pparams->time * v_ipitch_cycle.value) * (v_ipitch_level.value * 0.5);
 	viewent->angles[YAW] -= v_idlescale * Q_sin(pparams->time * v_iyaw_cycle.value) * v_iyaw_level.value;
 
+	viewent->angles += pparams->punchangle;
+
+	if (pparams->punchangle.Length() > 0.0f)
+		RANDOM_LONG(0, 1);
+
 	VectorCopy(viewent->angles, viewent->curstate.angles);
 	VectorCopy(viewent->angles, viewent->latched.prevangles);
 }
@@ -996,7 +1001,8 @@ void V_CalcNormalRefdef(ref_params_s* pparams)
 	}
 	else
 	{
-		VectorCopy (pparams->cl_viewangles, pViewModel->angles);
+		//VectorCopy (pparams->cl_viewangles, pViewModel->angles);
+		pViewModel->angles = pparams->cl_viewangles + pparams->punchangle;
 	}
 
 	// set up gun position
@@ -1030,7 +1036,11 @@ void V_CalcNormalRefdef(ref_params_s* pparams)
 		pViewModel->model = NULL;
 
 	// Add in the punchangle, if any
-	pparams->viewangles = pparams->viewangles + pparams->punchangle;
+	pparams->viewangles += pparams->punchangle;
+
+	// add the VShift to the viewangle
+	pparams->cl_viewangles += gPseudoPlayer.m_vecVAngleShift;
+	gPseudoPlayer.m_vecVAngleShift = g_vecZero;
 
 	// smooth out stair step ups
 	if (!pparams->smoothing && pparams->onground && pparams->simorg[2] - oldz > 0)

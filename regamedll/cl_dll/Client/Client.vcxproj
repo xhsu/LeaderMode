@@ -166,11 +166,13 @@
     <ClCompile Include="..\..\dlls\weapontype.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\dlls\wpn_shared\wpn_anaconda.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_awp.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_cm901.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_ksg12.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\dlls\wpn_shared\wpn_mp7a1.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_usp.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
     </ClCompile>

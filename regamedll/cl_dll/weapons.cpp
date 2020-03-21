@@ -46,6 +46,11 @@ Vector CBasePlayer::FireBullets3(Vector vecSrc, Vector vecDirShooting, float flS
 	{
 		x = UTIL_SharedRandomFloat(shared_rand, -0.5, 0.5) + UTIL_SharedRandomFloat(shared_rand + 1, -0.5, 0.5);
 		y = UTIL_SharedRandomFloat(shared_rand + 2, -0.5, 0.5) + UTIL_SharedRandomFloat(shared_rand + 3, -0.5, 0.5);
+
+		// print for debug.
+#ifdef RANDOM_SEED_CALIBRATION
+		gEngfuncs.pfnConsolePrint(SharedVarArgs("CL:[seed: %d] x: %f, y: %f\n", shared_rand, x, y));
+#endif
 	}
 	else
 	{
@@ -124,20 +129,28 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 
 	switch (iId)
 	{
+	case WEAPON_ANACONDA:
+		p = new CAnaconda;
+		break;
+
 	case WEAPON_AWP:
 		p = new CAWP;
 		break;
 
-	case WEAPON_USP:
-		p = new CUSP;
+	case WEAPON_CM901:
+		p = new CCM901;
 		break;
 
 	case WEAPON_KSG12:
 		p = new CKSG12;
 		break;
 
-	case WEAPON_CM901:
-		p = new CCM901;
+	case WEAPON_MP7A1:
+		p = new CMP7A1;
+		break;
+
+	case WEAPON_USP:
+		p = new CUSP;
 		break;
 
 	default:
@@ -233,7 +246,12 @@ void CBaseWeapon::PostFrame()
 		m_bInReload = false;
 	}
 
-	if ((usableButtons & IN_ATTACK2) && m_flNextSecondaryAttack <= UTIL_WeaponTimeBase())	// UseDecrement()
+	// LUNA: there are some problems regarding client prediction.
+	// sometimes, the client side m_flNextPrimaryAttack and m_flNextSecondaryAttack would be wirely re-zero and induce multiple bullet hole VFX bug.
+	// thus, I decide to use message instead.
+	// (gmsgShoot and gmsgSteelSight)
+
+	/*if ((usableButtons & IN_ATTACK2) && m_flNextSecondaryAttack <= UTIL_WeaponTimeBase())	// UseDecrement()
 	{
 		SecondaryAttack();
 		m_pPlayer->pev->button &= ~IN_ATTACK2;
@@ -247,7 +265,7 @@ void CBaseWeapon::PostFrame()
 			PrimaryAttack();
 		}
 	}
-	else if ((m_pPlayer->pev->button & IN_RELOAD) && m_pItemInfo->m_iMaxClip != WEAPON_NOCLIP && !m_bInReload && m_flNextPrimaryAttack < UTIL_WeaponTimeBase())
+	else */if ((m_pPlayer->pev->button & IN_RELOAD) && m_pItemInfo->m_iMaxClip != WEAPON_NOCLIP && !m_bInReload && m_flNextPrimaryAttack < UTIL_WeaponTimeBase())
 	{
 		// reload when reload is pressed, or if no buttons are down and weapon is empty.
 		Reload();
@@ -371,6 +389,7 @@ bool CBaseWeapon::DefaultDeploy(const char* szViewModel, const char* szWeaponMod
 	m_pPlayer->pev->fov = DEFAULT_FOV;
 	m_pPlayer->m_iLastZoom = DEFAULT_FOV;
 	m_pPlayer->m_bResumeZoom = false;
+	m_pPlayer->m_vecVAngleShift = g_vecZero;
 
 	return TRUE;
 }
@@ -466,6 +485,50 @@ void CBaseWeapon::PopAnim(void)
 	m_Stack.m_iSequence = -1;
 }
 
+void CBaseWeapon::KickBack(float up_base, float lateral_base, float up_modifier, float lateral_modifier, float up_max, float lateral_max, int direction_change)
+{
+	real_t flKickUp;
+	float flKickLateral;
+
+	if (m_iShotsFired == 1)
+	{
+		flKickUp = up_base;
+		flKickLateral = lateral_base;
+	}
+	else
+	{
+		flKickUp = float(m_iShotsFired) * up_modifier + up_base;
+		flKickLateral = float(m_iShotsFired) * lateral_modifier + lateral_base;
+	}
+
+	m_pPlayer->m_vecVAngleShift.x -= flKickUp;
+
+	if (m_pPlayer->m_vecVAngleShift.x < -up_max)
+	{
+		m_pPlayer->m_vecVAngleShift.x = -up_max;
+	}
+
+	if (m_bDirection)
+	{
+		m_pPlayer->m_vecVAngleShift.y += flKickLateral;
+
+		if (m_pPlayer->m_vecVAngleShift.y > lateral_max)
+			m_pPlayer->m_vecVAngleShift.y = lateral_max;
+	}
+	else
+	{
+		m_pPlayer->m_vecVAngleShift.y -= flKickLateral;
+
+		if (m_pPlayer->m_vecVAngleShift.y < -lateral_max)
+			m_pPlayer->m_vecVAngleShift.y = -lateral_max;
+	}
+
+	if (!UTIL_SharedRandomLong(m_pPlayer->random_seed, 0, direction_change))
+	{
+		m_bDirection = !m_bDirection;
+	}
+}
+
 //
 // PSEUDO-UTILS
 //
@@ -504,10 +567,8 @@ void HUD_InitClientWeapons(void)
 
 	Q_memset(&g_rgpClientWeapons, NULL, sizeof(g_rgpClientWeapons));
 
-	g_rgpClientWeapons[WEAPON_AWP] = CBaseWeapon::Give(WEAPON_AWP, &gPseudoPlayer);
-	g_rgpClientWeapons[WEAPON_CM901] = CBaseWeapon::Give(WEAPON_CM901, &gPseudoPlayer);
-	g_rgpClientWeapons[WEAPON_KSG12] = CBaseWeapon::Give(WEAPON_KSG12, &gPseudoPlayer);
-	g_rgpClientWeapons[WEAPON_USP] = CBaseWeapon::Give(WEAPON_USP, &gPseudoPlayer);
+	for (int i = WEAPON_NONE; i < LAST_WEAPON; i++)
+		g_rgpClientWeapons[i] = CBaseWeapon::Give((WeaponIdType)i, &gPseudoPlayer);
 }
 
 // During our weapon prediction processing, we'll need to reference some data that is part of
@@ -575,7 +636,7 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		weapon_data_t* pfrom = from->weapondata + i;
 
 		pCurrent->m_bInReload = pfrom->m_fInReload;
-		pCurrent->m_bInZoom = pfrom->m_fInSpecialReload;
+		pCurrent->m_bInZoom = pfrom->m_fInSpecialReload;	// not directly used.
 		pCurrent->m_iClip = pfrom->m_iClip;
 		pCurrent->m_flNextPrimaryAttack = pfrom->m_flNextPrimaryAttack;
 		pCurrent->m_flNextSecondaryAttack = pfrom->m_flNextSecondaryAttack;
@@ -585,7 +646,7 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		//pCurrent->m_iSwing = pfrom->iuser1;
 		pCurrent->m_bitsFlags = pfrom->m_iWeaponState;
 		pCurrent->m_flLastFire = pfrom->m_fAimedDamage;
-		pCurrent->m_iShotsFired = pfrom->m_fInZoom;
+		pCurrent->m_iShotsFired = pfrom->m_fInZoom;	// not directly used.
 	}
 
 	if (from->client.vuser4.x < AMMO_NONE || from->client.vuser4.x > AMMO_MAXTYPE)
@@ -759,7 +820,6 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		pto->m_flNextPrimaryAttack -= cmd->msec / 1000.0f;
 		pto->m_flNextSecondaryAttack -= cmd->msec / 1000.0f;
 		pto->m_flTimeWeaponIdle -= cmd->msec / 1000.0f;
-
 
 		if (pto->m_flPumpTime != -9999.0f)
 		{

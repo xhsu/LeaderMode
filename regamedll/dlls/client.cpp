@@ -79,6 +79,8 @@ int gmsgRole = 0;
 int gmsgRadarPoint = 0;
 int gmsgRadarRP = 0;
 int gmsgSetSlot = 0;
+int gmsgShoot = 0;
+int gmsgSteelSight = 0;
 
 bool g_bClientPrintEnable = true;
 
@@ -218,6 +220,8 @@ void LinkUserMessages()
 	gmsgRadarPoint	  = REG_USER_MSG("RadarPoint", 8);
 	gmsgRadarRP		  = REG_USER_MSG("RadarRP", 1);
 	gmsgSetSlot		  = REG_USER_MSG("SetSlot", 2);
+	gmsgShoot		  = REG_USER_MSG("Shoot", 2);
+	gmsgSteelSight	  = REG_USER_MSG("SteelSight", 1);
 }
 
 void WriteSigonMessages()

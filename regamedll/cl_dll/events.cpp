@@ -73,10 +73,16 @@ EV_EjectBrass
 Bullet shell casings
 =================
 */
-void EV_EjectBrass(float* origin, float* velocity, float rotation, int model, int soundtype, float life)
+void EV_EjectBrass(float* origin, float* velocity, float rotation, int model, int soundtype, float life, float flAngularVel)
 {
 	Vector angles(0.0f, 0.0f, rotation);
-	gEngfuncs.pEfxAPI->R_TempModel(origin, velocity, angles, life, model, soundtype);
+	TEMPENTITY* p = gEngfuncs.pEfxAPI->R_TempModel(origin, velocity, angles, life, model, soundtype);
+
+	if (p)
+	{
+		// baseline.angles		- angle velocity
+		p->entity.baseline.angles *= flAngularVel;
+	}
 }
 
 /*
@@ -1057,7 +1063,9 @@ DECLARE_EVENT(FireAWP)
 	{
 		g_iShotsFired++;
 		EV_MuzzleFlash();
-		gEngfuncs.pEventAPI->EV_WeaponAnimation(AWP_SHOOT1 + UTIL_SharedRandomLong(gPseudoPlayer.random_seed, 0, 2), 2);
+
+		if (g_pCurWeapon)
+			g_pCurWeapon->SendWeaponAnim(UTIL_SharedRandomLong(gPseudoPlayer.random_seed, AWP_SHOOT1, AWP_SHOOT3));
 
 		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 3, 0.5, 20, 20, 20, EV_PISTOL_SMOKE, velocity, false, 35);
 		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 40, 0.5, 15, 15, 15, EV_WALL_PUFF, velocity, false, 35);
@@ -1069,7 +1077,7 @@ DECLARE_EVENT(FireAWP)
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
-	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, AWP_EFFECTIVE_RANGE, BULLET_PLAYER_338MAG, AWP_PENETRATION);
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, AWP_EFFECTIVE_RANGE, g_rgAmmoInfo[g_rgItemInfo[WEAPON_AWP].m_iAmmoType].m_iBulletBehavior, AWP_PENETRATION);
 }
 
 DECLARE_EVENT(FireDEAGLE)
@@ -1146,7 +1154,7 @@ DECLARE_EVENT(FireM3)
 
 		// shoot anim.
 		if (g_pCurWeapon)
-			g_pCurWeapon->SendWeaponAnim(KSG12_FIRE1 + UTIL_SharedRandomLong(gPseudoPlayer.random_seed, 0, 1), 2);
+			g_pCurWeapon->SendWeaponAnim(UTIL_SharedRandomLong(gPseudoPlayer.random_seed, KSG12_FIRE1, KSG12_FIRE2));
 
 		// first personal smoke VFX.
 		EV_HLDM_CreateSmoke(ent->attachment[0], forward, 3, 0.5, 25, 25, 25, EV_PISTOL_SMOKE, velocity, false, 35);
@@ -1158,7 +1166,7 @@ DECLARE_EVENT(FireM3)
 	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/m3-1.wav", 1.0, 0.48, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
 
 	Vector vecSrc = EV_GetGunPosition(args, origin);
-	EV_HLDM_FireBullets(idx, forward, right, up, KSG12_PROJECTILE_COUNT, vecSrc, forward, KSG12_CONE_VECTOR, KSG12_EFFECTIVE_RANGE, BULLET_PLAYER_BUCKSHOT, 1, shared_rand);
+	EV_HLDM_FireBullets(idx, forward, right, up, KSG12_PROJECTILE_COUNT, vecSrc, forward, KSG12_CONE_VECTOR, KSG12_EFFECTIVE_RANGE, g_rgAmmoInfo[g_rgItemInfo[WEAPON_KSG12].m_iAmmoType].m_iBulletBehavior, 1, shared_rand);
 }
 
 DECLARE_EVENT(FireM4A1)
@@ -1176,9 +1184,48 @@ DECLARE_EVENT(FireMP5)
 
 }
 
-DECLARE_EVENT(FireP228)
+DECLARE_EVENT(FireAnaconda)
 {
+	Vector origin;
+	Vector angles;
+	Vector velocity;
+	Vector up, right, forward;
 
+	int idx = args->entindex;
+	bool empty = args->bparam1;
+
+	VectorCopy(args->origin, origin);
+	VectorCopy(args->angles, angles);
+	VectorCopy(args->velocity, velocity);
+
+	angles[0] += args->iparam1 / 100.0;
+	angles[1] += args->iparam2 / 100.0;
+
+	gEngfuncs.pfnAngleVectors(angles, forward, right, up);
+
+	if (EV_IsLocal(idx))
+	{
+		g_iShotsFired++;
+		EV_MuzzleFlash();
+
+		if (empty)
+			g_pCurWeapon->SendWeaponAnim(ANACONDA_SHOOT_EMPTY);
+		else
+			g_pCurWeapon->SendWeaponAnim(UTIL_SharedRandomLong(gPseudoPlayer.random_seed, ANACONDA_SHOOT1, ANACONDA_SHOOT3));
+
+		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 0, 0.25, 10, 10, 10, EV_PISTOL_SMOKE, velocity, false, 35);
+		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 25, 0.3, 15, 15, 15, EV_WALL_PUFF, velocity, false, 35);
+		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 50, 0.2, 20, 20, 20, EV_WALL_PUFF, velocity, false, 35);
+	}
+
+	// no shell VFX while shooting for Anaconda. since it is a revolvor.
+
+	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/p228-1.wav", 1.0, ATTN_NORM, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
+
+	Vector vecSrc = EV_GetGunPosition(args, origin);
+	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
+
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, ANACONDA_EFFECTIVE_RANGE, g_rgAmmoInfo[g_rgItemInfo[WEAPON_ANACONDA].m_iAmmoType].m_iBulletBehavior, ANACONDA_PENETRATION);
 }
 
 DECLARE_EVENT(FireP90)
@@ -1201,9 +1248,55 @@ DECLARE_EVENT(FireSG552)
 
 }
 
-DECLARE_EVENT(FireTMP)
+DECLARE_EVENT(FireMP7A1)
 {
+	int idx = args->entindex;
 
+	Vector origin, angles, velocity;
+	VectorCopy(args->origin, origin);
+	VectorCopy(args->angles, angles);
+	VectorCopy(args->velocity, velocity);
+
+	angles[0] += args->iparam1 / 100.0;
+	angles[1] += args->iparam2 / 100.0;
+
+	Vector forward, right, up;
+	gEngfuncs.pfnAngleVectors(angles, forward, right, up);
+
+	if (EV_IsLocal(idx))
+	{
+		g_iShotsFired++;
+		EV_MuzzleFlash();
+
+		if (g_pCurWeapon)
+			g_pCurWeapon->SendWeaponAnim(UTIL_SharedRandomLong(gPseudoPlayer.random_seed, MP7A1_SHOOT1, MP7A1_SHOOT3));
+
+		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 3, 0.2, 10, 10, 10, EV_PISTOL_SMOKE, velocity, false, 35);
+	}
+
+	Vector ShellVelocity, ShellOrigin;
+	if (EV_IsLocal(idx))
+	{
+		if (cl_righthand->value == 0)
+			EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 32.0, -6.0, -11.0);
+		else
+			EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 32.0, -6.0, 11.0);
+
+		VectorCopy(g_pViewEnt->attachment[1], ShellOrigin);
+		VectorScale(ShellVelocity, 1.2, ShellVelocity);
+		ShellVelocity[2] -= 50;
+	}
+	else
+		EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -12.0, -4.0);
+
+	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iPShell, TE_BOUNCE_SHELL, idx, 15);
+
+	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/tmp-1.wav", 1.0, 1.6, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
+
+	Vector vecSrc = EV_GetGunPosition(args, origin);
+	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
+
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, MP7A1_EFFECTIVE_RANGE, g_rgAmmoInfo[g_rgItemInfo[WEAPON_MP7A1].m_iAmmoType].m_iBulletBehavior, MP7A1_PENETRATION);
 }
 
 DECLARE_EVENT(FireUMP45)
@@ -1289,7 +1382,7 @@ DECLARE_EVENT(FireUSP)
 	EV_HLDM_FireBullets(idx,
 		forward, right, up,
 		1, vecSrc, forward,
-		vSpread, USP_EFFECTIVE_RANGE, BULLET_PLAYER_45ACP,
+		vSpread, USP_EFFECTIVE_RANGE, g_rgAmmoInfo[g_rgItemInfo[WEAPON_USP].m_iAmmoType].m_iBulletBehavior,
 		USP_PENETRATION);
 }
 
@@ -1418,12 +1511,12 @@ void Events_Init(void)
 	HOOK_EVENT(m4a1, FireM4A1);
 	HOOK_EVENT(mac10, FireMAC10);
 	HOOK_EVENT(mp5n, FireMP5);
-	HOOK_EVENT(p228, FireP228);
+	HOOK_EVENT(anaconda, FireAnaconda);
 	HOOK_EVENT(p90, FireP90);
 	HOOK_EVENT(scout, FireScout);
 	HOOK_EVENT(sg550, FireSG550);
 	HOOK_EVENT(sg552, FireSG552);
-	HOOK_EVENT(tmp, FireTMP);
+	HOOK_EVENT(mp7a1, FireMP7A1);
 	HOOK_EVENT(ump45, FireUMP45);
 	HOOK_EVENT(usp, FireUSP);
 	HOOK_EVENT(xm1014, FireXM1014);

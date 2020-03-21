@@ -717,6 +717,7 @@ public:
 	std::list<WeaponIdType> m_lstRebuy;
 	TacticalSchemes m_iVotedTS;
 	float m_flTSThink;
+	Vector m_vecVAngleShift;	// this is a dummy at SV side. However, this would add to player viewangle at CL side.
 
 	// overhealing mechanism.
 	float m_flOHNextThink;

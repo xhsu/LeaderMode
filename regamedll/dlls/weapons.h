@@ -28,6 +28,9 @@
 
 #pragma once
 
+// debug macro
+//#define RANDOM_SEED_CALIBRATION 1
+
 class CBasePlayer;
 class CWeaponBox;
 
@@ -155,6 +158,8 @@ public:	// SV exclusive variables.
 #else
 public:	// CL exclusive variables.
 	CBasePlayer*	m_pPlayer;	// local pseudo-player
+	bool			m_bServerInZoom;
+	int				m_iServerShotsFired;
 #endif
 
 public:	// basic logic funcs
@@ -192,6 +197,7 @@ public:	// util funcs
 	virtual void	PopAnim			(void);
 	inline	bool	CanHolster		(void) { return Holster(true); }	// smells, looks and tastes like a duck...
 	virtual	bool	CanDrop			(void) { return true; }
+	virtual void	KickBack		(float up_base, float lateral_base, float up_modifier, float lateral_modifier, float up_max, float lateral_max, int direction_change);	// recoil
 };
 
 
@@ -578,20 +584,55 @@ enum mac10_e
 	MAC10_SHOOT3,
 };
 
-const float P228_MAX_SPEED     = 250.0f;
-const float P228_DAMAGE        = 32.0f;
-const float P228_RANGE_MODIFER = 0.8f;
-const float P228_RELOAD_TIME   = 2.7f;
+constexpr float ANACONDA_MAX_SPEED			= 250.0f;
+constexpr float ANACONDA_DAMAGE				= 64.0f;
+constexpr float ANACONDA_RANGE_MODIFER		= 0.8f;
+constexpr float ANACONDA_RELOAD_TIME		= 2.68f;
+constexpr float ANACONDA_DEPLOY_TIME		= 0.367f;	// a really quick-ready gun.
+constexpr float ANACONDA_FIRE_INTERVAL		= 0.15f;
+constexpr int	ANACONDA_PENETRATION		= 1;
+constexpr float	ANACONDA_EFFECTIVE_RANGE	= 4096.0f;
 
-enum p228_e
+enum anaconda_e
 {
-	P228_IDLE,
-	P228_SHOOT1,
-	P228_SHOOT2,
-	P228_SHOOT3,
-	P228_SHOOT_EMPTY,
-	P228_RELOAD,
-	P228_DRAW,
+	ANACONDA_IDLE,
+	ANACONDA_SHOOT1,
+	ANACONDA_SHOOT2,
+	ANACONDA_SHOOT3,
+	ANACONDA_SHOOT_EMPTY,
+	ANACONDA_RELOAD,
+	ANACONDA_DRAW,
+};
+
+class CAnaconda : public CBaseWeapon
+{
+#ifndef CLIENT_DLL
+public:	// SV exclusive variables.
+	static unsigned short m_usEvent;
+	static int m_iShell;
+
+public:	// SV exclusive functions.
+	virtual void	Precache		(void);
+#else
+public:	// CL exclusive variables.
+	float m_flShellRain;
+
+public:	// we need some CL-exclusive VFX.
+	virtual void	Think			(void);
+#endif
+
+public:	// basic logic funcs
+	virtual bool	Deploy			(void);
+	virtual void	PrimaryAttack	(void);
+	virtual void	SecondaryAttack	(void);
+	virtual bool	Reload			(void);
+	virtual void	WeaponIdle		(void);
+
+public:	// util funcs
+	virtual float GetMaxSpeed		(void) { return ANACONDA_MAX_SPEED; }
+
+public:	// new funcs
+	void AnacondaFire(float flSpread, float flCycleTime);
 };
 
 const float P90_MAX_SPEED     = 245.0f;
@@ -635,19 +676,47 @@ enum smokegrenade_e
 	SMOKEGRENADE_DRAW,
 };
 
-const float TMP_MAX_SPEED     = 250.0f;
-const float TMP_DAMAGE        = 20.0f;
-const float TMP_RANGE_MODIFER = 0.85f;
-const float TMP_RELOAD_TIME   = 2.12f;
+constexpr float MP7A1_MAX_SPEED			= 250.0f;
+constexpr float MP7A1_DAMAGE			= 20.0f;
+constexpr float MP7A1_RANGE_MODIFER		= 0.85f;
+constexpr float MP7A1_RELOAD_TIME		= 2.1f;
+constexpr float MP7A1_RPM				= 850.0f;
+constexpr int	MP7A1_PENETRATION		= 1;
+constexpr float	MP7A1_EFFECTIVE_RANGE	= 8192.0f;
 
-enum tmp_e
+enum mp7a1_e
 {
-	TMP_IDLE1,
-	TMP_RELOAD,
-	TMP_DRAW,
-	TMP_SHOOT1,
-	TMP_SHOOT2,
-	TMP_SHOOT3,
+	MP7A1_IDLE1,
+	MP7A1_RELOAD,
+	MP7A1_DRAW,
+	MP7A1_SHOOT1,
+	MP7A1_SHOOT2,
+	MP7A1_SHOOT3,
+};
+
+class CMP7A1 : public CBaseWeapon
+{
+#ifndef CLIENT_DLL
+public:	// SV exclusive variables.
+	static unsigned short m_usEvent;
+	static int m_iShell;
+
+public:	// SV exclusive functions.
+	virtual void	Precache		(void);
+#endif
+
+public:
+	virtual bool	Deploy			(void);
+	virtual void	PrimaryAttack	(void);
+	virtual void	SecondaryAttack	(void);
+	virtual bool	Reload			(void);
+	virtual void	WeaponIdle		(void);
+
+public:	// util funcs
+	virtual float	GetMaxSpeed		(void) { return MP7A1_MAX_SPEED; }
+
+public:	// new funcs
+	void MP7A1Fire(float flSpread, float flCycleTime);
 };
 
 const float XM1014_MAX_SPEED   = 240.0f;

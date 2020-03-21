@@ -156,9 +156,9 @@ void CKSG12::PrimaryAttack()
 		m_flTimeWeaponIdle = KSG12_FIRE_INTERVAL;
 
 	if (m_pPlayer->pev->flags & FL_ONGROUND)
-		m_pPlayer->pev->punchangle.x -= UTIL_SharedRandomLong(m_pPlayer->random_seed + iSeedOfs, 4, 6);
+		m_pPlayer->m_vecVAngleShift.x -= UTIL_SharedRandomLong(m_pPlayer->random_seed + iSeedOfs, 4, 6);
 	else
-		m_pPlayer->pev->punchangle.x -= UTIL_SharedRandomLong(m_pPlayer->random_seed + iSeedOfs, 8, 11);
+		m_pPlayer->m_vecVAngleShift.x -= UTIL_SharedRandomLong(m_pPlayer->random_seed + iSeedOfs, 8, 11);
 }
 
 void CKSG12::SecondaryAttack(void)
@@ -170,7 +170,7 @@ void CKSG12::SecondaryAttack(void)
 	// due to some logic problem, we actually cannot use m_bInZoom here.
 	// it would be override.
 
-	if (!g_vecGunOfsGoal.Length())
+	if (!g_vecGunOfsGoal.LengthSquared())
 	{
 		g_vecGunOfsGoal = Vector(-10.15f, -7.5f, 3.1f);
 		gHUD::m_iFOV = 85;	// allow clients to predict the zoom.

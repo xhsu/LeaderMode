@@ -271,3 +271,5 @@ extern int gmsgRole;
 extern int gmsgRadarPoint;
 extern int gmsgRadarRP;
 extern int gmsgSetSlot;
+extern int gmsgShoot;
+extern int gmsgSteelSight;

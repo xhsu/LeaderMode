@@ -42,7 +42,7 @@ void CUSP::SecondaryAttack()
 	// due to some logic problem, we actually cannot use m_bInZoom here.
 	// it would be override.
 
-	if (!g_vecGunOfsGoal.Length())
+	if (!g_vecGunOfsGoal.LengthSquared())
 	{
 		g_vecGunOfsGoal = Vector(-4.6f, -10.0f, 2.4f);
 		gHUD::m_iFOV = 85;	// allow clients to predict the zoom.
@@ -129,7 +129,7 @@ void CUSP::USPFire(float flSpread, float flCycleTime)
 		return;
 	}
 
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
+	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
 
 	m_iClip--;
 
@@ -144,7 +144,7 @@ void CUSP::USPFire(float flSpread, float flCycleTime)
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecAiming = gpGlobals->v_forward;
 
-	Vector vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, USP_EFFECTIVE_RANGE, USP_PENETRATION, BULLET_PLAYER_45ACP, USP_DAMAGE, USP_RANGE_MODIFER, m_pPlayer->pev, true, m_pPlayer->random_seed);
+	Vector vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, USP_EFFECTIVE_RANGE, USP_PENETRATION, m_pAmmoInfo->m_iBulletBehavior, USP_DAMAGE, USP_RANGE_MODIFER, m_pPlayer->pev, true, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
 	int seq = UTIL_SharedRandomFloat(m_pPlayer->random_seed, USP_UNSIL_SHOOT1, USP_UNSIL_SHOOT3);
@@ -179,7 +179,7 @@ void CUSP::USPFire(float flSpread, float flCycleTime)
 #endif
 
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.0f;
-	m_pPlayer->pev->punchangle.x -= 2.0f;
+	m_pPlayer->m_vecVAngleShift.x -= 2.0f;
 }
 
 bool CUSP::Reload()

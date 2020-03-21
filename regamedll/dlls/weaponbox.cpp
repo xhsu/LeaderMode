@@ -353,7 +353,7 @@ const char* CWeaponBox::GetCSModelName(WeaponIdType iId)
 	const char* modelName = nullptr;
 	switch (iId)
 	{
-	case WEAPON_ANACONDA:		modelName = "models/w_p228.mdl"; break;
+	case WEAPON_ANACONDA:		modelName = "models/weapons/w_anaconda.mdl"; break;
 	case WEAPON_M200:			modelName = "models/w_scout.mdl"; break;
 	case WEAPON_HEGRENADE:		modelName = "models/w_hegrenade.mdl"; break;
 	case WEAPON_STRIKER:		modelName = "models/w_xm1014.mdl"; break;
@@ -373,7 +373,7 @@ const char* CWeaponBox::GetCSModelName(WeaponIdType iId)
 	case WEAPON_MK46:			modelName = "models/w_m249.mdl"; break;
 	case WEAPON_KSG12:			modelName = "models/weapons/w_ksg12.mdl"; break;
 	case WEAPON_M4A1:			modelName = "models/w_m4a1.mdl"; break;
-	case WEAPON_MP7A1:			modelName = "models/w_tmp.mdl"; break;
+	case WEAPON_MP7A1:			modelName = "models/weapons/w_mp7a1.mdl"; break;
 	case WEAPON_SVD:			modelName = "models/w_g3sg1.mdl"; break;
 	case WEAPON_FLASHBANG:		modelName = "models/w_flashbang.mdl"; break;
 	case WEAPON_DEAGLE:			modelName = "models/w_deagle.mdl"; break;

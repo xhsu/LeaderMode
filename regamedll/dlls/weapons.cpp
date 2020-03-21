@@ -276,20 +276,28 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 
 	switch (iId)
 	{
+	case WEAPON_ANACONDA:
+		p = new CAnaconda;
+		break;
+
 	case WEAPON_AWP:
 		p = new CAWP;
 		break;
 
-	case WEAPON_USP:
-		p = new CUSP;
+	case WEAPON_CM901:
+		p = new CCM901;
 		break;
 
 	case WEAPON_KSG12:
 		p = new CKSG12;
 		break;
 
-	case WEAPON_CM901:
-		p = new CCM901;
+	case WEAPON_MP7A1:
+		p = new CMP7A1;
+		break;
+
+	case WEAPON_USP:
+		p = new CUSP;
 		break;
 
 	default:
@@ -403,6 +411,10 @@ void CBaseWeapon::PostFrame()
 
 	if ((usableButtons & IN_ATTACK2) && m_flNextSecondaryAttack <= UTIL_WeaponTimeBase())	// UseDecrement()
 	{
+		MESSAGE_BEGIN(MSG_ONE, gmsgSteelSight, nullptr, m_pPlayer->pev);
+		WRITE_BYTE(m_bInZoom);
+		MESSAGE_END();
+
 		SecondaryAttack();
 		m_pPlayer->pev->button &= ~IN_ATTACK2;
 	}
@@ -412,6 +424,11 @@ void CBaseWeapon::PostFrame()
 		// Always allow firing in single player
 		if ((m_pPlayer->m_bCanShoot && CSGameRules()->IsMultiplayer() && !CSGameRules()->IsFreezePeriod()) || !CSGameRules()->IsMultiplayer())
 		{
+			// prediction code is unusable for full-automatic weapon. I have to use this instead.
+			MESSAGE_BEGIN(MSG_ONE, gmsgShoot, nullptr, m_pPlayer->pev);
+			WRITE_SHORT(m_pPlayer->random_seed);
+			MESSAGE_END();
+
 			PrimaryAttack();
 			m_flNextPrimaryAttack *= m_pPlayer->WeaponFireIntervalModifier(this);	// passive skill applied.
 		}
@@ -675,6 +692,7 @@ bool CBaseWeapon::DefaultDeploy(const char* szViewModel, const char* szWeaponMod
 	m_pPlayer->pev->fov = DEFAULT_FOV;
 	m_pPlayer->m_iLastZoom = DEFAULT_FOV;
 	m_pPlayer->m_bResumeZoom = false;
+	m_pPlayer->m_vecVAngleShift = g_vecZero;
 
 	return TRUE;
 }
@@ -796,4 +814,48 @@ void CBaseWeapon::PopAnim(void)
 	// clear old data, mark for invalid.
 	Q_memset(&m_Stack, NULL, sizeof(m_Stack));
 	m_Stack.m_iSequence = -1;
+}
+
+void CBaseWeapon::KickBack(float up_base, float lateral_base, float up_modifier, float lateral_modifier, float up_max, float lateral_max, int direction_change)
+{
+	real_t flKickUp;
+	float flKickLateral;
+
+	if (m_iShotsFired == 1)
+	{
+		flKickUp = up_base;
+		flKickLateral = lateral_base;
+	}
+	else
+	{
+		flKickUp = float(m_iShotsFired) * up_modifier + up_base;
+		flKickLateral = float(m_iShotsFired) * lateral_modifier + lateral_base;
+	}
+
+	m_pPlayer->m_vecVAngleShift.x -= flKickUp;
+
+	if (m_pPlayer->m_vecVAngleShift.x < -up_max)
+	{
+		m_pPlayer->m_vecVAngleShift.x = -up_max;
+	}
+
+	if (m_bDirection)
+	{
+		m_pPlayer->m_vecVAngleShift.y += flKickLateral;
+
+		if (m_pPlayer->m_vecVAngleShift.y > lateral_max)
+			m_pPlayer->m_vecVAngleShift.y = lateral_max;
+	}
+	else
+	{
+		m_pPlayer->m_vecVAngleShift.y -= flKickLateral;
+
+		if (m_pPlayer->m_vecVAngleShift.y < -lateral_max)
+			m_pPlayer->m_vecVAngleShift.y = -lateral_max;
+	}
+
+	if (!UTIL_SharedRandomLong(m_pPlayer->random_seed, 0, direction_change))
+	{
+		m_bDirection = !m_bDirection;
+	}
 }

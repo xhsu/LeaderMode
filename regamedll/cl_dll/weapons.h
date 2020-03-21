@@ -85,6 +85,7 @@ public:
 	int		m_afButtonReleased;
 	CBaseWeapon* m_pActiveItem;
 	CBaseWeapon* m_pLastItem;
+	Vector	m_vecVAngleShift;
 
 public:
 	void	SetAnimation(PLAYER_ANIM playerAnim)	{}

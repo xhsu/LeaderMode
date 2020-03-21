@@ -362,11 +362,12 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Play|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Play|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\dlls\wpn_shared\wpn_p228.cpp">
+    <ClCompile Include="..\dlls\wpn_shared\wpn_anaconda.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Play|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Play|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Play|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tests|Win32'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\dlls\wpn_shared\wpn_p90.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
@@ -398,11 +399,12 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Play|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Play|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\dlls\wpn_shared\wpn_tmp.cpp">
+    <ClCompile Include="..\dlls\wpn_shared\wpn_mp7a1.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Play|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Play|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Play|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tests|Win32'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\dlls\wpn_shared\wpn_ump45.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>

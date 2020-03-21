@@ -343,6 +343,13 @@ MSG_FUNC(WeapPickup)
 
 	// recenter the card, make some VFX.
 	gHUD::m_WeaponList.m_rgvecCurCoord[g_rgItemInfo[iWeaponId].m_iSlot] = Vector2D(ScreenWidth / 2, ScreenHeight / 2);
+	gHUD::m_WeaponList.m_flAlpha = 255;
+	gHUD::m_WeaponList.m_iPhase = CHudWeaponList::MOVING_IN;
+
+	// if this weapon would be auto-deploy, let's predict it.
+	if (g_pCurWeapon && g_pCurWeapon->m_pItemInfo->m_iWeight < g_rgItemInfo[iWeaponId].m_iWeight)
+		g_iSelectedWeapon = (WeaponIdType)iWeaponId;
+
 	return TRUE;
 }
 
@@ -1038,6 +1045,38 @@ MSG_FUNC(SetSlot)
 	return TRUE;
 }
 
+MSG_FUNC(Shoot)
+{
+	BEGIN_READ(pbuf, iSize);
+
+	int iSeed = READ_SHORT();
+
+	if (g_pCurWeapon)
+	{
+		int iSave = gPseudoPlayer.random_seed;
+		gPseudoPlayer.random_seed = iSeed;
+		g_pCurWeapon->PrimaryAttack();
+		gPseudoPlayer.random_seed = iSave;
+	}
+
+	return TRUE;
+}
+
+MSG_FUNC(SteelSight)
+{
+	BEGIN_READ(pbuf, iSize);
+
+	bool bInitialState = READ_BYTE();
+
+	if (g_pCurWeapon)
+	{
+		g_pCurWeapon->m_bInReload = bInitialState;
+		g_pCurWeapon->SecondaryAttack();
+	}
+
+	return TRUE;
+}
+
 
 // player.cpp
 MSG_FUNC(Logo)
@@ -1151,6 +1190,8 @@ void Msg_Init(void)
 	HOOK_USER_MSG(RadarPoint);
 	HOOK_USER_MSG(RadarRP);
 	HOOK_USER_MSG(SetSlot);
+	HOOK_USER_MSG(Shoot);
+	HOOK_USER_MSG(SteelSight);
 
 	// player.cpp
 	HOOK_USER_MSG(Logo);

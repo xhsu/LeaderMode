@@ -198,6 +198,12 @@
     <ClCompile Include="..\hud\hud_weaponlist.cpp">
       <Filter>cl_dll\hud</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\dlls\wpn_shared\wpn_anaconda.cpp">
+      <Filter>dlls\wpn_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\dlls\wpn_shared\wpn_mp7a1.cpp">
+      <Filter>dlls\wpn_shared</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\cdll_int.h">
