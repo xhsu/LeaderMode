@@ -35,7 +35,7 @@ bool CUSP::Deploy()
 {
 	m_flAccuracy = 0.92f;
 
-	return DefaultDeploy("models/weapons/v_usp.mdl", "models/weapons/p_usp.mdl", USP_UNSIL_DRAW, "onehanded");
+	return DefaultDeploy("models/weapons/v_usp.mdl", "models/weapons/p_usp.mdl", USP_DRAW, "onehanded", USP_DEPLOY_TIME);
 }
 
 void CUSP::SecondaryAttack()
@@ -155,9 +155,9 @@ void CUSP::USPFire(float flSpread, float flCycleTime)
 	Vector vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, USP_EFFECTIVE_RANGE, USP_PENETRATION, m_pAmmoInfo->m_iBulletBehavior, USP_DAMAGE, USP_RANGE_MODIFER, m_pPlayer->pev, true, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
-	int seq = UTIL_SharedRandomFloat(m_pPlayer->random_seed, USP_UNSIL_SHOOT1, USP_UNSIL_SHOOT3);
+	int seq = UTIL_SharedRandomFloat(m_pPlayer->random_seed, USP_SHOOT1, USP_SHOOT3);
 	if (m_iClip == 0)
-		seq = USP_UNSIL_SHOOT_EMPTY;
+		seq = USP_SHOOT_EMPTY;
 
 	SendWeaponAnim(seq);	// LUNA: I don't know why, but this has to be done on SV side, or client fire anim would be override.
 	PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL, m_pPlayer->edict(), m_usEvent, 0, (float*)&g_vecZero, (float*)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 100), 0, m_iClip == 0, FALSE);
@@ -192,7 +192,7 @@ void CUSP::USPFire(float flSpread, float flCycleTime)
 
 bool CUSP::Reload()
 {
-	if (DefaultReload(m_pItemInfo->m_iMaxClip, USP_UNSIL_RELOAD, USP_RELOAD_TIME))
+	if (DefaultReload(m_pItemInfo->m_iMaxClip, USP_RELOAD, USP_RELOAD_TIME))
 	{
 		m_flAccuracy = 0.92f;
 		return true;
@@ -206,6 +206,6 @@ void CUSP::WeaponIdle()
 	if (m_iClip)
 	{
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 60.0f;
-		SendWeaponAnim(USP_UNSIL_IDLE);
+		SendWeaponAnim(USP_IDLE);
 	}
 }

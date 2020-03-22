@@ -219,7 +219,7 @@ bool CAWP::Reload()
 #ifndef CLIENT_DLL
 		// VFX corespounding to model anim.
 		// we can only do this on SV side.
-		m_pPlayer->m_flEjectBrass = gpGlobals->time + 1.91f;
+		m_pPlayer->m_flEjectBrass = gpGlobals->time + 3.2f;	// rechamber portion of reload anim.
 		m_pPlayer->m_iShellModelIndex = m_iShell;
 #endif
 		return true;

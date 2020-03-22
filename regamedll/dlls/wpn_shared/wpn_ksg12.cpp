@@ -21,10 +21,8 @@ void CKSG12::Precache()
 	PRECACHE_MODEL("models/weapons/w_ksg12.mdl");
 	PRECACHE_MODEL("models/weapons/p_ksg12.mdl");
 
-	PRECACHE_SOUND("weapons/m3_insertshell.wav");
-	PRECACHE_SOUND("weapons/m3_pump.wav");
-	PRECACHE_SOUND("weapons/reload1.wav");
-	PRECACHE_SOUND("weapons/reload3.wav");
+	PRECACHE_SOUND("weapons/ksg12/ksg12_fire.wav");
+	PRECACHE_SOUND("weapons/ksg12/ksg12_insert.wav");
 
 	m_usEvent = PRECACHE_EVENT(1, "events/ksg12.sc");
 	m_iShell = PRECACHE_MODEL("models/shotgunshell.mdl");
@@ -65,7 +63,11 @@ void CKSG12::PostFrame(void)
 			m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
 
 			m_flNextAddAmmo = gpGlobals->time + KSG12_TIME_INSERT;	// yeah, that's right, not KSG12_TIME_ADD_AMMO.
-			// TODO: reload sfx.
+
+#ifndef CLIENT_DLL
+			// SFX should be played at SV
+			EMIT_SOUND_DYN(m_pPlayer->edict(), CHAN_ITEM, "weapons/ksg12/ksg12_insert.wav", VOL_NORM, ATTN_NORM, 0, 85 + RANDOM_LONG(0, 31));
+#endif
 		}
 
 		if (((m_iClip >= m_pItemInfo->m_iMaxClip || m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0) && m_flNextInsertAnim <= gpGlobals->time)

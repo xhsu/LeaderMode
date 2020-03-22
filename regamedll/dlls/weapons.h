@@ -206,7 +206,8 @@ public:	// util funcs
 constexpr float USP_MAX_SPEED       = 250.0f;
 constexpr float USP_DAMAGE          = 30.0f;
 constexpr float USP_RANGE_MODIFER   = 0.79f;
-constexpr float USP_RELOAD_TIME     = 2.66f;	// TODO: model needs to adjust.
+constexpr float USP_DEPLOY_TIME		= 0.34f;
+constexpr float USP_RELOAD_TIME		= 1.87f;
 constexpr float USP_FIRE_INTERVAL	= 0.15f;
 constexpr float	USP_EFFECTIVE_RANGE = 4096.0f;
 constexpr int	USP_PENETRATION		= 1;	// 1 means it can't penetrate anything.
@@ -220,15 +221,6 @@ enum usp_e
 	USP_SHOOT_EMPTY,
 	USP_RELOAD,
 	USP_DRAW,
-	USP_ATTACH_SILENCER,
-	USP_UNSIL_IDLE,
-	USP_UNSIL_SHOOT1,
-	USP_UNSIL_SHOOT2,
-	USP_UNSIL_SHOOT3,
-	USP_UNSIL_SHOOT_EMPTY,
-	USP_UNSIL_RELOAD,
-	USP_UNSIL_DRAW,
-	USP_DETACH_SILENCER,
 };
 
 class CUSP : public CBaseWeapon
@@ -375,9 +367,9 @@ public:	// new functions
 
 constexpr float AWP_MAX_SPEED		= 210.0f;
 constexpr float AWP_MAX_SPEED_ZOOM	= 150.0f;
-constexpr float AWP_DAMAGE			= 115.0f;
+constexpr float AWP_DAMAGE			= 125.0f;
 constexpr float AWP_RANGE_MODIFER	= 0.99f;
-constexpr float	AWP_RELOAD_TIME		= 2.48f;
+constexpr float	AWP_RELOAD_TIME		= 4.0f;
 constexpr float	AWP_DEPLOY_TIME		= 1.39f;
 constexpr float AWP_FIRE_INTERVAL	= 1.5f;
 constexpr float AWP_TIME_SHELL_EJ	= 0.85f;
@@ -569,11 +561,11 @@ constexpr float KSG12_MAX_SPEED			= 230.0f;
 constexpr float KSG12_DAMAGE			= 20.0f;
 constexpr int	KSG12_PROJECTILE_COUNT	= 9;
 constexpr float	KSG12_EFFECTIVE_RANGE	= 3000.0f;
-constexpr float KSG12_FIRE_INTERVAL		= 0.9f;
+constexpr float KSG12_FIRE_INTERVAL		= 0.95f;
 constexpr float KSG12_SHELL_EJECT		= 0.66f;
 constexpr float KSG12_TIME_START_RELOAD = 0.566f;
-constexpr float KSG12_TIME_INSERT		= 0.5f;
-constexpr float KSG12_TIME_ADD_AMMO		= 0.45f;
+constexpr float KSG12_TIME_INSERT		= 0.75f;
+constexpr float KSG12_TIME_ADD_AMMO		= 0.3f;
 constexpr float KSG12_TIME_AFTER_RELOAD = 1.033f;
 const	Vector	KSG12_CONE_VECTOR		= Vector(0.0675f, 0.0675f, 0.0f); // special shotgun spreads
 

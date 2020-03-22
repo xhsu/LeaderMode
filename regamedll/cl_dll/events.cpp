@@ -1163,7 +1163,7 @@ DECLARE_EVENT(FireAWP)
 		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 80, 0.5, 10, 10, 10, EV_WALL_PUFF, velocity, false, 35);
 	}
 
-	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/awp1.wav", 1.0, 0.28, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
+	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/awp/awp_fire.wav", 1.0, 0.28, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
 
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
@@ -1355,7 +1355,7 @@ DECLARE_EVENT(FireKSG12)
 		EV_HLDM_CreateSmoke(ent->attachment[0], forward, 75, 0.35, 7, 7, 7, EV_WALL_PUFF, velocity, false, 35);
 	}
 
-	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/m3-1.wav", 1.0, 0.48, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
+	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/ksg12/ksg12_fire.wav", 1.0, 0.48, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
 
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	EV_HLDM_FireBullets(idx, forward, right, up, KSG12_PROJECTILE_COUNT, vecSrc, forward, KSG12_CONE_VECTOR, KSG12_EFFECTIVE_RANGE, g_rgAmmoInfo[g_rgItemInfo[WEAPON_KSG12].m_iAmmoType].m_iBulletBehavior, 1, shared_rand);
@@ -1412,7 +1412,7 @@ DECLARE_EVENT(FireAnaconda)
 
 	// no shell VFX while shooting for Anaconda. since it is a revolvor.
 
-	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/p228-1.wav", 1.0, ATTN_NORM, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
+	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/anaconda/anaconda_fire.wav", 1.0, ATTN_NORM, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
 
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
@@ -1501,7 +1501,7 @@ DECLARE_EVENT(FireUSP)
 	Vector ShellVelocity;
 	Vector ShellOrigin;
 
-	bool silencer_on = !args->bparam2;
+	bool silencer_on = !args->bparam2;	// useless
 	bool empty = !args->bparam1;
 	int    idx = args->entindex;
 	Vector origin(args->origin);
@@ -1520,21 +1520,11 @@ DECLARE_EVENT(FireUSP)
 		++g_iShotsFired;
 
 		int seq;
-		if (silencer_on)
-		{
-			if (!empty)
-				seq = UTIL_SharedRandomFloat(gPseudoPlayer.random_seed, USP_UNSIL_SHOOT1, USP_UNSIL_SHOOT3);
-			else
-				seq = USP_UNSIL_SHOOT_EMPTY;
-		}
+		EV_MuzzleFlash();
+		if (!empty)
+			seq = UTIL_SharedRandomFloat(gPseudoPlayer.random_seed, USP_SHOOT1, USP_SHOOT3);
 		else
-		{
-			EV_MuzzleFlash();
-			if (!empty)
-				seq = UTIL_SharedRandomFloat(gPseudoPlayer.random_seed, USP_SHOOT1, USP_SHOOT3);
-			else
-				seq = USP_SHOOT_EMPTY;
-		}
+			seq = USP_SHOOT_EMPTY;
 
 		// first personal gun smoke.
 		Vector smoke_origin = g_pViewEnt->attachment[0] - forward * 3.0f;
@@ -1563,10 +1553,7 @@ DECLARE_EVENT(FireUSP)
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iPShell, TE_BOUNCE_SHELL);
 
 	// gunshot sound.
-	if (!silencer_on)
-		gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/usp_unsil-1.wav", 1.0, ATTN_NORM, 0, 87 + gEngfuncs.pfnRandomLong(0, 0x12));
-	else
-		gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/usp1.wav", 1.0, 2.0, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
+	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/usp/usp_fire.wav", 1.0, ATTN_NORM, 0, 87 + gEngfuncs.pfnRandomLong(0, 0x12));
 
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);

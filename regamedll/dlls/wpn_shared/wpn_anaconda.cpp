@@ -39,9 +39,8 @@ void CAnaconda::Think(void)
 	{
 		m_flShellRain = 0;
 
-		// TODO: make the model have a official shell spawn point.
 		for (int i = 0; i < m_pItemInfo->m_iMaxClip; i++)
-			EV_EjectBrass(g_pViewEnt->origin + Vector(RANDOM_FLOAT(-10, 10), RANDOM_FLOAT(-10, 10), RANDOM_FLOAT(-10, 0)), m_pPlayer->pev->velocity * 0.75f, m_pPlayer->pev->angles.yaw, g_iPShell, TE_BOUNCE_SHELL);
+			EV_EjectBrass(g_pViewEnt->attachment[1] + Vector(RANDOM_FLOAT(-10, 10), RANDOM_FLOAT(-10, 10), RANDOM_FLOAT(-10, 0)), m_pPlayer->pev->velocity * 0.75f, m_pPlayer->pev->angles.yaw, g_iPShell, TE_BOUNCE_SHELL);
 	}
 }
 
@@ -91,7 +90,7 @@ void CAnaconda::SecondaryAttack()
 
 	if (!g_vecGunOfsGoal.LengthSquared())
 	{
-		g_vecGunOfsGoal = Vector(-9.5f, -10.0f, 1.0f);
+		g_vecGunOfsGoal = Vector(-9.61f, -5.0f, 3.0f);
 		gHUD::m_iFOV = 85;	// allow clients to predict the zoom.
 	}
 	else
