@@ -3,7 +3,8 @@
 Remastered Date: Mar 21 2020
 
 Modern Warfare Dev Team
- - Luna the Reborn
+Code - Luna the Reborn
+Model - Miracle(Innocent Blue)
 
 */
 
@@ -38,9 +39,8 @@ void CAnaconda::Think(void)
 	{
 		m_flShellRain = 0;
 
-		// TODO: make the model have a official shell spawn point.
 		for (int i = 0; i < m_pItemInfo->m_iMaxClip; i++)
-			EV_EjectBrass(g_pViewEnt->origin + Vector(RANDOM_FLOAT(-10, 10), RANDOM_FLOAT(-10, 10), RANDOM_FLOAT(-10, 0)), m_pPlayer->pev->velocity * 0.75f, m_pPlayer->pev->angles.yaw, g_iPShell, TE_BOUNCE_SHELL);
+			EV_EjectBrass(g_pViewEnt->attachment[1] + Vector(RANDOM_FLOAT(-10, 10), RANDOM_FLOAT(-10, 10), RANDOM_FLOAT(-10, 0)), m_pPlayer->pev->velocity * 0.75f, m_pPlayer->pev->angles.yaw, g_iPShell, TE_BOUNCE_SHELL);
 	}
 }
 
@@ -48,7 +48,7 @@ void CAnaconda::Think(void)
 
 bool CAnaconda::Deploy()
 {
-	DefaultDeploy("models/weapons/v_anaconda.mdl", "models/weapons/p_anaconda.mdl", ANACONDA_DRAW, "onehanded");
+	DefaultDeploy("models/weapons/v_anaconda.mdl", "models/weapons/p_anaconda.mdl", ANACONDA_DRAW, "onehanded", ANACONDA_DEPLOY_TIME);
 
 #ifdef CLIENT_DLL
 	// reset this when switching gun.
@@ -56,7 +56,6 @@ bool CAnaconda::Deploy()
 #endif
 
 	m_flAccuracy = 0.9f;
-	m_pPlayer->m_flNextAttack = ANACONDA_DEPLOY_TIME;	// this gun has a extremely short deploy time.
 	return true;
 }
 
@@ -64,19 +63,19 @@ void CAnaconda::PrimaryAttack()
 {
 	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
 	{
-		AnacondaFire(1.5f * (1.0f - m_flAccuracy), ANACONDA_FIRE_INTERVAL);
+		AnacondaFire(1.5f * (1.0f - m_flAccuracy));
 	}
 	else if (m_pPlayer->pev->velocity.Length2D() > 0)
 	{
-		AnacondaFire(0.255f * (1.0f - m_flAccuracy), ANACONDA_FIRE_INTERVAL);
+		AnacondaFire(0.255f * (1.0f - m_flAccuracy));
 	}
 	else if (m_pPlayer->pev->flags & FL_DUCKING)
 	{
-		AnacondaFire(0.075f * (1.0f - m_flAccuracy), ANACONDA_FIRE_INTERVAL);
+		AnacondaFire(0.075f * (1.0f - m_flAccuracy));
 	}
 	else
 	{
-		AnacondaFire(0.15 * (1.0f - m_flAccuracy), ANACONDA_FIRE_INTERVAL);
+		AnacondaFire(0.15 * (1.0f - m_flAccuracy));
 	}
 }
 
@@ -91,7 +90,7 @@ void CAnaconda::SecondaryAttack()
 
 	if (!g_vecGunOfsGoal.LengthSquared())
 	{
-		g_vecGunOfsGoal = Vector(-9.5f, -10.0f, 1.0f);
+		g_vecGunOfsGoal = Vector(-9.61f, -5.0f, 3.0f);
 		gHUD::m_iFOV = 85;	// allow clients to predict the zoom.
 	}
 	else
@@ -124,6 +123,9 @@ void CAnaconda::AnacondaFire(float flSpread, float flCycleTime)
 	{
 		return;
 	}
+
+	if (m_bInZoom)	// decrease spread while scoping.
+		flSpread *= 0.5f;
 
 	if (m_flLastFire != 0.0f)
 	{
@@ -214,7 +216,6 @@ bool CAnaconda::Reload()
 {
 	if (DefaultReload(m_pItemInfo->m_iMaxClip, ANACONDA_RELOAD, ANACONDA_RELOAD_TIME))
 	{
-		m_pPlayer->SetAnimation(PLAYER_RELOAD);
 		m_flAccuracy = 0.9f;
 
 #ifdef CLIENT_DLL

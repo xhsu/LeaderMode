@@ -1055,7 +1055,7 @@ MSG_FUNC(Shoot)
 	{
 		int iSave = gPseudoPlayer.random_seed;
 		gPseudoPlayer.random_seed = iSeed;
-		g_pCurWeapon->PrimaryAttack();
+		g_pCurWeapon->PrimaryAttack();	// use the seed for primary attack only.
 		gPseudoPlayer.random_seed = iSave;
 	}
 

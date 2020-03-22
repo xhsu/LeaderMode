@@ -1,6 +1,6 @@
 /*
 
-Remastered Date: Mar 21 2020
+Remastered Date: Mar 22 2020
 
 Modern Warfare Dev Team
  - Luna the Reborn
@@ -11,36 +11,37 @@ Modern Warfare Dev Team
 
 #ifndef CLIENT_DLL
 
-unsigned short CAK47::m_usEvent = 0;
-int CAK47::m_iShell = 0;
+unsigned short CACR::m_usEvent = 0;
+int CACR::m_iShell = 0;
 
-void CAK47::Precache()
+void CACR::Precache()
 {
-	PRECACHE_MODEL("models/weapons/v_ak47.mdl");
-	PRECACHE_MODEL("models/weapons/w_ak47.mdl");
-	PRECACHE_MODEL("models/weapons/p_ak47.mdl");
+	PRECACHE_MODEL("models/weapons/v_acr.mdl");
+	PRECACHE_MODEL("models/weapons/w_acr.mdl");
+	PRECACHE_MODEL("models/weapons/p_acr.mdl");
 
-	PRECACHE_SOUND("weapons/ak47-1.wav");
-	PRECACHE_SOUND("weapons/ak47-2.wav");
-	PRECACHE_SOUND("weapons/ak47_clipout.wav");
-	PRECACHE_SOUND("weapons/ak47_clipin.wav");
-	PRECACHE_SOUND("weapons/ak47_boltpull.wav");
+	PRECACHE_SOUND("weapons/aug-1.wav");
+	PRECACHE_SOUND("weapons/aug_clipout.wav");
+	PRECACHE_SOUND("weapons/aug_clipin.wav");
+	PRECACHE_SOUND("weapons/aug_boltpull.wav");
+	PRECACHE_SOUND("weapons/aug_boltslap.wav");
+	PRECACHE_SOUND("weapons/aug_forearm.wav");
 
 	m_iShell = PRECACHE_MODEL("models/rshell.mdl");
-	m_usEvent = PRECACHE_EVENT(1, "events/ak47.sc");
+	m_usEvent = PRECACHE_EVENT(1, "events/acr.sc");
 }
 
 #endif
 
-bool CAK47::Deploy()
+bool CACR::Deploy()
 {
 	m_flAccuracy = 0.2f;
 	m_iShotsFired = 0;
 
-	return DefaultDeploy("models/weapons/v_ak47.mdl", "models/weapons/p_ak47.mdl", AK47_DRAW, "ak47");
+	return DefaultDeploy("models/weapons/v_acr.mdl", "models/weapons/p_acr.mdl", ACR_DRAW, "carbine");
 }
 
-void CAK47::SecondaryAttack()
+void CACR::SecondaryAttack()
 {
 	m_bInZoom = !m_bInZoom;
 	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.3f;
@@ -51,8 +52,8 @@ void CAK47::SecondaryAttack()
 
 	if (!g_vecGunOfsGoal.LengthSquared())
 	{
-		g_vecGunOfsGoal = Vector(-11.6f, -10.0f, 3.8f);
-		gHUD::m_iFOV = 85;	// allow clients to predict the zoom.
+		g_vecGunOfsGoal = Vector(-18.0f, -20.0f, 2.0f);
+		gHUD::m_iFOV = 75;	// allow clients to predict the zoom.
 	}
 	else
 	{
@@ -60,13 +61,13 @@ void CAK47::SecondaryAttack()
 		gHUD::m_iFOV = 90;
 	}
 
-	g_flGunOfsMovingSpeed = 8.0f;
+	g_flGunOfsMovingSpeed = 14.0f;
 #else
 	// just zoom a liiiiittle bit.
 	// this doesn't suffer from the same bug where the gunofs does, since the FOV was actually sent from SV.
 	if (m_bInZoom)
 	{
-		m_pPlayer->pev->fov = 85;
+		m_pPlayer->pev->fov = 75;
 		EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, "weapons/steelsight_in.wav", 0.75f, ATTN_STATIC);
 	}
 	else
@@ -77,34 +78,34 @@ void CAK47::SecondaryAttack()
 #endif
 }
 
-void CAK47::PrimaryAttack()
+void CACR::PrimaryAttack()
 {
 	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
 	{
-		AK47Fire(0.04f + (0.4f * m_flAccuracy));
+		ACRFire(0.035f + (0.4f * m_flAccuracy));
 	}
 	else if (m_pPlayer->pev->velocity.Length2D() > 140)
 	{
-		AK47Fire(0.04f + (0.07f * m_flAccuracy));
+		ACRFire(0.035f + (0.07f * m_flAccuracy));
 	}
 	else if (m_bInZoom)	// decrease spread while scoping.
 	{
-		AK47Fire(0.015f * m_flAccuracy);
+		ACRFire(0.01f * m_flAccuracy);
 	}
 	else
 	{
-		AK47Fire(0.0275f * m_flAccuracy);
+		ACRFire(0.02f * m_flAccuracy);
 	}
 }
 
-void CAK47::AK47Fire(float flSpread, float flCycleTime)
+void CACR::ACRFire(float flSpread, float flCycleTime)
 {
 	m_iShotsFired++;
 
-	m_flAccuracy = (float(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 200.0f) + 0.35f;
+	m_flAccuracy = (float(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 215.0f) + 0.3f;
 
-	if (m_flAccuracy > 1.25f)
-		m_flAccuracy = 1.25f;
+	if (m_flAccuracy > 1.0f)
+		m_flAccuracy = 1.0f;
 
 	if (m_iClip <= 0)
 	{
@@ -125,16 +126,19 @@ void CAK47::AK47Fire(float flSpread, float flCycleTime)
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
+	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
+	m_pPlayer->m_iWeaponFlash = BRIGHT_GUN_FLASH;
+
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecAiming = gpGlobals->v_forward;
 
-	Vector vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, AK47_EFFECTIVE_RANGE, AK47_PENETRATION, m_pAmmoInfo->m_iBulletBehavior,
-		AK47_DAMAGE, AK47_RANGE_MODIFER, m_pPlayer->pev, false, m_pPlayer->random_seed);
+	Vector vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, ACR_EFFECTIVE_RANGE, ACR_PENETRATION, m_pAmmoInfo->m_iBulletBehavior,
+		ACR_DAMAGE, ACR_RANGE_MODIFER, m_pPlayer->pev, false, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
-	SendWeaponAnim(UTIL_SharedRandomFloat(m_pPlayer->random_seed, AK47_SHOOT1, AK47_SHOOT3));
+	SendWeaponAnim(UTIL_SharedRandomFloat(m_pPlayer->random_seed, ACR_SHOOT1, ACR_SHOOT3));
 	PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL, m_pPlayer->edict(), m_usEvent, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y,
 		int(m_pPlayer->pev->punchangle.x * 100), int(m_pPlayer->pev->punchangle.y * 100), FALSE, FALSE);
 
@@ -159,46 +163,43 @@ void CAK47::AK47Fire(float flSpread, float flCycleTime)
 	args.origin = m_pPlayer->pev->origin;
 	args.velocity = m_pPlayer->pev->velocity;
 
-	EV_FireAK47(&args);
+	EV_FireACR(&args);
 #endif
-
-	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
-	m_pPlayer->m_iWeaponFlash = BRIGHT_GUN_FLASH;
 
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.9f;
 
 	if (m_pPlayer->pev->velocity.Length2D() > 0)
 	{
-		KickBack(1.5, 0.45, 0.225, 0.05, 6.5, 2.5, 7);
+		KickBack(1.0, 0.45, 0.275, 0.05, 4.0, 2.5, 7);
 	}
 	else if (!(m_pPlayer->pev->flags & FL_ONGROUND))
 	{
-		KickBack(2.0, 1.0, 0.5, 0.35, 9.0, 6.0, 5);
+		KickBack(1.25, 0.45, 0.22, 0.18, 5.5, 4.0, 5);
 	}
 	else if (m_pPlayer->pev->flags & FL_DUCKING)
 	{
-		KickBack(0.9, 0.35, 0.15, 0.025, 5.5, 1.5, 9);
+		KickBack(0.575, 0.325, 0.2, 0.011, 3.25, 2.0, 8);
 	}
 	else
 	{
-		KickBack(1.0, 0.375, 0.175, 0.0375, 5.75, 1.75, 8);
+		KickBack(0.625, 0.375, 0.25, 0.0125, 3.5, 2.25, 8);
 	}
 }
 
-bool CAK47::Reload()
+bool CACR::Reload()
 {
-	if (DefaultReload(m_pItemInfo->m_iMaxClip, AK47_RELOAD, AK47_RELOAD_TIME))
+	if (DefaultReload(m_pItemInfo->m_iMaxClip, ACR_RELOAD, ACR_RELOAD_TIME))
 	{
-		m_flAccuracy = 0.2f;
+		m_flAccuracy = 0.0f;
 		return true;
 	}
 
 	return false;
 }
 
-void CAK47::WeaponIdle()
+void CACR::WeaponIdle()
 {
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
-	SendWeaponAnim(AK47_IDLE1);
+	SendWeaponAnim(ACR_IDLE1);
 }

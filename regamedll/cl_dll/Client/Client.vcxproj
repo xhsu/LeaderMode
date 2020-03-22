@@ -29,14 +29,14 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -130,6 +130,7 @@
       <ConformanceMode>true</ConformanceMode>
       <DisableSpecificWarnings>4244;26402;26429;26430;26433;26440;26446;26451;26461;26462;26481;26482;26485;26486;26489;26493;26496;26812;26814;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\;$(ProjectDir)..\..\pm_shared;$(ProjectDir)..\..\engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -166,13 +167,17 @@
     <ClCompile Include="..\..\dlls\weapontype.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\dlls\wpn_shared\wpn_acr.cpp" />
+    <ClCompile Include="..\..\dlls\wpn_shared\wpn_ak47.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_anaconda.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_awp.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_cm901.cpp" />
+    <ClCompile Include="..\..\dlls\wpn_shared\wpn_deagle.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_ksg12.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_mp7a1.cpp" />
+    <ClCompile Include="..\..\dlls\wpn_shared\wpn_qbz95.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_usp.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
     </ClCompile>

@@ -188,7 +188,7 @@ public:	// util funcs
 	virtual	float	GetMaxSpeed		(void) { return 260.0f; }
 	virtual	bool	AddPrimaryAmmo	(int iCount);	// fill in clip first, then bpammo.
 	inline	bool	IsPistol		(void) { return m_pItemInfo->m_iSlot == PISTOL_SLOT; }
-	virtual	bool	DefaultDeploy	(const char* szViewModel, const char* szWeaponModel, int iAnim, const char* szAnimExt);
+	virtual	bool	DefaultDeploy	(const char* szViewModel, const char* szWeaponModel, int iAnim, const char* szAnimExt, float flDeployTime = 0.75f);
 	virtual	void	SendWeaponAnim	(int iAnim, int iBody = 0, bool bSkipLocal = true);
 	virtual	void	PlayEmptySound	(void);
 	virtual	bool	DefaultReload	(int iClipSize, int iAnim, float fDelay);
@@ -206,7 +206,8 @@ public:	// util funcs
 constexpr float USP_MAX_SPEED       = 250.0f;
 constexpr float USP_DAMAGE          = 30.0f;
 constexpr float USP_RANGE_MODIFER   = 0.79f;
-constexpr float USP_RELOAD_TIME     = 2.66f;	// TODO: model needs to adjust.
+constexpr float USP_DEPLOY_TIME		= 0.34f;
+constexpr float USP_RELOAD_TIME		= 1.87f;
 constexpr float USP_FIRE_INTERVAL	= 0.15f;
 constexpr float	USP_EFFECTIVE_RANGE = 4096.0f;
 constexpr int	USP_PENETRATION		= 1;	// 1 means it can't penetrate anything.
@@ -220,15 +221,6 @@ enum usp_e
 	USP_SHOOT_EMPTY,
 	USP_RELOAD,
 	USP_DRAW,
-	USP_ATTACH_SILENCER,
-	USP_UNSIL_IDLE,
-	USP_UNSIL_SHOOT1,
-	USP_UNSIL_SHOOT2,
-	USP_UNSIL_SHOOT3,
-	USP_UNSIL_SHOOT_EMPTY,
-	USP_UNSIL_RELOAD,
-	USP_UNSIL_DRAW,
-	USP_DETACH_SILENCER,
 };
 
 class CUSP : public CBaseWeapon
@@ -253,7 +245,7 @@ public:	// util funcs
 	virtual	float	GetMaxSpeed		(void) { return USP_MAX_SPEED; }
 
 public:	// new functions
-	void USPFire(float flSpread, float flCycleTime);
+	void USPFire(float flSpread, float flCycleTime = USP_FIRE_INTERVAL);
 };
 
 const float MP5N_MAX_SPEED     = 250.0f;
@@ -287,10 +279,13 @@ enum sg552_e
 	SG552_SHOOT3,
 };
 
-const float AK47_MAX_SPEED     = 221.0f;
-const float AK47_DAMAGE        = 36.0f;
-const float AK47_RANGE_MODIFER = 0.98f;
-const float AK47_RELOAD_TIME   = 2.45f;
+constexpr float AK47_MAX_SPEED			= 221.0f;
+constexpr float AK47_DAMAGE				= 36.0f;
+constexpr float AK47_RANGE_MODIFER		= 0.98f;
+constexpr float AK47_RELOAD_TIME		= 2.44f;
+constexpr float AK47_RPM				= 600.0f;
+constexpr float	AK47_EFFECTIVE_RANGE	= 8192.0f;
+constexpr int	AK47_PENETRATION		= 2;
 
 enum ak47_e
 {
@@ -302,26 +297,79 @@ enum ak47_e
 	AK47_SHOOT3,
 };
 
-const float AUG_MAX_SPEED     = 240.0f;
-const float AUG_DAMAGE        = 32.0f;
-const float AUG_RANGE_MODIFER = 0.96f;
-const float AUG_RELOAD_TIME   = 3.3f;
-
-enum aug_e
+class CAK47 : public CBaseWeapon
 {
-	AUG_IDLE1,
-	AUG_RELOAD,
-	AUG_DRAW,
-	AUG_SHOOT1,
-	AUG_SHOOT2,
-	AUG_SHOOT3,
+#ifndef CLIENT_DLL
+public:	// SV exclusive variables.
+	static unsigned short m_usEvent;
+	static int m_iShell;
+
+public:	// SV exclusive functions.
+	virtual void	Precache		(void);
+#endif
+
+public:	// basic logic funcs
+	virtual bool	Deploy			(void);
+	virtual void	PrimaryAttack	(void);
+	virtual void	SecondaryAttack	(void);
+	virtual bool	Reload			(void);
+	virtual void	WeaponIdle		(void);
+
+public:	// util funcs
+	virtual	float	GetMaxSpeed		(void) { return AK47_MAX_SPEED; }
+
+public:	// new functions
+	void AK47Fire(float flSpread, float flCycleTime = (60.0f / AK47_RPM));
+};
+
+constexpr float ACR_MAX_SPEED		= 240.0f;
+constexpr float ACR_DAMAGE			= 32.0f;
+constexpr float ACR_RANGE_MODIFER	= 0.96f;
+constexpr float ACR_RELOAD_TIME		= 3.2f;
+constexpr float ACR_RPM				= 750.0f;
+constexpr int	ACR_PENETRATION		= 2;
+constexpr float	ACR_EFFECTIVE_RANGE	= 8192.0f;
+
+enum acr_e
+{
+	ACR_IDLE1,
+	ACR_RELOAD,
+	ACR_DRAW,
+	ACR_SHOOT1,
+	ACR_SHOOT2,
+	ACR_SHOOT3,
+};
+
+class CACR : public CBaseWeapon
+{
+#ifndef CLIENT_DLL
+public:	// SV exclusive variables.
+	static unsigned short m_usEvent;
+	static int m_iShell;
+
+public:	// SV exclusive functions.
+	virtual void	Precache		(void);
+#endif
+
+public:	// basic logic funcs
+	virtual bool	Deploy			(void);
+	virtual void	PrimaryAttack	(void);
+	virtual void	SecondaryAttack	(void);
+	virtual bool	Reload			(void);
+	virtual void	WeaponIdle		(void);
+
+public:	// util funcs
+	virtual	float	GetMaxSpeed		(void) { return ACR_MAX_SPEED; }
+
+public:	// new functions
+	void ACRFire(float flSpread, float flCycleTime = (60.0f / ACR_RPM));
 };
 
 constexpr float AWP_MAX_SPEED		= 210.0f;
 constexpr float AWP_MAX_SPEED_ZOOM	= 150.0f;
-constexpr float AWP_DAMAGE			= 115.0f;
+constexpr float AWP_DAMAGE			= 125.0f;
 constexpr float AWP_RANGE_MODIFER	= 0.99f;
-constexpr float	AWP_RELOAD_TIME		= 2.48f;
+constexpr float	AWP_RELOAD_TIME		= 4.0f;
 constexpr float	AWP_DEPLOY_TIME		= 1.39f;
 constexpr float AWP_FIRE_INTERVAL	= 1.5f;
 constexpr float AWP_TIME_SHELL_EJ	= 0.85f;
@@ -360,13 +408,17 @@ public:	// util funcs
 	virtual float GetMaxSpeed		(void);
 
 public:	// new funcs
-	void AWPFire(float flSpread, float flCycleTime);
+	void AWPFire(float flSpread, float flCycleTime = AWP_FIRE_INTERVAL);
 };
 
-const float DEAGLE_MAX_SPEED     = 250.0f;
-const float DEAGLE_DAMAGE        = 54.0f;
-const float DEAGLE_RANGE_MODIFER = 0.81f;
-const float DEAGLE_RELOAD_TIME   = 2.2f;
+constexpr float DEAGLE_MAX_SPEED		= 245.0f;
+constexpr float DEAGLE_DAMAGE			= 57.0f;
+constexpr float DEAGLE_RANGE_MODIFER	= 0.86f;
+constexpr float DEAGLE_DEPLOY_TIME		= 0.34f;
+constexpr float DEAGLE_RELOAD_TIME		= 2.16f;
+constexpr float DEAGLE_FIRE_INTERVAL	= 0.225f;
+constexpr int	DEAGLE_PENETRATION		= 3;
+constexpr float	DEAGLE_EFFECTIVE_RANGE	= 8192.0f;
 
 enum deagle_e
 {
@@ -376,6 +428,31 @@ enum deagle_e
 	DEAGLE_SHOOT_EMPTY,
 	DEAGLE_RELOAD,
 	DEAGLE_DRAW,
+};
+
+class CDEagle : public CBaseWeapon
+{
+#ifndef CLIENT_DLL
+public:	// SV exclusive variables.
+	static unsigned short m_usEvent;
+	static int m_iShell;
+
+public:	// SV exclusive functions.
+	virtual void	Precache		(void);
+#endif
+
+public:	// basic logic funcs
+	virtual bool	Deploy			(void);
+	virtual void	PrimaryAttack	(void);
+	virtual void	SecondaryAttack	(void);
+	virtual	bool	Reload			(void);
+	virtual void	WeaponIdle		(void);
+
+public:	// util funcs
+	virtual	float	GetMaxSpeed		(void) { return DEAGLE_MAX_SPEED; }
+
+public:	// new functions
+	void DEagleFire(float flSpread, float flCycleTime = DEAGLE_FIRE_INTERVAL);
 };
 
 const float FLASHBANG_MAX_SPEED        = 250.0f;
@@ -484,11 +561,11 @@ constexpr float KSG12_MAX_SPEED			= 230.0f;
 constexpr float KSG12_DAMAGE			= 20.0f;
 constexpr int	KSG12_PROJECTILE_COUNT	= 9;
 constexpr float	KSG12_EFFECTIVE_RANGE	= 3000.0f;
-constexpr float KSG12_FIRE_INTERVAL		= 0.9f;
+constexpr float KSG12_FIRE_INTERVAL		= 0.95f;
 constexpr float KSG12_SHELL_EJECT		= 0.66f;
 constexpr float KSG12_TIME_START_RELOAD = 0.566f;
-constexpr float KSG12_TIME_INSERT		= 0.5f;
-constexpr float KSG12_TIME_ADD_AMMO		= 0.45f;
+constexpr float KSG12_TIME_INSERT		= 0.75f;
+constexpr float KSG12_TIME_ADD_AMMO		= 0.3f;
 constexpr float KSG12_TIME_AFTER_RELOAD = 1.033f;
 const	Vector	KSG12_CONE_VECTOR		= Vector(0.0675f, 0.0675f, 0.0f); // special shotgun spreads
 
@@ -588,7 +665,7 @@ constexpr float ANACONDA_MAX_SPEED			= 250.0f;
 constexpr float ANACONDA_DAMAGE				= 64.0f;
 constexpr float ANACONDA_RANGE_MODIFER		= 0.8f;
 constexpr float ANACONDA_RELOAD_TIME		= 2.68f;
-constexpr float ANACONDA_DEPLOY_TIME		= 0.367f;	// a really quick-ready gun.
+constexpr float ANACONDA_DEPLOY_TIME		= 0.367f;	// this gun has a extremely short deploy time.
 constexpr float ANACONDA_FIRE_INTERVAL		= 0.15f;
 constexpr int	ANACONDA_PENETRATION		= 1;
 constexpr float	ANACONDA_EFFECTIVE_RANGE	= 4096.0f;
@@ -632,7 +709,7 @@ public:	// util funcs
 	virtual float GetMaxSpeed		(void) { return ANACONDA_MAX_SPEED; }
 
 public:	// new funcs
-	void AnacondaFire(float flSpread, float flCycleTime);
+	void AnacondaFire(float flSpread, float flCycleTime = ANACONDA_FIRE_INTERVAL);
 };
 
 const float P90_MAX_SPEED     = 245.0f;
@@ -716,7 +793,7 @@ public:	// util funcs
 	virtual float	GetMaxSpeed		(void) { return MP7A1_MAX_SPEED; }
 
 public:	// new funcs
-	void MP7A1Fire(float flSpread, float flCycleTime);
+	void MP7A1Fire(float flSpread, float flCycleTime = (60.0f / MP7A1_RPM));
 };
 
 const float XM1014_MAX_SPEED   = 240.0f;
@@ -862,20 +939,47 @@ public:	// new functions
 	void CM901Fire(float flSpread, float flCycleTime);
 };
 
-const float FAMAS_MAX_SPEED     = 240.0f;
-const float FAMAS_RELOAD_TIME   = 3.3f;
-const float FAMAS_DAMAGE        = 30.0f;
-const float FAMAS_DAMAGE_BURST  = 34.0f;
-const float FAMAS_RANGE_MODIFER = 0.96f;
+constexpr float QBZ95_MAX_SPEED			= 240.0f;
+constexpr float QBZ95_RELOAD_TIME		= 3.311f;
+constexpr float QBZ95_DAMAGE			= 30.0f;
+constexpr float QBZ95_RANGE_MODIFER		= 0.96f;
+constexpr float QBZ95_RPM				= 600.0f;
+constexpr float	QBZ95_EFFECTIVE_RANGE	= 8192.0f;
+constexpr int	QBZ95_PENETRATION		= 2;
 
-enum famas_e
+enum qbz95_e
 {
-	FAMAS_IDLE1,
-	FAMAS_RELOAD,
-	FAMAS_DRAW,
-	FAMAS_SHOOT1,
-	FAMAS_SHOOT2,
-	FAMAS_SHOOT3,
+	QBZ95_IDLE1,
+	QBZ95_RELOAD,
+	QBZ95_DRAW,
+	QBZ95_SHOOT1,
+	QBZ95_SHOOT2,
+	QBZ95_SHOOT3,
+};
+
+class CQBZ95 : public CBaseWeapon
+{
+#ifndef CLIENT_DLL
+public:	// SV exclusive variables.
+	static unsigned short m_usEvent;
+	static int m_iShell;
+
+public:	// SV exclusive functions.
+	virtual void	Precache		(void);
+#endif
+
+public:	// basic logic funcs
+	virtual bool	Deploy			(void);
+	virtual void	PrimaryAttack	(void);
+	virtual void	SecondaryAttack	(void);
+	virtual bool	Reload			(void);
+	virtual void	WeaponIdle		(void);
+
+public:	// util funcs
+	virtual	float	GetMaxSpeed		(void) { return QBZ95_MAX_SPEED; }
+
+public:	// new functions
+	void QBZ95Fire(float flSpread, float flCycleTime = (60.0f / QBZ95_RPM));
 };
 
 #ifndef CLIENT_DLL

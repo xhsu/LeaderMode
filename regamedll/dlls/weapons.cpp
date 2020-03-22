@@ -276,6 +276,14 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 
 	switch (iId)
 	{
+	case WEAPON_ACR:
+		p = new CACR;
+		break;
+
+	case WEAPON_AK47:
+		p = new CAK47;
+		break;
+
 	case WEAPON_ANACONDA:
 		p = new CAnaconda;
 		break;
@@ -288,12 +296,20 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 		p = new CCM901;
 		break;
 
+	case WEAPON_DEAGLE:
+		p = new CDEagle;
+		break;
+
 	case WEAPON_KSG12:
 		p = new CKSG12;
 		break;
 
 	case WEAPON_MP7A1:
 		p = new CMP7A1;
+		break;
+
+	case WEAPON_QBZ95:
+		p = new CQBZ95;
 		break;
 
 	case WEAPON_USP:
@@ -425,6 +441,7 @@ void CBaseWeapon::PostFrame()
 		if ((m_pPlayer->m_bCanShoot && CSGameRules()->IsMultiplayer() && !CSGameRules()->IsFreezePeriod()) || !CSGameRules()->IsMultiplayer())
 		{
 			// prediction code is unusable for full-automatic weapon. I have to use this instead.
+			// UNDONE: perhaps I need to send a angle along with?
 			MESSAGE_BEGIN(MSG_ONE, gmsgShoot, nullptr, m_pPlayer->pev);
 			WRITE_SHORT(m_pPlayer->random_seed);
 			MESSAGE_END();
@@ -487,6 +504,9 @@ bool CBaseWeapon::Melee(void)
 	// you just.. can't do this.
 	if (m_iId == WEAPON_KNIFE || m_bitsFlags & WPNSTATE_MELEE)
 		return false;
+
+	if (m_bInZoom)
+		SecondaryAttack();
 
 	// save what we are doing right now.
 	PushAnim();
@@ -673,7 +693,7 @@ bool CBaseWeapon::AddPrimaryAmmo(int iCount)
 	return bGotAmmo;
 }
 
-bool CBaseWeapon::DefaultDeploy(const char* szViewModel, const char* szWeaponModel, int iAnim, const char* szAnimExt)
+bool CBaseWeapon::DefaultDeploy(const char* szViewModel, const char* szWeaponModel, int iAnim, const char* szAnimExt, float flDeployTime)
 {
 	// TODO
 	/*if (!CanDeploy())
@@ -685,8 +705,8 @@ bool CBaseWeapon::DefaultDeploy(const char* szViewModel, const char* szWeaponMod
 	Q_strlcpy(m_pPlayer->m_szAnimExtention, szAnimExt);
 	SendWeaponAnim(iAnim);
 
-	m_pPlayer->m_flNextAttack = 0.75f;
-	m_flTimeWeaponIdle = 1.5f;
+	m_pPlayer->m_flNextAttack = flDeployTime;
+	m_flTimeWeaponIdle = flDeployTime + 0.75f;
 	m_flDecreaseShotsFired = gpGlobals->time;
 
 	m_pPlayer->pev->fov = DEFAULT_FOV;
@@ -741,16 +761,24 @@ bool CBaseWeapon::DefaultReload(int iClipSize, int iAnim, float fDelay)
 		return false;
 	}
 
-	if (m_bInZoom)
+	// exit scope
+	if (m_bInZoom || int(m_pPlayer->pev->fov) != DEFAULT_FOV)
 		SecondaryAttack();	// close scope when we reload.
 
-	m_pPlayer->m_flNextAttack = fDelay;
-
+	// 3rd personal anim & SFX
+	m_pPlayer->SetAnimation(PLAYER_RELOAD);
 	ReloadSound();
-	SendWeaponAnim(iAnim);
 
-	m_bInReload = true;
+	// reset accuracy data
+	m_iShotsFired = 0;
+
+	// pause weapon actions
+	m_pPlayer->m_flNextAttack = fDelay;
 	m_flTimeWeaponIdle = fDelay + 0.5f;
+	m_bInReload = true;
+
+	// 1st personal anim
+	SendWeaponAnim(iAnim);
 
 	return true;
 }

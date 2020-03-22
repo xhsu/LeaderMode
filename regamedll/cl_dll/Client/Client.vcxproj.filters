@@ -204,6 +204,18 @@
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_mp7a1.cpp">
       <Filter>dlls\wpn_shared</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\dlls\wpn_shared\wpn_ak47.cpp">
+      <Filter>dlls\wpn_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\dlls\wpn_shared\wpn_qbz95.cpp">
+      <Filter>dlls\wpn_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\dlls\wpn_shared\wpn_acr.cpp">
+      <Filter>dlls\wpn_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\dlls\wpn_shared\wpn_deagle.cpp">
+      <Filter>dlls\wpn_shared</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\cdll_int.h">

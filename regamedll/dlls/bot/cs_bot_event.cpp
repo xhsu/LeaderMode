@@ -207,7 +207,7 @@ void CCSBot::OnEvent(GameEventType event, CBaseEntity *pEntity, CBaseEntity *pOt
 	}
 
 	// Process radio events from our team
-	if (pPlayer && BotRelationship(pPlayer) == BOT_TEAMMATE && event > EVENT_START_RADIO_1 && event < EVENT_END_RADIO)
+	if (pPlayer && pEntity->IsPlayer() && BotRelationship(pPlayer) == BOT_TEAMMATE && event > EVENT_START_RADIO_1 && event < EVENT_END_RADIO)
 	{
 		// TODO: Distinguish between radio commands and responses
 		if (event != EVENT_RADIO_AFFIRMATIVE && event != EVENT_RADIO_NEGATIVE && event != EVENT_RADIO_REPORTING_IN)
@@ -220,7 +220,7 @@ void CCSBot::OnEvent(GameEventType event, CBaseEntity *pEntity, CBaseEntity *pOt
 	}
 
 	// player_follows needs a player
-	if (!pPlayer)
+	if (!pPlayer || !pEntity->IsPlayer())
 		return;
 
 	// don't pay attention to noise that friends make

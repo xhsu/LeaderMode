@@ -17,7 +17,7 @@ enum EV_SmokeTypes
 	EV_RIFLE_SMOKE,
 };
 
-void EV_EjectBrass(float* origin, float* velocity, float rotation, int model, int soundtype, float life = 2.5f, float flAngularVel = 4.0f);
+void EV_EjectBrass(float* origin, float* velocity, float rotation, int model, int soundtype, float flAngularVel = 4.0f, float life = 15.0f);
 bool EV_IsLocal(int idx);
 
 extern int g_iRShell;
@@ -28,8 +28,13 @@ extern int g_iBlackSmoke;
 void Events_Init(void);
 
 // weapons
+DECLARE_EVENT(FireACR);
+DECLARE_EVENT(FireAK47);
 DECLARE_EVENT(FireAnaconda);
 DECLARE_EVENT(FireAWP);
-DECLARE_EVENT(FireM3);
-DECLARE_EVENT(FireUSP);
 DECLARE_EVENT(FireCM901);
+DECLARE_EVENT(FireDEagle);
+DECLARE_EVENT(FireKSG12);
+DECLARE_EVENT(FireMP7A1);
+DECLARE_EVENT(FireQBZ95);
+DECLARE_EVENT(FireUSP);
