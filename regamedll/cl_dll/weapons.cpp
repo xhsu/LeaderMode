@@ -129,6 +129,10 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 
 	switch (iId)
 	{
+	case WEAPON_ACR:
+		p = new CACR;
+		break;
+
 	case WEAPON_AK47:
 		p = new CAK47;
 		break;
@@ -143,6 +147,10 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 
 	case WEAPON_CM901:
 		p = new CCM901;
+		break;
+
+	case WEAPON_DEAGLE:
+		p = new CDEagle;
 		break;
 
 	case WEAPON_KSG12:
@@ -382,7 +390,7 @@ bool CBaseWeapon::AddPrimaryAmmo(int iCount)
 	return false;
 }
 
-bool CBaseWeapon::DefaultDeploy(const char* szViewModel, const char* szWeaponModel, int iAnim, const char* szAnimExt)
+bool CBaseWeapon::DefaultDeploy(const char* szViewModel, const char* szWeaponModel, int iAnim, const char* szAnimExt, float flDeployTime)
 {
 	// TODO
 	/*if (!CanDeploy())
@@ -393,8 +401,8 @@ bool CBaseWeapon::DefaultDeploy(const char* szViewModel, const char* szWeaponMod
 	Q_strlcpy(m_pPlayer->m_szAnimExtention, szAnimExt);
 	SendWeaponAnim(iAnim);
 
-	m_pPlayer->m_flNextAttack = 0.75f;
-	m_flTimeWeaponIdle = 1.5f;
+	m_pPlayer->m_flNextAttack = flDeployTime;
+	m_flTimeWeaponIdle = flDeployTime + 0.75f;
 	m_flDecreaseShotsFired = gpGlobals->time;
 
 	m_pPlayer->pev->fov = DEFAULT_FOV;
@@ -432,16 +440,24 @@ bool CBaseWeapon::DefaultReload(int iClipSize, int iAnim, float fDelay)
 		return false;
 	}
 
-	if (m_bInZoom)
+	// exit scope
+	if (m_bInZoom || int(m_pPlayer->pev->fov) != DEFAULT_FOV)
 		SecondaryAttack();	// close scope when we reload.
 
-	m_pPlayer->m_flNextAttack = fDelay;
-
+	// 3rd personal anim & SFX
+	m_pPlayer->SetAnimation(PLAYER_RELOAD);
 	ReloadSound();
-	SendWeaponAnim(iAnim);
 
-	m_bInReload = true;
+	// reset accuracy data
+	m_iShotsFired = 0;
+
+	// pause weapon actions
+	m_pPlayer->m_flNextAttack = fDelay;
 	m_flTimeWeaponIdle = fDelay + 0.5f;
+	m_bInReload = true;
+
+	// 1st personal anim
+	SendWeaponAnim(iAnim);
 
 	return true;
 }

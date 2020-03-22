@@ -32,11 +32,15 @@ void CMP7A1::PrimaryAttack()
 {
 	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
 	{
-		MP7A1Fire(0.25f * m_flAccuracy, 60.0f / MP7A1_RPM);
+		MP7A1Fire(0.25f * m_flAccuracy);
+	}
+	else if (m_bInZoom)	// decrease spread while scoping.
+	{
+		MP7A1Fire(0.015f * m_flAccuracy);
 	}
 	else
 	{
-		MP7A1Fire(0.03f * m_flAccuracy, 60.0f / MP7A1_RPM);
+		MP7A1Fire(0.03f * m_flAccuracy);
 	}
 }
 
@@ -171,11 +175,7 @@ bool CMP7A1::Reload()
 {
 	if (DefaultReload(m_pItemInfo->m_iMaxClip, MP7A1_RELOAD, MP7A1_RELOAD_TIME))
 	{
-		m_pPlayer->SetAnimation(PLAYER_RELOAD);
-
 		m_flAccuracy = 0.2f;
-		m_iShotsFired = 0;
-
 		return true;
 	}
 

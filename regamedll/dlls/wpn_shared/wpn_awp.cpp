@@ -3,7 +3,8 @@
 Remastered Date: Mar 20 2020
 
 Modern Warfare Dev Team
- - Luna the Reborn
+Code - Luna the Reborn
+Model - Miracle(Innocent Blue)
 
 */
 
@@ -107,23 +108,23 @@ void CAWP::PrimaryAttack()
 {
 	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
 	{
-		AWPFire(0.85, AWP_FIRE_INTERVAL);
+		AWPFire(0.85f);
 	}
 	else if (m_pPlayer->pev->velocity.Length2D() > 140)
 	{
-		AWPFire(0.25, AWP_FIRE_INTERVAL);
+		AWPFire(0.25f);
 	}
 	else if (m_pPlayer->pev->velocity.Length2D() > 10)
 	{
-		AWPFire(0.1, AWP_FIRE_INTERVAL);
+		AWPFire(0.1f);
 	}
 	else if (m_pPlayer->pev->flags & FL_DUCKING)
 	{
-		AWPFire(0.0, AWP_FIRE_INTERVAL);
+		AWPFire(0.0f);
 	}
 	else
 	{
-		AWPFire(0.001, AWP_FIRE_INTERVAL);
+		AWPFire(0.001f);
 	}
 }
 
@@ -215,22 +216,12 @@ bool CAWP::Reload()
 {
 	if (DefaultReload(m_pItemInfo->m_iMaxClip, AWP_RELOAD, AWP_RELOAD_TIME))
 	{
-		m_pPlayer->SetAnimation(PLAYER_RELOAD);
-
 #ifndef CLIENT_DLL
 		// VFX corespounding to model anim.
 		// we can only do this on SV side.
 		m_pPlayer->m_flEjectBrass = gpGlobals->time + 1.91f;
 		m_pPlayer->m_iShellModelIndex = m_iShell;
 #endif
-
-		if (m_pPlayer->pev->fov != DEFAULT_FOV)
-		{
-			m_pPlayer->pev->fov = 10;
-
-			SecondaryAttack();
-		}
-
 		return true;
 	}
 

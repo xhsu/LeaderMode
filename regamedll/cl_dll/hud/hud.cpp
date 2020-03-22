@@ -214,6 +214,7 @@ void gHUD::Init(void)
 	gEngfuncs.pfnAddCommand("invnext", CommandFunc_NextWeapon);
 	gEngfuncs.pfnAddCommand("invprev", CommandFunc_PrevWeapon);
 	gEngfuncs.pfnAddCommand("adjust_crosshair", CommandFunc_Adjust_Crosshair);
+	gEngfuncs.pfnAddCommand("lastinv", CommandFunc_SelectLastItem);
 }
 
 void gHUD::Shutdown(void)
@@ -887,6 +888,45 @@ void CommandFunc_Adjust_Crosshair(void)
 {
 	// forward this call, since most of this command is reagarding changing the variables in m_Ammo.
 	gHUD::m_Crosshair.Adjust_Crosshair();
+}
+
+void CommandFunc_SelectLastItem(void)	// an equivlent function of void CBasePlayer::SelectLastItem() on SV.
+{
+	if (gPseudoPlayer.m_pActiveItem && !gPseudoPlayer.m_pActiveItem->CanHolster())
+		return;
+
+	if (!gPseudoPlayer.m_pLastItem || gPseudoPlayer.m_pLastItem == gPseudoPlayer.m_pActiveItem)
+	{
+		for (int i = PRIMARY_WEAPON_SLOT; i < MAX_ITEM_TYPES; i++)
+		{
+			if (g_rgpClientWeapons[gHUD::m_WeaponList.m_rgiWeapons[i]] && g_rgpClientWeapons[gHUD::m_WeaponList.m_rgiWeapons[i]] != gPseudoPlayer.m_pActiveItem)
+			{
+				gPseudoPlayer.m_pLastItem = g_rgpClientWeapons[gHUD::m_WeaponList.m_rgiWeapons[i]];
+				break;
+			}
+		}
+	}
+
+	if (!gPseudoPlayer.m_pLastItem || gPseudoPlayer.m_pLastItem == gPseudoPlayer.m_pActiveItem)
+		return;
+
+	// TODO
+	/*if (!gPseudoPlayer.m_pLastItem->CanDeploy())
+		return;*/
+
+	if (gPseudoPlayer.m_pActiveItem)
+	{
+		gPseudoPlayer.m_pActiveItem->Holster();
+	}
+
+	SWAP(gPseudoPlayer.m_pActiveItem, gPseudoPlayer.m_pLastItem);
+
+	gPseudoPlayer.m_pActiveItem->Deploy();
+
+	gPseudoPlayer.ResetMaxSpeed();
+
+	// don't forget to forward this command to SV.
+	gEngfuncs.pfnServerCmd("lastinv");
 }
 
 /*

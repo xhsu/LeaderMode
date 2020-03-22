@@ -4787,7 +4787,7 @@ void CBasePlayer::SelectLastItem()
 
 	if (!m_pLastItem || m_pLastItem == m_pActiveItem)
 	{
-		for (int i = 0; i < MAX_ITEM_TYPES; i++)
+		for (int i = PRIMARY_WEAPON_SLOT; i < MAX_ITEM_TYPES; i++)
 		{
 			if (m_rgpPlayerItems[i] && m_rgpPlayerItems[i] != m_pActiveItem)
 			{

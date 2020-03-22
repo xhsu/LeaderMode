@@ -335,6 +335,7 @@ void CommandFunc_Slot10(void);
 void CommandFunc_NextWeapon(void);
 void CommandFunc_PrevWeapon(void);
 void CommandFunc_Adjust_Crosshair(void);
+void CommandFunc_SelectLastItem(void);
 
 #define ScreenHeight (gHUD::m_scrinfo.iHeight)
 #define ScreenWidth (gHUD::m_scrinfo.iWidth)

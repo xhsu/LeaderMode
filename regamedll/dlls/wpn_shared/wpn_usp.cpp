@@ -2,6 +2,11 @@
 
 Remastered Date: Mar 13 2020
 
+Modern Warfare Dev Team
+Code - Luna the Reborn
+Model - Miracle(Innocent Blue)
+
+
 */
 
 #include "precompiled.h"
@@ -75,19 +80,19 @@ void CUSP::PrimaryAttack()
 {
 	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
 	{
-		USPFire(1.2f * (1.0f - m_flAccuracy), USP_FIRE_INTERVAL);
+		USPFire(1.2f * (1.0f - m_flAccuracy));
 	}
 	else if (m_pPlayer->pev->velocity.Length2D() > 0)
 	{
-		USPFire(0.225f * (1.0f - m_flAccuracy), USP_FIRE_INTERVAL);
+		USPFire(0.225f * (1.0f - m_flAccuracy));
 	}
 	else if (m_pPlayer->pev->flags & FL_DUCKING)
 	{
-		USPFire(0.08f * (1.0f - m_flAccuracy), USP_FIRE_INTERVAL);
+		USPFire(0.08f * (1.0f - m_flAccuracy));
 	}
 	else
 	{
-		USPFire(0.1f * (1.0f - m_flAccuracy), USP_FIRE_INTERVAL);
+		USPFire(0.1f * (1.0f - m_flAccuracy));
 	}
 }
 
@@ -97,6 +102,9 @@ void CUSP::USPFire(float flSpread, float flCycleTime)
 	{
 		return;
 	}
+
+	if (m_bInZoom)	// decrease spread while scoping.
+		flSpread *= 0.5f;
 
 	if (m_flLastFire != 0.0f)
 	{
@@ -186,7 +194,6 @@ bool CUSP::Reload()
 {
 	if (DefaultReload(m_pItemInfo->m_iMaxClip, USP_UNSIL_RELOAD, USP_RELOAD_TIME))
 	{
-		m_pPlayer->SetAnimation(PLAYER_RELOAD);
 		m_flAccuracy = 0.92f;
 		return true;
 	}

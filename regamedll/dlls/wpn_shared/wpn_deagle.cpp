@@ -1,31 +1,24 @@
+/*
+
+Remastered Date: Mar 22 2020
+
+Modern Warfare Dev Team
+Code - Luna the Reborn
+
+*/
+
 #include "precompiled.h"
 
-LINK_ENTITY_TO_CLASS(weapon_deagle, CDEAGLE)
+#ifndef CLIENT_DLL
 
-void CDEAGLE::Spawn()
+unsigned short CDEagle::m_usEvent = 0;
+int CDEagle::m_iShell = 0;
+
+void CDEagle::Precache()
 {
-	Precache();
-
-	m_iId = WEAPON_DEAGLE;
-	SET_MODEL(edict(), "models/w_deagle.mdl");
-
-	m_iDefaultAmmo = iinfo()->m_iMaxClip;
-	m_iWeaponState &= ~WPNSTATE_SHIELD_DRAWN;
-	m_fMaxSpeed = DEAGLE_MAX_SPEED;
-	m_flAccuracy = 0.9f;
-
-	// Get ready to fall down
-	FallInit();
-
-	// extend
-	CBasePlayerWeapon::Spawn();
-}
-
-void CDEAGLE::Precache()
-{
-	PRECACHE_MODEL("models/v_deagle.mdl");
-	PRECACHE_MODEL("models/shield/v_shield_deagle.mdl");
-	PRECACHE_MODEL("models/w_deagle.mdl");
+	PRECACHE_MODEL("models/weapons/v_deagle.mdl");
+	PRECACHE_MODEL("models/weapons/w_deagle.mdl");
+	PRECACHE_MODEL("models/weapons/p_deagle.mdl");
 
 	PRECACHE_SOUND("weapons/deagle-1.wav");
 	PRECACHE_SOUND("weapons/deagle-2.wav");
@@ -34,58 +27,85 @@ void CDEAGLE::Precache()
 	PRECACHE_SOUND("weapons/de_deploy.wav");
 
 	m_iShell = PRECACHE_MODEL("models/pshell.mdl");
-	m_usFireDeagle = PRECACHE_EVENT(1, "events/deagle.sc");
+	m_usEvent = PRECACHE_EVENT(1, "events/deagle.sc");
 }
 
-BOOL CDEAGLE::Deploy()
+#endif
+
+bool CDEagle::Deploy()
 {
 	m_flAccuracy = 0.9f;
-	m_fMaxSpeed = DEAGLE_MAX_SPEED;
-	m_iWeaponState &= ~WPNSTATE_SHIELD_DRAWN;
-	m_pPlayer->m_bShieldDrawn = false;
 
-	if (m_pPlayer->HasShield())
-		return DefaultDeploy("models/shield/v_shield_deagle.mdl", "models/shield/p_shield_deagle.mdl", DEAGLE_DRAW, "shieldgun", UseDecrement() != FALSE);
-	else
-		return DefaultDeploy("models/v_deagle.mdl", "models/p_deagle.mdl", DEAGLE_DRAW, "onehanded", UseDecrement() != FALSE);
+	return DefaultDeploy("models/weapons/v_deagle.mdl", "models/weapons/p_deagle.mdl", DEAGLE_DRAW, "onehanded", DEAGLE_DEPLOY_TIME);
 }
 
-void CDEAGLE::PrimaryAttack()
+void CDEagle::PrimaryAttack()
 {
 	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
 	{
-		DEAGLEFire(1.5 * (1 - m_flAccuracy), 0.3, FALSE);
+		DEagleFire(1.5f * (1.0f - m_flAccuracy));
 	}
 	else if (m_pPlayer->pev->velocity.Length2D() > 0)
 	{
-		DEAGLEFire(0.25 * (1 - m_flAccuracy), 0.3, FALSE);
+		DEagleFire(0.25f * (1.0f - m_flAccuracy));
 	}
 	else if (m_pPlayer->pev->flags & FL_DUCKING)
 	{
-		DEAGLEFire(0.115 * (1 - m_flAccuracy), 0.3, FALSE);
+		DEagleFire(0.115f * (1.0f - m_flAccuracy));
 	}
 	else
 	{
-		DEAGLEFire(0.13 * (1 - m_flAccuracy), 0.3, FALSE);
+		DEagleFire(0.13f * (1.0f - m_flAccuracy));
 	}
 }
 
-void CDEAGLE::SecondaryAttack()
+void CDEagle::SecondaryAttack()
 {
-	ShieldSecondaryFire(SHIELDGUN_UP, SHIELDGUN_DOWN);
+	m_bInZoom = !m_bInZoom;
+	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.3f;
+
+#ifdef CLIENT_DLL
+	// due to some logic problem, we actually cannot use m_bInZoom here.
+	// it would be override.
+
+	if (!g_vecGunOfsGoal.LengthSquared())
+	{
+		g_vecGunOfsGoal = Vector(-6.18f, -5.0f, 0.6f);
+		gHUD::m_iFOV = 85;	// allow clients to predict the zoom.
+	}
+	else
+	{
+		g_vecGunOfsGoal = g_vecZero;
+		gHUD::m_iFOV = 90;
+	}
+
+	// this model needs faster.
+	g_flGunOfsMovingSpeed = 10.0f;
+#else
+	// just zoom a liiiiittle bit.
+	// this doesn't suffer from the same bug where the gunofs does, since the FOV was actually sent from SV.
+	if (m_bInZoom)
+	{
+		m_pPlayer->pev->fov = 85;
+		EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, "weapons/steelsight_in.wav", 0.75f, ATTN_STATIC);
+	}
+	else
+	{
+		m_pPlayer->pev->fov = 90;
+		EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, "weapons/steelsight_out.wav", 0.75f, ATTN_STATIC);
+	}
+#endif
 }
 
-void CDEAGLE::DEAGLEFire(float flSpread, float flCycleTime, BOOL fUseSemi)
+void CDEagle::DEagleFire(float flSpread, float flCycleTime)
 {
-	Vector vecAiming, vecSrc, vecDir;
-	int flag;
-
-	flCycleTime -= 0.075f;
-
 	if (++m_iShotsFired > 1)
 	{
 		return;
 	}
+
+	if (m_bInZoom)	// decrease spread while scoping.
+		flSpread *= 0.5f;
 
 	if (m_flLastFire != 0.0)
 	{
@@ -105,23 +125,21 @@ void CDEAGLE::DEAGLEFire(float flSpread, float flCycleTime, BOOL fUseSemi)
 
 	if (m_iClip <= 0)
 	{
-		if (m_fFireOnEmpty)
-		{
-			PlayEmptySound();
-			m_flNextPrimaryAttack = GetNextAttackDelay(0.2);
-		}
+		PlayEmptySound();
+		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.2f;
 
+#ifndef CLIENT_DLL
 		if (TheBots)
 		{
 			TheBots->OnEvent(EVENT_WEAPON_FIRED_ON_EMPTY, m_pPlayer);
 		}
+#endif
 
 		return;
 	}
 
 	m_iClip--;
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
-	SetPlayerShieldAnim();
 
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
@@ -129,54 +147,63 @@ void CDEAGLE::DEAGLEFire(float flSpread, float flCycleTime, BOOL fUseSemi)
 	m_pPlayer->m_iWeaponVolume = BIG_EXPLOSION_VOLUME;
 	m_pPlayer->m_iWeaponFlash = NORMAL_GUN_FLASH;
 
-	vecSrc = m_pPlayer->GetGunPosition();
-	vecAiming = gpGlobals->v_forward;
+	Vector vecSrc = m_pPlayer->GetGunPosition();
+	Vector vecAiming = gpGlobals->v_forward;
 
-	float flBaseDamage = DEAGLE_DAMAGE;
-	vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, 4096, 2, BULLET_PLAYER_50AE, flBaseDamage, DEAGLE_RANGE_MODIFER, m_pPlayer->pev, true, m_pPlayer->random_seed);
+	Vector vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, DEAGLE_EFFECTIVE_RANGE, DEAGLE_PENETRATION, m_pAmmoInfo->m_iBulletBehavior, DEAGLE_DAMAGE, DEAGLE_RANGE_MODIFER, m_pPlayer->pev, true, m_pPlayer->random_seed);
 
-#ifdef CLIENT_WEAPONS
-	flag = FEV_NOTHOST;
-#else
-	flag = 0;
-#endif
+#ifndef CLIENT_DLL
+	int seq = UTIL_SharedRandomFloat(m_pPlayer->random_seed, DEAGLE_SHOOT1, DEAGLE_SHOOT2);
+	if (m_iClip == 0)
+		seq = DEAGLE_SHOOT_EMPTY;
 
-	PLAYBACK_EVENT_FULL(flag, m_pPlayer->edict(), m_usFireDeagle, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y,
+	SendWeaponAnim(seq);	// LUNA: I don't know why, but this has to be done on SV side, or client fire anim would be override.
+	PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL, m_pPlayer->edict(), m_usEvent, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y,
 		int(m_pPlayer->pev->punchangle.x * 100), int(m_pPlayer->pev->punchangle.y * 100), m_iClip == 0, FALSE);
-
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = GetNextAttackDelay(flCycleTime);
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 	{
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", SUIT_SENTENCE, SUIT_REPEAT_OK);
 	}
+#else
+	static event_args_t args;
+	Q_memset(&args, NULL, sizeof(args));
 
+	args.angles = m_pPlayer->pev->v_angle;
+	args.bparam1 = m_iClip == 0;
+	args.bparam2 = false;	// unused
+	args.ducking = gEngfuncs.pEventAPI->EV_LocalPlayerDucking();
+	args.entindex = gEngfuncs.GetLocalPlayer()->index;
+	args.flags = FEV_NOTHOST | FEV_RELIABLE | FEV_CLIENT | FEV_GLOBAL;
+	args.fparam1 = vecDir.x;
+	args.fparam2 = vecDir.y;
+	args.iparam1 = int(m_pPlayer->pev->punchangle.x * 100.0f);
+	args.iparam2 = int(m_pPlayer->pev->punchangle.y * 100.0f);
+	args.origin = m_pPlayer->pev->origin;
+	args.velocity = m_pPlayer->pev->velocity;
+
+	EV_FireDEagle(&args);
+#endif
+
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.8f;
-	m_pPlayer->pev->punchangle.x -= 2;
-	ResetPlayerShieldAnim();
+
+	m_pPlayer->m_vecVAngleShift.x -= 2.5f;
 }
 
-void CDEAGLE::Reload()
+bool CDEagle::Reload()
 {
-	if (DefaultReload(iinfo()->m_iMaxClip, DEAGLE_RELOAD, DEAGLE_RELOAD_TIME))
+	if (DefaultReload(m_pItemInfo->m_iMaxClip, DEAGLE_RELOAD, DEAGLE_RELOAD_TIME))
 	{
-		m_pPlayer->SetAnimation(PLAYER_RELOAD);
 		m_flAccuracy = 0.9f;
+		return true;
 	}
+
+	return false;
 }
 
-void CDEAGLE::WeaponIdle()
+void CDEagle::WeaponIdle()
 {
-	ResetEmptySound();
-	m_pPlayer->GetAutoaimVector(AUTOAIM_10DEGREES);
-
-	if (m_flTimeWeaponIdle <= UTIL_WeaponTimeBase())
-	{
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
-
-		if (m_iWeaponState & WPNSTATE_SHIELD_DRAWN)
-		{
-			SendWeaponAnim(SHIELDGUN_DRAWN_IDLE, UseDecrement() != FALSE);
-		}
-	}
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
+	SendWeaponAnim(DEAGLE_IDLE1);
 }

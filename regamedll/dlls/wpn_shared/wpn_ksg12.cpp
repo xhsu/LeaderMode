@@ -2,6 +2,10 @@
 
 Remastered Date: Mar 13 2020
 
+Modern Warfare Dev Team
+Code - Luna the Reborn
+Model - Miracle(Innocent Blue)
+
 */
 
 #include "precompiled.h"
@@ -22,7 +26,7 @@ void CKSG12::Precache()
 	PRECACHE_SOUND("weapons/reload1.wav");
 	PRECACHE_SOUND("weapons/reload3.wav");
 
-	m_usEvent = PRECACHE_EVENT(1, "events/m3.sc");
+	m_usEvent = PRECACHE_EVENT(1, "events/ksg12.sc");
 	m_iShell = PRECACHE_MODEL("models/shotgunshell.mdl");
 }
 
@@ -145,7 +149,7 @@ void CKSG12::PrimaryAttack()
 	args.origin = m_pPlayer->pev->origin;
 	args.velocity = m_pPlayer->pev->velocity;
 
-	EV_FireM3(&args);
+	EV_FireKSG12(&args);
 #endif
 
 	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + KSG12_FIRE_INTERVAL;

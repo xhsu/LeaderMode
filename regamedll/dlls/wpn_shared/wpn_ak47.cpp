@@ -81,15 +81,19 @@ void CAK47::PrimaryAttack()
 {
 	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
 	{
-		AK47Fire(0.04f + (0.4f * m_flAccuracy), 60.0f / AK47_RPM);
+		AK47Fire(0.04f + (0.4f * m_flAccuracy));
 	}
 	else if (m_pPlayer->pev->velocity.Length2D() > 140)
 	{
-		AK47Fire(0.04f + (0.07f * m_flAccuracy), 60.0f / AK47_RPM);
+		AK47Fire(0.04f + (0.07f * m_flAccuracy));
+	}
+	else if (m_bInZoom)	// decrease spread while scoping.
+	{
+		AK47Fire(0.015f * m_flAccuracy);
 	}
 	else
 	{
-		AK47Fire(0.0275f * m_flAccuracy, 60.0f / AK47_RPM);
+		AK47Fire(0.0275f * m_flAccuracy);
 	}
 }
 
@@ -186,11 +190,7 @@ bool CAK47::Reload()
 {
 	if (DefaultReload(m_pItemInfo->m_iMaxClip, AK47_RELOAD, AK47_RELOAD_TIME))
 	{
-		m_pPlayer->SetAnimation(PLAYER_RELOAD);
-
 		m_flAccuracy = 0.2f;
-		m_iShotsFired = 0;
-
 		return true;
 	}
 
