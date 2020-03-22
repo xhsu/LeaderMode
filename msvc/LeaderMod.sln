@@ -20,6 +20,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "gradle", "gradle", "{DB5703
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Client", "..\regamedll\cl_dll\Client\Client.vcxproj", "{8DAB2081-91EF-4A84-BCF2-E5726DB3A4E6}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Metahook Module", "..\regamedll\metahook\msvc\Metahook Module.vcxproj", "{13AFB6F4-3CB5-454D-B141-A4387E0E0994}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug Play|Win32 = Debug Play|Win32
@@ -87,6 +89,26 @@ Global
 		{8DAB2081-91EF-4A84-BCF2-E5726DB3A4E6}.Tests|Win32.Build.0 = Release|Win32
 		{8DAB2081-91EF-4A84-BCF2-E5726DB3A4E6}.Tests|x64.ActiveCfg = Release|x64
 		{8DAB2081-91EF-4A84-BCF2-E5726DB3A4E6}.Tests|x64.Build.0 = Release|x64
+		{13AFB6F4-3CB5-454D-B141-A4387E0E0994}.Debug Play|Win32.ActiveCfg = Debug|Win32
+		{13AFB6F4-3CB5-454D-B141-A4387E0E0994}.Debug Play|Win32.Build.0 = Debug|Win32
+		{13AFB6F4-3CB5-454D-B141-A4387E0E0994}.Debug Play|x64.ActiveCfg = Debug|x64
+		{13AFB6F4-3CB5-454D-B141-A4387E0E0994}.Debug Play|x64.Build.0 = Debug|x64
+		{13AFB6F4-3CB5-454D-B141-A4387E0E0994}.Debug|Win32.ActiveCfg = Debug|Win32
+		{13AFB6F4-3CB5-454D-B141-A4387E0E0994}.Debug|Win32.Build.0 = Debug|Win32
+		{13AFB6F4-3CB5-454D-B141-A4387E0E0994}.Debug|x64.ActiveCfg = Debug|x64
+		{13AFB6F4-3CB5-454D-B141-A4387E0E0994}.Debug|x64.Build.0 = Debug|x64
+		{13AFB6F4-3CB5-454D-B141-A4387E0E0994}.Release Play|Win32.ActiveCfg = Release|Win32
+		{13AFB6F4-3CB5-454D-B141-A4387E0E0994}.Release Play|Win32.Build.0 = Release|Win32
+		{13AFB6F4-3CB5-454D-B141-A4387E0E0994}.Release Play|x64.ActiveCfg = Release|x64
+		{13AFB6F4-3CB5-454D-B141-A4387E0E0994}.Release Play|x64.Build.0 = Release|x64
+		{13AFB6F4-3CB5-454D-B141-A4387E0E0994}.Release|Win32.ActiveCfg = Release|Win32
+		{13AFB6F4-3CB5-454D-B141-A4387E0E0994}.Release|Win32.Build.0 = Release|Win32
+		{13AFB6F4-3CB5-454D-B141-A4387E0E0994}.Release|x64.ActiveCfg = Release|x64
+		{13AFB6F4-3CB5-454D-B141-A4387E0E0994}.Release|x64.Build.0 = Release|x64
+		{13AFB6F4-3CB5-454D-B141-A4387E0E0994}.Tests|Win32.ActiveCfg = Release|Win32
+		{13AFB6F4-3CB5-454D-B141-A4387E0E0994}.Tests|Win32.Build.0 = Release|Win32
+		{13AFB6F4-3CB5-454D-B141-A4387E0E0994}.Tests|x64.ActiveCfg = Release|x64
+		{13AFB6F4-3CB5-454D-B141-A4387E0E0994}.Tests|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

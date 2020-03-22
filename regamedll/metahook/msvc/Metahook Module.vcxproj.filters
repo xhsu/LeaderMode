@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="metahook">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{45860301-291f-4a65-8d88-65fbb25b2ebf}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\precompiled.cpp">
+      <Filter>metahook</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\interface.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\metahook.cpp">
+      <Filter>metahook</Filter>
+    </ClCompile>
+    <ClCompile Include="..\larger_textures.cpp">
+      <Filter>metahook</Filter>
+    </ClCompile>
+    <ClCompile Include="..\fullbright_textures.cpp">
+      <Filter>metahook</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\precompiled.h">
+      <Filter>metahook</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\interface.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\metahook.h">
+      <Filter>metahook</Filter>
+    </ClInclude>
+    <ClInclude Include="..\cdll_export.h">
+      <Filter>metahook</Filter>
+    </ClInclude>
+    <ClInclude Include="..\larger_textures.h">
+      <Filter>metahook</Filter>
+    </ClInclude>
+    <ClInclude Include="..\fullbright_textures.h">
+      <Filter>metahook</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
