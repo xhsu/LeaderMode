@@ -16,15 +16,7 @@ int CDEagle::m_iShell = 0;
 
 void CDEagle::Precache()
 {
-	PRECACHE_MODEL("models/weapons/v_deagle.mdl");
-	PRECACHE_MODEL("models/weapons/w_deagle.mdl");
-	PRECACHE_MODEL("models/weapons/p_deagle.mdl");
-
-	PRECACHE_SOUND("weapons/deagle-1.wav");
-	PRECACHE_SOUND("weapons/deagle-2.wav");
-	PRECACHE_SOUND("weapons/de_clipout.wav");
-	PRECACHE_SOUND("weapons/de_clipin.wav");
-	PRECACHE_SOUND("weapons/de_deploy.wav");
+	PRECACHE_NECESSARY_FILES(DEAGLE);
 
 	m_iShell = PRECACHE_MODEL("models/pshell.mdl");
 	m_usEvent = PRECACHE_EVENT(1, "events/deagle.sc");
@@ -36,7 +28,7 @@ bool CDEagle::Deploy()
 {
 	m_flAccuracy = 0.9f;
 
-	return DefaultDeploy("models/weapons/v_deagle.mdl", "models/weapons/p_deagle.mdl", DEAGLE_DRAW, "onehanded", DEAGLE_DEPLOY_TIME);
+	return DefaultDeploy(DEAGLE_VIEW_MODEL, DEAGLE_WORLD_MODEL, DEAGLE_DRAW, "onehanded", DEAGLE_DEPLOY_TIME);
 }
 
 void CDEagle::PrimaryAttack()

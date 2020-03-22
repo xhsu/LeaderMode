@@ -165,6 +165,10 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 		p = new CQBZ95;
 		break;
 
+	case WEAPON_SVD:
+		p = new CSVD;
+		break;
+
 	case WEAPON_USP:
 		p = new CUSP;
 		break;
@@ -297,8 +301,8 @@ void CBaseWeapon::PostFrame()
 
 		m_flDecreaseShotsFired = gpGlobals->time + 0.4f;
 
-		// if it's a pistol then set the shots fired to 0 after the player releases a button
-		if (IsSecondaryWeapon(m_iId) && m_iId != WEAPON_GLOCK18)
+		// if it's a semi-auto weapon then set the shots fired to 0 after the player releases a button
+		if (IsSemiautoWeapon(m_iId))
 		{
 			m_iShotsFired = 0;
 		}

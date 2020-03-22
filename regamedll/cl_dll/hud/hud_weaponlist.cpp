@@ -198,9 +198,9 @@ int CHudWeaponList::Draw(float flTime)
 			vecAmmoBarCoord = m_rgvecCurCoord[i] + Vector2D(-AMMOBAR_WIDTH, flFullHeight - flCurHeight);
 
 			UnpackRGB(r, g, b, gPseudoPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType] ? RGB_YELLOWISH : RGB_REDISH);
-			gEngfuncs.pfnFillRGBA(vecAmmoBarCoord.x, m_rgvecCurCoord[i].y, AMMOBAR_WIDTH, flFullHeight, r, g, b, 128);
+			gEngfuncs.pfnFillRGBA(vecAmmoBarCoord.x, m_rgvecCurCoord[i].y, AMMOBAR_WIDTH, flFullHeight, r, g, b, 64);
 
-			UnpackRGB(r, g, b, gPseudoPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType] > pWeapon->m_pAmmoInfo->m_iCountPerBox ? RGB_GREENISH : RGB_REDISH);
+			UnpackRGB(r, g, b, gPseudoPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType] > pWeapon->m_pItemInfo->m_iMaxClip ? RGB_GREENISH : RGB_REDISH);
 			gEngfuncs.pfnFillRGBA(vecAmmoBarCoord.x, vecAmmoBarCoord.y, AMMOBAR_WIDTH, flCurHeight, r, g, b, 255);
 		}
 

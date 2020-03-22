@@ -18,9 +18,7 @@ int CUSP::m_iShell = 0;
 
 void CUSP::Precache()
 {
-	PRECACHE_MODEL("models/weapons/v_usp.mdl");
-	PRECACHE_MODEL("models/weapons/w_usp.mdl");
-	PRECACHE_MODEL("models/weapons/p_usp.mdl");
+	PRECACHE_NECESSARY_FILES(USP);
 
 	m_iShell = PRECACHE_MODEL("models/pshell.mdl");
 	m_usEvent = PRECACHE_EVENT(1, "events/usp.sc");
@@ -35,7 +33,7 @@ bool CUSP::Deploy()
 {
 	m_flAccuracy = 0.92f;
 
-	return DefaultDeploy("models/weapons/v_usp.mdl", "models/weapons/p_usp.mdl", USP_DRAW, "onehanded", USP_DEPLOY_TIME);
+	return DefaultDeploy(USP_VIEW_MODEL, USP_WORLD_MODEL, USP_DRAW, "onehanded", USP_DEPLOY_TIME);
 }
 
 void CUSP::SecondaryAttack()

@@ -1072,7 +1072,7 @@ DECLARE_EVENT(FireAK47)
 
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iRShell, TE_BOUNCE_SHELL, 9);
 
-	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/ak47-1.wav", 1.0, 0.4, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
+	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, AK47_FIRE_SFX, 1.0, 0.4, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
 
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
@@ -1123,7 +1123,7 @@ DECLARE_EVENT(FireACR)
 
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iRShell, TE_BOUNCE_SHELL, 8);
 
-	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/aug-1.wav", 1.0, 0.48, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
+	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, ACR_FIRE_SFX, 1.0, 0.48, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
 
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
@@ -1163,7 +1163,7 @@ DECLARE_EVENT(FireAWP)
 		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 80, 0.5, 10, 10, 10, EV_WALL_PUFF, velocity, false, 35);
 	}
 
-	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/awp/awp_fire.wav", 1.0, 0.28, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
+	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, AWP_FIRE_SFX, 1.0, 0.28, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
 
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
@@ -1222,7 +1222,7 @@ DECLARE_EVENT(FireDEagle)
 
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iPShell, TE_BOUNCE_SHELL, 5);
 
-	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/deagle-1.wav", 1.0, 0.6, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
+	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, DEAGLE_FIRE_SFX, 1.0, 0.6, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
 
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
@@ -1281,10 +1281,7 @@ DECLARE_EVENT(FireQBZ95)
 
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iRShell, TE_BOUNCE_SHELL, 8);
 
-	if (gEngfuncs.pfnRandomLong(0, 1))
-		gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/famas-1.wav", 1.0, 0.48, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
-	else
-		gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/famas-2.wav", 1.0, 0.48, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
+	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, QBZ95_FIRE_SFX, 1.0, 0.48, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
 
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
@@ -1297,9 +1294,57 @@ DECLARE_EVENT(Fire57)
 
 }
 
-DECLARE_EVENT(FireG3SG1)
+DECLARE_EVENT(FireSVD)
 {
+	int idx = args->entindex;
 
+	Vector origin, angles, velocity;
+	VectorCopy(args->origin, origin);
+	VectorCopy(args->angles, angles);
+	VectorCopy(args->velocity, velocity);
+
+	angles[0] += args->iparam1 / 100.0;
+	angles[1] += args->iparam2 / 100.0;
+
+	Vector forward, right, up;
+	gEngfuncs.pfnAngleVectors(angles, forward, right, up);
+
+	if (EV_IsLocal(idx))
+	{
+		g_iShotsFired++;
+		EV_MuzzleFlash();
+
+		if (g_pCurWeapon)
+			g_pCurWeapon->SendWeaponAnim(UTIL_SharedRandomLong(gPseudoPlayer.random_seed, SVD_SHOOT, SVD_SHOOT2));
+
+		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 3, 0.3, 35, 35, 35, EV_RIFLE_SMOKE, velocity, false, 35);
+		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 35, 0.35, 30, 30, 30, EV_WALL_PUFF, velocity, false, 35);
+		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 70, 0.3, 25, 25, 25, EV_WALL_PUFF, velocity, false, 35);
+	}
+
+	Vector ShellVelocity, ShellOrigin;
+	if (EV_IsLocal(idx))
+	{
+		if (cl_righthand->value == 0)
+			EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -8.0, -10.0);
+		else
+			EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -8.0, 10.0);
+
+		VectorCopy(g_pViewEnt->attachment[1], ShellOrigin);
+		VectorScale(ShellVelocity, 1.5, ShellVelocity);
+		ShellVelocity[2] -= 50.0;
+	}
+	else
+		EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -12.0, -4.0);
+
+	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iRShell, TE_BOUNCE_SHELL, idx, 17);
+
+	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, SVD_FIRE_SFX, 1.0, 0.6, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
+
+	Vector vecSrc = EV_GetGunPosition(args, origin);
+	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
+
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, SVD_EFFECTIVE_RANGE, g_rgAmmoInfo[g_rgItemInfo[WEAPON_SVD].m_iAmmoType].m_iBulletBehavior, SVD_PENETRATION);
 }
 
 DECLARE_EVENT(FireGALIL)
@@ -1355,7 +1400,7 @@ DECLARE_EVENT(FireKSG12)
 		EV_HLDM_CreateSmoke(ent->attachment[0], forward, 75, 0.35, 7, 7, 7, EV_WALL_PUFF, velocity, false, 35);
 	}
 
-	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/ksg12/ksg12_fire.wav", 1.0, 0.48, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
+	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, KSG12_FIRE_SFX, 1.0, 0.48, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
 
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	EV_HLDM_FireBullets(idx, forward, right, up, KSG12_PROJECTILE_COUNT, vecSrc, forward, KSG12_CONE_VECTOR, KSG12_EFFECTIVE_RANGE, g_rgAmmoInfo[g_rgItemInfo[WEAPON_KSG12].m_iAmmoType].m_iBulletBehavior, 1, shared_rand);
@@ -1412,7 +1457,7 @@ DECLARE_EVENT(FireAnaconda)
 
 	// no shell VFX while shooting for Anaconda. since it is a revolvor.
 
-	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/anaconda/anaconda_fire.wav", 1.0, ATTN_NORM, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
+	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, ANACONDA_FIRE_SFX, 1.0, ATTN_NORM, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
 
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
@@ -1483,7 +1528,7 @@ DECLARE_EVENT(FireMP7A1)
 
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iPShell, TE_BOUNCE_SHELL, 15);
 
-	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/tmp-1.wav", 1.0, 1.6, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
+	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, MP7A1_FIRE_SFX, 1.0, 1.6, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
 
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
@@ -1553,7 +1598,7 @@ DECLARE_EVENT(FireUSP)
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iPShell, TE_BOUNCE_SHELL);
 
 	// gunshot sound.
-	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/usp/usp_fire.wav", 1.0, ATTN_NORM, 0, 87 + gEngfuncs.pfnRandomLong(0, 0x12));
+	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, USP_FIRE_SFX, 1.0, ATTN_NORM, 0, 87 + gEngfuncs.pfnRandomLong(0, 0x12));
 
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
@@ -1656,10 +1701,7 @@ DECLARE_EVENT(FireCM901)
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iPShell, TE_BOUNCE_SHELL);
 
 	// gunshot sound.
-	if (!silencer_on)
-		gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/cm901-1.wav", 1.0, ATTN_NORM, 0, 87 + gEngfuncs.pfnRandomLong(0, 0x12));
-	else
-		gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, "weapons/cm901-1.wav", 1.0, 2.0, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
+	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, CM901_FIRE_SFX, 1.0, ATTN_NORM, 0, 87 + gEngfuncs.pfnRandomLong(0, 0x12));
 
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
@@ -1681,7 +1723,7 @@ void Events_Init(void)
 	HOOK_EVENT(elite_right, FireEliteRight);
 	HOOK_EVENT(qbz95, FireQBZ95);
 	HOOK_EVENT(fiveseven, Fire57);
-	HOOK_EVENT(g3sg1, FireG3SG1);
+	HOOK_EVENT(svd, FireSVD);
 	HOOK_EVENT(galil, FireGALIL);
 	HOOK_EVENT(glock18, Fireglock18);
 	HOOK_EVENT(knife, Knife);

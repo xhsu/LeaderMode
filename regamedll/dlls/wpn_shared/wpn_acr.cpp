@@ -16,16 +16,7 @@ int CACR::m_iShell = 0;
 
 void CACR::Precache()
 {
-	PRECACHE_MODEL("models/weapons/v_acr.mdl");
-	PRECACHE_MODEL("models/weapons/w_acr.mdl");
-	PRECACHE_MODEL("models/weapons/p_acr.mdl");
-
-	PRECACHE_SOUND("weapons/aug-1.wav");
-	PRECACHE_SOUND("weapons/aug_clipout.wav");
-	PRECACHE_SOUND("weapons/aug_clipin.wav");
-	PRECACHE_SOUND("weapons/aug_boltpull.wav");
-	PRECACHE_SOUND("weapons/aug_boltslap.wav");
-	PRECACHE_SOUND("weapons/aug_forearm.wav");
+	PRECACHE_NECESSARY_FILES(ACR);
 
 	m_iShell = PRECACHE_MODEL("models/rshell.mdl");
 	m_usEvent = PRECACHE_EVENT(1, "events/acr.sc");
@@ -38,7 +29,7 @@ bool CACR::Deploy()
 	m_flAccuracy = 0.2f;
 	m_iShotsFired = 0;
 
-	return DefaultDeploy("models/weapons/v_acr.mdl", "models/weapons/p_acr.mdl", ACR_DRAW, "carbine");
+	return DefaultDeploy(ACR_VIEW_MODEL, ACR_WORLD_MODEL, ACR_DRAW, "carbine");
 }
 
 void CACR::SecondaryAttack()

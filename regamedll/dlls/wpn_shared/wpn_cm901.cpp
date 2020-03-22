@@ -14,9 +14,7 @@ int CCM901::m_iShell = 0;
 
 void CCM901::Precache()
 {
-	PRECACHE_MODEL("models/weapons/v_cm901.mdl");
-	PRECACHE_MODEL("models/weapons/w_cm901.mdl");
-	PRECACHE_MODEL("models/weapons/p_cm901.mdl");
+	PRECACHE_NECESSARY_FILES(CM901);
 
 	m_iShell = PRECACHE_MODEL("models/rshell.mdl");
 	m_usEvent = PRECACHE_EVENT(1, "events/cm901.sc");
@@ -31,7 +29,7 @@ bool CCM901::Deploy()
 {
 	m_flAccuracy = 0.92f;
 
-	return DefaultDeploy("models/weapons/v_cm901.mdl", "models/weapons/p_cm901.mdl", CM901_DRAW, "rifle");
+	return DefaultDeploy(CM901_VIEW_MODEL, CM901_WORLD_MODEL, CM901_DRAW, "rifle");
 }
 
 void CCM901::SecondaryAttack()

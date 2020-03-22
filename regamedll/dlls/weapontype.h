@@ -199,6 +199,7 @@ WeaponClassType WeaponIDToWeaponClass(WeaponIdType id);
 bool IsPrimaryWeapon(int id);	// Return true if given weapon ID is a primary weapon
 bool IsSecondaryWeapon(int id);	// Return true if given weapon ID is a secondary weapon
 bool IsGrenadeWeapon(int id);	// Return true if given weapon ID is a grenade
+bool IsSemiautoWeapon(WeaponIdType iId);	// Return true if this weapon is logically coded as a semi-auto weapon.
 const ItemInfo* GetWeaponInfo(int weaponID);
 const ItemInfo* GetWeaponInfo(const char* weaponName);
 

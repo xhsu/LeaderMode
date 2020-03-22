@@ -196,6 +196,13 @@ bool IsGrenadeWeapon(int id)
 	return g_rgItemInfo[id].m_iSlot == GRENADE_SLOT;
 }
 
+constexpr int BITS_SEMIAUTO_WEAPON = ((1 << WEAPON_USP) | (1 << WEAPON_ANACONDA) | (1 << WEAPON_DEAGLE) | (1 << WEAPON_FIVESEVEN) | (1 << WEAPON_P99) | (1 << WEAPON_M14EBR) | (1 << WEAPON_SVD));
+
+bool IsSemiautoWeapon(WeaponIdType iId)
+{
+	return !!((1 << iId) & BITS_SEMIAUTO_WEAPON);
+}
+
 const ItemInfo* GetWeaponInfo(int weaponID)
 {
 	return (weaponID > 0 && weaponID < LAST_WEAPON) ? &g_rgItemInfo[weaponID] : nullptr;

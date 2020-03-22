@@ -127,9 +127,6 @@
     <ClCompile Include="..\dlls\wpn_shared\wpn_flashbang.cpp">
       <Filter>dlls\wpn_shared</Filter>
     </ClCompile>
-    <ClCompile Include="..\dlls\wpn_shared\wpn_g3sg1.cpp">
-      <Filter>dlls\wpn_shared</Filter>
-    </ClCompile>
     <ClCompile Include="..\dlls\wpn_shared\wpn_galil.cpp">
       <Filter>dlls\wpn_shared</Filter>
     </ClCompile>
@@ -488,6 +485,9 @@
       <Filter>dlls\wpn_shared</Filter>
     </ClCompile>
     <ClCompile Include="..\dlls\wpn_shared\wpn_acr.cpp">
+      <Filter>dlls\wpn_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dlls\wpn_shared\wpn_svd.cpp">
       <Filter>dlls\wpn_shared</Filter>
     </ClCompile>
   </ItemGroup>

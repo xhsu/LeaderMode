@@ -17,15 +17,7 @@ int CAnaconda::m_iShell = 0;
 
 void CAnaconda::Precache()
 {
-	PRECACHE_MODEL("models/weapons/v_anaconda.mdl");
-	PRECACHE_MODEL("models/weapons/w_anaconda.mdl");
-	PRECACHE_MODEL("models/weapons/p_anaconda.mdl");
-
-	PRECACHE_SOUND("weapons/p228-1.wav");
-	PRECACHE_SOUND("weapons/p228_clipout.wav");
-	PRECACHE_SOUND("weapons/p228_clipin.wav");
-	PRECACHE_SOUND("weapons/p228_sliderelease.wav");
-	PRECACHE_SOUND("weapons/p228_slidepull.wav");
+	PRECACHE_NECESSARY_FILES(ANACONDA);
 
 	m_iShell = PRECACHE_MODEL("models/pshell.mdl");
 	m_usEvent = PRECACHE_EVENT(1, "events/anaconda.sc");
@@ -48,15 +40,17 @@ void CAnaconda::Think(void)
 
 bool CAnaconda::Deploy()
 {
-	DefaultDeploy("models/weapons/v_anaconda.mdl", "models/weapons/p_anaconda.mdl", ANACONDA_DRAW, "onehanded", ANACONDA_DEPLOY_TIME);
-
+	if (DefaultDeploy(ANACONDA_VIEW_MODEL, ANACONDA_WORLD_MODEL, ANACONDA_DRAW, "onehanded", ANACONDA_DEPLOY_TIME))
+	{
 #ifdef CLIENT_DLL
-	// reset this when switching gun.
-	m_flShellRain = 0;
+		// reset this when switching gun.
+		m_flShellRain = 0;
 #endif
+		m_flAccuracy = 0.9f;
+		return true;
+	}
 
-	m_flAccuracy = 0.9f;
-	return true;
+	return false;
 }
 
 void CAnaconda::PrimaryAttack()

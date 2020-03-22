@@ -7,12 +7,7 @@ int CMP7A1::m_iShell = 0;
 
 void CMP7A1::Precache()
 {
-	PRECACHE_MODEL("models/weapons/v_mp7a1.mdl");
-	PRECACHE_MODEL("models/weapons/w_mp7a1.mdl");
-	PRECACHE_MODEL("models/weapons/p_mp7a1.mdl");
-
-	PRECACHE_SOUND("weapons/tmp-1.wav");
-	PRECACHE_SOUND("weapons/tmp-2.wav");
+	PRECACHE_NECESSARY_FILES(MP7A1);
 
 	m_iShell = PRECACHE_MODEL("models/pshell.mdl");
 	m_usEvent = PRECACHE_EVENT(1, "events/mp7a1.sc");
@@ -25,7 +20,7 @@ bool CMP7A1::Deploy()
 	m_flAccuracy = 0.2f;
 	m_iShotsFired = 0;
 
-	return DefaultDeploy("models/weapons/v_mp7a1.mdl", "models/weapons/p_mp7a1.mdl", MP7A1_DRAW, "onehanded");
+	return DefaultDeploy(MP7A1_VIEW_MODEL, MP7A1_WORLD_MODEL, MP7A1_DRAW, "onehanded");
 }
 
 void CMP7A1::PrimaryAttack()

@@ -16,18 +16,7 @@ int CQBZ95::m_iShell = 0;
 
 void CQBZ95::Precache()
 {
-	PRECACHE_MODEL("models/weapons/v_qbz95.mdl");
-	PRECACHE_MODEL("models/weapons/w_qbz95.mdl");
-	PRECACHE_MODEL("models/weapons/p_qbz95.mdl");
-
-	PRECACHE_SOUND("weapons/famas-1.wav");
-	PRECACHE_SOUND("weapons/famas-2.wav");
-	PRECACHE_SOUND("weapons/famas_clipout.wav");
-	PRECACHE_SOUND("weapons/famas_clipin.wav");
-	PRECACHE_SOUND("weapons/famas_boltpull.wav");
-	PRECACHE_SOUND("weapons/famas_boltslap.wav");
-	PRECACHE_SOUND("weapons/famas_forearm.wav");
-	PRECACHE_SOUND("weapons/famas-burst.wav");
+	PRECACHE_NECESSARY_FILES(QBZ95);
 
 	m_iShell = PRECACHE_MODEL("models/rshell.mdl");
 	m_usEvent = PRECACHE_EVENT(1, "events/qbz95.sc");
@@ -40,7 +29,7 @@ bool CQBZ95::Deploy()
 	m_iShotsFired = 0;
 	m_flAccuracy = 0.2f;
 
-	return DefaultDeploy("models/weapons/v_qbz95.mdl", "models/weapons/p_qbz95.mdl", QBZ95_DRAW, "carbine");
+	return DefaultDeploy(QBZ95_VIEW_MODEL, QBZ95_WORLD_MODEL, QBZ95_DRAW, "carbine");
 }
 
 void CQBZ95::SecondaryAttack()
