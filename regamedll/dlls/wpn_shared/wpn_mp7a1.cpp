@@ -1,3 +1,13 @@
+/*
+
+Remastered Date: Mar 21 2020
+
+Modern Warfare Dev Team
+Code - Luna the Reborn
+Model - Miracle(Innocent Blue)
+
+*/
+
 #include "precompiled.h"
 
 #ifndef CLIENT_DLL
@@ -50,7 +60,7 @@ void CMP7A1::SecondaryAttack(void)
 
 	if (!g_vecGunOfsGoal.LengthSquared())
 	{
-		g_vecGunOfsGoal = Vector(-11.6f, -11.0f, 4.0f);
+		g_vecGunOfsGoal = Vector(-11.37f, -8.0f, 4.5f);
 		gHUD::m_iFOV = 85;	// allow clients to predict the zoom.
 	}
 	else

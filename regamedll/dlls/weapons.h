@@ -857,7 +857,7 @@ enum smokegrenade_e
 constexpr float MP7A1_MAX_SPEED			= 250.0f;
 constexpr float MP7A1_DAMAGE			= 20.0f;
 constexpr float MP7A1_RANGE_MODIFER		= 0.85f;
-constexpr float MP7A1_RELOAD_TIME		= 2.1f;
+constexpr float MP7A1_RELOAD_TIME		= 2.575f;
 constexpr float MP7A1_RPM				= 850.0f;
 constexpr int	MP7A1_PENETRATION		= 1;
 constexpr float	MP7A1_EFFECTIVE_RANGE	= 8192.0f;
