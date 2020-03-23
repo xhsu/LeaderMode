@@ -132,8 +132,7 @@ void CQBZ95::QBZ95Fire(float flSpread, float flCycleTime)
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecAiming = gpGlobals->v_forward;
 
-	Vector vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, QBZ95_EFFECTIVE_RANGE, QBZ95_PENETRATION, m_pAmmoInfo->m_iBulletBehavior,
-		QBZ95_DAMAGE, QBZ95_RANGE_MODIFER, m_pPlayer->pev, false, m_pPlayer->random_seed);
+	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, QBZ95_EFFECTIVE_RANGE, QBZ95_PENETRATION, m_iPrimaryAmmoType, QBZ95_DAMAGE, QBZ95_RANGE_MODIFER, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
 	SendWeaponAnim(UTIL_SharedRandomFloat(m_pPlayer->random_seed, QBZ95_SHOOT1, QBZ95_SHOOT3));

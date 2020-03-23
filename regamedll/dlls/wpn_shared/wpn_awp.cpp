@@ -160,7 +160,7 @@ void CAWP::AWPFire(float flSpread, float flCycleTime)
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecAiming = gpGlobals->v_forward;
 
-	Vector vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, AWP_EFFECTIVE_RANGE, AWP_PENETRATION, m_pAmmoInfo->m_iBulletBehavior, AWP_DAMAGE, AWP_RANGE_MODIFER, m_pPlayer->pev, true, m_pPlayer->random_seed);
+	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, AWP_EFFECTIVE_RANGE, AWP_PENETRATION, m_iPrimaryAmmoType, AWP_DAMAGE, AWP_RANGE_MODIFER, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
 	SendWeaponAnim(UTIL_SharedRandomLong(m_pPlayer->random_seed, AWP_SHOOT1, AWP_SHOOT3));

@@ -31,19 +31,31 @@
 enum AmmoIdType
 {
 	AMMO_NONE = 0,
+
+	// Sniper & Hunter
 	AMMO_338Magnum = 1,
 	AMMO_408CheyTac,
+
+	// Assault
 	AMMO_762Nato,
 	AMMO_556NatoBox,
 	AMMO_556Nato,
 	AMMO_58mmCN,
+
+	// Buckshot
 	AMMO_Buckshot,
-	AMMO_45acp,
+
+	// PDWs
 	AMMO_57mm,
+	AMMO_46PDW,
+
+	// High retarding force
+	AMMO_45acp,
 	AMMO_50AE,
 	AMMO_44Magnum,
 	AMMO_9mm,
-	AMMO_46PDW,
+
+	// Equipments
 	AMMO_Flashbang,
 	AMMO_HEGrenade,
 	AMMO_SmokeGrenade,
@@ -59,7 +71,8 @@ struct AmmoInfo
 	int m_iMax;
 	int m_iCountPerBox;
 	int m_iCostPerBox;
-	int m_iBulletBehavior;
+	int m_iPenetrationPower;
+	float m_flPenetrationDistance;
 };
 
 extern const AmmoInfo g_rgAmmoInfo[AMMO_MAXTYPE];
@@ -83,3 +96,4 @@ extern const AmmoInfo g_rgAmmoInfo[AMMO_MAXTYPE];
 
 const AmmoInfo* GetAmmoInfo(const char* ammoName);
 const AmmoInfo* GetAmmoInfo(int iId);
+bool DescribeBulletTypeParameters(AmmoIdType iBulletType, int& iPenetrationPower, float& flPenetrationDistance);

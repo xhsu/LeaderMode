@@ -122,8 +122,7 @@ void CAK47::AK47Fire(float flSpread, float flCycleTime)
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecAiming = gpGlobals->v_forward;
 
-	Vector vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, AK47_EFFECTIVE_RANGE, AK47_PENETRATION, m_pAmmoInfo->m_iBulletBehavior,
-		AK47_DAMAGE, AK47_RANGE_MODIFER, m_pPlayer->pev, false, m_pPlayer->random_seed);
+	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, AK47_EFFECTIVE_RANGE, AK47_PENETRATION, m_iPrimaryAmmoType, AK47_DAMAGE, AK47_RANGE_MODIFER, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
 	SendWeaponAnim(UTIL_SharedRandomFloat(m_pPlayer->random_seed, AK47_SHOOT1, AK47_SHOOT3));

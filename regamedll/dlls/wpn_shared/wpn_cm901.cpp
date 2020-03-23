@@ -138,7 +138,7 @@ void CCM901::CM901Fire(float flSpread, float flCycleTime)
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecAiming = gpGlobals->v_forward;
 
-	Vector vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, CM901_EFFECTIVE_RANGE, CM901_PENETRATION, BULLET_PLAYER_556MM, CM901_DAMAGE, CM901_RANGE_MODIFER, m_pPlayer->pev, true, m_pPlayer->random_seed);
+	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, CM901_EFFECTIVE_RANGE, CM901_PENETRATION, m_iPrimaryAmmoType, CM901_DAMAGE, CM901_RANGE_MODIFER, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
 	PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL, m_pPlayer->edict(), m_usEvent, 0, (float*)&g_vecZero, (float*)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 100), 0, m_iClip == 0, FALSE);

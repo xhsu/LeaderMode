@@ -2909,7 +2909,7 @@ void EXT_FUNC CHalfLifeMultiplay::DeathNotice(CBasePlayer *pVictim, entvars_t *p
 				{
 					if (pAttacker->m_pActiveItem)
 					{
-						killer_weapon_name = pAttacker->m_pActiveItem->m_pItemInfo->m_pszClassName;
+						killer_weapon_name = pAttacker->m_pActiveItem->m_pItemInfo->m_pszInternalName;
 					}
 				}
 			}
@@ -3022,7 +3022,7 @@ bool CHalfLifeMultiplay::CanHavePlayerItem(CBasePlayer* pPlayer, WeaponIdType iI
 		if (g_bClientPrintEnable && bPrintHint)
 		{
 			ClientPrint(pPlayer->pev, HUD_PRINTCENTER, "#Cannot_Buy_This");
-			UTIL_PrintChatColor(pPlayer, REDCHAT, "/yYou are unqualified to use /t%s/y since you are /g%s/y.", g_rgszWeaponAlias[iId], g_rgszRoleNames[pPlayer->m_iRoleType]);
+			UTIL_PrintChatColor(pPlayer, REDCHAT, "/yYou are unqualified to use /t%s/y since you are /g%s/y.", g_rgItemInfo[iId].m_pszExternalName, g_rgszRoleNames[pPlayer->m_iRoleType]);
 		}
 
 		return false;

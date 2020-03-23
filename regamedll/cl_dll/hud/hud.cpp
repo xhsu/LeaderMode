@@ -753,7 +753,7 @@ void gHUD::SlotInput(int iSlot)
 	if (iSlot <= SLOT_NO || iSlot >= MAX_ITEM_TYPES)
 		return;
 
-	const char* psz = g_rgItemInfo[gHUD::m_WeaponList.m_rgiWeapons[iSlot]].m_pszClassName;
+	const char* psz = g_rgItemInfo[gHUD::m_WeaponList.m_rgiWeapons[iSlot]].m_pszInternalName;
 	if (psz && Q_strlen(psz))
 	{
 		char sz[128];
@@ -816,7 +816,7 @@ void CommandFunc_NextWeapon(void)
 
 	if (bFound)
 	{
-		const char* psz = g_rgItemInfo[iId].m_pszClassName;
+		const char* psz = g_rgItemInfo[iId].m_pszInternalName;
 		if (psz && Q_strlen(psz))
 		{
 			char sz[128];
@@ -868,7 +868,7 @@ void CommandFunc_PrevWeapon(void)
 
 	if (bFound)
 	{
-		const char* psz = g_rgItemInfo[iId].m_pszClassName;
+		const char* psz = g_rgItemInfo[iId].m_pszInternalName;
 		if (psz && Q_strlen(psz))
 		{
 			char sz[128];

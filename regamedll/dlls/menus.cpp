@@ -571,17 +571,17 @@ bool AddMenuWeaponItem(CBasePlayer *pPlayer, WeaponIdType iId, char *pszMenuText
 
 	if (g_rgRoleWeaponsAccessibility[pPlayer->m_iRoleType][iId] == WPN_F)
 	{
-		Q_sprintf(szBuffer, "\\d%d. %s - UNAVAILABLE\n", g_iMenuItemCount, g_rgszWeaponAlias[iId]);
+		Q_sprintf(szBuffer, "\\d%d. %s - UNAVAILABLE\n", g_iMenuItemCount, g_rgItemInfo[iId].m_pszExternalName);
 		Q_strcat(pszMenuText, szBuffer);
 	}
 	else
 	{
 		int iCost = GetPrice(pPlayer->m_iRoleType, iId);
 
-		Q_sprintf(szBuffer, pPlayer->m_iAccount >= iCost ? "\\r%d. \\w%s - \\y%d\\w$" : "\\r%d. \\d%s - \\r%d\\d$", g_iMenuItemCount, g_rgszWeaponAlias[iId], iCost);
+		Q_sprintf(szBuffer, pPlayer->m_iAccount >= iCost ? "\\r%d. \\w%s - \\y%d\\w$" : "\\r%d. \\d%s - \\r%d\\d$", g_iMenuItemCount, g_rgItemInfo[iId].m_pszExternalName, iCost);
 
 		if (g_rgRoleWeaponsAccessibility[pPlayer->m_iRoleType][iId] == WPN_D)
-			Q_strcat(szBuffer, " \\y(DISCOUNTED)\n");
+			Q_strcat(szBuffer, " \\g(DISCOUNTED)\n");
 		else if (g_rgRoleWeaponsAccessibility[pPlayer->m_iRoleType][iId] == WPN_P)
 			Q_strcat(szBuffer, " \\r(PENALIZED)\n");
 		else

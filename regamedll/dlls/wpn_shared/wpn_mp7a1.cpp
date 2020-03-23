@@ -111,8 +111,7 @@ void CMP7A1::MP7A1Fire(float flSpread, float flCycleTime)
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecAiming = gpGlobals->v_forward;
 
-	Vector vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, MP7A1_EFFECTIVE_RANGE, MP7A1_PENETRATION, m_pAmmoInfo->m_iBulletBehavior,
-		MP7A1_DAMAGE, MP7A1_RANGE_MODIFER, m_pPlayer->pev, false, m_pPlayer->random_seed);
+	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, MP7A1_EFFECTIVE_RANGE, MP7A1_PENETRATION, m_iPrimaryAmmoType, MP7A1_DAMAGE, MP7A1_RANGE_MODIFER, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
 	SendWeaponAnim(UTIL_SharedRandomLong(m_pPlayer->random_seed, MP7A1_SHOOT1, MP7A1_SHOOT3));

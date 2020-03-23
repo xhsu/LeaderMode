@@ -38,11 +38,11 @@ Vector CBasePlayer::GetGunPosition()
 	return pev->origin + pev->view_ofs;
 }
 
-Vector CBasePlayer::FireBullets3(Vector vecSrc, Vector vecDirShooting, float flSpread, float flDistance, int iPenetration, int iBulletType, int iDamage, float flRangeModifier, std::shared_ptr<pseudo_ent_var_s> pevAttacker, bool bPistol, int shared_rand)
+Vector2D CBasePlayer::FireBullets3(Vector vecSrc, Vector vecDirShooting, float vecSpread, float flDistance, int iPenetration, AmmoIdType iBulletType, int iDamage, float flRangeModifier, int shared_rand)
 {
 	float x, y, z;
 
-	if (pevAttacker)
+	if (pev)
 	{
 		x = UTIL_SharedRandomFloat(shared_rand, -0.5, 0.5) + UTIL_SharedRandomFloat(shared_rand + 1, -0.5, 0.5);
 		y = UTIL_SharedRandomFloat(shared_rand + 2, -0.5, 0.5) + UTIL_SharedRandomFloat(shared_rand + 3, -0.5, 0.5);
@@ -63,7 +63,7 @@ Vector CBasePlayer::FireBullets3(Vector vecSrc, Vector vecDirShooting, float flS
 		while (z > 1);
 	}
 
-	return Vector(x * flSpread, y * flSpread, 0);
+	return Vector2D(x * vecSpread, y * vecSpread);
 }
 
 int CBasePlayer::FireBuckshots(ULONG cShots, const Vector& vecSrc, const Vector& vecDirShooting, const Vector& vecSpread, float flDistance, int iDamage, int shared_rand)

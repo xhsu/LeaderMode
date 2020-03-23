@@ -1208,7 +1208,7 @@ CBaseWeapon*BuyWeapon(CBasePlayer *pPlayer, WeaponIdType weaponID)
 		return nullptr;
 
 	const ItemInfo *info = &g_rgItemInfo[weaponID];
-	if (!info || !Q_strlen(info->m_pszClassName))
+	if (!info || !Q_strlen(info->m_pszInternalName))
 		return nullptr;
 
 	int iCost = GetCost(pPlayer->m_iRoleType, weaponID);
@@ -2711,7 +2711,7 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 					const auto pInfo = GetWeaponInfo(parg1);
 					if (pInfo)
 					{
-						//pPlayer->GiveNamedItem(pInfo->m_pszClassName);
+						//pPlayer->GiveNamedItem(pInfo->m_pszInternalName);
 						pPlayer->AddPlayerItem(CBaseWeapon::Give(pInfo->m_iId, pPlayer));
 					}
 				}
@@ -2823,10 +2823,10 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 				for (auto pWeapon : CBaseWeapon::m_lstWeapons)
 				{
 					if (pWeapon->m_pPlayer.IsValid())
-						SERVER_PRINT(SharedVarArgs("Wpn: %s, Owner: %s\n", g_rgszWeaponAlias[pWeapon->m_iId], STRING(pWeapon->m_pPlayer->pev->netname)));
+						SERVER_PRINT(SharedVarArgs("Wpn: %s, Owner: %s\n", pWeapon->m_pItemInfo->m_pszExternalName, STRING(pWeapon->m_pPlayer->pev->netname)));
 					else
 					{
-						SERVER_PRINT(SharedVarArgs("Wpn: %s, Owner: CWeaponBox\n", g_rgszWeaponAlias[pWeapon->m_iId]));
+						SERVER_PRINT(SharedVarArgs("Wpn: %s, Owner: CWeaponBox\n", pWeapon->m_pItemInfo->m_pszExternalName));
 					}
 				}
 			}

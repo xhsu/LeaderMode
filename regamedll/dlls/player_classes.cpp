@@ -23,7 +23,7 @@ const char* g_rgszRoleNames[ROLE_COUNT] =
 	"Arsonist"
 };
 
-const int g_rgRoleWeaponsAccessibility[ROLE_COUNT][LAST_WEAPON] =
+const int g_rgRoleWeaponsAccessibility2[ROLE_COUNT][LAST_WEAPON] =
 {
 	//					      0                                  5                                  10                                 15                                 20                                 25                                 30
 	//					      NONE   ANACO  UNUSED M200   HE     M1014  C4     PM9    ACR    S_GR   P99    FN57   UMP45  M14    CM901  QBZ95  USP    G18C   AWP    MP5    MK46   KSG    M4A1   MP7A1  SVD    FBang  DEAGLE SCARL  AK74   KNIFE  P90
@@ -40,6 +40,25 @@ const int g_rgRoleWeaponsAccessibility[ROLE_COUNT][LAST_WEAPON] =
 	/*Role_MadScientist*/	{ WPN_F, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_P, WPN_F, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F },
 	/*Role_Assassin*/		{ WPN_F, WPN_A, WPN_F, WPN_D, WPN_F, WPN_F, WPN_F, WPN_A, WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_P, WPN_F, WPN_F, WPN_D, WPN_A, WPN_F, WPN_A, WPN_F, WPN_F, WPN_F, WPN_D, WPN_F, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_A },
 	/*Role_Arsonist = 10*/	{ WPN_F, WPN_A, WPN_F, WPN_F, WPN_P, WPN_D, WPN_F, WPN_F, WPN_F, WPN_F, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_D, WPN_A, WPN_F, WPN_F, WPN_F, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F }
+};
+
+const int g_rgRoleWeaponsAccessibility[ROLE_COUNT][LAST_WEAPON] =
+{
+	//					      0                                  5                                  10                                 15                                 20                                 25                                 30
+	//					      NONE   G18C   USP    ANACO  DEAGLE FN57   P99    KSG12  STR    MP7A1  PM9    MP5    UMP45  P90    CM901  QBZ95  AK47   M4A1   SCARL  ACR    M200   M14    AWP    SVD    MK46   HE		FB     SG     ERR    C4     KNIFE
+	/*Role_UNASSIGNED*/		{ WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F },
+
+	/*Role_Commander = 1*/	{ WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_P, WPN_A, WPN_P, WPN_P, WPN_A, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F },
+	/*Role_SWAT*/			{ WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_F, WPN_F, WPN_F, WPN_F, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_D, WPN_D, WPN_F, WPN_F, WPN_F },
+	/*Role_Blaster*/		{ WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_D, WPN_D, WPN_A, WPN_A, WPN_A, WPN_A, WPN_D, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_D, WPN_D, WPN_D, WPN_F, WPN_F, WPN_F },
+	/*Role_Sharpshooter*/	{ WPN_F, WPN_A, WPN_A, WPN_D, WPN_D, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_P, WPN_P, WPN_P, WPN_P, WPN_P, WPN_P, WPN_D, WPN_A, WPN_D, WPN_A, WPN_F, WPN_P, WPN_F, WPN_A, WPN_F, WPN_F, WPN_F },
+	/*Role_Medic = 5*/		{ WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_F, WPN_F, WPN_F, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_P, WPN_F, WPN_F, WPN_F },
+
+	/*Role_Godfather = 6*/	{ WPN_F, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_P, WPN_A, WPN_P, WPN_P, WPN_A, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F },
+	/*Role_LeadEnforcer*/	{ WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_F, WPN_F, WPN_F, WPN_F, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F },
+	/*Role_MadScientist*/	{ WPN_F, WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_F, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_P, WPN_F, WPN_F, WPN_F },
+	/*Role_Assassin*/		{ WPN_F, WPN_A, WPN_D, WPN_A, WPN_A, WPN_A, WPN_A, WPN_F, WPN_F, WPN_D, WPN_A, WPN_A, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_D, WPN_P, WPN_F, WPN_F, WPN_F, WPN_F, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F },
+	/*Role_Arsonist = 10*/	{ WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_D, WPN_D, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_P, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_P, WPN_F, WPN_A, WPN_F, WPN_F, WPN_F },
 };
 
 const char* CBaseSkill::RADAR_BEEP_SFX = "leadermode/nes_8bit_alien3_radar_beep1.wav";
@@ -493,8 +512,8 @@ bool CSkillBulletproof::Execute()
 	}
 
 	// give grenades
-	m_pPlayer->GiveNamedItem(GetWeaponInfo(WEAPON_FLASHBANG)->m_pszClassName);
-	m_pPlayer->GiveNamedItem(GetWeaponInfo(WEAPON_SMOKEGRENADE)->m_pszClassName);
+	m_pPlayer->GiveNamedItem(GetWeaponInfo(WEAPON_FLASHBANG)->m_pszInternalName);
+	m_pPlayer->GiveNamedItem(GetWeaponInfo(WEAPON_SMOKEGRENADE)->m_pszInternalName);
 
 	// give vest + helmet
 	m_pPlayer->GiveNamedItem("item_assaultsuit");
@@ -968,13 +987,13 @@ bool CSkillInfiniteGrenade::Execute()
 			continue;
 
 		if (g_rgRoleWeaponsAccessibility[pPlayer->m_iRoleType][WEAPON_HEGRENADE] != WPN_F)
-			pPlayer->GiveNamedItem(GetWeaponInfo(WEAPON_HEGRENADE)->m_pszClassName);
+			pPlayer->GiveNamedItem(GetWeaponInfo(WEAPON_HEGRENADE)->m_pszInternalName);
 
 		if (g_rgRoleWeaponsAccessibility[pPlayer->m_iRoleType][WEAPON_FLASHBANG] != WPN_F)
-			pPlayer->GiveNamedItem(GetWeaponInfo(WEAPON_FLASHBANG)->m_pszClassName);
+			pPlayer->GiveNamedItem(GetWeaponInfo(WEAPON_FLASHBANG)->m_pszInternalName);
 
 		if (g_rgRoleWeaponsAccessibility[pPlayer->m_iRoleType][WEAPON_SMOKEGRENADE] != WPN_F)
-			pPlayer->GiveNamedItem(GetWeaponInfo(WEAPON_SMOKEGRENADE)->m_pszClassName);
+			pPlayer->GiveNamedItem(GetWeaponInfo(WEAPON_SMOKEGRENADE)->m_pszInternalName);
 
 		pPlayer->GiveAmmo(1, AMMO_HEGrenade);
 		pPlayer->GiveAmmo(1, AMMO_Flashbang);

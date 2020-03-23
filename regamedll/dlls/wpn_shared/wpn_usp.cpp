@@ -150,7 +150,7 @@ void CUSP::USPFire(float flSpread, float flCycleTime)
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecAiming = gpGlobals->v_forward;
 
-	Vector vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, USP_EFFECTIVE_RANGE, USP_PENETRATION, m_pAmmoInfo->m_iBulletBehavior, USP_DAMAGE, USP_RANGE_MODIFER, m_pPlayer->pev, true, m_pPlayer->random_seed);
+	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, USP_EFFECTIVE_RANGE, USP_PENETRATION, m_iPrimaryAmmoType, USP_DAMAGE, USP_RANGE_MODIFER, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
 	int seq = UTIL_SharedRandomFloat(m_pPlayer->random_seed, USP_SHOOT1, USP_SHOOT3);

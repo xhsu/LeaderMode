@@ -125,6 +125,16 @@ int CHudMenu::Draw(float flTime)
 				sptr += 2;
 				break;
 			}
+			
+			case 'g':
+			{
+				menu_r = 0;
+				menu_g = 160;
+				menu_b = 0;
+
+				sptr += 2;
+				break;
+			}
 
 			case 'R':
 			{

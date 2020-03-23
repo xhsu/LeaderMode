@@ -154,7 +154,7 @@ void CSVD::SVDFire(float flSpread, float flCycleTime)
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecAiming = gpGlobals->v_forward;
 
-	Vector vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, (1 - m_flAccuracy) * flSpread, SVD_EFFECTIVE_RANGE, SVD_PENETRATION, m_pAmmoInfo->m_iBulletBehavior, SVD_DAMAGE, SVD_RANGE_MODIFER, m_pPlayer->pev, true, m_pPlayer->random_seed);
+	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, (1 - m_flAccuracy) * flSpread, SVD_EFFECTIVE_RANGE, SVD_PENETRATION, m_iPrimaryAmmoType, SVD_DAMAGE, SVD_RANGE_MODIFER, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
 	SendWeaponAnim(UTIL_SharedRandomLong(m_pPlayer->random_seed, SVD_SHOOT, SVD_SHOOT2));

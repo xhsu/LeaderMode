@@ -142,7 +142,7 @@ void CDEagle::DEagleFire(float flSpread, float flCycleTime)
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecAiming = gpGlobals->v_forward;
 
-	Vector vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, DEAGLE_EFFECTIVE_RANGE, DEAGLE_PENETRATION, m_pAmmoInfo->m_iBulletBehavior, DEAGLE_DAMAGE, DEAGLE_RANGE_MODIFER, m_pPlayer->pev, true, m_pPlayer->random_seed);
+	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, DEAGLE_EFFECTIVE_RANGE, DEAGLE_PENETRATION, m_iPrimaryAmmoType, DEAGLE_DAMAGE, DEAGLE_RANGE_MODIFER, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
 	int seq = UTIL_SharedRandomFloat(m_pPlayer->random_seed, DEAGLE_SHOOT1, DEAGLE_SHOOT2);
