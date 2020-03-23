@@ -43,7 +43,7 @@ void CQBZ95::SecondaryAttack()
 
 	if (!g_vecGunOfsGoal.LengthSquared())
 	{
-		g_vecGunOfsGoal = Vector(-16.37f, -10.0f, 0.8f);
+		g_vecGunOfsGoal = Vector(-15.26f, -10.0f, 0.55f);
 		gHUD::m_iFOV = 85;	// allow clients to predict the zoom.
 	}
 	else
