@@ -951,29 +951,18 @@ void Host_Say(edict_t *pEntity, BOOL teamonly)
 	}
 }
 
-void BuyItem(CBasePlayer *pPlayer, int iSlot)
+void BuyItem(CBasePlayer *pPlayer, EquipmentIdType iSlot)
 {
 	int iItemPrice = 0;
 	const char *pszItem = nullptr;
 
-	if (pPlayer->m_iTeam == CT)
-	{
-		if (iSlot < 1 || iSlot > 8)
-			return;
-	}
-	else
-	{
-		if (iSlot < 1 || iSlot > 6)
-			return;
-	}
-
-	bool bFullArmor = (pPlayer->pev->armorvalue >= 100);
-	bool bHasHelmet = (pPlayer->pev->armortype == ARMOR_VESTHELM);
+	bool bFullArmor = (int(pPlayer->pev->armorvalue) >= int(CSGameRules()->PlayerMaxArmour(pPlayer)));
+	bool bHasHelmet = (pPlayer->pev->armortype >= ARMOR_VESTHELM);
 	bool bEnoughMoney = false;
 
 	switch (iSlot)
 	{
-		case MENU_SLOT_ITEM_VEST:
+		case EQP_KEVLAR:
 		{
 			if (bFullArmor)
 			{
@@ -998,7 +987,7 @@ void BuyItem(CBasePlayer *pPlayer, int iSlot)
 			}
 			break;
 		}
-		case MENU_SLOT_ITEM_VESTHELM:
+		case EQP_ASSAULT_SUIT:
 		{
 			if (bFullArmor)
 			{
@@ -1053,7 +1042,7 @@ void BuyItem(CBasePlayer *pPlayer, int iSlot)
 			}
 			break;
 		}
-		case MENU_SLOT_ITEM_FLASHGREN:
+		case EQP_FLASHBANG:
 		{
 			if (CSGameRules()->CanHavePlayerItem(pPlayer, WEAPON_FLASHBANG, true))
 				return;
@@ -1077,7 +1066,7 @@ void BuyItem(CBasePlayer *pPlayer, int iSlot)
 			}
 			break;
 		}
-		case MENU_SLOT_ITEM_HEGREN:
+		case EQP_HEGRENADE:
 		{
 			if (CSGameRules()->CanHavePlayerItem(pPlayer, WEAPON_HEGRENADE, true))
 				return;
@@ -1100,7 +1089,7 @@ void BuyItem(CBasePlayer *pPlayer, int iSlot)
 			}
 			break;
 		}
-		case MENU_SLOT_ITEM_SMOKEGREN:
+		case EQP_SMOKEGRENADE:
 		{
 			if (CSGameRules()->CanHavePlayerItem(pPlayer, WEAPON_SMOKEGRENADE, true))
 				return;
@@ -1123,7 +1112,7 @@ void BuyItem(CBasePlayer *pPlayer, int iSlot)
 			}
 			break;
 		}
-		case MENU_SLOT_ITEM_NVG:
+		case EQP_NVG:
 		{
 			if (pPlayer->m_bHasNightVision)
 			{
@@ -1152,6 +1141,7 @@ void BuyItem(CBasePlayer *pPlayer, int iSlot)
 			}
 			break;
 		}
+		/* disused.
 		case MENU_SLOT_ITEM_DEFUSEKIT:
 		{
 			return;
@@ -1174,6 +1164,7 @@ void BuyItem(CBasePlayer *pPlayer, int iSlot)
 			}
 			break;
 		}
+		*/
 	}
 
 	if (!bEnoughMoney)
@@ -2795,11 +2786,13 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 			}
 			else if (FStrEq(pcmd, "+qtg"))
 			{
-				pPlayer->QuickThrowGrenade_Start();
+				if (pPlayer->m_pActiveItem)
+					pPlayer->m_pActiveItem->QuickThrowStart(pPlayer->m_iUsingGrenadeId);
 			}
 			else if (FStrEq(pcmd, "-qtg"))
 			{
-				pPlayer->QuickThrowGrenade_Release();
+				if (pPlayer->m_pActiveItem)
+					pPlayer->m_pActiveItem->QuickThrowRelease();
 			}
 			else if (FStrEq(pcmd, "electrify"))
 			{

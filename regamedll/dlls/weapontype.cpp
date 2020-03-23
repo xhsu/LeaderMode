@@ -15,6 +15,7 @@ const ItemInfo g_rgItemInfo[LAST_WEAPON] =
 	// SHOTGUNS
 	{WEAPON_KSG12,			"weapon_ksg12",			"Kel-Tec KSG-12",				AMMO_Buckshot,		14,	PRIMARY_WEAPON_SLOT,	ITEM_FLAG_NONE,			SHOTGUN_BASIC_WEIGHT + 1,		WEAPONCLASS_SHOTGUN,		1700},
 	{WEAPON_STRIKER,		"weapon_striker",		"Armsel Striker",				AMMO_Buckshot,		7,	PRIMARY_WEAPON_SLOT,	ITEM_FLAG_NONE,			SHOTGUN_BASIC_WEIGHT + 2,		WEAPONCLASS_SHOTGUN,		3000},
+	// AA12/USAS12, M1014
 
 	// SMGS
 	{WEAPON_MP7A1,			"weapon_mp7a1",			"H&K MP7A1",					AMMO_46PDW,			40,	PRIMARY_WEAPON_SLOT,	ITEM_FLAG_NONE,			SMG_BASIC_WEIGHT + 1,			WEAPONCLASS_SUBMACHINEGUN,	1250},
@@ -22,6 +23,7 @@ const ItemInfo g_rgItemInfo[LAST_WEAPON] =
 	{WEAPON_MP5N,			"weapon_mp5navy",		"H&K MP5",						AMMO_9mm,			30,	PRIMARY_WEAPON_SLOT,	ITEM_FLAG_NONE,			SMG_BASIC_WEIGHT + 3,			WEAPONCLASS_SUBMACHINEGUN,	1500},
 	{WEAPON_UMP45,			"weapon_ump45",			"H&K UMP45",					AMMO_45acp,			25,	PRIMARY_WEAPON_SLOT,	ITEM_FLAG_NONE,			SMG_BASIC_WEIGHT + 4,			WEAPONCLASS_SUBMACHINEGUN,	1700},
 	{WEAPON_P90,			"weapon_p90",			"FN P90",						AMMO_57mm,			50,	PRIMARY_WEAPON_SLOT,	ITEM_FLAG_NONE,			SMG_BASIC_WEIGHT + 5,			WEAPONCLASS_SUBMACHINEGUN,	2350},
+	// Kriss Vector, MAC10
 
 	// ASSAULT RIFLES
 	{WEAPON_CM901,			"weapon_cm901",			"Colt CM901",					AMMO_556Nato,		30,	PRIMARY_WEAPON_SLOT,	ITEM_FLAG_NONE,			ASSAULT_RIFLE_BASIC_WEIGHT + 1,	WEAPONCLASS_RIFLE,			2000},
@@ -30,15 +32,18 @@ const ItemInfo g_rgItemInfo[LAST_WEAPON] =
 	{WEAPON_M4A1,			"weapon_m4a1",			"Colt M4A1",					AMMO_556Nato,		30,	PRIMARY_WEAPON_SLOT,	ITEM_FLAG_NONE,			ASSAULT_RIFLE_BASIC_WEIGHT + 4,	WEAPONCLASS_RIFLE,			3100},
 	{WEAPON_SCARL,			"weapon_scarl",			"FN SCAR-L",					AMMO_556Nato,		30,	PRIMARY_WEAPON_SLOT,	ITEM_FLAG_NONE,			ASSAULT_RIFLE_BASIC_WEIGHT + 5,	WEAPONCLASS_RIFLE,			3500},
 	{WEAPON_ACR,			"weapon_acr",			"Remington ACR",				AMMO_556Nato,		30,	PRIMARY_WEAPON_SLOT,	ITEM_FLAG_NONE,			ASSAULT_RIFLE_BASIC_WEIGHT + 6,	WEAPONCLASS_RIFLE,			3500},
+	// XM8
 
 	// SNIPER RIFLES
 	{WEAPON_M200,			"weapon_m200",			"CheyTac Intervention M200",	AMMO_408CheyTac,	7,	PRIMARY_WEAPON_SLOT,	ITEM_FLAG_NONE,			SNIPER_RIFLE_BASIC_WEIGHT + 1,	WEAPONCLASS_SNIPERRIFLE,	2750},
 	{WEAPON_M14EBR,			"weapon_m14ebr",		"Mk.14 EBR",					AMMO_762Nato,		20,	PRIMARY_WEAPON_SLOT,	ITEM_FLAG_NONE,			SNIPER_RIFLE_BASIC_WEIGHT + 2,	WEAPONCLASS_SNIPERRIFLE,	4200},
 	{WEAPON_AWP,			"weapon_awp",			"A.I. Arctic Warfare",			AMMO_338Magnum,		10, PRIMARY_WEAPON_SLOT,	ITEM_FLAG_NONE,			SNIPER_RIFLE_BASIC_WEIGHT + 3,	WEAPONCLASS_SNIPERRIFLE,	4750},
 	{WEAPON_SVD,			"weapon_svd",			"Dragunov SVD",					AMMO_762Nato,		10,	PRIMARY_WEAPON_SLOT,	ITEM_FLAG_NONE,			SNIPER_RIFLE_BASIC_WEIGHT + 4,	WEAPONCLASS_SNIPERRIFLE,	5000},
+	// PSG-1
 
 	// MACHINE GUNS
 	{WEAPON_MK46,			"weapon_mk46",			"Mk.46 Mod.0",					AMMO_556NatoBox,	100,PRIMARY_WEAPON_SLOT,	ITEM_FLAG_NONE,			MACHINE_GUN_BASIC_WEIGHT + 1,	WEAPONCLASS_MACHINEGUN,		5750},
+	// RPD
 
 	// THROWABLES
 	{WEAPON_HEGRENADE,		"weapon_hegrenade",		"HE Grenade",					AMMO_HEGrenade,		-1,	GRENADE_SLOT,			ITEM_FLAG_EXHAUSTIBLE,	THROWABLE_BASIC_WEIGHT + 1,		WEAPONCLASS_GRENADE,		HEGRENADE_PRICE},
@@ -51,6 +56,27 @@ const ItemInfo g_rgItemInfo[LAST_WEAPON] =
 	{WEAPON_KNIFE,			"weapon_knife",			"Seal Knife",					AMMO_NONE,			-1,	KNIFE_SLOT,				ITEM_FLAG_NONE,			MELEE_BASIC_WEIGHT,				WEAPONCLASS_KNIFE,			0},
 
 	//{LAST_WEAPON, nullptr, AMMO_NONE, WEAPON_NOCLIP, SLOT_NO, ITEM_FLAG_NONE, -1, 0},	// vest, should never use it.
+};
+
+const EquipmentInfo g_rgEquipmentInfo[EQP_COUNT] =
+{
+	{EQP_NONE,	"",	"",	0},
+
+	// armour
+	{EQP_KEVLAR,		"item_kevlar",			"Kevlar",			KEVLAR_PRICE},
+	{EQP_ASSAULT_SUIT,	"item_assaultsuit",		"Kevlar & Helmet",	ASSAULTSUIT_PRICE},
+
+	// grenades
+	{EQP_HEGRENADE,		"weapon_hegrenade",		"HE Grenade",			HEGRENADE_PRICE},
+	{EQP_FLASHBANG,		"weapon_flashbang",		"Flashbang",			FLASHBANG_PRICE},
+	{EQP_SMOKEGRENADE,	"weapon_smokegrenade",	"Smoke Grenade",		SMOKEGRENADE_PRICE},
+	{EQP_FROST_GR,		"weapon_frostgrenade",	"Cryogrenade",			HEGRENADE_PRICE * 2},
+	{EQP_INCENDIARY_GR,	"weapon_incendiary_gr",	"Incendiary Grenade",	HEGRENADE_PRICE * 2},
+	{EQP_HEALING_GR,	"weapon_healing_gr",	"Healing Grenade",		SMOKEGRENADE_PRICE * 2},
+	{EQP_GAS_GR,		"weapon_gasgrenade",	"Nerve Gas Grenade",	SMOKEGRENADE_PRICE * 2},
+
+	// misc
+	{EQP_NVG,			"item_nvg",				"Nightvision",			NVG_PRICE},
 };
 
 // Given an alias, return the associated weapon ID
@@ -95,7 +121,7 @@ const char* WeaponIDToWeaponClassname(WeaponIdType id)
 
 WeaponIdType WeaponClassnameToID(const char* classname)
 {
-	if (classname)
+	if (classname && Q_strlen(classname))
 	{
 		for (int i = 0; i < LAST_WEAPON; i++)
 		{

@@ -222,11 +222,8 @@ void CBaseWeapon::PostFrame()
 		// if the player was reloading, then we should back to reload.
 		if (m_bInReload)
 		{
-			Holster();	// the default Holster() would remove m_bInReload flag. Thus we have to do this.
-			Deploy();
-
-			PopAnim();
-			m_bInReload = true;
+			ResetModel();	// you have to switch from knife model to gun model.
+			PopAnim();		// then you may resume you anim.
 		}
 		else
 		{
@@ -351,6 +348,16 @@ bool CBaseWeapon::Melee(void)
 	return true;
 }
 
+bool CBaseWeapon::QuickThrowStart(EquipmentIdType iId)
+{
+	return false;
+}
+
+bool CBaseWeapon::QuickThrowRelease(void)
+{
+	return false;
+}
+
 bool CBaseWeapon::Holster(bool bTrial)
 {
 	if (m_bitsFlags & WPNSTATE_MELEE)	// you can't holster while meleeing.
@@ -400,7 +407,7 @@ bool CBaseWeapon::DefaultDeploy(const char* szViewModel, const char* szWeaponMod
 	/*if (!CanDeploy())
 		return FALSE;*/
 
-	gEngfuncs.CL_LoadModel(szViewModel, &m_pPlayer->pev->viewmodel);
+	g_pViewEnt->model = gEngfuncs.CL_LoadModel(szViewModel, &m_pPlayer->pev->viewmodel);
 
 	Q_strlcpy(m_pPlayer->m_szAnimExtention, szAnimExt);
 	SendWeaponAnim(iAnim);

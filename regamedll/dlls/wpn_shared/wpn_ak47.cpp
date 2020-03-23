@@ -193,3 +193,5 @@ void CAK47::WeaponIdle()
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
 	SendWeaponAnim(AK47_IDLE1);
 }
+
+DECLARE_STANDARD_RESET_MODEL_FUNC(AK47)

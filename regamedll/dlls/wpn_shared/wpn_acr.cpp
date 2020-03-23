@@ -193,3 +193,5 @@ void CACR::WeaponIdle()
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
 	SendWeaponAnim(ACR_IDLE1);
 }
+
+DECLARE_STANDARD_RESET_MODEL_FUNC(ACR)

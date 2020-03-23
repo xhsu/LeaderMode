@@ -191,3 +191,5 @@ void CMP7A1::WeaponIdle()
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
 	SendWeaponAnim(MP7A1_IDLE1);
 }
+
+DECLARE_STANDARD_RESET_MODEL_FUNC(MP7A1)

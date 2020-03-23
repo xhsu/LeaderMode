@@ -16,7 +16,7 @@ int CDEagle::m_iShell = 0;
 
 void CDEagle::Precache()
 {
-	PRECACHE_NECESSARY_FILES(DEAGLE);
+	PRECACHE_NECESSARY_FILES(DEagle);
 
 	m_iShell = PRECACHE_MODEL("models/pshell.mdl");
 	m_usEvent = PRECACHE_EVENT(1, "events/deagle.sc");
@@ -28,7 +28,7 @@ bool CDEagle::Deploy()
 {
 	m_flAccuracy = 0.9f;
 
-	return DefaultDeploy(DEAGLE_VIEW_MODEL, DEAGLE_WORLD_MODEL, DEAGLE_DRAW, "onehanded", DEAGLE_DEPLOY_TIME);
+	return DefaultDeploy(DEagle_VIEW_MODEL, DEagle_WORLD_MODEL, DEAGLE_DRAW, "onehanded", DEAGLE_DEPLOY_TIME);
 }
 
 void CDEagle::PrimaryAttack()
@@ -199,3 +199,5 @@ void CDEagle::WeaponIdle()
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
 	SendWeaponAnim(DEAGLE_IDLE1);
 }
+
+DECLARE_STANDARD_RESET_MODEL_FUNC(DEagle)

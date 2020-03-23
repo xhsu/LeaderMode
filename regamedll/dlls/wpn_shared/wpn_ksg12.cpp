@@ -254,3 +254,5 @@ void CKSG12::PopAnim(void)
 	m_flNextAddAmmo		= gpGlobals->time - m_Stack2.m_flNextAddAmmo;
 	m_flNextInsertAnim	= gpGlobals->time - m_Stack2.m_flNextInsertAnim;
 }
+
+DECLARE_STANDARD_RESET_MODEL_FUNC(KSG12)

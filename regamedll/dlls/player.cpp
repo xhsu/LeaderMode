@@ -5482,7 +5482,7 @@ void CBasePlayer::SendAmmoUpdate()
 			// send "Ammo" update message
 			MESSAGE_BEGIN(MSG_ONE, gmsgAmmoX, nullptr, pev);
 				WRITE_BYTE(i);
-				WRITE_BYTE(clamp(m_rgAmmo[i], 0, 255)); // clamp the value to one byte
+				WRITE_BYTE(Q_clamp(m_rgAmmo[i], 0, 255)); // clamp the value to one byte
 			MESSAGE_END();
 		}
 	}
@@ -7578,27 +7578,27 @@ bool CBasePlayer::CheckActivityInGame()
 	return (Q_fabs(deltaYaw) >= 0.1f && Q_fabs(deltaPitch) >= 0.1f);
 }
 
-void CBasePlayer::QuickThrowGrenade_Start()
+int CBasePlayer::GetGrenadeInventory(EquipmentIdType iId)
 {
-	// WPN_UNDONE
-	/*CBasePlayerWeapon* pGrenade = CSGameRules()->SelectProperGrenade(this);
-
-	if (pGrenade == m_pActiveItem)	// you shouldn't QTG when you already have it on your hand.
-		return;
-
-	pGrenade->m_bQuickThrow = true;
-	SelectItem(pGrenade->pev->classname);*/
+	return *GetGrenadeInventoryPointer(iId);
 }
 
-void CBasePlayer::QuickThrowGrenade_Release()
+int* CBasePlayer::GetGrenadeInventoryPointer(EquipmentIdType iId)
 {
-	// WPN_UNDONE
-	/*CBasePlayerWeapon* pGrenade = CSGameRules()->SelectProperGrenade(this);
+	switch (iId)
+	{
+	case EQP_HEGRENADE:
+		return &m_rgAmmo[AMMO_HEGrenade];
 
-	if (pGrenade != m_pActiveItem)	// by the time you should already put it on your hand. what's wrong here?
-		return;
+	case EQP_FLASHBANG:
+		return &m_rgAmmo[AMMO_Flashbang];
 
-	pGrenade->m_bReleaseLock = false;	// release the lock, let WeaponIdle() do its job.*/
+	case EQP_SMOKEGRENADE:
+		return &m_rgAmmo[AMMO_SmokeGrenade];
+
+	default:
+		return &m_rgAmmo[AMMO_NONE];
+	}
 }
 
 void CBasePlayer::AssignRole(RoleTypes iNewRole)

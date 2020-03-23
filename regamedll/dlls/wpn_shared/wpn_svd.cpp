@@ -216,3 +216,5 @@ float CSVD::GetMaxSpeed()
 {
 	return (int(m_pPlayer->pev->fov) >= DEFAULT_FOV) ? SVD_MAX_SPEED : SVD_MAX_SPEED_ZOOM;
 }
+
+DECLARE_STANDARD_RESET_MODEL_FUNC(SVD)

@@ -763,14 +763,8 @@ void CFuncTankGun::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShootin
 			}
 			else
 			{
-				float flDamage;
-
 				switch (iBulletType)
 				{
-				case BULLET_PLAYER_BUCKSHOT:
-					flDamage = ((1 - tr.flFraction) * 20);
-					pEntity->TraceAttack(pevAttacker, int(flDamage), vecDir, &tr, DMG_BULLET);
-					break;
 				case BULLET_MONSTER_9MM:
 					pEntity->TraceAttack(pevAttacker, 12, vecDir, &tr, DMG_BULLET);
 					TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
@@ -788,17 +782,6 @@ void CFuncTankGun::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShootin
 					{
 						TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
 						DecalGunshot(&tr, iBulletType, false, pev, false);
-					}
-					break;
-				case BULLET_NONE:
-					flDamage = 50;
-					pEntity->TraceAttack(pevAttacker, flDamage, vecDir, &tr, DMG_CLUB);
-					TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
-
-					// only decal glass
-					if (!FNullEnt(tr.pHit) && VARS(tr.pHit)->rendermode != kRenderNormal)
-					{
-						UTIL_DecalTrace(&tr, DECAL_GLASSBREAK1 + RANDOM_LONG(0, 2));
 					}
 					break;
 				default:

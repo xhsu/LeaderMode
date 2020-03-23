@@ -191,3 +191,5 @@ void CCM901::WeaponIdle()
 		SendWeaponAnim(CM901_IDLE);
 	}
 }
+
+DECLARE_STANDARD_RESET_MODEL_FUNC(CM901)

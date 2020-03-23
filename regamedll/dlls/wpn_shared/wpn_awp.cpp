@@ -234,3 +234,5 @@ float CAWP::GetMaxSpeed()
 	// Slower speed when zoomed in.
 	return AWP_MAX_SPEED_ZOOM;
 }
+
+DECLARE_STANDARD_RESET_MODEL_FUNC(AWP)

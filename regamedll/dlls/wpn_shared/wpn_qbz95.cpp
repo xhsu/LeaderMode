@@ -200,3 +200,5 @@ void CQBZ95::WeaponIdle()
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
 	SendWeaponAnim(QBZ95_IDLE1);
 }
+
+DECLARE_STANDARD_RESET_MODEL_FUNC(QBZ95)

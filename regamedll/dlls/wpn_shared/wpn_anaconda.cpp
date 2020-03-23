@@ -17,7 +17,7 @@ int CAnaconda::m_iShell = 0;
 
 void CAnaconda::Precache()
 {
-	PRECACHE_NECESSARY_FILES(ANACONDA);
+	PRECACHE_NECESSARY_FILES(Anaconda);
 
 	m_iShell = PRECACHE_MODEL("models/pshell.mdl");
 	m_usEvent = PRECACHE_EVENT(1, "events/anaconda.sc");
@@ -40,7 +40,7 @@ void CAnaconda::Think(void)
 
 bool CAnaconda::Deploy()
 {
-	if (DefaultDeploy(ANACONDA_VIEW_MODEL, ANACONDA_WORLD_MODEL, ANACONDA_DRAW, "onehanded", ANACONDA_DEPLOY_TIME))
+	if (DefaultDeploy(Anaconda_VIEW_MODEL, Anaconda_WORLD_MODEL, ANACONDA_DRAW, "onehanded", ANACONDA_DEPLOY_TIME))
 	{
 #ifdef CLIENT_DLL
 		// reset this when switching gun.
@@ -230,3 +230,5 @@ void CAnaconda::WeaponIdle()
 		SendWeaponAnim(ANACONDA_IDLE);
 	}
 }
+
+DECLARE_STANDARD_RESET_MODEL_FUNC(Anaconda)

@@ -166,6 +166,40 @@ struct ItemInfo
 
 extern const ItemInfo g_rgItemInfo[LAST_WEAPON];
 
+// equipments
+enum EquipmentIdType
+{
+	EQP_NONE = 0,
+
+	// armour
+	EQP_KEVLAR,
+	EQP_ASSAULT_SUIT,
+
+	// grenades
+	EQP_HEGRENADE,
+	EQP_FLASHBANG,
+	EQP_SMOKEGRENADE,
+	EQP_FROST_GR,
+	EQP_INCENDIARY_GR,
+	EQP_HEALING_GR,
+	EQP_GAS_GR,
+
+	// misc
+	EQP_NVG,
+
+	EQP_COUNT,
+};
+
+struct EquipmentInfo
+{
+	EquipmentIdType	m_iId;
+	const char*		m_pszInternalName;
+	const char*		m_pszExternalName;
+	int				m_iCost;
+};
+
+extern const EquipmentInfo g_rgEquipmentInfo[EQP_COUNT];
+
 WeaponIdType AliasToWeaponID(const char* alias);
 const char* WeaponIDToAlias(int id);	// Given a weapon ID, return its alias
 const char* AliasToWeaponClassname(const char* alias);

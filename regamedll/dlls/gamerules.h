@@ -389,7 +389,7 @@ public:
 	void GetTSVoteDetail(TeamName iTeam, int* rgiBallotBoxes);
 	void GiveDefaultItems(CBasePlayer* pPlayer);
 	float PlayerMaxArmour(CBasePlayer* pPlayer);
-	CBaseWeapon* SelectProperGrenade(CBasePlayer* pPlayer);
+	EquipmentIdType SelectProperGrenade(CBasePlayer* pPlayer);
 
 private:
 	void MarkLivingPlayersOnTeamAsNotReceivingMoneyNextRound(int iTeam);

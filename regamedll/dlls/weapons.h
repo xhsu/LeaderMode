@@ -36,6 +36,19 @@
 									PRECACHE_MODEL(x##_WORLD_MODEL);	\
 									PRECACHE_SOUND(x##_FIRE_SFX)
 
+#ifndef CLIENT_DLL
+#define DECLARE_STANDARD_RESET_MODEL_FUNC(x)	void C##x::ResetModel(void)	\
+												{	\
+													m_pPlayer->pev->viewmodel = MAKE_STRING(x##_VIEW_MODEL);	\
+													m_pPlayer->pev->weaponmodel = MAKE_STRING(x##_WORLD_MODEL);	\
+												}
+#else
+#define DECLARE_STANDARD_RESET_MODEL_FUNC(x)	void C##x::ResetModel(void)	\
+												{	\
+													g_pViewEnt->model = gEngfuncs.CL_LoadModel(x##_VIEW_MODEL, &m_pPlayer->pev->viewmodel);	\
+												}
+#endif
+
 class CBasePlayer;
 class CWeaponBox;
 
@@ -177,7 +190,8 @@ public:	// basic logic funcs
 	virtual void	WeaponIdle		(void) {}	// constantly called when nothing else to do.
 	virtual bool	Reload			(void) { return false; }	// you know what it is, right?
 	virtual bool	Melee			(void);		// quick knife.
-	virtual bool	QuickThrow		(WeaponIdType iId) { return false; };	// quick grenade (maybe something else in the future?).
+	virtual bool	QuickThrowStart	(EquipmentIdType iId);	// quick grenade (maybe something else in the future?).
+	virtual bool	QuickThrowRelease(void);	// triggered when +qtg button released.
 	virtual bool	Holster			(bool bTrial = false);		// called when attempting to put it off. bTrial means only testing whether weapon can be holster.
 	virtual bool	Drop			(void **ppWeaponBoxReturned = nullptr);		// called when attempting to drop it on ground. ppWeaponBoxReturned is the CWeaponBox to be returned. (NOT avaliable on client side.)
 	virtual bool	Kill			(void);		// called when attempting to remove it from your inventory.
@@ -203,6 +217,7 @@ public:	// util funcs
 	inline	bool	CanHolster		(void) { return Holster(true); }	// smells, looks and tastes like a duck...
 	virtual	bool	CanDrop			(void) { return true; }
 	virtual void	KickBack		(float up_base, float lateral_base, float up_modifier, float lateral_modifier, float up_max, float lateral_max, int direction_change);	// recoil
+	virtual void	ResetModel		(void) { }
 };
 
 
@@ -251,6 +266,7 @@ public:	// basic logic funcs
 
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void) { return USP_MAX_SPEED; }
+	virtual void	ResetModel		(void);
 
 public:	// new functions
 	void USPFire(float flSpread, float flCycleTime = USP_FIRE_INTERVAL);
@@ -337,6 +353,7 @@ public:	// basic logic funcs
 
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void) { return AK47_MAX_SPEED; }
+	virtual void	ResetModel		(void);
 
 public:	// new functions
 	void AK47Fire(float flSpread, float flCycleTime = (60.0f / AK47_RPM));
@@ -384,6 +401,7 @@ public:	// basic logic funcs
 
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void) { return ACR_MAX_SPEED; }
+	virtual void	ResetModel		(void);
 
 public:	// new functions
 	void ACRFire(float flSpread, float flCycleTime = (60.0f / ACR_RPM));
@@ -434,14 +452,15 @@ public:	// basic logic funcs
 
 public:	// util funcs
 	virtual float GetMaxSpeed		(void);
+	virtual void	ResetModel		(void);
 
 public:	// new funcs
 	void AWPFire(float flSpread, float flCycleTime = AWP_FIRE_INTERVAL);
 };
 
-#define DEAGLE_VIEW_MODEL	"models/weapons/v_deagle.mdl"
-#define DEAGLE_WORLD_MODEL	"models/weapons/w_deagle.mdl"
-#define DEAGLE_FIRE_SFX		"weapons/deagle/deagle_fire.wav"
+#define DEagle_VIEW_MODEL	"models/weapons/v_deagle.mdl"
+#define DEagle_WORLD_MODEL	"models/weapons/w_deagle.mdl"
+#define DEagle_FIRE_SFX		"weapons/deagle/deagle_fire.wav"
 
 constexpr float DEAGLE_MAX_SPEED		= 245.0f;
 constexpr float DEAGLE_DAMAGE			= 57.0f;
@@ -482,6 +501,7 @@ public:	// basic logic funcs
 
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void) { return DEAGLE_MAX_SPEED; }
+	virtual void	ResetModel		(void);
 
 public:	// new functions
 	void DEagleFire(float flSpread, float flCycleTime = DEAGLE_FIRE_INTERVAL);
@@ -541,6 +561,7 @@ public:	// basic logic funcs
 
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void);
+	virtual void	ResetModel		(void);
 
 public:	// new functions
 	void SVDFire(float flSpread, float flCycleTime = SVD_FIRE_INTERVAL);
@@ -696,6 +717,7 @@ public:	// util funcs
 	virtual	void	PlayEmptySound	(void);
 	virtual void	PushAnim		(void);
 	virtual void	PopAnim			(void);
+	virtual void	ResetModel		(void);
 };
 
 #define M4A1_VIEW_MODEL		"models/weapons/v_m4a1.mdl"
@@ -746,9 +768,9 @@ enum mac10_e
 	MAC10_SHOOT3,
 };
 
-#define ANACONDA_VIEW_MODEL		"models/weapons/v_anaconda.mdl"
-#define ANACONDA_WORLD_MODEL	"models/weapons/w_anaconda.mdl"
-#define ANACONDA_FIRE_SFX		"weapons/anaconda/anaconda_fire.wav"
+#define Anaconda_VIEW_MODEL		"models/weapons/v_anaconda.mdl"
+#define Anaconda_WORLD_MODEL	"models/weapons/w_anaconda.mdl"
+#define Anaconda_FIRE_SFX		"weapons/anaconda/anaconda_fire.wav"
 
 constexpr float ANACONDA_MAX_SPEED			= 250.0f;
 constexpr float ANACONDA_DAMAGE				= 64.0f;
@@ -796,6 +818,7 @@ public:	// basic logic funcs
 
 public:	// util funcs
 	virtual float GetMaxSpeed		(void) { return ANACONDA_MAX_SPEED; }
+	virtual void	ResetModel		(void);
 
 public:	// new funcs
 	void AnacondaFire(float flSpread, float flCycleTime = ANACONDA_FIRE_INTERVAL);
@@ -892,6 +915,7 @@ public:
 
 public:	// util funcs
 	virtual float	GetMaxSpeed		(void) { return MP7A1_MAX_SPEED; }
+	virtual void	ResetModel		(void);
 
 public:	// new funcs
 	void MP7A1Fire(float flSpread, float flCycleTime = (60.0f / MP7A1_RPM));
@@ -1043,7 +1067,8 @@ public:	// basic logic funcs
 	virtual void	WeaponIdle(void);
 
 public:	// util funcs
-	virtual	float	GetMaxSpeed(void) { return CM901_MAX_SPEED; }
+	virtual	float	GetMaxSpeed		(void) { return CM901_MAX_SPEED; }
+	virtual void	ResetModel		(void);
 
 public:	// new functions
 	void CM901Fire(float flSpread, float flCycleTime);
@@ -1091,6 +1116,7 @@ public:	// basic logic funcs
 
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void) { return QBZ95_MAX_SPEED; }
+	virtual void	ResetModel		(void);
 
 public:	// new functions
 	void QBZ95Fire(float flSpread, float flCycleTime = (60.0f / QBZ95_RPM));

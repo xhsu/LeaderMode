@@ -239,14 +239,15 @@ void CBaseWeapon::TheWeaponsThink(void)
 
 	while (i != m_lstWeapons.end())
 	{
-		if ((*i)->IsDead())
+		auto pWeapon = (*i);
+
+		if (pWeapon->IsDead())
 		{
+			delete pWeapon;	// destory pointer, otherwise it would become a wild pointer.
 			m_lstWeapons.erase(i++);  // alternatively, i = m_lstWeapons.erase(i);
 		}
 		else
 		{
-			auto pWeapon = (*i);
-
 			// the owner is vanished.
 			if (!pWeapon->m_pPlayer.IsValid() && !pWeapon->m_pWeaponBox.IsValid())
 				pWeapon->Kill();
@@ -388,11 +389,8 @@ void CBaseWeapon::PostFrame()
 		// if the player was reloading, then we should back to reload.
 		if (m_bInReload)
 		{
-			Holster();	// the default Holster() would remove m_bInReload flag. Thus we have to do this.
-			Deploy();
-
-			PopAnim();
-			m_bInReload = true;
+			ResetModel();	// you have to switch from knife model to gun model.
+			PopAnim();		// then you may resume you anim.
 		}
 		else
 		{
@@ -519,6 +517,16 @@ bool CBaseWeapon::Melee(void)
 	BasicKnife::Deploy(this);
 	BasicKnife::Swing();
 	return true;
+}
+
+bool CBaseWeapon::QuickThrowStart(EquipmentIdType iId)
+{
+	return false;
+}
+
+bool CBaseWeapon::QuickThrowRelease(void)
+{
+	return false;
 }
 
 bool CBaseWeapon::Holster(bool bTrial)

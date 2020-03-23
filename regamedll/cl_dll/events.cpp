@@ -750,7 +750,7 @@ void EV_HLDM_FireBullets(int idx, Vector& forward, Vector& right, Vector& up, in
 
 		while (iShots > 0)
 		{
-			if (iBulletType == BULLET_PLAYER_BUCKSHOT)
+			if (iBulletType == AMMO_Buckshot)
 			{
 				do
 				{
@@ -1170,7 +1170,7 @@ DECLARE_EVENT(FireDEagle)
 
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iPShell, TE_BOUNCE_SHELL, 5);
 
-	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, DEAGLE_FIRE_SFX, 1.0, 0.6, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
+	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, DEagle_FIRE_SFX, 1.0, 0.6, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
 
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
@@ -1405,7 +1405,7 @@ DECLARE_EVENT(FireAnaconda)
 
 	// no shell VFX while shooting for Anaconda. since it is a revolvor.
 
-	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, ANACONDA_FIRE_SFX, 1.0, ATTN_NORM, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
+	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, Anaconda_FIRE_SFX, 1.0, ATTN_NORM, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
 
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);

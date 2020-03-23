@@ -207,3 +207,5 @@ void CUSP::WeaponIdle()
 		SendWeaponAnim(USP_IDLE);
 	}
 }
+
+DECLARE_STANDARD_RESET_MODEL_FUNC(USP)

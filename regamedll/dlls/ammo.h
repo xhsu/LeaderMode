@@ -61,7 +61,10 @@ enum AmmoIdType
 	AMMO_SmokeGrenade,
 	AMMO_C4,
 
-	AMMO_MAXTYPE
+	// util valus.
+	AMMO_MAXTYPE,
+	AMMO_THROWABLE_START = AMMO_Flashbang,
+	AMMO_THROWABLE_END = AMMO_SmokeGrenade,
 };
 
 struct AmmoInfo
@@ -77,22 +80,13 @@ struct AmmoInfo
 
 extern const AmmoInfo g_rgAmmoInfo[AMMO_MAXTYPE];
 
-#define BULLET_NONE				0
-#define BULLET_PLAYER_9MM		1
-#define BULLET_PLAYER_BUCKSHOT	4
-#define BULLET_PLAYER_CROWBAR	5	// used in knife
-#define BULLET_PLAYER_45ACP		9
-#define BULLET_PLAYER_338MAG	10
-#define BULLET_PLAYER_762MM		11
-#define BULLET_PLAYER_556MM		12
-#define BULLET_PLAYER_50AE		13
-#define BULLET_PLAYER_57MM		14
-#define BULLET_PLAYER_357SIG	15
-
 // only used in func_tank
 #define BULLET_MONSTER_9MM		6
 #define BULLET_MONSTER_MP5		7
 #define BULLET_MONSTER_12MM		8
+
+// only used in Sound.cpp
+#define BULLET_PLAYER_CROWBAR	5	// used in knife
 
 const AmmoInfo* GetAmmoInfo(const char* ammoName);
 const AmmoInfo* GetAmmoInfo(int iId);
