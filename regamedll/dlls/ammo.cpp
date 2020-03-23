@@ -53,6 +53,24 @@ const AmmoInfo* GetAmmoInfo(int iId)
 	return (iId > 0 && iId < AMMO_MAXTYPE) ? &g_rgAmmoInfo[iId] : nullptr;
 }
 
+AmmoIdType GetAmmoIdOfEquipment(EquipmentIdType iId)
+{
+	switch (iId)
+	{
+	case EQP_HEGRENADE:
+		return AMMO_HEGrenade;
+
+	case EQP_FLASHBANG:
+		return AMMO_Flashbang;
+
+	case EQP_SMOKEGRENADE:
+		return AMMO_SmokeGrenade;
+
+	default:
+		return AMMO_NONE;
+	}
+}
+
 /*
 ============
 DescribeBulletTypeParameters

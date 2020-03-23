@@ -166,6 +166,8 @@ void WeaponsPrecache()
 	UTIL_PrecacheOtherWeapon(WEAPON_MP7A1);
 	UTIL_PrecacheOtherWeapon(WEAPON_P99);
 
+	PRECACHE_MODEL(THROWABLE_VIEW_MODEL);
+	PRECACHE_SOUND("items/ammopickup1.wav");	// grenade purchasing SFX.
 	UTIL_PrecacheOtherWeapon(WEAPON_FLASHBANG);
 	UTIL_PrecacheOtherWeapon(WEAPON_HEGRENADE);
 	UTIL_PrecacheOtherWeapon(WEAPON_SMOKEGRENADE);
@@ -403,6 +405,98 @@ void CBaseWeapon::PostFrame()
 		return;
 	}
 
+	// the handle of WPNSTATE_QUICK_THROWING
+	if (m_bitsFlags & WPNSTATE_QUICK_THROWING)
+	{
+		if (m_bitsFlags & WPNSTATE_QT_EXIT)
+		{
+			// remove all flags.
+			m_bitsFlags &= ~(WPNSTATE_QUICK_THROWING | WPNSTATE_QT_RELEASE | WPNSTATE_QT_SHOULD_SPAWN | WPNSTATE_QT_EXIT);
+
+			// back to our weapon.
+			Holster();
+			Deploy();
+
+			// check inventory of current equipment.
+			m_pPlayer->ResetUsingEquipment();
+
+			// wait for 1 frame.
+			return;
+		}
+
+		// throw the grenade.
+		else if (m_bitsFlags & WPNSTATE_QT_SHOULD_SPAWN)
+		{
+			float flTime = TIME_GR_IDLE_LOOP;
+			switch (m_pPlayer->m_iUsingGrenadeId)
+			{
+			case EQP_HEGRENADE:
+			case EQP_CRYOGRENADE:
+			case EQP_INCENDIARY_GR:
+			case EQP_FLASHBANG:
+				flTime = TIME_QT_THROWING_FAR - TIME_SP_QT_THROWING_FAR;	// the post-throwing time.
+				break;
+
+			case EQP_SMOKEGRENADE:
+			case EQP_GAS_GR:
+			case EQP_HEALING_GR:
+				flTime = TIME_QT_THROWING_SOFT - TIME_SP_QT_THROWING_SOFT;
+				break;
+
+			default:
+				return;	// how did he get here???
+			}
+
+			// reduce the grenade inventory
+			if (*m_pPlayer->GetGrenadeInventoryPointer(m_pPlayer->m_iUsingGrenadeId))
+				(*m_pPlayer->GetGrenadeInventoryPointer(m_pPlayer->m_iUsingGrenadeId))--;
+
+			m_pPlayer->Radio("%!MRAD_FIREINHOLE", "#Fire_in_the_hole");
+			m_bitsFlags |= WPNSTATE_QT_EXIT;
+			m_pPlayer->m_flNextAttack = flTime;
+		}
+
+		// play the release anim.
+		else if (m_bitsFlags & WPNSTATE_QT_RELEASE)
+		{
+			int iAnim = GR_IDLE;
+			float flTime = TIME_GR_IDLE_LOOP;
+			switch (m_pPlayer->m_iUsingGrenadeId)
+			{
+			case EQP_HEGRENADE:
+			case EQP_CRYOGRENADE:
+			case EQP_INCENDIARY_GR:
+			case EQP_FLASHBANG:
+				iAnim = QT_THROWING_FAR;
+				flTime = TIME_SP_QT_THROWING_FAR;
+				break;
+
+			case EQP_SMOKEGRENADE:
+			case EQP_GAS_GR:
+			case EQP_HEALING_GR:
+				iAnim = QT_THROWING_SOFT;
+				flTime = TIME_SP_QT_THROWING_SOFT;
+				break;
+
+			default:
+				return;	// how did he get here???
+			}
+
+			m_bitsFlags |= WPNSTATE_QT_SHOULD_SPAWN;
+			m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+			SendWeaponAnim(iAnim);
+			m_pPlayer->m_flNextAttack = flTime;
+		}
+
+		// hold and do nothing.
+		else
+		{
+
+		}
+
+		return;
+	}
+
 	// Return zoom level back to previous zoom level before we fired a shot.
 	// This is used only for the AWP and Scout
 	if (m_flNextPrimaryAttack <= UTIL_WeaponTimeBase())
@@ -504,7 +598,7 @@ void CBaseWeapon::PostFrame()
 bool CBaseWeapon::Melee(void)
 {
 	// you just.. can't do this.
-	if (m_iId == WEAPON_KNIFE || m_bitsFlags & WPNSTATE_MELEE)
+	if (m_iId == WEAPON_KNIFE || m_bitsFlags & (WPNSTATE_MELEE | WPNSTATE_QUICK_THROWING))
 		return false;
 
 	if (m_bInZoom)
@@ -521,17 +615,76 @@ bool CBaseWeapon::Melee(void)
 
 bool CBaseWeapon::QuickThrowStart(EquipmentIdType iId)
 {
-	return false;
+	if (m_bitsFlags & (WPNSTATE_MELEE | WPNSTATE_QUICK_THROWING))
+		return false;
+
+	if (!m_pPlayer->GetGrenadeInventory(iId))
+		return false;
+
+	if (m_bInZoom)
+		SecondaryAttack();
+
+	int iAnim = GR_IDLE;
+	float flTime = TIME_GR_IDLE_LOOP;
+	const char *pszViewModel = THROWABLE_VIEW_MODEL, *pszWeaponModel = "";	// remember, you have to use the constant string.
+	switch (iId)
+	{
+	case EQP_HEGRENADE:
+	case EQP_CRYOGRENADE:
+	case EQP_INCENDIARY_GR:
+		iAnim = GR_QT_READY;
+		flTime = TIME_GR_QT_READY;
+		break;
+
+	case EQP_FLASHBANG:
+		iAnim = FB_QT_READY;
+		flTime = TIME_FB_QT_READY;
+		break;
+
+	case EQP_SMOKEGRENADE:
+	case EQP_GAS_GR:
+	case EQP_HEALING_GR:
+		iAnim = SG_QT_READY;
+		flTime = TIME_SG_QT_READY;
+		break;
+
+	default:
+		return false;	// how did he get here???
+	}
+
+	m_bitsFlags |= WPNSTATE_QUICK_THROWING;
+	m_pPlayer->m_iUsingGrenadeId = iId;
+	m_pPlayer->pev->viewmodel = MAKE_STRING(pszViewModel);
+	m_pPlayer->pev->weaponmodel = MAKE_STRING(pszWeaponModel);
+
+	Q_strlcpy(m_pPlayer->m_szAnimExtention, "grenade");
+	SendWeaponAnim(iAnim);
+
+	m_pPlayer->m_flNextAttack = flTime;
+	m_flTimeWeaponIdle = flTime + 0.75f;
+	m_flDecreaseShotsFired = gpGlobals->time;
+	m_bInReload = false;	// the reload has to stop this time.
+
+	m_pPlayer->pev->fov = DEFAULT_FOV;
+	m_pPlayer->m_iLastZoom = DEFAULT_FOV;
+	m_pPlayer->m_bResumeZoom = false;
+	m_pPlayer->m_vecVAngleShift = g_vecZero;
+
+	return true;
 }
 
 bool CBaseWeapon::QuickThrowRelease(void)
 {
-	return false;
+	if (!(m_bitsFlags & WPNSTATE_QUICK_THROWING))
+		return false;	// what are you doing here then?
+
+	m_bitsFlags |= WPNSTATE_QT_RELEASE;
+	return true;
 }
 
 bool CBaseWeapon::Holster(bool bTrial)
 {
-	if (m_bitsFlags & WPNSTATE_MELEE)	// you can't holster while meleeing.
+	if (m_bitsFlags & (WPNSTATE_MELEE | WPNSTATE_QUICK_THROWING))	// you can't holster while meleeing or throwing.
 		return false;
 
 	// if this is only a trial like original CanHolster(), let's finish here.
@@ -709,7 +862,7 @@ bool CBaseWeapon::DefaultDeploy(const char* szViewModel, const char* szWeaponMod
 {
 	// TODO
 	/*if (!CanDeploy())
-		return FALSE;*/
+		return false;*/
 
 	m_pPlayer->pev->viewmodel = MAKE_STRING(szViewModel);
 	m_pPlayer->pev->weaponmodel = MAKE_STRING(szWeaponModel);
@@ -726,7 +879,7 @@ bool CBaseWeapon::DefaultDeploy(const char* szViewModel, const char* szWeaponMod
 	m_pPlayer->m_bResumeZoom = false;
 	m_pPlayer->m_vecVAngleShift = g_vecZero;
 
-	return TRUE;
+	return true;
 }
 
 void CBaseWeapon::SendWeaponAnim(int iAnim, int iBody, bool bSkipLocal)

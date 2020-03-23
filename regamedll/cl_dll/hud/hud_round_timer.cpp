@@ -8,7 +8,9 @@ Created Date: Mar 11 2020
 
 int CHudRoundTimer::Init(void)
 {
-	gHUD::AddHudElem(this);
+	// LUNA: in leader mod, we don't need a timer.
+	// remove the comment symbol to activate timer.
+	//gHUD::AddHudElem(this);
 
 	Reset();
 	return 1;

@@ -112,10 +112,13 @@ enum ItemCostType
 enum WeaponState
 {
 	WPNSTATE_DEAD				= BIT(0),	// mark for remove.
-	WPNSTATE_MELEE				= BIT(1),
-	WPNSTATE_ELITE_LEFT         = BIT(3),
-	WPNSTATE_FAMAS_BURST_MODE   = BIT(4),
-	WPNSTATE_SHIELD_DRAWN       = BIT(5),
+	WPNSTATE_MELEE				= BIT(1),	// mark for melee fight
+	WPNSTATE_QUICK_THROWING		= BIT(2),	// mark for using a throwable
+	WPNSTATE_QT_RELEASE			= BIT(3),	// mark for the release of the throwable
+	WPNSTATE_QT_SHOULD_SPAWN	= BIT(4),	// mark for spawning the selected GR.
+	WPNSTATE_QT_EXIT			= BIT(5),	// mark for the end of QT seq.
+
+	WPNSTATE_SHIELD_DRAWN		= BIT(30)	// disused.
 };
 
 enum WeaponClassWeight
@@ -179,7 +182,7 @@ enum EquipmentIdType
 	EQP_HEGRENADE,
 	EQP_FLASHBANG,
 	EQP_SMOKEGRENADE,
-	EQP_FROST_GR,
+	EQP_CRYOGRENADE,
 	EQP_INCENDIARY_GR,
 	EQP_HEALING_GR,
 	EQP_GAS_GR,

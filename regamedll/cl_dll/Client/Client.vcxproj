@@ -210,6 +210,7 @@
     <ClCompile Include="..\hud\hud_death_notice.cpp" />
     <ClCompile Include="..\hud\hud_flashlight.cpp" />
     <ClCompile Include="..\hud\hud_geiger.cpp" />
+    <ClCompile Include="..\hud\hud_grenade.cpp" />
     <ClCompile Include="..\hud\hud_head_name.cpp" />
     <ClCompile Include="..\hud\hud_health.cpp" />
     <ClCompile Include="..\hud\hud_menu.cpp" />
@@ -269,6 +270,7 @@
     <ClInclude Include="..\hud\hud_death_notice.h" />
     <ClInclude Include="..\hud\hud_flashlight.h" />
     <ClInclude Include="..\hud\hud_geiger.h" />
+    <ClInclude Include="..\hud\hud_grenade.h" />
     <ClInclude Include="..\hud\hud_head_name.h" />
     <ClInclude Include="..\hud\hud_health.h" />
     <ClInclude Include="..\hud\hud_menu.h" />

@@ -5843,6 +5843,15 @@ void EXT_FUNC CBasePlayer::UpdateClientData()
 
 		m_vLastOrigin = pev->origin;
 	}
+
+	if (m_iClientKnownUsingGrenadeId != m_iUsingGrenadeId)
+	{
+		MESSAGE_BEGIN(MSG_ONE, gmsgEqpSelect, nullptr, pev);
+		WRITE_BYTE(m_iUsingGrenadeId);
+		MESSAGE_END();
+
+		m_iClientKnownUsingGrenadeId = m_iUsingGrenadeId;
+	}
 }
 
 bool CBasePlayer::ShouldToShowAccount(CBasePlayer *pReceiver) const
@@ -7585,20 +7594,39 @@ int CBasePlayer::GetGrenadeInventory(EquipmentIdType iId)
 
 int* CBasePlayer::GetGrenadeInventoryPointer(EquipmentIdType iId)
 {
-	switch (iId)
+	return &m_rgAmmo[GetAmmoIdOfEquipment(iId)];
+}
+
+void CBasePlayer::ResetUsingEquipment(void)
+{
+	// the stock is ok.
+	if (GetGrenadeInventory(m_iUsingGrenadeId) > 0)
+		return;
+
+	AmmoIdType iAmmoId = AMMO_NONE;
+	EquipmentIdType iCandidate = CSGameRules()->SelectProperGrenade(this);
+
+	// check inventory of recommanded equipment.
+	if (GetGrenadeInventory(iCandidate))
 	{
-	case EQP_HEGRENADE:
-		return &m_rgAmmo[AMMO_HEGrenade];
-
-	case EQP_FLASHBANG:
-		return &m_rgAmmo[AMMO_Flashbang];
-
-	case EQP_SMOKEGRENADE:
-		return &m_rgAmmo[AMMO_SmokeGrenade];
-
-	default:
-		return &m_rgAmmo[AMMO_NONE];
+		// it's good? take and leave.
+		m_iUsingGrenadeId = iCandidate;
+		return;
 	}
+
+	// start the searching from the first.
+	for (int i = EQP_NONE; i < EQP_COUNT; i++)
+	{
+		iAmmoId = GetAmmoIdOfEquipment((EquipmentIdType)i);
+
+		if (!iAmmoId || m_rgAmmo[iAmmoId] <= 0)
+			continue;
+
+		iCandidate = (EquipmentIdType)i;
+		break;
+	}
+
+	m_iUsingGrenadeId = iCandidate;
 }
 
 void CBasePlayer::AssignRole(RoleTypes iNewRole)

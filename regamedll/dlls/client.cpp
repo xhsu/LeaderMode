@@ -81,6 +81,7 @@ int gmsgRadarRP = 0;
 int gmsgSetSlot = 0;
 int gmsgShoot = 0;
 int gmsgSteelSight = 0;
+int gmsgEqpSelect = 0;
 
 bool g_bClientPrintEnable = true;
 
@@ -222,6 +223,7 @@ void LinkUserMessages()
 	gmsgSetSlot		  = REG_USER_MSG("SetSlot", 2);
 	gmsgShoot		  = REG_USER_MSG("Shoot", 2);
 	gmsgSteelSight	  = REG_USER_MSG("SteelSight", 1);
+	gmsgEqpSelect	  = REG_USER_MSG("EqpSelect", 1);
 }
 
 void WriteSigonMessages()
@@ -951,8 +953,11 @@ void Host_Say(edict_t *pEntity, BOOL teamonly)
 	}
 }
 
-void BuyItem(CBasePlayer *pPlayer, EquipmentIdType iSlot)
+void BuyEquipment(CBasePlayer *pPlayer, EquipmentIdType iSlot)
 {
+	if (!CSGameRules()->CanHaveEquipment(pPlayer, iSlot))
+		return;
+
 	int iItemPrice = 0;
 	const char *pszItem = nullptr;
 
@@ -1042,59 +1047,17 @@ void BuyItem(CBasePlayer *pPlayer, EquipmentIdType iSlot)
 			}
 			break;
 		}
-		case EQP_FLASHBANG:
-		{
-			if (CSGameRules()->CanHavePlayerItem(pPlayer, WEAPON_FLASHBANG, true))
-				return;
-
-			if (pPlayer->m_rgAmmo[AMMO_Flashbang] >= g_rgAmmoInfo[AMMO_Flashbang].m_iMax)
-			{
-				if (g_bClientPrintEnable)
-				{
-					ClientPrint(pPlayer->pev, HUD_PRINTCENTER, "#Cannot_Carry_Anymore");
-				}
-
-				return;
-			}
-
-			if (pPlayer->m_iAccount >= GetCost(pPlayer->m_iRoleType, WEAPON_FLASHBANG))
-			{
-				bEnoughMoney = true;
-				pszItem = "weapon_flashbang";
-				iItemPrice = GetCost(pPlayer->m_iRoleType, WEAPON_FLASHBANG);
-
-			}
-			break;
-		}
 		case EQP_HEGRENADE:
-		{
-			if (CSGameRules()->CanHavePlayerItem(pPlayer, WEAPON_HEGRENADE, true))
-				return;
-
-			if (pPlayer->m_rgAmmo[AMMO_HEGrenade] >= g_rgAmmoInfo[AMMO_HEGrenade].m_iMax)
-			{
-				if (g_bClientPrintEnable)
-				{
-					ClientPrint(pPlayer->pev, HUD_PRINTCENTER, "#Cannot_Carry_Anymore");
-				}
-
-				return;
-			}
-
-			if (pPlayer->m_iAccount >= GetCost(pPlayer->m_iRoleType, WEAPON_HEGRENADE))
-			{
-				bEnoughMoney = true;
-				pszItem = "weapon_hegrenade";
-				iItemPrice = GetCost(pPlayer->m_iRoleType, WEAPON_HEGRENADE);
-			}
-			break;
-		}
+		case EQP_FLASHBANG:
 		case EQP_SMOKEGRENADE:
+		case EQP_CRYOGRENADE:
+		case EQP_INCENDIARY_GR:
+		case EQP_HEALING_GR:
+		case EQP_GAS_GR:
 		{
-			if (CSGameRules()->CanHavePlayerItem(pPlayer, WEAPON_SMOKEGRENADE, true))
-				return;
+			AmmoIdType iAmmoId = GetAmmoIdOfEquipment(iSlot);
 
-			if (pPlayer->m_rgAmmo[AMMO_SmokeGrenade] >= g_rgAmmoInfo[AMMO_SmokeGrenade].m_iMax)
+			if (!CSGameRules()->CanHaveAmmo(pPlayer, iAmmoId))
 			{
 				if (g_bClientPrintEnable)
 				{
@@ -1104,12 +1067,19 @@ void BuyItem(CBasePlayer *pPlayer, EquipmentIdType iSlot)
 				return;
 			}
 
-			if (pPlayer->m_iAccount >= GetCost(pPlayer->m_iRoleType, WEAPON_SMOKEGRENADE))
+			iItemPrice = GetEquipmentPrice(pPlayer->m_iRoleType, iSlot);
+
+			if (pPlayer->m_iAccount >= iItemPrice)
 			{
+				EMIT_SOUND(pPlayer->edict(), CHAN_ITEM, "items/ammopickup1.wav", VOL_NORM, ATTN_STATIC);
+
+				pPlayer->m_rgAmmo[iAmmoId]++;	// give player the equipment.
 				bEnoughMoney = true;
-				pszItem = "weapon_smokegrenade";
-				iItemPrice = GetCost(pPlayer->m_iRoleType, WEAPON_SMOKEGRENADE);
+
+				if (!pPlayer->m_iUsingGrenadeId || pPlayer->m_rgAmmo[GetAmmoIdOfEquipment(pPlayer->m_iUsingGrenadeId)] <= 0)	// choose the new grenade as our grenade.
+					pPlayer->m_iUsingGrenadeId = iSlot;
 			}
+
 			break;
 		}
 		case EQP_NVG:
@@ -1181,6 +1151,10 @@ void BuyItem(CBasePlayer *pPlayer, EquipmentIdType iSlot)
 	if (pszItem)
 	{
 		pPlayer->GiveNamedItem(pszItem);
+	}
+
+	if (iItemPrice)
+	{
 		pPlayer->AddAccount(-iItemPrice, RT_PLAYER_BOUGHT_SOMETHING);
 	}
 
@@ -2767,13 +2741,13 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 			}
 			else if (FStrEq(pcmd, "role"))
 			{
-				int iRole = atoi(parg1);
+				int iRole = Q_atoi(parg1);
 				if (iRole >= Role_UNASSIGNED && iRole < ROLE_COUNT)
 					pPlayer->AssignRole(RoleTypes(iRole));
 			}
 			else if (FStrEq(pcmd, "addmoney"))
 			{
-				int iMoney = atoi(parg1);
+				int iMoney = Q_atoi(parg1);
 				pPlayer->AddAccount(iMoney);
 			}
 			else if (FStrEq(pcmd, "declarerole"))
@@ -2793,6 +2767,12 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 			{
 				if (pPlayer->m_pActiveItem)
 					pPlayer->m_pActiveItem->QuickThrowRelease();
+			}
+			else if (FStrEq(pcmd, "eqpselect"))
+			{
+				EquipmentIdType iId = (EquipmentIdType)Q_atoi(parg1);
+				pPlayer->m_iUsingGrenadeId = iId;
+				pPlayer->ResetUsingEquipment();	// it is not a reset, it just a check.
 			}
 			else if (FStrEq(pcmd, "electrify"))
 			{

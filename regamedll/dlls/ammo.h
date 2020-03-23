@@ -88,6 +88,10 @@ extern const AmmoInfo g_rgAmmoInfo[AMMO_MAXTYPE];
 // only used in Sound.cpp
 #define BULLET_PLAYER_CROWBAR	5	// used in knife
 
+// dummy
+enum EquipmentIdType;
+
 const AmmoInfo* GetAmmoInfo(const char* ammoName);
 const AmmoInfo* GetAmmoInfo(int iId);
+AmmoIdType GetAmmoIdOfEquipment(EquipmentIdType iId);
 bool DescribeBulletTypeParameters(AmmoIdType iBulletType, int& iPenetrationPower, float& flPenetrationDistance);

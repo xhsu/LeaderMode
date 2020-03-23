@@ -178,6 +178,7 @@ class CHudVGUI2Print;
 class CHudSniperScope;
 class CHudCrosshair;
 class CHudWeaponList;
+class CHudGrenade;
 
 namespace gHUD
 {
@@ -272,6 +273,7 @@ namespace gHUD
 	extern CHudSniperScope m_SniperScope;
 	extern CHudCrosshair m_Crosshair;
 	extern CHudWeaponList m_WeaponList;
+	extern CHudGrenade m_Grenade;
 };
 
 class CScreenFade
@@ -336,6 +338,8 @@ void CommandFunc_NextWeapon(void);
 void CommandFunc_PrevWeapon(void);
 void CommandFunc_Adjust_Crosshair(void);
 void CommandFunc_SelectLastItem(void);
+void CommandFunc_NextEquipment(void);
+void CommandFunc_PrevEquipment(void);
 
 #define ScreenHeight (gHUD::m_scrinfo.iHeight)
 #define ScreenWidth (gHUD::m_scrinfo.iWidth)

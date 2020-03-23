@@ -70,7 +70,7 @@ const EquipmentInfo g_rgEquipmentInfo[EQP_COUNT] =
 	{EQP_HEGRENADE,		"weapon_hegrenade",		"HE Grenade",			HEGRENADE_PRICE},
 	{EQP_FLASHBANG,		"weapon_flashbang",		"Flashbang",			FLASHBANG_PRICE},
 	{EQP_SMOKEGRENADE,	"weapon_smokegrenade",	"Smoke Grenade",		SMOKEGRENADE_PRICE},
-	{EQP_FROST_GR,		"weapon_frostgrenade",	"Cryogrenade",			HEGRENADE_PRICE * 2},
+	{EQP_CRYOGRENADE,		"weapon_frostgrenade",	"Cryogrenade",			HEGRENADE_PRICE * 2},
 	{EQP_INCENDIARY_GR,	"weapon_incendiary_gr",	"Incendiary Grenade",	HEGRENADE_PRICE * 2},
 	{EQP_HEALING_GR,	"weapon_healing_gr",	"Healing Grenade",		SMOKEGRENADE_PRICE * 2},
 	{EQP_GAS_GR,		"weapon_gasgrenade",	"Nerve Gas Grenade",	SMOKEGRENADE_PRICE * 2},

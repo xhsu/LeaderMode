@@ -1077,6 +1077,16 @@ MSG_FUNC(SteelSight)
 	return TRUE;
 }
 
+MSG_FUNC(EqpSelect)
+{
+	BEGIN_READ(pbuf, iSize);
+
+	EquipmentIdType iId = (EquipmentIdType)READ_BYTE();
+
+	gPseudoPlayer.m_iUsingGrenadeId = iId;
+	return TRUE;
+}
+
 
 // player.cpp
 MSG_FUNC(Logo)
@@ -1192,6 +1202,7 @@ void Msg_Init(void)
 	HOOK_USER_MSG(SetSlot);
 	HOOK_USER_MSG(Shoot);
 	HOOK_USER_MSG(SteelSight);
+	HOOK_USER_MSG(EqpSelect);
 
 	// player.cpp
 	HOOK_USER_MSG(Logo);
