@@ -414,7 +414,7 @@ bool CCSBot::DoEquip(CBaseWeapon *pWeapon)
 		return false;
 
 	// equip it
-	SelectItem(pWeapon->m_pItemInfo->m_pszClassName);
+	SelectItem(pWeapon->m_pItemInfo->m_pszInternalName);
 	m_equipTimer.Start();
 
 	return true;
@@ -478,7 +478,7 @@ void CCSBot::EquipKnife()
 	{
 		if (m_rgpPlayerItems[KNIFE_SLOT])
 		{
-			SelectItem(m_rgpPlayerItems[KNIFE_SLOT]->m_pItemInfo->m_pszClassName);
+			SelectItem(m_rgpPlayerItems[KNIFE_SLOT]->m_pItemInfo->m_pszInternalName);
 		}
 	}
 }
@@ -508,7 +508,7 @@ bool CCSBot::EquipGrenade(bool noSmoke)
 			if (noSmoke && pGrenade->m_iId == WEAPON_SMOKEGRENADE)
 				return false;
 
-			SelectItem(pGrenade->m_pItemInfo->m_pszClassName);
+			SelectItem(pGrenade->m_pItemInfo->m_pszInternalName);
 			return true;
 		}
 	}

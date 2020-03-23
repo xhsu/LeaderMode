@@ -1060,7 +1060,7 @@ int CBaseEntity::FireBuckshots(ULONG cShots, const Vector& vecSrc, const Vector&
 
 // Go to the trouble of combining multiple pellets into a single damage call.
 // This version is used by Players, uses the random seed generator to sync client and server side shots.
-Vector CBaseEntity::FireBullets3(Vector vecSrc, Vector vecDirShooting, float vecSpread, float flDistance, int iPenetration, int iBulletType, int iDamage, float flRangeModifier, entvars_t *pevAttacker, bool bPistol, int shared_rand)
+Vector2D CBaseEntity::FireBullets3(Vector vecSrc, Vector vecDirShooting, float vecSpread, float flDistance, int iPenetration, AmmoIdType iBulletType, int iDamage, float flRangeModifier, int shared_rand)
 {
 	int iOriginalPenetration = iPenetration;
 	int iPenetrationPower;
@@ -1077,51 +1077,7 @@ Vector CBaseEntity::FireBullets3(Vector vecSrc, Vector vecDirShooting, float vec
 	vecRight = gpGlobals->v_right;
 	vecUp = gpGlobals->v_up;
 
-	switch (iBulletType)
-	{
-	case BULLET_PLAYER_9MM:
-		iPenetrationPower = 21;
-		flPenetrationDistance = 800;
-		break;
-	case BULLET_PLAYER_45ACP:
-		iPenetrationPower = 15;
-		flPenetrationDistance = 500;
-		break;
-	case BULLET_PLAYER_50AE:
-		iPenetrationPower = 30;
-		flPenetrationDistance = 1000;
-		break;
-	case BULLET_PLAYER_762MM:
-		iPenetrationPower = 39;
-		flPenetrationDistance = 5000;
-		break;
-	case BULLET_PLAYER_556MM:
-		iPenetrationPower = 35;
-		flPenetrationDistance = 4000;
-		break;
-	case BULLET_PLAYER_338MAG:
-		iPenetrationPower = 45;
-		flPenetrationDistance = 8000;
-		break;
-	case BULLET_PLAYER_57MM:
-		iPenetrationPower = 30;
-		flPenetrationDistance = 2000;
-		break;
-	case BULLET_PLAYER_357SIG:
-		iPenetrationPower = 25;
-		flPenetrationDistance = 800;
-		break;
-	default:
-		iPenetrationPower = 0;
-		flPenetrationDistance = 0;
-		break;
-	}
-
-	if (!pevAttacker)
-	{
-		// the default attacker is ourselves
-		pevAttacker = pev;
-	}
+	DescribeBulletTypeParameters(iBulletType, iPenetrationPower, flPenetrationDistance);
 
 	gMultiDamage.type = (DMG_BULLET | DMG_NEVERGIB);
 
@@ -1271,13 +1227,11 @@ Vector CBaseEntity::FireBullets3(Vector vecSrc, Vector vecDirShooting, float vec
 			else
 				flDistanceModifier = 0.5;
 
-			DecalGunshot(&tr, iBulletType, (!bPistol && RANDOM_LONG(0, 3)), pev, bHitMetal);
-
 			vecSrc = tr.vecEndPos + (vecDir * iPenetrationPower);
 			flDistance = (flDistance - flCurrentDistance) * flDistanceModifier;
 			vecEnd = vecSrc + (vecDir * flDistance);
 
-			pEntity->TraceAttack(pevAttacker, iCurrentDamage, vecDir, &tr, (DMG_BULLET | DMG_NEVERGIB));
+			pEntity->TraceAttack(pev, iCurrentDamage, vecDir, &tr, (DMG_BULLET | DMG_NEVERGIB));
 			iCurrentDamage *= flDamageModifier;
 		}
 		else
@@ -1285,14 +1239,14 @@ Vector CBaseEntity::FireBullets3(Vector vecSrc, Vector vecDirShooting, float vec
 
 		if (IsPlayer())
 		{
-			CBasePlayer* me = CBasePlayer::Instance(pevAttacker);
+			CBasePlayer* me = CBasePlayer::Instance(pev);
 			me->OnFireBullets3PreDamage(gMultiDamage.amount, tr);
 		}
 
-		ApplyMultiDamage(pev, pevAttacker);
+		ApplyMultiDamage(pev, pev);
 	}
 
-	return Vector(x * vecSpread, y * vecSpread, 0);
+	return Vector2D(x * vecSpread, y * vecSpread);
 }
 
 void CBaseEntity::TraceBleed(float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)

@@ -77,10 +77,10 @@ int CHudCrosshair::VidInit(void)
 
 		for (int j = 0; j < LAST_WEAPON; j++)
 		{
-			if (!g_rgItemInfo[j].m_pszClassName || g_rgItemInfo[j].m_pszClassName[0] == '\0')
+			if (!g_rgItemInfo[j].m_pszInternalName || g_rgItemInfo[j].m_pszInternalName[0] == '\0')
 				continue;
 
-			p = gHUD::GetSpriteFromList(pList, g_rgItemInfo[j].m_pszClassName, 640, i);
+			p = gHUD::GetSpriteFromList(pList, g_rgItemInfo[j].m_pszInternalName, 640, i);
 
 			if (p)
 			{

@@ -40,11 +40,11 @@ int CHudWeaponList::VidInit(void)
 
 		for (int j = 0; j < LAST_WEAPON; j++)
 		{
-			if (!g_rgItemInfo[j].m_pszClassName || g_rgItemInfo[j].m_pszClassName[0] == '\0')
+			if (!g_rgItemInfo[j].m_pszInternalName || g_rgItemInfo[j].m_pszInternalName[0] == '\0')
 				continue;
 
 			// get normal SPR
-			p = gHUD::GetSpriteFromList(pList, g_rgItemInfo[j].m_pszClassName, 640, i);
+			p = gHUD::GetSpriteFromList(pList, g_rgItemInfo[j].m_pszInternalName, 640, i);
 
 			if (p)
 			{
@@ -56,7 +56,7 @@ int CHudWeaponList::VidInit(void)
 				m_rghWeaponSprite[j] = NULL;
 
 			// get highlighted SPR
-			Q_snprintf(sz, charsmax(sz), "%s_s", g_rgItemInfo[j].m_pszClassName);
+			Q_snprintf(sz, charsmax(sz), "%s_s", g_rgItemInfo[j].m_pszInternalName);
 			p = gHUD::GetSpriteFromList(pList, sz, 640, i);
 
 			if (p)
@@ -198,9 +198,9 @@ int CHudWeaponList::Draw(float flTime)
 			vecAmmoBarCoord = m_rgvecCurCoord[i] + Vector2D(-AMMOBAR_WIDTH, flFullHeight - flCurHeight);
 
 			UnpackRGB(r, g, b, gPseudoPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType] ? RGB_YELLOWISH : RGB_REDISH);
-			gEngfuncs.pfnFillRGBA(vecAmmoBarCoord.x, m_rgvecCurCoord[i].y, AMMOBAR_WIDTH, flFullHeight, r, g, b, 128);
+			gEngfuncs.pfnFillRGBA(vecAmmoBarCoord.x, m_rgvecCurCoord[i].y, AMMOBAR_WIDTH, flFullHeight, r, g, b, 64);
 
-			UnpackRGB(r, g, b, gPseudoPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType] > pWeapon->m_pAmmoInfo->m_iCountPerBox ? RGB_GREENISH : RGB_REDISH);
+			UnpackRGB(r, g, b, gPseudoPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType] > pWeapon->m_pItemInfo->m_iMaxClip ? RGB_GREENISH : RGB_REDISH);
 			gEngfuncs.pfnFillRGBA(vecAmmoBarCoord.x, vecAmmoBarCoord.y, AMMOBAR_WIDTH, flCurHeight, r, g, b, 255);
 		}
 

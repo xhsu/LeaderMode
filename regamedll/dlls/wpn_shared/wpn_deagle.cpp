@@ -16,15 +16,7 @@ int CDEagle::m_iShell = 0;
 
 void CDEagle::Precache()
 {
-	PRECACHE_MODEL("models/weapons/v_deagle.mdl");
-	PRECACHE_MODEL("models/weapons/w_deagle.mdl");
-	PRECACHE_MODEL("models/weapons/p_deagle.mdl");
-
-	PRECACHE_SOUND("weapons/deagle-1.wav");
-	PRECACHE_SOUND("weapons/deagle-2.wav");
-	PRECACHE_SOUND("weapons/de_clipout.wav");
-	PRECACHE_SOUND("weapons/de_clipin.wav");
-	PRECACHE_SOUND("weapons/de_deploy.wav");
+	PRECACHE_NECESSARY_FILES(DEagle);
 
 	m_iShell = PRECACHE_MODEL("models/pshell.mdl");
 	m_usEvent = PRECACHE_EVENT(1, "events/deagle.sc");
@@ -36,7 +28,7 @@ bool CDEagle::Deploy()
 {
 	m_flAccuracy = 0.9f;
 
-	return DefaultDeploy("models/weapons/v_deagle.mdl", "models/weapons/p_deagle.mdl", DEAGLE_DRAW, "onehanded", DEAGLE_DEPLOY_TIME);
+	return DefaultDeploy(DEagle_VIEW_MODEL, DEagle_WORLD_MODEL, DEAGLE_DRAW, "onehanded", DEAGLE_DEPLOY_TIME);
 }
 
 void CDEagle::PrimaryAttack()
@@ -150,7 +142,7 @@ void CDEagle::DEagleFire(float flSpread, float flCycleTime)
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecAiming = gpGlobals->v_forward;
 
-	Vector vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, DEAGLE_EFFECTIVE_RANGE, DEAGLE_PENETRATION, m_pAmmoInfo->m_iBulletBehavior, DEAGLE_DAMAGE, DEAGLE_RANGE_MODIFER, m_pPlayer->pev, true, m_pPlayer->random_seed);
+	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, DEAGLE_EFFECTIVE_RANGE, DEAGLE_PENETRATION, m_iPrimaryAmmoType, DEAGLE_DAMAGE, DEAGLE_RANGE_MODIFER, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
 	int seq = UTIL_SharedRandomFloat(m_pPlayer->random_seed, DEAGLE_SHOOT1, DEAGLE_SHOOT2);
@@ -207,3 +199,5 @@ void CDEagle::WeaponIdle()
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
 	SendWeaponAnim(DEAGLE_IDLE1);
 }
+
+DECLARE_STANDARD_RESET_MODEL_FUNC(DEagle)

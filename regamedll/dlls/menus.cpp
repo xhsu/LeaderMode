@@ -120,7 +120,7 @@ bool MenuHandler_Buy3(CBasePlayer* pPlayer, int iSlot)
 			AddMenuWeaponItem(pPlayer, WEAPON_FIVESEVEN, szMenuText);	// 5
 			AddMenuWeaponItem(pPlayer, WEAPON_P99, szMenuText);			// 6
 
-			Q_strcat(szMenuText,	"\n"
+			Q_strlcat(szMenuText,	"\n"
 									"\\r0. \\wExit\n");
 
 			ShowMenu(pPlayer, MENU_KEY_0 | MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5 | MENU_KEY_6, -1, szMenuText);
@@ -137,7 +137,7 @@ bool MenuHandler_Buy3(CBasePlayer* pPlayer, int iSlot)
 			AddMenuWeaponItem(pPlayer, WEAPON_KSG12, szMenuText);		// 1
 			AddMenuWeaponItem(pPlayer, WEAPON_STRIKER, szMenuText);		// 2
 
-			Q_strcat(szMenuText,	"\n"
+			Q_strlcat(szMenuText,	"\n"
 									"\\r0. \\wExit\n");
 
 			ShowMenu(pPlayer, MENU_KEY_0 | MENU_KEY_1 | MENU_KEY_2, -1, szMenuText);
@@ -157,7 +157,7 @@ bool MenuHandler_Buy3(CBasePlayer* pPlayer, int iSlot)
 			AddMenuWeaponItem(pPlayer, WEAPON_UMP45, szMenuText);	// 4
 			AddMenuWeaponItem(pPlayer, WEAPON_P90, szMenuText);		// 5
 
-			Q_strcat(szMenuText,	"\n"
+			Q_strlcat(szMenuText,	"\n"
 									"\\r0. \\wExit\n");
 
 			ShowMenu(pPlayer, MENU_KEY_0 | MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5, -1, szMenuText);
@@ -179,7 +179,7 @@ bool MenuHandler_Buy3(CBasePlayer* pPlayer, int iSlot)
 			AddMenuWeaponItem(pPlayer, WEAPON_SCARL,	szMenuText);	// 6
 			AddMenuWeaponItem(pPlayer, WEAPON_MK46,		szMenuText);	// 7
 
-			Q_strcat(szMenuText,	"\n"
+			Q_strlcat(szMenuText,	"\n"
 									"\\r0. \\wExit\n");
 
 			ShowMenu(pPlayer, MENU_KEY_0 | MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5 | MENU_KEY_6 | MENU_KEY_7, -1, szMenuText);
@@ -198,7 +198,7 @@ bool MenuHandler_Buy3(CBasePlayer* pPlayer, int iSlot)
 			AddMenuWeaponItem(pPlayer, WEAPON_AWP, szMenuText);		// 3
 			AddMenuWeaponItem(pPlayer, WEAPON_SVD, szMenuText);		// 4
 
-			Q_strcat(szMenuText,	"\n"
+			Q_strlcat(szMenuText,	"\n"
 									"\\r0. \\wExit\n");
 
 			ShowMenu(pPlayer, MENU_KEY_0 | MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4, -1, szMenuText);
@@ -207,22 +207,25 @@ bool MenuHandler_Buy3(CBasePlayer* pPlayer, int iSlot)
 		}
 		case BuyMenu_BuyEquipments:
 		{
+			pPlayer->m_vMenuItems.clear();
+			pPlayer->m_vMenuItems.resize(EQP_COUNT, EQP_NONE);
+			g_iMenuItemCount = 0;
+
 			char szMenuText[512];
-			Q_sprintf(szMenuText,	"\\rBuy SMGs\n"
+			Q_sprintf(szMenuText,	"\\rBuy Equipments\n"
 									"\\yRole: \\w%s\n\n", g_rgszRoleNames[pPlayer->m_iRoleType]);
 
-			g_iMenuItemCount = 2;
-			Q_strcat(szMenuText, "\\r1. \\wArmour - \\y650\\w$\n");
-			Q_strcat(szMenuText, "\\r2. \\wArmour & Helmet - \\y1000\\w$\n");
-			AddMenuWeaponItem(pPlayer, WEAPON_HEGRENADE, szMenuText);		// 3
-			AddMenuWeaponItem(pPlayer, WEAPON_FLASHBANG, szMenuText);		// 4
-			AddMenuWeaponItem(pPlayer, WEAPON_SMOKEGRENADE, szMenuText);	// 5
-			Q_strcat(szMenuText, "\\r6. \\wNightvision - \\y1250\\w$\n");
+			for (int i = 0; i < EQP_COUNT; i++)
+				AddMenuEquipmentItem(pPlayer, (EquipmentIdType)i, szMenuText);
 
-			Q_strcat(szMenuText,	"\n"
+			Q_strlcat(szMenuText,	"\n"
 									"\\r0. \\wExit\n");
 
-			ShowMenu(pPlayer, MENU_KEY_0 | MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5 | MENU_KEY_6, -1, szMenuText);
+			int bitsValidButtons = MENU_KEY_0;
+			for (int i = 0; i < g_iMenuItemCount; i++)
+				bitsValidButtons |= BIT(i);	// MENU_KEY_1 is BIT(0), so...
+
+			ShowMenu(pPlayer, bitsValidButtons, -1, szMenuText);
 			pPlayer->m_iMenu = Menu_BuyEquipments;
 			return true;
 		}
@@ -365,32 +368,8 @@ bool MenuHandler_BuySniperRifles(CBasePlayer* pPlayer, int iSlot)
 
 bool MenuHandler_BuyEquipments(CBasePlayer* pPlayer, int iSlot)
 {
-	switch (iSlot)
-	{
-	case 1:
-		BuyItem(pPlayer, MENU_SLOT_ITEM_VEST);
-		return false;
-
-	case 2:
-		BuyItem(pPlayer, MENU_SLOT_ITEM_VESTHELM);
-		return false;
-
-	case 3:
-		return BuyWeapon(pPlayer, WEAPON_HEGRENADE);
-
-	case 4:
-		return BuyWeapon(pPlayer, WEAPON_FLASHBANG);
-
-	case 5:
-		return BuyWeapon(pPlayer, WEAPON_SMOKEGRENADE);
-
-	case 6:
-		BuyItem(pPlayer, MENU_SLOT_ITEM_NVG);
-		return false;
-
-	default:
-		return false;
-	}
+	BuyItem(pPlayer, (EquipmentIdType)pPlayer->m_vMenuItems[iSlot]);
+	return true;
 }
 
 ////////////////////
@@ -571,21 +550,21 @@ bool AddMenuWeaponItem(CBasePlayer *pPlayer, WeaponIdType iId, char *pszMenuText
 
 	if (g_rgRoleWeaponsAccessibility[pPlayer->m_iRoleType][iId] == WPN_F)
 	{
-		Q_sprintf(szBuffer, "\\d%d. %s - UNAVAILABLE\n", g_iMenuItemCount, g_rgszWeaponAlias[iId]);
+		Q_sprintf(szBuffer, "\\d%d. %s - UNAVAILABLE\n", g_iMenuItemCount, g_rgItemInfo[iId].m_pszExternalName);
 		Q_strcat(pszMenuText, szBuffer);
 	}
 	else
 	{
-		int iCost = GetPrice(pPlayer->m_iRoleType, iId);
+		int iCost = GetWeaponPrice(pPlayer->m_iRoleType, iId);
 
-		Q_sprintf(szBuffer, pPlayer->m_iAccount >= iCost ? "\\r%d. \\w%s - \\y%d\\w$" : "\\r%d. \\d%s - \\r%d\\d$", g_iMenuItemCount, g_rgszWeaponAlias[iId], iCost);
+		Q_sprintf(szBuffer, pPlayer->m_iAccount >= iCost ? "\\r%d. \\w%s - \\y%d\\w$" : "\\r%d. \\d%s - \\r%d\\d$", g_iMenuItemCount, g_rgItemInfo[iId].m_pszExternalName, iCost);
 
 		if (g_rgRoleWeaponsAccessibility[pPlayer->m_iRoleType][iId] == WPN_D)
-			Q_strcat(szBuffer, " \\y(DISCOUNTED)\n");
+			Q_strlcat(szBuffer, " \\g(DISCOUNTED)\n");
 		else if (g_rgRoleWeaponsAccessibility[pPlayer->m_iRoleType][iId] == WPN_P)
-			Q_strcat(szBuffer, " \\r(PENALIZED)\n");
+			Q_strlcat(szBuffer, " \\r(PENALIZED)\n");
 		else
-			Q_strcat(szBuffer, "\n");	// in C++ code, we need a closure
+			Q_strlcat(szBuffer, "\n");	// in C++ code, we need a closure
 
 		Q_strcat(pszMenuText, szBuffer);
 	}
@@ -593,7 +572,7 @@ bool AddMenuWeaponItem(CBasePlayer *pPlayer, WeaponIdType iId, char *pszMenuText
 	return true;
 }
 
-int GetPrice(RoleTypes iRoleIndex, WeaponIdType iId)
+int GetWeaponPrice(RoleTypes iRoleIndex, WeaponIdType iId)
 {
 	int iCost = GetWeaponInfo(iId)->m_iCost;
 
@@ -613,6 +592,63 @@ int GetPrice(RoleTypes iRoleIndex, WeaponIdType iId)
 
 		default:
 			break;
+	}
+
+	return iCost;
+}
+
+bool AddMenuEquipmentItem(CBasePlayer* pPlayer, EquipmentIdType iId, char* pszMenuText)
+{
+	static char szBuffer[192];
+
+	if (g_rgRoleEquipmentsAccessibility[pPlayer->m_iRoleType][iId] == WPN_F)
+	{
+		// in this case, just hide the item which is not available to this player.
+		return false;
+	}
+	else
+	{
+		g_iMenuItemCount++;	// only increase this when we sure about it.
+		int iCost = GetEquipmentPrice(pPlayer->m_iRoleType, iId);
+
+		Q_sprintf(szBuffer, pPlayer->m_iAccount >= iCost ? "\\r%d. \\w%s - \\y%d\\w$" : "\\r%d. \\d%s - \\r%d\\d$", g_iMenuItemCount, g_rgEquipmentInfo[iId].m_pszExternalName, iCost);
+
+		if (g_rgRoleEquipmentsAccessibility[pPlayer->m_iRoleType][iId] == WPN_D)
+			Q_strlcat(szBuffer, " \\g(DISCOUNTED)\n");
+		else if (g_rgRoleEquipmentsAccessibility[pPlayer->m_iRoleType][iId] == WPN_P)
+			Q_strlcat(szBuffer, " \\r(PENALIZED)\n");
+		else
+			Q_strlcat(szBuffer, "\n");	// in C++ code, we need a closure
+
+		Q_strcat(pszMenuText, szBuffer);
+
+		// at the same time, add this item index to player's menu list.
+		pPlayer->m_vMenuItems[g_iMenuItemCount] = iId;
+	}
+
+	return true;
+}
+
+int GetEquipmentPrice(RoleTypes iRoleIndex, EquipmentIdType iId)
+{
+	int iCost = g_rgEquipmentInfo[iId].m_iCost;
+
+	switch (g_rgRoleEquipmentsAccessibility[iRoleIndex][iId])
+	{
+	case WPN_F:
+		iCost = 160001;
+		break;
+
+	case WPN_D:
+		iCost /= 2;
+		break;
+
+	case WPN_P:
+		iCost *= 2;
+		break;
+
+	default:
+		break;
 	}
 
 	return iCost;

@@ -31,6 +31,24 @@
 // debug macro
 //#define RANDOM_SEED_CALIBRATION 1
 
+// util macro
+#define PRECACHE_NECESSARY_FILES(x)	PRECACHE_MODEL(x##_VIEW_MODEL);	\
+									PRECACHE_MODEL(x##_WORLD_MODEL);	\
+									PRECACHE_SOUND(x##_FIRE_SFX)
+
+#ifndef CLIENT_DLL
+#define DECLARE_STANDARD_RESET_MODEL_FUNC(x)	void C##x::ResetModel(void)	\
+												{	\
+													m_pPlayer->pev->viewmodel = MAKE_STRING(x##_VIEW_MODEL);	\
+													m_pPlayer->pev->weaponmodel = MAKE_STRING(x##_WORLD_MODEL);	\
+												}
+#else
+#define DECLARE_STANDARD_RESET_MODEL_FUNC(x)	void C##x::ResetModel(void)	\
+												{	\
+													g_pViewEnt->model = gEngfuncs.CL_LoadModel(x##_VIEW_MODEL, &m_pPlayer->pev->viewmodel);	\
+												}
+#endif
+
 class CBasePlayer;
 class CWeaponBox;
 
@@ -172,7 +190,8 @@ public:	// basic logic funcs
 	virtual void	WeaponIdle		(void) {}	// constantly called when nothing else to do.
 	virtual bool	Reload			(void) { return false; }	// you know what it is, right?
 	virtual bool	Melee			(void);		// quick knife.
-	virtual bool	QuickThrow		(WeaponIdType iId) { return false; };	// quick grenade (maybe something else in the future?).
+	virtual bool	QuickThrowStart	(EquipmentIdType iId);	// quick grenade (maybe something else in the future?).
+	virtual bool	QuickThrowRelease(void);	// triggered when +qtg button released.
 	virtual bool	Holster			(bool bTrial = false);		// called when attempting to put it off. bTrial means only testing whether weapon can be holster.
 	virtual bool	Drop			(void **ppWeaponBoxReturned = nullptr);		// called when attempting to drop it on ground. ppWeaponBoxReturned is the CWeaponBox to be returned. (NOT avaliable on client side.)
 	virtual bool	Kill			(void);		// called when attempting to remove it from your inventory.
@@ -198,10 +217,14 @@ public:	// util funcs
 	inline	bool	CanHolster		(void) { return Holster(true); }	// smells, looks and tastes like a duck...
 	virtual	bool	CanDrop			(void) { return true; }
 	virtual void	KickBack		(float up_base, float lateral_base, float up_modifier, float lateral_modifier, float up_max, float lateral_max, int direction_change);	// recoil
+	virtual void	ResetModel		(void) { }
 };
 
 
 
+#define USP_VIEW_MODEL		"models/weapons/v_usp.mdl"
+#define USP_WORLD_MODEL		"models/weapons/w_usp.mdl"
+#define USP_FIRE_SFX		"weapons/usp/usp_fire.wav"
 
 constexpr float USP_MAX_SPEED       = 250.0f;
 constexpr float USP_DAMAGE          = 30.0f;
@@ -243,10 +266,15 @@ public:	// basic logic funcs
 
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void) { return USP_MAX_SPEED; }
+	virtual void	ResetModel		(void);
 
 public:	// new functions
 	void USPFire(float flSpread, float flCycleTime = USP_FIRE_INTERVAL);
 };
+
+#define MP5N_VIEW_MODEL		"models/weapons/v_mp5.mdl"
+#define MP5N_WORLD_MODEL	"models/weapons/w_mp5.mdl"
+#define MP5N_FIRE_SFX		"weapons/mp5/mp5_fire.wav"
 
 const float MP5N_MAX_SPEED     = 250.0f;
 const float MP5N_DAMAGE        = 26.0f;
@@ -263,6 +291,10 @@ enum mp5n_e
 	MP5N_SHOOT3,
 };
 
+#define SCARL_VIEW_MODEL	"models/weapons/v_scarl.mdl"
+#define SCARL_WORLD_MODEL	"models/weapons/w_scarl.mdl"
+#define SCARL_FIRE_SFX		"weapons/scarl/scarl_fire.wav"
+
 const float SG552_MAX_SPEED      = 235.0f;
 const float SG552_MAX_SPEED_ZOOM = 200.0f;
 const float SG552_DAMAGE         = 33.0f;
@@ -278,6 +310,10 @@ enum sg552_e
 	SG552_SHOOT2,
 	SG552_SHOOT3,
 };
+
+#define AK47_VIEW_MODEL		"models/weapons/v_ak47.mdl"
+#define AK47_WORLD_MODEL	"models/weapons/w_ak47.mdl"
+#define AK47_FIRE_SFX		"weapons/ak47/ak47_fire.wav"
 
 constexpr float AK47_MAX_SPEED			= 221.0f;
 constexpr float AK47_DAMAGE				= 36.0f;
@@ -317,10 +353,15 @@ public:	// basic logic funcs
 
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void) { return AK47_MAX_SPEED; }
+	virtual void	ResetModel		(void);
 
 public:	// new functions
 	void AK47Fire(float flSpread, float flCycleTime = (60.0f / AK47_RPM));
 };
+
+#define ACR_VIEW_MODEL	"models/weapons/v_acr.mdl"
+#define ACR_WORLD_MODEL	"models/weapons/w_acr.mdl"
+#define ACR_FIRE_SFX	"weapons/acr/acr_fire.wav"
 
 constexpr float ACR_MAX_SPEED		= 240.0f;
 constexpr float ACR_DAMAGE			= 32.0f;
@@ -360,10 +401,15 @@ public:	// basic logic funcs
 
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void) { return ACR_MAX_SPEED; }
+	virtual void	ResetModel		(void);
 
 public:	// new functions
 	void ACRFire(float flSpread, float flCycleTime = (60.0f / ACR_RPM));
 };
+
+#define AWP_VIEW_MODEL	"models/weapons/v_awp.mdl"
+#define AWP_WORLD_MODEL	"models/weapons/w_awp.mdl"
+#define AWP_FIRE_SFX	"weapons/awp/awp_fire.wav"
 
 constexpr float AWP_MAX_SPEED		= 210.0f;
 constexpr float AWP_MAX_SPEED_ZOOM	= 150.0f;
@@ -406,10 +452,15 @@ public:	// basic logic funcs
 
 public:	// util funcs
 	virtual float GetMaxSpeed		(void);
+	virtual void	ResetModel		(void);
 
 public:	// new funcs
 	void AWPFire(float flSpread, float flCycleTime = AWP_FIRE_INTERVAL);
 };
+
+#define DEagle_VIEW_MODEL	"models/weapons/v_deagle.mdl"
+#define DEagle_WORLD_MODEL	"models/weapons/w_deagle.mdl"
+#define DEagle_FIRE_SFX		"weapons/deagle/deagle_fire.wav"
 
 constexpr float DEAGLE_MAX_SPEED		= 245.0f;
 constexpr float DEAGLE_DAMAGE			= 57.0f;
@@ -417,8 +468,8 @@ constexpr float DEAGLE_RANGE_MODIFER	= 0.86f;
 constexpr float DEAGLE_DEPLOY_TIME		= 0.34f;
 constexpr float DEAGLE_RELOAD_TIME		= 2.16f;
 constexpr float DEAGLE_FIRE_INTERVAL	= 0.225f;
-constexpr int	DEAGLE_PENETRATION		= 3;
-constexpr float	DEAGLE_EFFECTIVE_RANGE	= 8192.0f;
+constexpr int	DEAGLE_PENETRATION		= 2;
+constexpr float	DEAGLE_EFFECTIVE_RANGE	= 4096.0f;
 
 enum deagle_e
 {
@@ -450,6 +501,7 @@ public:	// basic logic funcs
 
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void) { return DEAGLE_MAX_SPEED; }
+	virtual void	ResetModel		(void);
 
 public:	// new functions
 	void DEagleFire(float flSpread, float flCycleTime = DEAGLE_FIRE_INTERVAL);
@@ -466,20 +518,58 @@ enum flashbang_e
 	FLASHBANG_DRAW,
 };
 
-const float G3SG1_MAX_SPEED      = 210.0f;
-const float G3SG1_MAX_SPEED_ZOOM = 150.0f;
-const float G3SG1_DAMAGE         = 80.0f;
-const float G3SG1_RANGE_MODIFER  = 0.98f;
-const float G3SG1_RELOAD_TIME    = 3.5f;
+#define SVD_VIEW_MODEL	"models/weapons/v_svd.mdl"
+#define SVD_WORLD_MODEL	"models/weapons/w_svd.mdl"
+#define SVD_FIRE_SFX	"weapons/svd/svd_fire.wav"
 
-enum g3sg1_e
+constexpr float SVD_MAX_SPEED		= 210.0f;
+constexpr float SVD_MAX_SPEED_ZOOM	= 150.0f;
+constexpr float SVD_DAMAGE			= 80.0f;
+constexpr float SVD_RANGE_MODIFER	= 0.98f;
+constexpr float SVD_DEPLOY_TIME		= 1.13f;
+constexpr float SVD_RELOAD_TIME		= 3.49f;
+constexpr float SVD_FIRE_INTERVAL	= 0.25f;
+constexpr int	SVD_PENETRATION		= 3;
+constexpr float	SVD_EFFECTIVE_RANGE	= 8192.0f;
+
+enum svd_e
 {
-	G3SG1_IDLE,
-	G3SG1_SHOOT,
-	G3SG1_SHOOT2,
-	G3SG1_RELOAD,
-	G3SG1_DRAW,
+	SVD_IDLE,
+	SVD_SHOOT,
+	SVD_SHOOT2,
+	SVD_RELOAD,
+	SVD_DRAW,
 };
+
+class CSVD : public CBaseWeapon
+{
+#ifndef CLIENT_DLL
+public:	// SV exclusive variables.
+	static unsigned short m_usEvent;
+	static int m_iShell;
+
+public:	// SV exclusive functions.
+	virtual void	Precache		(void);
+#endif
+
+public:	// basic logic funcs
+	virtual bool	Deploy			(void);
+	virtual void	PrimaryAttack	(void);
+	virtual void	SecondaryAttack	(void);
+	virtual	bool	Reload			(void);
+	virtual void	WeaponIdle		(void);
+
+public:	// util funcs
+	virtual	float	GetMaxSpeed		(void);
+	virtual void	ResetModel		(void);
+
+public:	// new functions
+	void SVDFire(float flSpread, float flCycleTime = SVD_FIRE_INTERVAL);
+};
+
+#define G18C_VIEW_MODEL		"models/weapons/v_glock18.mdl"
+#define G18C_WORLD_MODEL	"models/weapons/w_glock18.mdl"
+#define G18C_FIRE_SFX		"weapons/glock18/glock18_fire.wav"
 
 const float GLOCK18_MAX_SPEED     = 250.0f;
 const float GLOCK18_DAMAGE        = 25.0f;
@@ -543,6 +633,10 @@ namespace BasicKnife
 #endif
 };
 
+#define MK46_VIEW_MODEL		"models/weapons/v_mk46.mdl"
+#define MK46_WORLD_MODEL	"models/weapons/w_mk46.mdl"
+#define MK46_FIRE_SFX		"weapons/mk46/mk46_fire.wav"
+
 const float M249_MAX_SPEED     = 220.0f;
 const float M249_DAMAGE        = 32.0f;
 const float M249_RANGE_MODIFER = 0.97f;
@@ -556,6 +650,10 @@ enum m249_e
 	M249_RELOAD,
 	M249_DRAW,
 };
+
+#define KSG12_VIEW_MODEL	"models/weapons/v_ksg12.mdl"
+#define KSG12_WORLD_MODEL	"models/weapons/w_ksg12.mdl"
+#define KSG12_FIRE_SFX		"weapons/ksg12/ksg12_fire.wav"
 
 constexpr float KSG12_MAX_SPEED			= 230.0f;
 constexpr float KSG12_DAMAGE			= 20.0f;
@@ -619,7 +717,12 @@ public:	// util funcs
 	virtual	void	PlayEmptySound	(void);
 	virtual void	PushAnim		(void);
 	virtual void	PopAnim			(void);
+	virtual void	ResetModel		(void);
 };
+
+#define M4A1_VIEW_MODEL		"models/weapons/v_m4a1.mdl"
+#define M4A1_WORLD_MODEL	"models/weapons/w_m4a1.mdl"
+#define M4A1_FIRE_SFX		"weapons/m4a1/m4a1_fire.wav"
 
 const float M4A1_MAX_SPEED         = 230.0f;
 const float M4A1_DAMAGE            = 32.0f;
@@ -646,6 +749,10 @@ enum m4a1_e
 	M4A1_DETACH_SILENCER,
 };
 
+#define PM9_VIEW_MODEL	"models/weapons/v_pm9.mdl"
+#define PM9_WORLD_MODEL	"models/weapons/w_pm9.mdl"
+#define PM9_FIRE_SFX	"weapons/pm9/pm9_fire.wav"
+
 const float MAC10_MAX_SPEED     = 250.0f;
 const float MAC10_DAMAGE        = 29.0f;
 const float MAC10_RANGE_MODIFER = 0.82f;
@@ -660,6 +767,10 @@ enum mac10_e
 	MAC10_SHOOT2,
 	MAC10_SHOOT3,
 };
+
+#define Anaconda_VIEW_MODEL		"models/weapons/v_anaconda.mdl"
+#define Anaconda_WORLD_MODEL	"models/weapons/w_anaconda.mdl"
+#define Anaconda_FIRE_SFX		"weapons/anaconda/anaconda_fire.wav"
 
 constexpr float ANACONDA_MAX_SPEED			= 250.0f;
 constexpr float ANACONDA_DAMAGE				= 64.0f;
@@ -707,10 +818,15 @@ public:	// basic logic funcs
 
 public:	// util funcs
 	virtual float GetMaxSpeed		(void) { return ANACONDA_MAX_SPEED; }
+	virtual void	ResetModel		(void);
 
 public:	// new funcs
 	void AnacondaFire(float flSpread, float flCycleTime = ANACONDA_FIRE_INTERVAL);
 };
+
+#define P90_VIEW_MODEL	"models/weapons/v_p90.mdl"
+#define P90_WORLD_MODEL	"models/weapons/w_p90.mdl"
+#define P90_FIRE_SFX	"weapons/p90/p90_fire.wav"
 
 const float P90_MAX_SPEED     = 245.0f;
 const float P90_DAMAGE        = 21.0f;
@@ -726,6 +842,10 @@ enum p90_e
 	P90_SHOOT2,
 	P90_SHOOT3,
 };
+
+#define M200_VIEW_MODEL		"models/weapons/v_m200.mdl"
+#define M200_WORLD_MODEL	"models/weapons/w_m200.mdl"
+#define M200_FIRE_SFX		"weapons/m200/m200_fire.wav"
 
 const float SCOUT_MAX_SPEED      = 260.0f;
 const float SCOUT_MAX_SPEED_ZOOM = 220.0f;
@@ -753,10 +873,14 @@ enum smokegrenade_e
 	SMOKEGRENADE_DRAW,
 };
 
+#define MP7A1_VIEW_MODEL	"models/weapons/v_mp7a1.mdl"
+#define MP7A1_WORLD_MODEL	"models/weapons/w_mp7a1.mdl"
+#define MP7A1_FIRE_SFX		"weapons/mp7a1/mp7a1_fire.wav"
+
 constexpr float MP7A1_MAX_SPEED			= 250.0f;
 constexpr float MP7A1_DAMAGE			= 20.0f;
 constexpr float MP7A1_RANGE_MODIFER		= 0.85f;
-constexpr float MP7A1_RELOAD_TIME		= 2.1f;
+constexpr float MP7A1_RELOAD_TIME		= 2.575f;
 constexpr float MP7A1_RPM				= 850.0f;
 constexpr int	MP7A1_PENETRATION		= 1;
 constexpr float	MP7A1_EFFECTIVE_RANGE	= 8192.0f;
@@ -791,10 +915,15 @@ public:
 
 public:	// util funcs
 	virtual float	GetMaxSpeed		(void) { return MP7A1_MAX_SPEED; }
+	virtual void	ResetModel		(void);
 
 public:	// new funcs
 	void MP7A1Fire(float flSpread, float flCycleTime = (60.0f / MP7A1_RPM));
 };
+
+#define STRIKER_VIEW_MODEL	"models/weapons/v_striker.mdl"
+#define STRIKER_WORLD_MODEL	"models/weapons/w_striker.mdl"
+#define STRIKER_FIRE_SFX	"weapons/striker/striker_fire.wav"
 
 const float XM1014_MAX_SPEED   = 240.0f;
 const float XM1014_DAMAGE      = 20.0f;
@@ -810,6 +939,10 @@ enum xm1014_e
 	XM1014_START_RELOAD,
 	XM1014_DRAW,
 };
+
+#define P99_VIEW_MODEL	"models/weapons/v_p99.mdl"
+#define P99_WORLD_MODEL	"models/weapons/w_p99.mdl"
+#define P99_FIRE_SFX	"weapons/p99/p99_fire.wav"
 
 const float ELITE_MAX_SPEED     = 250.0f;
 const float ELITE_RELOAD_TIME   = 4.5f;
@@ -836,6 +969,10 @@ enum elite_e
 	ELITE_DRAW,
 };
 
+#define FN57_VIEW_MODEL		"models/weapons/v_fiveseven.mdl"
+#define FN57_WORLD_MODEL	"models/weapons/w_fiveseven.mdl"
+#define FN57_FIRE_SFX		"weapons/fiveseven/fiveseven_fire.wav"
+
 const float FIVESEVEN_MAX_SPEED     = 250.0f;
 const float FIVESEVEN_DAMAGE        = 20.0f;
 const float FIVESEVEN_RANGE_MODIFER = 0.885f;
@@ -850,6 +987,10 @@ enum fiveseven_e
 	FIVESEVEN_RELOAD,
 	FIVESEVEN_DRAW,
 };
+
+#define UMP45_VIEW_MODEL	"models/weapons/v_ump45.mdl"
+#define UMP45_WORLD_MODEL	"models/weapons/w_ump45.mdl"
+#define UMP45_FIRE_SFX		"weapons/ump45/ump45_fire.wav"
 
 const float UMP45_MAX_SPEED     = 250.0f;
 const float UMP45_DAMAGE        = 30.0f;
@@ -866,6 +1007,10 @@ enum ump45_e
 	UMP45_SHOOT3,
 };
 
+#define M14EBR_VIEW_MODEL	"models/weapons/v_m14ebr.mdl"
+#define M14EBR_WORLD_MODEL	"models/weapons/w_m14ebr.mdl"
+#define M14EBR_FIRE_SFX		"weapons/m14ebr/m14ebr_fire.wav"
+
 const float SG550_MAX_SPEED      = 210.0f;
 const float SG550_MAX_SPEED_ZOOM = 150.0f;
 const float SG550_DAMAGE         = 70.0f;
@@ -881,28 +1026,17 @@ enum sg550_e
 	SG550_DRAW,
 };
 
-const float GALIL_MAX_SPEED     = 240.0f;
-const float GALIL_DAMAGE        = 30.0f;
-const float GALIL_RANGE_MODIFER = 0.98f;
-const float GALIL_RELOAD_TIME   = 2.45f;
+#define CM901_VIEW_MODEL	"models/weapons/v_cm901.mdl"
+#define CM901_WORLD_MODEL	"models/weapons/w_cm901.mdl"
+#define CM901_FIRE_SFX		"weapons/cm901/cm901_fire.wav"
 
-enum galil_e
-{
-	GALIL_IDLE1,
-	GALIL_RELOAD,
-	GALIL_DRAW,
-	GALIL_SHOOT1,
-	GALIL_SHOOT2,
-	GALIL_SHOOT3,
-};
-
-const float CM901_FIRE_INTERVAL = 0.0857f;
-const float CM901_EFFECTIVE_RANGE = 8000.0f;
-const float CM901_PENETRATION = 0.2f;
-const float CM901_MAX_SPEED = 240.0f;
-const float CM901_DAMAGE = 30.0f;
-const float CM901_RANGE_MODIFER = 0.98f;
-const float CM901_RELOAD_TIME = 2.459;
+constexpr float CM901_FIRE_INTERVAL = 0.0857f;
+constexpr float CM901_EFFECTIVE_RANGE = 8000.0f;
+constexpr float CM901_PENETRATION = 0.2f;
+constexpr float CM901_MAX_SPEED = 240.0f;
+constexpr float CM901_DAMAGE = 30.0f;
+constexpr float CM901_RANGE_MODIFER = 0.98f;
+constexpr float CM901_RELOAD_TIME = 2.459;
 
 enum cm901_e
 {
@@ -933,11 +1067,16 @@ public:	// basic logic funcs
 	virtual void	WeaponIdle(void);
 
 public:	// util funcs
-	virtual	float	GetMaxSpeed(void) { return CM901_MAX_SPEED; }
+	virtual	float	GetMaxSpeed		(void) { return CM901_MAX_SPEED; }
+	virtual void	ResetModel		(void);
 
 public:	// new functions
 	void CM901Fire(float flSpread, float flCycleTime);
 };
+
+#define QBZ95_VIEW_MODEL	"models/weapons/v_qbz95.mdl"
+#define QBZ95_WORLD_MODEL	"models/weapons/w_qbz95.mdl"
+#define QBZ95_FIRE_SFX		"weapons/qbz95/qbz95_fire.wav"
 
 constexpr float QBZ95_MAX_SPEED			= 240.0f;
 constexpr float QBZ95_RELOAD_TIME		= 3.311f;
@@ -977,6 +1116,7 @@ public:	// basic logic funcs
 
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void) { return QBZ95_MAX_SPEED; }
+	virtual void	ResetModel		(void);
 
 public:	// new functions
 	void QBZ95Fire(float flSpread, float flCycleTime = (60.0f / QBZ95_RPM));

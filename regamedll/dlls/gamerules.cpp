@@ -2909,7 +2909,7 @@ void EXT_FUNC CHalfLifeMultiplay::DeathNotice(CBasePlayer *pVictim, entvars_t *p
 				{
 					if (pAttacker->m_pActiveItem)
 					{
-						killer_weapon_name = pAttacker->m_pActiveItem->m_pItemInfo->m_pszClassName;
+						killer_weapon_name = pAttacker->m_pActiveItem->m_pItemInfo->m_pszInternalName;
 					}
 				}
 			}
@@ -3022,7 +3022,7 @@ bool CHalfLifeMultiplay::CanHavePlayerItem(CBasePlayer* pPlayer, WeaponIdType iI
 		if (g_bClientPrintEnable && bPrintHint)
 		{
 			ClientPrint(pPlayer->pev, HUD_PRINTCENTER, "#Cannot_Buy_This");
-			UTIL_PrintChatColor(pPlayer, REDCHAT, "/yYou are unqualified to use /t%s/y since you are /g%s/y.", g_rgszWeaponAlias[iId], g_rgszRoleNames[pPlayer->m_iRoleType]);
+			UTIL_PrintChatColor(pPlayer, REDCHAT, "/yYou are unqualified to use /t%s/y since you are /g%s/y.", g_rgItemInfo[iId].m_pszExternalName, g_rgszRoleNames[pPlayer->m_iRoleType]);
 		}
 
 		return false;
@@ -4216,47 +4216,44 @@ float CHalfLifeMultiplay::PlayerMaxArmour(CBasePlayer* pPlayer)
 	return MAX_NORMAL_BATTERY;
 }
 
-CBaseWeapon* CHalfLifeMultiplay::SelectProperGrenade(CBasePlayer* pPlayer)
+EquipmentIdType CHalfLifeMultiplay::SelectProperGrenade(CBasePlayer* pPlayer)
 {
-	return pPlayer->m_rgpPlayerItems[GRENADE_SLOT];
-
-	// WPN_UNDONE
-	/*if (FNullEnt(pPlayer->m_rgpPlayerItems[GRENADE_SLOT]))
-		return nullptr;
-
-	char* pGrenadeName = nullptr;
+	EquipmentIdType iId = EQP_NONE;
 
 	switch (pPlayer->m_iRoleType)
 	{
-	case Role_Sharpshooter:
+	case Role_Commander:
 	case Role_Breacher:
-	case Role_Arsonist:
-		pGrenadeName = "weapon_hegrenade";
+	case Role_Godfather:
+	case Role_LeadEnforcer:
+		iId = EQP_HEGRENADE;
+		break;
+
+	case Role_SWAT:
+	case Role_Assassin:
+		iId = EQP_FLASHBANG;
+		break;
+
+	case Role_Sharpshooter:
+		iId = EQP_FROST_GR;
 		break;
 
 	case Role_Medic:
+		iId = EQP_HEALING_GR;
+		break;
+
 	case Role_MadScientist:
-		pGrenadeName = "weapon_smokegrenade";
+		iId = EQP_GAS_GR;
+		break;
+
+	case Role_Arsonist:
+		iId = EQP_INCENDIARY_GR;
 		break;
 
 	default:
-		pGrenadeName = "weapon_flashbang";
+		iId = EQP_SMOKEGRENADE;
 		break;
 	}
 
-	CBaseEntity* pEntity = nullptr;
-	CBasePlayerWeapon* pWeapon = nullptr;
-	while ((pEntity = UTIL_FindEntityByClassname(pEntity, pGrenadeName)))
-	{
-		if (FNullEnt(pEntity))
-			continue;
-
-		pWeapon = (CBasePlayerWeapon*)pEntity;
-		if (pWeapon->m_pPlayer != pPlayer)
-			continue;
-
-		return pWeapon;
-	}
-
-	return nullptr;*/
+	return iId;
 }

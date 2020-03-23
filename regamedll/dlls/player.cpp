@@ -713,7 +713,7 @@ const char *GetWeaponName(entvars_t *pevInflictor, entvars_t *pKiller)
 				if (pAttacker && pAttacker->IsPlayer())
 				{
 					if (pAttacker->m_pActiveItem)
-						killer_weapon_name = pAttacker->m_pActiveItem->m_pItemInfo->m_pszClassName;
+						killer_weapon_name = pAttacker->m_pActiveItem->m_pItemInfo->m_pszInternalName;
 				}
 			}
 			else
@@ -1008,7 +1008,7 @@ BOOL CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 			}
 
 			// bullets hurt teammates less
-			flDamage *= clamp(((bitsDamageType & DMG_BULLET) ?
+			flDamage *= Q_clamp(((bitsDamageType & DMG_BULLET) ?
 				ff_damage_reduction_bullets.value :
 				ff_damage_reduction_other.value), 0.0f, 1.0f);
 		}
@@ -5241,7 +5241,7 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 				// If by some case the weapon got invalid
 				const auto pInfo = GetWeaponInfo(wpnid);
 				if (pInfo) {
-					GiveNamedItem(pInfo->m_pszClassName);
+					GiveNamedItem(pInfo->m_pszInternalName);
 					GiveAmmo(255, (AmmoIdType)pInfo->m_iAmmoType);
 				}
 			}
@@ -5482,7 +5482,7 @@ void CBasePlayer::SendAmmoUpdate()
 			// send "Ammo" update message
 			MESSAGE_BEGIN(MSG_ONE, gmsgAmmoX, nullptr, pev);
 				WRITE_BYTE(i);
-				WRITE_BYTE(clamp(m_rgAmmo[i], 0, 255)); // clamp the value to one byte
+				WRITE_BYTE(Q_clamp(m_rgAmmo[i], 0, 255)); // clamp the value to one byte
 			MESSAGE_END();
 		}
 	}
@@ -6965,7 +6965,7 @@ bool CurrentWeaponSatisfies(CBaseWeapon *pWeapon, int id, int classId)
 	if (!pWeapon)
 		return false;
 
-	const char *weaponName = GetWeaponAliasFromName(pWeapon->m_pItemInfo->m_pszClassName);
+	const char *weaponName = GetWeaponAliasFromName(pWeapon->m_pItemInfo->m_pszInternalName);
 
 	if (id && AliasToWeaponID(weaponName) == id)
 		return true;
@@ -7198,7 +7198,7 @@ void CBasePlayer::SaveRebuy()
 	for (auto iId : m_lstRebuy)
 	{
 		Q_strlcat(szText, "/y[/g");
-		Q_strlcat(szText, g_rgszWeaponAlias[iId]);
+		Q_strlcat(szText, g_rgItemInfo[iId].m_pszExternalName);
 		Q_strlcat(szText, "/y]/t ");
 	}
 
@@ -7578,27 +7578,27 @@ bool CBasePlayer::CheckActivityInGame()
 	return (Q_fabs(deltaYaw) >= 0.1f && Q_fabs(deltaPitch) >= 0.1f);
 }
 
-void CBasePlayer::QuickThrowGrenade_Start()
+int CBasePlayer::GetGrenadeInventory(EquipmentIdType iId)
 {
-	// WPN_UNDONE
-	/*CBasePlayerWeapon* pGrenade = CSGameRules()->SelectProperGrenade(this);
-
-	if (pGrenade == m_pActiveItem)	// you shouldn't QTG when you already have it on your hand.
-		return;
-
-	pGrenade->m_bQuickThrow = true;
-	SelectItem(pGrenade->pev->classname);*/
+	return *GetGrenadeInventoryPointer(iId);
 }
 
-void CBasePlayer::QuickThrowGrenade_Release()
+int* CBasePlayer::GetGrenadeInventoryPointer(EquipmentIdType iId)
 {
-	// WPN_UNDONE
-	/*CBasePlayerWeapon* pGrenade = CSGameRules()->SelectProperGrenade(this);
+	switch (iId)
+	{
+	case EQP_HEGRENADE:
+		return &m_rgAmmo[AMMO_HEGrenade];
 
-	if (pGrenade != m_pActiveItem)	// by the time you should already put it on your hand. what's wrong here?
-		return;
+	case EQP_FLASHBANG:
+		return &m_rgAmmo[AMMO_Flashbang];
 
-	pGrenade->m_bReleaseLock = false;	// release the lock, let WeaponIdle() do its job.*/
+	case EQP_SMOKEGRENADE:
+		return &m_rgAmmo[AMMO_SmokeGrenade];
+
+	default:
+		return &m_rgAmmo[AMMO_NONE];
+	}
 }
 
 void CBasePlayer::AssignRole(RoleTypes iNewRole)
@@ -7787,7 +7787,7 @@ void CBasePlayer::CheckItemAccessibility()
 		if (g_rgRoleWeaponsAccessibility[m_iRoleType][pWeapon->m_iId] == WPN_F && pWeapon->m_iId != WEAPON_KNIFE)
 		{
 			AddAccount(GetWeaponInfo(pWeapon->m_iId)->m_iCost / 2, RT_SOLD_ITEM);
-			UTIL_PrintChatColor(this, REDCHAT, "/gRefunding/y improper item /t%s/y for /g%d$/y.", g_rgszWeaponAlias[pWeapon->m_iId], GetWeaponInfo(pWeapon->m_iId)->m_iCost / 2);
+			UTIL_PrintChatColor(this, REDCHAT, "/gRefunding/y improper item /t%s/y for /g%d$/y.", pWeapon->m_pItemInfo->m_pszExternalName, GetWeaponInfo(pWeapon->m_iId)->m_iCost / 2);
 			UTIL_PlayEarSound(this, SFX_REFUND_GUNS);
 
 			pWeapon->Kill();	// RemovePlayerItem() is included!

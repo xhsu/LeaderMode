@@ -16,18 +16,7 @@ int CQBZ95::m_iShell = 0;
 
 void CQBZ95::Precache()
 {
-	PRECACHE_MODEL("models/weapons/v_qbz95.mdl");
-	PRECACHE_MODEL("models/weapons/w_qbz95.mdl");
-	PRECACHE_MODEL("models/weapons/p_qbz95.mdl");
-
-	PRECACHE_SOUND("weapons/famas-1.wav");
-	PRECACHE_SOUND("weapons/famas-2.wav");
-	PRECACHE_SOUND("weapons/famas_clipout.wav");
-	PRECACHE_SOUND("weapons/famas_clipin.wav");
-	PRECACHE_SOUND("weapons/famas_boltpull.wav");
-	PRECACHE_SOUND("weapons/famas_boltslap.wav");
-	PRECACHE_SOUND("weapons/famas_forearm.wav");
-	PRECACHE_SOUND("weapons/famas-burst.wav");
+	PRECACHE_NECESSARY_FILES(QBZ95);
 
 	m_iShell = PRECACHE_MODEL("models/rshell.mdl");
 	m_usEvent = PRECACHE_EVENT(1, "events/qbz95.sc");
@@ -40,7 +29,7 @@ bool CQBZ95::Deploy()
 	m_iShotsFired = 0;
 	m_flAccuracy = 0.2f;
 
-	return DefaultDeploy("models/weapons/v_qbz95.mdl", "models/weapons/p_qbz95.mdl", QBZ95_DRAW, "carbine");
+	return DefaultDeploy(QBZ95_VIEW_MODEL, QBZ95_WORLD_MODEL, QBZ95_DRAW, "carbine");
 }
 
 void CQBZ95::SecondaryAttack()
@@ -143,8 +132,7 @@ void CQBZ95::QBZ95Fire(float flSpread, float flCycleTime)
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecAiming = gpGlobals->v_forward;
 
-	Vector vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, QBZ95_EFFECTIVE_RANGE, QBZ95_PENETRATION, m_pAmmoInfo->m_iBulletBehavior,
-		QBZ95_DAMAGE, QBZ95_RANGE_MODIFER, m_pPlayer->pev, false, m_pPlayer->random_seed);
+	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, QBZ95_EFFECTIVE_RANGE, QBZ95_PENETRATION, m_iPrimaryAmmoType, QBZ95_DAMAGE, QBZ95_RANGE_MODIFER, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
 	SendWeaponAnim(UTIL_SharedRandomFloat(m_pPlayer->random_seed, QBZ95_SHOOT1, QBZ95_SHOOT3));
@@ -212,3 +200,5 @@ void CQBZ95::WeaponIdle()
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
 	SendWeaponAnim(QBZ95_IDLE1);
 }
+
+DECLARE_STANDARD_RESET_MODEL_FUNC(QBZ95)

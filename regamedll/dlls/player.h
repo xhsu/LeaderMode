@@ -38,6 +38,7 @@
 #include "player_classes.h"
 #include <list>
 #include <array>
+#include <vector>
 #include "effect_over_time.h"
 
 #define SOUND_FLASHLIGHT_ON  "items/flashlight1.wav"
@@ -502,8 +503,8 @@ public:
 	void RemoveSpawnProtection();
 	void DropIdlePlayer(const char *reason);
 	bool CheckActivityInGame();
-	void QuickThrowGrenade_Start();
-	void QuickThrowGrenade_Release();
+	int GetGrenadeInventory(EquipmentIdType iId);
+	int* GetGrenadeInventoryPointer(EquipmentIdType iId);
 
 	// new functions from leader mod.
 	void AssignRole(RoleTypes iNewRole);	// this function is only for skill installation.
@@ -718,6 +719,8 @@ public:
 	TacticalSchemes m_iVotedTS;
 	float m_flTSThink;
 	Vector m_vecVAngleShift;	// this is a dummy at SV side. However, this would add to player viewangle at CL side.
+	std::vector<int> m_vMenuItems;
+	EquipmentIdType m_iUsingGrenadeId;
 
 	// overhealing mechanism.
 	float m_flOHNextThink;

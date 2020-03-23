@@ -45,36 +45,52 @@
 enum WeaponIdType
 {
 	WEAPON_NONE,
-	WEAPON_ANACONDA,	// WEAPON_P228
-	WEAPON_UNUSED,		// WEAPON_GLOCK
-	WEAPON_M200,		// WEAPON_SCOUT
-	WEAPON_HEGRENADE,
-	WEAPON_STRIKER,		// WEAPON_XM1014
-	WEAPON_C4,
-	WEAPON_PM9,			// WEAPON_MAC10
-	WEAPON_ACR,			// WEAPON_AUG
-	WEAPON_SMOKEGRENADE,
-	WEAPON_P99,			// WEAPON_ELITE
-	WEAPON_FIVESEVEN,
-	WEAPON_UMP45,
-	WEAPON_M14EBR,		// WEAPON_SG550
-	WEAPON_CM901,		// WEAPON_GALIL
-	WEAPON_QBZ95,		// WEAPON_FAMAS
-	WEAPON_USP,
+
+	// PISTOLS
 	WEAPON_GLOCK18,
-	WEAPON_AWP,
-	WEAPON_MP5N,
-	WEAPON_MK46,		// WEAPON_M249
-	WEAPON_KSG12,		// WEAPON_M3
-	WEAPON_M4A1,
-	WEAPON_MP7A1,		// WEAPON_TMP
-	WEAPON_SVD,			// WEAPON_G3SG1
-	WEAPON_FLASHBANG,
+	WEAPON_USP,
+	WEAPON_ANACONDA,
 	WEAPON_DEAGLE,
-	WEAPON_SCARL,		// WEAPON_SG552
-	WEAPON_AK47,
-	WEAPON_KNIFE,
+	WEAPON_FIVESEVEN,
+	WEAPON_P99,
+
+	// SHOTGUNS
+	WEAPON_KSG12,
+	WEAPON_STRIKER,
+
+	// SMGS
+	WEAPON_MP7A1,
+	WEAPON_PM9,
+	WEAPON_MP5N,
+	WEAPON_UMP45,
 	WEAPON_P90,
+
+	// ASSAULT RIFLES
+	WEAPON_CM901,
+	WEAPON_QBZ95,
+	WEAPON_AK47,
+	WEAPON_M4A1,
+	WEAPON_SCARL,
+	WEAPON_ACR,
+
+	// SNIPER RIFLES,
+	WEAPON_M200,
+	WEAPON_M14EBR,
+	WEAPON_AWP,
+	WEAPON_SVD,
+
+	// MACHINE GUNS
+	WEAPON_MK46,
+
+	// THROWABLES
+	WEAPON_HEGRENADE,
+	WEAPON_FLASHBANG,
+	WEAPON_SMOKEGRENADE,
+
+	//DISUSED
+	WEAPON_UNUSED,
+	WEAPON_C4,
+	WEAPON_KNIFE,
 
 	LAST_WEAPON,
 	WEAPON_SHIELDGUN = 99
@@ -102,37 +118,18 @@ enum WeaponState
 	WPNSTATE_SHIELD_DRAWN       = BIT(5),
 };
 
-enum WeightWeapon
+enum WeaponClassWeight
 {
-	P228_WEIGHT         = 5,
-	GLOCK18_WEIGHT      = 5,
-	SCOUT_WEIGHT        = 30,
-	HEGRENADE_WEIGHT    = 2,
-	XM1014_WEIGHT       = 20,
-	C4_WEIGHT           = 3,
-	MAC10_WEIGHT        = 25,
-	AUG_WEIGHT          = 25,
-	SMOKEGRENADE_WEIGHT = 1,
-	ELITE_WEIGHT        = 5,
-	FIVESEVEN_WEIGHT    = 5,
-	UMP45_WEIGHT        = 25,
-	SG550_WEIGHT        = 20,
-	GALIL_WEIGHT        = 25,
-	FAMAS_WEIGHT        = 75,
-	USP_WEIGHT          = 5,
-	AWP_WEIGHT          = 30,
-	MP5NAVY_WEIGHT      = 25,
-	M249_WEIGHT         = 25,
-	M3_WEIGHT           = 20,
-	M4A1_WEIGHT         = 25,
-	TMP_WEIGHT          = 25,
-	G3SG1_WEIGHT        = 20,
-	FLASHBANG_WEIGHT    = 1,
-	DEAGLE_WEIGHT       = 7,
-	SG552_WEIGHT        = 25,
-	AK47_WEIGHT         = 25,
-	P90_WEIGHT          = 26,
-	KNIFE_WEIGHT        = 0,
+	EQUIPMENT_BASIC_WEIGHT = 0,
+	MELEE_BASIC_WEIGHT,
+	THROWABLE_BASIC_WEIGHT,
+
+	PISTOL_BASIC_WEIGHT,
+	SHOTGUN_BASIC_WEIGHT,
+	SMG_BASIC_WEIGHT,
+	ASSAULT_RIFLE_BASIC_WEIGHT,
+	MACHINE_GUN_BASIC_WEIGHT,
+	SNIPER_RIFLE_BASIC_WEIGHT,
 };
 
 enum WeaponClassType
@@ -149,46 +146,59 @@ enum WeaponClassType
 	WEAPONCLASS_MAX,
 };
 
-enum shieldgun_e
-{
-	SHIELDGUN_IDLE,
-	SHIELDGUN_SHOOT1,
-	SHIELDGUN_SHOOT2,
-	SHIELDGUN_SHOOT_EMPTY,
-	SHIELDGUN_RELOAD,
-	SHIELDGUN_DRAW,
-	SHIELDGUN_DRAWN_IDLE,
-	SHIELDGUN_UP,
-	SHIELDGUN_DOWN,
-};
-
-// custom
-enum shieldgren_e
-{
-	SHIELDREN_IDLE = 4,
-	SHIELDREN_UP,
-	SHIELDREN_DOWN
-};
-
 // dummy.
 enum AmmoIdType;
 
 // one of the core data structure.
 struct ItemInfo
 {
-	WeaponIdType m_iId;
-	const char* m_pszClassName;
-	AmmoIdType m_iAmmoType;
-	int m_iMaxClip;
-	int m_iSlot;
-	int m_iPosition;
-	int m_bitsFlags;
-	int m_iWeight;
-	int m_iCost;
+	WeaponIdType	m_iId;
+	const char*		m_pszInternalName;
+	const char*		m_pszExternalName;
+	AmmoIdType		m_iAmmoType;
+	int				m_iMaxClip;
+	int				m_iSlot;
+	int				m_bitsFlags;
+	int				m_iWeight;
+	WeaponClassType	m_iClassType;
+	int				m_iCost;
 };
 
 extern const ItemInfo g_rgItemInfo[LAST_WEAPON];
-extern const char* g_rgszWeaponAlias[LAST_WEAPON];
+
+// equipments
+enum EquipmentIdType
+{
+	EQP_NONE = 0,
+
+	// armour
+	EQP_KEVLAR,
+	EQP_ASSAULT_SUIT,
+
+	// grenades
+	EQP_HEGRENADE,
+	EQP_FLASHBANG,
+	EQP_SMOKEGRENADE,
+	EQP_FROST_GR,
+	EQP_INCENDIARY_GR,
+	EQP_HEALING_GR,
+	EQP_GAS_GR,
+
+	// misc
+	EQP_NVG,
+
+	EQP_COUNT,
+};
+
+struct EquipmentInfo
+{
+	EquipmentIdType	m_iId;
+	const char*		m_pszInternalName;
+	const char*		m_pszExternalName;
+	int				m_iCost;
+};
+
+extern const EquipmentInfo g_rgEquipmentInfo[EQP_COUNT];
 
 WeaponIdType AliasToWeaponID(const char* alias);
 const char* WeaponIDToAlias(int id);	// Given a weapon ID, return its alias
@@ -199,6 +209,7 @@ WeaponClassType WeaponIDToWeaponClass(WeaponIdType id);
 bool IsPrimaryWeapon(int id);	// Return true if given weapon ID is a primary weapon
 bool IsSecondaryWeapon(int id);	// Return true if given weapon ID is a secondary weapon
 bool IsGrenadeWeapon(int id);	// Return true if given weapon ID is a grenade
+bool IsSemiautoWeapon(WeaponIdType iId);	// Return true if this weapon is logically coded as a semi-auto weapon.
 const ItemInfo* GetWeaponInfo(int weaponID);
 const ItemInfo* GetWeaponInfo(const char* weaponName);
 

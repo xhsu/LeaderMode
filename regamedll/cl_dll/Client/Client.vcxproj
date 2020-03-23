@@ -178,6 +178,7 @@
     </ClCompile>
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_mp7a1.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_qbz95.cpp" />
+    <ClCompile Include="..\..\dlls\wpn_shared\wpn_svd.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_usp.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
     </ClCompile>

@@ -38,11 +38,11 @@ Vector CBasePlayer::GetGunPosition()
 	return pev->origin + pev->view_ofs;
 }
 
-Vector CBasePlayer::FireBullets3(Vector vecSrc, Vector vecDirShooting, float flSpread, float flDistance, int iPenetration, int iBulletType, int iDamage, float flRangeModifier, std::shared_ptr<pseudo_ent_var_s> pevAttacker, bool bPistol, int shared_rand)
+Vector2D CBasePlayer::FireBullets3(Vector vecSrc, Vector vecDirShooting, float vecSpread, float flDistance, int iPenetration, AmmoIdType iBulletType, int iDamage, float flRangeModifier, int shared_rand)
 {
 	float x, y, z;
 
-	if (pevAttacker)
+	if (pev)
 	{
 		x = UTIL_SharedRandomFloat(shared_rand, -0.5, 0.5) + UTIL_SharedRandomFloat(shared_rand + 1, -0.5, 0.5);
 		y = UTIL_SharedRandomFloat(shared_rand + 2, -0.5, 0.5) + UTIL_SharedRandomFloat(shared_rand + 3, -0.5, 0.5);
@@ -63,7 +63,7 @@ Vector CBasePlayer::FireBullets3(Vector vecSrc, Vector vecDirShooting, float flS
 		while (z > 1);
 	}
 
-	return Vector(x * flSpread, y * flSpread, 0);
+	return Vector2D(x * vecSpread, y * vecSpread);
 }
 
 int CBasePlayer::FireBuckshots(ULONG cShots, const Vector& vecSrc, const Vector& vecDirShooting, const Vector& vecSpread, float flDistance, int iDamage, int shared_rand)
@@ -165,6 +165,10 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 		p = new CQBZ95;
 		break;
 
+	case WEAPON_SVD:
+		p = new CSVD;
+		break;
+
 	case WEAPON_USP:
 		p = new CUSP;
 		break;
@@ -218,11 +222,8 @@ void CBaseWeapon::PostFrame()
 		// if the player was reloading, then we should back to reload.
 		if (m_bInReload)
 		{
-			Holster();	// the default Holster() would remove m_bInReload flag. Thus we have to do this.
-			Deploy();
-
-			PopAnim();
-			m_bInReload = true;
+			ResetModel();	// you have to switch from knife model to gun model.
+			PopAnim();		// then you may resume you anim.
 		}
 		else
 		{
@@ -297,8 +298,8 @@ void CBaseWeapon::PostFrame()
 
 		m_flDecreaseShotsFired = gpGlobals->time + 0.4f;
 
-		// if it's a pistol then set the shots fired to 0 after the player releases a button
-		if (IsSecondaryWeapon(m_iId) && m_iId != WEAPON_GLOCK18)
+		// if it's a semi-auto weapon then set the shots fired to 0 after the player releases a button
+		if (IsSemiautoWeapon(m_iId))
 		{
 			m_iShotsFired = 0;
 		}
@@ -345,6 +346,16 @@ bool CBaseWeapon::Melee(void)
 	// but we should push-pop anims.
 	PushAnim();
 	return true;
+}
+
+bool CBaseWeapon::QuickThrowStart(EquipmentIdType iId)
+{
+	return false;
+}
+
+bool CBaseWeapon::QuickThrowRelease(void)
+{
+	return false;
 }
 
 bool CBaseWeapon::Holster(bool bTrial)
@@ -396,7 +407,7 @@ bool CBaseWeapon::DefaultDeploy(const char* szViewModel, const char* szWeaponMod
 	/*if (!CanDeploy())
 		return FALSE;*/
 
-	gEngfuncs.CL_LoadModel(szViewModel, &m_pPlayer->pev->viewmodel);
+	g_pViewEnt->model = gEngfuncs.CL_LoadModel(szViewModel, &m_pPlayer->pev->viewmodel);
 
 	Q_strlcpy(m_pPlayer->m_szAnimExtention, szAnimExt);
 	SendWeaponAnim(iAnim);

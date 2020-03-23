@@ -321,7 +321,7 @@ void BuyState::OnUpdate(CCSBot *me)
 			if (buyWeaponId != WEAPON_NONE)
 			{
 				BuyWeapon(me, buyWeaponId);
-				me->PrintIfWatched("Tried to buy preferred weapon %s.\n", buyWeaponId == WEAPON_SHIELDGUN ? "Tactical Shield" : g_rgszWeaponAlias[buyWeaponId]);
+				me->PrintIfWatched("Tried to buy preferred weapon %s.\n", buyWeaponId == WEAPON_SHIELDGUN ? "Tactical Shield" : g_rgItemInfo[buyWeaponId].m_pszExternalName);
 
 				isPreferredAllDisallowed = false;
 			}
@@ -403,7 +403,7 @@ void BuyState::OnUpdate(CCSBot *me)
 					}
 
 					BuyWeapon(me, stockPrimary[which]->iId);
-					me->PrintIfWatched("Tried to buy %s.\n", g_rgszWeaponAlias[stockPrimary[which]->iId]);
+					me->PrintIfWatched("Tried to buy %s.\n", g_rgItemInfo[stockPrimary[which]->iId].m_pszExternalName);
 				}
 			}
 		}
@@ -418,8 +418,8 @@ void BuyState::OnUpdate(CCSBot *me)
 			}
 
 			// buy armor last, to make sure we bought a weapon first
-			BuyItem(me, MENU_SLOT_ITEM_VESTHELM);
-			BuyItem(me, MENU_SLOT_ITEM_VEST);
+			BuyItem(me, EQP_ASSAULT_SUIT);
+			BuyItem(me, EQP_KEVLAR);
 
 			// pistols - if we have no preferred pistol, buy at random
 			if (TheCSBots()->AllowPistols() && !me->GetProfile()->HasPistolPreference())
@@ -447,17 +447,17 @@ void BuyState::OnUpdate(CCSBot *me)
 					if (rnd < 10.0f)
 					{
 						// smoke grenade
-						BuyItem(me, MENU_SLOT_ITEM_SMOKEGREN);
+						BuyItem(me, EQP_SMOKEGRENADE);
 					}
 					else if (rnd < 35.0f)
 					{
 						// flashbang
-						BuyItem(me, MENU_SLOT_ITEM_FLASHGREN);
+						BuyItem(me, EQP_FLASHBANG);
 					}
 					else
 					{
 						// he grenade
-						BuyItem(me, MENU_SLOT_ITEM_HEGREN);
+						BuyItem(me, EQP_HEGRENADE);
 					}
 				}
 				else
@@ -465,19 +465,20 @@ void BuyState::OnUpdate(CCSBot *me)
 					if (RANDOM_FLOAT(0, 100) < 10.0f)
 					{
 						// smoke grenade
-						BuyItem(me, MENU_SLOT_ITEM_SMOKEGREN);
+						BuyItem(me, EQP_SMOKEGRENADE);
 					}
 					else
 					{
 						// he grenade
-						BuyItem(me, MENU_SLOT_ITEM_HEGREN);
+						BuyItem(me, EQP_HEGRENADE);
 					}
 				}
 			}
 
 			if (m_buyDefuseKit)
 			{
-				BuyItem(me, MENU_SLOT_ITEM_DEFUSEKIT);
+				// disused.
+				//BuyItem(me, MENU_SLOT_ITEM_DEFUSEKIT);
 			}
 
 			m_doneBuying = true;

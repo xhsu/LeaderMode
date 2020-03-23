@@ -14,9 +14,7 @@ int CCM901::m_iShell = 0;
 
 void CCM901::Precache()
 {
-	PRECACHE_MODEL("models/weapons/v_cm901.mdl");
-	PRECACHE_MODEL("models/weapons/w_cm901.mdl");
-	PRECACHE_MODEL("models/weapons/p_cm901.mdl");
+	PRECACHE_NECESSARY_FILES(CM901);
 
 	m_iShell = PRECACHE_MODEL("models/rshell.mdl");
 	m_usEvent = PRECACHE_EVENT(1, "events/cm901.sc");
@@ -31,7 +29,7 @@ bool CCM901::Deploy()
 {
 	m_flAccuracy = 0.92f;
 
-	return DefaultDeploy("models/weapons/v_cm901.mdl", "models/weapons/p_cm901.mdl", CM901_DRAW, "rifle");
+	return DefaultDeploy(CM901_VIEW_MODEL, CM901_WORLD_MODEL, CM901_DRAW, "rifle");
 }
 
 void CCM901::SecondaryAttack()
@@ -140,7 +138,7 @@ void CCM901::CM901Fire(float flSpread, float flCycleTime)
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecAiming = gpGlobals->v_forward;
 
-	Vector vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, CM901_EFFECTIVE_RANGE, CM901_PENETRATION, BULLET_PLAYER_556MM, CM901_DAMAGE, CM901_RANGE_MODIFER, m_pPlayer->pev, true, m_pPlayer->random_seed);
+	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, CM901_EFFECTIVE_RANGE, CM901_PENETRATION, m_iPrimaryAmmoType, CM901_DAMAGE, CM901_RANGE_MODIFER, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
 	PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL, m_pPlayer->edict(), m_usEvent, 0, (float*)&g_vecZero, (float*)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 100), 0, m_iClip == 0, FALSE);
@@ -193,3 +191,5 @@ void CCM901::WeaponIdle()
 		SendWeaponAnim(CM901_IDLE);
 	}
 }
+
+DECLARE_STANDARD_RESET_MODEL_FUNC(CM901)

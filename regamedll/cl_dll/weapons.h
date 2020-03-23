@@ -90,7 +90,7 @@ public:
 public:
 	void	SetAnimation(PLAYER_ANIM playerAnim)	{}
 	Vector	GetGunPosition(void);
-	Vector	FireBullets3(Vector vecSrc, Vector vecDirShooting, float flSpread, float flDistance, int iPenetration, int iBulletType, int iDamage, float flRangeModifier, std::shared_ptr<pseudo_ent_var_s> pevAttacker, bool bPistol, int shared_rand);
+	Vector2D FireBullets3(Vector vecSrc, Vector vecDirShooting, float vecSpread, float flDistance, int iPenetration, AmmoIdType iBulletType, int iDamage, float flRangeModifier, int shared_rand);
 	int		FireBuckshots(ULONG cShots, const Vector& vecSrc, const Vector& vecDirShooting, const Vector& vecSpread, float flDistance, int iDamage, int shared_rand);	// returns the offset of shared_rand.
 	void	ResetMaxSpeed(void);
 };

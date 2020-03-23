@@ -1,6 +1,6 @@
 #pragma once
 
-#define GetCost	GetPrice
+#define GetCost	GetWeaponPrice
 
 enum BuyMenus
 {
@@ -35,4 +35,6 @@ void OpenMenu_VoteTacticalSchemes(CBasePlayer* pPlayer);
 bool MenuHandler_VoteTacticalSchemes(CBasePlayer* pPlayer, int iSlot);
 
 bool AddMenuWeaponItem(CBasePlayer* pPlayer, WeaponIdType iId, char* pszMenuText);
-int GetPrice(RoleTypes iRoleIndex, WeaponIdType iId);
+int GetWeaponPrice(RoleTypes iRoleIndex, WeaponIdType iId);
+bool AddMenuEquipmentItem(CBasePlayer* pPlayer, EquipmentIdType iId, char* pszMenuText);
+int GetEquipmentPrice(RoleTypes iRoleIndex, EquipmentIdType iId);

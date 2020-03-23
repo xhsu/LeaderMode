@@ -16,15 +16,7 @@ int CAK47::m_iShell = 0;
 
 void CAK47::Precache()
 {
-	PRECACHE_MODEL("models/weapons/v_ak47.mdl");
-	PRECACHE_MODEL("models/weapons/w_ak47.mdl");
-	PRECACHE_MODEL("models/weapons/p_ak47.mdl");
-
-	PRECACHE_SOUND("weapons/ak47-1.wav");
-	PRECACHE_SOUND("weapons/ak47-2.wav");
-	PRECACHE_SOUND("weapons/ak47_clipout.wav");
-	PRECACHE_SOUND("weapons/ak47_clipin.wav");
-	PRECACHE_SOUND("weapons/ak47_boltpull.wav");
+	PRECACHE_NECESSARY_FILES(AK47);
 
 	m_iShell = PRECACHE_MODEL("models/rshell.mdl");
 	m_usEvent = PRECACHE_EVENT(1, "events/ak47.sc");
@@ -37,7 +29,7 @@ bool CAK47::Deploy()
 	m_flAccuracy = 0.2f;
 	m_iShotsFired = 0;
 
-	return DefaultDeploy("models/weapons/v_ak47.mdl", "models/weapons/p_ak47.mdl", AK47_DRAW, "ak47");
+	return DefaultDeploy(AK47_VIEW_MODEL, AK47_WORLD_MODEL, AK47_DRAW, "ak47");
 }
 
 void CAK47::SecondaryAttack()
@@ -130,8 +122,7 @@ void CAK47::AK47Fire(float flSpread, float flCycleTime)
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecAiming = gpGlobals->v_forward;
 
-	Vector vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, AK47_EFFECTIVE_RANGE, AK47_PENETRATION, m_pAmmoInfo->m_iBulletBehavior,
-		AK47_DAMAGE, AK47_RANGE_MODIFER, m_pPlayer->pev, false, m_pPlayer->random_seed);
+	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, AK47_EFFECTIVE_RANGE, AK47_PENETRATION, m_iPrimaryAmmoType, AK47_DAMAGE, AK47_RANGE_MODIFER, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
 	SendWeaponAnim(UTIL_SharedRandomFloat(m_pPlayer->random_seed, AK47_SHOOT1, AK47_SHOOT3));
@@ -202,3 +193,5 @@ void CAK47::WeaponIdle()
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
 	SendWeaponAnim(AK47_IDLE1);
 }
+
+DECLARE_STANDARD_RESET_MODEL_FUNC(AK47)

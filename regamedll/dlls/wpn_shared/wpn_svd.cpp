@@ -1,10 +1,9 @@
 /*
 
-Remastered Date: Mar 20 2020
+Remastered Date: Mar 22 2020
 
 Modern Warfare Dev Team
 Code - Luna the Reborn
-Model - Miracle(Innocent Blue)
 
 */
 
@@ -12,44 +11,30 @@ Model - Miracle(Innocent Blue)
 
 #ifndef CLIENT_DLL
 
-unsigned short CAWP::m_usEvent = 0;
-int CAWP::m_iShell = 0;
+unsigned short CSVD::m_usEvent = 0;
+int CSVD::m_iShell = 0;
 
-void CAWP::Precache()
+void CSVD::Precache()
 {
-	PRECACHE_NECESSARY_FILES(AWP);
+	PRECACHE_NECESSARY_FILES(SVD);
+	PRECACHE_SOUND("weapons/zoom.wav");
 
-	m_iShell = PRECACHE_MODEL("models/rshell_big.mdl");
-	m_usEvent = PRECACHE_EVENT(1, "events/awp.sc");
+	m_iShell = PRECACHE_MODEL("models/rshell.mdl");
+	m_usEvent = PRECACHE_EVENT(1, "events/svd.sc");
 }
 
 #endif
 
-bool CAWP::Deploy()
+bool CSVD::Deploy()
 {
-	if (DefaultDeploy(AWP_VIEW_MODEL, AWP_WORLD_MODEL, AWP_DRAW, "rifle"))
-	{
-		m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + AWP_DEPLOY_TIME;
-		m_flNextPrimaryAttack = m_pPlayer->m_flNextAttack;
-		m_flNextSecondaryAttack = m_pPlayer->m_flNextAttack;
-
-#ifndef CLIENT_DLL
-		// VFX corespounding to model anim.
-		// we can only do this on SV side.
-		m_pPlayer->m_flEjectBrass = gpGlobals->time + 0.43f;
-		m_pPlayer->m_iShellModelIndex = m_iShell;
-#endif
-
-		return true;
-	}
-
-	return false;
+	m_flAccuracy = 0.2f;
+	return DefaultDeploy(SVD_VIEW_MODEL, SVD_WORLD_MODEL, SVD_DRAW, "mp5", SVD_DEPLOY_TIME);
 }
 
-void CAWP::SecondaryAttack()
+void CSVD::SecondaryAttack()
 {
 	// this is the delay for the m_bResumeZoom.
-	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.25f;
+	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.3f;
 
 	if (int(m_pPlayer->pev->fov) < 90)
 	{
@@ -71,7 +56,7 @@ void CAWP::SecondaryAttack()
 
 #ifdef CLIENT_DLL
 		// zoom out anim.
-		g_vecGunOfsGoal = Vector(-6.3f, -5.0f, 1.6f);
+		g_vecGunOfsGoal = Vector(-5.2f, -6.0f, 0.25f);
 #endif
 	}
 
@@ -93,45 +78,54 @@ void CAWP::SecondaryAttack()
 	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.3f;
 }
 
-void CAWP::PrimaryAttack()
+void CSVD::PrimaryAttack()
 {
 	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
 	{
-		AWPFire(0.85f);
+		SVDFire(0.45f);
 	}
-	else if (m_pPlayer->pev->velocity.Length2D() > 140)
+	else if (m_pPlayer->pev->velocity.Length2D() > 0)
 	{
-		AWPFire(0.25f);
-	}
-	else if (m_pPlayer->pev->velocity.Length2D() > 10)
-	{
-		AWPFire(0.1f);
+		SVDFire(0.15f);
 	}
 	else if (m_pPlayer->pev->flags & FL_DUCKING)
 	{
-		AWPFire(0.0f);
+		SVDFire(0.035f);
 	}
 	else
 	{
-		AWPFire(0.001f);
+		SVDFire(0.055f);
 	}
 }
 
-void CAWP::AWPFire(float flSpread, float flCycleTime)
+void CSVD::SVDFire(float flSpread, float flCycleTime)
 {
-	if (m_pPlayer->pev->fov != DEFAULT_FOV)
+	// semi-auto is NOT full-auto with a lower fire rate.
+	if (++m_iShotsFired > 1)
 	{
-		m_pPlayer->m_bResumeZoom = true;
-		m_pPlayer->m_iLastZoom = m_pPlayer->pev->fov;
-
-		// reset a fov
-		m_pPlayer->pev->fov = DEFAULT_FOV;
+		return;
 	}
-	// If we are not zoomed in, the bullet diverts more.
+
+	if (m_pPlayer->pev->fov == DEFAULT_FOV)
+	{
+		flSpread += 0.025f;
+	}
+
+	if (m_flLastFire)
+	{
+		m_flAccuracy = (gpGlobals->time - m_flLastFire) * 0.3f + 0.55f;
+
+		if (m_flAccuracy > 0.98f)
+		{
+			m_flAccuracy = 0.98f;
+		}
+	}
 	else
 	{
-		flSpread += 0.08f;
+		m_flAccuracy = 0.98f;
 	}
+
+	m_flLastFire = gpGlobals->time;
 
 	if (m_iClip <= 0)
 	{
@@ -160,15 +154,12 @@ void CAWP::AWPFire(float flSpread, float flCycleTime)
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecAiming = gpGlobals->v_forward;
 
-	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, AWP_EFFECTIVE_RANGE, AWP_PENETRATION, m_iPrimaryAmmoType, AWP_DAMAGE, AWP_RANGE_MODIFER, m_pPlayer->random_seed);
+	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, (1 - m_flAccuracy) * flSpread, SVD_EFFECTIVE_RANGE, SVD_PENETRATION, m_iPrimaryAmmoType, SVD_DAMAGE, SVD_RANGE_MODIFER, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
-	SendWeaponAnim(UTIL_SharedRandomLong(m_pPlayer->random_seed, AWP_SHOOT1, AWP_SHOOT3));
+	SendWeaponAnim(UTIL_SharedRandomLong(m_pPlayer->random_seed, SVD_SHOOT, SVD_SHOOT2));
 	PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL, m_pPlayer->edict(), m_usEvent, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y,
 		int(m_pPlayer->pev->punchangle.x * 100), int(m_pPlayer->pev->punchangle.x * 100), FALSE, FALSE);
-	
-	m_pPlayer->m_flEjectBrass = gpGlobals->time + AWP_TIME_SHELL_EJ;
-	m_pPlayer->m_iShellModelIndex = m_iShell;
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 	{
@@ -191,48 +182,39 @@ void CAWP::AWPFire(float flSpread, float flCycleTime)
 	args.origin = m_pPlayer->pev->origin;
 	args.velocity = m_pPlayer->pev->velocity;
 
-	EV_FireAWP(&args);
+	EV_FireSVD(&args);
 #endif
 
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.8f;
 
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.0f;
-	m_pPlayer->m_vecVAngleShift.x -= 4.0f;
-	m_pPlayer->m_vecVAngleShift.y -= UTIL_SharedRandomFloat(m_pPlayer->random_seed + AWP_PENETRATION, -2.0f, 2.0f);
+	m_pPlayer->m_vecVAngleShift.x -= UTIL_SharedRandomFloat(m_pPlayer->random_seed + 4, 0.95, 2.15);
+	m_pPlayer->m_vecVAngleShift.y += UTIL_SharedRandomFloat(m_pPlayer->random_seed + 5, -0.75, 0.75);
 }
 
-bool CAWP::Reload()
+bool CSVD::Reload()
 {
-	if (DefaultReload(m_pItemInfo->m_iMaxClip, AWP_RELOAD, AWP_RELOAD_TIME))
+	if (DefaultReload(m_pItemInfo->m_iMaxClip, SVD_RELOAD, SVD_RELOAD_TIME))
 	{
-#ifndef CLIENT_DLL
-		// VFX corespounding to model anim.
-		// we can only do this on SV side.
-		m_pPlayer->m_flEjectBrass = gpGlobals->time + 3.2f;	// rechamber portion of reload anim.
-		m_pPlayer->m_iShellModelIndex = m_iShell;
-#endif
+		m_flAccuracy = 0.2f;
 		return true;
 	}
 
 	return false;
 }
 
-void CAWP::WeaponIdle()
+void CSVD::WeaponIdle()
 {
-	if (m_flTimeWeaponIdle <= UTIL_WeaponTimeBase() && m_iClip)
+	if (m_iClip)
 	{
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 60.0f;
-		SendWeaponAnim(AWP_IDLE);
+		SendWeaponAnim(SVD_IDLE);
 	}
 }
 
-float CAWP::GetMaxSpeed()
+float CSVD::GetMaxSpeed()
 {
-	if (int(m_pPlayer->pev->fov) == DEFAULT_FOV)
-		return AWP_MAX_SPEED;
-
-	// Slower speed when zoomed in.
-	return AWP_MAX_SPEED_ZOOM;
+	return (int(m_pPlayer->pev->fov) >= DEFAULT_FOV) ? SVD_MAX_SPEED : SVD_MAX_SPEED_ZOOM;
 }
 
-DECLARE_STANDARD_RESET_MODEL_FUNC(AWP)
+DECLARE_STANDARD_RESET_MODEL_FUNC(SVD)

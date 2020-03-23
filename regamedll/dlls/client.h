@@ -43,19 +43,6 @@ enum ChooseTeamMenuSlot
 	MENU_SLOT_TEAM_SPECT
 };
 
-// custom enum
-enum BuyItemMenuSlot
-{
-	MENU_SLOT_ITEM_VEST = 1,
-	MENU_SLOT_ITEM_VESTHELM,
-	MENU_SLOT_ITEM_FLASHGREN,
-	MENU_SLOT_ITEM_HEGREN,
-	MENU_SLOT_ITEM_SMOKEGREN,
-	MENU_SLOT_ITEM_NVG,
-	MENU_SLOT_ITEM_DEFUSEKIT,
-	MENU_SLOT_ITEM_SHIELD,
-};
-
 #define CS_NUM_SKIN				4
 #define CZ_NUM_SKIN				5
 
@@ -129,7 +116,7 @@ void CheckStartMoney();
 void ClientPutInServer(edict_t *pEntity);
 void Host_Say(edict_t *pEntity, BOOL teamonly);
 CBaseWeapon *BuyWeapon(CBasePlayer *pPlayer, WeaponIdType weaponID);
-void BuyItem(CBasePlayer *pPlayer, int iSlot);
+void BuyItem(CBasePlayer *pPlayer, EquipmentIdType iSlot);
 void HandleMenu_ChooseAppearance(CBasePlayer *pPlayer, int slot);
 BOOL HandleMenu_ChooseTeam(CBasePlayer *pPlayer, int slot);
 void Radio1(CBasePlayer *pPlayer, int slot);

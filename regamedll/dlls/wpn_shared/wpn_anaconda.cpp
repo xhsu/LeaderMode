@@ -17,15 +17,7 @@ int CAnaconda::m_iShell = 0;
 
 void CAnaconda::Precache()
 {
-	PRECACHE_MODEL("models/weapons/v_anaconda.mdl");
-	PRECACHE_MODEL("models/weapons/w_anaconda.mdl");
-	PRECACHE_MODEL("models/weapons/p_anaconda.mdl");
-
-	PRECACHE_SOUND("weapons/p228-1.wav");
-	PRECACHE_SOUND("weapons/p228_clipout.wav");
-	PRECACHE_SOUND("weapons/p228_clipin.wav");
-	PRECACHE_SOUND("weapons/p228_sliderelease.wav");
-	PRECACHE_SOUND("weapons/p228_slidepull.wav");
+	PRECACHE_NECESSARY_FILES(Anaconda);
 
 	m_iShell = PRECACHE_MODEL("models/pshell.mdl");
 	m_usEvent = PRECACHE_EVENT(1, "events/anaconda.sc");
@@ -48,15 +40,17 @@ void CAnaconda::Think(void)
 
 bool CAnaconda::Deploy()
 {
-	DefaultDeploy("models/weapons/v_anaconda.mdl", "models/weapons/p_anaconda.mdl", ANACONDA_DRAW, "onehanded", ANACONDA_DEPLOY_TIME);
-
+	if (DefaultDeploy(Anaconda_VIEW_MODEL, Anaconda_WORLD_MODEL, ANACONDA_DRAW, "onehanded", ANACONDA_DEPLOY_TIME))
+	{
 #ifdef CLIENT_DLL
-	// reset this when switching gun.
-	m_flShellRain = 0;
+		// reset this when switching gun.
+		m_flShellRain = 0;
 #endif
+		m_flAccuracy = 0.9f;
+		return true;
+	}
 
-	m_flAccuracy = 0.9f;
-	return true;
+	return false;
 }
 
 void CAnaconda::PrimaryAttack()
@@ -171,7 +165,7 @@ void CAnaconda::AnacondaFire(float flSpread, float flCycleTime)
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecAiming = gpGlobals->v_forward;
 
-	Vector vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, ANACONDA_EFFECTIVE_RANGE, ANACONDA_PENETRATION, m_pAmmoInfo->m_iBulletBehavior, ANACONDA_DAMAGE, ANACONDA_RANGE_MODIFER, m_pPlayer->pev, true, m_pPlayer->random_seed);
+	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, ANACONDA_EFFECTIVE_RANGE, ANACONDA_PENETRATION, m_iPrimaryAmmoType, ANACONDA_DAMAGE, ANACONDA_RANGE_MODIFER, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
 	int seq = UTIL_SharedRandomFloat(m_pPlayer->random_seed, ANACONDA_SHOOT1, ANACONDA_SHOOT2);
@@ -236,3 +230,5 @@ void CAnaconda::WeaponIdle()
 		SendWeaponAnim(ANACONDA_IDLE);
 	}
 }
+
+DECLARE_STANDARD_RESET_MODEL_FUNC(Anaconda)

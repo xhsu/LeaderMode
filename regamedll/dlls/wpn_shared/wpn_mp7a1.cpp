@@ -1,3 +1,13 @@
+/*
+
+Remastered Date: Mar 21 2020
+
+Modern Warfare Dev Team
+Code - Luna the Reborn
+Model - Miracle(Innocent Blue)
+
+*/
+
 #include "precompiled.h"
 
 #ifndef CLIENT_DLL
@@ -7,12 +17,7 @@ int CMP7A1::m_iShell = 0;
 
 void CMP7A1::Precache()
 {
-	PRECACHE_MODEL("models/weapons/v_mp7a1.mdl");
-	PRECACHE_MODEL("models/weapons/w_mp7a1.mdl");
-	PRECACHE_MODEL("models/weapons/p_mp7a1.mdl");
-
-	PRECACHE_SOUND("weapons/tmp-1.wav");
-	PRECACHE_SOUND("weapons/tmp-2.wav");
+	PRECACHE_NECESSARY_FILES(MP7A1);
 
 	m_iShell = PRECACHE_MODEL("models/pshell.mdl");
 	m_usEvent = PRECACHE_EVENT(1, "events/mp7a1.sc");
@@ -25,7 +30,7 @@ bool CMP7A1::Deploy()
 	m_flAccuracy = 0.2f;
 	m_iShotsFired = 0;
 
-	return DefaultDeploy("models/weapons/v_mp7a1.mdl", "models/weapons/p_mp7a1.mdl", MP7A1_DRAW, "onehanded");
+	return DefaultDeploy(MP7A1_VIEW_MODEL, MP7A1_WORLD_MODEL, MP7A1_DRAW, "onehanded");
 }
 
 void CMP7A1::PrimaryAttack()
@@ -55,7 +60,7 @@ void CMP7A1::SecondaryAttack(void)
 
 	if (!g_vecGunOfsGoal.LengthSquared())
 	{
-		g_vecGunOfsGoal = Vector(-11.6f, -11.0f, 4.0f);
+		g_vecGunOfsGoal = Vector(-11.37f, -8.0f, 4.5f);
 		gHUD::m_iFOV = 85;	// allow clients to predict the zoom.
 	}
 	else
@@ -116,8 +121,7 @@ void CMP7A1::MP7A1Fire(float flSpread, float flCycleTime)
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecAiming = gpGlobals->v_forward;
 
-	Vector vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, MP7A1_EFFECTIVE_RANGE, MP7A1_PENETRATION, m_pAmmoInfo->m_iBulletBehavior,
-		MP7A1_DAMAGE, MP7A1_RANGE_MODIFER, m_pPlayer->pev, false, m_pPlayer->random_seed);
+	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, MP7A1_EFFECTIVE_RANGE, MP7A1_PENETRATION, m_iPrimaryAmmoType, MP7A1_DAMAGE, MP7A1_RANGE_MODIFER, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
 	SendWeaponAnim(UTIL_SharedRandomLong(m_pPlayer->random_seed, MP7A1_SHOOT1, MP7A1_SHOOT3));
@@ -187,3 +191,5 @@ void CMP7A1::WeaponIdle()
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
 	SendWeaponAnim(MP7A1_IDLE1);
 }
+
+DECLARE_STANDARD_RESET_MODEL_FUNC(MP7A1)
