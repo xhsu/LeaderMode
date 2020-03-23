@@ -217,7 +217,7 @@ public:	// util funcs
 	inline	bool	CanHolster		(void) { return Holster(true); }	// smells, looks and tastes like a duck...
 	virtual	bool	CanDrop			(void) { return true; }
 	virtual void	KickBack		(float up_base, float lateral_base, float up_modifier, float lateral_modifier, float up_max, float lateral_max, int direction_change);	// recoil
-	virtual void	ResetModel		(void) { }
+	virtual void	ResetModel		(void) { }	// used after Melee() and QuickThrowRelease().
 };
 
 
@@ -593,15 +593,34 @@ enum glock18_e
 	GLOCK18_RELOAD2,
 };
 
-const float HEGRENADE_MAX_SPEED        = 250.0f;
-const float HEGRENADE_MAX_SPEED_SHIELD = 180.0f;
+#define THROWABLE_VIEW_MODEL	"models/weapons/v_throwable.mdl"
 
-enum hegrenade_e
+constexpr float TIME_GR_IDLE_LOOP			= (11.0f / 3.0f);
+constexpr float TIME_GR_QT_READY			= 0.86f;
+constexpr float TIME_GR_QT_READY_2			= 0.86f;
+constexpr float TIME_FB_QT_READY			= 0.96f;
+constexpr float TIME_SG_QT_READY			= 0.96f;
+constexpr float TIME_QT_THROWING_FAR		= 0.78f;
+constexpr float TIME_SP_QT_THROWING_FAR		= 0.25f;
+constexpr float TIME_QT_THROWING_LONGBOW	= 0.79f;
+constexpr float TIME_SP_QT_THROWING_LB		= 0.18f;
+constexpr float TIME_QT_THROWING_SOFT		= 0.79f;
+constexpr float TIME_SP_QT_THROWING_SOFT	= 0.21f;
+
+enum throwable_e
 {
-	HEGRENADE_IDLE,
-	HEGRENADE_PULLPIN,
-	HEGRENADE_THROW,
-	HEGRENADE_DRAW,
+	GR_IDLE = 0,
+
+	GR_QT_READY = 12,
+	GR_QT_READY_2 = 25,
+
+	FB_QT_READY = 38,
+
+	SG_QT_READY = 51,
+
+	QT_THROWING_FAR = 52,
+	QT_THROWING_LONGBOW = 53,
+	QT_THROWING_SOFT = 54,
 };
 
 constexpr float KNIFE_BODYHIT_VOLUME   = 128.0f;

@@ -243,8 +243,9 @@ public:
 	virtual float FlItemRespawnTime(CItem *pItem);
 	virtual Vector VecItemRespawnSpot(CItem *pItem);
 
-	// Ammo retrieval
-	virtual void PlayerGotAmmo(CBasePlayer *pPlayer, char *szName, int iCount);
+	// Equipment retrieval
+	virtual bool CanHaveEquipment(CBasePlayer* pPlayer, EquipmentIdType iId);
+	virtual void PlayerGotEquipment(CBasePlayer* pPlayer, EquipmentIdType iId);
 
 	// Healthcharger respawn control
 	virtual float FlHealthChargerRechargeTime();

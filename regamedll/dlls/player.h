@@ -505,6 +505,7 @@ public:
 	bool CheckActivityInGame();
 	int GetGrenadeInventory(EquipmentIdType iId);
 	int* GetGrenadeInventoryPointer(EquipmentIdType iId);
+	void ResetUsingEquipment(void);
 
 	// new functions from leader mod.
 	void AssignRole(RoleTypes iNewRole);	// this function is only for skill installation.
@@ -721,6 +722,7 @@ public:
 	Vector m_vecVAngleShift;	// this is a dummy at SV side. However, this would add to player viewangle at CL side.
 	std::vector<int> m_vMenuItems;
 	EquipmentIdType m_iUsingGrenadeId;
+	EquipmentIdType m_iClientKnownUsingGrenadeId;
 
 	// overhealing mechanism.
 	float m_flOHNextThink;

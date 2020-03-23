@@ -110,6 +110,7 @@ namespace gHUD
 	CHudSniperScope m_SniperScope;
 	CHudCrosshair m_Crosshair;
 	CHudWeaponList m_WeaponList;
+	CHudGrenade m_Grenade;
 };
 
 void gHUD::Init(void)
@@ -143,9 +144,6 @@ void gHUD::Init(void)
 	m_Flash.Init();
 	m_Message.Init();
 	m_StatusBar.Init();
-	m_DeathNotice.Init();
-	m_Menu.Init();
-	m_NightVision.Init();
 	m_TextMessage.Init();
 	m_roundTimer.Init();
 	m_accountBalance.Init();
@@ -155,7 +153,11 @@ void gHUD::Init(void)
 	m_scenarioStatus.Init();
 	m_progressBar.Init();
 	m_VGUI2Print.Init();
-	m_SniperScope.Init();
+	m_Grenade.Init();
+	m_SniperScope.Init();	// this is a important borderline. Any HUD should not be block by Scope DDS should place behind on this.
+	m_DeathNotice.Init();
+	m_Menu.Init();
+	m_NightVision.Init();
 	m_Crosshair.Init();
 	m_WeaponList.Init();
 
@@ -215,6 +217,8 @@ void gHUD::Init(void)
 	gEngfuncs.pfnAddCommand("invprev", CommandFunc_PrevWeapon);
 	gEngfuncs.pfnAddCommand("adjust_crosshair", CommandFunc_Adjust_Crosshair);
 	gEngfuncs.pfnAddCommand("lastinv", CommandFunc_SelectLastItem);
+	gEngfuncs.pfnAddCommand("eqpnext", CommandFunc_NextEquipment);
+	gEngfuncs.pfnAddCommand("eqpprev", CommandFunc_PrevEquipment);
 }
 
 void gHUD::Shutdown(void)
@@ -927,6 +931,86 @@ void CommandFunc_SelectLastItem(void)	// an equivlent function of void CBasePlay
 
 	// don't forget to forward this command to SV.
 	gEngfuncs.pfnServerCmd("lastinv");
+}
+
+void CommandFunc_NextEquipment(void)
+{
+	// the drawing sequence is the select sequence. and the drawing sequence is the index.
+
+	// you can't do this on the halfway.
+	if (g_pCurWeapon && g_pCurWeapon->m_bitsFlags & WPNSTATE_QUICK_THROWING)
+		return;
+
+	AmmoIdType iAmmoId = AMMO_NONE;
+	EquipmentIdType iCandidate = EQP_NONE;
+
+	for (int i = gPseudoPlayer.m_iUsingGrenadeId; i < EQP_COUNT; i++)
+	{
+		iAmmoId = GetAmmoIdOfEquipment((EquipmentIdType)i);
+
+		if (i == gPseudoPlayer.m_iUsingGrenadeId || !iAmmoId || gPseudoPlayer.m_rgAmmo[iAmmoId] <= 0)
+			continue;
+
+		iCandidate = (EquipmentIdType)i;
+		break;
+	}
+
+	if (!iCandidate)
+	{
+		for (int i = EQP_NONE; i < EQP_COUNT; i++)
+		{
+			iAmmoId = GetAmmoIdOfEquipment((EquipmentIdType)i);
+
+			if (!iAmmoId || gPseudoPlayer.m_rgAmmo[iAmmoId] <= 0)
+				continue;
+
+			iCandidate = (EquipmentIdType)i;
+			break;
+		}
+	}
+
+	gPseudoPlayer.m_iUsingGrenadeId = iCandidate;
+	gEngfuncs.pfnServerCmd(SharedVarArgs("eqpselect %d\n", iCandidate));
+}
+
+void CommandFunc_PrevEquipment(void)
+{
+	// the drawing sequence is the select sequence. and the drawing sequence is the index.
+
+	// you can't do this on the halfway.
+	if (g_pCurWeapon && g_pCurWeapon->m_bitsFlags & WPNSTATE_QUICK_THROWING)
+		return;
+
+	AmmoIdType iAmmoId = AMMO_NONE;
+	EquipmentIdType iCandidate = EQP_NONE;
+
+	for (int i = gPseudoPlayer.m_iUsingGrenadeId; i > EQP_NONE; i--)
+	{
+		iAmmoId = GetAmmoIdOfEquipment((EquipmentIdType)i);
+
+		if (i == gPseudoPlayer.m_iUsingGrenadeId || !iAmmoId || gPseudoPlayer.m_rgAmmo[iAmmoId] <= 0)
+			continue;
+
+		iCandidate = (EquipmentIdType)i;
+		break;
+	}
+
+	if (!iCandidate)
+	{
+		for (int i = EQP_COUNT - 1; i > EQP_NONE; i--)
+		{
+			iAmmoId = GetAmmoIdOfEquipment((EquipmentIdType)i);
+
+			if (!iAmmoId || gPseudoPlayer.m_rgAmmo[iAmmoId] <= 0)
+				continue;
+
+			iCandidate = (EquipmentIdType)i;
+			break;
+		}
+	}
+
+	gPseudoPlayer.m_iUsingGrenadeId = iCandidate;
+	gEngfuncs.pfnServerCmd(SharedVarArgs("eqpselect %d\n", iCandidate));
 }
 
 /*

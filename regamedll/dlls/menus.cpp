@@ -368,7 +368,7 @@ bool MenuHandler_BuySniperRifles(CBasePlayer* pPlayer, int iSlot)
 
 bool MenuHandler_BuyEquipments(CBasePlayer* pPlayer, int iSlot)
 {
-	BuyItem(pPlayer, (EquipmentIdType)pPlayer->m_vMenuItems[iSlot]);
+	BuyEquipment(pPlayer, (EquipmentIdType)pPlayer->m_vMenuItems[iSlot]);
 	return true;
 }
 

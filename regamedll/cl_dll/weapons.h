@@ -86,6 +86,7 @@ public:
 	CBaseWeapon* m_pActiveItem;
 	CBaseWeapon* m_pLastItem;
 	Vector	m_vecVAngleShift;
+	EquipmentIdType m_iUsingGrenadeId;
 
 public:
 	void	SetAnimation(PLAYER_ANIM playerAnim)	{}
@@ -93,6 +94,10 @@ public:
 	Vector2D FireBullets3(Vector vecSrc, Vector vecDirShooting, float vecSpread, float flDistance, int iPenetration, AmmoIdType iBulletType, int iDamage, float flRangeModifier, int shared_rand);
 	int		FireBuckshots(ULONG cShots, const Vector& vecSrc, const Vector& vecDirShooting, const Vector& vecSpread, float flDistance, int iDamage, int shared_rand);	// returns the offset of shared_rand.
 	void	ResetMaxSpeed(void);
+	int		GetGrenadeInventory(EquipmentIdType iId);
+	int*	GetGrenadeInventoryPointer(EquipmentIdType iId);
+	void	ResetUsingEquipment(void);
+	void	Radio(const char* psz1, const char* psz2) {}
 };
 
 extern int g_runfuncs;

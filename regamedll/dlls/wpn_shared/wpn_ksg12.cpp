@@ -43,7 +43,7 @@ bool CKSG12::Deploy()
 
 void CKSG12::PostFrame(void)
 {
-	if (m_bInReload && !(m_bitsFlags & WPNSTATE_MELEE))
+	if (m_bInReload && !(m_bitsFlags & (WPNSTATE_MELEE | WPNSTATE_QUICK_THROWING)))
 	{
 		if (m_flNextInsertAnim <= gpGlobals->time && m_iClip < m_pItemInfo->m_iMaxClip)
 		{

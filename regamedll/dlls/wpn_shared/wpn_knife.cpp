@@ -44,7 +44,7 @@ bool BasicKnife::Deploy(CBaseWeapon* pWeapon)
 	m_pPlayer->pev->weaponmodel = MAKE_STRING("models/p_knife.mdl");
 #else
 	m_pPlayer = &gPseudoPlayer;	// reclaim him.
-	gEngfuncs.CL_LoadModel("models/weapons/v_knife.mdl", &m_pPlayer->pev->viewmodel);
+	g_pViewEnt->model = gEngfuncs.CL_LoadModel("models/weapons/v_knife.mdl", &m_pPlayer->pev->viewmodel);
 #endif
 
 	return true;

@@ -3120,9 +3120,24 @@ Vector CHalfLifeMultiplay::VecItemRespawnSpot(CItem *pItem)
 	return pItem->pev->origin;
 }
 
-void CHalfLifeMultiplay::PlayerGotAmmo(CBasePlayer *pPlayer, char *szName, int iCount)
+bool CHalfLifeMultiplay::CanHaveEquipment(CBasePlayer* pPlayer, EquipmentIdType iId)
 {
-	;
+	if (g_rgRoleEquipmentsAccessibility[pPlayer->m_iRoleType][iId] == WPN_F)
+	{
+		if (g_bClientPrintEnable)
+		{
+			ClientPrint(pPlayer->pev, HUD_PRINTCENTER, "#Cannot_Buy_This");
+			UTIL_PrintChatColor(pPlayer, REDCHAT, "/yYou are unqualified to have /t%s/y since you are /g%s/y.", g_rgEquipmentInfo[iId].m_pszExternalName, g_rgszRoleNames[pPlayer->m_iRoleType]);
+		}
+
+		return false;
+	}
+
+	return true;
+}
+
+void CHalfLifeMultiplay::PlayerGotEquipment(CBasePlayer* pPlayer, EquipmentIdType iId)
+{
 }
 
 BOOL CHalfLifeMultiplay::IsAllowedToSpawn(CBaseEntity *pEntity)
@@ -4235,7 +4250,7 @@ EquipmentIdType CHalfLifeMultiplay::SelectProperGrenade(CBasePlayer* pPlayer)
 		break;
 
 	case Role_Sharpshooter:
-		iId = EQP_FROST_GR;
+		iId = EQP_CRYOGRENADE;
 		break;
 
 	case Role_Medic:

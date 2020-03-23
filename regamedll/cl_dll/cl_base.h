@@ -163,3 +163,4 @@ Created Date: 05 Mar 2020
 #include "hud/hud_sniperscope.h"
 #include "hud/hud_crosshair.h"
 #include "hud/hud_weaponlist.h"
+#include "hud/hud_grenade.h"

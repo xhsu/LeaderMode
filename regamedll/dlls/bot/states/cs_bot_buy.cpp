@@ -418,8 +418,8 @@ void BuyState::OnUpdate(CCSBot *me)
 			}
 
 			// buy armor last, to make sure we bought a weapon first
-			BuyItem(me, EQP_ASSAULT_SUIT);
-			BuyItem(me, EQP_KEVLAR);
+			BuyEquipment(me, EQP_ASSAULT_SUIT);
+			BuyEquipment(me, EQP_KEVLAR);
 
 			// pistols - if we have no preferred pistol, buy at random
 			if (TheCSBots()->AllowPistols() && !me->GetProfile()->HasPistolPreference())
@@ -447,17 +447,17 @@ void BuyState::OnUpdate(CCSBot *me)
 					if (rnd < 10.0f)
 					{
 						// smoke grenade
-						BuyItem(me, EQP_SMOKEGRENADE);
+						BuyEquipment(me, EQP_SMOKEGRENADE);
 					}
 					else if (rnd < 35.0f)
 					{
 						// flashbang
-						BuyItem(me, EQP_FLASHBANG);
+						BuyEquipment(me, EQP_FLASHBANG);
 					}
 					else
 					{
 						// he grenade
-						BuyItem(me, EQP_HEGRENADE);
+						BuyEquipment(me, EQP_HEGRENADE);
 					}
 				}
 				else
@@ -465,12 +465,12 @@ void BuyState::OnUpdate(CCSBot *me)
 					if (RANDOM_FLOAT(0, 100) < 10.0f)
 					{
 						// smoke grenade
-						BuyItem(me, EQP_SMOKEGRENADE);
+						BuyEquipment(me, EQP_SMOKEGRENADE);
 					}
 					else
 					{
 						// he grenade
-						BuyItem(me, EQP_HEGRENADE);
+						BuyEquipment(me, EQP_HEGRENADE);
 					}
 				}
 			}
@@ -478,7 +478,7 @@ void BuyState::OnUpdate(CCSBot *me)
 			if (m_buyDefuseKit)
 			{
 				// disused.
-				//BuyItem(me, MENU_SLOT_ITEM_DEFUSEKIT);
+				//BuyEquipment(me, MENU_SLOT_ITEM_DEFUSEKIT);
 			}
 
 			m_doneBuying = true;
