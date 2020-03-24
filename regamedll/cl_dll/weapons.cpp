@@ -316,7 +316,9 @@ void CBaseWeapon::PostFrame()
 			if (*m_pPlayer->GetGrenadeInventoryPointer(m_pPlayer->m_iUsingGrenadeId))
 				(*m_pPlayer->GetGrenadeInventoryPointer(m_pPlayer->m_iUsingGrenadeId))--;
 
-			m_pPlayer->Radio("%!MRAD_FIREINHOLE", "#Fire_in_the_hole");
+			// we should spawn a grenade at this line... on SV.
+			// at client, we do nothing.
+
 			m_bitsFlags |= WPNSTATE_QT_EXIT;
 			m_pPlayer->m_flNextAttack = flTime;
 		}
@@ -348,7 +350,6 @@ void CBaseWeapon::PostFrame()
 			}
 
 			m_bitsFlags |= WPNSTATE_QT_SHOULD_SPAWN;
-			m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 			SendWeaponAnim(iAnim);
 			m_pPlayer->m_flNextAttack = flTime;
 		}

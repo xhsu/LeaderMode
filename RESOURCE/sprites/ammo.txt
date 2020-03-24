@@ -16,4 +16,8 @@ buckshot		640 640hud7			0	72	24	24
 Flashbang		640 battery_frag1	0	180	25	24
 HEGrenade		640 battery_frag1	64	180	18	17
 SmokeGrenade	640 battery_frag1	128	180	28	23
+Cryogrenade		640	ammo_cryo		222	96	24	24
+Molotov			640	ammo_incendiary	24	231	24	24
+HealingGr		640	ammo_csol		231	48	24	24
+GasGrenade		640	ammo_nervegas	1	232	24	24
 C4				640 icon_c4			0	45	170	45

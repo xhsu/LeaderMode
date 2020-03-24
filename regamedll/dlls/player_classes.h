@@ -168,7 +168,7 @@ public:	// skill action
 
 	// passive skill: weapons
 	virtual float WeaponFireIntervalModifier(CBaseWeapon* pWeapon) { return 1.0f; }
-	virtual void OnGrenadeThrew(WeaponIdType iId, CGrenade* pGrenade) { }
+	virtual void OnGrenadeThrew(EquipmentIdType iId, CGrenade* pGrenade) { }
 
 	// passive skill: damage
 	virtual float PlayerDamageSufferedModifier(int bitsDamageTypes) { return 1.0f; }
@@ -371,7 +371,7 @@ public:
 
 	float PlayerDamageSufferedModifier(int bitsDamageTypes) { return (m_bUsingSkill && (bitsDamageTypes & (DMG_EXPLOSION | DMG_BLAST))) ? SELF_EXPLO_DMG_MUL : 1.0f; }
 	float PlayerDamageDealtModifier(int bitsDamageTypes) { return (bitsDamageTypes & (DMG_EXPLOSION | DMG_BLAST)) ? DEALT_EXPLO_DMG_MUL : 1.0f; }
-	void OnGrenadeThrew(WeaponIdType iId, CGrenade* pGrenade);
+	void OnGrenadeThrew(EquipmentIdType iId, CGrenade* pGrenade);
 };
 
 // Role_Sharpshooter: Bullseye

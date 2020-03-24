@@ -896,8 +896,16 @@ void CommandFunc_Adjust_Crosshair(void)
 
 void CommandFunc_SelectLastItem(void)	// an equivlent function of void CBasePlayer::SelectLastItem() on SV.
 {
+	// this cmd can cancel grenade throw aswell.
+	if (g_pCurWeapon && g_pCurWeapon->m_bitsFlags & WPNSTATE_QUICK_THROWING)
+	{
+		g_pCurWeapon->m_bitsFlags |= WPNSTATE_QT_EXIT;
+		gPseudoPlayer.m_flNextAttack = 0;
+		goto LAB_LASTINV_END;
+	}
+
 	if (gPseudoPlayer.m_pActiveItem && !gPseudoPlayer.m_pActiveItem->CanHolster())
-		return;
+		goto LAB_LASTINV_END;
 
 	if (!gPseudoPlayer.m_pLastItem || gPseudoPlayer.m_pLastItem == gPseudoPlayer.m_pActiveItem)
 	{
@@ -912,7 +920,7 @@ void CommandFunc_SelectLastItem(void)	// an equivlent function of void CBasePlay
 	}
 
 	if (!gPseudoPlayer.m_pLastItem || gPseudoPlayer.m_pLastItem == gPseudoPlayer.m_pActiveItem)
-		return;
+		goto LAB_LASTINV_END;
 
 	// TODO
 	/*if (!gPseudoPlayer.m_pLastItem->CanDeploy())
@@ -929,6 +937,7 @@ void CommandFunc_SelectLastItem(void)	// an equivlent function of void CBasePlay
 
 	gPseudoPlayer.ResetMaxSpeed();
 
+LAB_LASTINV_END:
 	// don't forget to forward this command to SV.
 	gEngfuncs.pfnServerCmd("lastinv");
 }

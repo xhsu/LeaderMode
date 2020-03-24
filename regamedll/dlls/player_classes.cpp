@@ -1044,12 +1044,12 @@ bool CSkillInfiniteGrenade::Terminate()
 	return true;
 }
 
-void CSkillInfiniteGrenade::OnGrenadeThrew(WeaponIdType iId, CGrenade* pGrenade)
+void CSkillInfiniteGrenade::OnGrenadeThrew(EquipmentIdType iId, CGrenade* pGrenade)
 {
 	if (!m_bUsingSkill)
 		return;
 
-	m_pPlayer->m_rgAmmo[GetWeaponInfo(iId)->m_iAmmoType]++;
+	(*m_pPlayer->GetGrenadeInventoryPointer(iId))++;
 
 	pGrenade->pev->dmgtime = gpGlobals->time + 9999.0f;
 	pGrenade->SetTouch(&CGrenade::ExplodeTouch);

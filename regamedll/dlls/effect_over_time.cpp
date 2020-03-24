@@ -11,7 +11,7 @@ Created date: 03/03/2020
 // OVERHEALING //
 /////////////////
 
-LINK_ENTITY_TO_CLASS(healing_smoke_centre, CHealingSmokeCenter);
+LINK_ENTITY_TO_CLASS(healing_smoke_centre, CHealingSmokeCenter)
 
 const char* CHealingSmokeCenter::HEALING_SFX[10] =
 {
@@ -398,7 +398,7 @@ void gElectrifiedDOTMgr::VFX(CBasePlayer* pPlayer)
 // POISONED //
 //////////////
 
-LINK_ENTITY_TO_CLASS(poisoned_smoke_centre, CPoisonedSmokeCentre);
+LINK_ENTITY_TO_CLASS(poisoned_smoke_centre, CPoisonedSmokeCentre)
 
 const char* CPoisonedSmokeCentre::COUGH_SFX[6] =
 {
@@ -536,7 +536,7 @@ void gPoisonDOTMgr::Free(CBasePlayer* pPlayer)
 // BURNING //
 /////////////
 
-LINK_ENTITY_TO_CLASS(incendiary_grenade_centre, CIncendiaryGrenadeCentre);
+LINK_ENTITY_TO_CLASS(incendiary_grenade_centre, CIncendiaryGrenadeCentre)
 
 const char* CIncendiaryGrenadeCentre::DETONATE = "leadermode/molotov_detonate_3.wav";
 const char* CIncendiaryGrenadeCentre::FIRE_SFX_LOOP = "leadermode/fire_loop_1.wav";
@@ -606,7 +606,11 @@ void CIncendiaryGrenadeCentre::Think()
 
 	if (m_flNextDamageCheck <= gpGlobals->time)
 	{
+		vec_t flHighterZ = 0;
+		Vector vecCentre;
+		TraceResult tr;
 		CBaseEntity* pEntity = nullptr;
+
 		while ((pEntity = UTIL_FindEntityInSphere(pEntity, pev->origin, m_flRadius)))
 		{
 			if (FNullEnt(pEntity))
@@ -615,8 +619,10 @@ void CIncendiaryGrenadeCentre::Think()
 			if (pEntity->pev->takedamage == DAMAGE_NO)
 				continue;
 
-			TraceResult tr;
-			UTIL_TraceLine(pEntity->Center(), pev->origin, ignore_monsters, ignore_glass, pEntity->edict(), &tr);
+			vecCentre = pEntity->Center();
+			flHighterZ = Q_max(vecCentre.z, pev->origin.z);	// test visibility at the same height.
+
+			UTIL_TraceLine(Vector(vecCentre.x, vecCentre.y, flHighterZ), Vector(pev->origin.x, pev->origin.y, flHighterZ), ignore_monsters, ignore_glass, pEntity->edict(), &tr);
 			if (tr.flFraction < 1.0f)	// not visible.
 				continue;
 
@@ -654,6 +660,7 @@ void CIncendiaryGrenadeCentre::Think()
 	{
 		m_flNextFlameSpr = gpGlobals->time + 0.1f;
 
+#ifndef CLIENT_VFX
 		Vector vecOrigin;
 		edict_t* pEntity = CREATE_NAMED_ENTITY(MAKE_STRING("info_target"));
 
@@ -690,6 +697,7 @@ void CIncendiaryGrenadeCentre::Think()
 		}
 
 		pEntity->v.flags |= FL_KILLME;
+#endif
 	}
 }
 

@@ -2562,35 +2562,44 @@ bool CBasePlayer::HasShield()
 	return m_bOwnsShield;
 }
 
-CGrenade *CBasePlayer::ThrowGrenade(WeaponIdType iId, Vector& vecSrc, Vector& vecThrow, float time, unsigned short usEvent)
+CGrenade *CBasePlayer::ThrowGrenade(EquipmentIdType iId)
 {
 	CGrenade* pGrenade = nullptr;
 
-	// special gr first.
-	if (iId == WEAPON_HEGRENADE && m_iRoleType == Role_Sharpshooter)	// frost grenade
-	{
-		pGrenade = CGrenade::FrostGrenade(this);
-	}
-	else if (iId == WEAPON_SMOKEGRENADE && m_iRoleType == Role_Medic)	// healing grenade
-	{
-		pGrenade = CGrenade::HealingGrenade(pev, vecSrc, vecThrow, time, usEvent);
-	}
-	else if (iId == WEAPON_SMOKEGRENADE && m_iRoleType == Role_MadScientist)
-	{
-		pGrenade = CGrenade::NerveGasGrenade(pev, vecSrc, vecThrow, time, usEvent);
-	}
-	else if (iId == WEAPON_HEGRENADE && m_iRoleType == Role_Arsonist)
-	{
-		pGrenade = CGrenade::IncendiaryGrenade(pev, vecSrc, vecThrow);
-	}
+	// radio everyone.
+	Radio("%!MRAD_FIREINHOLE", "#Fire_in_the_hole");
+
+	Vector angThrow = pev->v_angle + pev->punchangle;
+
+	if (angThrow.pitch < 0)
+		angThrow.pitch = -10 + angThrow.pitch * ((90 - 10) / 90.0f);
 	else
+		angThrow.pitch = -10 + angThrow.pitch * ((90 + 10) / 90.0f);
+
+	float flVel = (90.0f - angThrow.pitch) * 6.0f;
+
+	// cap the speed.
+	if (flVel > 750.0f)
+		flVel = 750.0f;
+
+	UTIL_MakeVectors(angThrow);
+
+	Vector vecSrc = pev->origin + pev->view_ofs + gpGlobals->v_forward * 16.0f;
+	Vector vecThrow = gpGlobals->v_forward * flVel + pev->velocity;
+
+	// player "shoot" animation
+	SetAnimation(PLAYER_ATTACK1);
+
+	// translate EQP_ to grenade function call.
+	switch (iId)
 	{
-		switch (iId)
-		{
-		case WEAPON_HEGRENADE:    pGrenade = CGrenade::ShootTimed2(pev, vecSrc, vecThrow, time, m_iTeam, usEvent); break;
-		case WEAPON_FLASHBANG:    pGrenade = CGrenade::ShootTimed(pev, vecSrc, vecThrow, time); break;
-		case WEAPON_SMOKEGRENADE: pGrenade = CGrenade::ShootSmokeGrenade(pev, vecSrc, vecThrow, time, usEvent); break;
-		}
+	case EQP_HEGRENADE:	pGrenade = CGrenade::HEGrenade(pev, vecSrc, vecThrow, m_iTeam); break;
+	case EQP_FLASHBANG:    pGrenade = CGrenade::Flashbang(pev, vecSrc, vecThrow); break;
+	case EQP_SMOKEGRENADE: pGrenade = CGrenade::SmokeGrenade(pev, vecSrc, vecThrow); break;
+	case EQP_CRYOGRENADE: pGrenade = CGrenade::Cryogrenade(this); break;
+	case EQP_INCENDIARY_GR: pGrenade = CGrenade::IncendiaryGrenade(pev, vecSrc, vecThrow); break;
+	case EQP_HEALING_GR: pGrenade = CGrenade::HealingGrenade(pev, vecSrc, vecThrow); break;
+	case EQP_GAS_GR: pGrenade = CGrenade::NerveGasGrenade(pev, vecSrc, vecThrow); break;
 	}
 
 	OnGrenadeThrew(iId, pGrenade);
@@ -4782,6 +4791,14 @@ void CBasePlayer::SelectItem(const char *pstr)
 
 void CBasePlayer::SelectLastItem()
 {
+	// this action can cancel grenade throw.
+	if (m_pActiveItem && m_pActiveItem->m_bitsFlags & WPNSTATE_QUICK_THROWING)
+	{
+		m_pActiveItem->m_bitsFlags |= WPNSTATE_QT_EXIT;
+		m_flNextAttack = 0;
+		return;
+	}
+
 	if (m_pActiveItem && !m_pActiveItem->CanHolster())
 		return;
 
@@ -7197,7 +7214,7 @@ void CBasePlayer::SaveRebuy()
 
 	for (int i = 0; i < MAX_ITEM_TYPES; i++)
 	{
-		if (m_rgpPlayerItems[i]->m_iId != WEAPON_KNIFE)
+		if (m_rgpPlayerItems[i] && m_rgpPlayerItems[i]->m_iId != WEAPON_KNIFE)
 			m_lstRebuy.emplace_back(m_rgpPlayerItems[i]->m_iId);
 	}
 
@@ -8000,7 +8017,7 @@ void CBasePlayer::OnHurtingAnotherPlayer(CBasePlayer* pVictim, entvars_t* pevInf
 	}
 }
 
-void CBasePlayer::OnGrenadeThrew(WeaponIdType iId, CGrenade* pGrenade)
+void CBasePlayer::OnGrenadeThrew(EquipmentIdType iId, CGrenade* pGrenade)
 {
 	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
 	{

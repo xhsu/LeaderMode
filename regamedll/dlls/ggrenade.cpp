@@ -8,6 +8,25 @@ TYPEDESCRIPTION CGrenade::m_SaveData[] =
 	DEFINE_FIELD(CGrenade, m_usEvent, FIELD_INTEGER),
 };
 
+unsigned short CGrenade::m_rgusEvents[EQP_COUNT];
+
+const float CGrenade::m_rgflFuseTime[EQP_COUNT] =
+{
+	0,
+	0,
+	0,
+
+	1.5f,	// EQP_HEGRENADE,
+	1.5f,	// EQP_FLASHBANG,
+	1.5f,	// EQP_SMOKEGRENADE,
+	9999.0f,	// EQP_CRYOGRENADE, explode on touch.
+	9999.0f,	// EQP_INCENDIARY_GR, explode on touch.
+	1.5f,	// EQP_HEALING_GR,
+	1.5f,	// EQP_GAS_GR,
+
+	0,
+};
+
 LINK_ENTITY_TO_CLASS(grenade, CGrenade)
 
 void CGrenade::Explode(Vector vecSrc, Vector vecAim)
@@ -63,6 +82,20 @@ void CGrenade::Explode(TraceResult *pTrace, int bitsDamageType)
 	SetThink(&CGrenade::Smoke);
 	pev->velocity = g_vecZero;
 	pev->nextthink = gpGlobals->time + 0.3f;
+
+	// VFX of the flash light.
+	MESSAGE_BEGIN(MSG_ALL, SVC_TEMPENTITY, pev->origin);
+	WRITE_BYTE(TE_DLIGHT); // TE_DLIGHT
+	WRITE_COORD(pev->origin.x); // x
+	WRITE_COORD(pev->origin.y); // y
+	WRITE_COORD(pev->origin.z); // z
+	WRITE_BYTE(50);	// radius
+	WRITE_BYTE(255);	// r
+	WRITE_BYTE(255);	// g
+	WRITE_BYTE(255);	// b
+	WRITE_BYTE(8);	// life
+	WRITE_BYTE(60);	// decay rate
+	MESSAGE_END();
 
 	// draw sparks
 	if (iContents != CONTENTS_WATER)
@@ -140,6 +173,9 @@ void CGrenade::Explode3(TraceResult *pTrace, int bitsDamageType)
 	{
 		Create("spark_shower", pev->origin, pTrace->vecPlaneNormal, nullptr);
 	}
+
+	// additional VFX...
+	PLAYBACK_EVENT_FULL(0, nullptr, m_usEvent, 0, pev->origin, (float*)&g_vecZero, 0, 0, 0, 0, FALSE, FALSE);
 }
 
 void CGrenade::Smoke3_C()
@@ -589,7 +625,29 @@ void CGrenade::Spawn()
 	m_fRegisteredSound = FALSE;
 }
 
-CGrenade *CGrenade::ShootTimed2(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, float time, int iTeam, unsigned short usEvent)
+void CGrenade::Precache()
+{
+	m_rgusEvents[EQP_HEGRENADE] = PRECACHE_EVENT(1, "events/createexplo.sc");
+	m_rgusEvents[EQP_FLASHBANG] = 0;	// Flashbang is not using any event.
+	m_rgusEvents[EQP_SMOKEGRENADE] = PRECACHE_EVENT(1, "events/createsmoke.sc");
+	m_rgusEvents[EQP_CRYOGRENADE] = PRECACHE_EVENT(1, "events/CryoExplo.sc");
+	m_rgusEvents[EQP_INCENDIARY_GR] = PRECACHE_EVENT(1, "events/Molotov.sc");
+	m_rgusEvents[EQP_HEALING_GR] = PRECACHE_EVENT(1, "events/createsmoke.sc");	// UNDONE
+	m_rgusEvents[EQP_GAS_GR] = PRECACHE_EVENT(1, "events/createsmoke.sc");	// UNDONE
+
+	PRECACHE_SOUND("weapons/hegrenade-1.wav");
+	PRECACHE_SOUND("weapons/hegrenade-2.wav");
+	PRECACHE_SOUND("weapons/he_bounce-1.wav");
+
+	PRECACHE_SOUND("weapons/flashbang-1.wav");
+	PRECACHE_SOUND("weapons/flashbang-2.wav");
+
+	PRECACHE_SOUND("weapons/sg_explode.wav");
+
+	PRECACHE_MODEL("sprites/VFX/fire3.spr");
+}
+
+CGrenade *CGrenade::HEGrenade(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, int iTeam)
 {
 	CGrenade *pGrenade = GetClassPtr((CGrenade *)nullptr);
 	pGrenade->Spawn();
@@ -599,11 +657,11 @@ CGrenade *CGrenade::ShootTimed2(entvars_t *pevOwner, Vector vecStart, Vector vec
 	pGrenade->pev->angles = pevOwner->angles;
 	pGrenade->pev->owner = ENT(pevOwner);
 
-	pGrenade->m_usEvent = usEvent;
+	pGrenade->m_usEvent = m_rgusEvents[EQP_HEGRENADE];
 
 	pGrenade->SetTouch(&CGrenade::BounceTouch);
 
-	pGrenade->pev->dmgtime = gpGlobals->time + time;
+	pGrenade->pev->dmgtime = gpGlobals->time + m_rgflFuseTime[EQP_HEGRENADE];
 	pGrenade->SetThink(&CGrenade::TumbleThink);
 	pGrenade->pev->nextthink = gpGlobals->time + 0.1f;
 
@@ -623,7 +681,7 @@ CGrenade *CGrenade::ShootTimed2(entvars_t *pevOwner, Vector vecStart, Vector vec
 	return pGrenade;
 }
 
-CGrenade *CGrenade::ShootTimed(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, float time)
+CGrenade *CGrenade::Flashbang(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity)
 {
 	CGrenade *pGrenade = GetClassPtr((CGrenade *)nullptr);
 	pGrenade->Spawn();
@@ -638,13 +696,13 @@ CGrenade *CGrenade::ShootTimed(entvars_t *pevOwner, Vector vecStart, Vector vecV
 
 	// Take one second off of the desired detonation time and set the think to PreDetonate. PreDetonate
 	// will insert a DANGER sound into the world sound list and delay detonation for one second so that
-	// the grenade explodes after the exact amount of time specified in the call to ShootTimed().
+	// the grenade explodes after the exact amount of time specified in the call to Flashbang().
 
-	pGrenade->pev->dmgtime = gpGlobals->time + time;
+	pGrenade->pev->dmgtime = gpGlobals->time + m_rgflFuseTime[EQP_FLASHBANG];
 	pGrenade->SetThink(&CGrenade::TumbleThink);
 	pGrenade->pev->nextthink = gpGlobals->time + 0.1f;
 
-	if (time < 0.1f)
+	if (m_rgflFuseTime[EQP_FLASHBANG] < 0.1f)	// technically it won't happen...
 	{
 		pGrenade->pev->nextthink = gpGlobals->time;
 		pGrenade->pev->velocity = Vector(0, 0, 0);
@@ -664,7 +722,7 @@ CGrenade *CGrenade::ShootTimed(entvars_t *pevOwner, Vector vecStart, Vector vecV
 	return pGrenade;
 }
 
-CGrenade *CGrenade::ShootSmokeGrenade(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, float time, unsigned short usEvent)
+CGrenade *CGrenade::SmokeGrenade(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity)
 {
 	CGrenade *pGrenade = GetClassPtr((CGrenade *)nullptr);
 	pGrenade->Spawn();
@@ -673,15 +731,15 @@ CGrenade *CGrenade::ShootSmokeGrenade(entvars_t *pevOwner, Vector vecStart, Vect
 	pGrenade->pev->velocity = vecVelocity;
 	pGrenade->pev->angles = pevOwner->angles;
 	pGrenade->pev->owner = ENT(pevOwner);
-	pGrenade->m_usEvent = usEvent;
+	pGrenade->m_usEvent = m_rgusEvents[EQP_SMOKEGRENADE];
 	pGrenade->m_bLightSmoke = false;
 	pGrenade->m_bDetonated = false;
 	pGrenade->SetTouch(&CGrenade::BounceTouch);
-	pGrenade->pev->dmgtime = gpGlobals->time + time;
+	pGrenade->pev->dmgtime = gpGlobals->time + m_rgflFuseTime[EQP_SMOKEGRENADE];
 	pGrenade->SetThink(&CGrenade::SG_TumbleThink);
 	pGrenade->pev->nextthink = gpGlobals->time + 0.1f;
 
-	if (time < 0.1)
+	if (m_rgflFuseTime[EQP_SMOKEGRENADE] < 0.1)	// technically it won't happen...
 	{
 		pGrenade->pev->nextthink = gpGlobals->time;
 		pGrenade->pev->velocity = Vector(0, 0, 0);
@@ -700,11 +758,11 @@ CGrenade *CGrenade::ShootSmokeGrenade(entvars_t *pevOwner, Vector vecStart, Vect
 	return pGrenade;
 }
 
-const float CGrenade::FROST_GR_DAMAGE = 20.0f;
-const float CGrenade::FROST_GR_RADIUS = 240.0f;
-const float CGrenade::FROST_GR_EFTIME = 4.0f;
+const float CGrenade::CRYOGR_DAMAGE = 20.0f;
+const float CGrenade::CRYOGR_RADIUS = 240.0f;
+const float CGrenade::CRYOGR_EFTIME = 4.0f;
 
-CGrenade* CGrenade::FrostGrenade(CBasePlayer* pPlayer)
+CGrenade* CGrenade::Cryogrenade(CBasePlayer* pPlayer)
 {
 	CGrenade* pGrenade = GetClassPtr((CGrenade*)nullptr);
 	pGrenade->Spawn();
@@ -717,7 +775,7 @@ CGrenade* CGrenade::FrostGrenade(CBasePlayer* pPlayer)
 	pGrenade->pev->angles = pPlayer->pev->angles;
 	pGrenade->pev->owner = pPlayer->edict();
 
-	pGrenade->SetTouch(&CGrenade::FrostTouch);
+	pGrenade->SetTouch(&CGrenade::CryoTouch);
 	pGrenade->SetThink(&CGrenade::SUB_DoNothing);
 
 	pGrenade->pev->gravity = 0.55f;
@@ -726,7 +784,7 @@ CGrenade* CGrenade::FrostGrenade(CBasePlayer* pPlayer)
 	pGrenade->m_iTeam = pPlayer->m_iTeam;
 
 	SET_MODEL(ENT(pGrenade->pev), "models/w_hegrenade.mdl");
-	pGrenade->pev->dmg = FROST_GR_DAMAGE;
+	pGrenade->pev->dmg = CRYOGR_DAMAGE;
 
 	// Give it a glow
 	pGrenade->pev->renderfx = kRenderFxGlowShell;
@@ -747,79 +805,14 @@ CGrenade* CGrenade::FrostGrenade(CBasePlayer* pPlayer)
 	WRITE_BYTE(200); // brightness
 	MESSAGE_END();
 
+	pGrenade->m_usEvent = m_rgusEvents[EQP_CRYOGRENADE];
 	return pGrenade;
 }
 
-void CGrenade::FrostTouch(CBaseEntity* pOther)
+void CGrenade::CryoTouch(CBaseEntity* pOther)
 {
-	// Smallest ring
-	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
-	WRITE_BYTE(TE_BEAMCYLINDER); // TE id
-	WRITE_COORD(pev->origin[0]); // x
-	WRITE_COORD(pev->origin[1]); // y
-	WRITE_COORD(pev->origin[2]); // z
-	WRITE_COORD(pev->origin[0]); // x axis
-	WRITE_COORD(pev->origin[1]); // y axis
-	WRITE_COORD(pev->origin[2] + 385.0f); // z axis
-	WRITE_SHORT(MODEL_INDEX("sprites/shockwave.spr")); // sprite
-	WRITE_BYTE(0); // startframe
-	WRITE_BYTE(0); // framerate
-	WRITE_BYTE(4); // life
-	WRITE_BYTE(60); // width
-	WRITE_BYTE(0); // noise
-	WRITE_BYTE(0); // red
-	WRITE_BYTE(100); // green
-	WRITE_BYTE(200); // blue
-	WRITE_BYTE(200); // brightness
-	WRITE_BYTE(0); // speed
-	MESSAGE_END();
-
-	// Medium ring
-	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
-	WRITE_BYTE(TE_BEAMCYLINDER); // TE id
-	WRITE_COORD(pev->origin[0]); // x
-	WRITE_COORD(pev->origin[1]); // y
-	WRITE_COORD(pev->origin[2]); // z
-	WRITE_COORD(pev->origin[0]); // x axis
-	WRITE_COORD(pev->origin[1]); // y axis
-	WRITE_COORD(pev->origin[2] + 470.0f); // z axis
-	WRITE_SHORT(MODEL_INDEX("sprites/shockwave.spr")); // sprite
-	WRITE_BYTE(0); // startframe
-	WRITE_BYTE(0); // framerate
-	WRITE_BYTE(4); // life
-	WRITE_BYTE(60); // width
-	WRITE_BYTE(0); // noise
-	WRITE_BYTE(0); // red
-	WRITE_BYTE(100); // green
-	WRITE_BYTE(200); // blue
-	WRITE_BYTE(200); // brightness
-	WRITE_BYTE(0); // speed
-	MESSAGE_END();
-
-	// Largest ring
-	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
-	WRITE_BYTE(TE_BEAMCYLINDER); // TE id
-	WRITE_COORD(pev->origin[0]); // x
-	WRITE_COORD(pev->origin[1]); // y
-	WRITE_COORD(pev->origin[2]); // z
-	WRITE_COORD(pev->origin[0]); // x axis
-	WRITE_COORD(pev->origin[1]); // y axis
-	WRITE_COORD(pev->origin[2] + 555.0f); // z axis
-	WRITE_SHORT(MODEL_INDEX("sprites/shockwave.spr")); // sprite
-	WRITE_BYTE(0); // startframe
-	WRITE_BYTE(0); // framerate
-	WRITE_BYTE(4); // life
-	WRITE_BYTE(60); // width
-	WRITE_BYTE(0); // noise
-	WRITE_BYTE(0); // red
-	WRITE_BYTE(100); // green
-	WRITE_BYTE(200); // blue
-	WRITE_BYTE(200); // brightness
-	WRITE_BYTE(0); // speed
-	MESSAGE_END();
-
 	CBaseEntity* pEntity = nullptr;
-	while ((pEntity = UTIL_FindEntityInSphere(pEntity, pev->origin, FROST_GR_RADIUS)))
+	while ((pEntity = UTIL_FindEntityInSphere(pEntity, pev->origin, CRYOGR_RADIUS)))
 	{
 		if (FNullEnt(pEntity) || pEntity->pev == pev)
 			continue;
@@ -832,17 +825,20 @@ void CGrenade::FrostTouch(CBaseEntity* pOther)
 			CBasePlayer* pPlayer = CBasePlayer::Instance(pEntity->pev);
 			if (pPlayer->IsAlive())
 			{
-				gFrozenDOTMgr::Set(pPlayer, FROST_GR_DAMAGE, pev, &pev->owner->v, FROST_GR_EFTIME);
+				gFrozenDOTMgr::Set(pPlayer, CRYOGR_DAMAGE, pev, &pev->owner->v, CRYOGR_EFTIME);
 			}
 		}
 		else
 		{
-			pEntity->TakeDamage(pev, &pev->owner->v, FROST_GR_DAMAGE, DMG_FREEZE);
+			pEntity->TakeDamage(pev, &pev->owner->v, CRYOGR_DAMAGE, DMG_FREEZE);
 		}
 	}
 
 	EMIT_SOUND(edict(), CHAN_AUTO, gFrozenDOTMgr::ICEGRE_NOVA_SFX, VOL_NORM, ATTN_NORM);
 	pev->flags |= FL_KILLME;
+
+	// VFX now move to client.
+	PLAYBACK_EVENT_FULL(0, nullptr, m_usEvent, 0, pev->origin, (float*)&g_vecZero, 0, 0, 0, 0, FALSE, FALSE);
 }
 
 void CGrenade::IncendiaryTouch(CBaseEntity* pOther)
@@ -855,6 +851,11 @@ void CGrenade::IncendiaryTouch(CBaseEntity* pOther)
 
 	CIncendiaryGrenadeCentre::Create(pev->origin, CBasePlayer::Instance(pev->owner));
 	pev->flags |= FL_KILLME;
+
+	// VFX
+	// fparam1 == RADIUS
+	// fparam2 == DURATION
+	PLAYBACK_EVENT_FULL(FEV_GLOBAL | FEV_RELIABLE, nullptr, m_usEvent, 0, pev->origin, (float*)&g_vecZero, CIncendiaryGrenadeCentre::RADIUS, CIncendiaryGrenadeCentre::DURATION, 0, 0, FALSE, FALSE);
 }
 
 void CGrenade::IncendiaryThink()
@@ -868,18 +869,20 @@ void CGrenade::IncendiaryThink()
 	pev->nextthink = gpGlobals->time + 0.1f;
 }
 
-CGrenade* CGrenade::HealingGrenade(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity, float time, unsigned short usEvent)
+CGrenade* CGrenade::HealingGrenade(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity)
 {
-	CGrenade* pGrenade = ShootSmokeGrenade(pevOwner, vecStart, vecVelocity, time, usEvent);
+	CGrenade* pGrenade = SmokeGrenade(pevOwner, vecStart, vecVelocity);
 	pGrenade->m_bHealing = true;
+	pGrenade->pev->dmgtime = gpGlobals->time + m_rgflFuseTime[EQP_HEALING_GR];
 
 	return pGrenade;
 }
 
-CGrenade* CGrenade::NerveGasGrenade(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity, float time, unsigned short usEvent)
+CGrenade* CGrenade::NerveGasGrenade(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity)
 {
-	CGrenade* pGrenade = ShootSmokeGrenade(pevOwner, vecStart, vecVelocity, time, usEvent);
+	CGrenade* pGrenade = SmokeGrenade(pevOwner, vecStart, vecVelocity);
 	pGrenade->m_bPoisoned = true;
+	pGrenade->pev->dmgtime = gpGlobals->time + m_rgflFuseTime[EQP_GAS_GR];
 
 	return pGrenade;
 }
@@ -926,6 +929,7 @@ CGrenade* CGrenade::IncendiaryGrenade(entvars_t* pevOwner, Vector vecStart, Vect
 	WRITE_BYTE(200); // brightness
 	MESSAGE_END();
 
+	pGrenade->m_usEvent = m_rgusEvents[EQP_INCENDIARY_GR];
 	return pGrenade;
 }
 

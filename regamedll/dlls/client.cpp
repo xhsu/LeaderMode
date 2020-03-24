@@ -2589,7 +2589,7 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 			}
 			else if (FStrEq(pcmd, "lastinv"))
 			{
-				GetClassPtr((CBasePlayer *)pev)->SelectLastItem();
+				pPlayer->SelectLastItem();
 			}
 			else if (FStrEq(pcmd, "buyammo1"))
 			{

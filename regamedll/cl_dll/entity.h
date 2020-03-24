@@ -70,6 +70,7 @@ extern Vector g_vPlayerVelocity;
 extern float g_flPlayerSpeed;
 extern int g_iWeaponFlags;
 extern int g_iWaterLevel;
+extern float g_flRoundTime;
 
 extern extra_player_info_t	g_PlayerExtraInfo[MAX_PLAYERS]; // additional player info sent directly to the client.dll
 
@@ -88,3 +89,8 @@ void HUD_TempEntUpdate2 (
 	int		(*Callback_AddVisibleEntity)(cl_entity_t* pEntity),
 	void	(*Callback_TempEntPlaySound)(TEMPENTITY* pTemp, float damp));
 cl_entity_t* HUD_GetUserEntity2(int index);
+
+// for events.cpp
+void EV_CS16Client_KillEveryRound(TEMPENTITY* te, float frametime, float current_time);
+void EV_Smoke_FadeOut(struct tempent_s* te, float frametime, float currenttime);
+void EV_FlameDeath(struct tempent_s* ent, float frametime, float currenttime);

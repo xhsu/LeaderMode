@@ -14,7 +14,8 @@ Compile both client.dll and mp.dll, replace the corresponding file in czero/. Ma
 ## Commands
 | Command                             | Description                                     |
 | :---------------------------------- | :---------------------------------------------- |
-| +qtg                                | Throw grenade. It works just like R6:S. |
+| +qtg                                | Throw grenade. It works just like R6:S. (no cooking support... yet.) |
+| lastinv                             | Cancel grenade throw. It also works as original quick weapon switch. |
 | eqpnext                             | Choose next equipment for +qtg usage from your inventory. |
 | eqpprev                             | Choose previous equipment for +qtg usage from your inventory. |
 | melee                               | Swing the default knife for emergency attack. This won't cancel reload but pause it. |

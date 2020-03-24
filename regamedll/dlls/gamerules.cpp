@@ -3005,7 +3005,7 @@ void CHalfLifeMultiplay::PlayerGotWeapon(CBasePlayer *pPlayer, CBaseWeapon *pWea
 
 bool CHalfLifeMultiplay::CanHaveAmmo(CBasePlayer* pPlayer, AmmoIdType iId)
 {
-	return !!(pPlayer->m_rgAmmo[iId] < GetAmmoInfo(iId)->m_iMax);
+	return !!(pPlayer->m_rgAmmo[iId] < g_rgAmmoInfo[iId].m_iMax);
 }
 
 // Returns FALSE if the player is not allowed to pick up this weapon
