@@ -212,11 +212,11 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 	}
 
 	p->m_iId = iId;
-	p->m_iClip = iClip ? iClip : g_rgItemInfo[iId].m_iMaxClip;
+	p->m_iClip = iClip ? iClip : g_rgWpnInfo[iId].m_iMaxClip;
 	p->m_bitsFlags = bitsFlags;
-	p->m_pItemInfo = &g_rgItemInfo[iId];
-	p->m_pAmmoInfo = &g_rgAmmoInfo[g_rgItemInfo[iId].m_iAmmoType];
-	p->m_iPrimaryAmmoType = g_rgItemInfo[iId].m_iAmmoType;
+	p->m_pItemInfo = &g_rgWpnInfo[iId];
+	p->m_pAmmoInfo = &g_rgAmmoInfo[g_rgWpnInfo[iId].m_iAmmoType];
+	p->m_iPrimaryAmmoType = g_rgWpnInfo[iId].m_iAmmoType;
 	p->m_iSecondaryAmmoType = AMMO_NONE;
 	p->m_pPlayer = pPlayer;
 
@@ -316,7 +316,9 @@ void CBaseWeapon::PostFrame()
 			if (*m_pPlayer->GetGrenadeInventoryPointer(m_pPlayer->m_iUsingGrenadeId))
 				(*m_pPlayer->GetGrenadeInventoryPointer(m_pPlayer->m_iUsingGrenadeId))--;
 
-			m_pPlayer->Radio("%!MRAD_FIREINHOLE", "#Fire_in_the_hole");
+			// we should spawn a grenade at this line... on SV.
+			// at client, we do nothing.
+
 			m_bitsFlags |= WPNSTATE_QT_EXIT;
 			m_pPlayer->m_flNextAttack = flTime;
 		}
@@ -348,7 +350,6 @@ void CBaseWeapon::PostFrame()
 			}
 
 			m_bitsFlags |= WPNSTATE_QT_SHOULD_SPAWN;
-			m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 			SendWeaponAnim(iAnim);
 			m_pPlayer->m_flNextAttack = flTime;
 		}
@@ -460,7 +461,7 @@ void CBaseWeapon::PostFrame()
 bool CBaseWeapon::Melee(void)
 {
 	// you just.. can't do this.
-	if (m_iId == WEAPON_KNIFE || m_bitsFlags & (WPNSTATE_MELEE | WPNSTATE_QUICK_THROWING))
+	if (m_bitsFlags & (WPNSTATE_MELEE | WPNSTATE_QUICK_THROWING))
 		return false;
 
 	if (m_bInZoom)
@@ -921,7 +922,7 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	}
 
 	flags = from->client.iuser3;
-	g_bHoldingKnife = g_pCurWeapon->m_iId == WEAPON_KNIFE;
+	g_bHoldingKnife = !!(g_pCurWeapon->m_bitsFlags & WPNSTATE_MELEE);
 	gPseudoPlayer.m_bCanShoot = (flags & PLAYER_CAN_SHOOT) != 0;
 	g_bFreezeTimeOver = !(flags & PLAYER_FREEZE_TIME_OVER);
 	g_bInBombZone = (flags & PLAYER_IN_BOMB_ZONE) != 0;

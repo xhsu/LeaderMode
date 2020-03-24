@@ -383,7 +383,7 @@ public:
 	void Radio(const char *msg_id, const char *msg_verbose = nullptr, short pitch = 100, bool showIcon = true);
 	CBasePlayer *GetNextRadioRecipient(CBasePlayer *pStartPlayer);
 	void SmartRadio();
-	CGrenade *ThrowGrenade(WeaponIdType iId, Vector& vecSrc, Vector& vecThrow, float time, unsigned short usEvent = 0);
+	CGrenade *ThrowGrenade(EquipmentIdType iId);
 	void AddAccount(int amount, RewardType type = RT_NONE, bool bTrackChange = true);
 	void Disappear();
 	bool CanSwitchTeam(TeamName teamToSwap);
@@ -526,7 +526,7 @@ public:
 	void OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr);
 	void OnPlayerKills(CBasePlayer* pVictim);
 	void OnHurtingAnotherPlayer(CBasePlayer* pVictim, entvars_t* pevInflictor, float& flDamage, int& bitsDamageTypes);
-	void OnGrenadeThrew(WeaponIdType iId, CGrenade* pGrenade);
+	void OnGrenadeThrew(EquipmentIdType iId, CGrenade* pGrenade);
 	bool OnBlind();
 	void OnAddToFullPack(entity_state_s* pState, edict_t* pEnt, BOOL FIsPlayer);
 	void OnBeingAddToFullPack(entity_state_s* pState, CBasePlayer* pHost);

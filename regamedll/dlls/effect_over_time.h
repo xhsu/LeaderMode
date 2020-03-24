@@ -6,6 +6,9 @@ Created date: 03/03/2020
 
 #pragma once
 
+// use client VFX instead.
+#define CLIENT_VFX	1
+
 class CHealingSmokeCenter : public CBaseEntity
 {
 public:
@@ -103,8 +106,11 @@ public:
 
 	static int FLAME_SPR;
 
+	static constexpr float RADIUS = 275.0f;
+	static constexpr float DURATION = 25.5f;
+
 public:
-	static CIncendiaryGrenadeCentre* Create(Vector vecOrigin, CBasePlayer* pAttacker, float flRadius = 275.0f, float flTimeRemoved = 25.5f);
+	static CIncendiaryGrenadeCentre* Create(Vector vecOrigin, CBasePlayer* pAttacker, float flRadius = RADIUS, float flTimeRemoved = DURATION);
 
 public:
 	EntityHandle<CBasePlayer> m_pPlayer;

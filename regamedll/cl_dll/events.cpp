@@ -1025,7 +1025,7 @@ DECLARE_EVENT(FireAK47)
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
-	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, AK47_EFFECTIVE_RANGE, g_rgItemInfo[WEAPON_AK47].m_iAmmoType, AK47_PENETRATION);
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, AK47_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_AK47].m_iAmmoType, AK47_PENETRATION);
 }
 
 DECLARE_EVENT(FireACR)
@@ -1076,7 +1076,7 @@ DECLARE_EVENT(FireACR)
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
-	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, ACR_EFFECTIVE_RANGE, g_rgItemInfo[WEAPON_ACR].m_iAmmoType, ACR_PENETRATION);
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, ACR_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_ACR].m_iAmmoType, ACR_PENETRATION);
 }
 
 DECLARE_EVENT(FireAWP)
@@ -1116,7 +1116,7 @@ DECLARE_EVENT(FireAWP)
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
-	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, AWP_EFFECTIVE_RANGE, g_rgItemInfo[WEAPON_AWP].m_iAmmoType, AWP_PENETRATION);
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, AWP_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_AWP].m_iAmmoType, AWP_PENETRATION);
 }
 
 DECLARE_EVENT(FireDEagle)
@@ -1175,7 +1175,7 @@ DECLARE_EVENT(FireDEagle)
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
-	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, DEAGLE_EFFECTIVE_RANGE, g_rgItemInfo[WEAPON_DEAGLE].m_iAmmoType, DEAGLE_PENETRATION);
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, DEAGLE_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_DEAGLE].m_iAmmoType, DEAGLE_PENETRATION);
 }
 
 DECLARE_EVENT(FireEliteLeft)
@@ -1234,7 +1234,7 @@ DECLARE_EVENT(FireQBZ95)
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
-	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, QBZ95_EFFECTIVE_RANGE, g_rgItemInfo[WEAPON_QBZ95].m_iAmmoType, QBZ95_PENETRATION);
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, QBZ95_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_QBZ95].m_iAmmoType, QBZ95_PENETRATION);
 }
 
 DECLARE_EVENT(Fire57)
@@ -1292,7 +1292,7 @@ DECLARE_EVENT(FireSVD)
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
-	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, SVD_EFFECTIVE_RANGE, g_rgItemInfo[WEAPON_SVD].m_iAmmoType, SVD_PENETRATION);
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, SVD_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_SVD].m_iAmmoType, SVD_PENETRATION);
 }
 
 DECLARE_EVENT(FireGALIL)
@@ -1351,7 +1351,7 @@ DECLARE_EVENT(FireKSG12)
 	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, KSG12_FIRE_SFX, 1.0, 0.48, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
 
 	Vector vecSrc = EV_GetGunPosition(args, origin);
-	EV_HLDM_FireBullets(idx, forward, right, up, KSG12_PROJECTILE_COUNT, vecSrc, forward, KSG12_CONE_VECTOR, KSG12_EFFECTIVE_RANGE, g_rgItemInfo[WEAPON_KSG12].m_iAmmoType, 1, shared_rand);
+	EV_HLDM_FireBullets(idx, forward, right, up, KSG12_PROJECTILE_COUNT, vecSrc, forward, KSG12_CONE_VECTOR, KSG12_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_KSG12].m_iAmmoType, 1, shared_rand);
 }
 
 DECLARE_EVENT(FireM4A1)
@@ -1410,7 +1410,7 @@ DECLARE_EVENT(FireAnaconda)
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
-	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, ANACONDA_EFFECTIVE_RANGE, g_rgItemInfo[WEAPON_ANACONDA].m_iAmmoType, ANACONDA_PENETRATION);
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, ANACONDA_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_ANACONDA].m_iAmmoType, ANACONDA_PENETRATION);
 }
 
 DECLARE_EVENT(FireP90)
@@ -1481,7 +1481,7 @@ DECLARE_EVENT(FireMP7A1)
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
-	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, MP7A1_EFFECTIVE_RANGE, g_rgItemInfo[WEAPON_MP7A1].m_iAmmoType, MP7A1_PENETRATION);
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, MP7A1_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_MP7A1].m_iAmmoType, MP7A1_PENETRATION);
 }
 
 DECLARE_EVENT(FireUMP45)
@@ -1554,7 +1554,7 @@ DECLARE_EVENT(FireUSP)
 	EV_HLDM_FireBullets(idx,
 		forward, right, up,
 		1, vecSrc, forward,
-		vSpread, USP_EFFECTIVE_RANGE, g_rgItemInfo[WEAPON_USP].m_iAmmoType,
+		vSpread, USP_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_USP].m_iAmmoType,
 		USP_PENETRATION);
 }
 
@@ -1565,17 +1565,273 @@ DECLARE_EVENT(FireXM1014)
 
 DECLARE_EVENT(CreateExplo)
 {
+	// goal: some somke around the explosion centre...
 
+	const model_t* pGasModel = gEngfuncs.GetSpritePointer(gEngfuncs.pfnSPR_Load("sprites/gas_puff_01.spr"));
+
+	for (int i = 0; i < 5; i++)
+	{
+		// randomize smoke cloud position
+		Vector org(args->origin);
+		org.x += RANDOM_FLOAT(-100.0f, 100.0f);
+		org.y += RANDOM_FLOAT(-100.0f, 100.0f);
+		org.z += 30;
+
+		TEMPENTITY* pTemp = gEngfuncs.pEfxAPI->CL_TempEntAlloc(org, (model_s*)pGasModel);
+		if (pTemp)
+		{
+			// don't die when animation is ended
+			pTemp->flags |= (FTENT_SPRANIMATELOOP | FTENT_COLLIDEWORLD | FTENT_CLIENTCUSTOM);
+			pTemp->die = gEngfuncs.GetClientTime() + 5.0f;
+			pTemp->callback = EV_Smoke_FadeOut;
+			pTemp->entity.curstate.fuser3 = gEngfuncs.GetClientTime() - 10.0f; // start fading instantly
+			pTemp->entity.curstate.fuser4 = gEngfuncs.GetClientTime(); // entity creation time
+
+			pTemp->entity.curstate.rendermode = kRenderTransAlpha;	// MoE and most clients are wrong, we should use kRenderTransAlpha here...
+			pTemp->entity.curstate.renderamt = 200;
+			pTemp->entity.curstate.rendercolor.r = RANDOM_LONG(210, 230);
+			pTemp->entity.curstate.rendercolor.g = RANDOM_LONG(210, 230);
+			pTemp->entity.curstate.rendercolor.b = RANDOM_LONG(210, 230);
+			pTemp->entity.curstate.scale = 5.0f;
+
+			// make it move slowly
+			pTemp->entity.baseline.origin.x = RANDOM_LONG(-5, 5);
+			pTemp->entity.baseline.origin.y = RANDOM_LONG(-5, 5);
+			pTemp->entity.baseline.renderamt = 18;
+		}
+	}
 }
 
 DECLARE_EVENT(CreateSmoke)
 {
+	TEMPENTITY* pTemp;
 
+	if (!args->bparam2) // first explosion
+	{
+		const model_t* pGasModel = gEngfuncs.GetSpritePointer(gEngfuncs.pfnSPR_Load("sprites/gas_puff_01.spr"));
+
+		for (int i = 0; i < 20; i++)	// SMOKE_CLOUDS == 20
+		{
+			// randomize smoke cloud position
+			Vector org(args->origin);
+			org.x += RANDOM_FLOAT(-100.0f, 100.0f);
+			org.y += RANDOM_FLOAT(-100.0f, 100.0f);
+			org.z += 30;
+
+			pTemp = gEngfuncs.pEfxAPI->CL_TempEntAlloc(org, (model_s*)pGasModel);
+			if (pTemp)
+			{
+				// don't die when animation is ended
+				pTemp->flags |= (FTENT_SPRANIMATELOOP | FTENT_COLLIDEWORLD | FTENT_CLIENTCUSTOM);
+				pTemp->die = gEngfuncs.GetClientTime() + 30.0f;
+				pTemp->callback = EV_Smoke_FadeOut;
+				pTemp->entity.curstate.fuser3 = gEngfuncs.GetClientTime() + 15.0f; // start fading after 15 sec
+				pTemp->entity.curstate.fuser4 = gEngfuncs.GetClientTime(); // entity creation time
+
+				pTemp->entity.curstate.rendermode = kRenderTransAlpha;	// MoE and most clients are wrong, we should use kRenderTransAlpha here...
+				pTemp->entity.curstate.renderamt = 200;
+				pTemp->entity.curstate.rendercolor.r = RANDOM_LONG(210, 230);
+				pTemp->entity.curstate.rendercolor.g = RANDOM_LONG(210, 230);
+				pTemp->entity.curstate.rendercolor.b = RANDOM_LONG(210, 230);
+				pTemp->entity.curstate.scale = 5.0f;
+
+				// make it move slowly
+				pTemp->entity.baseline.origin.x = RANDOM_LONG(-5, 5);
+				pTemp->entity.baseline.origin.y = RANDOM_LONG(-5, 5);
+				pTemp->entity.baseline.renderamt = 18;
+			}
+		}
+	}
+	else // second and other
+	{
+		pTemp = gEngfuncs.pEfxAPI->R_DefaultSprite(args->origin, g_iBlackSmoke, 6.0f);
+
+		if (pTemp)
+		{
+			pTemp->flags |= (FTENT_CLIENTCUSTOM | FTENT_COLLIDEWORLD);
+			pTemp->callback = EV_CS16Client_KillEveryRound;
+			pTemp->entity.curstate.fuser4 = gEngfuncs.GetClientTime();
+
+			pTemp->entity.curstate.rendermode = kRenderTransAlpha;	// MoE and most clients are wrong, we should use kRenderTransAlpha here...
+			pTemp->entity.curstate.rendercolor.r = RANDOM_LONG(210, 230);
+			pTemp->entity.curstate.rendercolor.g = RANDOM_LONG(210, 230);
+			pTemp->entity.curstate.rendercolor.b = RANDOM_LONG(210, 230);
+			pTemp->entity.curstate.renderamt = RANDOM_LONG(180, 200);
+
+			pTemp->entity.baseline.origin[0] = RANDOM_LONG(10, 30);
+		}
+	}
+}
+
+DECLARE_EVENT(CryoExplo)
+{
+	const model_t* pGasModel = gEngfuncs.GetSpritePointer(gEngfuncs.pfnSPR_Load("sprites/gas_puff_01.spr"));
+	const model_t* pSnowModel = IEngineStudio.Mod_ForName("models/leadermode/snow.mdl", TRUE);
+	TEMPENTITY* pTemp = nullptr;
+
+	dlight_t* dl = gEngfuncs.pEfxAPI->CL_AllocDlight(0);
+	dl->origin = args->origin;
+	dl->radius = 240.0f;
+	dl->color.r = 0;
+	dl->color.g = 50;
+	dl->color.b = 200;
+	dl->die = gEngfuncs.GetClientTime() + 4.0f;
+	dl->decay = 40.0f;
+
+	for (int i = 0; i < 5; i++)
+	{
+		// randomize smoke cloud position
+		Vector org(args->origin);
+		org.x += RANDOM_FLOAT(-100.0f, 100.0f);
+		org.y += RANDOM_FLOAT(-100.0f, 100.0f);
+		org.z += 30;
+
+		pTemp = gEngfuncs.pEfxAPI->CL_TempEntAlloc(org, (model_s*)pGasModel);
+		if (pTemp)
+		{
+			// don't die when animation is ended
+			pTemp->flags |= (FTENT_SPRANIMATELOOP | FTENT_COLLIDEWORLD | FTENT_CLIENTCUSTOM);
+			pTemp->die = gEngfuncs.GetClientTime() + 7.5f;
+			pTemp->callback = EV_Smoke_FadeOut;
+			pTemp->entity.curstate.fuser3 = gEngfuncs.GetClientTime() - 7.5f; // start fading instantly
+			pTemp->entity.curstate.fuser4 = gEngfuncs.GetClientTime(); // entity creation time
+
+			pTemp->entity.curstate.rendermode = kRenderTransAlpha;	// MoE and most clients are wrong, we should use kRenderTransAlpha here...
+			pTemp->entity.curstate.renderamt = 200;
+			pTemp->entity.curstate.rendercolor.r = 0;
+			pTemp->entity.curstate.rendercolor.g = 50;
+			pTemp->entity.curstate.rendercolor.b = 200;
+			pTemp->entity.curstate.scale = 5.0f;
+
+			// make it move slowly
+			pTemp->entity.baseline.origin.x = RANDOM_LONG(-5, 5);
+			pTemp->entity.baseline.origin.y = RANDOM_LONG(-5, 5);
+			pTemp->entity.baseline.renderamt = 18;
+		}
+
+		pTemp = gEngfuncs.pEfxAPI->CL_TempEntAlloc(org, (model_s*)pSnowModel);
+		if (pTemp)
+		{
+			// don't die when animation is ended
+			pTemp->flags |= (FTENT_SPRANIMATELOOP | FTENT_COLLIDEWORLD | FTENT_CLIENTCUSTOM);
+			pTemp->die = gEngfuncs.GetClientTime() + 15.0f;
+			pTemp->callback = EV_Smoke_FadeOut;
+			pTemp->entity.curstate.fuser3 = gEngfuncs.GetClientTime(); // start fading instantly
+			pTemp->entity.curstate.fuser4 = gEngfuncs.GetClientTime(); // entity creation time
+
+			pTemp->entity.curstate.rendermode = kRenderTransAdd;
+			pTemp->entity.curstate.renderamt = 200;
+			pTemp->entity.curstate.rendercolor.r = 255;
+			pTemp->entity.curstate.rendercolor.g = 255;
+			pTemp->entity.curstate.rendercolor.b = 255;
+			pTemp->entity.curstate.scale = 1.0f;
+
+			// make it floating in the air
+			pTemp->entity.baseline.origin.x = RANDOM_LONG(-5, 5);
+			pTemp->entity.baseline.origin.y = RANDOM_LONG(-5, 5);
+			pTemp->entity.baseline.origin.z = RANDOM_LONG(-5, 5);
+			pTemp->entity.baseline.angles.x = RANDOM_LONG(-100, 100);
+			pTemp->entity.baseline.angles.y = RANDOM_LONG(-100, 100);
+			pTemp->entity.baseline.renderamt = 36;
+		}
+	}
+}
+
+DECLARE_EVENT(MolotovExplo)
+{
+	float flRadius = args->fparam1;
+	float flDuration = args->fparam2;
+	Vector vecOrigin = args->origin, vecEnd, vecSrc;
+	int iPointContents = CONTENTS_EMPTY;
+	pmtrace_t tr;
+	int iModelIndex = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/VFX/fire3.spr");
+	TEMPENTITY* pTemp = nullptr;
+
+	dlight_t* te = gEngfuncs.pEfxAPI->CL_AllocDlight(0);
+	te->origin = args->origin;
+	te->radius = flRadius;
+	te->color.r = 255;
+	te->color.g = 102;
+	te->color.b = 0;
+	te->die = gEngfuncs.GetClientTime() + flDuration + RANDOM_FLOAT(0.5, 1);	// extend it a little bit.
+
+	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(false, true);
+	gEngfuncs.pEventAPI->EV_PushPMStates();
+	gEngfuncs.pEventAPI->EV_SetSolidPlayers(-1);	// ignore monsters.
+	gEngfuncs.pEventAPI->EV_SetTraceHull(2);
+
+	for (int i = 0; i < int(flRadius / 10.0f); i++)
+	{
+		vecOrigin = args->origin;
+		vecOrigin.x += RANDOM_FLOAT(-flRadius / 2.0f, flRadius / 2.0f);
+		vecOrigin.y += RANDOM_FLOAT(-flRadius / 2.0f, flRadius / 2.0f);
+
+		if (gEngfuncs.PM_PointContents(vecOrigin, &iPointContents) != CONTENTS_EMPTY)
+			vecOrigin[2] += (vecOrigin - args->origin).Length2D();
+
+		vecEnd = vecOrigin - Vector(0, 0, 9999);
+		gEngfuncs.pEventAPI->EV_PlayerTrace(vecOrigin, vecEnd, PM_WORLD_ONLY, -1, &tr);
+
+		if (gEngfuncs.PM_PointContents(tr.endpos, &iPointContents) != CONTENTS_EMPTY)
+			continue;
+
+		// back up our candidate.
+		vecSrc = tr.endpos;
+
+		gEngfuncs.pEventAPI->EV_PlayerTrace(Vector(tr.endpos.x, tr.endpos.y, Q_max(args->origin.z, tr.endpos.z)), Vector(args->origin.x, args->origin.y, Q_max(args->origin.z, tr.endpos.z)), PM_WORLD_ONLY, -1, &tr);
+		if (tr.fraction < 1.0f)	// not visible.
+			continue;
+
+		// rise a little bit.
+		vecSrc.z += RANDOM_FLOAT(40, 60);
+
+		pTemp = gEngfuncs.pEfxAPI->R_DefaultSprite(vecSrc, iModelIndex, 10);
+		pTemp->entity.curstate.rendermode = kRenderTransAdd;
+		pTemp->entity.curstate.renderfx = kRenderFxNone;
+		pTemp->entity.curstate.renderamt = 190;
+		pTemp->entity.curstate.scale = gEngfuncs.pfnRandomFloat(0.7, 2);
+		pTemp->entity.curstate.frame = gEngfuncs.pfnRandomLong(0, pTemp->entity.model->numframes / 2);
+		pTemp->die = gEngfuncs.GetClientTime() + 99999.0;
+		pTemp->flags = (FTENT_SPRCYCLE | FTENT_CLIENTCUSTOM);
+		pTemp->callback = EV_FlameDeath;
+		pTemp->entity.curstate.fuser1 = gEngfuncs.GetClientTime() + flDuration;	// the death time.
+		pTemp->entity.curstate.iuser1 = TRUE;	// this is a flame SPR.
+	}
+
+	// pop here, we don't have any trace use later.
+	gEngfuncs.pEventAPI->EV_PopPMStates();
+
+	iModelIndex = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/steam1.spr");
+	int iMax = int(flRadius * flRadius * M_PI / 2500.0f);
+
+	for (int i = 0; i < iMax / 4; i++)
+	{
+		vecSrc = args->origin + Vector(RANDOM_FLOAT(-flRadius / 2.0f, flRadius / 2.0f), RANDOM_FLOAT(-flRadius / 2.0f, flRadius / 2.0f), RANDOM_FLOAT(140, 175));
+
+		pTemp = gEngfuncs.pEfxAPI->R_DefaultSprite(vecSrc, iModelIndex, 10);
+		pTemp->entity.curstate.rendermode = kRenderTransAlpha;
+		pTemp->entity.curstate.renderfx = kRenderFxNone;
+		pTemp->entity.curstate.rendercolor.r = 20;
+		pTemp->entity.curstate.rendercolor.g = 20;
+		pTemp->entity.curstate.rendercolor.b = 20;
+		pTemp->entity.curstate.renderamt = 190;
+		pTemp->entity.curstate.scale = gEngfuncs.pfnRandomFloat(3.5, 4.5);
+		pTemp->entity.curstate.frame = gEngfuncs.pfnRandomLong(0, pTemp->entity.model->numframes / 2);
+		pTemp->die = gEngfuncs.GetClientTime() + 99999.0;
+		pTemp->flags = (FTENT_SPRCYCLE | FTENT_CLIENTCUSTOM);
+		pTemp->callback = EV_FlameDeath;
+		pTemp->entity.curstate.fuser1 = gEngfuncs.GetClientTime() + flDuration;
+	}
 }
 
 DECLARE_EVENT(DecalReset)
 {
+	int decalnum = (int)(gEngfuncs.pfnGetCvarFloat("r_decals"));
 
+	for (int i = 0; i < decalnum; i++)
+		gEngfuncs.pEfxAPI->R_DecalRemoveAll(i);
+
+	g_flRoundTime = gEngfuncs.GetClientTime();
 }
 
 DECLARE_EVENT(Vehicle)
@@ -1657,7 +1913,7 @@ DECLARE_EVENT(FireCM901)
 	EV_HLDM_FireBullets(idx,
 		forward, right, up,
 		1, vecSrc, forward,
-		vSpread, CM901_EFFECTIVE_RANGE, g_rgItemInfo[WEAPON_CM901].m_iAmmoType,
+		vSpread, CM901_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_CM901].m_iAmmoType,
 		CM901_PENETRATION);
 }
 
@@ -1692,6 +1948,8 @@ void Events_Init(void)
 
 	HOOK_EVENT(createexplo, CreateExplo);
 	HOOK_EVENT(createsmoke, CreateSmoke);
+	HOOK_EVENT(CryoExplo, CryoExplo);
+	HOOK_EVENT(Molotov, MolotovExplo);
 	HOOK_EVENT(decal_reset, DecalReset);
 	HOOK_EVENT(vehicle, Vehicle);
 

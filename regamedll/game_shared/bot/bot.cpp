@@ -451,7 +451,7 @@ void CBot::PrintIfWatched(char *format, ...) const
 	}
 }
 
-ActiveGrenade::ActiveGrenade(int weaponID, CGrenade *grenadeEntity)
+ActiveGrenade::ActiveGrenade(EquipmentIdType weaponID, CGrenade *grenadeEntity)
 {
 	m_id = weaponID;
 	m_entity = grenadeEntity;
@@ -461,7 +461,7 @@ ActiveGrenade::ActiveGrenade(int weaponID, CGrenade *grenadeEntity)
 
 void ActiveGrenade::OnEntityGone()
 {
-	if (m_id == WEAPON_SMOKEGRENADE)
+	if (m_id == EQP_SMOKEGRENADE)
 	{
 		// smoke lingers after grenade is gone
 		const float smokeLingerTime = 4.0f;

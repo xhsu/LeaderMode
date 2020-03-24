@@ -158,7 +158,6 @@ void WeaponsPrecache()
 	UTIL_PrecacheOtherWeapon(WEAPON_ANACONDA);
 
 	// knife
-	UTIL_PrecacheOtherWeapon(WEAPON_KNIFE);
 	BasicKnife::Precache();
 
 	UTIL_PrecacheOtherWeapon(WEAPON_GLOCK18);
@@ -168,9 +167,6 @@ void WeaponsPrecache()
 
 	PRECACHE_MODEL(THROWABLE_VIEW_MODEL);
 	PRECACHE_SOUND("items/ammopickup1.wav");	// grenade purchasing SFX.
-	UTIL_PrecacheOtherWeapon(WEAPON_FLASHBANG);
-	UTIL_PrecacheOtherWeapon(WEAPON_HEGRENADE);
-	UTIL_PrecacheOtherWeapon(WEAPON_SMOKEGRENADE);
 
 	// container for dropped deathmatch weapons
 	UTIL_PrecacheOther("weaponbox");
@@ -273,7 +269,7 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 
 	if (!FNullEnt(pPlayer))
 	{
-		if (pPlayer->m_rgpPlayerItems[g_rgItemInfo[iId].m_iSlot] != nullptr)	// this player already got one in this slot!
+		if (pPlayer->m_rgpPlayerItems[g_rgWpnInfo[iId].m_iSlot] != nullptr)	// this player already got one in this slot!
 			return nullptr;
 	}
 
@@ -330,11 +326,11 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 	m_lstWeapons.emplace_back(p);
 
 	p->m_iId = iId;
-	p->m_iClip = iClip ? iClip : g_rgItemInfo[iId].m_iMaxClip;
+	p->m_iClip = iClip ? iClip : g_rgWpnInfo[iId].m_iMaxClip;
 	p->m_bitsFlags = bitsFlags;
-	p->m_pItemInfo = &g_rgItemInfo[iId];
-	p->m_pAmmoInfo = &g_rgAmmoInfo[g_rgItemInfo[iId].m_iAmmoType];
-	p->m_iPrimaryAmmoType = g_rgItemInfo[iId].m_iAmmoType;
+	p->m_pItemInfo = &g_rgWpnInfo[iId];
+	p->m_pAmmoInfo = &g_rgAmmoInfo[g_rgWpnInfo[iId].m_iAmmoType];
+	p->m_iPrimaryAmmoType = g_rgWpnInfo[iId].m_iAmmoType;
 	p->m_iSecondaryAmmoType = AMMO_NONE;
 	p->m_pPlayer = pPlayer;
 
@@ -368,7 +364,7 @@ bool CBaseWeapon::AddToPlayer(CBasePlayer* pPlayer)
 	if (FNullEnt(pPlayer))
 		return false;
 
-	if (pPlayer->m_rgpPlayerItems[g_rgItemInfo[m_iId].m_iSlot] != nullptr)	// this player already got one in this slot!
+	if (pPlayer->m_rgpPlayerItems[g_rgWpnInfo[m_iId].m_iSlot] != nullptr)	// this player already got one in this slot!
 		return false;
 
 	m_pWeaponBox = nullptr;	// make the weaponbox disown me.
@@ -451,7 +447,7 @@ void CBaseWeapon::PostFrame()
 			if (*m_pPlayer->GetGrenadeInventoryPointer(m_pPlayer->m_iUsingGrenadeId))
 				(*m_pPlayer->GetGrenadeInventoryPointer(m_pPlayer->m_iUsingGrenadeId))--;
 
-			m_pPlayer->Radio("%!MRAD_FIREINHOLE", "#Fire_in_the_hole");
+			m_pPlayer->ThrowGrenade(m_pPlayer->m_iUsingGrenadeId);
 			m_bitsFlags |= WPNSTATE_QT_EXIT;
 			m_pPlayer->m_flNextAttack = flTime;
 		}
@@ -483,7 +479,6 @@ void CBaseWeapon::PostFrame()
 			}
 
 			m_bitsFlags |= WPNSTATE_QT_SHOULD_SPAWN;
-			m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 			SendWeaponAnim(iAnim);
 			m_pPlayer->m_flNextAttack = flTime;
 		}
@@ -598,7 +593,7 @@ void CBaseWeapon::PostFrame()
 bool CBaseWeapon::Melee(void)
 {
 	// you just.. can't do this.
-	if (m_iId == WEAPON_KNIFE || m_bitsFlags & (WPNSTATE_MELEE | WPNSTATE_QUICK_THROWING))
+	if (m_bitsFlags & (WPNSTATE_MELEE | WPNSTATE_QUICK_THROWING))
 		return false;
 
 	if (m_bInZoom)

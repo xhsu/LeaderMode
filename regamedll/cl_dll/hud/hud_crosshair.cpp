@@ -77,10 +77,10 @@ int CHudCrosshair::VidInit(void)
 
 		for (int j = 0; j < LAST_WEAPON; j++)
 		{
-			if (!g_rgItemInfo[j].m_pszInternalName || g_rgItemInfo[j].m_pszInternalName[0] == '\0')
+			if (!g_rgWpnInfo[j].m_pszInternalName || g_rgWpnInfo[j].m_pszInternalName[0] == '\0')
 				continue;
 
-			p = gHUD::GetSpriteFromList(pList, g_rgItemInfo[j].m_pszInternalName, 640, i);
+			p = gHUD::GetSpriteFromList(pList, g_rgWpnInfo[j].m_pszInternalName, 640, i);
 
 			if (p)
 			{
@@ -342,13 +342,10 @@ int CHudCrosshair::DrawCrosshair(float flTime, WeaponIdType weaponid)
 	switch (weaponid)
 	{
 	case WEAPON_ANACONDA:
-	case WEAPON_HEGRENADE:
-	case WEAPON_SMOKEGRENADE:
 	case WEAPON_FIVESEVEN:
 	case WEAPON_USP:
 	case WEAPON_GLOCK18:
 	case WEAPON_AWP:
-	case WEAPON_FLASHBANG:
 	case WEAPON_DEAGLE:
 	{
 		iDistance = 8;
@@ -385,7 +382,6 @@ int CHudCrosshair::DrawCrosshair(float flTime, WeaponIdType weaponid)
 	}
 
 	case WEAPON_MP7A1:
-	case WEAPON_KNIFE:
 	case WEAPON_P90:
 	{
 		iDistance = 7;
@@ -465,12 +461,6 @@ int CHudCrosshair::DrawCrosshair(float flTime, WeaponIdType weaponid)
 				case WEAPON_SCARL:
 				{
 					flLimitSpeed = 140;
-					break;
-				}
-
-				case WEAPON_KNIFE:
-				{
-					flLimitSpeed = 170;
 					break;
 				}
 

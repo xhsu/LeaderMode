@@ -501,12 +501,11 @@ void CCSBot::Update()
 
 		if (doToss)
 		{
-			ClearPrimaryAttack();
+			// quick throw only requires release button.
+			if (m_pActiveItem)
+				m_pActiveItem->QuickThrowRelease();
+
 			m_isWaitingToTossGrenade = false;
-		}
-		else
-		{
-			PrimaryAttack();
 		}
 	}
 	else

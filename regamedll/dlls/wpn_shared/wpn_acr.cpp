@@ -43,7 +43,7 @@ void CACR::SecondaryAttack()
 
 	if (!g_vecGunOfsGoal.LengthSquared())
 	{
-		g_vecGunOfsGoal = Vector(-18.0f, -20.0f, 2.0f);
+		g_vecGunOfsGoal = Vector(-18.08f, -20.0f, 2.18f);
 		gHUD::m_iFOV = 75;	// allow clients to predict the zoom.
 	}
 	else

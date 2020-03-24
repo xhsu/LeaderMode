@@ -1040,7 +1040,6 @@ BOOL CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 				flRatio *= 1.25;
 				break;
 			case WEAPON_M200:
-			case WEAPON_KNIFE:
 				flRatio *= 1.7;
 				break;
 			case WEAPON_QBZ95:
@@ -2513,15 +2512,6 @@ CBaseEntity *EXT_FUNC CBasePlayer::DropShield(bool bDeploy)
 
 	if (m_pActiveItem)
 	{
-		if (m_pActiveItem->m_iId == WEAPON_HEGRENADE || m_pActiveItem->m_iId == WEAPON_FLASHBANG || m_pActiveItem->m_iId == WEAPON_SMOKEGRENADE)
-		{
-			if (m_rgAmmo[m_pActiveItem->m_iPrimaryAmmoType] <= 0)
-				CSGameRules()->GetNextBestWeapon(this, m_pActiveItem);
-		}
-	}
-
-	if (m_pActiveItem)
-	{
 		// WPN_UNDONE
 		//if (m_pActiveItem->m_flStartThrow != 0.0f)
 			//m_pActiveItem->Holster();
@@ -2562,35 +2552,44 @@ bool CBasePlayer::HasShield()
 	return m_bOwnsShield;
 }
 
-CGrenade *CBasePlayer::ThrowGrenade(WeaponIdType iId, Vector& vecSrc, Vector& vecThrow, float time, unsigned short usEvent)
+CGrenade *CBasePlayer::ThrowGrenade(EquipmentIdType iId)
 {
 	CGrenade* pGrenade = nullptr;
 
-	// special gr first.
-	if (iId == WEAPON_HEGRENADE && m_iRoleType == Role_Sharpshooter)	// frost grenade
-	{
-		pGrenade = CGrenade::FrostGrenade(this);
-	}
-	else if (iId == WEAPON_SMOKEGRENADE && m_iRoleType == Role_Medic)	// healing grenade
-	{
-		pGrenade = CGrenade::HealingGrenade(pev, vecSrc, vecThrow, time, usEvent);
-	}
-	else if (iId == WEAPON_SMOKEGRENADE && m_iRoleType == Role_MadScientist)
-	{
-		pGrenade = CGrenade::NerveGasGrenade(pev, vecSrc, vecThrow, time, usEvent);
-	}
-	else if (iId == WEAPON_HEGRENADE && m_iRoleType == Role_Arsonist)
-	{
-		pGrenade = CGrenade::IncendiaryGrenade(pev, vecSrc, vecThrow);
-	}
+	// radio everyone.
+	Radio("%!MRAD_FIREINHOLE", "#Fire_in_the_hole");
+
+	Vector angThrow = pev->v_angle + pev->punchangle;
+
+	if (angThrow.pitch < 0)
+		angThrow.pitch = -10 + angThrow.pitch * ((90 - 10) / 90.0f);
 	else
+		angThrow.pitch = -10 + angThrow.pitch * ((90 + 10) / 90.0f);
+
+	float flVel = (90.0f - angThrow.pitch) * 6.0f;
+
+	// cap the speed.
+	if (flVel > 750.0f)
+		flVel = 750.0f;
+
+	UTIL_MakeVectors(angThrow);
+
+	Vector vecSrc = pev->origin + pev->view_ofs + gpGlobals->v_forward * 16.0f;
+	Vector vecThrow = gpGlobals->v_forward * flVel + pev->velocity;
+
+	// player "shoot" animation
+	SetAnimation(PLAYER_ATTACK1);
+
+	// translate EQP_ to grenade function call.
+	switch (iId)
 	{
-		switch (iId)
-		{
-		case WEAPON_HEGRENADE:    pGrenade = CGrenade::ShootTimed2(pev, vecSrc, vecThrow, time, m_iTeam, usEvent); break;
-		case WEAPON_FLASHBANG:    pGrenade = CGrenade::ShootTimed(pev, vecSrc, vecThrow, time); break;
-		case WEAPON_SMOKEGRENADE: pGrenade = CGrenade::ShootSmokeGrenade(pev, vecSrc, vecThrow, time, usEvent); break;
-		}
+	case EQP_HEGRENADE:	pGrenade = CGrenade::HEGrenade(pev, vecSrc, vecThrow, m_iTeam); break;
+	case EQP_FLASHBANG:    pGrenade = CGrenade::Flashbang(pev, vecSrc, vecThrow); break;
+	case EQP_SMOKEGRENADE: pGrenade = CGrenade::SmokeGrenade(pev, vecSrc, vecThrow); break;
+	case EQP_CRYOGRENADE: pGrenade = CGrenade::Cryogrenade(this); break;
+	case EQP_INCENDIARY_GR: pGrenade = CGrenade::IncendiaryGrenade(pev, vecSrc, vecThrow); break;
+	case EQP_HEALING_GR: pGrenade = CGrenade::HealingGrenade(pev, vecSrc, vecThrow); break;
+	case EQP_GAS_GR: pGrenade = CGrenade::NerveGasGrenade(pev, vecSrc, vecThrow); break;
 	}
 
 	OnGrenadeThrew(iId, pGrenade);
@@ -4782,6 +4781,14 @@ void CBasePlayer::SelectItem(const char *pstr)
 
 void CBasePlayer::SelectLastItem()
 {
+	// this action can cancel grenade throw.
+	if (m_pActiveItem && m_pActiveItem->m_bitsFlags & WPNSTATE_QUICK_THROWING)
+	{
+		m_pActiveItem->m_bitsFlags |= WPNSTATE_QT_EXIT;
+		m_flNextAttack = 0;
+		return;
+	}
+
 	if (m_pActiveItem && !m_pActiveItem->CanHolster())
 		return;
 
@@ -5230,12 +5237,10 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 		case 255:
 		{
 			// Give weapons
-			for (int wpnid = WEAPON_NONE + 1; wpnid < MAX_WEAPONS; wpnid++)
+			for (int wpnid = WEAPON_NONE + 1; wpnid < LAST_WEAPON; wpnid++)
 			{
 				// unwanted candidates
-				if (wpnid == WEAPON_UNUSED
-					|| wpnid == WEAPON_C4
-					|| wpnid == WEAPON_KNIFE)
+				if (wpnid == WEAPON_C4)
 					continue;
 
 				// If by some case the weapon got invalid
@@ -7001,7 +7006,7 @@ const char *CBasePlayer::PickPrimaryCareerTaskWeapon()
 
 	for (auto pTask : *TheCareerTasks->GetTasks())
 	{
-		if (pTask->IsComplete() || pTask->GetWeaponId() == WEAPON_HEGRENADE)
+		if (pTask->IsComplete())
 			continue;
 
 		if (!IsPrimaryWeaponId(pTask->GetWeaponId()))
@@ -7072,7 +7077,7 @@ const char *CBasePlayer::PickSecondaryCareerTaskWeapon()
 
 	for (auto pTask : *TheCareerTasks->GetTasks())
 	{
-		if (pTask->IsComplete() || pTask->GetWeaponId() == WEAPON_HEGRENADE)
+		if (pTask->IsComplete())
 			continue;
 
 		if (!IsSecondaryWeaponId(pTask->GetWeaponId()))
@@ -7160,7 +7165,7 @@ const char *CBasePlayer::PickGrenadeKillWeaponString()
 	bool foundOne = false;
 	for (auto pTask : *TheCareerTasks->GetTasks())
 	{
-		if (!pTask->IsComplete() && pTask->GetWeaponId() == WEAPON_HEGRENADE)
+		if (!pTask->IsComplete())
 		{
 			foundOne = true;
 			break;
@@ -7175,6 +7180,103 @@ const char *CBasePlayer::PickGrenadeKillWeaponString()
 
 void CBasePlayer::ParseAutoBuy()
 {
+	WeaponIdType iRecommandedPrim = WEAPON_NONE, iRecommandedSed = WEAPON_NONE;
+
+	switch (m_iRoleType)
+	{
+	case Role_Commander:
+	case Role_Godfather:
+	case Role_LeadEnforcer:
+		iRecommandedPrim = WEAPON_QBZ95;	// UNDONE, should be cm901.
+		break;
+
+	case Role_SWAT:
+	case Role_Medic:
+	case Role_Assassin:
+		iRecommandedPrim = WEAPON_MP7A1;
+		break;
+
+	case Role_Breacher:
+	case Role_Arsonist:
+		iRecommandedPrim = WEAPON_KSG12;
+		break;
+
+	case Role_MadScientist:
+		iRecommandedPrim = WEAPON_UMP45;
+		break;
+
+	case Role_Sharpshooter:	// we recommand sharpshooter use DEAGLE.
+	default:
+		iRecommandedPrim = WEAPON_NONE;
+		break;
+	}
+
+	// analysis best 2nd weapon from prim weapon.
+	if (m_rgpPlayerItems[PRIMARY_WEAPON_SLOT])
+	{
+		switch (m_rgpPlayerItems[PRIMARY_WEAPON_SLOT]->m_pItemInfo->m_iClassType)
+		{
+		case WEAPONCLASS_SUBMACHINEGUN:
+		case WEAPONCLASS_MACHINEGUN:
+		case WEAPONCLASS_RIFLE:
+			iRecommandedSed = WEAPON_DEAGLE;
+			break;
+
+		case WEAPONCLASS_SHOTGUN:
+		case WEAPONCLASS_SNIPERRIFLE:
+			iRecommandedSed = WEAPON_GLOCK18;
+			break;
+
+		default:
+			iRecommandedSed = WEAPON_NONE;
+			break;
+		}
+	}
+	else
+	{
+		switch (m_iRoleType)
+		{
+		case Role_Commander:
+		case Role_SWAT:
+		case Role_Sharpshooter:
+		case Role_Medic:
+		case Role_Godfather:
+		case Role_LeadEnforcer:
+		case Role_MadScientist:
+			iRecommandedSed = WEAPON_DEAGLE;
+			break;
+
+		case Role_Breacher:
+		case Role_Arsonist:
+			iRecommandedSed = WEAPON_GLOCK18;
+			break;
+
+		case Role_Assassin:
+			iRecommandedSed = WEAPON_USP;	// because his skill.
+			break;
+
+		default:
+			iRecommandedSed = WEAPON_NONE;
+			break;
+		}
+	}
+
+	if (!m_rgpPlayerItems[PRIMARY_WEAPON_SLOT])
+		BuyWeapon(this, iRecommandedPrim);
+
+	BuyAmmo(this, PRIMARY_WEAPON_SLOT);
+
+	if (!m_rgpPlayerItems[PISTOL_SLOT])
+		BuyWeapon(this, iRecommandedSed);
+
+	BuyAmmo(this, PISTOL_SLOT);
+
+	BuyEquipment(this, EQP_KEVLAR);
+	BuyEquipment(this, EQP_ASSAULT_SUIT);
+	BuyEquipment(this, CSGameRules()->SelectProperGrenade(this));
+
+	if (m_iAccount > 12000)	// too much money? I can fix that for you!
+		BuyEquipment(this, EQP_NVG);
 }
 
 void CBasePlayer::ParseRebuy()
@@ -7197,7 +7299,7 @@ void CBasePlayer::SaveRebuy()
 
 	for (int i = 0; i < MAX_ITEM_TYPES; i++)
 	{
-		if (m_rgpPlayerItems[i]->m_iId != WEAPON_KNIFE)
+		if (m_rgpPlayerItems[i])
 			m_lstRebuy.emplace_back(m_rgpPlayerItems[i]->m_iId);
 	}
 
@@ -7207,7 +7309,7 @@ void CBasePlayer::SaveRebuy()
 	for (auto iId : m_lstRebuy)
 	{
 		Q_strlcat(szText, "/y[/g");
-		Q_strlcat(szText, g_rgItemInfo[iId].m_pszExternalName);
+		Q_strlcat(szText, g_rgWpnInfo[iId].m_pszExternalName);
 		Q_strlcat(szText, "/y]/t ");
 	}
 
@@ -7812,7 +7914,7 @@ void CBasePlayer::CheckItemAccessibility()
 		if (pWeapon->IsDead())
 			continue;
 
-		if (g_rgRoleWeaponsAccessibility[m_iRoleType][pWeapon->m_iId] == WPN_F && pWeapon->m_iId != WEAPON_KNIFE)
+		if (g_rgRoleWeaponsAccessibility[m_iRoleType][pWeapon->m_iId] == WPN_F)
 		{
 			AddAccount(GetWeaponInfo(pWeapon->m_iId)->m_iCost / 2, RT_SOLD_ITEM);
 			UTIL_PrintChatColor(this, REDCHAT, "/gRefunding/y improper item /t%s/y for /g%d$/y.", pWeapon->m_pItemInfo->m_pszExternalName, GetWeaponInfo(pWeapon->m_iId)->m_iCost / 2);
@@ -8000,7 +8102,7 @@ void CBasePlayer::OnHurtingAnotherPlayer(CBasePlayer* pVictim, entvars_t* pevInf
 	}
 }
 
-void CBasePlayer::OnGrenadeThrew(WeaponIdType iId, CGrenade* pGrenade)
+void CBasePlayer::OnGrenadeThrew(EquipmentIdType iId, CGrenade* pGrenade)
 {
 	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
 	{

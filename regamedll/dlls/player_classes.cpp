@@ -26,20 +26,20 @@ const char* g_rgszRoleNames[ROLE_COUNT] =
 const int g_rgRoleWeaponsAccessibility[ROLE_COUNT][LAST_WEAPON] =
 {
 	//					      0                                  5                                  10                                 15                                 20                                 25                                 30
-	//					      NONE   G18C   USP    ANACO  DEAGLE FN57   P99    KSG12  STR    MP7A1  PM9    MP5    UMP45  P90    CM901  QBZ95  AK47   M4A1   SCARL  ACR    M200   M14    AWP    SVD    MK46   HE		FB     SG     ERR    C4     KNIFE
-	/*Role_UNASSIGNED*/		{ WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F },
+	//					      NONE   G18C   USP    ANACO  DEAGLE FN57   P99    KSG12  STR    MP7A1  PM9    MP5    UMP45  P90    CM901  QBZ95  AK47   M4A1   SCARL  ACR    M200   M14    AWP    SVD    MK46   C4
+	/*Role_UNASSIGNED*/		{ WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_F },
 
-	/*Role_Commander = 1*/	{ WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_P, WPN_A, WPN_P, WPN_P, WPN_A, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F },
-	/*Role_SWAT*/			{ WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_F, WPN_F, WPN_F, WPN_F, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_D, WPN_D, WPN_F, WPN_F, WPN_F },
-	/*Role_Blaster*/		{ WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_D, WPN_D, WPN_A, WPN_A, WPN_A, WPN_A, WPN_D, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_D, WPN_D, WPN_D, WPN_F, WPN_F, WPN_F },
-	/*Role_Sharpshooter*/	{ WPN_F, WPN_A, WPN_A, WPN_D, WPN_D, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_P, WPN_P, WPN_P, WPN_P, WPN_P, WPN_P, WPN_D, WPN_A, WPN_D, WPN_A, WPN_F, WPN_P, WPN_F, WPN_A, WPN_F, WPN_F, WPN_F },
-	/*Role_Medic = 5*/		{ WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_F, WPN_F, WPN_F, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_P, WPN_F, WPN_F, WPN_F },
+	/*Role_Commander = 1*/	{ WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_P, WPN_A, WPN_P, WPN_P, WPN_F },
+	/*Role_SWAT*/			{ WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_F, WPN_F, WPN_F, WPN_F, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F },
+	/*Role_Blaster*/		{ WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_D, WPN_D, WPN_A, WPN_A, WPN_A, WPN_A, WPN_D, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F },
+	/*Role_Sharpshooter*/	{ WPN_F, WPN_A, WPN_A, WPN_D, WPN_D, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_P, WPN_P, WPN_P, WPN_P, WPN_P, WPN_P, WPN_D, WPN_A, WPN_D, WPN_A, WPN_F, WPN_F },
+	/*Role_Medic = 5*/		{ WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_F, WPN_F, WPN_F, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F },
 
-	/*Role_Godfather = 6*/	{ WPN_F, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_P, WPN_A, WPN_P, WPN_P, WPN_A, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F },
-	/*Role_LeadEnforcer*/	{ WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_F, WPN_F, WPN_F, WPN_F, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F },
-	/*Role_MadScientist*/	{ WPN_F, WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_F, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_P, WPN_F, WPN_F, WPN_F },
-	/*Role_Assassin*/		{ WPN_F, WPN_A, WPN_D, WPN_A, WPN_A, WPN_A, WPN_A, WPN_F, WPN_F, WPN_D, WPN_A, WPN_A, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_D, WPN_P, WPN_F, WPN_F, WPN_F, WPN_F, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F },
-	/*Role_Arsonist = 10*/	{ WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_D, WPN_D, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_P, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_P, WPN_F, WPN_A, WPN_F, WPN_F, WPN_F },
+	/*Role_Godfather = 6*/	{ WPN_F, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_P, WPN_A, WPN_P, WPN_P, WPN_F },
+	/*Role_LeadEnforcer*/	{ WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_F, WPN_F, WPN_F, WPN_F, WPN_A, WPN_F },
+	/*Role_MadScientist*/	{ WPN_F, WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_F, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F },
+	/*Role_Assassin*/		{ WPN_F, WPN_A, WPN_D, WPN_A, WPN_A, WPN_A, WPN_A, WPN_F, WPN_F, WPN_D, WPN_A, WPN_A, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_D, WPN_P, WPN_F, WPN_F, WPN_F, WPN_F },
+	/*Role_Arsonist = 10*/	{ WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_D, WPN_D, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_P, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F },
 };
 
 const int g_rgRoleEquipmentsAccessibility[ROLE_COUNT][EQP_COUNT] =
@@ -512,8 +512,8 @@ bool CSkillBulletproof::Execute()
 	}
 
 	// give grenades
-	m_pPlayer->GiveNamedItem(GetWeaponInfo(WEAPON_FLASHBANG)->m_pszInternalName);
-	m_pPlayer->GiveNamedItem(GetWeaponInfo(WEAPON_SMOKEGRENADE)->m_pszInternalName);
+	m_pPlayer->GiveAmmo(99, GetAmmoIdOfEquipment(EQP_FLASHBANG));
+	m_pPlayer->GiveAmmo(99, GetAmmoIdOfEquipment(EQP_SMOKEGRENADE));
 
 	// give vest + helmet
 	m_pPlayer->GiveNamedItem("item_assaultsuit");
@@ -933,7 +933,7 @@ void CSkillExplosiveBullets::OnPlayerDeath(CBasePlayer* pKiller)
 		}
 
 		int sparkCount = RANDOM_LONG(1, 3);
-		for (int i = 0; i < sparkCount; i++)
+		for (int j = 0; j < sparkCount; j++)
 			CBaseEntity::Create("spark_shower", pVictim->pev->origin, tr.vecPlaneNormal, nullptr);
 	}
 }
@@ -986,18 +986,9 @@ bool CSkillInfiniteGrenade::Execute()
 		if (pPlayer == m_pPlayer)	// not again...
 			continue;
 
-		if (g_rgRoleWeaponsAccessibility[pPlayer->m_iRoleType][WEAPON_HEGRENADE] != WPN_F)
-			pPlayer->GiveNamedItem(GetWeaponInfo(WEAPON_HEGRENADE)->m_pszInternalName);
-
-		if (g_rgRoleWeaponsAccessibility[pPlayer->m_iRoleType][WEAPON_FLASHBANG] != WPN_F)
-			pPlayer->GiveNamedItem(GetWeaponInfo(WEAPON_FLASHBANG)->m_pszInternalName);
-
-		if (g_rgRoleWeaponsAccessibility[pPlayer->m_iRoleType][WEAPON_SMOKEGRENADE] != WPN_F)
-			pPlayer->GiveNamedItem(GetWeaponInfo(WEAPON_SMOKEGRENADE)->m_pszInternalName);
-
-		pPlayer->GiveAmmo(1, AMMO_HEGrenade);
-		pPlayer->GiveAmmo(1, AMMO_Flashbang);
-		pPlayer->GiveAmmo(1, AMMO_SmokeGrenade);
+		EquipmentIdType iId = CSGameRules()->SelectProperGrenade(pPlayer);
+		if (g_rgRoleEquipmentsAccessibility[pPlayer->m_iRoleType][iId] != WPN_F)	// although this is wired, but I still have to ask.
+			pPlayer->GiveAmmo(99, GetAmmoIdOfEquipment(iId));	// give the max number.
 	}
 
 	EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, ACTIVATION_SFX, VOL_NORM, ATTN_NONE);
@@ -1044,12 +1035,12 @@ bool CSkillInfiniteGrenade::Terminate()
 	return true;
 }
 
-void CSkillInfiniteGrenade::OnGrenadeThrew(WeaponIdType iId, CGrenade* pGrenade)
+void CSkillInfiniteGrenade::OnGrenadeThrew(EquipmentIdType iId, CGrenade* pGrenade)
 {
 	if (!m_bUsingSkill)
 		return;
 
-	m_pPlayer->m_rgAmmo[GetWeaponInfo(iId)->m_iAmmoType]++;
+	(*m_pPlayer->GetGrenadeInventoryPointer(iId))++;
 
 	pGrenade->pev->dmgtime = gpGlobals->time + 9999.0f;
 	pGrenade->SetTouch(&CGrenade::ExplodeTouch);

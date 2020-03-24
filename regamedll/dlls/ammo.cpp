@@ -28,9 +28,13 @@ const AmmoInfo g_rgAmmoInfo[AMMO_MAXTYPE] =
 	{AMMO_9mm,			"9mm",			60,		30,		20,		21,		800.0f},
 
 	// Equipments
-	{AMMO_Flashbang,	"Flashbang",	2,		1,		FLASHBANG_PRICE,	0,		0.0f},
 	{AMMO_HEGrenade,	"HEGrenade",	1,		1,		HEGRENADE_PRICE,	0,		0.0f},
+	{AMMO_Flashbang,	"Flashbang",	2,		1,		FLASHBANG_PRICE,	0,		0.0f},
 	{AMMO_SmokeGrenade,	"SmokeGrenade",	1,		1,		SMOKEGRENADE_PRICE,	0,		0.0f},
+	{AMMO_Cryogrenade,	"Cryogrenade",	1,		1,		HEGRENADE_PRICE * 2,	0,		0.0f},
+	{AMMO_Molotov,		"Molotov",		1,		1,		HEGRENADE_PRICE * 2,	0,		0.0f},
+	{AMMO_HealingGr,	"HealingGr",	1,		1,		SMOKEGRENADE_PRICE * 2,	0,		0.0f},
+	{AMMO_GasGrenade,	"GasGrenade",	1,		1,		SMOKEGRENADE_PRICE * 2,	0,		0.0f},
 	{AMMO_C4,			"C4",			1,		1,		0,		0,		0.0f},
 };
 
@@ -38,7 +42,7 @@ const AmmoInfo* GetAmmoInfo(const char* ammoName)
 {
 	if (ammoName)
 	{
-		for (int i = 0; i < MAX_WEAPONS; i++)
+		for (int i = 0; i < AMMO_MAXTYPE; i++)
 		{
 			if (!Q_stricmp(ammoName, g_rgAmmoInfo[i].m_pszName))
 				return &g_rgAmmoInfo[i];
@@ -65,6 +69,18 @@ AmmoIdType GetAmmoIdOfEquipment(EquipmentIdType iId)
 
 	case EQP_SMOKEGRENADE:
 		return AMMO_SmokeGrenade;
+
+	case EQP_CRYOGRENADE:
+		return AMMO_Cryogrenade;
+
+	case EQP_INCENDIARY_GR:
+		return AMMO_Molotov;
+
+	case EQP_HEALING_GR:
+		return AMMO_HealingGr;
+
+	case EQP_GAS_GR:
+		return AMMO_GasGrenade;
 
 	default:
 		return AMMO_NONE;

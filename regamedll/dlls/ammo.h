@@ -56,15 +56,19 @@ enum AmmoIdType
 	AMMO_9mm,
 
 	// Equipments
-	AMMO_Flashbang,
 	AMMO_HEGrenade,
+	AMMO_Flashbang,
 	AMMO_SmokeGrenade,
+	AMMO_Cryogrenade,
+	AMMO_Molotov,
+	AMMO_HealingGr,
+	AMMO_GasGrenade,
 	AMMO_C4,
 
 	// util valus.
 	AMMO_MAXTYPE,
-	AMMO_THROWABLE_START = AMMO_Flashbang,
-	AMMO_THROWABLE_END = AMMO_SmokeGrenade,
+	AMMO_THROWABLE_START = AMMO_HEGrenade,
+	AMMO_THROWABLE_END = AMMO_GasGrenade,
 };
 
 struct AmmoInfo

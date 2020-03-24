@@ -9,12 +9,13 @@ Created Date: Mar 13 2020
 class CGrenade : public CBaseMonster
 {
 public:
-	static const float FROST_GR_DAMAGE;
-	static const float FROST_GR_RADIUS;
-	static const float FROST_GR_EFTIME;
+	static const float CRYOGR_DAMAGE;
+	static const float CRYOGR_RADIUS;
+	static const float CRYOGR_EFTIME;
 
 public:
 	virtual void Spawn();
+	virtual void Precache();
 	virtual int Save(CSave& save);
 	virtual int Restore(CRestore& restore);
 	virtual int ObjectCaps() { return 0; }
@@ -23,15 +24,14 @@ public:
 	virtual void BounceSound();
 
 public:
-
-	static CGrenade* ShootTimed(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity, float time);
-	static CGrenade* ShootTimed2(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity, float time, int iTeam, unsigned short usEvent);
-	static CGrenade* ShootSmokeGrenade(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity, float time, unsigned short usEvent);
+	static CGrenade* Flashbang(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity);
+	static CGrenade* HEGrenade(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity, int iTeam);
+	static CGrenade* SmokeGrenade(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity);
 
 	// skill grenade
-	static CGrenade* FrostGrenade(CBasePlayer* pPlayer);
-	static CGrenade* HealingGrenade(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity, float time, unsigned short usEvent);
-	static CGrenade* NerveGasGrenade(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity, float time, unsigned short usEvent);
+	static CGrenade* Cryogrenade(CBasePlayer* pPlayer);
+	static CGrenade* HealingGrenade(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity);
+	static CGrenade* NerveGasGrenade(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity);
 	static CGrenade* IncendiaryGrenade(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity);
 
 public:
@@ -57,12 +57,14 @@ public:
 	void EXPORT TumbleThink();
 	void EXPORT SG_TumbleThink();
 
-	void EXPORT FrostTouch(CBaseEntity* pOther);
+	void EXPORT CryoTouch(CBaseEntity* pOther);
 	void EXPORT IncendiaryTouch(CBaseEntity* pOther);
 	void EXPORT IncendiaryThink();
 
 public:
 	static TYPEDESCRIPTION m_SaveData[];
+	static unsigned short m_rgusEvents[];
+	static const float m_rgflFuseTime[];
 
 	bool m_bJustBlew;
 	int m_iTeam;

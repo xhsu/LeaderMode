@@ -321,7 +321,7 @@ void BuyState::OnUpdate(CCSBot *me)
 			if (buyWeaponId != WEAPON_NONE)
 			{
 				BuyWeapon(me, buyWeaponId);
-				me->PrintIfWatched("Tried to buy preferred weapon %s.\n", buyWeaponId == WEAPON_SHIELDGUN ? "Tactical Shield" : g_rgItemInfo[buyWeaponId].m_pszExternalName);
+				me->PrintIfWatched("Tried to buy preferred weapon %s.\n", buyWeaponId == WEAPON_SHIELDGUN ? "Tactical Shield" : g_rgWpnInfo[buyWeaponId].m_pszExternalName);
 
 				isPreferredAllDisallowed = false;
 			}
@@ -403,7 +403,7 @@ void BuyState::OnUpdate(CCSBot *me)
 					}
 
 					BuyWeapon(me, stockPrimary[which]->iId);
-					me->PrintIfWatched("Tried to buy %s.\n", g_rgItemInfo[stockPrimary[which]->iId].m_pszExternalName);
+					me->PrintIfWatched("Tried to buy %s.\n", g_rgWpnInfo[stockPrimary[which]->iId].m_pszExternalName);
 				}
 			}
 		}

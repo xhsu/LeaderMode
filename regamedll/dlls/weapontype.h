@@ -28,7 +28,7 @@
 
 #pragma once
 
-#define MAX_WEAPONS			32
+#define ENGINE_WEAPON_LIMIT	32
 
 #define SLOT_NO				0
 #define PRIMARY_WEAPON_SLOT	1
@@ -82,15 +82,8 @@ enum WeaponIdType
 	// MACHINE GUNS
 	WEAPON_MK46,
 
-	// THROWABLES
-	WEAPON_HEGRENADE,
-	WEAPON_FLASHBANG,
-	WEAPON_SMOKEGRENADE,
-
 	//DISUSED
-	WEAPON_UNUSED,
 	WEAPON_C4,
-	WEAPON_KNIFE,
 
 	LAST_WEAPON,
 	WEAPON_SHIELDGUN = 99
@@ -153,7 +146,7 @@ enum WeaponClassType
 enum AmmoIdType;
 
 // one of the core data structure.
-struct ItemInfo
+struct WeaponInfo
 {
 	WeaponIdType	m_iId;
 	const char*		m_pszInternalName;
@@ -167,7 +160,7 @@ struct ItemInfo
 	int				m_iCost;
 };
 
-extern const ItemInfo g_rgItemInfo[LAST_WEAPON];
+extern const WeaponInfo g_rgWpnInfo[LAST_WEAPON];
 
 // equipments
 enum EquipmentIdType
@@ -213,7 +206,7 @@ bool IsPrimaryWeapon(int id);	// Return true if given weapon ID is a primary wea
 bool IsSecondaryWeapon(int id);	// Return true if given weapon ID is a secondary weapon
 bool IsGrenadeWeapon(int id);	// Return true if given weapon ID is a grenade
 bool IsSemiautoWeapon(WeaponIdType iId);	// Return true if this weapon is logically coded as a semi-auto weapon.
-const ItemInfo* GetWeaponInfo(int weaponID);
-const ItemInfo* GetWeaponInfo(const char* weaponName);
+const WeaponInfo* GetWeaponInfo(int weaponID);
+const WeaponInfo* GetWeaponInfo(const char* weaponName);
 
 inline WeaponClassType AliasToWeaponClass(const char* alias) { return WeaponIDToWeaponClass(AliasToWeaponID(alias)); }

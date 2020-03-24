@@ -128,7 +128,7 @@ public:
 
 public:
 	WeaponIdType	m_iId;
-	const ItemInfo*	m_pItemInfo;
+	const WeaponInfo*	m_pItemInfo;
 	const AmmoInfo*	m_pAmmoInfo;
 	float			m_flNextPrimaryAttack;
 	float			m_flNextSecondaryAttack;

@@ -31,6 +31,7 @@ Vector g_vPlayerVelocity;
 float g_flPlayerSpeed;
 int g_iWeaponFlags;
 int g_iWaterLevel;
+float g_flRoundTime = 0;
 
 extra_player_info_t	g_PlayerExtraInfo[MAX_PLAYERS]; // additional player info sent directly to the client.dll
 
@@ -661,3 +662,73 @@ cl_entity_t* HUD_GetUserEntity2(int index)
 	return NULL;
 }
 
+///////////////////////////////
+// CUSTOM VFX FOR TEMPENTITY //
+///////////////////////////////
+
+void EV_CS16Client_KillEveryRound(TEMPENTITY* te, float frametime, float current_time)
+{
+	if (g_flRoundTime > te->entity.curstate.fuser4)
+	{
+		// Mark it die on next TempEntUpdate
+		te->die = 0.0f;
+		// Set null renderamt, so it will be invisible now
+		// Also it will die immediately, if FTEMP_FADEOUT was set
+		te->entity.curstate.renderamt = 0;
+	}
+}
+
+void EV_Smoke_FadeOut(struct tempent_s* te, float frametime, float currenttime)
+{
+	if (te->entity.curstate.renderamt > 0 && currenttime >= te->entity.curstate.fuser3)
+	{
+		te->entity.curstate.renderamt = 255.0f - (currenttime - te->entity.curstate.fuser3) * te->entity.baseline.renderamt;
+
+		if (te->entity.curstate.renderamt < 0)
+			te->entity.curstate.renderamt = 0;
+	}
+
+	EV_CS16Client_KillEveryRound(te, frametime, currenttime);
+}
+
+void EV_FlameDeath(struct tempent_s* ent, float frametime, float currenttime)
+{
+	if (ent->entity.curstate.fuser1 > gEngfuncs.GetClientTime())	// fuser1 is the death time.
+		return;
+
+	ent->flags &= ~FTENT_CLIENTCUSTOM;
+	ent->flags |= FTENT_FADEOUT;
+	ent->entity.curstate.framerate = ent->fadeSpeed = 12;
+	ent->die = gEngfuncs.GetClientTime() + ((ent->entity.model->numframes - ent->entity.curstate.frame) / ent->entity.curstate.framerate);
+
+	// randomize smoke cloud position
+	Vector org(ent->entity.origin);
+	org.x += RANDOM_FLOAT(-100.0f, 100.0f);
+	org.y += RANDOM_FLOAT(-100.0f, 100.0f);
+	org.z += 30;
+
+	// post-smoke VFX.
+	const model_t* pGasModel = gEngfuncs.GetSpritePointer(gEngfuncs.pfnSPR_Load("sprites/gas_puff_01.spr"));
+	TEMPENTITY* pTemp = gEngfuncs.pEfxAPI->CL_TempEntAlloc(org, (model_s*)pGasModel);
+	if (pTemp)
+	{
+		// don't die when animation is ended
+		pTemp->flags |= (FTENT_SPRANIMATELOOP | FTENT_COLLIDEWORLD | FTENT_CLIENTCUSTOM);
+		pTemp->die = gEngfuncs.GetClientTime() + 5.0f;
+		pTemp->callback = EV_Smoke_FadeOut;
+		pTemp->entity.curstate.fuser3 = gEngfuncs.GetClientTime() - 10.0f; // start fading instantly
+		pTemp->entity.curstate.fuser4 = gEngfuncs.GetClientTime(); // entity creation time
+
+		pTemp->entity.curstate.rendermode = kRenderTransAlpha;	// MoE and most clients are wrong, we should use kRenderTransAlpha here...
+		pTemp->entity.curstate.renderamt = 200;
+		pTemp->entity.curstate.rendercolor.r = 75;
+		pTemp->entity.curstate.rendercolor.g = 75;
+		pTemp->entity.curstate.rendercolor.b = 75;
+		pTemp->entity.curstate.scale = 5.0f;
+
+		// make it move slowly
+		pTemp->entity.baseline.origin.x = RANDOM_LONG(-5, 5);
+		pTemp->entity.baseline.origin.y = RANDOM_LONG(-5, 5);
+		pTemp->entity.baseline.renderamt = 18;
+	}
+}

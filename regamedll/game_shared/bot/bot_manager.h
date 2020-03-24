@@ -39,18 +39,18 @@ class CGrenade;
 class ActiveGrenade
 {
 public:
-	ActiveGrenade(int weaponID, CGrenade *grenadeEntity);
+	ActiveGrenade(EquipmentIdType weaponID, CGrenade *grenadeEntity);
 
 	void OnEntityGone();
 	bool IsValid() const;
 
 	bool IsEntity(CGrenade *grenade) const { return (grenade == m_entity) ? true : false; }
-	int GetID() const { return m_id; }
+	EquipmentIdType GetID() const { return m_id; }
 	const Vector *GetDetonationPosition() const { return &m_detonationPosition; }
 	const Vector *GetPosition() const;
 
 private:
-	int m_id;
+	EquipmentIdType m_id;
 	CGrenade *m_entity;
 	Vector m_detonationPosition;
 	float m_dieTimestamp;
@@ -84,7 +84,7 @@ public:
 public:
 	const char *GetNavMapFilename() const;										// return the filename for this map's "nav" file
 
-	void AddGrenade(int type, CGrenade *grenade);								// add an active grenade to the bot's awareness
+	void AddGrenade(EquipmentIdType type, CGrenade *grenade);								// add an active grenade to the bot's awareness
 	void RemoveGrenade(CGrenade *grenade);										// the grenade entity in the world is going away
 	void ValidateActiveGrenades();												// destroy any invalid active grenades
 	void DestroyAllGrenades();

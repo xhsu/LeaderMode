@@ -158,10 +158,8 @@ void AttackState::OnUpdate(CCSBot *me)
 	auto *pWeapon = me->m_pActiveItem;
 	if (pWeapon)
 	{
-		if (pWeapon->m_iId == WEAPON_C4 ||
-			pWeapon->m_iId == WEAPON_HEGRENADE ||
-			pWeapon->m_iId == WEAPON_FLASHBANG ||
-			pWeapon->m_iId == WEAPON_SMOKEGRENADE)
+		// item to avoid.
+		if (pWeapon->m_iId == WEAPON_C4)
 		{
 			me->EquipBestWeapon();
 		}

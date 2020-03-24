@@ -486,8 +486,13 @@ void CCSBot::EquipKnife()
 // Return true if we have a grenade in our inventory
 bool CCSBot::HasGrenade() const
 {
-	auto *pGrenade = (m_rgpPlayerItems[GRENADE_SLOT]);
-	return pGrenade != nullptr;
+	for (int i = AMMO_THROWABLE_START; i <= AMMO_THROWABLE_END; i++)
+	{
+		if (m_rgAmmo[i] > 0)
+			return true;
+	}
+
+	return false;
 }
 
 // Equip a grenade, return false if we cant
@@ -502,14 +507,20 @@ bool CCSBot::EquipGrenade(bool noSmoke)
 
 	if (HasGrenade())
 	{
-		auto *pGrenade = m_rgpPlayerItems[GRENADE_SLOT];
-		if (pGrenade)
+		m_iUsingGrenadeId = EQP_NONE;
+		ResetUsingEquipment();	// help bot choose grenade.
+
+		if (m_iUsingGrenadeId)
 		{
-			if (noSmoke && pGrenade->m_iId == WEAPON_SMOKEGRENADE)
+			if (noSmoke && m_iUsingGrenadeId == EQP_SMOKEGRENADE)
 				return false;
 
-			SelectItem(pGrenade->m_pItemInfo->m_pszInternalName);
-			return true;
+			if (m_pActiveItem)
+			{
+				// start quickthrow for bot.
+				m_pActiveItem->QuickThrowStart(m_iUsingGrenadeId);
+				return true;
+			}
 		}
 	}
 
@@ -519,7 +530,7 @@ bool CCSBot::EquipGrenade(bool noSmoke)
 // Returns true if we have knife equipped
 bool CCSBot::IsUsingKnife() const
 {
-	if (m_pActiveItem && m_pActiveItem->m_iId == WEAPON_KNIFE)
+	if (m_pActiveItem && m_pActiveItem->m_bitsFlags & WPNSTATE_MELEE)
 		return true;
 
 	return false;
@@ -540,9 +551,7 @@ bool CCSBot::IsUsingGrenade() const
 	if (!m_pActiveItem)
 		return false;
 
-	if (m_pActiveItem->m_iId == WEAPON_SMOKEGRENADE
-		|| m_pActiveItem->m_iId == WEAPON_FLASHBANG
-		|| m_pActiveItem->m_iId == WEAPON_HEGRENADE)
+	if (m_pActiveItem->m_bitsFlags & WPNSTATE_QUICK_THROWING)
 		return true;
 
 	return false;
@@ -550,7 +559,7 @@ bool CCSBot::IsUsingGrenade() const
 
 bool CCSBot::IsUsingHEGrenade() const
 {
-	if (m_pActiveItem && m_pActiveItem->m_iId == WEAPON_HEGRENADE)
+	if (IsUsingGrenade() && m_iUsingGrenadeId == EQP_HEGRENADE)
 		return true;
 
 	return false;

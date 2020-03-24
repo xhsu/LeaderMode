@@ -285,6 +285,7 @@ void CWorld::Precache()
 	CBaseSkill::Precache();
 
 	// other entities' precache.
+	UTIL_PrecacheOther("grenade");
 	UTIL_PrecacheOther("ice_cube");
 	UTIL_PrecacheOther("healing_smoke_centre");
 	UTIL_PrecacheOther("poisoned_smoke_centre");

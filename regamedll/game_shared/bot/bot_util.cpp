@@ -640,26 +640,25 @@ bool IsGameEventAudible(GameEventType event, CBaseEntity *pEntity, CBaseEntity *
 		switch (pPlayer->m_pActiveItem->m_iId)
 		{
 		// silent "firing"
-		case WEAPON_HEGRENADE:
-		case WEAPON_SMOKEGRENADE:
-		case WEAPON_FLASHBANG:
 		case WEAPON_SHIELDGUN:
 		case WEAPON_C4:
 			return false;
+
 		// quiet
-		case WEAPON_KNIFE:
 		case WEAPON_MP7A1:
 		case WEAPON_M14EBR:
 		case WEAPON_M200:
 		case WEAPON_USP:
 			*range = ShortRange;
 			break;
+
 		// loud
 		case WEAPON_AWP:
 		case WEAPON_SVD:
 		case WEAPON_DEAGLE:
 			*range = 99999.0f;
 			break;
+
 		// normal
 		default:
 			*range = NormalRange;
