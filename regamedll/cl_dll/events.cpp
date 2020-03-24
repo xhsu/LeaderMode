@@ -1713,7 +1713,7 @@ DECLARE_EVENT(CryoExplo)
 		if (pTemp)
 		{
 			// don't die when animation is ended
-			pTemp->flags |= (FTENT_SPRANIMATELOOP | FTENT_COLLIDEWORLD | FTENT_CLIENTCUSTOM);
+			pTemp->flags |= (FTENT_ROTATE | FTENT_SPRANIMATELOOP | FTENT_COLLIDEWORLD | FTENT_CLIENTCUSTOM);
 			pTemp->die = gEngfuncs.GetClientTime() + 15.0f;
 			pTemp->callback = EV_Smoke_FadeOut;
 			pTemp->entity.curstate.fuser3 = gEngfuncs.GetClientTime(); // start fading instantly

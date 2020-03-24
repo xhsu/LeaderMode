@@ -54,4 +54,9 @@ public:
 	float m_flAlpha;
 	Phase m_iPhase;
 	WeaponIdType m_iLastWpnId;
+
+	int m_hClipFont;
+	int m_hAmmoFont;
+	float m_rgflFontAlpha[MAX_ITEM_TYPES];
+	Vector2D m_rgvecFontCoord[MAX_ITEM_TYPES];	// UNDONE
 };

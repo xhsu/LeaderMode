@@ -74,6 +74,12 @@ int CHudWeaponList::VidInit(void)
 	Q_memset(&m_rgiWeapons, NULL, sizeof(m_rgiWeapons));
 	m_bitsFlags &= ~HUD_ACTIVE;
 
+	// get font for clip/ammo display.
+	m_hAmmoFont = gFontFuncs.CreateFont();
+	gFontFuncs.AddGlyphSetToFont(m_hAmmoFont, "Blackadder ITC", 36, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0xFFFF);
+	m_hClipFont = gFontFuncs.CreateFont();
+	gFontFuncs.AddGlyphSetToFont(m_hClipFont, "Forte", 48, FW_BOLD, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0xFFFF);
+
 	return 1;
 }
 
@@ -174,7 +180,10 @@ int CHudWeaponList::Draw(float flTime)
 	// DRAW.
 	int r, g, b;
 	Vector2D vecAmmoBarCoord, vecDiff;
-	float flFullHeight, flCurHeight;
+	Vector2D vecAmmoTextCoord, vecClipTextCoord;
+	int iTextWidth = 0, iTextHeight = 0;
+	wchar_t wszText[16];
+	float flCardHeight, flCurHeight;
 	CBaseWeapon* pWeapon;
 	for (int i = 0; i < MAX_ITEM_TYPES; i++)
 	{
@@ -187,21 +196,57 @@ int CHudWeaponList::Draw(float flTime)
 		vecDiff = m_rgvecDestCoord[i] - m_rgvecCurCoord[i];
 		m_rgvecCurCoord[i] += vecDiff * gHUD::m_flTimeDelta * WEAPONLIST_DRIFT_SPEED;
 
+		// teleport if it's so close.
 		if (vecDiff.Length() <= 0.01f)
 			m_rgvecCurCoord[i] = m_rgvecDestCoord[i];
 
-		// ammo bar on the side.
+		// we should get this anyway.
+		flCardHeight = m_rgprcList[i]->bottom - m_rgprcList[i]->top;
+
+		// ammo bar & text
 		if (pWeapon->m_iPrimaryAmmoType > AMMO_NONE && pWeapon->m_iPrimaryAmmoType < AMMO_MAXTYPE)
 		{
-			flFullHeight = m_rgprcList[i]->bottom - m_rgprcList[i]->top;
-			flCurHeight = (float(gPseudoPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType]) / float(pWeapon->m_pAmmoInfo->m_iMax)) * flFullHeight;
-			vecAmmoBarCoord = m_rgvecCurCoord[i] + Vector2D(-AMMOBAR_WIDTH, flFullHeight - flCurHeight);
+			// calculate alpha for this item first.
+			flTargetAlpha = pWeapon == g_pCurWeapon ? 255.0f : 0.0f;
+			m_rgflFontAlpha[i] += (flTargetAlpha - m_rgflFontAlpha[i]) * gHUD::m_flTimeDelta * WEAPONLIST_DRIFT_SPEED;
+
+			// ammo bar on the side.
+			flCurHeight = (float(gPseudoPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType]) / float(pWeapon->m_pAmmoInfo->m_iMax)) * flCardHeight;
+			vecAmmoBarCoord = m_rgvecCurCoord[i] + Vector2D(-AMMOBAR_WIDTH, flCardHeight - flCurHeight);
 
 			UnpackRGB(r, g, b, gPseudoPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType] ? RGB_YELLOWISH : RGB_REDISH);
-			gEngfuncs.pfnFillRGBA(vecAmmoBarCoord.x, m_rgvecCurCoord[i].y, AMMOBAR_WIDTH, flFullHeight, r, g, b, 64);
+			gEngfuncs.pfnFillRGBA(vecAmmoBarCoord.x, m_rgvecCurCoord[i].y, AMMOBAR_WIDTH, flCardHeight, r, g, b, 64);
 
 			UnpackRGB(r, g, b, gPseudoPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType] >= pWeapon->m_pItemInfo->m_iMaxClip ? RGB_GREENISH : RGB_REDISH);
 			gEngfuncs.pfnFillRGBA(vecAmmoBarCoord.x, vecAmmoBarCoord.y, AMMOBAR_WIDTH, flCurHeight, r, g, b, 255);
+
+			// ammo text.
+			_snwprintf(wszText, sizeof(wszText), L"%d", gPseudoPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType]);
+			gFontFuncs.GetTextSize(pWeapon->m_pItemInfo->m_iMaxClip == WEAPON_NOCLIP ? m_hClipFont : m_hAmmoFont, wszText, &iTextWidth, &iTextHeight);
+			vecAmmoTextCoord = m_rgvecCurCoord[i] + Vector2D(-AMMOBAR_WIDTH - iTextWidth - WEAPONLIST_GAP, (flCardHeight - iTextHeight) / 2);
+
+			UnpackRGB(r, g, b, gPseudoPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType] ? 0xFFFFFF : RGB_REDISH);
+			gFontFuncs.DrawSetTextFont(pWeapon->m_pItemInfo->m_iMaxClip == WEAPON_NOCLIP ? m_hClipFont : m_hAmmoFont);	// if this weapon is directly using ammo, then we should treat ammo as clip.
+			gFontFuncs.DrawSetTextPos(vecAmmoTextCoord.x, vecAmmoTextCoord.y);
+			gFontFuncs.DrawSetTextColor(r, g, b, m_rgflFontAlpha[i]);
+			gFontFuncs.DrawPrintText(wszText);
+
+			// clip text
+			if (pWeapon->m_pItemInfo->m_iMaxClip != WEAPON_NOCLIP)	// we must have a clip to do so.
+			{
+				_snwprintf(wszText, sizeof(wszText), L"%d", pWeapon->m_iClip);
+				gFontFuncs.GetTextSize(m_hClipFont, wszText, &iTextWidth, &iTextHeight);
+
+				// don't reset the coord, we need to recalculate based on it!
+				vecAmmoTextCoord.x -= iTextWidth + WEAPONLIST_GAP * 5;
+				vecAmmoTextCoord.y = m_rgvecCurCoord[i].y + (flCardHeight - iTextHeight) / 2;
+
+				UnpackRGB(r, g, b, pWeapon->m_iClip ? 0xFFFFFF : RGB_REDISH);
+				gFontFuncs.DrawSetTextFont(m_hClipFont);
+				gFontFuncs.DrawSetTextPos(vecAmmoTextCoord.x, vecAmmoTextCoord.y);
+				gFontFuncs.DrawSetTextColor(r, g, b, m_rgflFontAlpha[i]);
+				gFontFuncs.DrawPrintText(wszText);
+			}
 		}
 
 		// draw the item card.

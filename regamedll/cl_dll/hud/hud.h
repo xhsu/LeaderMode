@@ -244,6 +244,7 @@ namespace gHUD
 	extern int m_iKeyBits;
 	extern int m_iWeaponBits;
 	extern bool m_bPlayerDead;
+	extern int m_hCambriaFont;
 
 	extern SCREENINFO m_scrinfo;
 

@@ -10,9 +10,6 @@
     <Filter Include="pm_shared">
       <UniqueIdentifier>{4b08bc65-9b20-4224-a668-97ee8d720cef}</UniqueIdentifier>
     </Filter>
-    <Filter Include="cl_dll\hud">
-      <UniqueIdentifier>{8d35b26b-86bc-4932-a315-97465148eb04}</UniqueIdentifier>
-    </Filter>
     <Filter Include="game_shared">
       <UniqueIdentifier>{1f8e6670-929c-49ba-a3c4-47cfd978e4f2}</UniqueIdentifier>
     </Filter>
@@ -27,6 +24,12 @@
     </Filter>
     <Filter Include="cl_dll\Graph">
       <UniqueIdentifier>{73ee3683-7138-4eb4-a873-bafc41d8319b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cl_dll\HUD">
+      <UniqueIdentifier>{8d35b26b-86bc-4932-a315-97465148eb04}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cl_dll\Fonts">
+      <UniqueIdentifier>{8730108c-e79b-4d8c-a2f0-2c36c95d88e6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -64,7 +67,7 @@
       <Filter>cl_dll</Filter>
     </ClCompile>
     <ClCompile Include="..\hud\hud.cpp">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClCompile>
     <ClCompile Include="..\cl_util.cpp">
       <Filter>cl_dll</Filter>
@@ -76,73 +79,73 @@
       <Filter>cl_dll</Filter>
     </ClCompile>
     <ClCompile Include="..\hud\hud_spectator.cpp">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClCompile>
     <ClCompile Include="..\interpolation.cpp">
       <Filter>cl_dll</Filter>
     </ClCompile>
     <ClCompile Include="..\hud\hud_ammo.cpp">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClCompile>
     <ClCompile Include="..\..\game_shared\shared_util.cpp">
       <Filter>game_shared</Filter>
     </ClCompile>
     <ClCompile Include="..\hud\hud_health.cpp">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClCompile>
     <ClCompile Include="..\hud\hud_geiger.cpp">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClCompile>
     <ClCompile Include="..\hud\hud_battery.cpp">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClCompile>
     <ClCompile Include="..\hud\hud_train.cpp">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClCompile>
     <ClCompile Include="..\hud\hud_flashlight.cpp">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClCompile>
     <ClCompile Include="..\hud\hud_message.cpp">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClCompile>
     <ClCompile Include="..\hud\hud_status_bar.cpp">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClCompile>
     <ClCompile Include="..\hud\hud_death_notice.cpp">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClCompile>
     <ClCompile Include="..\hud\hud_say_text.cpp">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClCompile>
     <ClCompile Include="..\hud\hud_menu.cpp">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClCompile>
     <ClCompile Include="..\hud\hud_nightvision.cpp">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClCompile>
     <ClCompile Include="..\hud\hud_text_message.cpp">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClCompile>
     <ClCompile Include="..\hud\hud_round_timer.cpp">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClCompile>
     <ClCompile Include="..\hud\hud_money.cpp">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClCompile>
     <ClCompile Include="..\hud\hud_head_name.cpp">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClCompile>
     <ClCompile Include="..\hud\hud_radar.cpp">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClCompile>
     <ClCompile Include="..\hud\hud_status_icons.cpp">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClCompile>
     <ClCompile Include="..\hud\hud_scenario_status.cpp">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClCompile>
     <ClCompile Include="..\hud\hud_progress_bar.cpp">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClCompile>
     <ClCompile Include="..\corpse.cpp">
       <Filter>cl_dll</Filter>
@@ -160,7 +163,7 @@
       <Filter>cl_dll</Filter>
     </ClCompile>
     <ClCompile Include="..\hud\hud_vgui2print.cpp">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClCompile>
     <ClCompile Include="..\weapons.cpp">
       <Filter>cl_dll</Filter>
@@ -190,13 +193,13 @@
       <Filter>cl_dll\Graph</Filter>
     </ClCompile>
     <ClCompile Include="..\hud\hud_sniperscope.cpp">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClCompile>
     <ClCompile Include="..\hud\hud_crosshair.cpp">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClCompile>
     <ClCompile Include="..\hud\hud_weaponlist.cpp">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClCompile>
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_anaconda.cpp">
       <Filter>dlls\wpn_shared</Filter>
@@ -220,7 +223,22 @@
       <Filter>dlls\wpn_shared</Filter>
     </ClCompile>
     <ClCompile Include="..\hud\hud_grenade.cpp">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Fonts\DrawFonts.cpp">
+      <Filter>cl_dll\Fonts</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Fonts\FontAmalgam.cpp">
+      <Filter>cl_dll\Fonts</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Fonts\FontManager.cpp">
+      <Filter>cl_dll\Fonts</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Fonts\FontTextureCache.cpp">
+      <Filter>cl_dll\Fonts</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Fonts\Win32Font.cpp">
+      <Filter>cl_dll\Fonts</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -273,7 +291,7 @@
       <Filter>cl_dll</Filter>
     </ClInclude>
     <ClInclude Include="..\hud\hud.h">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClInclude>
     <ClInclude Include="..\message.h">
       <Filter>cl_dll</Filter>
@@ -282,73 +300,73 @@
       <Filter>cl_dll</Filter>
     </ClInclude>
     <ClInclude Include="..\hud\hud_spectator.h">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClInclude>
     <ClInclude Include="..\interpolation.h">
       <Filter>cl_dll</Filter>
     </ClInclude>
     <ClInclude Include="..\hud\hud_ammo.h">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClInclude>
     <ClInclude Include="..\..\game_shared\shared_util.h">
       <Filter>game_shared</Filter>
     </ClInclude>
     <ClInclude Include="..\hud\hud_health.h">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClInclude>
     <ClInclude Include="..\hud\hud_geiger.h">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClInclude>
     <ClInclude Include="..\hud\hud_battery.h">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClInclude>
     <ClInclude Include="..\hud\hud_train.h">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClInclude>
     <ClInclude Include="..\hud\hud_flashlight.h">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClInclude>
     <ClInclude Include="..\hud\hud_message.h">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClInclude>
     <ClInclude Include="..\hud\hud_status_bar.h">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClInclude>
     <ClInclude Include="..\hud\hud_death_notice.h">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClInclude>
     <ClInclude Include="..\hud\hud_say_text.h">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClInclude>
     <ClInclude Include="..\hud\hud_menu.h">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClInclude>
     <ClInclude Include="..\hud\hud_nightvision.h">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClInclude>
     <ClInclude Include="..\hud\hud_text_message.h">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClInclude>
     <ClInclude Include="..\hud\hud_round_timer.h">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClInclude>
     <ClInclude Include="..\hud\hud_money.h">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClInclude>
     <ClInclude Include="..\hud\hud_head_name.h">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClInclude>
     <ClInclude Include="..\hud\hud_radar.h">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClInclude>
     <ClInclude Include="..\hud\hud_status_icons.h">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClInclude>
     <ClInclude Include="..\hud\hud_scenario_status.h">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClInclude>
     <ClInclude Include="..\hud\hud_progress_bar.h">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClInclude>
     <ClInclude Include="..\corpse.h">
       <Filter>cl_dll</Filter>
@@ -363,7 +381,7 @@
       <Filter>cl_dll</Filter>
     </ClInclude>
     <ClInclude Include="..\hud\hud_vgui2print.h">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClInclude>
     <ClInclude Include="..\weapons.h">
       <Filter>cl_dll</Filter>
@@ -384,16 +402,31 @@
       <Filter>cl_dll\Graph</Filter>
     </ClInclude>
     <ClInclude Include="..\hud\hud_sniperscope.h">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClInclude>
     <ClInclude Include="..\hud\hud_crosshair.h">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClInclude>
     <ClInclude Include="..\hud\hud_weaponlist.h">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
     </ClInclude>
     <ClInclude Include="..\hud\hud_grenade.h">
-      <Filter>cl_dll\hud</Filter>
+      <Filter>cl_dll\HUD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Fonts\DrawFonts.h">
+      <Filter>cl_dll\Fonts</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Fonts\FontAmalgam.h">
+      <Filter>cl_dll\Fonts</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Fonts\FontManager.h">
+      <Filter>cl_dll\Fonts</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Fonts\FontTextureCache.h">
+      <Filter>cl_dll\Fonts</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Fonts\Win32Font.h">
+      <Filter>cl_dll\Fonts</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

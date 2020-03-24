@@ -20,6 +20,11 @@ int CHudAccountBalance::VidInit(void)
 	m_HUD_minus = gHUD::GetSpriteIndex("minus");
 	m_HUD_plus = gHUD::GetSpriteIndex("plus");
 
+	m_hNumberFont = gFontFuncs.CreateFont();
+	gFontFuncs.AddGlyphSetToFont(m_hNumberFont, "Viner Hand ITC", 36, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS|FONTFLAG_ADDITIVE, 0x0, 0xFFFF);
+	m_hSignFont = gFontFuncs.CreateFont();
+	gFontFuncs.AddGlyphSetToFont(m_hSignFont, "Viner Hand ITC", 48, FW_BOLD, 1, 0, FONTFLAG_ANTIALIAS | FONTFLAG_ADDITIVE, 0x0, 0xFFFF);
+
 	return 1;
 }
 
@@ -163,6 +168,30 @@ int CHudAccountBalance::Draw(float flTime)
 
 		gHUD::DrawHudNumber(x, y, abs(m_iAccountDelta), r1, g1, b1);
 	}
+
+	// draw version 2 here.
+	// get a posision below radar.
+	wchar_t wszText[64];
+	int iWidth, iHeight;
+	x = 10;
+	y = gHUD::m_Radar.GetRadarSize() + 10;
+
+	_snwprintf(wszText, charsmax(wszText), L"$ %d", m_iAccount);
+	gFontFuncs.GetTextSize(m_hSignFont, wszText, &iWidth, &iHeight);
+
+	UnpackRGB(r, g, b, 0xFFFFFF);
+	gFontFuncs.DrawSetTextFont(m_hSignFont);
+	gFontFuncs.DrawSetTextPos(x, y);
+	gFontFuncs.DrawSetTextColor(r, g, b, a);
+	gFontFuncs.DrawPrintText(wszText);
+
+	y += iHeight;
+	_snwprintf(wszText, charsmax(wszText), L"%d", m_iAccountDelta);
+
+	gFontFuncs.DrawSetTextFont(m_hNumberFont);
+	gFontFuncs.DrawSetTextPos(x, y);
+	gFontFuncs.DrawSetTextColor(r1, g1, b1, a1);
+	gFontFuncs.DrawPrintText(wszText);
 
 	return 1;
 }

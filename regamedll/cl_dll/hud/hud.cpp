@@ -81,6 +81,7 @@ namespace gHUD
 	int m_iKeyBits = 0;
 	int m_iWeaponBits = 0;
 	bool m_bPlayerDead = true;
+	int m_hCambriaFont = 0;
 
 	SCREENINFO m_scrinfo;
 
@@ -321,6 +322,10 @@ void gHUD::VidInit(void)
 	//GetClientVoiceHud()->VidInit();
 
 	m_iFontEngineHeight = VGUI_SURFACE->GetFontTall(font);
+
+	// custom font function set.
+	m_hCambriaFont = gFontFuncs.CreateFont();
+	gFontFuncs.AddGlyphSetToFont(m_hCambriaFont, "Cambria", 24, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0xFFFF);
 
 	// UNDONE
 	//if (gConfigs.bEnableClientUI)

@@ -136,6 +136,9 @@ Created Date: 05 Mar 2020
 // graphic stuff
 #include "Graph/dxt.h"
 
+// font stuff
+#include "Fonts/DrawFonts.h"
+
 // hud
 #include "hud/hud.h"
 #include "hud/hud_ammo.h"

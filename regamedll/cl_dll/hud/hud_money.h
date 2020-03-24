@@ -32,4 +32,7 @@ public:
 	bool m_bShowDelta;
 	int m_iBlinkCount;
 	float m_fBlinkTime;
+
+	int m_hNumberFont;
+	int m_hSignFont;
 };

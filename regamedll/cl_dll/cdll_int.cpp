@@ -174,6 +174,7 @@ void CL_DLLEXPORT HUD_Reset(void)
 void CL_DLLEXPORT HUD_Shutdown(void)
 {
 	gHUD::Shutdown();
+	gFontFuncs.Shutdown();
 }
 
 void CL_DLLEXPORT HUD_StudioEvent(const mstudioevent_s* event, const cl_entity_s* entity)
@@ -206,6 +207,7 @@ BOOL CL_DLLEXPORT HUD_VidInit(void)
 	g_pViewEnt = gEngfuncs.GetViewModel();
 
 	gHUD::VidInit();
+	gFontFuncs.Init();
 	return TRUE;
 }
 
