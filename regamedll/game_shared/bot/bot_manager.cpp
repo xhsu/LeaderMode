@@ -233,7 +233,7 @@ void CBotManager::OnEvent(GameEventType event, CBaseEntity *pEntity, CBaseEntity
 }
 
 // Add an active grenade to the bot's awareness
-void CBotManager::AddGrenade(int type, CGrenade *grenade)
+void CBotManager::AddGrenade(EquipmentIdType type, CGrenade *grenade)
 {
 	ActiveGrenade *ag = new ActiveGrenade(type, grenade);
 
@@ -301,7 +301,7 @@ bool CBotManager::IsInsideSmokeCloud(const Vector *pos)
 			iter++;
 		}
 
-		if (ag->GetID() == WEAPON_SMOKEGRENADE)
+		if (ag->GetID() == EQP_SMOKEGRENADE)
 		{
 			const Vector *smokeOrigin = ag->GetDetonationPosition();
 
@@ -345,7 +345,7 @@ bool CBotManager::IsLineBlockedBySmoke(const Vector *from, const Vector *to)
 			iter++;
 		}
 
-		if (ag->GetID() == WEAPON_SMOKEGRENADE)
+		if (ag->GetID() == EQP_SMOKEGRENADE)
 		{
 			const Vector *smokeOrigin = ag->GetDetonationPosition();
 

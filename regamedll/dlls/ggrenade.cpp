@@ -379,7 +379,7 @@ void CGrenade::SG_Detonate()
 	if (TheBots)
 	{
 		TheBots->OnEvent(EVENT_SMOKE_GRENADE_EXPLODED, CBaseEntity::Instance(pev->owner));
-		TheBots->AddGrenade(WEAPON_SMOKEGRENADE, this);
+		TheBots->AddGrenade(EQP_SMOKEGRENADE, this);
 	}
 
 	EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/sg_explode.wav", VOL_NORM, ATTN_NORM);

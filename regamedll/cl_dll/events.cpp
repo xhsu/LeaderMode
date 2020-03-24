@@ -1025,7 +1025,7 @@ DECLARE_EVENT(FireAK47)
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
-	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, AK47_EFFECTIVE_RANGE, g_rgItemInfo[WEAPON_AK47].m_iAmmoType, AK47_PENETRATION);
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, AK47_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_AK47].m_iAmmoType, AK47_PENETRATION);
 }
 
 DECLARE_EVENT(FireACR)
@@ -1076,7 +1076,7 @@ DECLARE_EVENT(FireACR)
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
-	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, ACR_EFFECTIVE_RANGE, g_rgItemInfo[WEAPON_ACR].m_iAmmoType, ACR_PENETRATION);
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, ACR_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_ACR].m_iAmmoType, ACR_PENETRATION);
 }
 
 DECLARE_EVENT(FireAWP)
@@ -1116,7 +1116,7 @@ DECLARE_EVENT(FireAWP)
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
-	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, AWP_EFFECTIVE_RANGE, g_rgItemInfo[WEAPON_AWP].m_iAmmoType, AWP_PENETRATION);
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, AWP_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_AWP].m_iAmmoType, AWP_PENETRATION);
 }
 
 DECLARE_EVENT(FireDEagle)
@@ -1175,7 +1175,7 @@ DECLARE_EVENT(FireDEagle)
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
-	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, DEAGLE_EFFECTIVE_RANGE, g_rgItemInfo[WEAPON_DEAGLE].m_iAmmoType, DEAGLE_PENETRATION);
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, DEAGLE_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_DEAGLE].m_iAmmoType, DEAGLE_PENETRATION);
 }
 
 DECLARE_EVENT(FireEliteLeft)
@@ -1234,7 +1234,7 @@ DECLARE_EVENT(FireQBZ95)
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
-	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, QBZ95_EFFECTIVE_RANGE, g_rgItemInfo[WEAPON_QBZ95].m_iAmmoType, QBZ95_PENETRATION);
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, QBZ95_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_QBZ95].m_iAmmoType, QBZ95_PENETRATION);
 }
 
 DECLARE_EVENT(Fire57)
@@ -1292,7 +1292,7 @@ DECLARE_EVENT(FireSVD)
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
-	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, SVD_EFFECTIVE_RANGE, g_rgItemInfo[WEAPON_SVD].m_iAmmoType, SVD_PENETRATION);
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, SVD_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_SVD].m_iAmmoType, SVD_PENETRATION);
 }
 
 DECLARE_EVENT(FireGALIL)
@@ -1351,7 +1351,7 @@ DECLARE_EVENT(FireKSG12)
 	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, KSG12_FIRE_SFX, 1.0, 0.48, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
 
 	Vector vecSrc = EV_GetGunPosition(args, origin);
-	EV_HLDM_FireBullets(idx, forward, right, up, KSG12_PROJECTILE_COUNT, vecSrc, forward, KSG12_CONE_VECTOR, KSG12_EFFECTIVE_RANGE, g_rgItemInfo[WEAPON_KSG12].m_iAmmoType, 1, shared_rand);
+	EV_HLDM_FireBullets(idx, forward, right, up, KSG12_PROJECTILE_COUNT, vecSrc, forward, KSG12_CONE_VECTOR, KSG12_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_KSG12].m_iAmmoType, 1, shared_rand);
 }
 
 DECLARE_EVENT(FireM4A1)
@@ -1410,7 +1410,7 @@ DECLARE_EVENT(FireAnaconda)
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
-	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, ANACONDA_EFFECTIVE_RANGE, g_rgItemInfo[WEAPON_ANACONDA].m_iAmmoType, ANACONDA_PENETRATION);
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, ANACONDA_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_ANACONDA].m_iAmmoType, ANACONDA_PENETRATION);
 }
 
 DECLARE_EVENT(FireP90)
@@ -1481,7 +1481,7 @@ DECLARE_EVENT(FireMP7A1)
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
-	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, MP7A1_EFFECTIVE_RANGE, g_rgItemInfo[WEAPON_MP7A1].m_iAmmoType, MP7A1_PENETRATION);
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, MP7A1_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_MP7A1].m_iAmmoType, MP7A1_PENETRATION);
 }
 
 DECLARE_EVENT(FireUMP45)
@@ -1554,7 +1554,7 @@ DECLARE_EVENT(FireUSP)
 	EV_HLDM_FireBullets(idx,
 		forward, right, up,
 		1, vecSrc, forward,
-		vSpread, USP_EFFECTIVE_RANGE, g_rgItemInfo[WEAPON_USP].m_iAmmoType,
+		vSpread, USP_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_USP].m_iAmmoType,
 		USP_PENETRATION);
 }
 
@@ -1913,7 +1913,7 @@ DECLARE_EVENT(FireCM901)
 	EV_HLDM_FireBullets(idx,
 		forward, right, up,
 		1, vecSrc, forward,
-		vSpread, CM901_EFFECTIVE_RANGE, g_rgItemInfo[WEAPON_CM901].m_iAmmoType,
+		vSpread, CM901_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_CM901].m_iAmmoType,
 		CM901_PENETRATION);
 }
 

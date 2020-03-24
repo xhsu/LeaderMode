@@ -1,6 +1,6 @@
 #include "precompiled.h"
 
-const ItemInfo g_rgItemInfo[LAST_WEAPON] =
+const WeaponInfo g_rgWpnInfo[LAST_WEAPON] =
 {
 	{WEAPON_NONE, "weapon_null", "AIR", AMMO_NONE, WEAPON_NOCLIP, SLOT_NO, ITEM_FLAG_NONE, -1, WEAPONCLASS_NONE, 0},
 
@@ -45,15 +45,8 @@ const ItemInfo g_rgItemInfo[LAST_WEAPON] =
 	{WEAPON_MK46,			"weapon_mk46",			"Mk.46 Mod.0",					AMMO_556NatoBox,	100,PRIMARY_WEAPON_SLOT,	ITEM_FLAG_NONE,			MACHINE_GUN_BASIC_WEIGHT + 1,	WEAPONCLASS_MACHINEGUN,		5750},
 	// RPD
 
-	// THROWABLES
-	{WEAPON_HEGRENADE,		"weapon_hegrenade",		"HE Grenade",					AMMO_HEGrenade,		-1,	GRENADE_SLOT,			ITEM_FLAG_EXHAUSTIBLE,	THROWABLE_BASIC_WEIGHT + 1,		WEAPONCLASS_GRENADE,		HEGRENADE_PRICE},
-	{WEAPON_FLASHBANG,		"weapon_flashbang",		"Flashbang",					AMMO_Flashbang,		-1,	GRENADE_SLOT,			ITEM_FLAG_EXHAUSTIBLE,	THROWABLE_BASIC_WEIGHT + 2,		WEAPONCLASS_GRENADE,		FLASHBANG_PRICE},
-	{WEAPON_SMOKEGRENADE,	"weapon_smokegrenade",	"Smoke Grenade",				AMMO_SmokeGrenade,	-1,	GRENADE_SLOT,			ITEM_FLAG_EXHAUSTIBLE,	THROWABLE_BASIC_WEIGHT + 3,		WEAPONCLASS_GRENADE,		SMOKEGRENADE_PRICE},
-
 	// DISUSED
-	{WEAPON_UNUSED, "", "", AMMO_NONE, WEAPON_NOCLIP, SLOT_NO, ITEM_FLAG_NONE, -1, WEAPONCLASS_NONE, 0},
-	{WEAPON_C4, "weapon_c4", "C4", AMMO_NONE, WEAPON_NOCLIP, SLOT_NO, ITEM_FLAG_NONE, -1, WEAPONCLASS_NONE, 0},	// C4
-	{WEAPON_KNIFE,			"weapon_knife",			"Seal Knife",					AMMO_NONE,			-1,	KNIFE_SLOT,				ITEM_FLAG_NONE,			MELEE_BASIC_WEIGHT,				WEAPONCLASS_KNIFE,			0},
+	{WEAPON_C4, "weapon_c4", "C4", AMMO_C4, WEAPON_NOCLIP, SLOT_NO, ITEM_FLAG_NONE, -1, WEAPONCLASS_NONE, 0},
 
 	//{LAST_WEAPON, nullptr, AMMO_NONE, WEAPON_NOCLIP, SLOT_NO, ITEM_FLAG_NONE, -1, 0},	// vest, should never use it.
 };
@@ -70,7 +63,7 @@ const EquipmentInfo g_rgEquipmentInfo[EQP_COUNT] =
 	{EQP_HEGRENADE,		"weapon_hegrenade",		"HE Grenade",			HEGRENADE_PRICE},
 	{EQP_FLASHBANG,		"weapon_flashbang",		"Flashbang",			FLASHBANG_PRICE},
 	{EQP_SMOKEGRENADE,	"weapon_smokegrenade",	"Smoke Grenade",		SMOKEGRENADE_PRICE},
-	{EQP_CRYOGRENADE,		"weapon_frostgrenade",	"Cryogrenade",			HEGRENADE_PRICE * 2},
+	{EQP_CRYOGRENADE,	"weapon_frostgrenade",	"Cryogrenade",			HEGRENADE_PRICE * 2},
 	{EQP_INCENDIARY_GR,	"weapon_incendiary_gr",	"Incendiary Grenade",	HEGRENADE_PRICE * 2},
 	{EQP_HEALING_GR,	"weapon_healing_gr",	"Healing Grenade",		SMOKEGRENADE_PRICE * 2},
 	{EQP_GAS_GR,		"weapon_gasgrenade",	"Nerve Gas Grenade",	SMOKEGRENADE_PRICE * 2},
@@ -86,7 +79,7 @@ WeaponIdType AliasToWeaponID(const char *alias)
 	{
 		for (int i = 0; i < LAST_WEAPON; i++)
 		{
-			if (!Q_stricmp(alias, g_rgItemInfo[i].m_pszExternalName))
+			if (!Q_stricmp(alias, g_rgWpnInfo[i].m_pszExternalName))
 				return WeaponIdType(i);
 		}
 	}
@@ -97,7 +90,7 @@ WeaponIdType AliasToWeaponID(const char *alias)
 // Given a weapon ID, return its alias
 const char* WeaponIDToAlias(int id)
 {
-	return g_rgItemInfo[id].m_pszExternalName;
+	return g_rgWpnInfo[id].m_pszExternalName;
 }
 
 const char* AliasToWeaponClassname(const char* alias)
@@ -106,8 +99,8 @@ const char* AliasToWeaponClassname(const char* alias)
 	{
 		for (int i = 0; i < LAST_WEAPON; i++)
 		{
-			if (!Q_stricmp(alias, g_rgItemInfo[i].m_pszExternalName))
-				return g_rgItemInfo[i].m_pszInternalName;
+			if (!Q_stricmp(alias, g_rgWpnInfo[i].m_pszExternalName))
+				return g_rgWpnInfo[i].m_pszInternalName;
 		}
 	}
 
@@ -116,7 +109,7 @@ const char* AliasToWeaponClassname(const char* alias)
 
 const char* WeaponIDToWeaponClassname(WeaponIdType id)
 {
-	return g_rgItemInfo[id].m_pszInternalName;
+	return g_rgWpnInfo[id].m_pszInternalName;
 }
 
 WeaponIdType WeaponClassnameToID(const char* classname)
@@ -125,8 +118,8 @@ WeaponIdType WeaponClassnameToID(const char* classname)
 	{
 		for (int i = 0; i < LAST_WEAPON; i++)
 		{
-			if (g_rgItemInfo[i].m_pszInternalName && !Q_stricmp(classname, g_rgItemInfo[i].m_pszInternalName))
-				return g_rgItemInfo[i].m_iId;
+			if (g_rgWpnInfo[i].m_pszInternalName && !Q_stricmp(classname, g_rgWpnInfo[i].m_pszInternalName))
+				return g_rgWpnInfo[i].m_iId;
 		}
 	}
 
@@ -135,25 +128,25 @@ WeaponIdType WeaponClassnameToID(const char* classname)
 
 WeaponClassType WeaponIDToWeaponClass(WeaponIdType id)
 {
-	return g_rgItemInfo[id].m_iClassType;
+	return g_rgWpnInfo[id].m_iClassType;
 }
 
 // Return true if given weapon ID is a primary weapon
 bool IsPrimaryWeapon(int id)
 {
-	return g_rgItemInfo[id].m_iSlot == PRIMARY_WEAPON_SLOT;
+	return g_rgWpnInfo[id].m_iSlot == PRIMARY_WEAPON_SLOT;
 }
 
 // Return true if given weapon ID is a secondary weapon
 bool IsSecondaryWeapon(int id)
 {
-	return g_rgItemInfo[id].m_iSlot == PISTOL_SLOT;
+	return g_rgWpnInfo[id].m_iSlot == PISTOL_SLOT;
 }
 
 // Return true if given weapon ID is a grenade
 bool IsGrenadeWeapon(int id)
 {
-	return g_rgItemInfo[id].m_iSlot == GRENADE_SLOT;
+	return g_rgWpnInfo[id].m_iSlot == GRENADE_SLOT;
 }
 
 constexpr int BITS_SEMIAUTO_WEAPON = ((1 << WEAPON_USP) | (1 << WEAPON_ANACONDA) | (1 << WEAPON_DEAGLE) | (1 << WEAPON_FIVESEVEN) | (1 << WEAPON_P99) | (1 << WEAPON_M14EBR) | (1 << WEAPON_SVD));
@@ -163,19 +156,19 @@ bool IsSemiautoWeapon(WeaponIdType iId)
 	return !!((1 << iId) & BITS_SEMIAUTO_WEAPON);
 }
 
-const ItemInfo* GetWeaponInfo(int weaponID)
+const WeaponInfo* GetWeaponInfo(int weaponID)
 {
-	return (weaponID > 0 && weaponID < LAST_WEAPON) ? &g_rgItemInfo[weaponID] : nullptr;
+	return (weaponID > 0 && weaponID < LAST_WEAPON) ? &g_rgWpnInfo[weaponID] : nullptr;
 }
 
-const ItemInfo* GetWeaponInfo(const char* weaponName)
+const WeaponInfo* GetWeaponInfo(const char* weaponName)
 {
 	if (weaponName)
 	{
 		for (int i = 0; i < LAST_WEAPON; i++)
 		{
-			if (g_rgItemInfo[i].m_pszInternalName && !Q_stricmp(weaponName, g_rgItemInfo[i].m_pszInternalName))
-				return &g_rgItemInfo[i];
+			if (g_rgWpnInfo[i].m_pszInternalName && !Q_stricmp(weaponName, g_rgWpnInfo[i].m_pszInternalName))
+				return &g_rgWpnInfo[i];
 		}
 	}
 

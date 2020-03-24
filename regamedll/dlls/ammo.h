@@ -67,8 +67,8 @@ enum AmmoIdType
 
 	// util valus.
 	AMMO_MAXTYPE,
-	AMMO_THROWABLE_START = AMMO_Flashbang,
-	AMMO_THROWABLE_END = AMMO_SmokeGrenade,
+	AMMO_THROWABLE_START = AMMO_HEGrenade,
+	AMMO_THROWABLE_END = AMMO_GasGrenade,
 };
 
 struct AmmoInfo

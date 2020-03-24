@@ -42,7 +42,7 @@ const AmmoInfo* GetAmmoInfo(const char* ammoName)
 {
 	if (ammoName)
 	{
-		for (int i = 0; i < MAX_WEAPONS; i++)
+		for (int i = 0; i < AMMO_MAXTYPE; i++)
 		{
 			if (!Q_stricmp(ammoName, g_rgAmmoInfo[i].m_pszName))
 				return &g_rgAmmoInfo[i];

@@ -1172,7 +1172,7 @@ CBaseWeapon*BuyWeapon(CBasePlayer *pPlayer, WeaponIdType weaponID)
 	if (!CSGameRules()->CanHavePlayerItem(pPlayer, weaponID, true))
 		return nullptr;
 
-	const ItemInfo *info = &g_rgItemInfo[weaponID];
+	const WeaponInfo *info = &g_rgWpnInfo[weaponID];
 	if (!info || !Q_strlen(info->m_pszInternalName))
 		return nullptr;
 
@@ -4035,7 +4035,7 @@ int EXT_FUNC GetWeaponData(edict_t *pEdict, struct weapon_data_s *info)
 	entvars_t *pev = &pEdict->v;
 	CBasePlayer *pPlayer = CBasePlayer::Instance(pev);
 
-	Q_memset(info, 0, sizeof(weapon_data_t) * MAX_WEAPONS);
+	Q_memset(info, 0, sizeof(weapon_data_t) * ENGINE_WEAPON_LIMIT);
 
 	if (!pPlayer)
 		return 1;
@@ -4047,10 +4047,10 @@ int EXT_FUNC GetWeaponData(edict_t *pEdict, struct weapon_data_s *info)
 		if (pWeapon)	// there's a weapon here. Should I pack it?
 		{
 				// Get The basic data
-			ItemInfo II;
-			Q_memcpy(&II, pWeapon->m_pItemInfo, sizeof(ItemInfo));
+			WeaponInfo II;
+			Q_memcpy(&II, pWeapon->m_pItemInfo, sizeof(WeaponInfo));
 
-			if (II.m_iId >= 0 && II.m_iId < MAX_WEAPONS)
+			if (II.m_iId >= 0 && II.m_iId < ENGINE_WEAPON_LIMIT)
 			{
 				auto item = &info[II.m_iId];
 
@@ -4075,7 +4075,7 @@ int EXT_FUNC GetWeaponData(edict_t *pEdict, struct weapon_data_s *info)
 		}
 	}
 #else
-	Q_memset(info, 0, sizeof(weapon_data_t) * MAX_WEAPONS);
+	Q_memset(info, 0, sizeof(weapon_data_t) * ENGINE_WEAPON_LIMIT);
 #endif
 
 	return 1;

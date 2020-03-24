@@ -342,12 +342,12 @@ MSG_FUNC(WeapPickup)
 	int iWeaponId = READ_BYTE();
 
 	// recenter the card, make some VFX.
-	gHUD::m_WeaponList.m_rgvecCurCoord[g_rgItemInfo[iWeaponId].m_iSlot] = Vector2D(ScreenWidth / 2, ScreenHeight / 2);
+	gHUD::m_WeaponList.m_rgvecCurCoord[g_rgWpnInfo[iWeaponId].m_iSlot] = Vector2D(ScreenWidth / 2, ScreenHeight / 2);
 	gHUD::m_WeaponList.m_flAlpha = 255;
 	gHUD::m_WeaponList.m_iPhase = CHudWeaponList::MOVING_IN;
 
 	// if this weapon would be auto-deploy, let's predict it.
-	if (g_pCurWeapon && g_pCurWeapon->m_pItemInfo->m_iWeight < g_rgItemInfo[iWeaponId].m_iWeight)
+	if (g_pCurWeapon && g_pCurWeapon->m_pItemInfo->m_iWeight < g_rgWpnInfo[iWeaponId].m_iWeight)
 		g_iSelectedWeapon = (WeaponIdType)iWeaponId;
 
 	return TRUE;

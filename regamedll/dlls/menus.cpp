@@ -16,7 +16,6 @@ const int g_rgiBuyMenuClassify[] =
 	(1 << WEAPON_MP7A1) | (1 << WEAPON_PM9) | (1 << WEAPON_MP5N) | (1 << WEAPON_UMP45) | (1 << WEAPON_P90),
 	(1 << WEAPON_QBZ95) | (1 << WEAPON_CM901) | (1 << WEAPON_AK47) | (1 << WEAPON_M4A1) | (1 << WEAPON_SCARL) | (1 << WEAPON_ACR) | (1 << WEAPON_MK46),
 	(1 << WEAPON_M200) | (1 << WEAPON_M14EBR) | (1 << WEAPON_AWP) | (1 << WEAPON_SVD),
-	(1 << WEAPON_HEGRENADE) | (1 << WEAPON_FLASHBANG) | (1 << WEAPON_SMOKEGRENADE),
 };
 
 const char* g_rgszBuyMenuItemName[] =
@@ -29,6 +28,8 @@ const char* g_rgszBuyMenuItemName[] =
 	"Sniper Rifles",
 	"Equipments",
 };
+
+#define BUYMENU_EQP_INDEX	6
 
 ///////////
 //	BUY
@@ -46,10 +47,14 @@ void OpenMenu_Buy3(CBasePlayer* pPlayer)
 	szMenu += szTitle;
 
 	char szItem[128];
+	int iAvailableCount = 0, iAffordableCount = 0;
 	g_iMenuItemCount = 0;
-	for (int i = 1; i <= 6; i++)
+
+	for (int i = 1; i <= 5; i++)	// equipments should not be included here.
 	{
-		int iAvailableCount = 0, iAffordableCount = 0;
+		iAvailableCount = 0;
+		iAffordableCount = 0;
+
 		for (int iId = 1; iId < LAST_WEAPON; iId++)
 		{
 			if ((1 << iId) & g_rgiBuyMenuClassify[i])	// is this iId a part of this weapon class?
@@ -71,6 +76,28 @@ void OpenMenu_Buy3(CBasePlayer* pPlayer)
 
 		szMenu += szItem;
 	}
+
+	// the EQUIPMENTS part.
+	iAvailableCount = 0;
+	iAffordableCount = 0;
+
+	for (int iId = 1; iId < EQP_COUNT; iId++)
+	{
+		if (GetEquipmentPrice(pPlayer->m_iRoleType, (EquipmentIdType)iId) <= pPlayer->m_iAccount)
+			iAffordableCount++;
+
+		if (g_rgRoleEquipmentsAccessibility[pPlayer->m_iRoleType][iId] != WPN_F)
+			iAvailableCount++;
+	}
+
+	if (!iAvailableCount)
+		Q_snprintf(szItem, sizeof(szItem) - 1, "\\d%d. %s - [NONE AVAILABLE]\n", ++g_iMenuItemCount, g_rgszBuyMenuItemName[BUYMENU_EQP_INDEX]);
+	else if (!iAffordableCount)
+		Q_snprintf(szItem, sizeof(szItem) - 1, "\\r%d. %s - [NONE AFFORDABLE]\n", ++g_iMenuItemCount, g_rgszBuyMenuItemName[BUYMENU_EQP_INDEX]);
+	else
+		Q_snprintf(szItem, sizeof(szItem) - 1, "\\r%d. \\w%s - \\r[\\y%d\\wAVAILABLE\\r|\\y%d\\wAFFORDABLE\\r]\n", ++g_iMenuItemCount, g_rgszBuyMenuItemName[BUYMENU_EQP_INDEX], iAvailableCount, iAffordableCount);
+
+	szMenu += szItem;
 
 	/*const char szItem[] =
 		"\n"
@@ -550,14 +577,14 @@ bool AddMenuWeaponItem(CBasePlayer *pPlayer, WeaponIdType iId, char *pszMenuText
 
 	if (g_rgRoleWeaponsAccessibility[pPlayer->m_iRoleType][iId] == WPN_F)
 	{
-		Q_sprintf(szBuffer, "\\d%d. %s - UNAVAILABLE\n", g_iMenuItemCount, g_rgItemInfo[iId].m_pszExternalName);
+		Q_sprintf(szBuffer, "\\d%d. %s - UNAVAILABLE\n", g_iMenuItemCount, g_rgWpnInfo[iId].m_pszExternalName);
 		Q_strcat(pszMenuText, szBuffer);
 	}
 	else
 	{
 		int iCost = GetWeaponPrice(pPlayer->m_iRoleType, iId);
 
-		Q_sprintf(szBuffer, pPlayer->m_iAccount >= iCost ? "\\r%d. \\w%s - \\y%d\\w$" : "\\r%d. \\d%s - \\r%d\\d$", g_iMenuItemCount, g_rgItemInfo[iId].m_pszExternalName, iCost);
+		Q_sprintf(szBuffer, pPlayer->m_iAccount >= iCost ? "\\r%d. \\w%s - \\y%d\\w$" : "\\r%d. \\d%s - \\r%d\\d$", g_iMenuItemCount, g_rgWpnInfo[iId].m_pszExternalName, iCost);
 
 		if (g_rgRoleWeaponsAccessibility[pPlayer->m_iRoleType][iId] == WPN_D)
 			Q_strlcat(szBuffer, " \\g(DISCOUNTED)\n");

@@ -355,11 +355,9 @@ const char* CWeaponBox::GetCSModelName(WeaponIdType iId)
 	{
 	case WEAPON_ANACONDA:		modelName = Anaconda_WORLD_MODEL; break;
 	case WEAPON_M200:			modelName = M200_WORLD_MODEL; break;
-	case WEAPON_HEGRENADE:		modelName = "models/w_hegrenade.mdl"; break;
 	case WEAPON_STRIKER:		modelName = STRIKER_WORLD_MODEL; break;
 	case WEAPON_PM9:			modelName = PM9_WORLD_MODEL; break;
 	case WEAPON_ACR:			modelName = ACR_WORLD_MODEL; break;
-	case WEAPON_SMOKEGRENADE:	modelName = "models/w_smokegrenade.mdl"; break;
 	case WEAPON_P99:			modelName = P99_WORLD_MODEL; break;
 	case WEAPON_FIVESEVEN:		modelName = FN57_WORLD_MODEL; break;
 	case WEAPON_UMP45:			modelName = UMP45_WORLD_MODEL; break;
@@ -375,11 +373,9 @@ const char* CWeaponBox::GetCSModelName(WeaponIdType iId)
 	case WEAPON_M4A1:			modelName = M4A1_WORLD_MODEL; break;
 	case WEAPON_MP7A1:			modelName = MP7A1_WORLD_MODEL; break;
 	case WEAPON_SVD:			modelName = SVD_WORLD_MODEL; break;
-	case WEAPON_FLASHBANG:		modelName = "models/w_flashbang.mdl"; break;
 	case WEAPON_DEAGLE:			modelName = DEagle_WORLD_MODEL; break;
 	case WEAPON_SCARL:			modelName = SCARL_WORLD_MODEL; break;
 	case WEAPON_AK47:			modelName = AK47_WORLD_MODEL; break;
-	case WEAPON_KNIFE:			modelName = "models/w_knife.mdl"; break;
 	case WEAPON_P90:			modelName = P90_WORLD_MODEL; break;
 	case WEAPON_SHIELDGUN:		modelName = "models/w_shield.mdl"; break;
 	default:

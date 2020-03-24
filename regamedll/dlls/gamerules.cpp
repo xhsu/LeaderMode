@@ -3017,12 +3017,12 @@ bool CHalfLifeMultiplay::CanHavePlayerItem(CBasePlayer* pPlayer, WeaponIdType iI
 		return false;
 	}
 
-	if (g_rgRoleWeaponsAccessibility[pPlayer->m_iRoleType][iId] == WPN_F && iId != WEAPON_KNIFE)	// you should never forbid a player from getting his knife.
+	if (g_rgRoleWeaponsAccessibility[pPlayer->m_iRoleType][iId] == WPN_F)	// you should never forbid a player from getting his knife.
 	{
 		if (g_bClientPrintEnable && bPrintHint)
 		{
 			ClientPrint(pPlayer->pev, HUD_PRINTCENTER, "#Cannot_Buy_This");
-			UTIL_PrintChatColor(pPlayer, REDCHAT, "/yYou are unqualified to use /t%s/y since you are /g%s/y.", g_rgItemInfo[iId].m_pszExternalName, g_rgszRoleNames[pPlayer->m_iRoleType]);
+			UTIL_PrintChatColor(pPlayer, REDCHAT, "/yYou are unqualified to use /t%s/y since you are /g%s/y.", g_rgWpnInfo[iId].m_pszExternalName, g_rgszRoleNames[pPlayer->m_iRoleType]);
 		}
 
 		return false;
@@ -3062,9 +3062,9 @@ bool CHalfLifeMultiplay::CanHavePlayerItem(CBasePlayer* pPlayer, WeaponIdType iI
 		return false;
 	}
 
-	if (g_rgItemInfo[iId].m_iAmmoType > 0)
+	if (g_rgWpnInfo[iId].m_iAmmoType > 0)
 	{
-		if (!CanHaveAmmo(pPlayer, g_rgItemInfo[iId].m_iAmmoType))
+		if (!CanHaveAmmo(pPlayer, g_rgWpnInfo[iId].m_iAmmoType))
 		{
 			// we can't carry anymore ammo for this gun. We can only
 			// have the gun if we aren't already carrying one of this type
@@ -4213,14 +4213,10 @@ void CHalfLifeMultiplay::GiveDefaultItems(CBasePlayer* pPlayer)
 	pPlayer->m_bHasNightVision = true;	// NVG
 	pPlayer->SendItemStatus();
 
-	if (g_rgRoleWeaponsAccessibility[pPlayer->m_iRoleType][WEAPON_HEGRENADE] != WPN_F)
-		pPlayer->GiveAmmo(1, AMMO_HEGrenade);
-
-	if (g_rgRoleWeaponsAccessibility[pPlayer->m_iRoleType][WEAPON_FLASHBANG] != WPN_F)
-		pPlayer->GiveAmmo(1, AMMO_Flashbang);
-
-	if (g_rgRoleWeaponsAccessibility[pPlayer->m_iRoleType][WEAPON_SMOKEGRENADE] != WPN_F)
-		pPlayer->GiveAmmo(1, AMMO_SmokeGrenade);
+	// give a basic, system recommanded grenade.
+	EquipmentIdType iId = SelectProperGrenade(pPlayer);
+	if (g_rgRoleEquipmentsAccessibility[pPlayer->m_iRoleType][iId] != WPN_F)	// although this is wired, but I still have to ask.
+		pPlayer->GiveAmmo(1, GetAmmoIdOfEquipment(iId));
 }
 
 float CHalfLifeMultiplay::PlayerMaxArmour(CBasePlayer* pPlayer)
