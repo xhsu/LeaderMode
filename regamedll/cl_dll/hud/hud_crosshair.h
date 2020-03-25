@@ -17,7 +17,7 @@ Modern Warfare Dev Team
 
 extern int g_iShotsFired;
 
-class CHudCrosshair : public CBaseHUDElement
+class CHudCrosshair : public CBaseHudElement
 {
 public:
 	hSprite m_hObserverCrosshair;

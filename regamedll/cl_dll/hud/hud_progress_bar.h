@@ -6,7 +6,7 @@ Created Date: Mar 12 2020
 
 #pragma once
 
-class CHudProgressBar : public CBaseHUDElement
+class CHudProgressBar : public CBaseHudElement
 {
 public:
 	int Init(void);

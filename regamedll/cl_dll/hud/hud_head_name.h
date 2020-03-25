@@ -6,7 +6,7 @@ Created Date: Mar 11 2020
 
 #pragma once
 
-class CHudHeadName : public CBaseHUDElement
+class CHudHeadName : public CBaseHudElement
 {
 public:
 	int Draw(float flTime);

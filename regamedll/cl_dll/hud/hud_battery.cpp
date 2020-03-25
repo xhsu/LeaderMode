@@ -126,6 +126,13 @@ int CHudBattery::Draw(float flTime)
 	return 1;
 }
 
+void CHudBattery::InitHUDData(void)
+{
+	m_flArmour = 0;
+	m_flDrawingArmour = 0;
+	m_iArmorType = 0;
+}
+
 void CHudBattery::MsgFunc_Battery(int& iNewArmourValue)
 {
 	m_bitsFlags |= HUD_ACTIVE;

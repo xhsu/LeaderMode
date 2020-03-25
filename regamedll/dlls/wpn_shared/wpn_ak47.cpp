@@ -3,7 +3,8 @@
 Remastered Date: Mar 21 2020
 
 Modern Warfare Dev Team
- - Luna the Reborn
+Code - Luna the Reborn
+Model - Miracle(Innocent Blue)
 
 */
 

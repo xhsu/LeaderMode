@@ -11,7 +11,7 @@ Created Date: Mar 11 2020
 #define TEXTCOLOR_PLAYERNAME	3
 #define TEXTCOLOR_LOCATION		4
 
-class CHudSayText : public CBaseHUDElement
+class CHudSayText : public CBaseHudElement
 {
 public:
 	int Init(void);

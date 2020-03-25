@@ -1,109 +1,101 @@
+/*
+
+Remastered Date: Mar 25 2020
+
+Modern Warfare Dev Team
+Code - Luna the Reborn
+Model - Miracle(Innocent Blue)
+
+*/
+
 #include "precompiled.h"
 
-LINK_ENTITY_TO_CLASS(weapon_glock18, CGLOCK18)
+#ifndef CLIENT_DLL
 
-void CGLOCK18::Spawn()
+unsigned short CG18C::m_usEvent = 0;
+int CG18C::m_iShell = 0;
+
+void CG18C::Precache()
 {
-	Precache();
+	PRECACHE_NECESSARY_FILES(G18C);
 
-	m_iId = WEAPON_GLOCK18;
-	SET_MODEL(edict(), "models/w_glock18.mdl");
+	m_iShell = PRECACHE_MODEL("models/pshell.mdl");
+	m_usEvent = PRECACHE_EVENT(1, "events/glock18.sc");
+}
 
-	m_iWeaponState &= ~WPNSTATE_SHIELD_DRAWN;
-	m_iDefaultAmmo = iinfo()->m_iMaxClip;
-	m_bBurstFire = false;
+#endif
 
-	m_iGlock18ShotsFired = 0;
-	m_flGlock18Shoot = 0;
+bool CG18C::Deploy()
+{
 	m_flAccuracy = 0.9f;
 
-	// Get ready to fall down
-	FallInit();
-
-	// extend
-	CBasePlayerWeapon::Spawn();
+	return DefaultDeploy(G18C_VIEW_MODEL, G18C_WORLD_MODEL, GLOCK18_DRAW, "onehanded", GLOCK18_DEPLOY_TIME);
 }
 
-void CGLOCK18::Precache()
+void CG18C::SecondaryAttack()
 {
-	PRECACHE_MODEL("models/v_glock18.mdl");
-	PRECACHE_MODEL("models/w_glock18.mdl");
-	PRECACHE_MODEL("models/shield/v_shield_glock18.mdl");
+	m_bInZoom = !m_bInZoom;
+	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.3f;
 
-	PRECACHE_SOUND("weapons/glock18-1.wav");
-	PRECACHE_SOUND("weapons/glock18-2.wav");
-	PRECACHE_SOUND("weapons/clipout1.wav");
-	PRECACHE_SOUND("weapons/clipin1.wav");
-	PRECACHE_SOUND("weapons/sliderelease1.wav");
-	PRECACHE_SOUND("weapons/slideback1.wav");
-	PRECACHE_SOUND("weapons/357_cock1.wav");
-	PRECACHE_SOUND("weapons/de_clipin.wav");
-	PRECACHE_SOUND("weapons/de_clipout.wav");
+#ifdef CLIENT_DLL
+	// due to some logic problem, we actually cannot use m_bInZoom here.
+	// it would be override.
 
-	m_iShellId = m_iShell = PRECACHE_MODEL("models/pshell.mdl");
-	m_usFireGlock18 = PRECACHE_EVENT(1, "events/glock18.sc");
-}
-
-BOOL CGLOCK18::Deploy()
-{
-	m_iWeaponState &= ~WPNSTATE_SHIELD_DRAWN;
-
-	m_bBurstFire = false;
-	m_iGlock18ShotsFired = 0;
-	m_flGlock18Shoot = 0;
-	m_flAccuracy = 0.9f;
-	m_fMaxSpeed = GLOCK18_MAX_SPEED;
-
-	m_pPlayer->m_bShieldDrawn = false;
-
-	if (m_pPlayer->HasShield())
+	if (!g_vecGunOfsGoal.LengthSquared())
 	{
-		return DefaultDeploy("models/shield/v_shield_glock18.mdl", "models/shield/p_shield_glock18.mdl", GLOCK18_SHIELD_DRAW, "shieldgun", UseDecrement() != FALSE);
-	}
-	else if (RANDOM_LONG(0, 1))
-	{
-		return DefaultDeploy("models/v_glock18.mdl", "models/p_glock18.mdl", GLOCK18_DRAW, "onehanded", UseDecrement() != FALSE);
-	}
-
-	return DefaultDeploy("models/v_glock18.mdl", "models/p_glock18.mdl", GLOCK18_DRAW2, "onehanded", UseDecrement() != FALSE);
-}
-
-void CGLOCK18::SecondaryAttack()
-{
-	ShieldSecondaryFire(GLOCK18_SHIELD_UP, GLOCK18_SHIELD_DOWN);
-}
-
-void CGLOCK18::PrimaryAttack()
-{
-	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
-	{
-		GLOCK18Fire(1.0 * (1 - m_flAccuracy), 0.05f, FALSE);
-	}
-	else if (m_pPlayer->pev->velocity.Length2D() > 0)
-	{
-		GLOCK18Fire(0.165 * (1 - m_flAccuracy), 0.05f, FALSE);
-	}
-	else if (m_pPlayer->pev->flags & FL_DUCKING)
-	{
-		GLOCK18Fire(0.075 * (1 - m_flAccuracy), 0.05f, FALSE);
+		g_vecGunOfsGoal = Vector(-11, -10, 2.4f);
+		gHUD::m_iFOV = 85;	// allow clients to predict the zoom.
 	}
 	else
 	{
-		GLOCK18Fire(0.1 * (1 - m_flAccuracy), 0.05f, FALSE);
+		g_vecGunOfsGoal = g_vecZero;
+		gHUD::m_iFOV = 90;
+	}
+
+	// this model needs faster.
+	g_flGunOfsMovingSpeed = 10.0f;
+#else
+	// just zoom a liiiiittle bit.
+	// this doesn't suffer from the same bug where the gunofs does, since the FOV was actually sent from SV.
+	if (m_bInZoom)
+	{
+		m_pPlayer->pev->fov = 85;
+		EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, "weapons/steelsight_in.wav", 0.75f, ATTN_STATIC);
+	}
+	else
+	{
+		m_pPlayer->pev->fov = 90;
+		EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, "weapons/steelsight_out.wav", 0.75f, ATTN_STATIC);
+	}
+#endif
+}
+
+void CG18C::PrimaryAttack()
+{
+	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
+	{
+		GLOCK18Fire(1.0f * (1.0f - m_flAccuracy));
+	}
+	else if (m_pPlayer->pev->velocity.Length2D() > 0)
+	{
+		GLOCK18Fire(0.165f * (1.0f - m_flAccuracy));
+	}
+	else if (m_pPlayer->pev->flags & FL_DUCKING)
+	{
+		GLOCK18Fire(0.075f * (1.0f - m_flAccuracy));
+	}
+	else
+	{
+		GLOCK18Fire(0.1f * (1.0f - m_flAccuracy));
 	}
 }
 
-void CGLOCK18::GLOCK18Fire(float flSpread, float flCycleTime, BOOL bFireBurst)
+void CG18C::GLOCK18Fire(float flSpread, float flCycleTime)
 {
-	Vector vecAiming, vecSrc, vecDir;
-	int flag;
-
-	if (bFireBurst)
-	{
-		m_iGlock18ShotsFired = 0;
-	}
-
 	// LUNA: G18C is allowed to fire in FULL AUTO.
+
+	if (m_bInZoom)
+		flSpread *= 0.5f;
 
 	if (m_flLastFire)
 	{
@@ -124,17 +116,15 @@ void CGLOCK18::GLOCK18Fire(float flSpread, float flCycleTime, BOOL bFireBurst)
 
 	if (m_iClip <= 0)
 	{
-		if (m_fFireOnEmpty)
-		{
-			PlayEmptySound();
-			m_flNextPrimaryAttack = GetNextAttackDelay(0.2);
-		}
+		PlayEmptySound();
+		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.2f;
 
+#ifndef CLIENT_DLL
 		if (TheBots)
 		{
 			TheBots->OnEvent(EVENT_WEAPON_FIRED_ON_EMPTY, m_pPlayer);
 		}
-
+#endif
 		return;
 	}
 
@@ -150,101 +140,85 @@ void CGLOCK18::GLOCK18Fire(float flSpread, float flCycleTime, BOOL bFireBurst)
 	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = NORMAL_GUN_FLASH;
 
-	vecSrc = m_pPlayer->GetGunPosition();
-	vecAiming = gpGlobals->v_forward;
+	Vector vecSrc = m_pPlayer->GetGunPosition();
+	Vector vecAiming = gpGlobals->v_forward;
 
-	float flBaseDamage = GLOCK18_DAMAGE;
-	vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, 8192, 1, BULLET_PLAYER_9MM, flBaseDamage, GLOCK18_RANGE_MODIFER, m_pPlayer->pev, true, m_pPlayer->random_seed);
+	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, GLOCK18_EFFECTIVE_RANGE, GLOCK18_PENETRATION, m_iPrimaryAmmoType, GLOCK18_DAMAGE, GLOCK18_RANGE_MODIFER, m_pPlayer->random_seed);
 
-#ifdef CLIENT_WEAPONS
-	flag = FEV_NOTHOST;
-#else
-	flag = 0;
-#endif
+#ifndef CLIENT_DLL
+	int seq = UTIL_SharedRandomFloat(m_pPlayer->random_seed, GLOCK18_SHOOT, GLOCK18_SHOOT3);
+	if (m_iClip == 0)
+		seq = GLOCK18_SHOOT_EMPTY;
 
-	PLAYBACK_EVENT_FULL(flag, m_pPlayer->edict(), m_usFireGlock18, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y,
+	SendWeaponAnim(seq);	// LUNA: I don't know why, but this has to be done on SV side, or client fire anim would be override.
+	PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL, m_pPlayer->edict(), m_usEvent, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y,
 		int(m_pPlayer->pev->punchangle.x * 100), int(m_pPlayer->pev->punchangle.y * 100), m_iClip == 0, FALSE);
-
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = GetNextAttackDelay(flCycleTime);
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 	{
 		// HEV suit - indicate out of ammo condition
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", SUIT_SENTENCE, SUIT_REPEAT_OK);
 	}
+#else
+	static event_args_t args;
+	Q_memset(&args, NULL, sizeof(args));
 
+	args.angles = m_pPlayer->pev->v_angle;
+	args.bparam1 = m_iClip == 0;
+	args.bparam2 = false;	// unused
+	args.ducking = gEngfuncs.pEventAPI->EV_LocalPlayerDucking();
+	args.entindex = gEngfuncs.GetLocalPlayer()->index;
+	args.flags = FEV_NOTHOST | FEV_RELIABLE | FEV_CLIENT | FEV_GLOBAL;
+	args.fparam1 = vecDir.x;
+	args.fparam2 = vecDir.y;
+	args.iparam1 = int(m_pPlayer->pev->punchangle.x * 100.0f);
+	args.iparam2 = int(m_pPlayer->pev->punchangle.y * 100.0f);
+	args.origin = m_pPlayer->pev->origin;
+	args.velocity = m_pPlayer->pev->velocity;
+
+	EV_Fireglock18(&args);
+#endif
+
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.5f;
 
-	if (bFireBurst)
-	{
-		// Fire off the next two rounds
-		m_iGlock18ShotsFired++;
-		m_flGlock18Shoot = gpGlobals->time + 0.1f;
-	}
-
-	ResetPlayerShieldAnim();
-
-	// LUNA: copied from MAC10 (PM9).
+	// tweaked from PM9/MAC10
 	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
 	{
-		KickBack(1.3, 0.55, 0.4, 0.05, 4.75, 3.75, 5);
+		KickBack(1.8, 0.55, 0.4, 0.05, 4.75, 3.75, 5);
 	}
 	else if (m_pPlayer->pev->velocity.Length2D() > 0)
 	{
-		KickBack(0.9, 0.45, 0.25, 0.035, 3.5, 2.75, 7);
+		KickBack(1.0, 0.45, 0.25, 0.035, 3.5, 2.75, 7);
 	}
 	else if (m_pPlayer->pev->flags & FL_DUCKING)
 	{
-		KickBack(0.75, 0.4, 0.175, 0.03, 2.75, 2.5, 10);
+		KickBack(0.8, 0.4, 0.175, 0.03, 2.75, 2.5, 10);
 	}
 	else
 	{
-		KickBack(0.775, 0.425, 0.2, 0.03, 3.0, 2.75, 9);
+		KickBack(0.825, 0.425, 0.2, 0.03, 3.0, 2.75, 9);
 	}
 }
 
-void CGLOCK18::Reload()
+bool CG18C::Reload()
 {
-	int iResult;
-
-	if (m_pPlayer->HasShield())
-		iResult = GLOCK18_SHIELD_RELOAD;
-	else
-		iResult = GLOCK18_RELOAD;
-
-	if (DefaultReload(iinfo()->m_iMaxClip, iResult, GLOCK18_RELOAD_TIME))
+	if (DefaultReload(m_pItemInfo->m_iMaxClip, GLOCK18_RELOAD, GLOCK18_RELOAD_TIME))
 	{
-		m_pPlayer->SetAnimation(PLAYER_RELOAD);
-		m_flAccuracy = 0.9;
+		m_flAccuracy = 0.9f;
+		return true;
 	}
+
+	return false;
 }
 
-void CGLOCK18::WeaponIdle()
+void CG18C::WeaponIdle()
 {
-	int iAnim;
-	float flRand;
-
-	ResetEmptySound();
-	m_pPlayer->GetAutoaimVector(AUTOAIM_10DEGREES);
-
-	if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase())
-	{
-		return;
-	}
-
-	if (m_pPlayer->HasShield())
-	{
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
-
-		if (m_iWeaponState & WPNSTATE_SHIELD_DRAWN)
-		{
-			SendWeaponAnim(GLOCK18_SHIELD_IDLE, UseDecrement() != FALSE);
-		}
-	}
 	// only idle if the slid isn't back
-	else if (m_iClip)
+	if (m_iClip)
 	{
-		flRand = RANDOM_FLOAT(0, 1);
+		auto flRand = RANDOM_FLOAT(0, 1);
+		int iAnim = 0;
 
 		if (flRand <= 0.3f)
 		{
@@ -262,6 +236,8 @@ void CGLOCK18::WeaponIdle()
 			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.5f;
 		}
 
-		SendWeaponAnim(iAnim, UseDecrement() != FALSE);
+		SendWeaponAnim(iAnim);
 	}
 }
+
+DECLARE_STANDARD_RESET_MODEL_FUNC(G18C)

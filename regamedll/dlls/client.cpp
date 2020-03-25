@@ -4046,7 +4046,7 @@ int EXT_FUNC GetWeaponData(edict_t *pEdict, struct weapon_data_s *info)
 		auto pWeapon = pPlayer->m_rgpPlayerItems[i];
 		if (pWeapon)	// there's a weapon here. Should I pack it?
 		{
-				// Get The basic data
+			// Get The basic data
 			WeaponInfo II;
 			Q_memcpy(&II, pWeapon->m_pItemInfo, sizeof(WeaponInfo));
 

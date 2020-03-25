@@ -30,6 +30,8 @@
 
 // debug macro
 //#define RANDOM_SEED_CALIBRATION 1
+//#define CHECKING_NEXT_PRIM_ATTACK_SYNC	1
+#define CLIENT_PREDICT_PRIM_ATK	1
 
 // util macro
 #define PRECACHE_NECESSARY_FILES(x)	PRECACHE_MODEL(x##_VIEW_MODEL);	\
@@ -571,10 +573,14 @@ public:	// new functions
 #define G18C_WORLD_MODEL	"models/weapons/w_glock18.mdl"
 #define G18C_FIRE_SFX		"weapons/glock18/glock18_fire.wav"
 
-const float GLOCK18_MAX_SPEED     = 250.0f;
-const float GLOCK18_DAMAGE        = 25.0f;
-const float GLOCK18_RANGE_MODIFER = 0.75f;
-const float GLOCK18_RELOAD_TIME   = 2.2f;
+constexpr float GLOCK18_MAX_SPEED		= 245.0f;
+constexpr float GLOCK18_DAMAGE			= 25.0f;
+constexpr float GLOCK18_RANGE_MODIFER	= 0.75f;
+constexpr float GLOCK18_DEPLOY_TIME		= 0.34f;
+constexpr float GLOCK18_RELOAD_TIME		= 1.87f;
+constexpr float GLOCK18_RPM				= 1200.0f;
+constexpr int	GLOCK18_PENETRATION		= 1;
+constexpr float	GLOCK18_EFFECTIVE_RANGE	= 4096.0f;
 
 enum glock18_e
 {
@@ -591,6 +597,32 @@ enum glock18_e
 	GLOCK18_ADD_SILENCER,
 	GLOCK18_DRAW2,
 	GLOCK18_RELOAD2,
+};
+
+class CG18C : public CBaseWeapon
+{
+#ifndef CLIENT_DLL
+public:	// SV exclusive variables.
+	static unsigned short m_usEvent;
+	static int m_iShell;
+
+public:	// SV exclusive functions.
+	virtual void	Precache		(void);
+#endif
+
+public:	// basic logic funcs
+	virtual bool	Deploy			(void);
+	virtual void	PrimaryAttack	(void);
+	virtual void	SecondaryAttack	(void);
+	virtual	bool	Reload			(void);
+	virtual void	WeaponIdle		(void);
+
+public:	// util funcs
+	virtual	float	GetMaxSpeed		(void) { return GLOCK18_MAX_SPEED; }
+	virtual void	ResetModel		(void);
+
+public:	// new functions
+	void GLOCK18Fire(float flSpread, float flCycleTime = 60.0f / GLOCK18_RPM);
 };
 
 #define THROWABLE_VIEW_MODEL	"models/weapons/v_throwable.mdl"
@@ -992,10 +1024,14 @@ enum elite_e
 #define FN57_WORLD_MODEL	"models/weapons/w_fiveseven.mdl"
 #define FN57_FIRE_SFX		"weapons/fiveseven/fiveseven_fire.wav"
 
-const float FIVESEVEN_MAX_SPEED     = 250.0f;
-const float FIVESEVEN_DAMAGE        = 20.0f;
-const float FIVESEVEN_RANGE_MODIFER = 0.885f;
-const float FIVESEVEN_RELOAD_TIME   = 2.7f;
+constexpr float FIVESEVEN_MAX_SPEED			= 250.0f;
+constexpr float FIVESEVEN_DAMAGE			= 20.0f;
+constexpr float FIVESEVEN_RANGE_MODIFER		= 0.885f;
+constexpr float FIVESEVEN_RELOAD_TIME		= 2.03f;
+constexpr float FIVESEVEN_DEPLOY_TIME		= 0.34f;
+constexpr float FIVESEVEN_FIRE_INTERVAL		= 0.1f;
+constexpr float	FIVESEVEN_EFFECTIVE_RANGE	= 4096.0f;
+constexpr int	FIVESEVEN_PENETRATION		= 2;
 
 enum fiveseven_e
 {
@@ -1007,14 +1043,43 @@ enum fiveseven_e
 	FIVESEVEN_DRAW,
 };
 
+class CFN57 : public CBaseWeapon
+{
+#ifndef CLIENT_DLL
+public:	// SV exclusive variables.
+	static unsigned short m_usEvent;
+	static int m_iShell;
+
+public:	// SV exclusive functions.
+	virtual void	Precache		(void);
+#endif
+
+public:	// basic logic funcs
+	virtual bool	Deploy			(void);
+	virtual void	PrimaryAttack	(void);
+	virtual void	SecondaryAttack	(void);
+	virtual	bool	Reload			(void);
+	virtual void	WeaponIdle		(void);
+
+public:	// util funcs
+	virtual	float	GetMaxSpeed		(void) { return FIVESEVEN_MAX_SPEED; }
+	virtual void	ResetModel		(void);
+
+public:	// new functions
+	void FiveSevenFire(float flSpread, float flCycleTime = FIVESEVEN_FIRE_INTERVAL);
+};
+
 #define UMP45_VIEW_MODEL	"models/weapons/v_ump45.mdl"
 #define UMP45_WORLD_MODEL	"models/weapons/w_ump45.mdl"
 #define UMP45_FIRE_SFX		"weapons/ump45/ump45_fire.wav"
 
-const float UMP45_MAX_SPEED     = 250.0f;
-const float UMP45_DAMAGE        = 30.0f;
-const float UMP45_RANGE_MODIFER = 0.82f;
-const float UMP45_RELOAD_TIME   = 3.5f;
+constexpr float UMP45_MAX_SPEED			= 250.0f;
+constexpr float UMP45_DAMAGE			= 30.0f;
+constexpr float UMP45_RANGE_MODIFER		= 0.82f;
+constexpr float UMP45_RELOAD_TIME		= 3.2f;
+constexpr float UMP45_RPM				= 600.0f;
+constexpr float	UMP45_EFFECTIVE_RANGE	= 8192.0f;
+constexpr int	UMP45_PENETRATION		= 1;
 
 enum ump45_e
 {
@@ -1024,6 +1089,32 @@ enum ump45_e
 	UMP45_SHOOT1,
 	UMP45_SHOOT2,
 	UMP45_SHOOT3,
+};
+
+class CUMP45 : public CBaseWeapon
+{
+#ifndef CLIENT_DLL
+public:	// SV exclusive variables.
+	static unsigned short m_usEvent;
+	static int m_iShell;
+
+public:	// SV exclusive functions.
+	virtual void	Precache		(void);
+#endif
+
+public:	// basic logic funcs
+	virtual bool	Deploy			(void);
+	virtual void	PrimaryAttack	(void);
+	virtual void	SecondaryAttack	(void);
+	virtual	bool	Reload			(void);
+	virtual void	WeaponIdle		(void);
+
+public:	// util funcs
+	virtual	float	GetMaxSpeed		(void) { return UMP45_MAX_SPEED; }
+	virtual void	ResetModel		(void);
+
+public:	// new functions
+	void UMP45Fire(float flSpread, float flCycleTime = 60.0f / UMP45_RPM);
 };
 
 #define M14EBR_VIEW_MODEL	"models/weapons/v_m14ebr.mdl"

@@ -19,7 +19,7 @@ Modern Warfare Dev Team
 
 #define AMMOBAR_WIDTH	5
 
-class CHudWeaponList : public CBaseHUDElement
+class CHudWeaponList : public CBaseHudElement
 {
 public:
 	enum Phase
@@ -34,7 +34,7 @@ public:
 	virtual int Draw(float flTime);
 	virtual void Think(void) {}
 	virtual void Reset(void);
-	virtual void InitHUDData(void) {}
+	virtual void InitHUDData(void);
 	virtual void Shutdown(void) {}
 
 	void MsgFunc_SetSlot(WeaponIdType iId, int iSlot);

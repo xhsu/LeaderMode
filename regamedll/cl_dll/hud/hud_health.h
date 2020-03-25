@@ -38,13 +38,14 @@ constexpr int HEALTH_BAR_WIDTH = 10;
 constexpr int HEALTH_SHAKE_AMPLITUDE = 3;
 constexpr int HEALTH_ICON_BAR_INTERSPACE = 10;
 
-class CHudHealth : public CBaseHUDElement
+class CHudHealth : public CBaseHudElement
 {
 public:
 	int Init(void);
 	int VidInit(void);
 	int Draw(float fTime);
 	void Reset(void);
+	void InitHUDData(void);
 
 	void MsgFunc_Health(int& iNewHealth);
 	void MsgFunc_Damage(int& armor, int& damageTaken, int& bitsDamage, Vector& vecFrom);

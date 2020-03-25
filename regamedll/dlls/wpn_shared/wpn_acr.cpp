@@ -3,7 +3,8 @@
 Remastered Date: Mar 22 2020
 
 Modern Warfare Dev Team
- - Luna the Reborn
+Code - Luna the Reborn
+Model - Miracle(Innocent Blue)
 
 */
 
@@ -43,7 +44,7 @@ void CACR::SecondaryAttack()
 
 	if (!g_vecGunOfsGoal.LengthSquared())
 	{
-		g_vecGunOfsGoal = Vector(-18.08f, -20.0f, 2.18f);
+		g_vecGunOfsGoal = Vector(-18.06f, -20.0f, 2.18f);
 		gHUD::m_iFOV = 75;	// allow clients to predict the zoom.
 	}
 	else

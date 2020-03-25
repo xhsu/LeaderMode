@@ -9,7 +9,7 @@ Created Date: Mar 11 2020
 #define BLINK_OMEGA		4.0f
 #define BLINK_PERIOD	(1.0f / BLINK_OMEGA)
 
-class CHudAccountBalance : public CBaseHUDElement
+class CHudAccountBalance : public CBaseHudElement
 {
 public:
 	int Init(void);

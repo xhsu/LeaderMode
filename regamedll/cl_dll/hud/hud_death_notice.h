@@ -28,7 +28,7 @@ struct DeathNoticeItem
 #define DEATHNOTICE_INTERSPACE		5
 
 // TODO, UNDONE : this entire class needs to reconstruct due to both CSBTE and CSMoE are sabortaging this class via implanting tons of CSOL code.
-class CHudDeathNotice : public CBaseHUDElement
+class CHudDeathNotice : public CBaseHudElement
 {
 public:
 	int Init(void);

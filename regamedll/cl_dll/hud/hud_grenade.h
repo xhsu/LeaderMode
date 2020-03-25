@@ -10,7 +10,7 @@ Model - Matoilet
 
 #pragma once
 
-class CHudGrenade : public CBaseHUDElement
+class CHudGrenade : public CBaseHudElement
 {
 public:
 	virtual int Init(void);

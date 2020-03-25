@@ -6,7 +6,7 @@ Created Date: Mar 12 2020
 
 #pragma once
 
-class CHudScenarioStatus : public CBaseHUDElement
+class CHudScenarioStatus : public CBaseHudElement
 {
 public:
 	int Init(void);

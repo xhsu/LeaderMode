@@ -205,8 +205,16 @@ void CHudHealth::Reset(void)
 	m_fAttackFront = m_fAttackRear = m_fAttackRight = m_fAttackLeft = 0;
 	m_bitsDamage = 0;
 
+	m_iHealth = 0;
+	m_flDrawingHealth = 0;
+
 	for (int i = 0; i < NUM_DMG_TYPES; i++)
 		m_dmg[i].fExpire = 0;
+}
+
+void CHudHealth::InitHUDData(void)
+{
+	Reset();
 }
 
 void CHudHealth::MsgFunc_Health(int& iNewHealth)

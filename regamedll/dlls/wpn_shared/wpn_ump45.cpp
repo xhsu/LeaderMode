@@ -1,66 +1,93 @@
+/*
+
+Remastered Date: Mar 25 2020
+
+Modern Warfare Dev Team
+Code - Luna the Reborn
+Model - Miracle(Innocent Blue)
+
+*/
+
 #include "precompiled.h"
 
-LINK_ENTITY_TO_CLASS(weapon_ump45, CUMP45)
+#ifndef CLIENT_DLL
 
-void CUMP45::Spawn()
-{
-	Precache();
-
-	m_iId = WEAPON_UMP45;
-	SET_MODEL(edict(), "models/w_ump45.mdl");
-
-	m_iDefaultAmmo = iinfo()->m_iMaxClip;
-	m_flAccuracy = 0.0f;
-	m_bDelayFire = false;
-
-	// Get ready to fall down
-	FallInit();
-
-	// extend
-	CBasePlayerWeapon::Spawn();
-}
+unsigned short CUMP45::m_usEvent = 0;
+int CUMP45::m_iShell = 0;
 
 void CUMP45::Precache()
 {
-	PRECACHE_MODEL("models/v_ump45.mdl");
-	PRECACHE_MODEL("models/w_ump45.mdl");
-
-	PRECACHE_SOUND("weapons/ump45-1.wav");
-	PRECACHE_SOUND("weapons/ump45_clipout.wav");
-	PRECACHE_SOUND("weapons/ump45_clipin.wav");
-	PRECACHE_SOUND("weapons/ump45_boltslap.wav");
+	PRECACHE_NECESSARY_FILES(UMP45);
 
 	m_iShell = PRECACHE_MODEL("models/pshell.mdl");
-	m_usFireUMP45 = PRECACHE_EVENT(1, "events/ump45.sc");
+	m_usEvent = PRECACHE_EVENT(1, "events/ump45.sc");
 }
 
-BOOL CUMP45::Deploy()
+#endif
+
+bool CUMP45::Deploy()
 {
 	m_flAccuracy = 0.0f;
-	m_bDelayFire = false;
-	iShellOn = 1;
 
-	return DefaultDeploy("models/v_ump45.mdl", "models/p_ump45.mdl", UMP45_DRAW, "carbine", UseDecrement() != FALSE);
+	return DefaultDeploy(UMP45_VIEW_MODEL, UMP45_WORLD_MODEL, UMP45_DRAW, "carbine");
 }
 
 void CUMP45::PrimaryAttack()
 {
 	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
 	{
-		UMP45Fire(0.24 * m_flAccuracy, 0.1, FALSE);	// UMP.45 600 RPM
+		UMP45Fire(0.24f * m_flAccuracy);
+	}
+	else if (m_bInZoom)	// decrease spread while scoping.
+	{
+		UMP45Fire(0.02f * m_flAccuracy);
 	}
 	else
 	{
-		UMP45Fire(0.04 * m_flAccuracy, 0.1, FALSE);
+		UMP45Fire(0.04f * m_flAccuracy);
 	}
 }
 
-void CUMP45::UMP45Fire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
+void CUMP45::SecondaryAttack(void)
 {
-	Vector vecAiming, vecSrc, vecDir;
-	int flag;
+	m_bInZoom = !m_bInZoom;
+	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.3f;
 
-	m_bDelayFire = true;
+#ifdef CLIENT_DLL
+	// due to some logic problem, we actually cannot use m_bInZoom here.
+	// it would be override.
+
+	if (!g_vecGunOfsGoal.LengthSquared())
+	{
+		g_vecGunOfsGoal = Vector(-13.7f, -10, 3.5f);
+		gHUD::m_iFOV = 85;	// allow clients to predict the zoom.
+	}
+	else
+	{
+		g_vecGunOfsGoal = g_vecZero;
+		gHUD::m_iFOV = 90;
+	}
+
+	// this model needs faster.
+	g_flGunOfsMovingSpeed = 10.0f;
+#else
+	// just zoom a liiiiittle bit.
+	// this doesn't suffer from the same bug where the gunofs does, since the FOV was actually sent from SV.
+	if (m_bInZoom)
+	{
+		m_pPlayer->pev->fov = 85;
+		EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, "weapons/steelsight_in.wav", 0.75f, ATTN_STATIC);
+	}
+	else
+	{
+		m_pPlayer->pev->fov = 90;
+		EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, "weapons/steelsight_out.wav", 0.75f, ATTN_STATIC);
+	}
+#endif
+}
+
+void CUMP45::UMP45Fire(float flSpread, float flCycleTime)
+{
 	m_iShotsFired++;
 
 	m_flAccuracy = ((m_iShotsFired * m_iShotsFired) / 210) + 0.5f;
@@ -70,16 +97,15 @@ void CUMP45::UMP45Fire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 
 	if (m_iClip <= 0)
 	{
-		if (m_fFireOnEmpty)
-		{
-			PlayEmptySound();
-			m_flNextPrimaryAttack = GetNextAttackDelay(0.2);
-		}
+		PlayEmptySound();
+		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.2f;
 
+#ifndef CLIENT_DLL
 		if (TheBots)
 		{
 			TheBots->OnEvent(EVENT_WEAPON_FIRED_ON_EMPTY, m_pPlayer);
 		}
+#endif
 
 		return;
 	}
@@ -90,32 +116,44 @@ void CUMP45::UMP45Fire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 
-	vecSrc = m_pPlayer->GetGunPosition();
-	vecAiming = gpGlobals->v_forward;
+	Vector vecSrc = m_pPlayer->GetGunPosition();
+	Vector vecAiming = gpGlobals->v_forward;
 
-	float flBaseDamage = UMP45_DAMAGE;
-	vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, 8192, 1, BULLET_PLAYER_45ACP,
-		flBaseDamage, UMP45_RANGE_MODIFER, m_pPlayer->pev, false, m_pPlayer->random_seed);
+	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, UMP45_EFFECTIVE_RANGE, UMP45_PENETRATION, m_iPrimaryAmmoType, UMP45_DAMAGE, UMP45_RANGE_MODIFER, m_pPlayer->random_seed);
 
-#ifdef CLIENT_WEAPONS
-	flag = FEV_NOTHOST;
-#else
-	flag = 0;
-#endif
-
-	PLAYBACK_EVENT_FULL(flag, m_pPlayer->edict(), m_usFireUMP45, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y,
+#ifndef CLIENT_DLL
+	SendWeaponAnim(UTIL_SharedRandomLong(m_pPlayer->random_seed, UMP45_SHOOT1, UMP45_SHOOT3));
+	PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL, m_pPlayer->edict(), m_usEvent, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y,
 		int(m_pPlayer->pev->punchangle.x * 100), int(m_pPlayer->pev->punchangle.y * 100), FALSE, FALSE);
-
-	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
-	m_pPlayer->m_iWeaponFlash = DIM_GUN_FLASH;
-
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = GetNextAttackDelay(flCycleTime);
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 	{
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", SUIT_SENTENCE, SUIT_REPEAT_OK);
 	}
+#else
+	static event_args_t args;
+	Q_memset(&args, NULL, sizeof(args));
 
+	args.angles = m_pPlayer->pev->v_angle;
+	args.bparam1 = false;	// unused
+	args.bparam2 = false;	// unused
+	args.ducking = gEngfuncs.pEventAPI->EV_LocalPlayerDucking();
+	args.entindex = gEngfuncs.GetLocalPlayer()->index;
+	args.flags = FEV_NOTHOST | FEV_RELIABLE | FEV_CLIENT | FEV_GLOBAL;
+	args.fparam1 = vecDir.x;
+	args.fparam2 = vecDir.y;
+	args.iparam1 = int(m_pPlayer->pev->punchangle.x * 100.0f);
+	args.iparam2 = int(m_pPlayer->pev->punchangle.y * 100.0f);
+	args.origin = m_pPlayer->pev->origin;
+	args.velocity = m_pPlayer->pev->velocity;
+
+	EV_FireUMP45(&args);
+#endif
+
+	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
+	m_pPlayer->m_iWeaponFlash = DIM_GUN_FLASH;
+
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.0f;
 
 	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
@@ -136,27 +174,21 @@ void CUMP45::UMP45Fire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 	}
 }
 
-void CUMP45::Reload()
+bool CUMP45::Reload()
 {
-	if (DefaultReload(iinfo()->m_iMaxClip, UMP45_RELOAD, UMP45_RELOAD_TIME))
+	if (DefaultReload(m_pItemInfo->m_iMaxClip, UMP45_RELOAD, UMP45_RELOAD_TIME))
 	{
-		m_pPlayer->SetAnimation(PLAYER_RELOAD);
-
 		m_flAccuracy = 0.0f;
-		m_iShotsFired = 0;
+		return true;
 	}
+
+	return false;
 }
 
 void CUMP45::WeaponIdle()
 {
-	ResetEmptySound();
-	m_pPlayer->GetAutoaimVector(AUTOAIM_10DEGREES);
-
-	if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase())
-	{
-		return;
-	}
-
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
-	SendWeaponAnim(UMP45_IDLE1, UseDecrement() != FALSE);
+	SendWeaponAnim(UMP45_IDLE1);
 }
+
+DECLARE_STANDARD_RESET_MODEL_FUNC(UMP45)

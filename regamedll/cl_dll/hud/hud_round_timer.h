@@ -6,7 +6,7 @@ Created Date: Mar 11 2020
 
 #pragma once
 
-class CHudRoundTimer : public CBaseHUDElement
+class CHudRoundTimer : public CBaseHudElement
 {
 public:
 	int Init(void);

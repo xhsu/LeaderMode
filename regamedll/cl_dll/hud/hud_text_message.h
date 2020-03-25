@@ -6,7 +6,7 @@ Created Date: Mar 11 2020
 
 #pragma once
 
-class CHudTextMessage : public CBaseHUDElement
+class CHudTextMessage : public CBaseHudElement
 {
 public:
 	static char* LocaliseTextString(const char* msg, char* dst_buffer, int buffer_size);

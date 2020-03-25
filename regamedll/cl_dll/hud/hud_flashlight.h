@@ -6,7 +6,7 @@ Created Date: Mar 11 2020
 
 #pragma once
 
-class CHudFlashlight : public CBaseHUDElement
+class CHudFlashlight : public CBaseHudElement
 {
 public:
 	int Init(void);

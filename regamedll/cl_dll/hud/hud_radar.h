@@ -27,7 +27,7 @@ struct radar_point_s
 	int m_iDotSize;
 };
 
-class CHudRadar : public CBaseHUDElement
+class CHudRadar : public CBaseHudElement
 {
 public:
 	int Init(void);

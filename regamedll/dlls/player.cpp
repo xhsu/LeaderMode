@@ -4094,6 +4094,11 @@ pt_end:
 		}
 	}
 
+#ifdef CHECKING_NEXT_PRIM_ATTACK_SYNC
+	if (m_pActiveItem && m_pActiveItem->m_flNextPrimaryAttack > 0.0f)
+		SERVER_PRINT(SharedVarArgs("[Server] m_flNextPrimaryAttack: %f\n", m_pActiveItem->m_flNextPrimaryAttack));
+#endif
+
 	m_flNextAttack -= gpGlobals->frametime;
 
 	if (m_flNextAttack < -0.001)

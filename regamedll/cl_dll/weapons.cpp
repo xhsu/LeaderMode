@@ -187,6 +187,14 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 		p = new CDEagle;
 		break;
 
+	case WEAPON_FIVESEVEN:
+		p = new CFN57;
+		break;
+
+	case WEAPON_GLOCK18:
+		p = new CG18C;
+		break;
+
 	case WEAPON_KSG12:
 		p = new CKSG12;
 		break;
@@ -201,6 +209,10 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 
 	case WEAPON_SVD:
 		p = new CSVD;
+		break;
+
+	case WEAPON_UMP45:
+		p = new CUMP45;
 		break;
 
 	case WEAPON_USP:
@@ -392,15 +404,18 @@ void CBaseWeapon::PostFrame()
 
 	// LUNA: there are some problems regarding client prediction.
 	// sometimes, the client side m_flNextPrimaryAttack and m_flNextSecondaryAttack would be wirely re-zero and induce multiple bullet hole VFX bug.
-	// thus, I decide to use message instead.
-	// (gmsgShoot and gmsgSteelSight)
+	// thus, I decide to use message instead. (gmsgShoot and gmsgSteelSight)
+	// UPDATE Mar 25: I managed to fix PrimAttack. However, due to many server-exclusive entity, the steelsight still can't be predict on client side.
+
 
 	/*if ((usableButtons & IN_ATTACK2) && m_flNextSecondaryAttack <= UTIL_WeaponTimeBase())	// UseDecrement()
 	{
 		SecondaryAttack();
 		m_pPlayer->pev->button &= ~IN_ATTACK2;
 	}
-	else if ((m_pPlayer->pev->button & IN_ATTACK) && CanAttack(m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), TRUE))	// UseDecrement()
+	else */
+#ifdef CLIENT_PREDICT_PRIM_ATK
+		if ((m_pPlayer->pev->button & IN_ATTACK) && CanAttack(m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), TRUE))	// UseDecrement()
 	{
 		// Can't shoot during the freeze period
 		// Always allow firing in single player
@@ -409,7 +424,9 @@ void CBaseWeapon::PostFrame()
 			PrimaryAttack();
 		}
 	}
-	else */if ((m_pPlayer->pev->button & IN_RELOAD) && m_pItemInfo->m_iMaxClip != WEAPON_NOCLIP && !m_bInReload && m_flNextPrimaryAttack < UTIL_WeaponTimeBase())
+	else
+#endif
+		if ((m_pPlayer->pev->button & IN_RELOAD) && m_pItemInfo->m_iMaxClip != WEAPON_NOCLIP && !m_bInReload && m_flNextPrimaryAttack < UTIL_WeaponTimeBase())
 	{
 		// reload when reload is pressed, or if no buttons are down and weapon is empty.
 		Reload();
@@ -1081,6 +1098,11 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 			pto->fuser1 = -0.001;
 		}*/
 	}
+
+#ifdef CHECKING_NEXT_PRIM_ATTACK_SYNC
+	if (g_pCurWeapon && g_pCurWeapon->m_flNextPrimaryAttack > 0.0f)
+		gEngfuncs.pfnConsolePrint(SharedVarArgs("[Client] m_flNextPrimaryAttack: %f\n", g_pCurWeapon->m_flNextPrimaryAttack));
+#endif
 
 	// m_flNextAttack is now part of the weapons, but is part of the player instead
 	to->client.m_flNextAttack -= cmd->msec / 1000.0f;

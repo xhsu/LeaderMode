@@ -240,6 +240,15 @@
     <ClCompile Include="..\Fonts\Win32Font.cpp">
       <Filter>cl_dll\Fonts</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\dlls\wpn_shared\wpn_fiveseven.cpp">
+      <Filter>dlls\wpn_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\dlls\wpn_shared\wpn_ump45.cpp">
+      <Filter>dlls\wpn_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\dlls\wpn_shared\wpn_glock18.cpp">
+      <Filter>dlls\wpn_shared</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\cdll_int.h">

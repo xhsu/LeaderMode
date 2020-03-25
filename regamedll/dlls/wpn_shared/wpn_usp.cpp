@@ -6,7 +6,6 @@ Modern Warfare Dev Team
 Code - Luna the Reborn
 Model - Miracle(Innocent Blue)
 
-
 */
 
 #include "precompiled.h"

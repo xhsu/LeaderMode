@@ -6,7 +6,7 @@ Created Date: Mar 12 2020
 
 #pragma once
 
-class CHudVGUI2Print : public CBaseHUDElement
+class CHudVGUI2Print : public CBaseHudElement
 {
 public:
 	int Init(void);

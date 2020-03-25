@@ -38,7 +38,7 @@ struct message_parms_t
 	float fadeTime;
 };
 
-class CHudMessage : public CBaseHUDElement
+class CHudMessage : public CBaseHudElement
 {
 public:
 	int Init(void);

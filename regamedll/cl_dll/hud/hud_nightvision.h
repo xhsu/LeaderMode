@@ -6,7 +6,7 @@ Created Date: Mar 11 2020
 
 #pragma once
 
-class CHudNightVision : public CBaseHUDElement
+class CHudNightVision : public CBaseHudElement
 {
 public:
 	void Reset(void);

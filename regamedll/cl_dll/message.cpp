@@ -134,7 +134,7 @@ MSG_FUNC(ResetHUD)
 {
 	// this msg have no arguments.
 
-	for (auto pHudElem : gHUD::m_lstAllHUDElems)
+	for (auto pHudElem : gHUD::m_lstHudElements)
 	{
 		pHudElem->Reset();
 	}
@@ -155,7 +155,7 @@ MSG_FUNC(InitHUD)
 {
 	// this msg have no arguments.
 
-	for (auto pHudElem : gHUD::m_lstAllHUDElems)
+	for (auto pHudElem : gHUD::m_lstHudElements)
 	{
 		pHudElem->InitHUDData();
 	}
@@ -177,7 +177,6 @@ MSG_FUNC(InitHUD)
 	g_iShotgunShell = gEngfuncs.pEventAPI->EV_FindModelIndex("models/shotgunshell.mdl");
 	g_iBlackSmoke = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/black_smoke4.spr");
 
-	/* UNDONE : Fog
 	g_FogParameters.density = 0;
 	g_FogParameters.affectsSkyBox = false;
 	g_FogParameters.color[0] = 0;
@@ -198,7 +197,7 @@ MSG_FUNC(InitHUD)
 
 	if (cl_fog_b)
 		gEngfuncs.Cvar_SetValue(cl_fog_b->name, g_FogParameters.color[2]);
-	*/
+
 	return TRUE;
 }
 

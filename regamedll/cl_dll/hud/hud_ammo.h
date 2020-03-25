@@ -12,7 +12,7 @@ typedef struct
 }
 RGBA;
 
-class CHudAmmo : public CBaseHUDElement
+class CHudAmmo : public CBaseHudElement
 {
 public:
 	int Init(void);

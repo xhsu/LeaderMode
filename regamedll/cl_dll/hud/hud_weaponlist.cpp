@@ -70,10 +70,6 @@ int CHudWeaponList::VidInit(void)
 		}
 	}
 
-	// only reset this when join a new server.
-	Q_memset(&m_rgiWeapons, NULL, sizeof(m_rgiWeapons));
-	m_bitsFlags &= ~HUD_ACTIVE;
-
 	// get font for clip/ammo display.
 	m_hAmmoFont = gFontFuncs.CreateFont();
 	gFontFuncs.AddGlyphSetToFont(m_hAmmoFont, "Blackadder ITC", 36, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0xFFFF);
@@ -291,6 +287,14 @@ void CHudWeaponList::Reset(void)
 	m_iPhase = MOVING_IN;
 	m_iLastWpnId = WEAPON_NONE;
 	m_flAlpha = 0;
+}
+
+void CHudWeaponList::InitHUDData(void)
+{
+	Reset();
+
+	Q_memset(&m_rgiWeapons, NULL, sizeof(m_rgiWeapons));
+	m_bitsFlags &= ~HUD_ACTIVE;
 }
 
 void CHudWeaponList::MsgFunc_SetSlot(WeaponIdType iId, int iSlot)

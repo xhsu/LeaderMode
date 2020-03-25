@@ -182,6 +182,9 @@ void CHudRadar::DrawRadar(float flTime)
 		if (gHUD::m_iPlayerNum == i || g_PlayerExtraInfo[i].m_iTeam != g_iTeamNumber || g_PlayerExtraInfo[i].dead)
 			continue;
 
+		if (g_PlayerExtraInfo[i].m_iHealth <= 0)	// no dead guy allowed.
+			continue;
+
 		// translate the location we received to radar coord.
 		vecTranslated = Translate(g_PlayerExtraInfo[i].m_vecOrigin, fRange, iRadarRadius);
 

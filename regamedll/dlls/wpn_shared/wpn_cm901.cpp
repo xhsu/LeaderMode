@@ -1,7 +1,8 @@
 /*
 
 Remastered Date: Mar 15 2020
-By Miracle(Innocent Blue)
+Code - Miracle (Innocent Blue)
+Model - Miracle (Innocent Blue)
 
 */
 

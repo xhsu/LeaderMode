@@ -299,6 +299,14 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 		p = new CDEagle;
 		break;
 
+	case WEAPON_FIVESEVEN:
+		p = new CFN57;
+		break;
+
+	case WEAPON_GLOCK18:
+		p = new CG18C;
+		break;
+
 	case WEAPON_KSG12:
 		p = new CKSG12;
 		break;
@@ -313,6 +321,10 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 
 	case WEAPON_SVD:
 		p = new CSVD;
+		break;
+
+	case WEAPON_UMP45:
+		p = new CUMP45;
 		break;
 
 	case WEAPON_USP:
@@ -531,12 +543,13 @@ void CBaseWeapon::PostFrame()
 		// Always allow firing in single player
 		if ((m_pPlayer->m_bCanShoot && CSGameRules()->IsMultiplayer() && !CSGameRules()->IsFreezePeriod()) || !CSGameRules()->IsMultiplayer())
 		{
+#ifndef CLIENT_PREDICT_PRIM_ATK
 			// prediction code is unusable for full-automatic weapon. I have to use this instead.
 			// UNDONE: perhaps I need to send a angle along with?
 			MESSAGE_BEGIN(MSG_ONE, gmsgShoot, nullptr, m_pPlayer->pev);
 			WRITE_SHORT(m_pPlayer->random_seed);
 			MESSAGE_END();
-
+#endif
 			PrimaryAttack();
 			m_flNextPrimaryAttack *= m_pPlayer->WeaponFireIntervalModifier(this);	// passive skill applied.
 		}

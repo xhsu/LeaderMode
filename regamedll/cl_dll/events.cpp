@@ -1239,7 +1239,62 @@ DECLARE_EVENT(FireQBZ95)
 
 DECLARE_EVENT(Fire57)
 {
+	int idx = args->entindex;
+	bool empty = args->bparam1;
 
+	Vector origin, angles, velocity;
+	VectorCopy(args->origin, origin);
+	VectorCopy(args->angles, angles);
+	VectorCopy(args->velocity, velocity);
+
+	angles[0] += args->iparam1 / 100.0;
+	angles[1] += args->iparam2 / 100.0;
+
+	Vector forward, right, up;
+	gEngfuncs.pfnAngleVectors(angles, forward, right, up);
+
+	if (EV_IsLocal(idx))
+	{
+		g_iShotsFired++;
+		EV_MuzzleFlash();
+
+		int seq = FIVESEVEN_SHOOT1;
+		if (empty)
+			seq = FIVESEVEN_SHOOT_EMPTY;
+		else
+			seq = UTIL_SharedRandomLong(gPseudoPlayer.random_seed, FIVESEVEN_SHOOT1, FIVESEVEN_SHOOT2);
+
+		if (g_pCurWeapon)
+			g_pCurWeapon->SendWeaponAnim(seq);
+
+		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 0, 0.25, 10, 10, 10, EV_PISTOL_SMOKE, velocity, false, 35);
+		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 25, 0.3, 15, 15, 15, EV_WALL_PUFF, velocity, false, 35);
+		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 50, 0.2, 20, 20, 20, EV_WALL_PUFF, velocity, false, 35);
+	}
+
+	Vector ShellVelocity, ShellOrigin;
+	if (EV_IsLocal(idx))
+	{
+		if (cl_righthand->value == 0)
+			EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 36.0, -14.0, -14.0);
+		else
+			EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 36.0, -14.0, 14.0);
+
+		VectorCopy(g_pViewEnt->attachment[1], ShellOrigin);
+		VectorScale(ShellVelocity, 0.75, ShellVelocity);
+		ShellVelocity[2] -= 35.0;
+	}
+	else
+		EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -12.0, -4.0);
+
+	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iPShell, TE_BOUNCE_SHELL, idx, 4);
+
+	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, FN57_FIRE_SFX, 1.0, ATTN_NORM, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
+
+	Vector vecSrc = EV_GetGunPosition(args, origin);
+	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
+
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, FIVESEVEN_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_FIVESEVEN].m_iAmmoType, FIVESEVEN_PENETRATION);
 }
 
 DECLARE_EVENT(FireSVD)
@@ -1302,7 +1357,61 @@ DECLARE_EVENT(FireGALIL)
 
 DECLARE_EVENT(Fireglock18)
 {
+	int idx = args->entindex;
+	bool empty = args->bparam1;
 
+	Vector origin, angles, velocity;
+	VectorCopy(args->origin, origin);
+	VectorCopy(args->angles, angles);
+	VectorCopy(args->velocity, velocity);
+
+	angles[0] += args->iparam1 / 100.0;
+	angles[1] += args->iparam2 / 100.0;
+
+	Vector forward, right, up;
+	gEngfuncs.pfnAngleVectors(angles, forward, right, up);
+
+	if (EV_IsLocal(idx))
+	{
+		g_iShotsFired++;
+		EV_MuzzleFlash();
+
+		int seq = GLOCK18_SHOOT;
+		if (empty)
+			seq = GLOCK18_SHOOT_EMPTY;
+		else
+			seq = UTIL_SharedRandomLong(gPseudoPlayer.random_seed, GLOCK18_SHOOT, GLOCK18_SHOOT3);
+
+		if (g_pCurWeapon)
+			g_pCurWeapon->SendWeaponAnim(seq);
+
+		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 0, 0.2, 10, 10, 10, EV_PISTOL_SMOKE, velocity, false, 35);
+		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 40, 0.4, 20, 20, 20, EV_WALL_PUFF, velocity, false, 35);
+	}
+
+	Vector ShellVelocity, ShellOrigin;
+	if (EV_IsLocal(idx))
+	{
+		if (cl_righthand->value == 0)
+			EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 36.0, -14.0, -14.0);
+		else
+			EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 36.0, -14.0, 14.0);
+
+		VectorCopy(g_pViewEnt->attachment[1], ShellOrigin);
+		VectorScale(ShellVelocity, 0.65, ShellVelocity);
+		ShellVelocity[2] += 25.0;
+	}
+	else
+		EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -12.0, -4.0);
+
+	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iPShell, TE_BOUNCE_SHELL, idx, 4);
+
+	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, G18C_FIRE_SFX, 1.0, ATTN_NORM, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
+
+	Vector vecSrc = EV_GetGunPosition(args, origin);
+	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
+
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, GLOCK18_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_GLOCK18].m_iAmmoType, GLOCK18_PENETRATION);
 }
 
 DECLARE_EVENT(Knife)
@@ -1486,7 +1595,52 @@ DECLARE_EVENT(FireMP7A1)
 
 DECLARE_EVENT(FireUMP45)
 {
+	int idx = args->entindex;
 
+	Vector origin, angles, velocity;
+	VectorCopy(args->origin, origin);
+	VectorCopy(args->angles, angles);
+	VectorCopy(args->velocity, velocity);
+
+	angles[0] += args->iparam1 / 100.0;
+	angles[1] += args->iparam2 / 100.0;
+
+	Vector forward, right, up;
+	gEngfuncs.pfnAngleVectors(angles, forward, right, up);
+
+	if (EV_IsLocal(idx))
+	{
+		g_iShotsFired++;
+		EV_MuzzleFlash();
+
+		if (g_pCurWeapon)
+			g_pCurWeapon->SendWeaponAnim(UTIL_SharedRandomLong(gPseudoPlayer.random_seed, UMP45_SHOOT1, UMP45_SHOOT3));
+
+		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 3, 0.25, 10, 10, 10, EV_PISTOL_SMOKE, velocity, false, 35);
+	}
+
+	Vector ShellVelocity, ShellOrigin;
+	if (EV_IsLocal(idx))
+	{
+		if (cl_righthand->value == 0)
+			EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 34.0, -10.0, -11.0);
+		else
+			EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 34.0, -10.0, 11.0);
+
+		VectorCopy(g_pViewEnt->attachment[1], ShellOrigin);
+		ShellVelocity[2] -= 50;
+	}
+	else
+		EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -12.0, -4.0);
+
+	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iPShell, TE_BOUNCE_SHELL, idx, 13);
+
+	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, UMP45_FIRE_SFX, 1.0, 0.64, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
+
+	Vector vecSrc = EV_GetGunPosition(args, origin);
+	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
+
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, UMP45_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_UMP45].m_iAmmoType, UMP45_PENETRATION);
 }
 
 DECLARE_EVENT(FireUSP)

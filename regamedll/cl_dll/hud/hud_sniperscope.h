@@ -17,7 +17,7 @@ constexpr float SCOPE_RATIOS[4] =
 	1920.0f / 1080.0f,
 };
 
-class CHudSniperScope : public CBaseHUDElement
+class CHudSniperScope : public CBaseHudElement
 {
 public:
 	enum Phase

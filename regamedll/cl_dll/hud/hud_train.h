@@ -6,7 +6,7 @@ Created Date: Mar 11 2020
 
 #pragma once
 
-class CHudTrain : public CBaseHUDElement
+class CHudTrain : public CBaseHudElement
 {
 public:
 	int Init(void);

@@ -47,7 +47,7 @@ cvar_t* hud_saytext_time = nullptr;
 
 namespace gHUD
 {
-	std::list<CBaseHUDElement*> m_lstAllHUDElems;
+	std::list<CBaseHudElement*> m_lstHudElements;
 
 	cvar_s* m_pCvarDraw = nullptr;
 	cvar_s* default_fov = nullptr;
@@ -129,7 +129,7 @@ void gHUD::Init(void)
 	m_iFOV = 0;
 
 	// we can't use this in init() since all these elements are adding themselves into std::list in init().
-	/*for (auto pHudElement : m_lstAllHUDElems)
+	/*for (auto pHudElement : m_lstHudElements)
 	{
 		pHudElement->Init();
 	}*/
@@ -224,7 +224,7 @@ void gHUD::Init(void)
 
 void gHUD::Shutdown(void)
 {
-	m_lstAllHUDElems.clear();
+	m_lstHudElements.clear();
 }
 
 void gHUD::VidInit(void)
@@ -313,7 +313,7 @@ void gHUD::VidInit(void)
 	m_szMOTD[0] = 0;
 	m_flTimeLeft = 0;
 
-	for (auto pHudElement : m_lstAllHUDElems)
+	for (auto pHudElement : m_lstHudElements)
 	{
 		pHudElement->VidInit();
 	}
@@ -375,7 +375,7 @@ int gHUD::Redraw(float flTime, int intermission)
 
 	if (m_pCvarDraw->value)
 	{
-		for (auto pHudElements : m_lstAllHUDElems)
+		for (auto pHudElements : m_lstHudElements)
 		{
 			if (!intermission)
 			{
@@ -416,7 +416,7 @@ float HUD_GetFOV(void)
 void gHUD::Think(void)
 {
 	// draw or not, you must think.
-	for (auto pHudElements : m_lstAllHUDElems)
+	for (auto pHudElements : m_lstHudElements)
 	{
 		if (pHudElements->m_bitsFlags & HUD_ACTIVE)
 			pHudElements->Think();
@@ -705,9 +705,9 @@ int gHUD::GetNumBits(int iNumber)
 	return bits;
 }
 
-void gHUD::AddHudElem(CBaseHUDElement* phudelem)
+void gHUD::AddHudElem(CBaseHudElement* phudelem)
 {
-	m_lstAllHUDElems.push_back(phudelem);
+	m_lstHudElements.push_back(phudelem);
 }
 
 float gHUD::GetSensitivity(void)

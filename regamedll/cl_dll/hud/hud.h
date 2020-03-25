@@ -112,7 +112,7 @@ typedef struct hud_player_info_s
 	uint64 m_nSteamID;
 } hud_player_info_t;
 
-class CBaseHUDElement
+class CBaseHudElement
 {
 public:
 	// avoid the complex memset();
@@ -124,8 +124,8 @@ public:
 	{
 		free(ptr);
 	}
-	CBaseHUDElement() {}
-	virtual ~CBaseHUDElement() {}
+	CBaseHudElement() {}
+	virtual ~CBaseHudElement() {}
 
 public:
 	int	  m_bitsFlags; // active, moving,
@@ -141,7 +141,7 @@ public:
 };
 
 /*
-class CHudExample : public CBaseHUDElement
+class CHudExample : public CBaseHudElement
 {
 public:
 	virtual int Init(void) { return 0; }
@@ -154,7 +154,7 @@ public:
 };
 */
 
-// dummy classes derived from CBaseHUDElement.
+// dummy classes derived from CBaseHudElement.
 class CHudAmmo;
 class CHudHealth;
 class CHudSpectator;
@@ -202,7 +202,7 @@ namespace gHUD
 	int DrawHudNumber(int x, int y, int iNumber, int r, int g, int b);
 	int GetNumWidth(int iNumber, int iFlags);
 	int GetNumBits(int iNumber);
-	void AddHudElem(CBaseHUDElement* phudelem);
+	void AddHudElem(CBaseHudElement* phudelem);
 	float GetSensitivity(void);
 	hSprite GetSprite(int index);
 	wrect_t GetSpriteRect(int index);
@@ -212,7 +212,7 @@ namespace gHUD
 	void SlotInput(int iSlot);
 
 	// VARs
-	extern std::list<CBaseHUDElement*> m_lstAllHUDElems;
+	extern std::list<CBaseHudElement*> m_lstHudElements;
 
 	extern cvar_s* m_pCvarDraw;
 	extern cvar_s* default_fov;

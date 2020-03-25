@@ -6,12 +6,13 @@ Created Date: Mar 11 2020
 
 #pragma once
 
-class CHudBattery : public CBaseHUDElement
+class CHudBattery : public CBaseHudElement
 {
 public:
 	int Init(void);
 	int VidInit(void);
 	int Draw(float flTime);
+	void InitHUDData(void);
 
 	void MsgFunc_Battery(int& iNewArmourValue);
 	void MsgFunc_ArmorType(int& iArmourType);

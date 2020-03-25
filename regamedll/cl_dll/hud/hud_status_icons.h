@@ -6,7 +6,7 @@ Created Date: Mar 12 2020
 
 #pragma once
 
-class CHudStatusIcons : public CBaseHUDElement
+class CHudStatusIcons : public CBaseHudElement
 {
 public:
 	int Init(void);

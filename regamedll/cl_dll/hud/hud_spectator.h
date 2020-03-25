@@ -57,7 +57,7 @@ typedef struct overviewEntity_s
 }
 overviewEntity_t;
 
-class CHudSpectator : public CBaseHUDElement
+class CHudSpectator : public CBaseHudElement
 {
 public:
 	void Reset(void);

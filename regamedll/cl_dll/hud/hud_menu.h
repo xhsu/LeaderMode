@@ -8,7 +8,7 @@ Created Date: Mar 11 2020
 
 #define MAX_MENU_STRING 512
 
-class CHudMenu : public CBaseHUDElement
+class CHudMenu : public CBaseHudElement
 {
 public:
 	int Init(void);
