@@ -71,6 +71,7 @@ extern float g_flPlayerSpeed;
 extern int g_iWeaponFlags;
 extern int g_iWaterLevel;
 extern float g_flRoundTime;
+extern RoleTypes g_iRoleType;
 
 extern extra_player_info_t	g_PlayerExtraInfo[MAX_PLAYERS]; // additional player info sent directly to the client.dll
 

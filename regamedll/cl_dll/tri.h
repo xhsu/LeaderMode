@@ -21,6 +21,7 @@ extern FogParameters g_FogParameters;
 namespace DrawUtils
 {
 	void Draw2DQuad(float x1, float y1, float x2, float y2);
+	void Draw2DProgressBar(float x, float y, float flWidth, float flFullLength, float flPercent);
 }
 
 // export funcs

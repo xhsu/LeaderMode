@@ -17,7 +17,7 @@ int CHudAmmo::Init(void)
 	Q_memset(&m_rghAmmoSprite, NULL, sizeof(m_rghAmmoSprite));
 	Q_memset(&m_rgrcAmmoSprite, NULL, sizeof(m_rgrcAmmoSprite));
 
-	m_bitsFlags |= HUD_ACTIVE;
+	m_bitsFlags &= ~HUD_ACTIVE;	// LUNA: this is now abolished.
 	return 1;
 };
 
@@ -138,14 +138,10 @@ int CHudAmmo::Draw(float flTime)
 	return 1;
 }
 
-void CHudAmmo::Think(void)
-{
-}
-
 void CHudAmmo::Reset(void)
 {
 	m_flAlpha = 255;
-	m_bitsFlags |= HUD_ACTIVE;
+	m_bitsFlags &= ~HUD_ACTIVE;	// LUNA: this is now abolished.
 	m_iLastDrawnBpAmmo = -1;
 	m_iLastDrawnClip = -1;
 }

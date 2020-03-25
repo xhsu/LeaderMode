@@ -8,10 +8,11 @@ Created Date: Mar 11 2020
 
 int CHudBattery::Init(void)
 {
-	m_iBat = 0;
+	m_flArmour = 0;
 	m_fFade = 0;
 	m_bitsFlags = 0;
 	m_iArmorType = 0;
+	m_flDrawingArmour = 0;
 
 	gHUD::AddHudElem(this);
 
@@ -58,9 +59,9 @@ int CHudBattery::Draw(float flTime)
 	wrect_t rc = *prcFull;
 
 	// battery can go from 0 to 100 so * 0.01 goes from 0 to 1
-	rc.top += m_iHeight * ((float)(100 - (Q_min(100, m_iBat))) * 0.01f);
-
-	UnpackRGB(r, g, b, RGB_YELLOWISH);
+	float flPercent = m_flDrawingArmour / GetMaxArmour();
+	rc.top += m_iHeight * (1.0f - flPercent);
+	m_flDrawingArmour += (m_flArmour - m_flDrawingArmour) * gHUD::m_flTimeDelta * 5.0f;
 
 	if (!(gHUD::m_iWeaponBits & (1 << (WEAPON_SUIT))))
 		return 1;
@@ -84,10 +85,11 @@ int CHudBattery::Draw(float flTime)
 	else
 		a = MIN_ALPHA;
 
+	UnpackRGB(r, g, b, RGB_YELLOWISH);
 	ScaleColors(r, g, b, a);
 
-	y = ScreenHeight - gHUD::m_iFontHeight - gHUD::m_iFontHeight / 2;
-	x = ScreenWidth / 5;
+	x = HEALTH_BASIC_OFS;//ScreenWidth / 5;
+	y = gHUD::m_Health.m_flLastDrawingY - (prcEmpty->bottom - prcEmpty->top) - HEALTH_BASIC_OFS;//ScreenHeight - gHUD::m_iFontHeight - gHUD::m_iFontHeight / 2;
 
 	gEngfuncs.pfnSPR_Set(hSpriteEmpty, r, g, b);
 	gEngfuncs.pfnSPR_DrawAdditive(0, x, y, prcEmpty);
@@ -98,8 +100,28 @@ int CHudBattery::Draw(float flTime)
 		gEngfuncs.pfnSPR_DrawAdditive(0, x, y + (rc.top - prcFull->top), &rc);
 	}
 
-	x += (prcEmpty->right - prcEmpty->left);
-	x = gHUD::DrawHudNumber(x, y, DHN_3DIGITS | DHN_DRAWZERO, m_iBat, r, g, b);
+	x += (prcEmpty->right - prcEmpty->left) + HEALTH_ICON_BAR_INTERSPACE;
+	y += (prcEmpty->bottom - prcEmpty->top - HEALTH_BAR_WIDTH) / 2;
+
+	glDisable(GL_TEXTURE_2D);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	if (m_iArmorType >= 1)
+		UnpackRGB(r, g, b, RGB_SPRINGGREENISH);
+	else
+		UnpackRGB(r, g, b, RGB_YELLOWISH);	// we can't use scaled colour on our bar!
+
+	glColor4f(r / 255.0, g / 255.0, b / 255.0, a / 255.0);
+
+	float flLength = HEALTH_BAR_LENGTH;
+	if (g_iRoleType == Role_SWAT)
+		flLength *= 2.0f;
+
+	DrawUtils::Draw2DProgressBar(x, y, HEALTH_BAR_WIDTH, flLength, flPercent);
+
+	glDisable(GL_BLEND);
+	glEnable(GL_TEXTURE_2D);
 
 	return 1;
 }
@@ -108,10 +130,10 @@ void CHudBattery::MsgFunc_Battery(int& iNewArmourValue)
 {
 	m_bitsFlags |= HUD_ACTIVE;
 
-	if (iNewArmourValue != m_iBat)
+	if (iNewArmourValue != m_flArmour)
 	{
 		m_fFade = FADE_TIME;
-		m_iBat = iNewArmourValue;
+		m_flArmour = iNewArmourValue;
 
 		if (iNewArmourValue <= 0)
 			m_iArmorType = 0;
@@ -121,4 +143,12 @@ void CHudBattery::MsgFunc_Battery(int& iNewArmourValue)
 void CHudBattery::MsgFunc_ArmorType(int& iArmourType)
 {
 	m_iArmorType = iArmourType;
+}
+
+float CHudBattery::GetMaxArmour(void)
+{
+	if (g_iRoleType == Role_SWAT)
+		return 200.0f;
+
+	return 100.0f;
 }

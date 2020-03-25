@@ -32,6 +32,8 @@ int CHudHealth::Init(void)
 	m_fAttackFront = m_fAttackRear = m_fAttackRight = m_fAttackLeft = 0;
 	giDmgHeight = 0;
 	giDmgWidth = 0;
+	m_hBloodScreen = 0;
+	m_flDrawingHealth = 0;
 
 	Q_memset(m_dmg, 0, sizeof(DAMAGE_IMAGE) * NUM_DMG_TYPES);
 
@@ -51,6 +53,8 @@ int CHudHealth::VidInit(void)
 
 	giDmgHeight = gHUD::GetSpriteRect(m_HUD_dmg_bio).right - gHUD::GetSpriteRect(m_HUD_dmg_bio).left;
 	giDmgWidth = gHUD::GetSpriteRect(m_HUD_dmg_bio).bottom - gHUD::GetSpriteRect(m_HUD_dmg_bio).top;
+
+	m_hBloodScreen = LoadDDS("texture/Screen/BloodScreen.dds");
 
 	return 1;
 }
@@ -85,26 +89,113 @@ int CHudHealth::Draw(float flTime)
 	if (m_iHealth <= 15)
 		a = 255;
 
-	GetPainColor(r, g, b);
-	ScaleColors(r, g, b, a);
+	if (!(gHUD::m_iWeaponBits & (1 << WEAPON_SUIT)))
+		return 0;
 
-	if (gHUD::m_iWeaponBits & (1 << (WEAPON_SUIT)))
+	// bloody screen
+	float flMaxHealth = GetMaxHealth();
+	m_flDrawingHealth += (float(m_iHealth) - m_flDrawingHealth) * gHUD::m_flTimeDelta * 5.0f;	// drifting.
+	float flHealthPercent = m_flDrawingHealth / flMaxHealth;	// not actual health.
+	float flAlpha = 255.0f * (1.0f - flHealthPercent);
+	flAlpha = Q_clamp(flAlpha, 0.0f, 255.0f);
+
+	gEngfuncs.pTriAPI->RenderMode(kRenderTransTexture);
+	glColor4ub(255, 255, 255, flAlpha);
+	glBindTexture(GL_TEXTURE_2D, m_hBloodScreen);
+	DrawUtils::Draw2DQuad(0, 0, ScreenWidth, ScreenHeight);
+
+	// red cross.
+	HealthWidth = gHUD::GetSpriteRect(gHUD::m_HUD_number_0).right - gHUD::GetSpriteRect(gHUD::m_HUD_number_0).left;
+	int CrossWidth = gHUD::GetSpriteRect(m_HUD_cross).right - gHUD::GetSpriteRect(m_HUD_cross).left;
+
+	y = ScreenHeight - HEALTH_BASIC_OFS - (gHUD::GetSpriteRect(m_HUD_cross).bottom - gHUD::GetSpriteRect(m_HUD_cross).top);
+	x = HEALTH_BASIC_OFS;
+
+	// shaking VFX.
+	if (flHealthPercent <= 0.25f)
 	{
-		HealthWidth = gHUD::GetSpriteRect(gHUD::m_HUD_number_0).right - gHUD::GetSpriteRect(gHUD::m_HUD_number_0).left;
-
-		int CrossWidth = gHUD::GetSpriteRect(m_HUD_cross).right - gHUD::GetSpriteRect(m_HUD_cross).left;
-
-		y = ScreenHeight - gHUD::m_iFontHeight - gHUD::m_iFontHeight / 2;
-		x = CrossWidth / 2;
-
-		gEngfuncs.pfnSPR_Set(gHUD::GetSprite(m_HUD_cross), r, g, b);
-		gEngfuncs.pfnSPR_DrawAdditive(0, x, y, &gHUD::GetSpriteRect(m_HUD_cross));
-
-		x = CrossWidth + HealthWidth / 2;
-		x = gHUD::DrawHudNumber(x, y, DHN_4DIGITS | DHN_DRAWZERO, m_iHealth, r, g, b);
-		x += HealthWidth / 2;
+		x += RANDOM_LONG(-HEALTH_SHAKE_AMPLITUDE, HEALTH_SHAKE_AMPLITUDE);
+		y += RANDOM_LONG(-HEALTH_SHAKE_AMPLITUDE, HEALTH_SHAKE_AMPLITUDE);
+		UnpackRGB(r, g, b, RGB_REDISH);
+	}
+	else
+	{
+		UnpackRGB(r, g, b, RGB_YELLOWISH);
 	}
 
+	//ScaleColors(r, g, b, a);
+	gEngfuncs.pfnSPR_Set(gHUD::GetSprite(m_HUD_cross), r, g, b);
+	gEngfuncs.pfnSPR_DrawAdditive(0, x, y, &gHUD::GetSpriteRect(m_HUD_cross));
+
+	// export Y for other HUDs
+	m_flLastDrawingY = y;
+
+	x += CrossWidth + HEALTH_ICON_BAR_INTERSPACE;
+	y += (gHUD::GetSpriteRect(m_HUD_cross).bottom - gHUD::GetSpriteRect(m_HUD_cross).top - HEALTH_BAR_WIDTH) / 2;
+
+	// health bar.
+	float flFullLength = HEALTH_BAR_LENGTH;
+	if (g_iRoleType == Role_Commander || g_iRoleType == Role_Godfather)
+		flFullLength *= 2.0f;
+
+	float flCurLength = flHealthPercent * flFullLength;
+
+	glDisable(GL_TEXTURE_2D);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glColor4f(r / 255.0, g / 255.0, b / 255.0, a / 255.0);
+
+	// the border of health bar.
+	glBegin(GL_LINE_LOOP);
+	glVertex2f(x, y);
+	glVertex2f(x + flFullLength, y);
+	glVertex2f(x + flFullLength, y + HEALTH_BAR_WIDTH);
+	glVertex2f(x, y + HEALTH_BAR_WIDTH);
+	glEnd();
+
+	// fill the health bar.
+	glBegin(GL_QUADS);
+	glVertex2f(x + 1, y + 2);
+	glVertex2f(x + round(flCurLength) - 2, y + 2);
+	glVertex2f(x + round(flCurLength) - 2, y + HEALTH_BAR_WIDTH - 1);
+	glVertex2f(x + 1, y + HEALTH_BAR_WIDTH - 1);
+	glEnd();
+
+	if (int(m_flDrawingHealth) > m_iHealth)	// loosing blood!
+	{
+		UnpackRGB(r, g, b, RGB_REDISH);
+		glColor4f(r / 255.0, g / 255.0, b / 255.0, 1);	// always on full bright.
+
+		x += round(1.0f + float(m_iHealth) / flMaxHealth * flFullLength);
+		flCurLength = Q_fabs(m_flDrawingHealth - float(m_iHealth)) / flMaxHealth * flFullLength;
+
+		glBegin(GL_QUADS);
+		glVertex2f(x, y + 2);
+		glVertex2f(x + round(flCurLength) - 2, y + 2);
+		glVertex2f(x + round(flCurLength) - 2, y + HEALTH_BAR_WIDTH - 1);
+		glVertex2f(x, y + HEALTH_BAR_WIDTH - 1);
+		glEnd();
+	}
+	else if (round(m_flDrawingHealth) < m_iHealth)	// we are on mending!
+	{
+		UnpackRGB(r, g, b, RGB_CYANISH);
+		glColor4f(r / 255.0, g / 255.0, b / 255.0, 1);	// always on full bright.
+
+		x += round(flCurLength) - 1;
+		flCurLength = Q_fabs(m_flDrawingHealth - float(m_iHealth)) / flMaxHealth * flFullLength;
+
+		glBegin(GL_QUADS);
+		glVertex2f(x, y + 2);
+		glVertex2f(x + round(flCurLength) - 2, y + 2);
+		glVertex2f(x + round(flCurLength) - 2, y + HEALTH_BAR_WIDTH - 1);
+		glVertex2f(x, y + HEALTH_BAR_WIDTH - 1);
+		glEnd();
+	}
+
+	glDisable(GL_BLEND);
+	glEnable(GL_TEXTURE_2D);
+
+	// other stuff
 	DrawDamage(flTime);
 	return DrawPain(flTime);
 }
@@ -137,27 +228,6 @@ void CHudHealth::MsgFunc_Damage(int& armor, int& damageTaken, int& bitsDamage, V
 		CalcDamageDirection(vecFrom);
 }
 
-void CHudHealth::GetPainColor(int& r, int& g, int& b)
-{
-	int iHealth = m_iHealth;
-
-	if (iHealth > 25)
-		iHealth -= 25;
-	else if (iHealth < 0)
-		iHealth = 0;
-
-	if (m_iHealth > 25)
-	{
-		UnpackRGB(r, g, b, RGB_YELLOWISH);
-	}
-	else
-	{
-		r = 250;
-		g = 0;
-		b = 0;
-	}
-}
-
 int CHudHealth::DrawPain(float flTime)
 {
 	if (!(m_fAttackFront || m_fAttackRear || m_fAttackLeft || m_fAttackRight))
@@ -172,7 +242,7 @@ int CHudHealth::DrawPain(float flTime)
 
 	if (m_fAttackFront > 0.4)
 	{
-		GetPainColor(r, g, b);
+		UnpackRGB(r, g, b, RGB_REDISH);
 		shade = a * Q_max(m_fAttackFront, 0.5f);
 		ScaleColors(r, g, b, shade);
 		gEngfuncs.pfnSPR_Set(m_hSprite, r, g, b);
@@ -187,7 +257,7 @@ int CHudHealth::DrawPain(float flTime)
 
 	if (m_fAttackRight > 0.4)
 	{
-		GetPainColor(r, g, b);
+		UnpackRGB(r, g, b, RGB_REDISH);
 		shade = a * Q_max(m_fAttackRight, 0.5f);
 		ScaleColors(r, g, b, shade);
 		gEngfuncs.pfnSPR_Set(m_hSprite, r, g, b);
@@ -202,7 +272,7 @@ int CHudHealth::DrawPain(float flTime)
 
 	if (m_fAttackRear > 0.4)
 	{
-		GetPainColor(r, g, b);
+		UnpackRGB(r, g, b, RGB_REDISH);
 		shade = a * Q_max(m_fAttackRear, 0.5f);
 		ScaleColors(r, g, b, shade);
 		gEngfuncs.pfnSPR_Set(m_hSprite, r, g, b);
@@ -217,7 +287,7 @@ int CHudHealth::DrawPain(float flTime)
 
 	if (m_fAttackLeft > 0.4)
 	{
-		GetPainColor(r, g, b);
+		UnpackRGB(r, g, b, RGB_REDISH);
 		shade = a * Q_max(m_fAttackLeft, 0.5f);
 		ScaleColors(r, g, b, shade);
 		gEngfuncs.pfnSPR_Set(m_hSprite, r, g, b);
@@ -382,4 +452,12 @@ void CHudHealth::UpdateTiles(float flTime, long bitsDamage)
 	}
 
 	m_bitsDamage |= bitsDamage;
+}
+
+float CHudHealth::GetMaxHealth(void)
+{
+	if (g_iRoleType == Role_Commander || g_iRoleType == Role_Godfather)
+		return 1000.0f;
+
+	return 100.0f;
 }

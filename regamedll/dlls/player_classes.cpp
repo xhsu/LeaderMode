@@ -521,6 +521,9 @@ bool CSkillBulletproof::Execute()
 	// reload all weapons
 	for (auto pWeapon : CBaseWeapon::m_lstWeapons)
 	{
+		if (!pWeapon->m_pPlayer.IsValid())
+			continue;
+
 		if (pWeapon->m_pPlayer->entindex() != m_pPlayer->entindex())
 			continue;
 
@@ -541,6 +544,9 @@ bool CSkillBulletproof::Execute()
 
 		for (auto pWeapon : CBaseWeapon::m_lstWeapons)
 		{
+			if (!pWeapon->m_pPlayer.IsValid())
+				continue;
+
 			if (pWeapon->m_pPlayer->entindex() != m_pPlayer->entindex())
 				continue;
 

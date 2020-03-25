@@ -131,7 +131,7 @@ GLuint gl_load_dds(GLvoid* pBuffer, int* iWidth, int* iHeight)
 
 	data = (GLvoid*)(header + 1);    // header data skipped
 
-	//int iTextureID = g_pSurface->CreateNewTextureID();
+	//int iTextureID = VGUI_SURFACE->CreateNewTextureID();
 	GLuint iTextureID;
 	glGenTextures(1, &iTextureID);
 	glBindTexture(GL_TEXTURE_2D, iTextureID);

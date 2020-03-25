@@ -2620,8 +2620,7 @@ void EXT_FUNC CBasePlayer::AddAccount(int amount, RewardType type, bool bTrackCh
 		// Send money update to HUD
 		MESSAGE_BEGIN(MSG_ALL, gmsgMoney);
 			WRITE_BYTE(entindex());
-			WRITE_LONG(m_iAccount);
-			WRITE_BYTE(bTrackChange);
+			WRITE_SHORT(m_iAccount);
 		MESSAGE_END();
 	}
 }
@@ -3386,6 +3385,14 @@ void EXT_FUNC CBasePlayer::AddPointsToTeam(int score, BOOL bAllowNegativeScore)
 
 void EXT_FUNC CBasePlayer::PreThink()
 {
+	// Merge shooting recoil into bot's v_angle
+	if (IsBot() && m_vecVAngleShift.LengthSquared())
+	{
+		pev->v_angle += m_vecVAngleShift;
+		pev->fixangle = TRUE;
+		m_vecVAngleShift = g_vecZero;
+	}
+
 	// These buttons have changed this frame
 	int buttonsChanged = (m_afButtonLast ^ pev->button);
 
@@ -4712,8 +4719,7 @@ void CBasePlayer::Reset()
 
 	MESSAGE_BEGIN(MSG_ALL, gmsgMoney);
 		WRITE_BYTE(entindex());
-		WRITE_LONG(m_iAccount);
-		WRITE_BYTE(FALSE);
+		WRITE_SHORT(m_iAccount);
 	MESSAGE_END();
 
 	m_bNotKilled = false;
@@ -5581,8 +5587,7 @@ void EXT_FUNC CBasePlayer::UpdateClientData()
 
 		MESSAGE_BEGIN(MSG_ONE, gmsgMoney, nullptr, pev);
 			WRITE_BYTE(entindex());
-			WRITE_LONG(m_iAccount);
-			WRITE_BYTE(0);
+			WRITE_SHORT(m_iAccount);
 		MESSAGE_END();
 
 		SyncRoundTimer();

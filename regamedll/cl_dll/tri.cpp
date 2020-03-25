@@ -83,3 +83,26 @@ void DrawUtils::Draw2DQuad(float x1, float y1, float x2, float y2)
 
 	gEngfuncs.pTriAPI->End();
 }
+
+void DrawUtils::Draw2DProgressBar(float x, float y, float flWidth, float flFullLength, float flPercent)
+{
+	// the border of bar.
+	glBegin(GL_LINE_LOOP);
+	glVertex2f(x, y);
+	glVertex2f(x + flFullLength, y);
+	glVertex2f(x + flFullLength, y + flWidth);
+	glVertex2f(x, y + flWidth);
+	glEnd();
+
+	// too short to be drawn.
+	if (flPercent * flFullLength < 0.5f)
+		return;
+
+	// fill the bar.
+	glBegin(GL_QUADS);
+	glVertex2f(x + 1.0f, y + 2.0f);
+	glVertex2f(x + flFullLength * flPercent - 2.0f, y + 2.0f);
+	glVertex2f(x + flFullLength * flPercent - 2.0f, y + flWidth - 1.0f);
+	glVertex2f(x + 1.0f, y + flWidth - 1.0f);
+	glEnd();
+}

@@ -127,8 +127,10 @@ int CHudWeaponList::Draw(float flTime)
 	if (!iTotalHeight)
 		return 0;
 
-	int x, y = (ScreenHeight - iTotalHeight) / 2;
+	// LUNA: weaponlist would now replace the position of original Money & Clip/Ammo.
+	int x, y = (ScreenHeight - iTotalHeight)/* / 2*/;
 
+	// calculate the Dest coordinate.
 	for (int i = 0; i < MAX_ITEM_TYPES; i++)
 	{
 		if (!m_rgphList[i] || !*m_rgphList[i] || !m_rgprcList[i])

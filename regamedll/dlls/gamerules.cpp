@@ -2409,8 +2409,7 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer *pl)
 
 		MESSAGE_BEGIN(MSG_ONE, gmsgMoney, nullptr, pl->edict());
 			WRITE_BYTE(plr->entindex());
-			WRITE_LONG(plr->ShouldToShowAccount(pl) ? plr->m_iAccount : -1 /* means that this 'Money' will be hidden */);
-			WRITE_BYTE(FALSE);
+			WRITE_SHORT(plr->ShouldToShowAccount(pl) ? plr->m_iAccount : -1 /* means that this 'Money' will be hidden */);
 		MESSAGE_END();
 
 		MESSAGE_BEGIN(MSG_ONE, gmsgRole, nullptr, pl->edict());	// tell him who is who. (?)

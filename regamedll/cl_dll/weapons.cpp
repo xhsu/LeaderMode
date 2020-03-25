@@ -630,11 +630,8 @@ bool CBaseWeapon::DefaultReload(int iClipSize, int iAnim, float fDelay)
 	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		return false;
 
-	int j = Q_min(iClipSize - m_iClip, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]);
-	if (!j)
-	{
+	if (m_iClip >= iClipSize)
 		return false;
-	}
 
 	// exit scope
 	if (m_bInZoom || int(m_pPlayer->pev->fov) != DEFAULT_FOV)
@@ -750,6 +747,9 @@ void CBaseWeapon::KickBack(float up_base, float lateral_base, float up_modifier,
 	{
 		m_bDirection = !m_bDirection;
 	}
+
+	if (m_bInZoom)
+		m_pPlayer->m_vecVAngleShift *= 0.5f;
 }
 
 //

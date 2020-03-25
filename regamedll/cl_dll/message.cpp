@@ -480,14 +480,13 @@ MSG_FUNC(Money)
 	BEGIN_READ(pbuf, iSize);
 
 	int iPlayerId = READ_BYTE();
-	int iAccount = READ_LONG();
-	BOOL FTrackChange = READ_BYTE();
+	int iAccount = READ_SHORT();
 
 	g_PlayerExtraInfo[iPlayerId].m_iAccount = iAccount;
 
 	// if it is the local player, call the HUD func.
 	if (iPlayerId == gEngfuncs.GetLocalPlayer()->index)
-		gHUD::m_accountBalance.MsgFunc_Money(iAccount, FTrackChange);
+		gHUD::m_accountBalance.MsgFunc_Money(iAccount);
 
 	return TRUE;
 }
@@ -998,6 +997,17 @@ MSG_FUNC(Role)
 	int iRole = READ_BYTE();
 
 	g_PlayerExtraInfo[iPlayerId].m_iRoleType = (RoleTypes)iRole;
+
+	if (EV_IsLocal(iPlayerId))
+	{
+		g_iRoleType = (RoleTypes)iRole;
+
+		// fix the flash blood screen bug.
+		// LUNA: in the SV, we update the Role info on the frame we assign, however, we won't update health info until next frame.
+		if (gHUD::m_Health.m_iHealth == 100 && (iRole == Role_Commander || iRole == Role_Godfather))
+			gHUD::m_Health.m_iHealth = 1000;
+	}
+
 	return TRUE;
 }
 

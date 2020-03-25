@@ -32,6 +32,7 @@ float g_flPlayerSpeed;
 int g_iWeaponFlags;
 int g_iWaterLevel;
 float g_flRoundTime = 0;
+RoleTypes g_iRoleType = Role_UNASSIGNED;
 
 extra_player_info_t	g_PlayerExtraInfo[MAX_PLAYERS]; // additional player info sent directly to the client.dll
 

@@ -177,7 +177,7 @@ void LinkUserMessages()
 	gmsgAmmoX         = REG_USER_MSG("AmmoX", 2);
 	gmsgSendAudio     = REG_USER_MSG("SendAudio", -1);
 	gmsgRoundTime     = REG_USER_MSG("RoundTime", 2);
-	gmsgMoney         = REG_USER_MSG("Money", 6);
+	gmsgMoney         = REG_USER_MSG("Money", 3);
 	gmsgArmorType     = REG_USER_MSG("ArmorType", 1);
 	gmsgBlinkAcct     = REG_USER_MSG("BlinkAcct", 1);
 	gmsgStatusValue   = REG_USER_MSG("StatusValue", -1);
