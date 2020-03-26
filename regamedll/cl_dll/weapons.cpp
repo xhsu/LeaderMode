@@ -11,7 +11,8 @@ double g_flGameTime = 0;
 const Vector g_vecZero = Vector(0, 0, 0);
 int g_iCurViewModelAnim = 0;
 CBaseWeapon* g_pCurWeapon = nullptr;
-WeaponIdType g_iSelectedWeapon = WEAPON_NONE;
+WeaponIdType g_iSelectedWeapon = WEAPON_NONE;	// this means directly switch weapon. try to use gPseudoPlayer.StartSwitchingWeapon() instead!
+usercmd_t* g_pCurUserCmd = nullptr;	// WARNING: use this within weapon's prediction code only.
 
 CBasePlayer gPseudoPlayer;
 std::shared_ptr<pseudo_global_vars_s> gpGlobals;
@@ -138,6 +139,54 @@ void CBasePlayer::ResetUsingEquipment(void)
 	m_iUsingGrenadeId = iCandidate;
 }
 
+bool CBasePlayer::StartSwitchingWeapon(CBaseWeapon* pSwitchingTo)
+{
+	if (!pSwitchingTo)
+		return false;
+
+	// TODO
+	if ((m_pActiveItem && !m_pActiveItem->CanHolster()) /*|| !pSwitchingTo->CanDeploy()*/)
+		return false;
+
+	if (m_pActiveItem)
+	{
+		m_pActiveItem->HolsterStart();
+		m_iWpnSwitchingTo = pSwitchingTo->m_iId;
+
+		return true;
+	}
+	else
+	{
+		// no active weapon? which means we can directly deploy this one.
+		g_iSelectedWeapon = pSwitchingTo->m_iId;
+		return true;
+	}
+}
+
+bool CBasePlayer::StartSwitchingWeapon(WeaponIdType iId)
+{
+	if (iId <= WEAPON_NONE || iId >= LAST_WEAPON)
+		return false;
+
+	// TODO
+	if ((m_pActiveItem && !m_pActiveItem->CanHolster()) /*|| !pSwitchingTo->CanDeploy()*/)
+		return false;
+
+	if (m_pActiveItem)
+	{
+		m_pActiveItem->HolsterStart();
+		m_iWpnSwitchingTo = iId;
+
+		return true;
+	}
+	else
+	{
+		// no active weapon? which means we can directly deploy this one.
+		g_iSelectedWeapon = iId;
+		return true;
+	}
+}
+
 //
 // PSEUDO-WEAPON
 //
@@ -199,6 +248,10 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 		p = new CKSG12;
 		break;
 
+	case WEAPON_M4A1:
+		p = new CM4A1;
+		break;
+
 	case WEAPON_MP7A1:
 		p = new CMP7A1;
 		break;
@@ -245,17 +298,55 @@ void CBaseWeapon::Think(void)
 		// we do nothing on client side.
 		// that's because the brass ejected is visible globally, thus, it should be managed by SV.
 	}
+
+	if (!(m_bitsFlags & WPNSTATE_BUSY) && m_pPlayer->m_afButtonPressed & IN_RUN && m_pPlayer->pev->button & IN_FORWARD && !(m_pPlayer->pev->button & IN_DUCK))
+	{
+		if (m_bInReload)
+			PushAnim();
+
+		if (m_bInZoom || m_pPlayer->pev->fov < 90)
+			SecondaryAttack();
+
+		DashStart();
+	}
+
+	if (m_bitsFlags & WPNSTATE_DASHING &&
+		(m_pPlayer->m_afButtonReleased & IN_RUN || !(m_pPlayer->pev->button & IN_FORWARD) || m_pPlayer->pev->button & IN_DUCK/* || m_pPlayer->pev->velocity.Length2D() < 50.0f*/)
+		)
+	{
+		DashEnd();
+	}
 }
 
 bool CBaseWeapon::AddToPlayer(CBasePlayer* pPlayer)
 {
 	m_pPlayer = pPlayer;
+	m_bitsFlags |= WPNSTATE_DRAW_FIRST;
 	return true;
 }
 
 void CBaseWeapon::PostFrame()
 {
 	int usableButtons = m_pPlayer->pev->button;
+
+	// if we should be holster, then just do it. stop everything else.
+	if (m_bitsFlags & WPNSTATE_HOLSTERING)
+	{
+		// only assign g_iSelectedWeapon is not quick enough. it has to wait another frame to work.
+		// therefore, we must directly set cmd->weaponselect.
+		g_iSelectedWeapon = m_pPlayer->m_iWpnSwitchingTo;
+		g_pCurUserCmd->weaponselect = m_pPlayer->m_iWpnSwitchingTo;
+		return;
+	}
+
+	// we can't do anything during dash.
+	if (m_bitsFlags & WPNSTATE_DASHING)
+	{
+		if (m_flTimeWeaponIdle < UTIL_WeaponTimeBase())
+			WeaponIdle();
+
+		return;
+	}
 
 	// since the call of BasicKnife::Swing() block the normal PostFrame() calls, this must be afterwards.
 	// so the only thing we need to do here is to resume everything back to normal.
@@ -274,7 +365,7 @@ void CBaseWeapon::PostFrame()
 		else
 		{
 			// or, holster & re-deploy our gun.
-			Holster();
+			Holstered();
 			Deploy();
 		}
 
@@ -282,6 +373,7 @@ void CBaseWeapon::PostFrame()
 		return;
 	}
 
+	// the handle of WPNSTATE_QUICK_THROWING
 	if (m_bitsFlags & WPNSTATE_QUICK_THROWING)
 	{
 		if (m_bitsFlags & WPNSTATE_QT_EXIT)
@@ -290,7 +382,7 @@ void CBaseWeapon::PostFrame()
 			m_bitsFlags &= ~(WPNSTATE_QUICK_THROWING | WPNSTATE_QT_RELEASE | WPNSTATE_QT_SHOULD_SPAWN | WPNSTATE_QT_EXIT);
 
 			// back to our weapon.
-			Holster();
+			Holstered();
 			Deploy();
 
 			// don't do this on CL side.
@@ -376,7 +468,7 @@ void CBaseWeapon::PostFrame()
 	}
 
 	// Return zoom level back to previous zoom level before we fired a shot.
-	// This is used only for the AWP and Scout
+	// It could also be used in entering a scope with a delay.
 	if (m_flNextPrimaryAttack <= UTIL_WeaponTimeBase())
 	{
 		if (m_pPlayer->m_bResumeZoom)
@@ -390,23 +482,30 @@ void CBaseWeapon::PostFrame()
 		}
 	}
 
+	// complete the magazine-based reload.
 	if (m_bInReload && m_pPlayer->m_flNextAttack <= UTIL_WeaponTimeBase())
 	{
-		// complete the reload.
 		int j = Q_min(m_pItemInfo->m_iMaxClip - m_iClip, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]);
 
 		// Add them to the clip
 		m_iClip += j;
 		m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= j;
 
+		// not reloaded from empty? extra 1 bullet.
+		if (!(m_bitsFlags & WPNSTATE_RELOAD_EMPTY) && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] > 0)
+		{
+			m_iClip++;
+			m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
+		}
+
 		m_bInReload = false;
+		m_bitsFlags &= ~WPNSTATE_RELOAD_EMPTY;	// remove it anyway.
 	}
 
 	// LUNA: there are some problems regarding client prediction.
 	// sometimes, the client side m_flNextPrimaryAttack and m_flNextSecondaryAttack would be wirely re-zero and induce multiple bullet hole VFX bug.
 	// thus, I decide to use message instead. (gmsgShoot and gmsgSteelSight)
 	// UPDATE Mar 25: I managed to fix PrimAttack. However, due to many server-exclusive entity, the steelsight still can't be predict on client side.
-
 
 	/*if ((usableButtons & IN_ATTACK2) && m_flNextSecondaryAttack <= UTIL_WeaponTimeBase())	// UseDecrement()
 	{
@@ -456,7 +555,6 @@ void CBaseWeapon::PostFrame()
 			}
 		}
 
-
 		if (!(m_bitsFlags & WPNSTATE_SHIELD_DRAWN))
 		{
 			// weapon is useable. Reload if empty and weapon has waited as long as it has to after firing
@@ -468,6 +566,10 @@ void CBaseWeapon::PostFrame()
 		}
 	}
 
+	// remove the first draw flag here. why? make sure player watch it all through.
+	if (m_bitsFlags & WPNSTATE_DRAW_FIRST)
+		m_bitsFlags &= ~WPNSTATE_DRAW_FIRST;
+
 	// catch all
 	if (m_flTimeWeaponIdle < UTIL_WeaponTimeBase())
 	{
@@ -478,7 +580,7 @@ void CBaseWeapon::PostFrame()
 bool CBaseWeapon::Melee(void)
 {
 	// you just.. can't do this.
-	if (m_bitsFlags & (WPNSTATE_MELEE | WPNSTATE_QUICK_THROWING))
+	if (m_bitsFlags & WPNSTATE_BUSY)
 		return false;
 
 	if (m_bInZoom)
@@ -494,7 +596,7 @@ bool CBaseWeapon::Melee(void)
 
 bool CBaseWeapon::QuickThrowStart(EquipmentIdType iId)
 {
-	if (m_bitsFlags & (WPNSTATE_MELEE | WPNSTATE_QUICK_THROWING))
+	if (m_bitsFlags & WPNSTATE_BUSY)
 		return false;
 
 	if (!m_pPlayer->GetGrenadeInventory(iId))
@@ -560,24 +662,30 @@ bool CBaseWeapon::QuickThrowRelease(void)
 	return true;
 }
 
-bool CBaseWeapon::Holster(bool bTrial)
+bool CBaseWeapon::HolsterStart(void)
 {
-	if (m_bitsFlags & (WPNSTATE_MELEE | WPNSTATE_QUICK_THROWING))	// you can't holster while meleeing or throwing.
-		return false;
+	// most weapon models still has no holster anim. therefore, we have nothing else todo but reset our data and leave.
+	SendWeaponAnim(0);
+	m_pPlayer->m_flNextAttack = 0.01f;
+	m_bitsFlags |= WPNSTATE_HOLSTERING;
 
-	// if this is only a trial like original CanHolster(), let's finish here.
-	if (bTrial)
-		return true;
+	return true;
+}
+
+void CBaseWeapon::Holstered(void)
+{
+	// if user is insist to holster weapon, we should allow that.
+	// LUNA: no longer check CanHolster() before Holster().
 
 	m_bInZoom = false;
 	g_vecGunOfsGoal = g_vecZero;
 	g_flGunOfsMovingSpeed = 10.0f;
 
 	m_bInReload = false;
+
 	m_pPlayer->pev->viewmodel = 0;
 	m_pPlayer->pev->weaponmodel = 0;
-
-	return true;
+	m_pPlayer->pev->fov = gHUD::default_fov->value;
 }
 
 bool CBaseWeapon::Drop(void** ppWeaponBoxReturned)
@@ -617,6 +725,7 @@ bool CBaseWeapon::DefaultDeploy(const char* szViewModel, const char* szWeaponMod
 	m_pPlayer->m_flNextAttack = flDeployTime;
 	m_flTimeWeaponIdle = flDeployTime + 0.75f;
 	m_flDecreaseShotsFired = gpGlobals->time;
+	m_bitsFlags &= ~WPNSTATE_HOLSTERING;	// remove this marker on deploy. !
 
 	m_pPlayer->pev->fov = DEFAULT_FOV;
 	m_pPlayer->m_iLastZoom = DEFAULT_FOV;
@@ -626,12 +735,12 @@ bool CBaseWeapon::DefaultDeploy(const char* szViewModel, const char* szWeaponMod
 	return true;
 }
 
-void CBaseWeapon::SendWeaponAnim(int iAnim, int iBody, bool bSkipLocal)
+void CBaseWeapon::SendWeaponAnim(int iAnim, bool bSkipLocal)
 {
 	g_iCurViewModelAnim = iAnim;
 
 	m_pPlayer->pev->weaponanim = iAnim;
-	gEngfuncs.pfnWeaponAnim(iAnim, iBody);
+	gEngfuncs.pfnWeaponAnim(iAnim, CalcBodyParam());
 
 	// save the time for the renderer.
 	g_flTimeViewModelAnimStart = gEngfuncs.GetClientTime();
@@ -668,6 +777,10 @@ bool CBaseWeapon::DefaultReload(int iClipSize, int iAnim, float fDelay)
 
 	// 1st personal anim
 	SendWeaponAnim(iAnim);
+
+	// it's currently useless.. but let's do it anyway.
+	if (!m_iClip)
+		m_bitsFlags |= WPNSTATE_RELOAD_EMPTY;
 
 	return true;
 }
@@ -715,11 +828,22 @@ void CBaseWeapon::PopAnim(void)
 	m_pPlayer->m_iShellModelIndex	= m_Stack.m_iShellModelIndex;
 
 	// LUNA: I don't know why, but execute this can prevent anim-restart over. This has to be done on both side.
-	gEngfuncs.pfnWeaponAnim(m_Stack.m_iSequence, 0);
+	gEngfuncs.pfnWeaponAnim(m_Stack.m_iSequence, CalcBodyParam());
 
 	// clear old data, mark for invalid.
 	Q_memset(&m_Stack, NULL, sizeof(m_Stack));
 	m_Stack.m_iSequence = -1;
+}
+
+bool CBaseWeapon::CanHolster(void)
+{
+	if (m_pPlayer->m_flNextAttack <= 0.0f && m_bitsFlags & WPNSTATE_HOLSTERING)	// the holster is completed.
+		return true;
+
+	if (m_bitsFlags & WPNSTATE_BUSY)
+		return false;
+
+	return true;
 }
 
 void CBaseWeapon::KickBack(float up_base, float lateral_base, float up_modifier, float lateral_modifier, float up_max, float lateral_max, int direction_change)
@@ -843,9 +967,10 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	if (from->client.m_iId > WEAPON_NONE && from->client.m_iId < LAST_WEAPON)
 		g_pCurWeapon = g_rgpClientWeapons[from->client.m_iId];
 
-	// Store pointer to our destination entity_state_t so we can get our origin, etc. from it
-	//  for setting up events on the client
+	// Store pointer to our destination entity_state_t so we can get our origin, etc. from it.
+	// for setting up events on the client.
 	g_finalstate = to;
+	g_pCurUserCmd = cmd;
 
 	// these vars have to be obtained nomatter what.
 	g_iWaterLevel = from->client.waterlevel;
@@ -860,9 +985,9 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	if (g_runfuncs)
 	{
 		if (to->client.health <= 0 && lasthealth > 0)
-			g_pCurWeapon->Holster();	// killed
+			g_pCurWeapon->Holstered();	// player is killed. holster your weapon data-ly is enough.
 		else if (to->client.health > 0 && lasthealth <= 0)
-			g_pCurWeapon->Deploy();	// spawned
+			g_pCurWeapon->Deploy();	// player is spawned
 
 		lasthealth = to->client.health;
 	}
@@ -970,6 +1095,8 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	to->client.m_iId = from->client.m_iId;
 
 	// Now see if we issued a changeweapon command ( and we're not dead )
+	// g_iSelectedWeapon was assign to cmd->weaponselect in input.cpp
+	// this is a weapon switching prediction.
 	if (cmd->weaponselect && (gPseudoPlayer.pev->deadflag != (DEAD_DISCARDBODY + 1)))
 	{
 		// Switched to a different weapon?
@@ -980,7 +1107,7 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 			{
 				// Put away old weapon
 				if (gPseudoPlayer.m_pActiveItem)
-					gPseudoPlayer.m_pActiveItem->Holster();
+					gPseudoPlayer.m_pActiveItem->Holstered();
 
 				gPseudoPlayer.m_pLastItem = gPseudoPlayer.m_pActiveItem;
 				gPseudoPlayer.m_pActiveItem = pNew;
@@ -1112,7 +1239,8 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	}
 
 	// Wipe it so we can't use it after this frame
-	g_finalstate = NULL;
+	g_finalstate = nullptr;
+	g_pCurUserCmd = nullptr;
 }
 
 /*

@@ -137,7 +137,7 @@ void BasicKnife::Swing()
 
 	if (tr.flFraction >= 1.0f)
 	{
-		m_pWeapon->SendWeaponAnim(KNIFE_QUICK_SLASH, 0, false);	// this anim msg has to be send!
+		m_pWeapon->SendWeaponAnim(KNIFE_QUICK_SLASH, false);	// this anim msg has to be send!
 		m_pPlayer->m_flNextAttack = KNIFE_QUICK_SLASH_TIME;
 
 		// play wiff or swish sound
@@ -154,7 +154,7 @@ void BasicKnife::Swing()
 		// hit
 		fDidHit = TRUE;
 
-		m_pWeapon->SendWeaponAnim(KNIFE_QUICK_SLASH, 0, false);	// this anim msg has to be send!
+		m_pWeapon->SendWeaponAnim(KNIFE_QUICK_SLASH, false);	// this anim msg has to be send!
 		m_pPlayer->m_flNextAttack = KNIFE_QUICK_SLASH_TIME;
 
 		// play thwack, smack, or dong sound

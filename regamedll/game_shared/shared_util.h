@@ -79,3 +79,11 @@ unsigned int U_Random();
 void U_Srand(unsigned int seed);
 int UTIL_SharedRandomLong(unsigned int seed, int low, int high);
 float UTIL_SharedRandomFloat(unsigned int seed, float low, float high);
+
+struct BodyEnumInfo_t
+{
+	int body;
+	int nummodels;
+};
+
+int CalcBody(BodyEnumInfo_t* info, int count);

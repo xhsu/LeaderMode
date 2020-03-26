@@ -84,6 +84,16 @@ void DrawUtils::Draw2DQuad(float x1, float y1, float x2, float y2)
 	gEngfuncs.pTriAPI->End();
 }
 
+void DrawUtils::Draw2DQuadNoTex(float x1, float y1, float x2, float y2)
+{
+	glBegin(GL_QUADS);
+	glVertex2f(x1, y1);
+	glVertex2f(x1, y2);
+	glVertex2f(x2, y2);
+	glVertex2f(x2, y1);
+	glEnd();
+}
+
 void DrawUtils::Draw2DProgressBar(float x, float y, float flWidth, float flFullLength, float flPercent)
 {
 	// the border of bar.

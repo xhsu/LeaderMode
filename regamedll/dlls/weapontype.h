@@ -104,13 +104,28 @@ enum ItemCostType
 
 enum WeaponState
 {
+	// Manager markers.
 	WPNSTATE_DEAD				= BIT(0),	// mark for remove.
+
+	// Melee
 	WPNSTATE_MELEE				= BIT(1),	// mark for melee fight
+
+	// Grenade
 	WPNSTATE_QUICK_THROWING		= BIT(2),	// mark for using a throwable
 	WPNSTATE_QT_RELEASE			= BIT(3),	// mark for the release of the throwable
 	WPNSTATE_QT_SHOULD_SPAWN	= BIT(4),	// mark for spawning the selected GR.
 	WPNSTATE_QT_EXIT			= BIT(5),	// mark for the end of QT seq.
 
+	// Standard behaviours: Draw, Reload, Holster and Dash.
+	WPNSTATE_DRAW_FIRST			= BIT(6),	// play draw_first?
+	WPNSTATE_RELOAD_EMPTY		= BIT(7),	// play reload_empty?
+	WPNSTATE_HOLSTERING			= BIT(8),	// disable all other behaviours?
+	WPNSTATE_DASHING			= BIT(9),	// get a speed boost?
+
+	// Sets
+	WPNSTATE_BUSY				= WPNSTATE_MELEE | WPNSTATE_QUICK_THROWING | WPNSTATE_HOLSTERING | WPNSTATE_DASHING,	// unable to do other 'busy' things.
+
+	// Disused
 	WPNSTATE_SHIELD_DRAWN		= BIT(30)	// disused.
 };
 

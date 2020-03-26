@@ -27,6 +27,8 @@ void CAnaconda::Precache()
 
 void CAnaconda::Think(void)
 {
+	CBaseWeapon::Think();
+
 	if (m_flShellRain > 0.0f && m_flShellRain <= gEngfuncs.GetClientTime())
 	{
 		m_flShellRain = 0;

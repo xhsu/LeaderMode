@@ -110,7 +110,6 @@ void CACR::ACRFire(float flSpread, float flCycleTime)
 			TheBots->OnEvent(EVENT_WEAPON_FIRED_ON_EMPTY, m_pPlayer);
 		}
 #endif
-
 		return;
 	}
 

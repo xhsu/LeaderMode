@@ -35,7 +35,7 @@ extern cvar_t* cl_upspeed;
 extern cvar_t* cl_forwardspeed;
 extern cvar_t* cl_backspeed;
 extern cvar_t* cl_sidespeed;
-extern cvar_t* cl_movespeedkey;
+extern cvar_t* cl_walkingspeedmodifier;
 extern cvar_t* cl_yawspeed;
 extern cvar_t* cl_pitchspeed;
 extern cvar_t* cl_anglespeedkey;
@@ -47,7 +47,7 @@ int KB_ConvertString(char* in, char** ppout);
 
 bool CL_IsDead(void);	// why is it here??
 float CL_KeyState(kbutton_t* key);
-int CL_ButtonBits(int bResetState);
+int CL_ButtonBits(bool bResetState = false);
 void CL_ResetButtonBits(int bits);
 
 void KeyDown(kbutton_t* b);

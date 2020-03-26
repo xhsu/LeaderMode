@@ -112,6 +112,7 @@ namespace gHUD
 	CHudCrosshair m_Crosshair;
 	CHudWeaponList m_WeaponList;
 	CHudGrenade m_Grenade;
+	CHudScoreboard m_Scoreboard;
 };
 
 void gHUD::Init(void)
@@ -161,6 +162,7 @@ void gHUD::Init(void)
 	m_NightVision.Init();
 	m_Crosshair.Init();
 	m_WeaponList.Init();
+	m_Scoreboard.Init();	// this is definately the last layer.
 
 	// UNDONE
 	//GetClientVoice()->Init(&g_VoiceStatusHelper);
@@ -768,7 +770,7 @@ void gHUD::SlotInput(int iSlot)
 		char sz[128];
 		Q_strlcpy(sz, psz);
 		gEngfuncs.pfnServerCmd(sz);
-		g_iSelectedWeapon = gHUD::m_WeaponList.m_rgiWeapons[iSlot];
+		gPseudoPlayer.StartSwitchingWeapon(gHUD::m_WeaponList.m_rgiWeapons[iSlot]);
 
 		gEngfuncs.pfnPlaySoundByName(WEAPONLIST_SELECT_SFX, VOL_NORM);
 	}
@@ -831,7 +833,7 @@ void CommandFunc_NextWeapon(void)
 			char sz[128];
 			Q_strlcpy(sz, psz);
 			gEngfuncs.pfnServerCmd(sz);
-			g_iSelectedWeapon = iId;
+			gPseudoPlayer.StartSwitchingWeapon(iId);
 
 			gEngfuncs.pfnPlaySoundByName(WEAPONLIST_WHEEL_SFX, VOL_NORM);
 			return;
@@ -883,7 +885,7 @@ void CommandFunc_PrevWeapon(void)
 			char sz[128];
 			Q_strlcpy(sz, psz);
 			gEngfuncs.pfnServerCmd(sz);
-			g_iSelectedWeapon = iId;
+			gPseudoPlayer.StartSwitchingWeapon(iId);
 
 			gEngfuncs.pfnPlaySoundByName(WEAPONLIST_WHEEL_SFX, VOL_NORM);
 			return;
@@ -927,20 +929,8 @@ void CommandFunc_SelectLastItem(void)	// an equivlent function of void CBasePlay
 	if (!gPseudoPlayer.m_pLastItem || gPseudoPlayer.m_pLastItem == gPseudoPlayer.m_pActiveItem)
 		goto LAB_LASTINV_END;
 
-	// TODO
-	/*if (!gPseudoPlayer.m_pLastItem->CanDeploy())
-		return;*/
-
-	if (gPseudoPlayer.m_pActiveItem)
-	{
-		gPseudoPlayer.m_pActiveItem->Holster();
-	}
-
-	SWAP(gPseudoPlayer.m_pActiveItem, gPseudoPlayer.m_pLastItem);
-
-	gPseudoPlayer.m_pActiveItem->Deploy();
-
-	gPseudoPlayer.ResetMaxSpeed();
+	// on client, we only needs to do one thing.
+	gPseudoPlayer.StartSwitchingWeapon(gPseudoPlayer.m_pLastItem);
 
 LAB_LASTINV_END:
 	// don't forget to forward this command to SV.

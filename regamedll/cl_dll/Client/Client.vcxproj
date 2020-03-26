@@ -180,6 +180,7 @@
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_ksg12.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\dlls\wpn_shared\wpn_m4a1.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_mp7a1.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_qbz95.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_svd.cpp" />
@@ -248,6 +249,7 @@
     <ClCompile Include="..\hud\hud_round_timer.cpp" />
     <ClCompile Include="..\hud\hud_say_text.cpp" />
     <ClCompile Include="..\hud\hud_scenario_status.cpp" />
+    <ClCompile Include="..\HUD\hud_scoreboard.cpp" />
     <ClCompile Include="..\hud\hud_sniperscope.cpp" />
     <ClCompile Include="..\hud\hud_status_icons.cpp" />
     <ClCompile Include="..\hud\hud_spectator.cpp" />
@@ -264,6 +266,7 @@
     <ClCompile Include="..\StudioModelRenderer.cpp" />
     <ClCompile Include="..\StudioModelRenderer_CS.cpp" />
     <ClCompile Include="..\tri.cpp" />
+    <ClCompile Include="..\UI\ui_panel.cpp" />
     <ClCompile Include="..\view.cpp" />
     <ClCompile Include="..\viewport_interface.cpp" />
     <ClCompile Include="..\weapons.cpp" />
@@ -313,6 +316,7 @@
     <ClInclude Include="..\hud\hud_round_timer.h" />
     <ClInclude Include="..\hud\hud_say_text.h" />
     <ClInclude Include="..\hud\hud_scenario_status.h" />
+    <ClInclude Include="..\HUD\hud_scoreboard.h" />
     <ClInclude Include="..\hud\hud_sniperscope.h" />
     <ClInclude Include="..\hud\hud_status_icons.h" />
     <ClInclude Include="..\hud\hud_spectator.h" />
@@ -328,6 +332,7 @@
     <ClInclude Include="..\message.h" />
     <ClInclude Include="..\StudioModelRenderer.h" />
     <ClInclude Include="..\tri.h" />
+    <ClInclude Include="..\UI\ui_panel.h" />
     <ClInclude Include="..\view.h" />
     <ClInclude Include="..\viewport_interface.h" />
     <ClInclude Include="..\weapons.h" />

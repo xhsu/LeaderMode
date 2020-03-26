@@ -250,7 +250,7 @@ bool CWeaponBox::PackWeapon(CBaseWeapon* pWeapon)
 	{
 		if (pWeapon->m_pPlayer->m_pActiveItem == pWeapon)
 		{
-			pWeapon->Holster();
+			pWeapon->Holstered();	// it's dropping weapon. just data-ly holster it.
 		}
 
 		if (!pWeapon->m_pPlayer->RemovePlayerItem(pWeapon))

@@ -400,7 +400,6 @@ public:
 	bool SetClientUserInfoName(char *infobuffer, char *szNewName);
 	void SetClientUserInfoModel(char *infobuffer, char *szNewModel);
 	void SetNewPlayerModel(const char *modelName);
-	BOOL SwitchWeapon(CBaseWeapon *pWeapon);
 	void CheckPowerups();
 	BOOL IsOnLadder();
 	BOOL FlashlightIsOn();
@@ -506,6 +505,8 @@ public:
 	int GetGrenadeInventory(EquipmentIdType iId);
 	int* GetGrenadeInventoryPointer(EquipmentIdType iId);
 	void ResetUsingEquipment(void);
+	bool StartSwitchingWeapon(CBaseWeapon* pSwitchingTo);	// play normal holster anim.
+	bool SwitchWeapon(CBaseWeapon* pSwitchingTo);	// skip holster anim.
 
 	// new functions from leader mod.
 	void AssignRole(RoleTypes iNewRole);	// this function is only for skill installation.
@@ -723,6 +724,7 @@ public:
 	std::vector<int> m_vMenuItems;
 	EquipmentIdType m_iUsingGrenadeId;
 	EquipmentIdType m_iClientKnownUsingGrenadeId;
+	WeaponIdType m_iWpnSwitchingTo;
 
 	// overhealing mechanism.
 	float m_flOHNextThink;

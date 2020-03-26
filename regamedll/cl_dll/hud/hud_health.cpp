@@ -138,29 +138,14 @@ int CHudHealth::Draw(float flTime)
 	if (g_iRoleType == Role_Commander || g_iRoleType == Role_Godfather)
 		flFullLength *= 2.0f;
 
-	float flCurLength = flHealthPercent * flFullLength;
-
 	glDisable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glColor4f(r / 255.0, g / 255.0, b / 255.0, a / 255.0);
 
-	// the border of health bar.
-	glBegin(GL_LINE_LOOP);
-	glVertex2f(x, y);
-	glVertex2f(x + flFullLength, y);
-	glVertex2f(x + flFullLength, y + HEALTH_BAR_WIDTH);
-	glVertex2f(x, y + HEALTH_BAR_WIDTH);
-	glEnd();
+	DrawUtils::Draw2DProgressBar(x, y, HEALTH_BAR_WIDTH, flFullLength, flHealthPercent);
 
-	// fill the health bar.
-	glBegin(GL_QUADS);
-	glVertex2f(x + 1, y + 2);
-	glVertex2f(x + round(flCurLength) - 2, y + 2);
-	glVertex2f(x + round(flCurLength) - 2, y + HEALTH_BAR_WIDTH - 1);
-	glVertex2f(x + 1, y + HEALTH_BAR_WIDTH - 1);
-	glEnd();
-
+	float flCurLength = flHealthPercent * flFullLength;
 	if (int(m_flDrawingHealth) > m_iHealth)	// loosing blood!
 	{
 		UnpackRGB(r, g, b, RGB_REDISH);

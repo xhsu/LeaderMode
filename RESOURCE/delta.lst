@@ -11,7 +11,7 @@ clientdata_t none
 	DEFINE_DELTA( velocity[0], DT_SIGNED | DT_FLOAT, 16, 8.0 ),
 	DEFINE_DELTA( velocity[1], DT_SIGNED | DT_FLOAT, 16, 8.0 ),
 
-	DEFINE_DELTA( m_flNextAttack, DT_FLOAT | DT_SIGNED, 22, 1000.0 ),
+	DEFINE_DELTA( m_flNextAttack, DT_FLOAT | DT_SIGNED, 32, 1000000.0 ),
 
 	DEFINE_DELTA( origin[2], DT_SIGNED | DT_FLOAT, 21, 128.0 ),
 	DEFINE_DELTA( velocity[2], DT_SIGNED | DT_FLOAT, 16, 8.0 ),
@@ -223,7 +223,7 @@ usercmd_t none
 
 weapon_data_t none
 {
-	DEFINE_DELTA( m_flTimeWeaponIdle, DT_FLOAT | DT_SIGNED, 22, 1000.0 ),
+	DEFINE_DELTA( m_flTimeWeaponIdle, DT_FLOAT | DT_SIGNED, 32, 1000000.0 ),
 	DEFINE_DELTA( m_flNextPrimaryAttack, DT_FLOAT | DT_SIGNED, 32, 1000000.0 ),
 	DEFINE_DELTA( m_flNextReload, DT_FLOAT | DT_SIGNED, 22, 1000.0 ),
 	DEFINE_DELTA( m_fNextAimBonus, DT_FLOAT | DT_SIGNED, 22, 1000.0 ),
@@ -235,8 +235,8 @@ weapon_data_t none
 	DEFINE_DELTA( m_fInReload, DT_INTEGER, 1, 1.0 ),
 	DEFINE_DELTA( m_fAimedDamage, DT_FLOAT, 22, 1000.0 ),
 	DEFINE_DELTA( m_fInZoom, DT_INTEGER, 8, 1.0 ),
-	DEFINE_DELTA( m_iWeaponState, DT_INTEGER, 7, 1.0 )
-	DEFINE_DELTA( m_iId, DT_INTEGER, 5, 1.0 )
+	DEFINE_DELTA( m_iWeaponState, DT_INTEGER, 32, 1.0 ),
+	DEFINE_DELTA( m_iId, DT_INTEGER, 5, 1.0 ),
 	DEFINE_DELTA( fuser1, DT_SIGNED | DT_FLOAT, 22, 1000.0 ),
 	DEFINE_DELTA( fuser2, DT_SIGNED | DT_FLOAT, 22, 128.0  ),
 	DEFINE_DELTA( fuser3, DT_SIGNED | DT_FLOAT, 22, 128.0  ),

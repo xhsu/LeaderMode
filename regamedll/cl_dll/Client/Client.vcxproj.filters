@@ -31,6 +31,9 @@
     <Filter Include="cl_dll\Fonts">
       <UniqueIdentifier>{8730108c-e79b-4d8c-a2f0-2c36c95d88e6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="cl_dll\UI">
+      <UniqueIdentifier>{73f28086-aa1c-4105-b2fd-271daebe87ff}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\cdll_int.cpp">
@@ -249,6 +252,15 @@
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_glock18.cpp">
       <Filter>dlls\wpn_shared</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\dlls\wpn_shared\wpn_m4a1.cpp">
+      <Filter>dlls\wpn_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\UI\ui_panel.cpp">
+      <Filter>cl_dll\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HUD\hud_scoreboard.cpp">
+      <Filter>cl_dll\HUD</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\cdll_int.h">
@@ -436,6 +448,12 @@
     </ClInclude>
     <ClInclude Include="..\Fonts\Win32Font.h">
       <Filter>cl_dll\Fonts</Filter>
+    </ClInclude>
+    <ClInclude Include="..\UI\ui_panel.h">
+      <Filter>cl_dll\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\HUD\hud_scoreboard.h">
+      <Filter>cl_dll\HUD</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

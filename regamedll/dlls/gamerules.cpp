@@ -2252,7 +2252,7 @@ BOOL EXT_FUNC CHalfLifeMultiplay::GetNextBestWeapon(CBasePlayer *pPlayer, CBaseW
 		return FALSE;
 	}
 
-	pPlayer->SwitchWeapon(pBest);
+	pPlayer->SwitchWeapon(pBest);	// skip holster for this switch.
 	return TRUE;
 }
 

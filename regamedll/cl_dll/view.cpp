@@ -778,31 +778,15 @@ void V_CalcViewRoll(ref_params_s* pparams)
 /*
 ==================
 V_CalcGunAngle
+
+Just as simple as that. No trick.
 ==================
 */
 void V_CalcGunAngle(ref_params_s* pparams)
 {
-	cl_entity_t* viewent;
-
-	viewent = gEngfuncs.GetViewModel();
-	if (!viewent)
-		return;
-
-	viewent->angles[YAW] = pparams->viewangles[YAW] + pparams->crosshairangle[YAW];
-	viewent->angles[PITCH] = -pparams->viewangles[PITCH] + pparams->crosshairangle[PITCH] * 0.25;
-	viewent->angles[ROLL] -= v_idlescale * Q_sin(pparams->time * v_iroll_cycle.value) * v_iroll_level.value;
-
-	// don't apply all of the v_ipitch to prevent normally unseen parts of viewmodel from coming into view.
-	viewent->angles[PITCH] -= v_idlescale * Q_sin(pparams->time * v_ipitch_cycle.value) * (v_ipitch_level.value * 0.5);
-	viewent->angles[YAW] -= v_idlescale * Q_sin(pparams->time * v_iyaw_cycle.value) * v_iyaw_level.value;
-
-	viewent->angles += pparams->punchangle;
-
-	if (pparams->punchangle.Length() > 0.0f)
-		RANDOM_LONG(0, 1);
-
-	VectorCopy(viewent->angles, viewent->curstate.angles);
-	VectorCopy(viewent->angles, viewent->latched.prevangles);
+	g_pViewEnt->angles = Vector(-pparams->viewangles.pitch, pparams->viewangles.yaw, pparams->viewangles.roll);
+	g_pViewEnt->curstate.angles = g_pViewEnt->angles;
+	g_pViewEnt->latched.prevangles = g_pViewEnt->angles;
 }
 
 /*
@@ -825,6 +809,75 @@ void V_CalcGunAimingOfs(ref_params_s* pparams)
 	g_vecTranslatedCurGunOfs = g_vecGunCurOfs.x * pparams->right + g_vecGunCurOfs.y * pparams->forward + g_vecGunCurOfs.z * pparams->up;
 }
 
+Vector g_vecGunBob = Vector();
+Vector g_vecTranslatedGunBob = Vector();
+double g_flGunBobAmplitudeModifier = 1.0;
+double g_flGunBobOmegaModifier = 1.0;
+
+/*
+==============
+V_CalcGunBob
+
+bob is presented when walking
+==============
+*/
+void V_CalcGunBob(ref_params_s* pparams)
+{
+	static Vector vecGoal = Vector();
+
+	if (g_flPlayerSpeed > 1.0f)	// start bob at this speed.
+	{
+		// scale the time.
+		double t = pparams->time * g_flGunBobOmegaModifier;
+
+		if (g_pCurWeapon)
+		{
+			if (!IS_DASHING || gPseudoPlayer.m_flNextAttack <= 0.0f)	// prevent over-shaking at dash_enter anim.
+			{
+				t *= g_pCurWeapon->GetMaxSpeed() * cl_walkingspeedmodifier->value * 0.035;
+			}
+			else
+			{
+				t *= g_pCurWeapon->GetMaxSpeed() * 0.035;
+			}
+		}
+
+		// a fucking circle.
+		//vecGoal = Vector(Q_sin(t), 0, Q_cos(t));
+
+		// a freaking butterfly curve.
+		//vecGoal.x = Q_sin(t) * (exp2(Q_cos(t)) - 2.0 * Q_cos(4.0 * t) - pow(Q_sin(t / 12.0), 5.0));
+		//vecGoal.z = Q_cos(t) * (exp2(Q_cos(t)) - 2.0 * Q_cos(4.0 * t) - pow(Q_sin(t / 12.0), 5.0));
+
+		// Lissajous curve. that's right...
+		vecGoal.x = g_flGunBobAmplitudeModifier * 1.0 * Q_sin(1.0 * t + M_PI / 2.0);
+		vecGoal.z = g_flGunBobAmplitudeModifier * 0.5 * Q_sin(2.0 * t);
+	}
+	else
+	{
+		vecGoal = Vector();
+	}
+
+	g_vecGunBob += (vecGoal - g_vecGunBob) * pparams->frametime * 6.0f;
+
+	// by this point, pparams->fwd, up and right are calculated.
+	g_vecTranslatedGunBob = g_vecGunBob.x * pparams->right + g_vecGunBob.y * pparams->forward + g_vecGunBob.z * pparams->up;
+}
+
+Vector g_vecGunLag = Vector();	// doesn't need to translate.
+
+/*
+==============
+V_CalcGunLag
+
+lag is presented when player is turning.
+==============
+*/
+void V_CalcGunLag(ref_params_s* pparams)
+{
+	g_vecGunLag += (pparams->forward - g_vecGunLag) * pparams->frametime * 2.0f;
+}
+
 /*
 ==================
 V_CalcNormalRefdef
@@ -832,7 +885,7 @@ V_CalcNormalRefdef
 */
 void V_CalcNormalRefdef(ref_params_s* pparams)
 {
-	cl_entity_t* pPlayer, * pViewModel;
+	cl_entity_t* pPlayer;
 	int				i;
 	Vector			angles;
 	float			bob, waterOffset;
@@ -855,9 +908,6 @@ void V_CalcNormalRefdef(ref_params_s* pparams)
 		// pPlayer is the player model ( visible when out of body )
 		pPlayer = gEngfuncs.GetLocalPlayer();
 	}
-
-	// view is the weapon model (only visible from inside body)
-	pViewModel = gEngfuncs.GetViewModel();
 
 	// transform the view offset by the model's matrix to get the offset from
 	// model origin for the view
@@ -994,46 +1044,9 @@ void V_CalcNormalRefdef(ref_params_s* pparams)
 		}
 	}*/
 
-	// Give gun our viewangles
-	if (pparams->health <= 0)
-	{
-		VectorCopy(dead_viewangles, pViewModel->angles);
-	}
-	else
-	{
-		//VectorCopy (pparams->cl_viewangles, pViewModel->angles);
-		pViewModel->angles = pparams->cl_viewangles + pparams->punchangle;
-	}
-
-	// set up gun position
-	V_CalcGunAngle(pparams);
-
-	// Use predicted origin as view origin.
-	VectorCopy (pparams->simorg, pViewModel->origin);
-	pViewModel->origin[2] += (waterOffset);
-	VectorAdd(pViewModel->origin, pparams->viewheight, pViewModel->origin);
-
-	// Let the viewmodel shake at about 10% of the amplitude
-	gEngfuncs.V_ApplyShake(pViewModel->origin, pViewModel->angles, 0.9);
-
-	for (i = 0; i < 3; i++)
-	{
-		pViewModel->origin[i] += bob * 0.4 * pparams->forward[i];
-	}
-	pViewModel->origin[2] += bob;
-
-	// throw in a little tilt.
-	pViewModel->angles.yaw -= bob * 0.5;
-	pViewModel->angles.roll -= bob * 1;
-	pViewModel->angles.pitch -= bob * 0.3;
-
-	// calc the gun steel sight ofs.
-	V_CalcGunAimingOfs(pparams);
-	pViewModel->origin += g_vecTranslatedCurGunOfs;
-
 	// Don't allow viewmodel, if we are in sniper scope
 	if (gHUD::m_iFOV <= 40)
-		pViewModel->model = NULL;
+		g_pViewEnt->model = NULL;
 
 	// Add in the punchangle, if any
 	pparams->viewangles += pparams->punchangle;
@@ -1057,8 +1070,8 @@ void V_CalcNormalRefdef(ref_params_s* pparams)
 			oldz = pparams->simorg[2];
 		if (pparams->simorg[2] - oldz > 18)
 			oldz = pparams->simorg[2] - 18;
+
 		pparams->vieworg[2] += oldz - pparams->simorg[2];
-		pViewModel->origin[2] += oldz - pparams->simorg[2];
 	}
 	else
 	{
@@ -1124,8 +1137,6 @@ void V_CalcNormalRefdef(ref_params_s* pparams)
 
 					VectorAdd(pparams->simorg, delta, pparams->simorg);
 					VectorAdd(pparams->vieworg, delta, pparams->vieworg);
-					VectorAdd(pViewModel->origin, delta, pViewModel->origin);
-
 				}
 			}
 		}
@@ -1173,7 +1184,16 @@ void V_CalcNormalRefdef(ref_params_s* pparams)
 
 	lasttime = pparams->time;
 
+	// save this var for other cpps.
 	v_origin = pparams->vieworg;
+
+	// last but not least, our gun.
+	V_CalcGunAngle(pparams);	// this function just set the value directly.
+	V_CalcGunAimingOfs(pparams);	// the return value of this function is g_vecTranslatedCurGunOfs.
+	V_CalcGunBob(pparams);
+	V_CalcGunLag(pparams);
+	g_pViewEnt->origin = v_origin + g_vecTranslatedCurGunOfs + g_vecTranslatedGunBob + g_vecGunLag;	// apply origin.
+	gEngfuncs.V_ApplyShake(g_pViewEnt->origin, g_pViewEnt->angles, 0.9f);	// Let the viewmodel shake at about 10% of the amplitude.
 }
 
 /*

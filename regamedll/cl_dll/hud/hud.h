@@ -181,6 +181,7 @@ class CHudSniperScope;
 class CHudCrosshair;
 class CHudWeaponList;
 class CHudGrenade;
+class CHudScoreboard;
 
 namespace gHUD
 {
@@ -277,6 +278,7 @@ namespace gHUD
 	extern CHudCrosshair m_Crosshair;
 	extern CHudWeaponList m_WeaponList;
 	extern CHudGrenade m_Grenade;
+	extern CHudScoreboard m_Scoreboard;
 };
 
 class CScreenFade

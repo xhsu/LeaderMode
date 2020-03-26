@@ -30,6 +30,9 @@ extern cvar_t* v_centermove;
 extern cvar_t* v_centerspeed;
 extern cvar_t* cl_gun_ofs[3];
 
+extern double g_flGunBobAmplitudeModifier;	// some weapons model is larger than others.
+extern double g_flGunBobOmegaModifier;	// some weapons model is larger than others.
+
 extern Vector g_vecGunCurOfs;
 extern Vector g_vecGunOfsGoal;
 extern Vector g_vecTranslatedCurGunOfs;

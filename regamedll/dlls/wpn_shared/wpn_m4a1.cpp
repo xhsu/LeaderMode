@@ -1,103 +1,128 @@
+/*
+
+Remastered Date: Mar 26 2020
+
+Modern Warfare Dev Team
+Code - Luna the Reborn
+Model - Matoilet
+
+*/
+
 #include "precompiled.h"
+#include "..\weapons.h"
 
-LINK_ENTITY_TO_CLASS(weapon_m4a1, CM4A1)
+#ifndef CLIENT_DLL
 
-void CM4A1::Spawn()
-{
-	Precache();
-
-	m_iId = WEAPON_M4A1;
-	SET_MODEL(edict(), "models/w_m4a1.mdl");
-
-	m_iDefaultAmmo = iinfo()->m_iMaxClip;
-	m_flAccuracy = 0.2f;
-	m_iShotsFired = 0;
-	m_bDelayFire = true;
-
-	// Get ready to fall down
-	FallInit();
-
-	// extend
-	CBasePlayerWeapon::Spawn();
-}
+unsigned short CM4A1::m_usEvent = 0;
+int CM4A1::m_iShell = 0;
 
 void CM4A1::Precache()
 {
-	PRECACHE_MODEL("models/v_m4a1.mdl");
-	PRECACHE_MODEL("models/w_m4a1.mdl");
-
-	PRECACHE_SOUND("weapons/m4a1-1.wav");
-	PRECACHE_SOUND("weapons/m4a1_unsil-1.wav");
-	PRECACHE_SOUND("weapons/m4a1_unsil-2.wav");
-	PRECACHE_SOUND("weapons/m4a1_clipin.wav");
-	PRECACHE_SOUND("weapons/m4a1_clipout.wav");
-	PRECACHE_SOUND("weapons/m4a1_boltpull.wav");
-	PRECACHE_SOUND("weapons/m4a1_deploy.wav");
-	PRECACHE_SOUND("weapons/m4a1_silencer_on.wav");
-	PRECACHE_SOUND("weapons/m4a1_silencer_off.wav");
+	PRECACHE_NECESSARY_FILES(M4A1);
 
 	m_iShell = PRECACHE_MODEL("models/rshell.mdl");
-	m_usFireM4A1 = PRECACHE_EVENT(1, "events/m4a1.sc");
+	m_usEvent = PRECACHE_EVENT(1, "events/m4a1.sc");
 }
 
-BOOL CM4A1::Deploy()
+#else
+
+void CM4A1::Think(void)
 {
-	m_bDelayFire = true;
+	CBaseWeapon::Think();
+
+	// just keep updating model during empty-reload.
+	if (m_bInReload && m_bitsFlags & WPNSTATE_RELOAD_EMPTY)
+	{
+		g_pViewEnt->curstate.body = CalcBodyParam();
+	}
+}
+
+#endif
+
+bool CM4A1::Deploy()
+{
 	m_flAccuracy = 0.2f;
 	m_iShotsFired = 0;
-
-	iShellOn = 1;
-
-	return DefaultDeploy("models/v_m4a1.mdl", "models/p_m4a1.mdl", M4A1_UNSIL_DRAW, "rifle", UseDecrement() != FALSE);
+	return DefaultDeploy(M4A1_VIEW_MODEL, M4A1_WORLD_MODEL, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? M4A1_DRAW_FIRST : M4A1_DRAW, "rifle", (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? M4A1_DRAW_FIRST_TIME : M4A1_DRAW_TIME);
 }
 
 void CM4A1::SecondaryAttack()
 {
-	;
+	m_bInZoom = !m_bInZoom;
+	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.3f;
+
+#ifdef CLIENT_DLL
+	// due to some logic problem, we actually cannot use m_bInZoom here.
+	// it would be override.
+
+	if (!g_vecGunOfsGoal.LengthSquared())
+	{
+		g_vecGunOfsGoal = Vector(-3.77f, -3, 0.37f);
+		gHUD::m_iFOV = 85;	// allow clients to predict the zoom.
+	}
+	else
+	{
+		g_vecGunOfsGoal = g_vecZero;
+		gHUD::m_iFOV = 90;
+	}
+
+	g_flGunOfsMovingSpeed = 10.0f;
+#else
+	// just zoom a liiiiittle bit.
+	// this doesn't suffer from the same bug where the gunofs does, since the FOV was actually sent from SV.
+	if (m_bInZoom)
+	{
+		m_pPlayer->pev->fov = 85;
+		EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, "weapons/steelsight_in.wav", 0.75f, ATTN_STATIC);
+	}
+	else
+	{
+		m_pPlayer->pev->fov = 90;
+		EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, "weapons/steelsight_out.wav", 0.75f, ATTN_STATIC);
+	}
+#endif
 }
 
 void CM4A1::PrimaryAttack()
 {
 	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
 	{
-		M4A1Fire(0.035 + (0.4 * m_flAccuracy), 0.0875, FALSE);
+		M4A1Fire(0.035f + (0.4f * m_flAccuracy));
 	}
 	else if (m_pPlayer->pev->velocity.Length2D() > 140)
 	{
-		M4A1Fire(0.035 + (0.07 * m_flAccuracy), 0.0875, FALSE);
+		M4A1Fire(0.035f + (0.07f * m_flAccuracy));
+	}
+	else if (m_bInZoom)	// decrease spread while scoping.
+	{
+		M4A1Fire(0.01f * m_flAccuracy);
 	}
 	else
 	{
-		M4A1Fire(0.02 * m_flAccuracy, 0.0875, FALSE);
+		M4A1Fire(0.02f * m_flAccuracy);
 	}
 }
 
-void CM4A1::M4A1Fire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
+void CM4A1::M4A1Fire(float flSpread, float flCycleTime)
 {
-	Vector vecAiming, vecSrc, vecDir;
-	int flag;
-
-	m_bDelayFire = true;
 	m_iShotsFired++;
 
-	m_flAccuracy = ((m_iShotsFired * m_iShotsFired * m_iShotsFired) / 220) + 0.3f;
+	m_flAccuracy = (float(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 220.0f) + 0.3f;
 
 	if (m_flAccuracy > 1)
 		m_flAccuracy = 1;
 
 	if (m_iClip <= 0)
 	{
-		if (m_fFireOnEmpty)
-		{
-			PlayEmptySound();
-			m_flNextPrimaryAttack = GetNextAttackDelay(0.2);
-		}
+		PlayEmptySound();
+		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.2f;
 
+#ifndef CLIENT_DLL
 		if (TheBots)
 		{
 			TheBots->OnEvent(EVENT_WEAPON_FIRED_ON_EMPTY, m_pPlayer);
 		}
-
+#endif
 		return;
 	}
 
@@ -109,27 +134,41 @@ void CM4A1::M4A1Fire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = BRIGHT_GUN_FLASH;
 
-	vecSrc = m_pPlayer->GetGunPosition();
-	vecAiming = gpGlobals->v_forward;
+	Vector vecSrc = m_pPlayer->GetGunPosition();
+	Vector vecAiming = gpGlobals->v_forward;
 
-	vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, 8192, 2, BULLET_PLAYER_556MM, M4A1_DAMAGE, M4A1_RANGE_MODIFER, m_pPlayer->pev, false, m_pPlayer->random_seed);
+	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, M4A1_EFFECTIVE_RANGE, M4A1_PENETRATION, m_iPrimaryAmmoType, M4A1_DAMAGE, M4A1_RANGE_MODIFER, m_pPlayer->random_seed);
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 
-#ifdef CLIENT_WEAPONS
-	flag = FEV_NOTHOST;
-#else
-	flag = 0;
-#endif
-
-	PLAYBACK_EVENT_FULL(flag, m_pPlayer->edict(), m_usFireM4A1, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, int(m_pPlayer->pev->punchangle.x * 100), int(m_pPlayer->pev->punchangle.y * 100), FALSE, FALSE);
-
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = GetNextAttackDelay(flCycleTime);
+#ifndef CLIENT_DLL
+	SendWeaponAnim(UTIL_SharedRandomFloat(m_pPlayer->random_seed, M4A1_SHOOT_BACKWARD, M4A1_SHOOT_RIGHTWARD));
+	PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL, m_pPlayer->edict(), m_usEvent, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, int(m_pPlayer->pev->punchangle.x * 100), int(m_pPlayer->pev->punchangle.y * 100), FALSE, FALSE);
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 	{
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", SUIT_SENTENCE, SUIT_REPEAT_OK);
 	}
+#else
+	static event_args_t args;
+	Q_memset(&args, NULL, sizeof(args));
 
+	args.angles = m_pPlayer->pev->v_angle;
+	args.bparam1 = false;	// silencer
+	args.bparam2 = false;	// unused
+	args.ducking = gEngfuncs.pEventAPI->EV_LocalPlayerDucking();
+	args.entindex = gEngfuncs.GetLocalPlayer()->index;
+	args.flags = FEV_NOTHOST | FEV_RELIABLE | FEV_CLIENT | FEV_GLOBAL;
+	args.fparam1 = vecDir.x;
+	args.fparam2 = vecDir.y;
+	args.iparam1 = int(m_pPlayer->pev->punchangle.x * 100.0f);
+	args.iparam2 = int(m_pPlayer->pev->punchangle.y * 100.0f);
+	args.origin = m_pPlayer->pev->origin;
+	args.velocity = m_pPlayer->pev->velocity;
+
+	EV_FireM4A1(&args);
+#endif
+
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.5f;
 
 	if (m_pPlayer->pev->velocity.Length2D() > 0)
@@ -150,33 +189,141 @@ void CM4A1::M4A1Fire(float flSpread, float flCycleTime, BOOL fUseAutoAim)
 	}
 }
 
-void CM4A1::Reload()
+bool CM4A1::Reload()
 {
-	if (DefaultReload(iinfo()->m_iMaxClip, M4A1_UNSIL_RELOAD, M4A1_RELOAD_TIME))
+	if (DefaultReload(m_pItemInfo->m_iMaxClip, m_iClip ? M4A1_RELOAD : M4A1_RELOAD_EMPTY, m_iClip ? M4A1_RELOAD_TIME : M4A1_RELOAD_EMPTY_TIME))
 	{
-		m_pPlayer->SetAnimation(PLAYER_RELOAD);
-
 		m_flAccuracy = 0.2f;
-		m_iShotsFired = 0;
-		m_bDelayFire = false;
+		return true;
 	}
+
+	// KF2 ???
+	if (m_pPlayer->pev->weaponanim != M4A1_CHECK_MAGAZINE)
+	{
+		if (m_bInReload)
+			SecondaryAttack();
+
+		SendWeaponAnim(M4A1_CHECK_MAGAZINE);
+		m_flTimeWeaponIdle = M4A1_CHECK_MAGAZINE_TIME;
+	}
+
+	return false;
 }
 
 void CM4A1::WeaponIdle()
 {
-	ResetEmptySound();
-	m_pPlayer->GetAutoaimVector(AUTOAIM_10DEGREES);
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
+	SendWeaponAnim((m_bitsFlags & WPNSTATE_DASHING) ? M4A1_DASHING : M4A1_IDLE);
+}
 
-	if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase())
+bool CM4A1::HolsterStart(void)
+{
+	SendWeaponAnim(M4A1_HOLSTER);
+	m_pPlayer->m_flNextAttack = M4A1_HOLSTER_TIME;
+	m_bitsFlags |= WPNSTATE_HOLSTERING;
+
+	return true;
+}
+
+void CM4A1::DashStart(void)
+{
+	if (m_bInReload)
+		m_bInReload = false;
+
+	if (m_bInZoom || m_pPlayer->pev->fov < 90)
 	{
-		return;
+#ifndef CLIENT_DLL
+		SecondaryAttack();
+#else
+		g_vecGunOfsGoal = g_vecZero;
+		g_flGunOfsMovingSpeed = 10.0f;
+		gHUD::m_iFOV = 90;
+#endif
 	}
 
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
-	SendWeaponAnim(M4A1_UNSIL_IDLE, UseDecrement() != FALSE);
+	SendWeaponAnim(M4A1_DASH_ENTER);
+	m_pPlayer->m_flNextAttack = M4A1_DASH_ENTER_TIME;
+	m_flTimeWeaponIdle = M4A1_DASH_ENTER_TIME;
+	m_bitsFlags |= WPNSTATE_DASHING;
 }
 
-float CM4A1::GetMaxSpeed()
+void CM4A1::DashEnd(void)
 {
-	return M4A1_MAX_SPEED;
+	if (m_pPlayer->m_flNextAttack > 0.0f && m_pPlayer->pev->weaponanim == M4A1_DASH_ENTER)
+	{
+		// m_pPlayer->m_flNextAttack means how much time left, save it first.
+		float flRunStartUnplayedRatio = m_pPlayer->m_flNextAttack / M4A1_DASH_ENTER_TIME;
+
+		// get the time we need to wait.
+		float flRunStopTimeLeft = M4A1_DASH_EXIT_TIME * flRunStartUnplayedRatio;
+
+		// normally play RUN_STOP
+		SendWeaponAnim(M4A1_DASH_EXIT);
+
+#ifdef CLIENT_DLL
+		// change this var, if RUN_STOP is made by a inversion of RUN_START, this will work pretty well.
+		g_flTimeViewModelAnimStart = gEngfuncs.GetClientTime() - flRunStopTimeLeft;
+#endif
+
+		// type 2 anim CD.
+		m_pPlayer->m_flNextAttack = m_flNextPrimaryAttack = m_flNextSecondaryAttack = m_flTimeWeaponIdle = flRunStopTimeLeft;
+	}
+
+	// if RUN_START is normally played and finished, go normal.
+	else
+	{
+		SendWeaponAnim(M4A1_DASH_EXIT);
+		m_pPlayer->m_flNextAttack = M4A1_DASH_EXIT_TIME;
+		m_flTimeWeaponIdle = M4A1_DASH_EXIT_TIME;
+	}
+
+	// either way, we have to remove this flag.
+	m_bitsFlags &= ~WPNSTATE_DASHING;
 }
+
+int CM4A1::CalcBodyParam(void)
+{
+	BodyEnumInfo_t info[] =
+	{
+		{ 0, 2 },	// hands		= 0;
+		{ 0, 1 },
+		{ 0, 1 },
+
+		{ 0, 1 },	// rifle		= 3;
+		{ 0, 1 },
+		{ 0, 1 },
+
+		{ 0, 2 },	// magazine		= 6;
+		{ 0, 3 },	// steel sight	= 7;
+		{ 0, 6 },	// scopes		= 8;
+		{ 0, 4 },	// attachments	= 9;
+		{ 0, 2 },	// nail/shell	= 10;
+		{ 0, 4 },	// muzzle		= 11;
+		{ 0, 2 },	// laser		= 12;
+	};
+
+	// by default, this weapon has:
+	// filpped down steel sight.
+	// holographic sight.
+	// laser.
+
+	info[7].body = 1;
+	info[8].body = 2;
+	info[12].body = 1;
+
+	if (!m_iClip)
+		info[6].body = 1;	// empty mag.
+
+	// in EMPTY reload, after we remove the empty mag, the new mag should be full of bullets.
+	if (m_bInReload && m_bitsFlags & WPNSTATE_RELOAD_EMPTY)
+	{
+		if (m_pPlayer->m_flNextAttack < 1.7f)	// in this anim, a new mag was taken out after around 0.3s. thus, 2.03f - 0.3f ~= 1.7f.
+		{
+			info[6].body = 0;	// empty mag.
+		}
+	}
+
+	return CalcBody(info, 13);	// elements count of the info[].
+}
+
+DECLARE_STANDARD_RESET_MODEL_FUNC(M4A1)

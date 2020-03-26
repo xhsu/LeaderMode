@@ -19,7 +19,7 @@ cvar_t* cl_upspeed;
 cvar_t* cl_forwardspeed;
 cvar_t* cl_backspeed;
 cvar_t* cl_sidespeed;
-cvar_t* cl_movespeedkey;
+cvar_t* cl_walkingspeedmodifier;
 cvar_t* cl_yawspeed;
 cvar_t* cl_pitchspeed;
 cvar_t* cl_anglespeedkey;
@@ -176,11 +176,12 @@ void CL_AdjustAngles(float frametime, Vector viewangles)
 
 	if (in_speed.state & 1)
 	{
-		speed = frametime * cl_anglespeedkey->value;
+		speed = frametime;
 	}
 	else
 	{
-		speed = frametime;
+		// LUNA: this is reverted as well now. press in_speed you would get faster, or you would get slower. (SHIFT key)
+		speed = frametime * cl_anglespeedkey->value;
 	}
 
 	if (!(in_strafe.state & 1))
@@ -224,7 +225,7 @@ Returns appropriate button info for keyboard and mouse state
 Set bResetState to 1 to clear old state info
 ============
 */
-int CL_ButtonBits(int bResetState)
+int CL_ButtonBits(bool bResetState)
 {
 	int bits = 0;
 
@@ -307,6 +308,11 @@ int CL_ButtonBits(int bResetState)
 		bits |= IN_SCORE;
 	}
 
+	if (in_speed.state & 3)
+	{
+		bits |= IN_RUN;
+	}
+
 	// Dead or in intermission? Shore scoreboard, too
 	if (CL_IsDead() || gHUD::m_bIntermission)
 	{
@@ -329,6 +335,7 @@ int CL_ButtonBits(int bResetState)
 		in_reload.state &= ~2;
 		in_alt1.state &= ~2;
 		in_score.state &= ~2;
+		in_speed.state &= ~2;
 	}
 
 	return bits;
@@ -357,7 +364,7 @@ void CL_CreateMove2(float frametime, usercmd_s* cmd, int active)
 
 		CL_AdjustAngles(frametime, viewangles);
 
-		memset (cmd, 0, sizeof(*cmd));
+		memset(cmd, 0, sizeof(*cmd));
 
 		gEngfuncs.SetViewAngles((float*)viewangles);
 
@@ -389,20 +396,29 @@ void CL_CreateMove2(float frametime, usercmd_s* cmd, int active)
 			//}
 		}
 
-		// adjust for speed key
-		if (in_speed.state & 1)
+		// LUNA: revert this key function back to running.
+		// if you don't press it, the player speed goes down. unless you're ducking.
+
+		// TODO: ALT slow walk func.
+		// save these for later ALT slow walk.
+		/*if (!(in_speed.state & 1) && !(in_duck.state & 1))
 		{
-			cmd->forwardmove *= cl_movespeedkey->value;
-			cmd->sidemove *= cl_movespeedkey->value;
-			cmd->upmove *= cl_movespeedkey->value;
-		}
+			cmd->forwardmove *= cl_walkingspeedmodifier->value;
+			cmd->sidemove *= cl_walkingspeedmodifier->value;
+			cmd->upmove *= cl_walkingspeedmodifier->value;
+		}*/
 
 		// clip to maxspeed
 		spd = gEngfuncs.GetClientMaxspeed();
+
+		// slow down if we are not running.
+		if (!IS_DASHING)
+			spd *= cl_walkingspeedmodifier->value;
+
 		if (spd != 0.0)
 		{
 			// scale the 3 speeds so that the total velocity is not > cl.maxspeed
-			float fmov = sqrt((cmd->forwardmove * cmd->forwardmove) + (cmd->sidemove * cmd->sidemove) + (cmd->upmove * cmd->upmove));
+			float fmov = Q_sqrt((cmd->forwardmove * cmd->forwardmove) + (cmd->sidemove * cmd->sidemove) + (cmd->upmove * cmd->upmove));
 
 			if (fmov > spd)
 			{
@@ -749,7 +765,7 @@ void InitInput(void)
 	cl_forwardspeed = gEngfuncs.pfnRegisterVariable ("cl_forwardspeed", "400", FCVAR_ARCHIVE);
 	cl_backspeed = gEngfuncs.pfnRegisterVariable ("cl_backspeed", "400", FCVAR_ARCHIVE);
 	cl_sidespeed = gEngfuncs.pfnRegisterVariable ("cl_sidespeed", "400", 0);
-	cl_movespeedkey = gEngfuncs.pfnRegisterVariable ("cl_movespeedkey", "0.3", 0);
+	cl_walkingspeedmodifier = gEngfuncs.pfnRegisterVariable ("cl_walkingspeedmodifier", "0.35", 0);
 	cl_pitchup = gEngfuncs.pfnRegisterVariable ("cl_pitchup", "89", 0);
 	cl_pitchdown = gEngfuncs.pfnRegisterVariable ("cl_pitchdown", "89", 0);
 

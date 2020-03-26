@@ -194,7 +194,10 @@ public:	// basic logic funcs
 	virtual bool	Melee			(void);		// quick knife.
 	virtual bool	QuickThrowStart	(EquipmentIdType iId);	// quick grenade (maybe something else in the future?).
 	virtual bool	QuickThrowRelease(void);	// triggered when +qtg button released.
-	virtual bool	Holster			(bool bTrial = false);		// called when attempting to put it off. bTrial means only testing whether weapon can be holster.
+	virtual bool	HolsterStart	(void);		// play holster anim, initialize holstering.
+	virtual void	Holstered		(void);		// majorlly reset the weapon data. no visual stuff.
+	virtual	void	DashStart		(void) { m_bitsFlags |= WPNSTATE_DASHING; }		// called when system thinks it's time to dash.
+	virtual void	DashEnd			(void) { m_bitsFlags &= ~WPNSTATE_DASHING; }		// called when system thinks it's time to stop dash.
 	virtual bool	Drop			(void **ppWeaponBoxReturned = nullptr);		// called when attempting to drop it on ground. ppWeaponBoxReturned is the CWeaponBox to be returned. (NOT avaliable on client side.)
 	virtual bool	Kill			(void);		// called when attempting to remove it from your inventory.
 
@@ -210,16 +213,17 @@ public:	// util funcs
 	virtual	bool	AddPrimaryAmmo	(int iCount);	// fill in clip first, then bpammo.
 	inline	bool	IsPistol		(void) { return m_pItemInfo->m_iSlot == PISTOL_SLOT; }
 	virtual	bool	DefaultDeploy	(const char* szViewModel, const char* szWeaponModel, int iAnim, const char* szAnimExt, float flDeployTime = 0.75f);
-	virtual	void	SendWeaponAnim	(int iAnim, int iBody = 0, bool bSkipLocal = true);
+	virtual	void	SendWeaponAnim	(int iAnim, bool bSkipLocal = true);
 	virtual	void	PlayEmptySound	(void);
 	virtual	bool	DefaultReload	(int iClipSize, int iAnim, float fDelay);
 	virtual	void	ReloadSound		(void);
 	virtual void	PushAnim		(void);
 	virtual void	PopAnim			(void);
-	inline	bool	CanHolster		(void) { return Holster(true); }	// smells, looks and tastes like a duck...
+	virtual	bool	CanHolster		(void);	// smells, looks and tastes like a duck...
 	virtual	bool	CanDrop			(void) { return true; }
 	virtual void	KickBack		(float up_base, float lateral_base, float up_modifier, float lateral_modifier, float up_max, float lateral_max, int direction_change);	// recoil
 	virtual void	ResetModel		(void) { }	// used after Melee() and QuickThrowRelease().
+	virtual int		CalcBodyParam	(void) { return 0; }	// allow user to varient weapon body.
 };
 
 
@@ -773,31 +777,87 @@ public:	// util funcs
 
 #define M4A1_VIEW_MODEL		"models/weapons/v_m4a1.mdl"
 #define M4A1_WORLD_MODEL	"models/weapons/w_m4a1.mdl"
-#define M4A1_FIRE_SFX		"weapons/m4a1/m4a1_fire.wav"
+#define M4A1_FIRE_SFX		"weapons/ar15_mod/ar15_shoot.wav"
 
-const float M4A1_MAX_SPEED         = 230.0f;
-const float M4A1_DAMAGE            = 32.0f;
-const float M4A1_DAMAGE_SIL        = 33.0f;
-const float M4A1_RANGE_MODIFER     = 0.97f;
-const float M4A1_RANGE_MODIFER_SIL = 0.95f;
-const float M4A1_RELOAD_TIME       = 3.05f;
+constexpr float M4A1_MAX_SPEED			= 230.0f;
+constexpr float M4A1_DAMAGE				= 32.0f;
+constexpr float M4A1_RANGE_MODIFER		= 0.97f;
+constexpr float M4A1_DRAW_TIME			= 0.743f;
+constexpr float M4A1_DRAW_FIRST_TIME	= 2.45f;
+constexpr float M4A1_RELOAD_TIME		= 2.03f;
+constexpr float M4A1_RELOAD_EMPTY_TIME	= 2.6f;
+constexpr float M4A1_CHECK_MAGAZINE_TIME= 3.06f;
+constexpr float M4A1_HOLSTER_TIME		= 0.6f;
+constexpr float M4A1_DASH_ENTER_TIME	= 0.485f;
+constexpr float M4A1_DASH_EXIT_TIME		= 0.485f;
+constexpr float M4A1_RPM				= 700.0f;	// 700~950 RPM
+constexpr int	M4A1_PENETRATION		= 2;
+constexpr float	M4A1_EFFECTIVE_RANGE	= 8192.0f;
 
 enum m4a1_e
 {
 	M4A1_IDLE,
-	M4A1_SHOOT1,
-	M4A1_SHOOT2,
-	M4A1_SHOOT3,
+	M4A1_SHOOT_BACKWARD,
+	M4A1_SHOOT_LEFTWARD,
+	M4A1_SHOOT_RIGHTWARD,
+	M4A1_SHOOT_ATTACHMENTS,
+	M4A1_M870MCS_RECHAMBER,
 	M4A1_RELOAD,
+	M4A1_RELOAD_EMPTY,
+	M4A1_M203_RELOAD,
+	M4A1_XM26_RELOAD,
+	M4A1_XM26_RELOAD_EMPTY,
+	M4A1_M870MCS_RELOAD_START,
+	M4A1_M870MCS_RELOAD_FIRST_INSERT,
+	M4A1_M870MCS_RELOAD_INSERT,
+	M4A1_M870MCS_RELOAD_END,
+	M4A1_M870MCS_RELOAD_END_EMPTY,
+	M4A1_DRAW_FIRST,
 	M4A1_DRAW,
-	M4A1_ATTACH_SILENCER,
-	M4A1_UNSIL_IDLE,
-	M4A1_UNSIL_SHOOT1,
-	M4A1_UNSIL_SHOOT2,
-	M4A1_UNSIL_SHOOT3,
-	M4A1_UNSIL_RELOAD,
-	M4A1_UNSIL_DRAW,
-	M4A1_DETACH_SILENCER,
+	M4A1_JUMP,
+	M4A1_CHECK_MAGAZINE,
+	M4A1_SWITCH_SELECTOR,
+	M4A1_HOLSTER,
+	M4A1_BLOCKED_UP,
+	M4A1_BLOCKED_DOWN,
+	M4A1_LHAND_UP,
+	M4A1_LHAND_DOWN,
+	M4A1_DASH_ENTER,
+	M4A1_DASHING,
+	M4A1_DASH_EXIT,
+};
+
+class CM4A1 : public CBaseWeapon
+{
+#ifndef CLIENT_DLL
+public:	// SV exclusive variables.
+	static unsigned short m_usEvent;
+	static int m_iShell;
+
+public:	// SV exclusive functions.
+	virtual void	Precache		(void);
+#else
+public:	// CL exclusive functions.
+	virtual void	Think			(void);
+#endif
+
+public:	// basic logic funcs
+	virtual bool	Deploy			(void);
+	virtual void	PrimaryAttack	(void);
+	virtual void	SecondaryAttack	(void);
+	virtual bool	Reload			(void);
+	virtual void	WeaponIdle		(void);
+	virtual bool	HolsterStart	(void);
+	virtual	void	DashStart		(void);
+	virtual void	DashEnd			(void);
+
+public:	// util funcs
+	virtual	float	GetMaxSpeed		(void) { return M4A1_MAX_SPEED; }
+	virtual void	ResetModel		(void);
+	virtual int		CalcBodyParam	(void);
+
+public:	// new functions
+	void M4A1Fire(float flSpread, float flCycleTime = (60.0f / M4A1_RPM));
 };
 
 #define PM9_VIEW_MODEL	"models/weapons/v_pm9.mdl"

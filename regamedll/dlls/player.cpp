@@ -1276,7 +1276,7 @@ void CBasePlayer::RemoveAllItems(BOOL removeSuit)
 	{
 		ResetAutoaim();
 
-		m_pActiveItem->Holster();
+		m_pActiveItem->Holstered();	// it's weapon removal anyway.
 		m_pActiveItem = nullptr;
 	}
 
@@ -2481,7 +2481,7 @@ void EXT_FUNC CBasePlayer::GiveShield(bool bDeploy)
 		if (bDeploy)
 		{
 			if (m_rgAmmo[m_pActiveItem->m_iPrimaryAmmoType] > 0)
-				m_pActiveItem->Holster();
+				m_pActiveItem->Holstered();
 
 			if (!m_pActiveItem->Deploy())
 				CSGameRules()->GetNextBestWeapon(this, m_pActiveItem);
@@ -2982,9 +2982,6 @@ void EXT_FUNC CBasePlayer::RoundRespawn()
 		pev->nextthink = -1;
 	}
 
-	if (m_pActiveItem && m_pActiveItem->m_pItemInfo->m_iSlot == GRENADE_SLOT)
-		SwitchWeapon(m_pActiveItem);
-
 	m_lastLocation[0] = '\0';
 
 	if (m_bPunishedForTK && pev->health > 0)
@@ -3023,7 +3020,7 @@ void EXT_FUNC CBasePlayer::StartObserver(Vector &vecPosition, Vector &vecViewAng
 
 	// Holster weapon immediately, to allow it to cleanup
 	if (m_pActiveItem)
-		m_pActiveItem->Holster();
+		m_pActiveItem->Holstered();
 
 	if (m_pTank)
 	{
@@ -4760,34 +4757,11 @@ void CBasePlayer::SelectItem(const char *pstr)
 	if (m_pActiveItem && !m_pActiveItem->CanHolster())
 		return;
 
-	auto pItem = GetItemById(WeaponClassnameToID(pstr));
-	if (!pItem || pItem == m_pActiveItem)
+	auto pWeapon = GetItemById(WeaponClassnameToID(pstr));
+	if (!pWeapon || pWeapon == m_pActiveItem)
 		return;
 
-	// TODO
-	/*if (!pItem->CanDeploy())
-		return;*/
-
-	ResetAutoaim();
-
-	// FIX, this needs to queue them up and delay
-	if (m_pActiveItem)
-	{
-		m_pActiveItem->Holster();
-	}
-
-	m_pLastItem = m_pActiveItem;
-	m_pActiveItem = pItem;
-
-	m_pActiveItem->m_bitsFlags &= ~WPNSTATE_SHIELD_DRAWN;
-
-	m_bShieldDrawn = false;
-	UpdateShieldCrosshair(true);
-
-	m_pActiveItem->Deploy();
-	m_pActiveItem->UpdateClientData();
-
-	ResetMaxSpeed();
+	StartSwitchingWeapon(pWeapon);
 }
 
 void CBasePlayer::SelectLastItem()
@@ -4818,33 +4792,9 @@ void CBasePlayer::SelectLastItem()
 	if (!m_pLastItem || m_pLastItem == m_pActiveItem)
 		return;
 
-	// TODO
-	/*if (!m_pLastItem->CanDeploy())
-		return;*/
-
-	ResetAutoaim();
-
-	if (m_pActiveItem)
-	{
-		m_pActiveItem->Holster();
-	}
-
-	if (HasShield())
-	{
-		if (m_pActiveItem)
-			m_pActiveItem->m_bitsFlags &= ~WPNSTATE_SHIELD_DRAWN;
-
-		m_bShieldDrawn = false;
-	}
-
-	SWAP(m_pActiveItem, m_pLastItem);
-
-	m_pActiveItem->Deploy();
-	m_pActiveItem->UpdateClientData();
-
-	UpdateShieldCrosshair(true);
-
-	ResetMaxSpeed();
+	auto temp = m_pActiveItem;	// save this, and we can set it to last weapon later on.
+	StartSwitchingWeapon(m_pLastItem);
+	m_pLastItem = temp;
 }
 
 // HasWeapons - do I have any weapons at all?
@@ -5362,7 +5312,7 @@ BOOL EXT_FUNC CBasePlayer::AddPlayerItem(CBaseWeapon *pItem)
 		{
 			if (!m_bShieldDrawn)
 			{
-				SwitchWeapon(pItem);
+				StartSwitchingWeapon(pItem);
 			}
 		}
 
@@ -6418,41 +6368,6 @@ void CBasePlayer::UpdateShieldCrosshair(bool draw)
 		m_iHideHUD &= ~HIDEHUD_CROSSHAIR;
 	else
 		m_iHideHUD |= HIDEHUD_CROSSHAIR;
-}
-
-BOOL CBasePlayer::SwitchWeapon(CBaseWeapon *pWeapon)
-{
-	/* UNDONE
-	if (!pWeapon->CanDeploy())
-	{
-		return FALSE;
-	}*/
-
-	ResetAutoaim();
-
-	if (m_pActiveItem && m_pActiveItem->m_pPlayer == this)
-	{
-		m_pActiveItem->Holster();
-	}
-
-	CBaseWeapon *pTemp = m_pActiveItem;
-	m_pActiveItem = pWeapon;
-	m_pLastItem = pTemp;
-
-	pWeapon->Deploy();
-	pWeapon->UpdateClientData();
-
-	if (pWeapon->m_pPlayer)
-	{
-		pWeapon->m_pPlayer->ResetMaxSpeed();
-	}
-
-	if (HasShield())
-	{
-		UpdateShieldCrosshair(true);
-	}
-
-	return TRUE;
 }
 
 LINK_ENTITY_TO_CLASS(monster_hevsuit_dead, CDeadHEV)
@@ -7739,6 +7654,65 @@ void CBasePlayer::ResetUsingEquipment(void)
 	}
 
 	m_iUsingGrenadeId = iCandidate;
+}
+
+bool CBasePlayer::StartSwitchingWeapon(CBaseWeapon* pSwitchingTo)
+{
+	if (!pSwitchingTo)
+		return false;
+
+	// TODO
+	if ((m_pActiveItem && !m_pActiveItem->CanHolster()) /*|| !pSwitchingTo->CanDeploy()*/)
+		return false;
+
+	if (m_pActiveItem)
+	{
+		m_pActiveItem->HolsterStart();
+		m_iWpnSwitchingTo = pSwitchingTo->m_iId;
+
+		return true;
+	}
+	else
+	{
+		// no active weapon? which means we can directly deploy this one.
+		return SwitchWeapon(pSwitchingTo);
+	}
+}
+
+bool CBasePlayer::SwitchWeapon(CBaseWeapon* pSwitchingTo)
+{
+	if (!pSwitchingTo)
+		return false;
+
+	// TODO
+	if ((m_pActiveItem && !m_pActiveItem->CanHolster()) /*|| !pSwitchingTo->CanDeploy()*/)
+		return false;
+
+	ResetAutoaim();
+
+	if (m_pActiveItem)
+	{
+		m_pActiveItem->Holstered();
+	}
+
+	if (HasShield())
+	{
+		if (m_pActiveItem)
+			m_pActiveItem->m_bitsFlags &= ~WPNSTATE_SHIELD_DRAWN;
+
+		m_bShieldDrawn = false;
+		UpdateShieldCrosshair(true);
+	}
+
+	m_pLastItem = m_pActiveItem;
+	m_pActiveItem = pSwitchingTo;
+
+	m_pActiveItem->Deploy();
+	m_pActiveItem->UpdateClientData();
+
+	ResetMaxSpeed();
+
+	return true;
 }
 
 void CBasePlayer::AssignRole(RoleTypes iNewRole)

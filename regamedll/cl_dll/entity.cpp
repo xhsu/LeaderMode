@@ -269,7 +269,7 @@ void HUD_StudioEvent2(const mstudioevent_s* pEvent, const cl_entity_s* pEntity)
 		break;
 		// Client side sound
 	case 5004:
-		gEngfuncs.pfnPlaySoundByNameAtLocation((char*)pEvent->options, 1.0, (float*)&pEntity->attachment[0]);
+		gEngfuncs.pfnPlaySoundByName((char*)pEvent->options, VOL_NORM);
 		break;
 	default:
 		break;

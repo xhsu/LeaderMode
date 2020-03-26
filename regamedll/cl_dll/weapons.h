@@ -8,6 +8,10 @@ Created Date: Mar 12 2020
 
 #include "../dlls/weapons.h"	// only import this.
 
+// util macros
+#define IS_AIMING	(g_pCurWeapon && (g_pCurWeapon->m_bInZoom || gHUD::m_iFOV < 90))
+#define IS_DASHING	(g_pCurWeapon && g_pCurWeapon->m_bitsFlags & WPNSTATE_DASHING)
+
 // copied from mp.dll::player.h
 enum PLAYER_ANIM
 {
@@ -87,6 +91,7 @@ public:
 	CBaseWeapon* m_pLastItem;
 	Vector	m_vecVAngleShift;
 	EquipmentIdType m_iUsingGrenadeId;
+	WeaponIdType m_iWpnSwitchingTo;	// use this instead of g_iSelectedWeapon.
 
 public:
 	void	SetAnimation(PLAYER_ANIM playerAnim)	{}
@@ -98,6 +103,8 @@ public:
 	int*	GetGrenadeInventoryPointer(EquipmentIdType iId);
 	void	ResetUsingEquipment(void);
 	void	Radio(const char* psz1, const char* psz2) {}
+	bool	StartSwitchingWeapon(CBaseWeapon* pSwitchingTo);	// play normal holster anim.
+	bool	StartSwitchingWeapon(WeaponIdType iId);	// play normal holster anim.
 };
 
 extern int g_runfuncs;
@@ -107,7 +114,7 @@ extern const Vector g_vecZero;
 extern CBaseWeapon* g_rgpClientWeapons[LAST_WEAPON];
 extern CBaseWeapon* g_pCurWeapon;
 extern CBasePlayer gPseudoPlayer;
-extern WeaponIdType g_iSelectedWeapon;	// this is for prediction!
+extern WeaponIdType g_iSelectedWeapon;	// this means directly switch weapon. try to use gPseudoPlayer.StartSwitchingWeapon() instead!
 
 extern bool g_bHoldingKnife;
 extern bool g_bFreezeTimeOver;

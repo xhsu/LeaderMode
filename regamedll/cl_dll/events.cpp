@@ -1210,6 +1210,9 @@ DECLARE_EVENT(FireQBZ95)
 
 		if (g_pCurWeapon)
 			g_pCurWeapon->SendWeaponAnim(UTIL_SharedRandomLong(gPseudoPlayer.random_seed, QBZ95_SHOOT1, QBZ95_SHOOT3));
+
+		// original CS1.6 FAMAS had no gun smoke. This is copied from GALIL.
+		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 3, 0.26, 15, 15, 15, EV_RIFLE_SMOKE, velocity, false, 35);
 	}
 
 	Vector ShellVelocity, ShellOrigin;
@@ -1465,7 +1468,53 @@ DECLARE_EVENT(FireKSG12)
 
 DECLARE_EVENT(FireM4A1)
 {
+	int idx = args->entindex;
+	//bool silencer_on = args->bparam1;	// disused
 
+	Vector origin, angles, velocity;
+	VectorCopy(args->origin, origin);
+	VectorCopy(args->angles, angles);
+	VectorCopy(args->velocity, velocity);
+
+	angles[0] += args->iparam1 / 100.0;
+	angles[1] += args->iparam2 / 100.0;
+
+	Vector forward, right, up;
+	gEngfuncs.pfnAngleVectors(angles, forward, right, up);
+
+	if (EV_IsLocal(idx))
+	{
+		g_iShotsFired++;
+		EV_MuzzleFlash();
+
+		if (g_pCurWeapon)
+			g_pCurWeapon->SendWeaponAnim(UTIL_SharedRandomLong(gPseudoPlayer.random_seed, M4A1_SHOOT_BACKWARD, M4A1_SHOOT_RIGHTWARD));
+
+		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[1], forward, 3, 0.2, 16, 16, 16, EV_RIFLE_SMOKE, velocity, false, 35);
+	}
+
+	Vector ShellVelocity, ShellOrigin;
+	if (EV_IsLocal(idx))
+	{
+		if (cl_righthand->value == 0)
+			EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -8.0, -10.0);
+		else
+			EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -8.0, -10.0);
+
+		VectorCopy(g_pViewEnt->attachment[1], ShellOrigin);
+		ShellVelocity[2] -= 45;
+	}
+	else
+		EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -12.0, -4.0);
+
+	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iRShell, TE_BOUNCE_SHELL, idx, 10);
+
+	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, M4A1_FIRE_SFX, 1.0, 0.52, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
+
+	Vector vecSrc = EV_GetGunPosition(args, origin);
+	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
+
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, M4A1_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_M4A1].m_iAmmoType, M4A1_PENETRATION);
 }
 
 DECLARE_EVENT(FireMAC10)

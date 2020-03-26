@@ -347,7 +347,7 @@ MSG_FUNC(WeapPickup)
 
 	// if this weapon would be auto-deploy, let's predict it.
 	if (g_pCurWeapon && g_pCurWeapon->m_pItemInfo->m_iWeight < g_rgWpnInfo[iWeaponId].m_iWeight)
-		g_iSelectedWeapon = (WeaponIdType)iWeaponId;
+		gPseudoPlayer.StartSwitchingWeapon((WeaponIdType)iWeaponId);
 
 	return TRUE;
 }
@@ -1004,7 +1004,10 @@ MSG_FUNC(Role)
 		// fix the flash blood screen bug.
 		// LUNA: in the SV, we update the Role info on the frame we assign, however, we won't update health info until next frame.
 		if (gHUD::m_Health.m_iHealth == 100 && (iRole == Role_Commander || iRole == Role_Godfather))
+		{
 			gHUD::m_Health.m_iHealth = 1000;
+			gHUD::m_Health.m_flDrawingHealth = 1000.0f;
+		}
 	}
 
 	return TRUE;
