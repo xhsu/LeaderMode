@@ -403,6 +403,14 @@ int gHUD::Redraw(float flTime, int intermission)
 	//if (gConfigs.bEnableClientUI)
 		//g_pViewPort->SetPaintEnabled(m_pCvarDraw->value);
 
+	// draw a cursor.
+	if (!g_bMouseControlledByGame)
+	{
+		int x = 0, y = 0;
+		gEngfuncs.GetMousePosition(&x, &y);
+		gEngfuncs.pfnFillRGBABlend(x, y, 2, 2, 255, 255, 255, 255);
+	}
+
 	gScreenFadeMgr.Think();
 	gScreenFadeMgr.Draw();
 	return 1;
@@ -487,7 +495,10 @@ void gHUD::CalcRefdef(ref_params_s* pparams)
 
 bool gHUD::KeyEvent(bool bDown, int iKeyIndex, const char* pszCurrentBinding)	// Return true to allow engine to process the key, otherwise, act on it as needed
 {
-	return true;
+	if (pszCurrentBinding && !Q_strcmp(pszCurrentBinding, "buy"))	// allow the exit from buy menu.
+		return true;
+
+	return g_bMouseControlledByGame;	// if controlled by game, then okay. otherwise, no.
 }
 
 int gHUD::GetSpriteIndex(const char* SpriteName)

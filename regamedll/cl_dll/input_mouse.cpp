@@ -19,7 +19,7 @@ long		s_mouseDeltaX = 0, s_mouseDeltaY = 0;
 
 static int		restore_spi;
 static int		originalmouseparms[3], newmouseparms[3] = { 0, 0, 1 };
-static int		mouseactive = 0;
+bool			g_bMouseControlledByGame = false;
 int				mouseinitialized;
 static int		mouseparmsvalid;
 static int		mouseshowtoggle = 1;
@@ -114,7 +114,7 @@ DWORD WINAPI MousePos_ThreadFunction(LPVOID p)
 			return 0;
 		}
 
-		if (mouseactive)
+		if (g_bMouseControlledByGame)
 		{
 			POINT		mouse_pos;
 			GetCursorPos(&mouse_pos);
@@ -193,7 +193,7 @@ void IN_ResetMouse(void)
 {
 	// no work to do in SDL
 
-	if (!m_bRawInput && mouseactive && gEngfuncs.GetWindowCenterX && gEngfuncs.GetWindowCenterY)
+	if (!m_bRawInput && g_bMouseControlledByGame && gEngfuncs.GetWindowCenterX && gEngfuncs.GetWindowCenterY)
 	{
 
 		SetCursorPos(gEngfuncs.GetWindowCenterX(), gEngfuncs.GetWindowCenterY());
@@ -345,7 +345,7 @@ IN_Move
 */
 void IN_Move(float frametime, usercmd_t* cmd)
 {
-	if (!iMouseInUse && mouseactive)
+	if (!iMouseInUse && g_bMouseControlledByGame)
 	{
 		IN_MouseMove(frametime, cmd);
 	}
@@ -434,7 +434,7 @@ void IN_ActivateMouse2(void)
 		if (mouseparmsvalid)
 			restore_spi = SystemParametersInfo (SPI_SETMOUSE, 0, newmouseparms, 0);
 
-		mouseactive = 1;
+		g_bMouseControlledByGame = 1;
 
 		// this reset prevents instant v_angle change due to cursor movement in intermission screen.
 		IN_ResetMouse();
@@ -453,7 +453,7 @@ void IN_DeactivateMouse2(void)
 		if (restore_spi)
 			SystemParametersInfo (SPI_SETMOUSE, 0, originalmouseparms, 0);
 
-		mouseactive = 0;
+		g_bMouseControlledByGame = 0;
 	}
 }
 
@@ -498,7 +498,7 @@ void IN_Accumulate2(void)
 	//only accumulate mouse if we are not moving the camera with the mouse
 	if (!iMouseInUse && !g_iVisibleMouse)
 	{
-		if (mouseactive)
+		if (g_bMouseControlledByGame)
 		{
 			if (!m_bRawInput)
 			{
@@ -532,7 +532,7 @@ IN_ClearStates
 */
 void IN_ClearStates2(void)
 {
-	if (!mouseactive)
+	if (!g_bMouseControlledByGame)
 		return;
 
 	mx_accum = 0;

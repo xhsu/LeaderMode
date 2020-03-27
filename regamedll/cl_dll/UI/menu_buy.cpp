@@ -15,13 +15,16 @@ void CommandFunc_Buy(void)
 	{
 		gHUD::m_UI_BuyMenu.m_bitsFlags &= ~IN_ACTIVE;
 		IN_ActivateMouse();
-		gEngfuncs.pfnSetMouseEnable(true);
+		//gEngfuncs.pfnSetMouseEnable(true);
+		//VGUI_SURFACE->LockCursor();
+
 	}
 	else
 	{
 		gHUD::m_UI_BuyMenu.m_bitsFlags |= IN_ACTIVE;
 		IN_DeactivateMouse();
-		gEngfuncs.pfnSetMouseEnable(false);
+		//gEngfuncs.pfnSetMouseEnable(false);
+		//VGUI_SURFACE->UnlockCursor();
 	}
 }
 

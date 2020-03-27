@@ -8,6 +8,8 @@ Created Date: 06 Mar 2020
 
 #define MOUSE_BUTTON_COUNT 5	// LUNA: mine have 6 in total.
 
+extern bool g_bMouseControlledByGame;
+
 extern cvar_t* sensitivity;
 extern cvar_t* zoom_sensitivity_ratio;
 
