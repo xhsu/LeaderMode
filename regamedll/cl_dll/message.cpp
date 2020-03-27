@@ -240,6 +240,10 @@ MSG_FUNC(ScoreAttrib)
 	int iPlayerId = READ_BYTE();
 	int bitsFlags = READ_BYTE();
 
+	g_PlayerExtraInfo[iPlayerId].m_bIsDead = !!(bitsFlags & SCORE_STATUS_DEAD);
+	g_PlayerExtraInfo[iPlayerId].m_bIsGodfather = !!(bitsFlags & SCORE_STATUS_GODFATHER);
+	g_PlayerExtraInfo[iPlayerId].m_bIsCommander = !!(bitsFlags & SCORE_STATUS_COMMANDER);
+
 	return TRUE;
 }
 
@@ -250,8 +254,12 @@ MSG_FUNC(ScoreInfo)
 	int iPlayerId = READ_BYTE();
 	int iScore = READ_SHORT();
 	int iDeaths = READ_SHORT();
-	int iPlayerClass = READ_SHORT();
+	int iPlayerClass = READ_SHORT();	// useless, not Role.
 	int iTeam = READ_SHORT();
+
+	g_PlayerExtraInfo[iPlayerId].m_iKills = iScore;
+	g_PlayerExtraInfo[iPlayerId].m_iDeaths = iDeaths;
+	g_PlayerExtraInfo[iPlayerId].m_iTeam = iTeam;
 
 	return TRUE;
 }
@@ -275,11 +283,10 @@ MSG_FUNC(TeamScore)
 {
 	BEGIN_READ(pbuf, iSize);
 
-	char szTeamName[192];
-	Q_strlcpy(szTeamName, READ_STRING());
-
+	int iTeamNum = READ_BYTE();
 	int iTeamScore = READ_SHORT();
 
+	g_rgiTeamScore[iTeamNum] = iTeamScore;
 	return TRUE;
 }
 
@@ -313,12 +320,14 @@ MSG_FUNC(MOTD)
 	return TRUE;
 }
 
+char g_szServerName[192] = "";
+
 MSG_FUNC(ServerName)
 {
 	BEGIN_READ(pbuf, iSize);
 
-	char szServerName[192];
-	Q_strlcpy(szServerName, READ_STRING());
+	Q_strlcpy(g_szServerName, READ_STRING());
+	gHUD::m_Scoreboard.m_ServerName.SetANSI(g_szServerName);
 
 	return TRUE;
 }

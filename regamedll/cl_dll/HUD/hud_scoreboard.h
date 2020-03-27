@@ -9,6 +9,49 @@ Code - Luna the Reborn
 
 #pragma once
 
+inline bool IsConnected(int playerIndex)
+{
+	return (g_PlayerInfoList[playerIndex].name && g_PlayerInfoList[playerIndex].name[0] != 0);
+}
+
+inline int GetTeamCounts(short teamnumber)
+{
+	int count = 0;
+
+	for (int i = 1; i <= MAX_PLAYERS; i++)
+	{
+		gEngfuncs.pfnGetPlayerInfo(i, &g_PlayerInfoList[i]);
+
+		if (!IsConnected(i))
+			continue;
+
+		if (g_PlayerExtraInfo[i].m_iTeam == teamnumber)
+			count++;
+	}
+
+	return count;
+}
+
+inline int GetTeamAliveCounts(short teamnumber)
+{
+	int count = 0;
+
+	for (int i = 1; i <= MAX_PLAYERS; i++)
+	{
+		gEngfuncs.pfnGetPlayerInfo(i, &g_PlayerInfoList[i]);
+
+		if (!IsConnected(i))
+			continue;
+
+		if (g_PlayerExtraInfo[i].m_iTeam == teamnumber && g_PlayerExtraInfo[i].m_iHealth > 0)
+			count++;
+	}
+
+	return count;
+}
+
+extern int g_rgiTeamScore[4];
+
 class CHudScoreboard : public CBaseHudElement
 {
 public:
@@ -16,10 +59,44 @@ public:
 	virtual int VidInit(void);
 	virtual int Draw(float flTime);
 	virtual void Think(void);
-	virtual void Reset(void) { m_Baseboard.NewRound(); }
+	virtual void Reset(void) { m_Baseboard.OnNewRound(); }
 	virtual void InitHUDData(void) { m_Baseboard.InitHUDData(); }
 	virtual void Shutdown(void) { m_Baseboard.Shutdown(); }
 
 public:
-	CBasePanel m_Baseboard;
+	enum ScoreboardElementName
+	{
+		SBE_Name = 0,
+		SBE_Class,
+		SBE_HP,
+		SBE_Money,
+		SBE_Kill,
+		SBE_Death,
+		SBE_KDA,
+		SBE_Ping
+	};
+
+	static constexpr char* m_rgszScoreboardElemKeyName[8] =
+	{
+		"#Career_PlayerName",
+		"#Cstrike_TitlesTXT_CLASS",
+		"#Cstrike_TitlesTXT_Health",
+		"#LeaderMod_SBE_Money",
+		"#Cstrike_TitlesTXT_SCORE",
+		"#Cstrike_TitlesTXT_DEATHS",
+		"#LeaderMod_SBE_KDA",
+		"#Cstrike_TitlesTXT_LATENCY"
+	};
+
+public:
+	CBasePanel		m_Baseboard;
+	CBaseText		m_ServerName;
+	CBasePanel		m_Line01;
+	const wchar_t*	m_pwszTeamName[4];
+	int				m_hPlayerNameFont;
+	const wchar_t*	m_pwszPlayerCalled;
+	const wchar_t*	m_pwszDeathCalled;
+	float			m_flChunkOffset;
+	const wchar_t*	m_rgpwcScoreboardElementName[8];
+	const wchar_t*	m_pwcTeamWinsText;
 };

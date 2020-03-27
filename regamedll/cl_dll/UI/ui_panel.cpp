@@ -9,6 +9,10 @@ Code - Luna the Reborn
 
 #include "precompiled.h"
 
+CBasePanel::CBasePanel()
+{
+}
+
 CBasePanel::~CBasePanel()
 {
 	// deal with own parent.
@@ -82,15 +86,31 @@ void CBasePanel::InitHUDData(void)
 	}
 }
 
-void CBasePanel::NewRound(void)
+void CBasePanel::OnNewRound(void)
 {
 	if (!m_lstChildren.empty())
 	{
 		for (auto pChild : m_lstChildren)
 		{
-			pChild->NewRound();
+			pChild->OnNewRound();
 		}
 	}
+}
+
+bool CBasePanel::KeyEvent(bool bDown, int iKeyIndex, const char* pszCurrentBinding)
+{
+	bool bSkip = true;
+
+	if (!m_lstChildren.empty())
+	{
+		for (auto pChild : m_lstChildren)
+		{
+			if (!pChild->KeyEvent(bDown, iKeyIndex, pszCurrentBinding))
+				bSkip = false;
+		}
+	}
+
+	return bSkip;
 }
 
 void CBasePanel::Think(void)
@@ -106,13 +126,8 @@ void CBasePanel::Think(void)
 
 bool CBasePanel::Draw(float flTime)
 {
-	float x = m_vecCoord.x, y = m_vecCoord.y;
-
-	if (m_pParent)
-	{
-		x += m_pParent->m_vecCoord.x;
-		y += m_pParent->m_vecCoord.y;
-	}
+	float x = GetX();
+	float y = GetY();
 
 	glDisable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
@@ -128,7 +143,8 @@ bool CBasePanel::Draw(float flTime)
 	{
 		for (auto pChild : m_lstChildren)
 		{
-			pChild->Draw(flTime);
+			if (pChild->m_bitsFlags & HUD_ACTIVE)
+				pChild->Draw(flTime);
 		}
 	}
 

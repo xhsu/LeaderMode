@@ -297,7 +297,7 @@ int GetWeaponAccuracyFlags(WeaponIdType iId)
 		case WEAPON_ACR:
 		case WEAPON_CM901:
 		case WEAPON_MK46:
-		case WEAPON_SCARL:
+		case WEAPON_SCARH:
 		case WEAPON_AK47:
 		case WEAPON_P90:
 			result = ACCURACY_AIR | ACCURACY_SPEED;
@@ -421,7 +421,7 @@ int CHudCrosshair::DrawCrosshair(float flTime, WeaponIdType weaponid)
 
 	case WEAPON_M200:
 	case WEAPON_M14EBR:
-	case WEAPON_SCARL:
+	case WEAPON_SCARH:
 	{
 		iDistance = 5;
 		iDeltaDistance = 3;
@@ -458,7 +458,7 @@ int CHudCrosshair::DrawCrosshair(float flTime, WeaponIdType weaponid)
 				case WEAPON_MP5N:
 				case WEAPON_KSG12:
 				case WEAPON_DEAGLE:
-				case WEAPON_SCARL:
+				case WEAPON_SCARH:
 				{
 					flLimitSpeed = 140;
 					break;

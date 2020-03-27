@@ -182,9 +182,9 @@ bool CHudSpectator::AddOverviewEntity(int type, cl_entity_s* ent, const char* mo
 			default: hSprite = m_hsprPlayer; break;
 			}
 
-			if (g_PlayerExtraInfo[ent->index].vip)
+			if (g_PlayerExtraInfo[ent->index].m_bIsCommander)
 				hSprite = m_hsprPlayerVIP;
-			else if (g_PlayerExtraInfo[ent->index].has_c4)
+			else if (g_PlayerExtraInfo[ent->index].m_bIsGodfather)
 				hSprite = m_hsprPlayerC4;
 		}
 		else

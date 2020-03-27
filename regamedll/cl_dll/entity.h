@@ -44,15 +44,14 @@ struct extra_player_info_t
 	int			m_iHealth;
 	int			m_iAccount;
 
-	bool has_c4;
-	bool vip;
-
 	float	m_flTimeNextRadarFlash;
 	bool	m_bRadarFlashing;
 	float	m_iRadarFlashRemains;
 	bool	m_bBeingTracking;	// assassin's skill & commander's skill.
-	
-	bool dead;
+
+	bool	m_bIsDead;
+	bool	m_bIsGodfather;
+	bool	m_bIsCommander;
 	
 	char location[32];
 };

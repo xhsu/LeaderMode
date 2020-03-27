@@ -14,7 +14,7 @@ const int g_rgiBuyMenuClassify[] =
 	(1 << WEAPON_GLOCK18) | (1 << WEAPON_USP) | (1 << WEAPON_ANACONDA) | (1 << WEAPON_DEAGLE) | (1 << WEAPON_FIVESEVEN) | (1 << WEAPON_P99),
 	(1 << WEAPON_KSG12) | (1 << WEAPON_STRIKER),
 	(1 << WEAPON_MP7A1) | (1 << WEAPON_PM9) | (1 << WEAPON_MP5N) | (1 << WEAPON_UMP45) | (1 << WEAPON_P90),
-	(1 << WEAPON_QBZ95) | (1 << WEAPON_CM901) | (1 << WEAPON_AK47) | (1 << WEAPON_M4A1) | (1 << WEAPON_SCARL) | (1 << WEAPON_ACR) | (1 << WEAPON_MK46),
+	(1 << WEAPON_QBZ95) | (1 << WEAPON_CM901) | (1 << WEAPON_AK47) | (1 << WEAPON_M4A1) | (1 << WEAPON_SCARH) | (1 << WEAPON_ACR) | (1 << WEAPON_MK46),
 	(1 << WEAPON_M200) | (1 << WEAPON_M14EBR) | (1 << WEAPON_AWP) | (1 << WEAPON_SVD),
 };
 
@@ -203,7 +203,7 @@ bool MenuHandler_Buy3(CBasePlayer* pPlayer, int iSlot)
 			AddMenuWeaponItem(pPlayer, WEAPON_AK47,		szMenuText);	// 3
 			AddMenuWeaponItem(pPlayer, WEAPON_M4A1,		szMenuText);	// 4
 			AddMenuWeaponItem(pPlayer, WEAPON_ACR,		szMenuText);	// 5
-			AddMenuWeaponItem(pPlayer, WEAPON_SCARL,	szMenuText);	// 6
+			AddMenuWeaponItem(pPlayer, WEAPON_SCARH,	szMenuText);	// 6
 			AddMenuWeaponItem(pPlayer, WEAPON_MK46,		szMenuText);	// 7
 
 			Q_strlcat(szMenuText,	"\n"
@@ -362,7 +362,7 @@ bool MenuHandler_BuyAssaultFirearms(CBasePlayer* pPlayer, int iSlot)
 		return BuyWeapon(pPlayer, WEAPON_ACR);
 
 	case 6:
-		return BuyWeapon(pPlayer, WEAPON_SCARL);
+		return BuyWeapon(pPlayer, WEAPON_SCARH);
 
 	case 7:
 		return BuyWeapon(pPlayer, WEAPON_MK46);

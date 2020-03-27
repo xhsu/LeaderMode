@@ -213,6 +213,10 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\Fonts\encode.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\Fonts\FontAmalgam.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
@@ -263,10 +267,13 @@
     <ClCompile Include="..\interpolation.cpp" />
     <ClCompile Include="..\in_camera.cpp" />
     <ClCompile Include="..\message.cpp" />
+    <ClCompile Include="..\sound.cpp" />
     <ClCompile Include="..\StudioModelRenderer.cpp" />
     <ClCompile Include="..\StudioModelRenderer_CS.cpp" />
     <ClCompile Include="..\tri.cpp" />
+    <ClCompile Include="..\UI\menu_buy.cpp" />
     <ClCompile Include="..\UI\ui_panel.cpp" />
+    <ClCompile Include="..\UI\ui_text.cpp" />
     <ClCompile Include="..\view.cpp" />
     <ClCompile Include="..\viewport_interface.cpp" />
     <ClCompile Include="..\weapons.cpp" />
@@ -292,6 +299,7 @@
     <ClInclude Include="..\entity.h" />
     <ClInclude Include="..\events.h" />
     <ClInclude Include="..\Fonts\DrawFonts.h" />
+    <ClInclude Include="..\Fonts\encode.h" />
     <ClInclude Include="..\Fonts\FontAmalgam.h" />
     <ClInclude Include="..\Fonts\FontManager.h" />
     <ClInclude Include="..\Fonts\FontTextureCache.h" />
@@ -330,9 +338,12 @@
     <ClInclude Include="..\interpolation.h" />
     <ClInclude Include="..\in_camera.h" />
     <ClInclude Include="..\message.h" />
+    <ClInclude Include="..\sound.h" />
     <ClInclude Include="..\StudioModelRenderer.h" />
     <ClInclude Include="..\tri.h" />
+    <ClInclude Include="..\UI\menu_buy.h" />
     <ClInclude Include="..\UI\ui_panel.h" />
+    <ClInclude Include="..\UI\ui_text.h" />
     <ClInclude Include="..\view.h" />
     <ClInclude Include="..\viewport_interface.h" />
     <ClInclude Include="..\weapons.h" />

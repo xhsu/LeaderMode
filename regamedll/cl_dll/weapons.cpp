@@ -299,19 +299,13 @@ void CBaseWeapon::Think(void)
 		// that's because the brass ejected is visible globally, thus, it should be managed by SV.
 	}
 
-	if (!(m_bitsFlags & WPNSTATE_BUSY) && m_pPlayer->m_afButtonPressed & IN_RUN && m_pPlayer->pev->button & IN_FORWARD && !(m_pPlayer->pev->button & IN_DUCK))
+	if (!(m_bitsFlags & WPNSTATE_BUSY) && m_pPlayer->pev->button & IN_RUN && m_pPlayer->pev->button & IN_FORWARD && !(m_pPlayer->pev->button & IN_DUCK))
 	{
-		if (m_bInReload)
-			PushAnim();
-
-		if (m_bInZoom || m_pPlayer->pev->fov < 90)
-			SecondaryAttack();
-
 		DashStart();
 	}
 
 	if (m_bitsFlags & WPNSTATE_DASHING &&
-		(m_pPlayer->m_afButtonReleased & IN_RUN || !(m_pPlayer->pev->button & IN_FORWARD) || m_pPlayer->pev->button & IN_DUCK/* || m_pPlayer->pev->velocity.Length2D() < 50.0f*/)
+		(m_pPlayer->m_afButtonReleased & IN_RUN || !(m_pPlayer->pev->button & IN_FORWARD) || m_pPlayer->pev->button & IN_DUCK || m_pPlayer->pev->velocity.Length2D() < 50.0f)
 		)
 	{
 		DashEnd();

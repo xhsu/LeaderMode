@@ -1043,7 +1043,7 @@ BOOL CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 				flRatio *= 1.7;
 				break;
 			case WEAPON_QBZ95:
-			case WEAPON_SCARL:
+			case WEAPON_SCARH:
 				flRatio *= 1.4;
 				break;
 			case WEAPON_CM901:
@@ -4285,10 +4285,10 @@ void CBasePlayer::SetScoreAttrib(CBasePlayer *dest)
 		state |= SCORE_STATUS_DEAD;
 
 	// TODO: Remove these fixes when they are implemented on the client side
-	if (state & (SCORE_STATUS_BOMB | SCORE_STATUS_DEFKIT) && GetForceCamera(dest) != CAMERA_MODE_SPEC_ANYONE)
+	if (state & (SCORE_STATUS_GODFATHER | SCORE_STATUS_DEFKIT) && GetForceCamera(dest) != CAMERA_MODE_SPEC_ANYONE)
 	{
 		if (CSGameRules()->PlayerRelationship(this, dest) != GR_TEAMMATE)
-			state &= ~(SCORE_STATUS_BOMB | SCORE_STATUS_DEFKIT);
+			state &= ~(SCORE_STATUS_GODFATHER | SCORE_STATUS_DEFKIT);
 	}
 
 	if (gmsgScoreAttrib)
@@ -5551,12 +5551,12 @@ void EXT_FUNC CBasePlayer::UpdateClientData()
 		if (g_pGameRules->IsMultiplayer())
 		{
 			MESSAGE_BEGIN(MSG_ONE, gmsgTeamScore, nullptr, pev);
-				WRITE_STRING(GetTeam(CT));
+				WRITE_BYTE(CT);
 				WRITE_SHORT(CSGameRules()->m_iNumCTWins);
 			MESSAGE_END();
 
 			MESSAGE_BEGIN(MSG_ONE, gmsgTeamScore, nullptr, pev);
-				WRITE_STRING(GetTeam(TERRORIST));
+				WRITE_BYTE(TERRORIST);
 				WRITE_SHORT(CSGameRules()->m_iNumTerroristWins);
 			MESSAGE_END();
 		}
@@ -6768,7 +6768,7 @@ BOOL CBasePlayer::ShouldDoLargeFlinch(int nHitGroup, int nGunType)
 		case WEAPON_M4A1:
 		case WEAPON_SVD:
 		case WEAPON_DEAGLE:
-		case WEAPON_SCARL:
+		case WEAPON_SCARH:
 		case WEAPON_AK47:
 			return TRUE;
 		}

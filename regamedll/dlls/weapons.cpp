@@ -134,7 +134,7 @@ void WeaponsPrecache()
 	UTIL_PrecacheOtherWeapon(WEAPON_MK46);
 
 	UTIL_PrecacheOtherWeapon(WEAPON_M4A1);
-	UTIL_PrecacheOtherWeapon(WEAPON_SCARL);
+	UTIL_PrecacheOtherWeapon(WEAPON_SCARH);
 	UTIL_PrecacheOtherWeapon(WEAPON_ACR);
 	UTIL_PrecacheOtherWeapon(WEAPON_M14EBR);
 	UTIL_PrecacheOtherWeapon(WEAPON_CM901);
@@ -373,7 +373,7 @@ void CBaseWeapon::Think(void)
 			vecShellVelocity, m_pPlayer->pev->angles.yaw, m_pPlayer->m_iShellModelIndex, soundType, m_pPlayer->entindex());
 	}
 
-	if (!(m_bitsFlags & WPNSTATE_BUSY) && m_pPlayer->m_afButtonPressed & IN_RUN && m_pPlayer->pev->button & IN_FORWARD && !(m_pPlayer->pev->button & IN_DUCK) && m_pPlayer->pev->velocity.Length2D() >= 50.0f)
+	if (!(m_bitsFlags & WPNSTATE_BUSY) && m_pPlayer->pev->button & IN_RUN && m_pPlayer->pev->button & IN_FORWARD && !(m_pPlayer->pev->button & IN_DUCK))
 	{
 		DashStart();
 	}

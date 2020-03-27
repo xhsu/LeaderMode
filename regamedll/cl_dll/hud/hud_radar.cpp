@@ -160,7 +160,7 @@ void CHudRadar::DrawRadar(float flTime)
 		iBaseDotSize = 1;
 	}
 
-	if (g_PlayerExtraInfo[gHUD::m_iPlayerNum].dead == true)
+	if (g_PlayerExtraInfo[gHUD::m_iPlayerNum].m_bIsDead)
 		return;
 
 	if (cl_radartype && cl_radartype->value != 0)
@@ -179,7 +179,7 @@ void CHudRadar::DrawRadar(float flTime)
 		if (!g_PlayerInfoList[i].name || !g_PlayerInfoList[i].name[0])
 			continue;
 
-		if (gHUD::m_iPlayerNum == i || g_PlayerExtraInfo[i].m_iTeam != g_iTeamNumber || g_PlayerExtraInfo[i].dead)
+		if (gHUD::m_iPlayerNum == i || g_PlayerExtraInfo[i].m_iTeam != g_iTeamNumber || g_PlayerExtraInfo[i].m_bIsDead)
 			continue;
 
 		if (g_PlayerExtraInfo[i].m_iHealth <= 0)	// no dead guy allowed.
@@ -191,7 +191,7 @@ void CHudRadar::DrawRadar(float flTime)
 		if (vecTranslated.x < 0 || vecTranslated.x > iRadarRadius || vecTranslated.y < 0 || vecTranslated.y > iRadarRadius)
 			continue;
 
-		if ((g_PlayerExtraInfo[i].has_c4 && (g_iTeamNumber == TEAM_TERRORIST || g_iTeamNumber == TEAM_UNASSIGNED)) || (g_PlayerExtraInfo[i].vip && (g_iTeamNumber == TEAM_CT || g_iTeamNumber == TEAM_UNASSIGNED)))
+		if ((g_PlayerExtraInfo[i].m_bIsGodfather && (g_iTeamNumber == TEAM_TERRORIST || g_iTeamNumber == TEAM_UNASSIGNED)) || (g_PlayerExtraInfo[i].m_bIsCommander && (g_iTeamNumber == TEAM_CT || g_iTeamNumber == TEAM_UNASSIGNED)))
 		{
 			r = 250;
 			g = 0;

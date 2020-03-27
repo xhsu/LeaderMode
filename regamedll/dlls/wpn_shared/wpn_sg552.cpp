@@ -6,7 +6,7 @@ void CSG552::Spawn()
 {
 	Precache();
 
-	m_iId = WEAPON_SCARL;
+	m_iId = WEAPON_SCARH;
 	SET_MODEL(edict(), "models/w_sg552.mdl");
 
 	m_iDefaultAmmo = iinfo()->m_iMaxClip;

@@ -65,7 +65,7 @@ Returns 1 if health is <= 0
 */
 bool CL_IsDead(void)
 {
-	return (gHUD::m_Health.m_iHealth <= 0) ? 1 : 0;
+	return (gHUD::m_Health.m_iHealth <= 0 || g_PlayerExtraInfo[gHUD::m_iPlayerNum].m_bIsDead);
 }
 
 /*
@@ -103,7 +103,7 @@ BOOL HUD_Key_Event2(int down, int keynum, const char* pszCurrentBinding)
 	//if (gViewPortInterface)
 		//return gViewPortInterface->KeyInput(down, keynum, pszCurrentBinding);
 
-	return TRUE;
+	return gHUD::KeyEvent(down, keynum, pszCurrentBinding);
 }
 
 /*
@@ -412,7 +412,7 @@ void CL_CreateMove2(float frametime, usercmd_s* cmd, int active)
 		spd = gEngfuncs.GetClientMaxspeed();
 
 		// slow down if we are not running.
-		if (!IS_DASHING)
+		if (!IS_DASHING && !(in_duck.state & 1))
 			spd *= cl_walkingspeedmodifier->value;
 
 		if (spd != 0.0)

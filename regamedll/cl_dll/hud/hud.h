@@ -27,6 +27,7 @@ Created Date: 07 Mar 2020
 
 #define HUD_ACTIVE			BIT(0)
 #define HUD_INTERMISSION	BIT(1)
+#define HUD_ENFORCE_THINK	BIT(2)	// no matter active or not, this elements would execute Think().
 
 #define MAX_PLAYER_NAME_LENGTH 128
 #define MAX_MOTD_LENGTH 1536
@@ -182,6 +183,7 @@ class CHudCrosshair;
 class CHudWeaponList;
 class CHudGrenade;
 class CHudScoreboard;
+class CUIBuyMenu;
 
 namespace gHUD
 {
@@ -193,6 +195,7 @@ namespace gHUD
 	void Think(void);
 	int UpdateClientData(client_data_t* cdata, float time);
 	void CalcRefdef(ref_params_s* pparams);
+	bool KeyEvent(bool bDown, int iKeyIndex, const char* pszCurrentBinding);	// Return true to allow engine to process the key, otherwise, act on it as needed
 
 	// HUD utils
 	int GetSpriteIndex(const char* SpriteName);
@@ -279,6 +282,7 @@ namespace gHUD
 	extern CHudWeaponList m_WeaponList;
 	extern CHudGrenade m_Grenade;
 	extern CHudScoreboard m_Scoreboard;
+	extern CUIBuyMenu m_UI_BuyMenu;
 };
 
 class CScreenFade

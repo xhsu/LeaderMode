@@ -61,8 +61,8 @@ const int DEFAULT_FOV      = 90;	// the default field of view
 #define ITEM_STATUS_DEFUSER     BIT(1)
 
 #define SCORE_STATUS_DEAD       BIT(0)
-#define SCORE_STATUS_BOMB       BIT(1)
-#define SCORE_STATUS_VIP        BIT(2)
+#define SCORE_STATUS_GODFATHER       BIT(1)
+#define SCORE_STATUS_COMMANDER        BIT(2)
 #define SCORE_STATUS_DEFKIT     BIT(3)
 
 // player data iuser3

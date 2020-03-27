@@ -19,3 +19,4 @@ MSG_FUNC(ResetHUD);
 // some sv vars came through message.
 extern bool g_bHasDefuser;
 extern bool g_bHasNightvision;
+extern char g_szServerName[192];

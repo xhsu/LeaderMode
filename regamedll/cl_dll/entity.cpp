@@ -267,10 +267,17 @@ void HUD_StudioEvent2(const mstudioevent_s* pEvent, const cl_entity_s* pEntity)
 	case 5002:
 		gEngfuncs.pEfxAPI->R_SparkEffect((float*)&pEntity->attachment[0], Q_atoi(pEvent->options), -100, 100);
 		break;
+
 		// Client side sound
 	case 5004:
-		gEngfuncs.pfnPlaySoundByName((char*)pEvent->options, VOL_NORM);
+		//gEngfuncs.pfnPlaySoundByName((char*)pEvent->options, VOL_NORM);	// no more engine sound API.
+
+		char szFilePath[128];
+		Q_snprintf(szFilePath, charsmax(szFilePath), "sound/%s", pEvent->options);
+
+		PlaySoundViaWinmm(szFilePath);
 		break;
+
 	default:
 		break;
 	}

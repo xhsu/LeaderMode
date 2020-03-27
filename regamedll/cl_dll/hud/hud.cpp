@@ -113,6 +113,7 @@ namespace gHUD
 	CHudWeaponList m_WeaponList;
 	CHudGrenade m_Grenade;
 	CHudScoreboard m_Scoreboard;
+	CUIBuyMenu m_UI_BuyMenu;
 };
 
 void gHUD::Init(void)
@@ -163,6 +164,9 @@ void gHUD::Init(void)
 	m_Crosshair.Init();
 	m_WeaponList.Init();
 	m_Scoreboard.Init();	// this is definately the last layer.
+
+	// UI is always above all other HUD elements.
+	m_UI_BuyMenu.Init();
 
 	// UNDONE
 	//GetClientVoice()->Init(&g_VoiceStatusHelper);
@@ -417,13 +421,6 @@ float HUD_GetFOV(void)
 
 void gHUD::Think(void)
 {
-	// draw or not, you must think.
-	for (auto pHudElements : m_lstHudElements)
-	{
-		if (pHudElements->m_bitsFlags & HUD_ACTIVE)
-			pHudElements->Think();
-	}
-
 	// Is Player Dead??
 	m_bPlayerDead = CL_IsDead();
 
@@ -457,6 +454,13 @@ void gHUD::Think(void)
 
 	// make FOV transition nice and smooth.
 	m_flDisplayedFOV += (float(m_iFOV) - m_flDisplayedFOV) * m_flTimeDelta * 7.0f;	// this 7.0 is the transition speed.
+
+	// draw or not, you must think.
+	for (auto pHudElements : m_lstHudElements)
+	{
+		if (pHudElements->m_bitsFlags & HUD_ACTIVE || pHudElements->m_bitsFlags & HUD_ENFORCE_THINK)
+			pHudElements->Think();
+	}
 }
 
 int gHUD::UpdateClientData(client_data_t* cdata, float time)
@@ -479,6 +483,11 @@ int gHUD::UpdateClientData(client_data_t* cdata, float time)
 
 void gHUD::CalcRefdef(ref_params_s* pparams)
 {
+}
+
+bool gHUD::KeyEvent(bool bDown, int iKeyIndex, const char* pszCurrentBinding)	// Return true to allow engine to process the key, otherwise, act on it as needed
+{
+	return true;
 }
 
 int gHUD::GetSpriteIndex(const char* SpriteName)

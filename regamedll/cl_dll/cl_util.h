@@ -7,7 +7,7 @@ Created Date: 05 Mar 2020
 #pragma once
 
 #define charsmax(x)		(sizeof(x) - 1)
-#define wcharsmax(x)	(sizeof(x) / 2 - 1)
+#define wcharsmax(x)	(sizeof(x) / sizeof(wchar_t) - 1)
 
 // some constants from MP
 #define TEAM_UNASSIGNED	0

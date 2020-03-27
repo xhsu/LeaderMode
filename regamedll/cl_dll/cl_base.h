@@ -132,15 +132,18 @@ Created Date: 05 Mar 2020
 #include "viewport_interface.h"
 #include "weapons.h"
 #include "tri.h"
+#include "sound.h"
 
 // graphic stuff
 #include "Graph/dxt.h"
 
 // font stuff
 #include "Fonts/DrawFonts.h"
+#include "Fonts/encode.h"
 
 // UI
 #include "UI/ui_panel.h"	// grandfather of every other UI elements.
+#include "UI/ui_text.h"
 
 // HUD
 #include "hud/hud.h"
@@ -171,3 +174,6 @@ Created Date: 05 Mar 2020
 #include "hud/hud_weaponlist.h"
 #include "hud/hud_grenade.h"
 #include "HUD/hud_scoreboard.h"
+
+// UI Instance
+#include "UI/menu_buy.h"

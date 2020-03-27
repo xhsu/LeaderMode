@@ -503,12 +503,12 @@ void EXT_FUNC CHalfLifeMultiplay::RemoveGuns()
 void CHalfLifeMultiplay::UpdateTeamScores()
 {
 	MESSAGE_BEGIN(MSG_ALL, gmsgTeamScore);
-		WRITE_STRING("CT");
+		WRITE_BYTE(CT);
 		WRITE_SHORT(m_iNumCTWins);
 	MESSAGE_END();
 
 	MESSAGE_BEGIN(MSG_ALL, gmsgTeamScore);
-		WRITE_STRING("TERRORIST");
+		WRITE_BYTE(TERRORIST);
 		WRITE_SHORT(m_iNumTerroristWins);
 	MESSAGE_END();
 }
@@ -1961,7 +1961,7 @@ void CHalfLifeMultiplay::AssignCommander(CBasePlayer *pPlayer)
 
 	MESSAGE_BEGIN(MSG_ALL, gmsgScoreAttrib);
 	WRITE_BYTE(THE_COMMANDER->entindex());	// head of CTs
-	WRITE_BYTE(SCORE_STATUS_VIP);
+	WRITE_BYTE(SCORE_STATUS_COMMANDER);
 	MESSAGE_END();
 
 	for (int i = 1; i <= gpGlobals->maxClients; i++)
@@ -2034,7 +2034,7 @@ void CHalfLifeMultiplay::AssignGodfather(CBasePlayer* pPlayer)
 
 	MESSAGE_BEGIN(MSG_ALL, gmsgScoreAttrib);
 	WRITE_BYTE(THE_GODFATHER->entindex());	// head of TRs
-	WRITE_BYTE(SCORE_STATUS_BOMB);
+	WRITE_BYTE(SCORE_STATUS_GODFATHER);
 	MESSAGE_END();
 
 	for (int i = 1; i <= gpGlobals->maxClients; i++)
@@ -2348,12 +2348,12 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer *pl)
 	}
 
 	MESSAGE_BEGIN(MSG_ONE, gmsgTeamScore, nullptr, pl->edict());
-		WRITE_STRING("TERRORIST");
+		WRITE_BYTE(TERRORIST);
 		WRITE_SHORT(m_iNumTerroristWins);
 	MESSAGE_END();
 
 	MESSAGE_BEGIN(MSG_ONE, gmsgTeamScore, nullptr, pl->edict());
-		WRITE_STRING("CT");
+		WRITE_BYTE(CT);
 		WRITE_SHORT(m_iNumCTWins);
 	MESSAGE_END();
 

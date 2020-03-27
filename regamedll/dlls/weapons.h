@@ -297,9 +297,9 @@ enum mp5n_e
 	MP5N_SHOOT3,
 };
 
-#define SCARL_VIEW_MODEL	"models/weapons/v_scarl.mdl"
-#define SCARL_WORLD_MODEL	"models/weapons/w_scarl.mdl"
-#define SCARL_FIRE_SFX		"weapons/scarl/scarl_fire.wav"
+#define SCARH_VIEW_MODEL	"models/weapons/v_scarh.mdl"
+#define SCARH_WORLD_MODEL	"models/weapons/w_scarl.mdl"
+#define SCARH_FIRE_SFX		"weapons/SCARH/mk17_shoot.wav"
 
 const float SG552_MAX_SPEED      = 235.0f;
 const float SG552_MAX_SPEED_ZOOM = 200.0f;
@@ -777,7 +777,7 @@ public:	// util funcs
 
 #define M4A1_VIEW_MODEL		"models/weapons/v_m4a1.mdl"
 #define M4A1_WORLD_MODEL	"models/weapons/w_m4a1.mdl"
-#define M4A1_FIRE_SFX		"weapons/ar15_mod/ar15_shoot.wav"
+#define M4A1_FIRE_SFX		"weapons/AR15/ar15_shoot.wav"
 
 constexpr float M4A1_MAX_SPEED			= 230.0f;
 constexpr float M4A1_DAMAGE				= 32.0f;

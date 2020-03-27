@@ -251,6 +251,7 @@ BOOL CL_DLLEXPORT Initialize_(cl_enginefunc_t* pEnginefuncs, int iVersion)	// LU
 
 	Dxt_Initialization();
 	Events_Init();
+	Sound_Init();
 
 	// LUNA: UNDONE, crsky told me to do it later.
 	//CL_LoadParticleMan();

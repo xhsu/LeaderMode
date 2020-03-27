@@ -30,7 +30,7 @@ int CHudHeadName::Draw(float flTime)
 			VGUI_LOCALISE->ConvertANSIToUnicode(g_PlayerInfoList[i].name, m_sUnicodes[i], sizeof(m_sUnicodes[i]));
 		}
 
-		if (g_PlayerExtraInfo[i].dead)
+		if (g_PlayerExtraInfo[i].m_bIsDead)
 			continue;
 
 		if (m_iDrawType == HEADNAME_TEAMMATE)
