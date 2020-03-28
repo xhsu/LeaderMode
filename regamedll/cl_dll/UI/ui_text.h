@@ -24,8 +24,10 @@ public:
 public:	// utils
 	void	SetUFT8				(const char* str);
 	void	SetANSI				(const char* str);
-	void	SetLocalise			(const char* key);
-	void	CreateFont			(const char* windowsFontName, int tall, int weight, int blur, int scanlines, int flags);
+
+	virtual	void	SetLocalise	(const char* key);
+	virtual	int		CreateFont	(const char* windowsFontName, int tall, int weight, int blur, int scanlines, int flags);
+	inline	void	SetFont		(int hFont, int iSize) { m_hFont = hFont; m_iFontSize = iSize; }
 
 public:
 	wchar_t	m_wszWords[2048];

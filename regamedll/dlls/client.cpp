@@ -2803,6 +2803,15 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 					}
 				}
 			}
+			else if (FStrEq(pcmd, "buyweapon"))
+			{
+				WeaponIdType iId = (WeaponIdType)Q_atoi(parg1);
+
+				if (iId <= WEAPON_NONE || iId >= LAST_WEAPON)
+					return;
+
+				BuyWeapon(pPlayer, iId);
+			}
 			else
 			{
 				if (HandleRadioAliasCommands(pPlayer, pcmd))

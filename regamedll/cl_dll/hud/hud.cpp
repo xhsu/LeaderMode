@@ -498,7 +498,12 @@ bool gHUD::KeyEvent(bool bDown, int iKeyIndex, const char* pszCurrentBinding)	//
 	if (pszCurrentBinding && !Q_strcmp(pszCurrentBinding, "buy"))	// allow the exit from buy menu.
 		return true;
 
-	return g_bMouseControlledByGame;	// if controlled by game, then okay. otherwise, no.
+	bool bGoToEngine = true;
+
+	if (!gHUD::m_UI_BuyMenu.m_Baseboard.KeyEvent(bDown, iKeyIndex, pszCurrentBinding))
+		bGoToEngine = false;
+
+	return (g_bMouseControlledByGame && bGoToEngine);	// if controlled by game, then okay. otherwise, no.
 }
 
 int gHUD::GetSpriteIndex(const char* SpriteName)

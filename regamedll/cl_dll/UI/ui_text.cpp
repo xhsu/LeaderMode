@@ -65,9 +65,10 @@ void CBaseText::SetLocalise(const char* key)
 	}
 }
 
-void CBaseText::CreateFont(const char* windowsFontName, int tall, int weight, int blur, int scanlines, int flags)
+int CBaseText::CreateFont(const char* windowsFontName, int tall, int weight, int blur, int scanlines, int flags)
 {
 	m_iFontSize = tall;
 	m_hFont = gFontFuncs.CreateFont();
 	gFontFuncs.AddGlyphSetToFont(m_hFont, windowsFontName, tall, weight, blur, scanlines, flags, 0x0, 0xFFFF);
+	return m_hFont;
 }

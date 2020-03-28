@@ -9,7 +9,6 @@ Model - Matoilet
 */
 
 #include "precompiled.h"
-#include "..\weapons.h"
 
 #ifndef CLIENT_DLL
 
@@ -251,21 +250,26 @@ void CM4A1::DashEnd(void)
 {
 	if (m_pPlayer->m_flNextAttack > 0.0f && m_pPlayer->pev->weaponanim == M4A1_DASH_ENTER)
 	{
-		// m_pPlayer->m_flNextAttack means how much time left, save it first.
-		float flRunStartUnplayedRatio = m_pPlayer->m_flNextAttack / M4A1_DASH_ENTER_TIME;
+		// this is how much you procees to the dashing phase.
+		// for example, assuming the whole length is 1.0s, you start 0.7s and decide to cancel.
+		// although there's only 0.3s to the dashing phase, but turning back still requires another equally 0.7s.
+		// "m_pPlayer->m_flNextAttack" is the 0.3s of full length. you need to get the rest part, i.e. the 70%.
+		float flRunStartUnplayedRatio = 1.0f - m_pPlayer->m_flNextAttack / M4A1_DASH_ENTER_TIME;
 
-		// get the time we need to wait.
+		// stick on the last instance in the comment: 70% * 1.0s(full length) = 0.7s, this is the time we need to turning back.
 		float flRunStopTimeLeft = M4A1_DASH_EXIT_TIME * flRunStartUnplayedRatio;
 
-		// normally play RUN_STOP
+		// play the anim.
 		SendWeaponAnim(M4A1_DASH_EXIT);
 
 #ifdef CLIENT_DLL
-		// change this var, if RUN_STOP is made by a inversion of RUN_START, this will work pretty well.
-		g_flTimeViewModelAnimStart = gEngfuncs.GetClientTime() - flRunStopTimeLeft;
+		// why we are using the "0.3s" here?
+		// this is because the g_flTimeViewModelAnimStart actually means how much time had passed since the anim was ordered to play.
+		// if we need to play 0.7s, we have to told system we only played it for 0.3s. right?
+		g_flTimeViewModelAnimStart = gEngfuncs.GetClientTime() - (M4A1_DASH_EXIT_TIME - flRunStopTimeLeft);
 #endif
 
-		// type 2 anim CD.
+		// force everything else to wait.
 		m_pPlayer->m_flNextAttack = m_flNextPrimaryAttack = m_flNextSecondaryAttack = m_flTimeWeaponIdle = flRunStopTimeLeft;
 	}
 

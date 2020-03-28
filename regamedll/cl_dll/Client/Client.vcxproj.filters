@@ -273,6 +273,12 @@
     <ClCompile Include="..\UI\menu_buy.cpp">
       <Filter>cl_dll\UI</Filter>
     </ClCompile>
+    <ClCompile Include="..\UI\ui_button.cpp">
+      <Filter>cl_dll\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\dlls\wpn_shared\wpn_mk46.cpp">
+      <Filter>dlls\wpn_shared</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\cdll_int.h">
@@ -477,6 +483,9 @@
       <Filter>cl_dll</Filter>
     </ClInclude>
     <ClInclude Include="..\UI\menu_buy.h">
+      <Filter>cl_dll\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\UI\ui_button.h">
       <Filter>cl_dll\UI</Filter>
     </ClInclude>
   </ItemGroup>

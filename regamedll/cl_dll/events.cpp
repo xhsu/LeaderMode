@@ -1422,9 +1422,60 @@ DECLARE_EVENT(Knife)
 
 }
 
-DECLARE_EVENT(FireM249)
+DECLARE_EVENT(FireMK46)
 {
+	int idx = args->entindex;
+	bool bInScope = args->bparam1;
 
+	Vector origin, angles, velocity;
+	VectorCopy(args->origin, origin);
+	VectorCopy(args->angles, angles);
+	VectorCopy(args->velocity, velocity);
+
+	angles[0] += args->iparam1 / 100.0;
+	angles[1] += args->iparam2 / 100.0;
+
+	Vector forward, right, up;
+	gEngfuncs.pfnAngleVectors(angles, forward, right, up);
+
+	if (EV_IsLocal(idx))
+	{
+		g_iShotsFired++;
+		EV_MuzzleFlash();
+
+		int seq = MK46_SHOOT_UNSCOPE;
+		if (bInScope)
+			seq = UTIL_SharedRandomLong(gPseudoPlayer.random_seed, MK46_SHOOT1, MK46_SHOOT3);
+
+		if (g_pCurWeapon)
+			g_pCurWeapon->SendWeaponAnim(seq);
+
+		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 3, 0.26, 15, 15, 15, EV_RIFLE_SMOKE, velocity, false, 35);
+	}
+
+	Vector ShellVelocity, ShellOrigin;
+	if (EV_IsLocal(idx))
+	{
+		if (cl_righthand->value == 0)
+			EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -10.0, -13.0);
+		else
+			EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -10.0, 13.0);
+
+		VectorCopy(g_pViewEnt->attachment[1], ShellOrigin);
+		VectorScale(ShellVelocity, 1.2, ShellVelocity);
+		ShellVelocity[2] -= 75;
+	}
+	else
+		EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -12.0, -4.0);
+
+	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iRShell, TE_BOUNCE_SHELL, idx, 10);
+
+	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, MK46_FIRE_SFX, 1.0, 0.52, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
+
+	Vector vecSrc = EV_GetGunPosition(args, origin);
+	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
+
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, MK46_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_MK46].m_iAmmoType, MK46_PENETRATION);
 }
 
 DECLARE_EVENT(FireKSG12)
@@ -2134,7 +2185,7 @@ void Events_Init(void)
 	HOOK_EVENT(galil, FireGALIL);
 	HOOK_EVENT(glock18, Fireglock18);
 	HOOK_EVENT(knife, Knife);
-	HOOK_EVENT(m249, FireM249);
+	HOOK_EVENT(mk46, FireMK46);
 	HOOK_EVENT(ksg12, FireKSG12);
 	HOOK_EVENT(m4a1, FireM4A1);
 	HOOK_EVENT(mac10, FireMAC10);

@@ -70,7 +70,7 @@ void CAWP::SecondaryAttack()
 		m_pPlayer->m_bResumeZoom = true;
 
 #ifdef CLIENT_DLL
-		// zoom out anim.
+		// zoom in anim.
 		g_vecGunOfsGoal = Vector(-6.3f, -5.0f, 1.6f);
 #endif
 	}

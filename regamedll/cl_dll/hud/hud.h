@@ -25,10 +25,6 @@ Created Date: 07 Mar 2020
 
 #define MAX_SPRITE_NAME_LENGTH 24
 
-#define HUD_ACTIVE			BIT(0)
-#define HUD_INTERMISSION	BIT(1)
-#define HUD_ENFORCE_THINK	BIT(2)	// no matter active or not, this elements would execute Think().
-
 #define MAX_PLAYER_NAME_LENGTH 128
 #define MAX_MOTD_LENGTH 1536
 

@@ -9,6 +9,10 @@ Code - Luna the Reborn
 
 #pragma once
 
+#define HUD_ACTIVE			BIT(0)
+#define HUD_INTERMISSION	BIT(1)
+#define HUD_ENFORCE_THINK	BIT(2)	// no matter active or not, this elements would execute Think().
+
 class CBasePanel
 {
 public:
@@ -133,7 +137,7 @@ public:
 	virtual	bool VidInit		(void) { return false; }
 	virtual	void InitHUDData	(void) {}
 	virtual	void OnNewRound		(void) {}
-	virtual bool KeyEvent		(bool bDown, int iKeyIndex, const char* pszCurrentBinding)	{ return true; }
+	virtual	bool KeyEvent		(bool bDown, int iKeyIndex, const char* pszCurrentBinding)	{ return true; }
 	virtual	void Think			(void) {}
 	virtual	bool Draw			(float flTime) { return false; }
 	virtual	void Shutdown		(void) {}

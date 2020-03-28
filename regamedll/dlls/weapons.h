@@ -207,15 +207,21 @@ public:	// SV exclusive functions.
 	virtual void	Precache		(void) {}
 #endif
 
+public:	// basic API and behaviour for weapons.
+	virtual	bool	DefaultDeploy	(const char* szViewModel, const char* szWeaponModel, int iAnim, const char* szAnimExt, float flDeployTime = 0.75f);
+	virtual	bool	DefaultReload	(int iClipSize, int iAnim, float fDelay);
+	virtual	void	DefaultSteelSight(const Vector& vecOfs, int iFOV, float flDriftingSpeed = 10.0f, float flNextSecondaryAttack = 0.3f)	{}
+	virtual	void	DefaultScopeSight(const Vector& vecOfs, int iFOV, float flEnterScopeDelay, float flDriftingSpeed = 10.0f, float flNextSecondaryAttack = 0.3f)	{}
+	virtual	void	DefaultDashStart(int iEnterAnim, float flEnterTime)	{}
+	virtual	void	DefaultDashEnd	(int iEnterAnim, float flEnterTime, int iExitAnim, float flExitTime)	{}
+
 public:	// util funcs
 	inline	bool	IsDead			(void) { return !!(m_bitsFlags & WPNSTATE_DEAD); }
 	virtual	float	GetMaxSpeed		(void) { return 260.0f; }
 	virtual	bool	AddPrimaryAmmo	(int iCount);	// fill in clip first, then bpammo.
 	inline	bool	IsPistol		(void) { return m_pItemInfo->m_iSlot == PISTOL_SLOT; }
-	virtual	bool	DefaultDeploy	(const char* szViewModel, const char* szWeaponModel, int iAnim, const char* szAnimExt, float flDeployTime = 0.75f);
 	virtual	void	SendWeaponAnim	(int iAnim, bool bSkipLocal = true);
 	virtual	void	PlayEmptySound	(void);
-	virtual	bool	DefaultReload	(int iClipSize, int iAnim, float fDelay);
 	virtual	void	ReloadSound		(void);
 	virtual void	PushAnim		(void);
 	virtual void	PopAnim			(void);
@@ -692,18 +698,73 @@ namespace BasicKnife
 #define MK46_WORLD_MODEL	"models/weapons/w_mk46.mdl"
 #define MK46_FIRE_SFX		"weapons/mk46/mk46_fire.wav"
 
-const float M249_MAX_SPEED     = 220.0f;
-const float M249_DAMAGE        = 32.0f;
-const float M249_RANGE_MODIFER = 0.97f;
-const float M249_RELOAD_TIME   = 4.7f;
+constexpr float MK46_MAX_SPEED			= 210.0f;
+constexpr float MK46_DAMAGE				= 32.0f;
+constexpr float MK46_RANGE_MODIFER		= 0.97f;
+constexpr float MK46_DEPLOY_TIME		= 1.0F;
+constexpr float MK46_DRAW_FIRST_TIME	= 1.68F;
+constexpr float MK46_RELOAD_TIME		= 6.76F;
+constexpr float MK46_RELOAD_EMPTY_TIME	= 6.23F;
+constexpr float MK46_HOLSTER_TIME		= 0.6F;
+constexpr float MK46_DASH_ENTER_TIME	= 0.68F;
+constexpr float MK46_DASH_EXIT_TIME		= 0.68F;
+constexpr float MK46_RPM				= 750.0f;
+constexpr int	MK46_PENETRATION		= 2;
+constexpr float	MK46_EFFECTIVE_RANGE	= 8192.0f;
 
-enum m249_e
+enum mk46_e
 {
-	M249_IDLE1,
-	M249_SHOOT1,
-	M249_SHOOT2,
-	M249_RELOAD,
-	M249_DRAW,
+	MK46_IDLE,
+	MK46_SHOOT_UNSCOPE,
+	MK46_SHOOT1,
+	MK46_SHOOT2,
+	MK46_SHOOT3,
+	MK46_RELOAD_EMPTY,
+	MK46_RELOAD,
+	MK46_DRAW_FIRST,
+	MK46_DRAW,
+	MK46_JUMP,
+	MK46_HOLSTER,
+	MK46_BLOCK_UP,
+	MK46_BLOCK_DOWN,
+	MK46_HANDS_ON,
+	MK46_HANDS_OFF,
+	MK46_DASH_ENTER,
+	MK46_DASHING,
+	MK46_DASH_EXIT,
+};
+
+class CMK46 : public CBaseWeapon
+{
+#ifndef CLIENT_DLL
+public:	// SV exclusive variables.
+	static unsigned short m_usEvent;
+	static int m_iShell;
+
+public:	// SV exclusive functions.
+	virtual void	Precache		(void);
+#else
+public:	// CL exclusive functions.
+	virtual void	Think			(void);
+#endif
+
+public:	// basic logic funcs
+	virtual bool	Deploy			(void);
+	virtual void	PrimaryAttack	(void);
+	virtual void	SecondaryAttack	(void);
+	virtual bool	Reload			(void);
+	virtual void	WeaponIdle		(void);
+	virtual bool	HolsterStart	(void);
+	virtual	void	DashStart		(void);
+	virtual void	DashEnd			(void);
+
+public:	// util funcs
+	virtual	float	GetMaxSpeed		(void) { return MK46_MAX_SPEED; }
+	virtual void	ResetModel		(void);
+	virtual int		CalcBodyParam	(void);
+
+public:	// new functions
+	void MK46Fire(float flSpread, float flCycleTime = (60.0f / MK46_RPM));
 };
 
 #define KSG12_VIEW_MODEL	"models/weapons/v_ksg12.mdl"

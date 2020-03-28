@@ -144,6 +144,7 @@ Created Date: 05 Mar 2020
 // UI
 #include "UI/ui_panel.h"	// grandfather of every other UI elements.
 #include "UI/ui_text.h"
+#include "UI/ui_button.h"
 
 // HUD
 #include "hud/hud.h"

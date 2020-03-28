@@ -252,6 +252,10 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 		p = new CM4A1;
 		break;
 
+	case WEAPON_MK46:
+		p = new CMK46;
+		break;
+
 	case WEAPON_MP7A1:
 		p = new CMP7A1;
 		break;

@@ -181,6 +181,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_m4a1.cpp" />
+    <ClCompile Include="..\..\dlls\wpn_shared\wpn_mk46.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_mp7a1.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_qbz95.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_svd.cpp" />
@@ -272,6 +273,7 @@
     <ClCompile Include="..\StudioModelRenderer_CS.cpp" />
     <ClCompile Include="..\tri.cpp" />
     <ClCompile Include="..\UI\menu_buy.cpp" />
+    <ClCompile Include="..\UI\ui_button.cpp" />
     <ClCompile Include="..\UI\ui_panel.cpp" />
     <ClCompile Include="..\UI\ui_text.cpp" />
     <ClCompile Include="..\view.cpp" />
@@ -342,6 +344,7 @@
     <ClInclude Include="..\StudioModelRenderer.h" />
     <ClInclude Include="..\tri.h" />
     <ClInclude Include="..\UI\menu_buy.h" />
+    <ClInclude Include="..\UI\ui_button.h" />
     <ClInclude Include="..\UI\ui_panel.h" />
     <ClInclude Include="..\UI\ui_text.h" />
     <ClInclude Include="..\view.h" />

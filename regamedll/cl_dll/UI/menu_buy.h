@@ -21,5 +21,6 @@ public:
 	virtual void Shutdown(void) { m_Baseboard.Shutdown(); }
 
 public:
-	CBasePanel	m_Baseboard;
+	CBasePanel			m_Baseboard;
+	CBaseTextButton2	m_Button_M4A1;
 };

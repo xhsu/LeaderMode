@@ -116,3 +116,13 @@ void DrawUtils::Draw2DProgressBar(float x, float y, float flWidth, float flFullL
 	glVertex2f(x + 1.0f, y + flWidth - 1.0f);
 	glEnd();
 }
+
+void DrawUtils::Draw2DHollowQuad(float x, float y, float flWidth, float flHeight)
+{
+	glBegin(GL_LINE_LOOP);
+	glVertex2f(x, y);
+	glVertex2f(x + flWidth, y);
+	glVertex2f(x + flWidth, y + flHeight);
+	glVertex2f(x, y + flHeight);
+	glEnd();
+}
