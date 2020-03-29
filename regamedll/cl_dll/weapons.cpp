@@ -264,6 +264,10 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 		p = new CQBZ95;
 		break;
 
+	case WEAPON_SCARH:
+		p = new CSCARH;
+		break;
+
 	case WEAPON_SVD:
 		p = new CSVD;
 		break;

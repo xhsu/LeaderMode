@@ -1,6 +1,6 @@
 /*
 
-Remastered Date: Mar 28 2020
+Remastered Date: Mar 29 2020
 
 Modern Warfare Dev Team
 Code - Luna the Reborn
@@ -10,23 +10,22 @@ Model - Matoilet
 
 #include "precompiled.h"
 
-
 #ifndef CLIENT_DLL
 
-unsigned short CMK46::m_usEvent = 0;
-int CMK46::m_iShell = 0;
+unsigned short CSCARH::m_usEvent = 0;
+int CSCARH::m_iShell = 0;
 
-void CMK46::Precache()
+void CSCARH::Precache()
 {
-	PRECACHE_NECESSARY_FILES(MK46);
+	PRECACHE_NECESSARY_FILES(SCARH);
 
 	m_iShell = PRECACHE_MODEL("models/rshell.mdl");
-	m_usEvent = PRECACHE_EVENT(1, "events/mk46.sc");
+	m_usEvent = PRECACHE_EVENT(1, "events/scarh.sc");
 }
 
 #else
 
-void CMK46::Think(void)
+void CSCARH::Think(void)
 {
 	CBaseWeapon::Think();
 
@@ -39,35 +38,14 @@ void CMK46::Think(void)
 
 #endif
 
-bool CMK46::Deploy()
+bool CSCARH::Deploy()
 {
 	m_flAccuracy = 0.2f;
 	m_iShotsFired = 0;
-
-	return DefaultDeploy(MK46_VIEW_MODEL, MK46_WORLD_MODEL, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? MK46_DRAW_FIRST : MK46_DRAW, "m249", (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? MK46_DRAW_FIRST_TIME : MK46_DEPLOY_TIME);
+	return DefaultDeploy(SCARH_VIEW_MODEL, SCARH_WORLD_MODEL, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? SCARH_DRAW_FIRST : SCARH_DEPLOY, "mp5", (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? SCARH_DRAW_FIRST_TIME : SCARH_DEPLOY_TIME);
 }
 
-void CMK46::PrimaryAttack()
-{
-	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
-	{
-		MK46Fire(0.045F + (0.5F * m_flAccuracy));
-	}
-	else if (m_pPlayer->pev->velocity.Length2D() > 140)
-	{
-		MK46Fire(0.045F + (0.095F * m_flAccuracy));
-	}
-	else if (m_bInZoom)	// decrease spread while scoping.
-	{
-		MK46Fire(0.015f * m_flAccuracy);
-	}
-	else
-	{
-		MK46Fire(0.03F * m_flAccuracy);
-	}
-}
-
-void CMK46::SecondaryAttack()
+void CSCARH::SecondaryAttack()
 {
 	m_bInZoom = !m_bInZoom;
 	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.3f;
@@ -78,7 +56,7 @@ void CMK46::SecondaryAttack()
 
 	if (!g_vecGunOfsGoal.LengthSquared())
 	{
-		g_vecGunOfsGoal = Vector(-4.08, -4, 0);
+		g_vecGunOfsGoal = Vector(-3.725F, -2, 0.615F);
 		gHUD::m_iFOV = 85;	// allow clients to predict the zoom.
 	}
 	else
@@ -87,7 +65,7 @@ void CMK46::SecondaryAttack()
 		gHUD::m_iFOV = 90;
 	}
 
-	g_flGunOfsMovingSpeed = 7.5F;
+	g_flGunOfsMovingSpeed = 8.0f;
 #else
 	// just zoom a liiiiittle bit.
 	// this doesn't suffer from the same bug where the gunofs does, since the FOV was actually sent from SV.
@@ -104,14 +82,34 @@ void CMK46::SecondaryAttack()
 #endif
 }
 
-void CMK46::MK46Fire(float flSpread, float flCycleTime)
+void CSCARH::PrimaryAttack()
+{
+	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
+	{
+		SCARHFire(0.035f + (0.45f * m_flAccuracy));
+	}
+	else if (m_pPlayer->pev->velocity.Length2D() > 140)
+	{
+		SCARHFire(0.035f + (0.075f * m_flAccuracy));
+	}
+	else if (m_bInZoom)	// decrease spread while scoping.
+	{
+		SCARHFire(0.01f * m_flAccuracy);
+	}
+	else
+	{
+		SCARHFire(0.02f * m_flAccuracy);
+	}
+}
+
+void CSCARH::SCARHFire(float flSpread, float flCycleTime)
 {
 	m_iShotsFired++;
 
-	m_flAccuracy = (float(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 175.0f) + 0.4f;
+	m_flAccuracy = (float(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 220.0f) + 0.3f;
 
-	if (m_flAccuracy > 0.9f)
-		m_flAccuracy = 0.9f;
+	if (m_flAccuracy > 1.0f)
+		m_flAccuracy = 1.0f;
 
 	if (m_iClip <= 0)
 	{
@@ -131,24 +129,24 @@ void CMK46::MK46Fire(float flSpread, float flCycleTime)
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
-	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
-
 	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = BRIGHT_GUN_FLASH;
 
-	Vector vecSrc = m_pPlayer->GetGunPosition();
-	Vector vecAiming = gpGlobals->v_forward;
+	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 
-	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, MK46_EFFECTIVE_RANGE, MK46_PENETRATION, m_iPrimaryAmmoType, MK46_DAMAGE, MK46_RANGE_MODIFER, m_pPlayer->random_seed);
+	auto vecSrc = m_pPlayer->GetGunPosition();
+	auto vecAiming = gpGlobals->v_forward;
+
+	auto vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, SCARH_EFFECTIVE_RANGE, SCARH_PENETRATION, m_iPrimaryAmmoType, SCARH_DAMAGE, SCARH_RANGE_MODIFER, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
-	int seq = UTIL_SharedRandomFloat(m_pPlayer->random_seed, MK46_SHOOT1, MK46_SHOOT3);
-	if (!m_bInZoom)
-		seq = MK46_SHOOT_UNSCOPE;
+	int seq = UTIL_SharedRandomFloat(m_pPlayer->random_seed, SCARH_SHOOT1, SCARH_SHOOT3);
+	if (m_iClip == 0)
+		seq = SCARH_SHOOT_LAST;
 
 	SendWeaponAnim(seq);
 	PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL, m_pPlayer->edict(), m_usEvent, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y,
-		int(m_pPlayer->pev->punchangle.x * 100), int(m_pPlayer->pev->punchangle.y * 100), m_bInZoom, FALSE);
+		int(m_pPlayer->pev->punchangle.x * 100), int(m_pPlayer->pev->punchangle.y * 100), m_iClip == 0, FALSE);
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 	{
@@ -159,7 +157,7 @@ void CMK46::MK46Fire(float flSpread, float flCycleTime)
 	Q_memset(&args, NULL, sizeof(args));
 
 	args.angles = m_pPlayer->pev->v_angle;
-	args.bparam1 = m_bInZoom;
+	args.bparam1 = m_iClip == 0;	// originally it was 5. I changed it to whether it's empty.
 	args.bparam2 = false;	// unused
 	args.ducking = gEngfuncs.pEventAPI->EV_LocalPlayerDucking();
 	args.entindex = gEngfuncs.GetLocalPlayer()->index;
@@ -171,62 +169,67 @@ void CMK46::MK46Fire(float flSpread, float flCycleTime)
 	args.origin = m_pPlayer->pev->origin;
 	args.velocity = m_pPlayer->pev->velocity;
 
-	EV_FireMK46(&args);
+	EV_FireSCARH(&args);
 #endif
 
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.6f;
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.0f;
 
-	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
+	if (m_pPlayer->pev->velocity.Length2D() > 0)
 	{
-		KickBack(1.8, 0.65, 0.45, 0.125, 5.0, 3.5, 8);
+		KickBack(1.0, 0.45, 0.28, 0.04, 4.25, 2.5, 7);
 	}
-	else if (m_pPlayer->pev->velocity.Length2D() > 0)
+	else if (!(m_pPlayer->pev->flags & FL_ONGROUND))
 	{
-		KickBack(1.1, 0.5, 0.3, 0.06, 4.0, 3.0, 8);
+		KickBack(1.25, 0.45, 0.22, 0.18, 6.0, 4.0, 5);
 	}
 	else if (m_pPlayer->pev->flags & FL_DUCKING)
 	{
-		KickBack(0.75, 0.325, 0.25, 0.025, 3.5, 2.5, 9);
+		KickBack(0.6, 0.35, 0.2, 0.0125, 3.7, 2.0, 10);
 	}
 	else
 	{
-		KickBack(0.8, 0.35, 0.3, 0.03, 3.75, 3.0, 9);
+		KickBack(0.625, 0.375, 0.25, 0.0125, 4.0, 2.25, 9);
 	}
 }
 
-bool CMK46::Reload()
+bool CSCARH::Reload()
 {
-	if (m_iClip < 13)	// at this point, we shall use full_reload. (accroading to model)
-	{
-		m_iClip = 0;
-	}
-
-	if (DefaultReload(m_pItemInfo->m_iMaxClip, m_iClip ? MK46_RELOAD : MK46_RELOAD_EMPTY, m_iClip ? MK46_RELOAD_TIME : MK46_RELOAD_EMPTY_TIME))
+	if (DefaultReload(m_pItemInfo->m_iMaxClip, m_iClip ? SCARH_RELOAD : SCARH_RELOAD_EMPTY, m_iClip ? SCARH_RELOAD_TIME : SCARH_RELOAD_EMPTY_TIME))
 	{
 		m_flAccuracy = 0.2f;
 		return true;
 	}
 
+	// KF2 ???
+	if (m_pPlayer->pev->weaponanim != SCARH_CHECK_MAGAZINE)
+	{
+		if (m_bInReload)
+			SecondaryAttack();
+
+		SendWeaponAnim(SCARH_CHECK_MAGAZINE);
+		m_flTimeWeaponIdle = SCARH_CHECK_MAGAZINE_TIME;
+	}
+
 	return false;
 }
 
-void CMK46::WeaponIdle()
+void CSCARH::WeaponIdle()
 {
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
-	SendWeaponAnim((m_bitsFlags & WPNSTATE_DASHING) ? MK46_DASHING : MK46_IDLE);
+	SendWeaponAnim((m_bitsFlags & WPNSTATE_DASHING) ? SCARH_DASHING : SCARH_IDLE);
 }
 
-bool CMK46::HolsterStart(void)
+bool CSCARH::HolsterStart(void)
 {
-	SendWeaponAnim(MK46_HOLSTER);
-	m_pPlayer->m_flNextAttack = MK46_HOLSTER_TIME;
+	SendWeaponAnim(SCARH_HOLSTER);
+	m_pPlayer->m_flNextAttack = SCARH_HOLSTER_TIME;
 	m_bitsFlags |= WPNSTATE_HOLSTERING;
 
 	return true;
 }
 
-void CMK46::DashStart(void)
+void CSCARH::DashStart(void)
 {
 	if (m_bInReload)
 		m_bInReload = false;
@@ -242,33 +245,33 @@ void CMK46::DashStart(void)
 #endif
 	}
 
-	SendWeaponAnim(MK46_DASH_ENTER);
-	m_pPlayer->m_flNextAttack = MK46_DASH_ENTER_TIME;
-	m_flTimeWeaponIdle = MK46_DASH_ENTER_TIME;
+	SendWeaponAnim(SCARH_DASH_ENTER);
+	m_pPlayer->m_flNextAttack = SCARH_DASH_ENTER_TIME;
+	m_flTimeWeaponIdle = SCARH_DASH_ENTER_TIME;
 	m_bitsFlags |= WPNSTATE_DASHING;
 }
 
-void CMK46::DashEnd(void)
+void CSCARH::DashEnd(void)
 {
-	if (m_pPlayer->m_flNextAttack > 0.0f && m_pPlayer->pev->weaponanim == MK46_DASH_ENTER)
+	if (m_pPlayer->m_flNextAttack > 0.0f && m_pPlayer->pev->weaponanim == SCARH_DASH_ENTER)
 	{
 		// this is how much you procees to the dashing phase.
-		// for example, the whole length is 1.0s, you start 0.7s and decide to cancel.
+		// for example, assuming the whole length is 1.0s, you start 0.7s and decide to cancel.
 		// although there's only 0.3s to the dashing phase, but turning back still requires another equally 0.7s.
 		// "m_pPlayer->m_flNextAttack" is the 0.3s of full length. you need to get the rest part, i.e. the 70%.
-		float flRunStartUnplayedRatio = 1.0f - m_pPlayer->m_flNextAttack / MK46_DASH_ENTER_TIME;
+		float flRunStartUnplayedRatio = 1.0f - m_pPlayer->m_flNextAttack / SCARH_DASH_ENTER_TIME;
 
 		// stick on the last instance in the comment: 70% * 1.0s(full length) = 0.7s, this is the time we need to turning back.
-		float flRunStopTimeLeft = MK46_DASH_EXIT_TIME * flRunStartUnplayedRatio;
+		float flRunStopTimeLeft = SCARH_DASH_EXIT_TIME * flRunStartUnplayedRatio;
 
 		// play the anim.
-		SendWeaponAnim(MK46_DASH_EXIT);
+		SendWeaponAnim(SCARH_DASH_EXIT);
 
 #ifdef CLIENT_DLL
 		// why we are using the "0.3s" here?
 		// this is because the g_flTimeViewModelAnimStart actually means how much time had passed since the anim was ordered to play.
 		// if we need to play 0.7s, we have to told system we only played it for 0.3s. right?
-		g_flTimeViewModelAnimStart = gEngfuncs.GetClientTime() - (MK46_DASH_EXIT_TIME - flRunStopTimeLeft);
+		g_flTimeViewModelAnimStart = gEngfuncs.GetClientTime() - (SCARH_DASH_EXIT_TIME - flRunStopTimeLeft);
 #endif
 
 		// force everything else to wait.
@@ -278,52 +281,58 @@ void CMK46::DashEnd(void)
 	// if RUN_START is normally played and finished, go normal.
 	else
 	{
-		SendWeaponAnim(MK46_DASH_EXIT);
-		m_pPlayer->m_flNextAttack = MK46_DASH_EXIT_TIME;
-		m_flTimeWeaponIdle = MK46_DASH_EXIT_TIME;
+		SendWeaponAnim(SCARH_DASH_EXIT);
+		m_pPlayer->m_flNextAttack = SCARH_DASH_EXIT_TIME;
+		m_flTimeWeaponIdle = SCARH_DASH_EXIT_TIME;
 	}
 
 	// either way, we have to remove this flag.
 	m_bitsFlags &= ~WPNSTATE_DASHING;
 }
 
-int CMK46::CalcBodyParam(void)
+int CSCARH::CalcBodyParam(void)
 {
 	BodyEnumInfo_t info[] =
 	{
 		{ 0, 2 },	// hands		= 0;
 		{ 0, 1 },
+		{ 0, 1 },
 
-		{ 0, 1 },	// weapon		= 2;
+		{ 0, 1 },	// rifle		= 3;
 		{ 0, 1 },
 		{ 0, 1 },
 
-		{ 0, 16 },	// bullets		= 5;
-		{ 0, 6 },	// optical sight= 6;
-		{ 0, 4 },	// muzzle		= 7;
-		{ 0, 2 },	// laser		= 8;
+		{ 0, 2 },	// magazine		= 6;
+		{ 0, 3 },	// steel sight	= 7;
+		{ 0, 6 },	// scopes		= 8;
+		{ 0, 4 },	// attachments	= 9;
+		{ 0, 2 },	// nail/shell	= 10;
+		{ 0, 4 },	// muzzle		= 11;
+		{ 0, 2 },	// laser		= 12;
 	};
 
 	// by default, this weapon has:
-	// red dot optical sight.
+	// filpped down steel sight.
+	// holographic sight.
 	// laser.
 
-	info[6].body = 3;
-	info[8].body = 1;
+	info[7].body = 1;
+	info[8].body = 2;
+	info[12].body = 1;
 
-	// as the magazine is getting lesser, this number is getting bigger. (later model)
-	info[5].body = Q_clamp(16 - m_iClip, 0, 15);
+	if (!m_iClip)
+		info[6].body = 1;	// empty mag.
 
 	// in EMPTY reload, after we remove the empty mag, the new mag should be full of bullets.
 	if (m_bInReload && m_bitsFlags & WPNSTATE_RELOAD_EMPTY)
 	{
-		if (m_pPlayer->m_flNextAttack < 3.77f)	// in this anim, a new mag was taken out after around 2.46. thus, 6.23 - 2.46 ~= 3.77f.
+		if (m_pPlayer->m_flNextAttack < 2.18F)	// in this anim, a new mag was taken out after around 0.3s. thus, 2.9F - 0.72f ~= 2.18f.
 		{
-			info[5].body = 0;	// a full loaded bullets chain.
+			info[6].body = 0;	// empty mag.
 		}
 	}
 
-	return CalcBody(info, sizeof(info) / sizeof(BodyEnumInfo_t));	// elements count of the info[].
+	return CalcBody(info, 13);	// elements count of the info[].
 }
 
-DECLARE_STANDARD_RESET_MODEL_FUNC(MK46)
+DECLARE_STANDARD_RESET_MODEL_FUNC(SCARH)

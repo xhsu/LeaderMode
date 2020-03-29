@@ -1637,9 +1637,60 @@ DECLARE_EVENT(FireSG550)
 
 }
 
-DECLARE_EVENT(FireSG552)
+DECLARE_EVENT(FireSCARH)
 {
+	int idx = args->entindex;
+	bool bLastBullet = args->bparam1;
 
+	Vector origin, angles, velocity;
+	VectorCopy(args->origin, origin);
+	VectorCopy(args->angles, angles);
+	VectorCopy(args->velocity, velocity);
+
+	angles[0] += args->iparam1 / 100.0;
+	angles[1] += args->iparam2 / 100.0;
+
+	Vector forward, right, up;
+	gEngfuncs.pfnAngleVectors(angles, forward, right, up);
+
+	if (EV_IsLocal(idx))
+	{
+		g_iShotsFired++;
+		EV_MuzzleFlash();
+
+		int seq = SCARH_SHOOT_LAST;
+		if (!bLastBullet)
+			seq = UTIL_SharedRandomLong(gPseudoPlayer.random_seed, SCARH_SHOOT1, SCARH_SHOOT3);
+
+		if (g_pCurWeapon)
+			g_pCurWeapon->SendWeaponAnim(seq);
+
+		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 3, 0.2, 18, 18, 18, EV_RIFLE_SMOKE, velocity, false, 35);
+	}
+
+	Vector ShellVelocity, ShellOrigin;
+	if (EV_IsLocal(idx))
+	{
+		if (cl_righthand->value == 0)
+			EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -8.0, -10.0);
+		else
+			EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -8.0, 10.0);
+
+		VectorCopy(g_pViewEnt->attachment[1], ShellOrigin);
+		VectorScale(ShellVelocity, 1.65, ShellVelocity);
+		ShellVelocity[2] -= 120;
+	}
+	else
+		EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -12.0, -4.0);
+
+	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iRShell, TE_BOUNCE_SHELL, idx, 15);
+
+	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, SCARH_FIRE_SFX, 1.0, 0.4, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
+
+	Vector vecSrc = EV_GetGunPosition(args, origin);
+	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
+
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, SCARH_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_SCARH].m_iAmmoType, SCARH_PENETRATION);
 }
 
 DECLARE_EVENT(FireMP7A1)
@@ -2194,7 +2245,7 @@ void Events_Init(void)
 	HOOK_EVENT(p90, FireP90);
 	HOOK_EVENT(scout, FireScout);
 	HOOK_EVENT(sg550, FireSG550);
-	HOOK_EVENT(sg552, FireSG552);
+	HOOK_EVENT(scarh, FireSCARH);
 	HOOK_EVENT(mp7a1, FireMP7A1);
 	HOOK_EVENT(ump45, FireUMP45);
 	HOOK_EVENT(usp, FireUSP);

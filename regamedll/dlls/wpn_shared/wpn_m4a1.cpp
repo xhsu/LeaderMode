@@ -65,7 +65,7 @@ void CM4A1::SecondaryAttack()
 		gHUD::m_iFOV = 90;
 	}
 
-	g_flGunOfsMovingSpeed = 10.0f;
+	g_flGunOfsMovingSpeed = 8.0f;
 #else
 	// just zoom a liiiiittle bit.
 	// this doesn't suffer from the same bug where the gunofs does, since the FOV was actually sent from SV.
@@ -108,8 +108,8 @@ void CM4A1::M4A1Fire(float flSpread, float flCycleTime)
 
 	m_flAccuracy = (float(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 220.0f) + 0.3f;
 
-	if (m_flAccuracy > 1)
-		m_flAccuracy = 1;
+	if (m_flAccuracy > 1.0f)
+		m_flAccuracy = 1.0f;
 
 	if (m_iClip <= 0)
 	{

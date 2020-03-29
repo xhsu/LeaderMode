@@ -288,10 +288,10 @@ public:	// new functions
 #define MP5N_WORLD_MODEL	"models/weapons/w_mp5.mdl"
 #define MP5N_FIRE_SFX		"weapons/mp5/mp5_fire.wav"
 
-const float MP5N_MAX_SPEED     = 250.0f;
-const float MP5N_DAMAGE        = 26.0f;
-const float MP5N_RANGE_MODIFER = 0.84f;
-const float MP5N_RELOAD_TIME   = 2.63f;
+constexpr float MP5N_MAX_SPEED     = 250.0f;
+constexpr float MP5N_DAMAGE        = 26.0f;
+constexpr float MP5N_RANGE_MODIFER = 0.84f;
+constexpr float MP5N_RELOAD_TIME   = 2.63f;
 
 enum mp5n_e
 {
@@ -307,20 +307,86 @@ enum mp5n_e
 #define SCARH_WORLD_MODEL	"models/weapons/w_scarl.mdl"
 #define SCARH_FIRE_SFX		"weapons/SCARH/mk17_shoot.wav"
 
-const float SG552_MAX_SPEED      = 235.0f;
-const float SG552_MAX_SPEED_ZOOM = 200.0f;
-const float SG552_DAMAGE         = 33.0f;
-const float SG552_RANGE_MODIFER  = 0.955f;
-const float SG552_RELOAD_TIME    = 3.0f;
+constexpr float SCARH_MAX_SPEED			= 235.0f;
+constexpr float SCARH_DAMAGE			= 39.0f;
+constexpr float SCARH_RANGE_MODIFER		= 0.955f;
+constexpr float SCARH_DEPLOY_TIME		= 0.97F;
+constexpr float SCARH_DRAW_FIRST_TIME	= 2.61F;
+constexpr float SCARH_RELOAD_TIME		= 2.6F;
+constexpr float SCARH_RELOAD_EMPTY_TIME	= 2.9F;
+constexpr float SCARH_CHECK_MAGAZINE_TIME = 3.06F;
+constexpr float SCARH_HOLSTER_TIME		= 0.74F;
+constexpr float SCARH_DASH_ENTER_TIME	= 0.485F;
+constexpr float SCARH_DASH_EXIT_TIME	= 0.485F;
+constexpr float SCARH_RPM				= 600.0F;
+constexpr int	SCARH_PENETRATION		= 2;
+constexpr float	SCARH_EFFECTIVE_RANGE	= 8192.0f;
 
-enum sg552_e
+enum scarh_e
 {
-	SG552_IDLE1,
-	SG552_RELOAD,
-	SG552_DRAW,
-	SG552_SHOOT1,
-	SG552_SHOOT2,
-	SG552_SHOOT3,
+	SCARH_IDLE,
+	SCARH_SHOOT1,
+	SCARH_SHOOT2,
+	SCARH_SHOOT3,
+	SCARH_SHOOT_LAST,
+	SCARH_SHOOT_ATTACHMENTS,
+	SCARH_M870MCS_RECHAMBER,
+	SCARH_RELOAD,
+	SCARH_RELOAD_EMPTY,
+	SCARH_EGLM_RELOAD,
+	SCARH_XM26_RELOAD,
+	SCARH_XM26_RELOAD_EMPTY,
+	SCARH_M870MCS_RELOAD_START,
+	SCARH_M870MCS_RELOAD_FIRST_INSERT,
+	SCARH_M870MCS_RELOAD_INSERT,
+	SCARH_M870MCS_RELOAD_END,
+	SCARH_M870MCS_RELOAD_END_EMPTY,
+	SCARH_DRAW_FIRST,
+	SCARH_DEPLOY,
+	SCARH_JUMP,
+	SCARH_CHECK_MAGAZINE,
+	SCARH_SWITCH_SELECTOR,
+	SCARH_HOLSTER,
+	SCARH_BLOCKED_UP,
+	SCARH_BLOCKED_DOWN,
+	SCARH_LHAND_UP,
+	SCARH_LHAND_DOWN,
+	SCARH_DASH_ENTER,
+	SCARH_DASHING,
+	SCARH_DASH_EXIT,
+};
+
+class CSCARH : public CBaseWeapon
+{
+#ifndef CLIENT_DLL
+public:	// SV exclusive variables.
+	static unsigned short m_usEvent;
+	static int m_iShell;
+
+public:	// SV exclusive functions.
+	virtual void	Precache		(void);
+#else
+public:	// CL exclusive functions.
+	virtual void	Think			(void);
+#endif
+
+public:	// basic logic funcs
+	virtual bool	Deploy			(void);
+	virtual void	PrimaryAttack	(void);
+	virtual void	SecondaryAttack	(void);
+	virtual bool	Reload			(void);
+	virtual void	WeaponIdle		(void);
+	virtual bool	HolsterStart	(void);
+	virtual	void	DashStart		(void);
+	virtual void	DashEnd			(void);
+
+public:	// util funcs
+	virtual	float	GetMaxSpeed		(void) { return SCARH_MAX_SPEED; }
+	virtual void	ResetModel		(void);
+	virtual int		CalcBodyParam	(void);
+
+public:	// new functions
+	void SCARHFire(float flSpread, float flCycleTime = (60.0f / SCARH_RPM));
 };
 
 #define AK47_VIEW_MODEL		"models/weapons/v_ak47.mdl"

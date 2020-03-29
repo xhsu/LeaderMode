@@ -184,6 +184,7 @@
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_mk46.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_mp7a1.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_qbz95.cpp" />
+    <ClCompile Include="..\..\dlls\wpn_shared\wpn_scarh.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_svd.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_ump45.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_usp.cpp">
