@@ -123,8 +123,9 @@ int CHudHealth::Draw(float flTime)
 		UnpackRGB(r, g, b, RGB_YELLOWISH);
 	}
 
-	//ScaleColors(r, g, b, a);
-	gEngfuncs.pfnSPR_Set(gHUD::GetSprite(m_HUD_cross), r, g, b);
+	int r1 = r, g1 = g, b1 = b;
+	ScaleColors(r1, g1, b1, a);
+	gEngfuncs.pfnSPR_Set(gHUD::GetSprite(m_HUD_cross), r1, g1, b1);
 	gEngfuncs.pfnSPR_DrawAdditive(0, x, y, &gHUD::GetSpriteRect(m_HUD_cross));
 
 	// export Y for other HUDs
@@ -143,7 +144,7 @@ int CHudHealth::Draw(float flTime)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glColor4f(r / 255.0, g / 255.0, b / 255.0, a / 255.0);
 
-	DrawUtils::Draw2DProgressBar(x, y, HEALTH_BAR_WIDTH, flFullLength, flHealthPercent);
+	DrawUtils::Draw2DLinearProgressBar(x, y, HEALTH_BAR_WIDTH, flFullLength, flHealthPercent);
 
 	float flCurLength = flHealthPercent * flFullLength;
 	if (int(m_flDrawingHealth) > m_iHealth)	// loosing blood!

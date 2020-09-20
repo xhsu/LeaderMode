@@ -82,6 +82,7 @@ int gmsgSetSlot = 0;
 int gmsgShoot = 0;
 int gmsgSteelSight = 0;
 int gmsgEqpSelect = 0;
+int gmsgSkillTimer = 0;
 
 bool g_bClientPrintEnable = true;
 
@@ -224,6 +225,7 @@ void LinkUserMessages()
 	gmsgShoot		  = REG_USER_MSG("Shoot", 2);
 	gmsgSteelSight	  = REG_USER_MSG("SteelSight", 1);
 	gmsgEqpSelect	  = REG_USER_MSG("EqpSelect", 1);
+	gmsgSkillTimer	  = REG_USER_MSG("SkillTimer", 5);
 }
 
 void WriteSigonMessages()
@@ -2703,11 +2705,11 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 
 				switch (iSkillType)
 				{
-				case Skill_Attack:
-				case Skill_Defense:
-				case Skill_Auxiliary:
-				case Skill_UNASSIGNED:
-				case Skill_WeaponEnhance:
+				case SkillType_Attack:
+				case SkillType_Defense:
+				case SkillType_Auxiliary:
+				case SkillType_UNASSIGNED:
+				case SkillType_WeaponEnhance:
 					if (pPlayer->m_rgpSkills[iSkillType])
 					{
 						delete pPlayer->m_rgpSkills[iSkillType];
@@ -2725,11 +2727,11 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 
 				switch (iSkillType)
 				{
-				case Skill_Attack:
-				case Skill_Defense:
-				case Skill_Auxiliary:
-				case Skill_UNASSIGNED:
-				case Skill_WeaponEnhance:
+				case SkillType_Attack:
+				case SkillType_Defense:
+				case SkillType_Auxiliary:
+				case SkillType_UNASSIGNED:
+				case SkillType_WeaponEnhance:
 					if (pPlayer->m_rgpSkills[iSkillType])
 						pPlayer->m_rgpSkills[iSkillType]->Execute();
 

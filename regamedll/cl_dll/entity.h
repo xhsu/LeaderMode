@@ -15,25 +15,6 @@ enum
 	MAX_HOSTAGES = 24,
 };
 
-enum RoleTypes
-{
-	Role_UNASSIGNED = 0,
-
-	Role_Commander = 1,
-	Role_SWAT,
-	Role_Breacher,
-	Role_Sharpshooter,
-	Role_Medic,
-
-	Role_Godfather = 6,
-	Role_LeadEnforcer,
-	Role_MadScientist,
-	Role_Assassin,
-	Role_Arsonist,
-
-	ROLE_COUNT
-};
-
 struct extra_player_info_t
 {
 	short		m_iKills;

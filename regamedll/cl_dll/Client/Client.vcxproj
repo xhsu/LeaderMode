@@ -103,7 +103,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>export.def</ModuleDefinitionFile>
       <AdditionalLibraryDirectories>$(ProjectDir)..\..\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;opengl32.lib;Glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateMapFile>true</GenerateMapFile>
     </Link>
   </ItemDefinitionGroup>
@@ -140,7 +140,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>export.def</ModuleDefinitionFile>
-      <AdditionalDependencies>SDL2.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;opengl32.lib;Glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -166,6 +166,7 @@
     <ClCompile Include="..\..\dlls\ammo.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\dlls\player_classes.cpp" />
     <ClCompile Include="..\..\dlls\weapontype.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
     </ClCompile>
@@ -239,6 +240,7 @@
     <ClCompile Include="..\hud\hud.cpp" />
     <ClCompile Include="..\hud\hud_ammo.cpp" />
     <ClCompile Include="..\hud\hud_battery.cpp" />
+    <ClCompile Include="..\HUD\hud_class_indicator.cpp" />
     <ClCompile Include="..\hud\hud_crosshair.cpp" />
     <ClCompile Include="..\hud\hud_death_notice.cpp" />
     <ClCompile Include="..\hud\hud_flashlight.cpp" />
@@ -286,6 +288,7 @@
     <ClInclude Include="..\..\common\parsemsg.h" />
     <ClInclude Include="..\..\dlls\ammo.h" />
     <ClInclude Include="..\..\dlls\cdll_dll.h" />
+    <ClInclude Include="..\..\dlls\player_classes.h" />
     <ClInclude Include="..\..\dlls\weapontype.h" />
     <ClInclude Include="..\..\game_shared\shared_util.h" />
     <ClInclude Include="..\..\pm_shared\pm_debug.h" />
@@ -311,6 +314,7 @@
     <ClInclude Include="..\hud\hud.h" />
     <ClInclude Include="..\hud\hud_ammo.h" />
     <ClInclude Include="..\hud\hud_battery.h" />
+    <ClInclude Include="..\HUD\hud_class_indicator.h" />
     <ClInclude Include="..\hud\hud_crosshair.h" />
     <ClInclude Include="..\hud\hud_death_notice.h" />
     <ClInclude Include="..\hud\hud_flashlight.h" />

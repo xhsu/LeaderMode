@@ -261,3 +261,4 @@ extern int gmsgSetSlot;
 extern int gmsgShoot;
 extern int gmsgSteelSight;
 extern int gmsgEqpSelect;
+extern int gmsgSkillTimer;

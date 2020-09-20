@@ -1739,7 +1739,7 @@ void EXT_FUNC CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 	}
 
 	// normally, skills should terminating here.
-	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	for (int i = SkillType_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
 	{
 		if (m_rgpSkills[i])
 			m_rgpSkills[i]->OnPlayerDeath(pAttackerEntity->IsPlayer() ? CBasePlayer::Instance(pevAttacker) : nullptr);
@@ -4109,7 +4109,7 @@ pt_end:
 	StudioProcessGait();
 
 	// Skill Think() functions are called from here.
-	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	for (int i = SkillType_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
 	{
 		if (m_rgpSkills[i])
 			m_rgpSkills[i]->Think();
@@ -4615,6 +4615,8 @@ void EXT_FUNC CBasePlayer::Spawn()
 	gPoisonDOTMgr::Free(this);
 	gBurningDOTMgr::Free(this);
 
+	m_flNextSkillTimerUpdate = 0.0f;
+
 	// everything that comes after this, this spawn of the player a the game.
 	if (m_bJustConnected)
 		return;
@@ -4823,7 +4825,7 @@ void CBasePlayer::Touch(CBaseEntity* pOther)
 {
 	CBaseMonster::Touch(pOther);
 
-	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	for (int i = SkillType_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
 	{
 		if (m_rgpSkills[i])
 			m_rgpSkills[i]->OnTouched(pOther);
@@ -5817,6 +5819,47 @@ void EXT_FUNC CBasePlayer::UpdateClientData()
 
 		m_iClientKnownUsingGrenadeId = m_iUsingGrenadeId;
 	}
+
+	if (m_flNextSkillTimerUpdate <= gpGlobals->time)
+	{
+		m_flNextSkillTimerUpdate = gpGlobals->time + 1.0f;
+
+		int iTimerSent = 10000;
+		CBaseSkill* pSkill = nullptr;
+
+		switch (m_iRoleType)
+		{
+		case Role_Arsonist:		// CSkillIncendiaryAmmo
+		case Role_MadScientist:	// CSkillTaserGun
+		case Role_Sharpshooter:	// CSkillEnfoceHeadshot
+			pSkill = m_rgpSkills[SkillType_WeaponEnhance];
+			break;
+
+		case Role_Assassin:	// CSkillInvisible
+		case Role_SWAT:		// CSkillBulletproof
+			pSkill = m_rgpSkills[SkillType_Defense];
+			break;
+
+		case Role_Breacher:		// CSkillInfiniteGrenade
+		case Role_LeadEnforcer:	// CSkillResistDeath
+			pSkill = m_rgpSkills[SkillType_Attack];
+			break;
+
+		case Role_Commander:	// CSkillRadarScan
+		case Role_Godfather:	// CSkillGavelkind
+		case Role_Medic:		// CSkillHealingShot
+			pSkill = m_rgpSkills[SkillType_Auxiliary];
+			break;
+
+		default:
+			break;
+		}
+
+		MESSAGE_BEGIN(MSG_ONE, gmsgSkillTimer, nullptr, pev);
+		WRITE_BYTE(pSkill ? pSkill->IsCoolingDown() : false);
+		WRITE_LONG(iTimerSent);
+		MESSAGE_END();
+	}
 }
 
 bool CBasePlayer::ShouldToShowAccount(CBasePlayer *pReceiver) const
@@ -6052,7 +6095,7 @@ void CBasePlayer::UpdateOnRemove()
 {
 	CBaseMonster::UpdateOnRemove();
 
-	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	for (int i = SkillType_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
 	{
 		if (m_rgpSkills[i])
 			delete m_rgpSkills[i];
@@ -7730,7 +7773,7 @@ void CBasePlayer::AssignRole(RoleTypes iNewRole)
 		CSGameRules()->AssignGodfather(nullptr);
 
 	// remove all skills from last role.
-	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	for (int i = SkillType_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
 	{
 		if (m_rgpSkills[i])
 		{
@@ -7835,7 +7878,7 @@ void CBasePlayer::UpdateHudText()
 	Q_snprintf(m_szHudText, sizeof(m_szHudText) - 1, "Role: %s\n", g_rgszRoleNames[m_iRoleType]);
 
 	// Part II: skills information.
-	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	for (int i = SkillType_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
 	{
 		if (m_rgpSkills[i])
 		{
@@ -7848,10 +7891,10 @@ void CBasePlayer::UpdateHudText()
 				int iLinesCount = m_rgpSkills[i]->GetHudPercentage() * 30.0f;
 				int iDotsCount = 30 - iLinesCount;
 
-				for (int i = 0; i < iLinesCount; i++)
+				for (int j = 0; i < iLinesCount; i++)
 					Q_strlcat(szBuffer, "/");
 
-				for (int i = 0; i < iDotsCount; i++)
+				for (int j = 0; i < iDotsCount; i++)
 					Q_strlcat(szBuffer, "-");
 			}
 
@@ -7922,43 +7965,43 @@ CBaseSkill* CBasePlayer::GetPrimarySkill()
 	switch (m_iRoleType)
 	{
 	case Role_Commander:
-		pSkill = m_rgpSkills[Skill_Auxiliary];
+		pSkill = m_rgpSkills[SkillType_Auxiliary];
 		break;
 
 	case Role_SWAT:
-		pSkill = m_rgpSkills[Skill_Defense];
+		pSkill = m_rgpSkills[SkillType_Defense];
 		break;
 
 	case Role_Breacher:
-		pSkill = m_rgpSkills[Skill_Attack];
+		pSkill = m_rgpSkills[SkillType_Attack];
 		break;
 
 	case Role_Sharpshooter:
-		pSkill = m_rgpSkills[Skill_WeaponEnhance];
+		pSkill = m_rgpSkills[SkillType_WeaponEnhance];
 		break;
 
 	case Role_Medic:
-		pSkill = m_rgpSkills[Skill_Auxiliary];
+		pSkill = m_rgpSkills[SkillType_Auxiliary];
 		break;
 
 	case Role_Godfather:
-		pSkill = m_rgpSkills[Skill_Auxiliary];
+		pSkill = m_rgpSkills[SkillType_Auxiliary];
 		break;
 
 	case Role_LeadEnforcer:
-		pSkill = m_rgpSkills[Skill_Attack];
+		pSkill = m_rgpSkills[SkillType_Attack];
 		break;
 
 	case Role_MadScientist:
-		pSkill = m_rgpSkills[Skill_WeaponEnhance];
+		pSkill = m_rgpSkills[SkillType_WeaponEnhance];
 		break;
 
 	case Role_Assassin:
-		pSkill = m_rgpSkills[Skill_Defense];
+		pSkill = m_rgpSkills[SkillType_Defense];
 		break;
 
 	case Role_Arsonist:
-		pSkill = m_rgpSkills[Skill_WeaponEnhance];
+		pSkill = m_rgpSkills[SkillType_WeaponEnhance];
 		break;
 
 	default:
@@ -7994,7 +8037,7 @@ float CBasePlayer::WeaponFireIntervalModifier(CBaseWeapon* pWeapon)
 {
 	float flResult = 1.0f;
 
-	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	for (int i = SkillType_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
 	{
 		if (m_rgpSkills[i])
 			flResult *= m_rgpSkills[i]->WeaponFireIntervalModifier(pWeapon);	// the active or not is determind in the function itself.
@@ -8007,7 +8050,7 @@ float CBasePlayer::PlayerDamageSufferedModifier(int bitsDamageTypes)
 {
 	float flResult = 1.0f;
 
-	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	for (int i = SkillType_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
 	{
 		if (m_rgpSkills[i])
 			flResult *= m_rgpSkills[i]->PlayerDamageSufferedModifier(bitsDamageTypes);	// the active or not is determind in the function itself.
@@ -8020,7 +8063,7 @@ float CBasePlayer::PlayerDamageDealtModifier(int bitsDamageTypes)
 {
 	float flResult = 1.0f;
 
-	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	for (int i = SkillType_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
 	{
 		if (m_rgpSkills[i])
 			flResult *= m_rgpSkills[i]->PlayerDamageDealtModifier(bitsDamageTypes);	// the active or not is determind in the function itself.
@@ -8031,7 +8074,7 @@ float CBasePlayer::PlayerDamageDealtModifier(int bitsDamageTypes)
 
 void CBasePlayer::OnPlayerDamagedPre(entvars_t* pevInflictor, entvars_t* pevAttacker, float& flDamage, int& bitsDamageTypes)
 {
-	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	for (int i = SkillType_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
 	{
 		if (m_rgpSkills[i])
 			m_rgpSkills[i]->OnPlayerDamagedPre(pevInflictor, pevAttacker, flDamage, bitsDamageTypes);	// the active or not is determind in the function itself.
@@ -8040,7 +8083,7 @@ void CBasePlayer::OnPlayerDamagedPre(entvars_t* pevInflictor, entvars_t* pevAtta
 
 void CBasePlayer::OnTraceDamagePre(float& flDamage, TraceResult& tr)
 {
-	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	for (int i = SkillType_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
 	{
 		if (m_rgpSkills[i])
 			m_rgpSkills[i]->OnTraceDamagePre(flDamage, tr);	// the active or not is determind in the function itself.
@@ -8049,7 +8092,7 @@ void CBasePlayer::OnTraceDamagePre(float& flDamage, TraceResult& tr)
 
 void CBasePlayer::OnFireBullets3PreDamage(float& flDamage, TraceResult& tr)
 {
-	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	for (int i = SkillType_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
 	{
 		if (m_rgpSkills[i])
 			m_rgpSkills[i]->OnFireBullets3PreDamage(flDamage, tr);	// the active or not is determind in the function itself.
@@ -8058,7 +8101,7 @@ void CBasePlayer::OnFireBullets3PreDamage(float& flDamage, TraceResult& tr)
 
 void CBasePlayer::OnFireBuckshotsPreTraceAttack(float& flDamage, TraceResult& tr)
 {
-	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	for (int i = SkillType_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
 	{
 		if (m_rgpSkills[i])
 			m_rgpSkills[i]->OnFireBuckshotsPreTraceAttack(flDamage, tr);	// the active or not is determind in the function itself.
@@ -8067,7 +8110,7 @@ void CBasePlayer::OnFireBuckshotsPreTraceAttack(float& flDamage, TraceResult& tr
 
 void CBasePlayer::OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr)
 {
-	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	for (int i = SkillType_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
 	{
 		if (m_rgpSkills[i])
 			m_rgpSkills[i]->OnPlayerFiringTraceLine(iDamage, tr);	// the active or not is determind in the function itself.
@@ -8076,7 +8119,7 @@ void CBasePlayer::OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr)
 
 void CBasePlayer::OnPlayerKills(CBasePlayer* pVictim)
 {
-	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	for (int i = SkillType_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
 	{
 		if (m_rgpSkills[i])
 			m_rgpSkills[i]->OnPlayerKills(pVictim);
@@ -8085,7 +8128,7 @@ void CBasePlayer::OnPlayerKills(CBasePlayer* pVictim)
 
 void CBasePlayer::OnHurtingAnotherPlayer(CBasePlayer* pVictim, entvars_t* pevInflictor, float& flDamage, int& bitsDamageTypes)
 {
-	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	for (int i = SkillType_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
 	{
 		if (m_rgpSkills[i])
 			m_rgpSkills[i]->OnHurtingAnotherPlayer(pVictim, pevInflictor, flDamage, bitsDamageTypes);	// the active or not is determind in the function itself.
@@ -8094,7 +8137,7 @@ void CBasePlayer::OnHurtingAnotherPlayer(CBasePlayer* pVictim, entvars_t* pevInf
 
 void CBasePlayer::OnGrenadeThrew(EquipmentIdType iId, CGrenade* pGrenade)
 {
-	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	for (int i = SkillType_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
 	{
 		if (m_rgpSkills[i])
 			m_rgpSkills[i]->OnGrenadeThrew(iId, pGrenade);	// the active or not is determind in the function itself.
@@ -8105,13 +8148,13 @@ bool CBasePlayer::OnBlind()
 {
 	bool rgbResults[SKILLTYPE_COUNT];
 
-	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	for (int i = SkillType_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
 	{
 		if (m_rgpSkills[i])
 			rgbResults[i] = m_rgpSkills[i]->OnBlind();
 	}
 
-	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	for (int i = SkillType_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
 	{
 		if (!rgbResults[i])	// if a skill decided not to blind, it would be a veto.
 			return false;
@@ -8122,7 +8165,7 @@ bool CBasePlayer::OnBlind()
 
 void CBasePlayer::OnAddToFullPack(entity_state_s* pState, edict_t* pEnt, BOOL FIsPlayer)
 {
-	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	for (int i = SkillType_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
 	{
 		if (m_rgpSkills[i])
 			m_rgpSkills[i]->OnAddToFullPack(pState, pEnt, FIsPlayer);
@@ -8131,7 +8174,7 @@ void CBasePlayer::OnAddToFullPack(entity_state_s* pState, edict_t* pEnt, BOOL FI
 
 void CBasePlayer::OnBeingAddToFullPack(entity_state_s* pState, CBasePlayer* pHost)
 {
-	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	for (int i = SkillType_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
 	{
 		if (m_rgpSkills[i])
 			m_rgpSkills[i]->OnBeingAddToFullPack(pState, pHost);
@@ -8140,7 +8183,7 @@ void CBasePlayer::OnBeingAddToFullPack(entity_state_s* pState, CBasePlayer* pHos
 
 void CBasePlayer::OnResetPlayerMaxspeed(float& flSpeed)
 {
-	for (int i = Skill_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
+	for (int i = SkillType_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
 	{
 		if (m_rgpSkills[i])
 			m_rgpSkills[i]->OnResetPlayerMaxspeed(flSpeed);

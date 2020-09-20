@@ -98,6 +98,7 @@ Created Date: 05 Mar 2020
 // sync the weapon data between cl and sv.
 #include "../dlls/ammo.h"
 #include "../dlls/weapontype.h"
+#include "../dlls/player_classes.h"
 
 // Ahh.. we are finally here, VGUI.
 #include <VGUI/VGUI.h>
@@ -175,6 +176,7 @@ Created Date: 05 Mar 2020
 #include "hud/hud_weaponlist.h"
 #include "hud/hud_grenade.h"
 #include "HUD/hud_scoreboard.h"
+#include "HUD/hud_class_indicator.h"
 
 // UI Instance
 #include "UI/menu_buy.h"

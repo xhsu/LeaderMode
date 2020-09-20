@@ -82,6 +82,10 @@ namespace gHUD
 	int m_iWeaponBits = 0;
 	bool m_bPlayerDead = true;
 	int m_hCambriaFont = 0;
+	GLUquadric* m_pGLUquadricHandle = nullptr;
+	float m_flUCDTime = 1;
+	float m_flUCDOldTime = 0;
+	float m_flUCDTimeDelta = 1;
 
 	SCREENINFO m_scrinfo;
 
@@ -113,6 +117,7 @@ namespace gHUD
 	CHudWeaponList m_WeaponList;
 	CHudGrenade m_Grenade;
 	CHudScoreboard m_Scoreboard;
+	CHudClassIndicator m_ClassIndicator;
 	CUIBuyMenu m_UI_BuyMenu;
 };
 
@@ -129,6 +134,13 @@ void gHUD::Init(void)
 	m_iPlayerNum = 0;
 	m_flTime = 1;
 	m_iFOV = 0;
+
+	m_flTime = 1;
+	m_fOldTime = 0;
+	m_flTimeDelta = 1;
+	m_flUCDTime = 1;
+	m_flUCDOldTime = 0;
+	m_flUCDTimeDelta = 1;
 
 	// we can't use this in init() since all these elements are adding themselves into std::list in init().
 	/*for (auto pHudElement : m_lstHudElements)
@@ -163,6 +175,7 @@ void gHUD::Init(void)
 	m_NightVision.Init();
 	m_Crosshair.Init();
 	m_WeaponList.Init();
+	m_ClassIndicator.Init();
 	m_Scoreboard.Init();	// this is definately the last layer.
 
 	// UI is always above all other HUD elements.
@@ -336,6 +349,8 @@ void gHUD::VidInit(void)
 	// UNDONE
 	//if (gConfigs.bEnableClientUI)
 		//g_pViewPort->VidInit();
+
+	m_pGLUquadricHandle = gluNewQuadric();
 }
 
 int gHUD::Redraw(float flTime, int intermission)
@@ -411,6 +426,9 @@ int gHUD::Redraw(float flTime, int intermission)
 		gEngfuncs.pfnFillRGBABlend(x, y, 2, 2, 255, 255, 255, 255);
 	}
 
+	// FIXME: deserted code: draw a disk on the screen.
+	//glTranslatef(ScreenWidth / 2, ScreenHeight / 2, 0);
+	//gluPartialDisk(m_pGLUquadricHandle, 30.0, 40.0, 90, 4, 0.0, 90.0);
 	gScreenFadeMgr.Think();
 	gScreenFadeMgr.Draw();
 	return 1;
@@ -478,6 +496,11 @@ int gHUD::UpdateClientData(client_data_t* cdata, float time)
 
 	m_iKeyBits = CL_ButtonBits(0);
 	m_iWeaponBits = cdata->iWeaponBits;
+
+	// therefore, UCD & Think() should use this set of time.
+	m_flUCDOldTime = m_flUCDTime;
+	m_flUCDTime = time;
+	m_flUCDTimeDelta = m_flUCDTime - m_flUCDOldTime;
 
 	Think();
 

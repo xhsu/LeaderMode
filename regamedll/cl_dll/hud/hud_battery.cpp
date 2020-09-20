@@ -118,7 +118,7 @@ int CHudBattery::Draw(float flTime)
 	if (g_iRoleType == Role_SWAT)
 		flLength *= 2.0f;
 
-	DrawUtils::Draw2DProgressBar(x, y, HEALTH_BAR_WIDTH, flLength, flPercent);
+	DrawUtils::Draw2DLinearProgressBar(x, y, HEALTH_BAR_WIDTH, flLength, flPercent);
 
 	glDisable(GL_BLEND);
 	glEnable(GL_TEXTURE_2D);

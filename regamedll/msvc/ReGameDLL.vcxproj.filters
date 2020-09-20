@@ -157,9 +157,6 @@
     <ClCompile Include="..\dlls\wpn_shared\wpn_usp.cpp">
       <Filter>dlls\wpn_shared</Filter>
     </ClCompile>
-    <ClCompile Include="..\dlls\wpn_shared\wpn_xm1014.cpp">
-      <Filter>dlls\wpn_shared</Filter>
-    </ClCompile>
     <ClCompile Include="..\dlls\weapontype.cpp">
       <Filter>dlls</Filter>
     </ClCompile>
@@ -480,6 +477,12 @@
     </ClCompile>
     <ClCompile Include="..\dlls\wpn_shared\wpn_scarh.cpp">
       <Filter>dlls\wpn_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dlls\wpn_shared\wpn_m1014.cpp">
+      <Filter>dlls\wpn_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dlls\skills.cpp">
+      <Filter>dlls</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -949,6 +952,9 @@
       <Filter>dlls</Filter>
     </ClInclude>
     <ClInclude Include="..\dlls\weaponbox.h">
+      <Filter>dlls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dlls\skills.h">
       <Filter>dlls</Filter>
     </ClInclude>
   </ItemGroup>

@@ -349,6 +349,12 @@ MSG_FUNC(WeapPickup)
 
 	int iWeaponId = READ_BYTE();
 
+	// something wrong with this message.
+	// FIXME: found a message sent with index 29.
+	// after I added this line/recompile client.dll, it's disappeared.
+	if (iWeaponId <= 0 || iWeaponId >= ARRAYSIZE(g_rgWpnInfo))
+		return TRUE;
+
 	// recenter the card, make some VFX.
 	gHUD::m_WeaponList.m_rgvecCurCoord[g_rgWpnInfo[iWeaponId].m_iSlot] = Vector2D(ScreenWidth / 2, ScreenHeight / 2);
 	gHUD::m_WeaponList.m_flAlpha = 255;
@@ -1010,6 +1016,9 @@ MSG_FUNC(Role)
 	{
 		g_iRoleType = (RoleTypes)iRole;
 
+		// light up the class indicator.
+		gHUD::m_ClassIndicator.LightUp();
+
 		// fix the flash blood screen bug.
 		// LUNA: in the SV, we update the Role info on the frame we assign, however, we won't update health info until next frame.
 		if (gHUD::m_Health.m_iHealth == 100 && (iRole == Role_Commander || iRole == Role_Godfather))
@@ -1105,6 +1114,18 @@ MSG_FUNC(EqpSelect)
 	EquipmentIdType iId = (EquipmentIdType)READ_BYTE();
 
 	gPseudoPlayer.m_iUsingGrenadeId = iId;
+	return TRUE;
+}
+
+MSG_FUNC(SkillTimer)
+{
+	BEGIN_READ(pbuf, iSize);
+
+	bool bCoolingDown = !!READ_BYTE();
+	int iValue = READ_LONG();
+
+	gHUD::m_ClassIndicator.SetSkillTimer(bCoolingDown, float(iValue) / 10000.0f);
+
 	return TRUE;
 }
 
@@ -1224,6 +1245,7 @@ void Msg_Init(void)
 	HOOK_USER_MSG(Shoot);
 	HOOK_USER_MSG(SteelSight);
 	HOOK_USER_MSG(EqpSelect);
+	HOOK_USER_MSG(SkillTimer);
 
 	// player.cpp
 	HOOK_USER_MSG(Logo);

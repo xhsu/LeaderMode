@@ -36,6 +36,7 @@
 #include "hintmessage.h"
 #include "unisignals.h"
 #include "player_classes.h"
+#include "skills.h"	// these are the skills for each player class.
 #include <list>
 #include <array>
 #include <vector>
@@ -725,6 +726,7 @@ public:
 	EquipmentIdType m_iUsingGrenadeId;
 	EquipmentIdType m_iClientKnownUsingGrenadeId;
 	WeaponIdType m_iWpnSwitchingTo;
+	float m_flNextSkillTimerUpdate;
 
 	// overhealing mechanism.
 	float m_flOHNextThink;

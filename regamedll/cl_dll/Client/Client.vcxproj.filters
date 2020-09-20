@@ -282,6 +282,12 @@
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_scarh.cpp">
       <Filter>dlls\wpn_shared</Filter>
     </ClCompile>
+    <ClCompile Include="..\HUD\hud_class_indicator.cpp">
+      <Filter>cl_dll\HUD</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\dlls\player_classes.cpp">
+      <Filter>dlls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\cdll_int.h">
@@ -490,6 +496,12 @@
     </ClInclude>
     <ClInclude Include="..\UI\ui_button.h">
       <Filter>cl_dll\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\HUD\hud_class_indicator.h">
+      <Filter>cl_dll\HUD</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\dlls\player_classes.h">
+      <Filter>dlls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

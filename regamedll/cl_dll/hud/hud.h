@@ -179,6 +179,7 @@ class CHudCrosshair;
 class CHudWeaponList;
 class CHudGrenade;
 class CHudScoreboard;
+class CHudClassIndicator;
 class CUIBuyMenu;
 
 namespace gHUD
@@ -248,6 +249,9 @@ namespace gHUD
 	extern bool m_bPlayerDead;
 	extern int m_hCambriaFont;
 	extern bool m_bCursorAllowed;
+	extern float m_flUCDTime;
+	extern float m_flUCDOldTime;
+	extern float m_flUCDTimeDelta;
 
 	extern SCREENINFO m_scrinfo;
 
@@ -279,6 +283,7 @@ namespace gHUD
 	extern CHudWeaponList m_WeaponList;
 	extern CHudGrenade m_Grenade;
 	extern CHudScoreboard m_Scoreboard;
+	extern CHudClassIndicator m_ClassIndicator;
 	extern CUIBuyMenu m_UI_BuyMenu;
 };
 
