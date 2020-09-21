@@ -5824,7 +5824,6 @@ void EXT_FUNC CBasePlayer::UpdateClientData()
 	{
 		m_flNextSkillTimerUpdate = gpGlobals->time + 1.0f;
 
-		int iTimerSent = 10000;
 		CBaseSkill* pSkill = nullptr;
 
 		switch (m_iRoleType)
@@ -5855,8 +5854,24 @@ void EXT_FUNC CBasePlayer::UpdateClientData()
 			break;
 		}
 
+		int iTotalTime = 1;
+		int iMode = 0;
+		int iTimerSent = 0;
+
+		if (pSkill)
+		{
+			iTotalTime = pSkill->IsCoolingDown() ? pSkill->GetCooldown() : pSkill->GetDuration();
+			iTimerSent = pSkill->GetCountingTime() * 10000.0f;
+
+			if (pSkill->IsCoolingDown())
+				iMode = 1;	// increase.
+			else if (pSkill->m_bUsingSkill)
+				iMode = -1;	// decrease.
+		}
+
 		MESSAGE_BEGIN(MSG_ONE, gmsgSkillTimer, nullptr, pev);
-		WRITE_BYTE(pSkill ? pSkill->IsCoolingDown() : false);
+		WRITE_BYTE(iTotalTime);
+		WRITE_BYTE(iMode + 1);	// the BYTE type contains only 0~255.
 		WRITE_LONG(iTimerSent);
 		MESSAGE_END();
 	}

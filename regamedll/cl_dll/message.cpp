@@ -1121,10 +1121,11 @@ MSG_FUNC(SkillTimer)
 {
 	BEGIN_READ(pbuf, iSize);
 
-	bool bCoolingDown = !!READ_BYTE();
-	int iValue = READ_LONG();
+	float flTotalTime = float(READ_BYTE());
+	int iMode = READ_BYTE() - 1;	// the BYTE type contains only 0~255.
+	float flCurrentTime = float(READ_LONG()) / 10000.0f;
 
-	gHUD::m_ClassIndicator.SetSkillTimer(bCoolingDown, float(iValue) / 10000.0f);
+	gHUD::m_ClassIndicator.SetSkillTimer(flTotalTime, CHudClassIndicator::MODE(iMode), flCurrentTime);
 
 	return TRUE;
 }

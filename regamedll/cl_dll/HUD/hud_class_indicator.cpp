@@ -9,6 +9,46 @@ Modern Warfare Dev Team
 
 #include "precompiled.h"
 
+SkillIndex CHudClassIndicator::GetPrimarySkill(void)
+{
+	switch (g_iRoleType)
+	{
+	case Role_Arsonist:
+		return SkillIndex_IncendiaryAmmo;
+
+	case Role_Assassin:
+		return SkillIndex_Invisible;
+
+	case Role_Breacher:
+		return SkillIndex_InfiniteGrenade;
+
+	case Role_Commander:
+		return SkillIndex_RadarScan;
+
+	case Role_Godfather:
+		return SkillIndex_Gavelkind;
+
+	case Role_LeadEnforcer:
+		return SkillIndex_ResistDeath;
+
+	case Role_MadScientist:
+		return SkillIndex_TaserGun;
+
+	case Role_Medic:
+		return SkillIndex_HealingShot;
+
+	case Role_Sharpshooter:
+		return SkillIndex_EnfoceHeadshot;
+
+	case Role_SWAT:
+		return SkillIndex_Bulletproof;
+
+	case Role_UNASSIGNED:
+	default:
+		return SkillIndex_ERROR;
+	}
+}
+
 int CHudClassIndicator::Init(void)
 {
 	Reset();
@@ -22,7 +62,6 @@ int CHudClassIndicator::Init(void)
 int CHudClassIndicator::VidInit(void)
 {
 	m_fFade = 0;
-	m_flSkillTimer = 1;
 
 	m_iClassesIcon[Role_UNASSIGNED]	= LoadDDS("texture/HUD/ClassesIcon/Doraemon.dds");
 
@@ -43,13 +82,13 @@ int CHudClassIndicator::VidInit(void)
 	return TRUE;
 }
 
-int CHudClassIndicator::Draw(float flTime)
+BOOL CHudClassIndicator::Draw(float flTime)
 {
 	// careful for the array bound!
 	if (g_iRoleType < Role_UNASSIGNED || g_iRoleType >= ROLE_COUNT)
 		return FALSE;
 
-	int r = 255, g = 255, b = 255, a = 255;
+	int a = 255;
 	if (m_fFade)
 	{
 		if (m_fFade > FADE_TIME)
@@ -69,30 +108,37 @@ int CHudClassIndicator::Draw(float flTime)
 	else
 		a = MIN_ALPHA;
 
-	UnpackRGB(r, g, b, RGB_YELLOWISH);
-
 	// class icon
 	gEngfuncs.pTriAPI->RenderMode(kRenderTransColor);
 	gEngfuncs.pTriAPI->Brightness(1.0);
 
 	// in order to make transparent fx on dds texture...
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glColor4f(r / 255.0, g / 255.0, b / 255.0, a / 255.0);
+	glColor4f(VEC_YELLOWISH.r, VEC_YELLOWISH.g, VEC_YELLOWISH.b, a / 255.0);
 
 	gEngfuncs.pTriAPI->CullFace(TRI_NONE);
 
 	glBindTexture(GL_TEXTURE_2D, m_iClassesIcon[g_iRoleType]);
-	DrawUtils::Draw2DQuad(0, 0, 128, 128);
+	DrawUtils::Draw2DQuad(ScreenWidth / 2, ScreenHeight / 2, ScreenWidth / 2 + 128, ScreenHeight / 2 + 128);
+
+	// if you don't have a avaliable skill, i.e. a Role_UNASSIGNED, the progress bar is unnecessary.
+	SkillIndex iSkillIndex = GetPrimarySkill();
+	if (iSkillIndex == SkillIndex_ERROR)
+		return TRUE;
 
 	// progress bar.
 	glDisable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	UnpackRGB(r, g, b, RGB_YELLOWISH);	// we can't use scaled colour on our bar!
-	glColor4f(r / 255.0, g / 255.0, b / 255.0, a / 255.0);
+	// a shinny colour make the player notice.
+	Vector vecColour = VEC_YELLOWISH;
+	if (m_flCurrentTime >= m_flTotalTime)
+		vecColour = VEC_YELLOWISH + (VEC_SPRINGGREENISH - VEC_YELLOWISH) * (sin(gHUD::m_flUCDTime * 2.0f) + 1.0f) / 2.0f;	// make this sine wave bouncing between 0 to 1.
 
-	DrawUtils::Draw2DQuadProgressBar(ScreenWidth / 2, ScreenHeight / 2, 128, 128, 8, m_bCooldingDown ? (m_flSkillTimer / g_rgSkillInfo) : ());
+	glColor4f(vecColour.r, vecColour.g, vecColour.b, 1.0);
+
+	DrawUtils::Draw2DQuadProgressBar2(ScreenWidth / 2, ScreenHeight / 2, 128, 128, 3, m_flCurrentTime / m_flTotalTime);
 
 	glDisable(GL_BLEND);
 	glEnable(GL_TEXTURE_2D);
@@ -102,15 +148,31 @@ int CHudClassIndicator::Draw(float flTime)
 
 void CHudClassIndicator::Think(void)
 {
-	m_flSkillTimer -= gHUD::m_flUCDTimeDelta;
+	switch (m_iMode)
+	{
+	case INCREASE:
+		m_flCurrentTime += gHUD::m_flUCDTimeDelta;
+		break;
 
-	if (m_flSkillTimer < 0.0f)
-		m_flSkillTimer = 0;
+	case DECREASE:
+		m_flCurrentTime -= gHUD::m_flUCDTimeDelta;
+		break;
+
+	case FREEZED:
+	default:
+		return;
+	}
+
+	if (m_flCurrentTime < 0.0f)
+		m_flCurrentTime = 0;
+
+	if (m_flCurrentTime > m_flTotalTime)
+		m_flCurrentTime = m_flTotalTime;
 }
 
 void CHudClassIndicator::Reset(void)
 {
-	m_flSkillTimer = 1;
+	SetSkillTimer(1, FREEZED, 0);	// make the bar disappear.
 }
 
 void CHudClassIndicator::LightUp(void)
@@ -118,8 +180,9 @@ void CHudClassIndicator::LightUp(void)
 	m_fFade = FADE_TIME;
 }
 
-void CHudClassIndicator::SetSkillTimer(bool bCoolingDown, float flTimer)
+void CHudClassIndicator::SetSkillTimer(float flTotalTime, MODE iMode, float flCurrentTime)
 {
-	m_bCooldingDown = bCoolingDown;
-	m_flSkillTimer = flTimer;
+	m_flTotalTime = flTotalTime;
+	m_iMode = iMode;
+	m_flCurrentTime = flCurrentTime;
 }

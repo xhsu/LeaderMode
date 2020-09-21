@@ -225,7 +225,7 @@ void LinkUserMessages()
 	gmsgShoot		  = REG_USER_MSG("Shoot", 2);
 	gmsgSteelSight	  = REG_USER_MSG("SteelSight", 1);
 	gmsgEqpSelect	  = REG_USER_MSG("EqpSelect", 1);
-	gmsgSkillTimer	  = REG_USER_MSG("SkillTimer", 5);
+	gmsgSkillTimer	  = REG_USER_MSG("SkillTimer", 6);
 }
 
 void WriteSigonMessages()
@@ -2723,22 +2723,33 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 			}
 			else if (FStrEq(pcmd, "executeskill"))
 			{
-				int iSkillType = atoi(parg1);
-
-				switch (iSkillType)
+				if (!Q_strlen(parg1))
 				{
-				case SkillType_Attack:
-				case SkillType_Defense:
-				case SkillType_Auxiliary:
-				case SkillType_UNASSIGNED:
-				case SkillType_WeaponEnhance:
-					if (pPlayer->m_rgpSkills[iSkillType])
-						pPlayer->m_rgpSkills[iSkillType]->Execute();
+					for each (CBaseSkill* pSkill in pPlayer->m_rgpSkills)
+					{
+						if (pSkill)
+							pSkill->Execute();
+					}
+				}
+				else
+				{
+					int iSkillType = atoi(parg1);
 
-					break;
+					switch (iSkillType)
+					{
+					case SkillType_Attack:
+					case SkillType_Defense:
+					case SkillType_Auxiliary:
+					case SkillType_UNASSIGNED:
+					case SkillType_WeaponEnhance:
+						if (pPlayer->m_rgpSkills[iSkillType])
+							pPlayer->m_rgpSkills[iSkillType]->Execute();
 
-				default:
-					break;
+						break;
+
+					default:
+						break;
+					}
 				}
 			}
 			else if (FStrEq(pcmd, "role"))

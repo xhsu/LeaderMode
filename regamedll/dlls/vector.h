@@ -369,9 +369,9 @@ public:
 	}
 
 	// Members
-	union { vec_t x; vec_t pitch; };
-	union { vec_t y; vec_t yaw; };
-	union { vec_t z; vec_t roll; };
+	union { vec_t x; vec_t pitch;	vec_t r; };
+	union { vec_t y; vec_t yaw;		vec_t g; };
+	union { vec_t z; vec_t roll;	vec_t b; };
 };
 
 inline Vector operator*(float fl, const Vector &v)

@@ -25,6 +25,7 @@ namespace DrawUtils
 	void Draw2DLinearProgressBar(float x, float y, float flWidth, float flFullLength, float flPercent);
 	void Draw2DHollowQuad(float x, float y, float flWidth, float flHeight);
 	void Draw2DQuadProgressBar(float x, float y, float flInnerWidth, float flInnerHeight, float flThickness, float flPercent);
+	void Draw2DQuadProgressBar2(float x, float y, float flTotalWidth, float flTotalHeight, float flThickness, float flPercent);
 }
 
 // export funcs

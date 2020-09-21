@@ -9,10 +9,15 @@ Created Date: 07 Mar 2020
 #include <list>
 
 #define RGB_YELLOWISH		0x00FFA000
+#define VEC_YELLOWISH		Vector(1.0f, 0.627451f, 0.0f)
 #define RGB_REDISH			0x00FF1010
+#define VEC_REDISH			Vector(1.0f, 0.0627451f, 0.0627451f)
 #define RGB_GREENISH		0x0000A000
+#define VEC_GREENISH		Vector(0.0f, 0.627451f, 0.0f)
 #define RGB_CYANISH			0x0033CCFF
+#define VEC_CYANISH			Vector(0.2f, 0.8f, 1.0f)
 #define RGB_SPRINGGREENISH	0x0066FF99
+#define VEC_SPRINGGREENISH	Vector(0.4f, 1.0f, 0.6f)
 
 #define DHN_DRAWZERO	BIT(0)
 #define DHN_2DIGITS		BIT(1)

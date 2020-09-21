@@ -62,14 +62,14 @@ float CBaseSkill::GetCountingTime() const
 {
 	if (m_bUsingSkill)	// how long will it take for the skill ends?
 	{
-		return (gpGlobals->time - m_flTimeLastUsed);
+		return GetDuration() - (gpGlobals->time - m_flTimeLastUsed);
 	}
 	else if (!m_bUsingSkill && !m_bAllowSkill)	// how long will it take for the cooldown over?
 	{
-		return (m_flTimeCooldownOver - gpGlobals->time);
+		return GetCooldown() - (m_flTimeCooldownOver - gpGlobals->time);
 	}
 
-	return 0.0f;	// ready to use.
+	return GetDuration();	// ready to use.
 }
 
 //

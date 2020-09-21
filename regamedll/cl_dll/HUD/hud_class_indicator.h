@@ -12,6 +12,11 @@ Modern Warfare Dev Team
 class CHudClassIndicator : public CBaseHudElement
 {
 public:
+	typedef enum { DECREASE = -1, FREEZED = 0, INCREASE = 1} MODE;
+public:
+	static	SkillIndex	GetPrimarySkill(void);
+
+public:
 	virtual int Init(void);
 	virtual int VidInit(void);
 	virtual int Draw(float flTime);
@@ -20,11 +25,12 @@ public:
 
 public:
 	void	LightUp(void);
-	void	SetSkillTimer(bool bCoolingDown, float flTimer);
+	void	SetSkillTimer(float flTotalTime, MODE iMode, float flCurrentTime);
 
 public:
 	GLuint m_iClassesIcon[ROLE_COUNT];
 	float m_fFade;
-	float m_flSkillTimer;
-	bool m_bCooldingDown;
+	float m_flTotalTime;
+	MODE m_iMode;
+	float m_flCurrentTime;
 };

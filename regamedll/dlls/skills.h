@@ -89,6 +89,7 @@ public:	// skill action
 	virtual float GetHudPercentage() const;
 	virtual float GetCountingTime() const;
 	virtual bool  IsCoolingDown() const { return (!m_bUsingSkill && !m_bAllowSkill); }
+	virtual bool  IsReady()	const { return (!m_bUsingSkill && m_bAllowSkill); }
 
 	// passive skill: weapons
 	virtual float WeaponFireIntervalModifier(CBaseWeapon* pWeapon) { return 1.0f; }

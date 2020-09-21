@@ -179,8 +179,8 @@ void DrawUtils::Draw2DQuadProgressBar(float x, float y, float flInnerWidth, floa
 		glBegin(GL_QUADS);
 		glVertex2f(x + flInnerWidth + flThickness * 1, y + flThickness * 1);
 		glVertex2f(x + flInnerWidth + flThickness * 2, y + flThickness * 1);
-		glVertex2f(x + flInnerWidth + flThickness * 2, y + (flInnerHeight + flThickness * 2) * factors[1]);
-		glVertex2f(x + flInnerWidth + flThickness * 1, y + (flInnerHeight + flThickness * 2) * factors[1]);
+		glVertex2f(x + flInnerWidth + flThickness * 2, y + (flInnerHeight + flThickness) * factors[1] + flThickness);	// this thickness value should stayed outside of the scalar, since it is a portion of BASE_Y.
+		glVertex2f(x + flInnerWidth + flThickness * 1, y + (flInnerHeight + flThickness) * factors[1] + flThickness);
 		glEnd();
 	}
 
@@ -205,6 +205,86 @@ void DrawUtils::Draw2DQuadProgressBar(float x, float y, float flInnerWidth, floa
 		glVertex2f(x + flThickness * 1, y + flThickness * 1 + flInnerHeight * (1.0f - factors[3]));
 		glVertex2f(x + flThickness * 1, y + flInnerHeight + flThickness * 1);
 		glVertex2f(x, y + flInnerHeight + flThickness * 1);
+		glEnd();
+	}
+}
+
+void DrawUtils::Draw2DQuadProgressBar2(float x, float y, float flTotalWidth, float flTotalHeight, float flThickness, float flPercent)
+{
+	flPercent = Q_clamp(flPercent, 0.0f, 1.0f);
+
+	if (flPercent >= 0.75f)
+	{
+		factors[0] = 1.0f;
+		factors[1] = 1.0f;
+		factors[2] = 1.0f;
+		factors[3] = (flPercent - 0.75f) / 0.25f;
+	}
+	else if (flPercent >= 0.50f)
+	{
+		factors[0] = 1.0f;
+		factors[1] = 1.0f;
+		factors[2] = (flPercent - 0.5f) / 0.25f;
+		factors[3] = 0.0f;
+	}
+	else if (flPercent >= 0.25f)
+	{
+		factors[0] = 1.0f;
+		factors[1] = (flPercent - 0.25f) / 0.25f;
+		factors[2] = 0.0f;
+		factors[3] = 0.0f;
+	}
+	else
+	{
+		factors[0] = flPercent / 0.25f;
+		factors[1] = 0.0f;
+		factors[2] = 0.0f;
+		factors[3] = 0.0f;
+	}
+
+	// first bar: -x => +x
+	if (factors[0] > 0.0f)
+	{
+		glBegin(GL_QUADS);
+		glVertex2f(x, y);
+		glVertex2f(x + flTotalWidth * factors[0], y);
+		glVertex2f(x + flTotalWidth * factors[0], y + flThickness * 1);
+		glVertex2f(x, y + flThickness * 1);
+		glEnd();
+	}
+
+	// second bar: -y => +y
+	if (factors[1] > 0.0f)
+	{
+		glBegin(GL_QUADS);
+		glVertex2f(x + flTotalWidth - flThickness * 1, y + flThickness * 1);
+		glVertex2f(x + flTotalWidth, y + flThickness * 1);
+		glVertex2f(x + flTotalWidth, y + flThickness + (flTotalHeight - flThickness) * factors[1]);
+		glVertex2f(x + flTotalWidth - flThickness * 1, y + flThickness + (flTotalHeight - flThickness) * factors[1]);
+		glEnd();
+	}
+
+	// third bar: +x => -x
+	// this one is kind of tricky, since we have to retract this bar from the left-side.
+	if (factors[2] > 0.0f)
+	{
+		glBegin(GL_QUADS);
+		glVertex2f(x + (flTotalWidth - flThickness * 1) * (1.0f - factors[2]), y + flTotalHeight - flThickness * 1);
+		glVertex2f(x + flTotalWidth - flThickness * 1, y + flTotalHeight - flThickness * 1);
+		glVertex2f(x + flTotalWidth - flThickness * 1, y + flTotalHeight);
+		glVertex2f(x + (flTotalWidth - flThickness * 1) * (1.0f - factors[2]), y + flTotalHeight);
+		glEnd();
+	}
+
+	// fourth bar: +y => -y
+	// same as above. we have to retract this bar from up-side.
+	if (factors[3] > 0.0f)
+	{
+		glBegin(GL_QUADS);
+		glVertex2f(x, y + flThickness * 1 + (flTotalHeight - flThickness * 2) * (1.0f - factors[3]));
+		glVertex2f(x + flThickness * 1, y + flThickness * 1 + (flTotalHeight - flThickness * 2) * (1.0f - factors[3]));
+		glVertex2f(x + flThickness * 1, y + flTotalHeight - flThickness * 1);
+		glVertex2f(x, y + flTotalHeight - flThickness * 1);
 		glEnd();
 	}
 }
