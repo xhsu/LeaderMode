@@ -71,7 +71,7 @@ inline void ScaleColors(int& r, int& g, int& b, int a)
 }
 
 void UTIL_StringToVector(float* pVector, const char* pString);
-int UTIL_FindEntityInMap(char* name, float* origin, float* angle);
+int UTIL_FindEntityInMap(const char* name, float* origin, float* angle);
 extern Vector g_ColorBlue;
 extern Vector g_ColorRed;
 extern Vector g_ColorGreen;

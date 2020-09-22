@@ -196,7 +196,7 @@ CCSTutor::~CCSTutor()
 	ClearEventList();
 }
 
-void ParseMessageParameters(char *&messageData, TutorMessage *ret)
+void ParseMessageParameters(const char *&messageData, TutorMessage *ret)
 {
 	char *token;
 
@@ -339,7 +339,7 @@ void ParseMessageParameters(char *&messageData, TutorMessage *ret)
 	}
 }
 
-TutorMessage *ConstructTutorMessage(char *&messageData, TutorMessage *defaults)
+TutorMessage *ConstructTutorMessage(const char *&messageData, TutorMessage *defaults)
 {
 	TutorMessage *msg = new TutorMessage;
 
@@ -364,7 +364,7 @@ TutorMessage *ConstructTutorMessage(char *&messageData, TutorMessage *defaults)
 	return msg;
 }
 
-void ReadDefaultValues(char *&messageData, TutorMessage *defaults)
+void ReadDefaultValues(const char *&messageData, TutorMessage *defaults)
 {
 	ParseMessageParameters(messageData, defaults);
 }
@@ -373,8 +373,8 @@ void CCSTutor::ReadTutorMessageFile()
 {
 	int messageFileLen = 0;
 
-	char *messageFile;
-	char *messageData;
+	const char *messageFile;
+	const char *messageData;
 	TutorMessage defaultMessage;
 
 	messageFile = messageData = (char *)LOAD_FILE_FOR_ME("tutordata.txt", &messageFileLen);
@@ -424,7 +424,7 @@ void CCSTutor::ReadTutorMessageFile()
 		}
 	}
 
-	FREE_FILE(messageFile);
+	FREE_FILE((void*)messageFile);
 }
 
 void CCSTutor::ApplyPersistentDecay()

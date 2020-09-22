@@ -73,7 +73,7 @@ void BotProfileManager::Init(const char *filename, unsigned int *checksum)
 
 	int dataLength;
 	char *dataPointer = (char *)LOAD_FILE_FOR_ME(const_cast<char *>(filename), &dataLength);
-	char *dataFile = dataPointer;
+	const char *dataFile = dataPointer;
 
 	if (!dataFile)
 	{

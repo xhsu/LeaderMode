@@ -3377,8 +3377,8 @@ int ReloadMapCycleFile(char *filename, mapcycle_t *cycle)
 	char szMap[MAX_MAPNAME_LENGHT];
 	int length;
 	char *pToken;
-	char *pFileList;
-	char *aFileList = pFileList = (char *)LOAD_FILE_FOR_ME(filename, &length);
+	const char *pFileList;
+	const char *aFileList = pFileList = (char *)LOAD_FILE_FOR_ME(filename, &length);
 	bool hasBuffer;
 	mapcycle_item_s *item, *newlist = nullptr, *next;
 
@@ -3459,7 +3459,7 @@ int ReloadMapCycleFile(char *filename, mapcycle_t *cycle)
 			}
 		}
 
-		FREE_FILE(aFileList);
+		FREE_FILE((void*)aFileList);
 	}
 
 	// Fixup circular list pointer

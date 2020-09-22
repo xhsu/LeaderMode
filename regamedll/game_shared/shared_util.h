@@ -33,15 +33,15 @@
 #include <wchar.h>
 #endif
 
-wchar_t *SharedWVarArgs(wchar_t *format, ...);
-char *SharedVarArgs(char *format, ...);
+wchar_t *SharedWVarArgs(const wchar_t *format, ...);
+char *SharedVarArgs(const char *format, ...);
 char *BufPrintf(char *buf, int &len, const char *fmt, ...);
 wchar_t *BufWPrintf(wchar_t *buf, int &len, const wchar_t *fmt, ...);
 const wchar_t *NumAsWString(int val);
 const char *NumAsString(int val);
 char *SharedGetToken();
 void SharedSetQuoteChar(char c);
-char *SharedParse(char *data);
+const char *SharedParse(const char *data);
 bool SharedTokenWaiting(const char *buffer);
 
 // Simple utility function to allocate memory and duplicate a string

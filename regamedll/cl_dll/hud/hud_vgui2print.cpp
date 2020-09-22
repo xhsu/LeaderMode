@@ -30,7 +30,7 @@ int CHudVGUI2Print::Draw(float flTime)
 	return 1;
 }
 
-int CHudVGUI2Print::DrawVGUI2StringReverse(wchar_t* msg, int x, int y, float r, float g, float b)
+int CHudVGUI2Print::DrawVGUI2StringReverse(const wchar_t* msg, int x, int y, float r, float g, float b)
 {
 	int len;
 	int i;
@@ -61,7 +61,7 @@ int CHudVGUI2Print::DrawVGUI2StringReverse(wchar_t* msg, int x, int y, float r, 
 	return 1;
 }
 
-int CHudVGUI2Print::DrawVGUI2StringReverse(char* charMsg, int x, int y, float r, float g, float b)
+int CHudVGUI2Print::DrawVGUI2StringReverse(const char* charMsg, int x, int y, float r, float g, float b)
 {
 	wchar_t* msg = VGUI_LOCALISE->Find(charMsg);
 
@@ -75,7 +75,7 @@ int CHudVGUI2Print::DrawVGUI2StringReverse(char* charMsg, int x, int y, float r,
 	return DrawVGUI2StringReverse(msg, x, y, r, g, b);
 }
 
-void CHudVGUI2Print::VGUI2LocalizeArg(char* pSrc, wchar_t* pDest, int unicodeBufferSizeInBytes)
+void CHudVGUI2Print::VGUI2LocalizeArg(const char* pSrc, wchar_t* pDest, int unicodeBufferSizeInBytes)
 {
 	if (!pSrc || !pDest)
 		return;
@@ -97,7 +97,7 @@ void CHudVGUI2Print::VGUI2LocalizeArg(char* pSrc, wchar_t* pDest, int unicodeBuf
 	VGUI_LOCALISE->ConvertANSIToUnicode(pSrc, pDest, unicodeBufferSizeInBytes);
 }
 
-void CHudVGUI2Print::VGUI2HudPrintArgs(char* charMsg, char* sstr1, char* sstr2, char* sstr3, char* sstr4, int x, int y, float r, float g, float b)
+void CHudVGUI2Print::VGUI2HudPrintArgs(const char* charMsg, char* sstr1, char* sstr2, char* sstr3, char* sstr4, int x, int y, float r, float g, float b)
 {
 	wchar_t* msg;
 	wchar_t wstr1[64];
@@ -133,7 +133,7 @@ void CHudVGUI2Print::VGUI2HudPrintArgs(char* charMsg, char* sstr1, char* sstr2, 
 	}
 }
 
-void CHudVGUI2Print::VGUI2HudPrint(char* charMsg, int x, int y, float r, float g, float b)
+void CHudVGUI2Print::VGUI2HudPrint(const char* charMsg, int x, int y, float r, float g, float b)
 {
 	wchar_t* temp = VGUI_LOCALISE->Find(charMsg);
 
@@ -194,7 +194,7 @@ void CHudVGUI2Print::GetStringSize(const wchar_t* string, int* width, int* heigh
 	}
 }
 
-int CHudVGUI2Print::DrawVGUI2String(wchar_t* msg, int x, int y, float r, float g, float b)
+int CHudVGUI2Print::DrawVGUI2String(const wchar_t* msg, int x, int y, float r, float g, float b)
 {
 	int i;
 	int iOriginalX;
@@ -203,7 +203,7 @@ int CHudVGUI2Print::DrawVGUI2String(wchar_t* msg, int x, int y, float r, float g
 	int w1, w2, w3;
 	bool bHorzCenter;
 	int len;
-	wchar_t* strTemp;
+	const wchar_t* strTemp;
 	int fontheight;
 
 	if (!m_hudfont)
@@ -292,7 +292,7 @@ int CHudVGUI2Print::DrawVGUI2String(wchar_t* msg, int x, int y, float r, float g
 	return x;
 }
 
-int CHudVGUI2Print::DrawVGUI2String(char* charMsg, int x, int y, float r, float g, float b)
+int CHudVGUI2Print::DrawVGUI2String(const char* charMsg, int x, int y, float r, float g, float b)
 {
 	wchar_t* msg = VGUI_LOCALISE->Find(charMsg);
 

@@ -51,6 +51,7 @@
 												}
 #endif
 
+class CBaseEntity;
 class CBasePlayer;
 class CWeaponBox;
 

@@ -78,7 +78,7 @@ CCSBotManager::CCSBotManager()
 	}
 	else
 	{
-		char *dataFile = SharedParse(dataPointer);
+		const char *dataFile = SharedParse(dataPointer);
 		char *token;
 
 		while (dataFile)

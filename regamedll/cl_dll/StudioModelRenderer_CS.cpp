@@ -41,7 +41,7 @@ typedef struct
 static client_anim_state_t g_state;
 static client_anim_state_t g_clientstate;
 
-char* s_boneNames[BONE_MAX] =
+const char* s_boneNames[BONE_MAX] =
 {
 	"Bip01 Head",
 	"Bip01 Pelvis",

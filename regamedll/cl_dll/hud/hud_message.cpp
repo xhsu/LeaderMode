@@ -175,7 +175,7 @@ void CHudMessage::MsgFunc_HudTextArgs(int iSize, void* pbuf)
 
 		for (int i = 0; i < m_pMessages[slotNum].numArgs; i++)
 		{
-			char* tmp = READ_STRING();
+			const char* tmp = READ_STRING();
 
 			if (!tmp)
 				tmp = "";

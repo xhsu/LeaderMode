@@ -14,15 +14,15 @@ public:
 	int Draw(float flTime);
 
 public:
-	int DrawVGUI2StringReverse(wchar_t* msg, int x, int y, float r, float g, float b);
-	int DrawVGUI2StringReverse(char* charMsg, int x, int y, float r, float g, float b);
-	void VGUI2LocalizeArg(char* pSrc, wchar_t* pDest, int unicodeBufferSizeInBytes);
-	void VGUI2HudPrintArgs(char* charMsg, char* sstr1, char* sstr2, char* sstr3, char* sstr4, int x, int y, float r, float g, float b);
-	void VGUI2HudPrint(char* charMsg, int x, int y, float r, float g, float b);
+	int DrawVGUI2StringReverse(const wchar_t* msg, int x, int y, float r, float g, float b);
+	int DrawVGUI2StringReverse(const char* charMsg, int x, int y, float r, float g, float b);
+	void VGUI2LocalizeArg(const char* pSrc, wchar_t* pDest, int unicodeBufferSizeInBytes);
+	void VGUI2HudPrintArgs(const char* charMsg, char* sstr1, char* sstr2, char* sstr3, char* sstr4, int x, int y, float r, float g, float b);
+	void VGUI2HudPrint(const char* charMsg, int x, int y, float r, float g, float b);
 	int GetHudFontHeight(void);
 	void GetStringSize(const wchar_t* string, int* width, int* height);
-	int DrawVGUI2String(wchar_t* msg, int x, int y, float r, float g, float b);
-	int DrawVGUI2String(char* charMsg, int x, int y, float r, float g, float b);
+	int DrawVGUI2String(const wchar_t* msg, int x, int y, float r, float g, float b);
+	int DrawVGUI2String(const char* charMsg, int x, int y, float r, float g, float b);
 
 private:
 	vgui::HFont m_hudfont;

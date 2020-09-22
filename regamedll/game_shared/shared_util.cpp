@@ -4,7 +4,7 @@
 char s_shared_token[1500];
 char s_shared_quote = '\"';
 
-NOXREF wchar_t *SharedWVarArgs(wchar_t *format, ...)
+NOXREF wchar_t *SharedWVarArgs(const wchar_t *format, ...)
 {
 	va_list argptr;
 	const int BufLen = 1024;
@@ -21,7 +21,7 @@ NOXREF wchar_t *SharedWVarArgs(wchar_t *format, ...)
 	return string[curstring];
 }
 
-char *SharedVarArgs(char *format, ...)
+char *SharedVarArgs(const char *format, ...)
 {
 	va_list argptr;
 	const int BufLen = 1024;
@@ -113,7 +113,7 @@ NOXREF void SharedSetQuoteChar(char c)
 }
 
 // Parse a token out of a string
-char *SharedParse(char *data)
+const char *SharedParse(const char *data)
 {
 	int c;
 	int len;

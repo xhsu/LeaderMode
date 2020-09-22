@@ -11,6 +11,18 @@ Code - Luna the Reborn
 
 int g_rgiTeamScore[4] = { 0, 0, 0, 0 };
 
+const char* CHudScoreboard::m_rgszScoreboardElemKeyName[8] =
+{
+	"#Career_PlayerName",
+	"#Cstrike_TitlesTXT_CLASS",
+	"#Cstrike_TitlesTXT_Health",
+	"#LeaderMod_SBE_Money",
+	"#Cstrike_TitlesTXT_SCORE",
+	"#Cstrike_TitlesTXT_DEATHS",
+	"#LeaderMod_SBE_KDA",
+	"#Cstrike_TitlesTXT_LATENCY"
+};
+
 int CHudScoreboard::Init(void)
 {
 	m_bitsFlags = HUD_ENFORCE_THINK|HUD_INTERMISSION;	// this is what intermission for, right?

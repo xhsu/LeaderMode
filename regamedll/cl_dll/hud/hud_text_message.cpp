@@ -69,7 +69,7 @@ int CHudTextMessage::Init(void)
 char* CHudTextMessage::LookupString(const char* msg, int* msg_dest)
 {
 	if (!msg)
-		return "";
+		return (char*)"";
 
 	if (msg[0] == '#')
 	{

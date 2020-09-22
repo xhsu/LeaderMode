@@ -635,7 +635,7 @@ void LoadLocationFile(const char *filename)
 
 		int locDataLength;
 		char *locDataFile = (char *)LOAD_FILE_FOR_ME(const_cast<char *>(locFilename), &locDataLength);
-		char *locData = locDataFile;
+		const char *locData = locDataFile;
 
 		if (locData)
 		{

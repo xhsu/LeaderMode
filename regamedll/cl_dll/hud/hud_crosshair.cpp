@@ -153,13 +153,13 @@ void CHudCrosshair::Reset(void)
 
 void CHudCrosshair::CalculateCrosshairColor(void)
 {
-	char* value = cl_crosshair_color->string;
+	const char* value = cl_crosshair_color->string;
 
 	if (value && Q_strcmp(value, m_szLastCrosshairColor))
 	{
 		int cvarR, cvarG, cvarB;
-		char* token;
-		char* data = value;
+		const char* token;
+		const char* data = value;
 
 		data = SharedParse(data);
 		token = SharedGetToken();
@@ -219,7 +219,7 @@ void CHudCrosshair::CalculateCrosshairDrawMode(void)
 
 void CHudCrosshair::CalculateCrosshairSize(void)
 {
-	char* value = cl_crosshair_size->string;
+	const char* value = cl_crosshair_size->string;
 
 	if (!value)
 		return;

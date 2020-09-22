@@ -76,17 +76,7 @@ public:
 		SBE_Ping
 	};
 
-	static constexpr char* m_rgszScoreboardElemKeyName[8] =
-	{
-		"#Career_PlayerName",
-		"#Cstrike_TitlesTXT_CLASS",
-		"#Cstrike_TitlesTXT_Health",
-		"#LeaderMod_SBE_Money",
-		"#Cstrike_TitlesTXT_SCORE",
-		"#Cstrike_TitlesTXT_DEATHS",
-		"#LeaderMod_SBE_KDA",
-		"#Cstrike_TitlesTXT_LATENCY"
-	};
+	static const char* m_rgszScoreboardElemKeyName[8];
 
 public:
 	CBasePanel		m_Baseboard;

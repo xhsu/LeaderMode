@@ -343,9 +343,9 @@ private:
 	PlayerDeathStruct m_playerDeathInfo[MAX_CLIENTS];
 };
 
-void ParseMessageParameters(char *&messageData, TutorMessage *ret);
-TutorMessage *ConstructTutorMessage(char *&messageData, TutorMessage *defaults);
-void ReadDefaultValues(char *&messageData, TutorMessage *defaults);
+void ParseMessageParameters(const char *&messageData, TutorMessage *ret);
+TutorMessage *ConstructTutorMessage(const char *&messageData, TutorMessage *defaults);
+void ReadDefaultValues(const char *&messageData, TutorMessage *defaults);
 
 // custom operator++
 inline TutorMessageID operator++(TutorMessageID &iter, int)

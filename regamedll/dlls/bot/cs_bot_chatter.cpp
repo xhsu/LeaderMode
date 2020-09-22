@@ -333,7 +333,7 @@ bool BotPhraseManager::Initialize(const char *filename, int bankIndex)
 	}
 
 	char *token;
-	char *phraseData = phraseDataFile;
+	const char *phraseData = phraseDataFile;
 	unsigned int nextID = 1;
 
 	// wav filenames need to be shorter than this to go over the net anyway.

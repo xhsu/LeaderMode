@@ -48,6 +48,6 @@
 #include "tier0/dbg.h"
 
 #include "dlls.h"
-#include "interface.h"
+#include "public/interface.h"
 #include "regamedll.h"
 #include "FileSystem.h"
