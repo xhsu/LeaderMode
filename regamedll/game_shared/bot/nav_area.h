@@ -695,7 +695,7 @@ bool NavAreaBuildPath(CNavArea *startArea, CNavArea *goalArea, const Vector *goa
 				{
 					dir++;
 
-					if (dir == NUM_DIRECTIONS)
+					if (dir >= NUM_DIRECTIONS)	// LUNA: if this line goes to '==' operator, it would cause "index out of bounce" error by accessing m_connect[] with 6.
 					{
 						// checked all directions on floor - check ladders next
 						searchFloor = false;
