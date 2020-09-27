@@ -5,8 +5,8 @@ weapon_m200				640 cod6_m200		0	0	170	45
 weapon_m200_s			640 cod6_m200		0	90	170	45
 weapon_hegrenade		640 battery_frag1	0	45	170	45
 weapon_hegrenade_s		640 battery_frag2	0	45	170	45
-weapon_striker			640 cod8_striker	0	0	170	45
-weapon_striker_s		640 cod8_striker	0	90	170	45
+weapon_m1014			640 cod8_striker	0	0	170	45
+weapon_m1014_s			640 cod8_striker	0	90	170	45
 weapon_pm9				640 cod8_pm9		0	0	170	67
 weapon_pm9_s			640 cod8_pm9		0	90	170	67
 weapon_acr				640 cod8_acr		0	0	170	55

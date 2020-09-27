@@ -17,7 +17,7 @@ usercmd_t* g_pCurUserCmd = nullptr;	// WARNING: use this within weapon's predict
 CBasePlayer gPseudoPlayer;
 std::shared_ptr<pseudo_global_vars_s> gpGlobals;
 
-CBaseWeapon* g_rgpClientWeapons[LAST_WEAPON];
+std::array<CBaseWeapon*, LAST_WEAPON> g_rgpClientWeapons;	// LUNA: switched to safer method.
 
 //
 // PSEUDO-PLAYER
@@ -248,6 +248,10 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 		p = new CKSG12;
 		break;
 
+	case WEAPON_M1014:
+		p = new CM1014;
+		break;
+
 	case WEAPON_M4A1:
 		p = new CM4A1;
 		break;
@@ -324,6 +328,8 @@ bool CBaseWeapon::AddToPlayer(CBasePlayer* pPlayer)
 {
 	m_pPlayer = pPlayer;
 	m_bitsFlags |= WPNSTATE_DRAW_FIRST;
+
+	SetVariation(g_iRoleType);
 	return true;
 }
 

@@ -119,7 +119,7 @@ BOOL CHudClassIndicator::Draw(float flTime)
 	gEngfuncs.pTriAPI->CullFace(TRI_NONE);
 
 	glBindTexture(GL_TEXTURE_2D, m_iClassesIcon[g_iRoleType]);
-	DrawUtils::Draw2DQuad(ScreenWidth / 2, ScreenHeight / 2, ScreenWidth / 2 + 128, ScreenHeight / 2 + 128);
+	DrawUtils::Draw2DQuad(ScreenWidth - 128, ScreenHeight / 2, ScreenWidth, ScreenHeight / 2 + 128);
 
 	// if you don't have a avaliable skill, i.e. a Role_UNASSIGNED, the progress bar is unnecessary.
 	SkillIndex iSkillIndex = GetPrimarySkill();
@@ -138,7 +138,7 @@ BOOL CHudClassIndicator::Draw(float flTime)
 
 	glColor4f(vecColour.r, vecColour.g, vecColour.b, 1.0);
 
-	DrawUtils::Draw2DQuadProgressBar2(ScreenWidth / 2, ScreenHeight / 2, 128, 128, 3, m_flCurrentTime / m_flTotalTime);
+	DrawUtils::Draw2DQuadProgressBar2(ScreenWidth - 128, ScreenHeight / 2, 128, 128, 3, m_flCurrentTime / m_flTotalTime);
 
 	glDisable(GL_BLEND);
 	glEnable(GL_TEXTURE_2D);

@@ -1026,6 +1026,14 @@ MSG_FUNC(Role)
 			gHUD::m_Health.m_iHealth = 1000;
 			gHUD::m_Health.m_flDrawingHealth = 1000.0f;
 		}
+
+		// we have to update the m_iVariation of all weapons, since their behaviour would change sometimes.
+		for (auto pWeapon : g_rgpClientWeapons)
+		{
+			// non-nullptr members only.
+			if (pWeapon)
+				pWeapon->SetVariation(g_iRoleType);
+		}
 	}
 
 	return TRUE;

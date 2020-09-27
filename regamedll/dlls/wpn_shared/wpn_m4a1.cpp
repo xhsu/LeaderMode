@@ -56,8 +56,20 @@ void CM4A1::SecondaryAttack()
 
 	if (!g_vecGunOfsGoal.LengthSquared())
 	{
-		g_vecGunOfsGoal = Vector(-3.77f, -3, 0.37f);
-		gHUD::m_iFOV = 85;	// allow clients to predict the zoom.
+		switch (m_iVariation)
+		{
+		case Role_Sharpshooter:
+			// ACOG.
+			g_vecGunOfsGoal = Vector(-3.77f, -3, 0.57f);
+			gHUD::m_iFOV = 55;
+			break;
+
+		default:
+			// HOLO.
+			g_vecGunOfsGoal = Vector(-3.77f, -3, 0.37f);
+			gHUD::m_iFOV = 85;	// allow clients to predict the zoom.
+			break;
+		}
 	}
 	else
 	{
@@ -67,11 +79,23 @@ void CM4A1::SecondaryAttack()
 
 	g_flGunOfsMovingSpeed = 8.0f;
 #else
-	// just zoom a liiiiittle bit.
+	// zoom according to the weapon variation.
 	// this doesn't suffer from the same bug where the gunofs does, since the FOV was actually sent from SV.
 	if (m_bInZoom)
 	{
-		m_pPlayer->pev->fov = 85;
+		switch (m_iVariation)
+		{
+		case Role_Sharpshooter:
+			// ACOG.
+			m_pPlayer->pev->fov = 55;
+			break;
+
+		default:
+			// HOLO.
+			m_pPlayer->pev->fov = 85;
+			break;
+		}
+
 		EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, "weapons/steelsight_in.wav", 0.75f, ATTN_STATIC);
 	}
 	else
@@ -306,14 +330,30 @@ int CM4A1::CalcBodyParam(void)
 		{ 0, 2 },	// laser		= 12;
 	};
 
-	// by default, this weapon has:
-	// filpped down steel sight.
-	// holographic sight.
-	// laser.
+	switch (m_iVariation)
+	{
+	case Role_Sharpshooter:
+		// the sharpshooter's version contains a ACOG and a laser.
+		// filpped down steel sight.
+		// ACOG.
+		// Recoil compensator.
+		// laser.
 
-	info[7].body = 1;
-	info[8].body = 2;
-	info[12].body = 1;
+		info[7].body = 1;
+		info[8].body = 4;
+		info[11].body = 2;
+		info[12].body = 1;
+		break;
+
+	default:
+		// by default, this weapon has:
+		// filpped down steel sight.
+		// holographic sight.
+
+		info[7].body = 1;
+		info[8].body = 2;
+		break;
+	}
 
 	if (!m_iClip)
 		info[6].body = 1;	// empty mag.

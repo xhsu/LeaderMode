@@ -757,7 +757,7 @@ void CSkillExplosiveBullets::OnPlayerFiringTraceLine(int& iDamage, TraceResult& 
 	// a. use KSG12 or STRIKER
 	// b. active your skill.
 
-	if (!((1 << m_pPlayer->m_pActiveItem->m_iId) & ((1 << WEAPON_KSG12) | (1 << WEAPON_STRIKER))) && !m_bUsingSkill)
+	if (!((1 << m_pPlayer->m_pActiveItem->m_iId) & ((1 << WEAPON_KSG12) | (1 << WEAPON_M1014))) && !m_bUsingSkill)
 	{
 		// or you will make sure that your victim receive a hidden explosive bullet inside them.
 
@@ -2339,7 +2339,7 @@ void CSkillIncendiaryAmmo::OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr
 {
 	WeaponIdType iId = m_pPlayer->m_pActiveItem->m_iId;
 
-	if (!m_bUsingSkill && (iId != WEAPON_KSG12 && iId != WEAPON_STRIKER))
+	if (!m_bUsingSkill && (iId != WEAPON_KSG12 && iId != WEAPON_M1014))
 		return;
 
 	// at least we have VFX here.

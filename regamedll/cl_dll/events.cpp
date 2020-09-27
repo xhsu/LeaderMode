@@ -1863,9 +1863,59 @@ DECLARE_EVENT(FireUSP)
 		USP_PENETRATION);
 }
 
-DECLARE_EVENT(FireXM1014)
+DECLARE_EVENT(FireM1014)
 {
+	int idx = args->entindex;
+	int lefthand = cl_righthand->value;
 
+	Vector origin, angles, velocity;
+	VectorCopy(args->origin, origin);
+	VectorCopy(args->angles, angles);
+	VectorCopy(args->velocity, velocity);
+
+	angles.pitch += args->iparam1 / 100.0f;	// only for x. args->iparam2 is used for seed.
+
+	Vector forward, right, up;
+	gEngfuncs.pfnAngleVectors(angles, forward, right, up);
+	int shell = gEngfuncs.pEventAPI->EV_FindModelIndex("models/shotgunshell.mdl");
+
+	if (EV_IsLocal(idx))
+	{
+		EV_MuzzleFlash();
+
+		if (g_pCurWeapon && g_pCurWeapon->m_bInZoom)
+			g_pCurWeapon->SendWeaponAnim(M1014_AIM_FIRE);
+		else if (g_pCurWeapon)
+			g_pCurWeapon->SendWeaponAnim(M1014_FIRE);
+
+		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 3, 0.45, 15, 15, 15, EV_PISTOL_SMOKE, velocity, false, 35);
+		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 40, 0.35, 9, 9, 9, EV_WALL_PUFF, velocity, false, 35);
+	}
+
+	Vector ShellVelocity, ShellOrigin;
+	if (EV_IsLocal(idx))
+	{
+		g_iShotsFired++;
+
+		if (lefthand == 0)
+			EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 22.0, -9.0, -11.0);
+		else
+			EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 22.0, -9.0, 11.0);
+
+		VectorCopy(g_pViewEnt->attachment[1], ShellOrigin);
+		VectorScale(ShellVelocity, 1.25, ShellVelocity);
+		ShellVelocity[2] -= 50;
+	}
+	else
+		EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -12.0, -4.0);
+
+	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, shell, TE_BOUNCE_SHOTSHELL, idx, 3);
+
+	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, M1014_FIRE_SFX, 1.0, 0.52, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
+
+	int shared_rand = args->iparam2;
+	Vector vecSrc = EV_GetGunPosition(args, origin);
+	EV_HLDM_FireBullets(idx, forward, right, up, M1014_PROJECTILE_COUNT, vecSrc, forward, M1014_CONE_VECTOR, M1014_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_M1014].m_iAmmoType, 1, shared_rand);
 }
 
 DECLARE_EVENT(CreateExplo)
@@ -2249,7 +2299,7 @@ void Events_Init(void)
 	HOOK_EVENT(mp7a1, FireMP7A1);
 	HOOK_EVENT(ump45, FireUMP45);
 	HOOK_EVENT(usp, FireUSP);
-	HOOK_EVENT(xm1014, FireXM1014);
+	HOOK_EVENT(m1014, FireM1014);
 
 	HOOK_EVENT(createexplo, CreateExplo);
 	HOOK_EVENT(createsmoke, CreateSmoke);

@@ -111,7 +111,7 @@ extern int g_runfuncs;
 extern double g_flGameTime;
 extern std::shared_ptr<pseudo_global_vars_s> gpGlobals;
 extern const Vector g_vecZero;
-extern CBaseWeapon* g_rgpClientWeapons[LAST_WEAPON];
+extern std::array<CBaseWeapon*, LAST_WEAPON> g_rgpClientWeapons;
 extern CBaseWeapon* g_pCurWeapon;
 extern CBasePlayer gPseudoPlayer;
 extern WeaponIdType g_iSelectedWeapon;	// this means directly switch weapon. try to use gPseudoPlayer.StartSwitchingWeapon() instead!

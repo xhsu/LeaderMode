@@ -11,6 +11,10 @@ You must buy a CS:CZ copy from Valve.<br/>
 Download the resource pack from AMX version. In addition, you have to download the view model pack of WeaponSight.amxx which currently not avaliable.<br/>
 Compile both client.dll and mp.dll, replace the corresponding file in czero/. Make yourself a backup.
 
+## Known Issues
+* Players have to press and hold CTRL to keep their speed while ducking.
+* Running into walls will cause a sudden stop of Dash_Out anim.
+
 ## Commands
 | Command                             | Description                                     |
 | :---------------------------------- | :---------------------------------------------- |

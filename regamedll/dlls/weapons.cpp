@@ -142,7 +142,7 @@ void WeaponsPrecache()
 
 	// shotgun
 	UTIL_PrecacheOtherWeapon(WEAPON_KSG12);
-	UTIL_PrecacheOtherWeapon(WEAPON_STRIKER);
+	UTIL_PrecacheOtherWeapon(WEAPON_M1014);
 
 	UTIL_PrecacheOtherWeapon(WEAPON_USP);
 	UTIL_PrecacheOtherWeapon(WEAPON_PM9);
@@ -311,6 +311,10 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 		p = new CKSG12;
 		break;
 
+	case WEAPON_M1014:
+		p = new CM1014;
+		break;
+
 	case WEAPON_M4A1:
 		p = new CM4A1;
 		break;
@@ -375,7 +379,7 @@ void CBaseWeapon::Think(void)
 		Vector vecRight = RANDOM_FLOAT(50, 70) * gpGlobals->v_right;
 
 		Vector vecShellVelocity = (m_pPlayer->pev->velocity + vecRight + vecUp) + gpGlobals->v_forward * 25;
-		int soundType = (m_iId == WEAPON_STRIKER || m_iId == WEAPON_KSG12) ? 2 : 1;
+		int soundType = (m_iId == WEAPON_M1014 || m_iId == WEAPON_KSG12) ? 2 : 1;
 
 		EjectBrass(m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs + gpGlobals->v_up * -9 + gpGlobals->v_forward * 16,
 			vecShellVelocity, m_pPlayer->pev->angles.yaw, m_pPlayer->m_iShellModelIndex, soundType, m_pPlayer->entindex());
@@ -406,6 +410,8 @@ bool CBaseWeapon::AddToPlayer(CBasePlayer* pPlayer)
 	m_pWeaponBox = nullptr;	// make the weaponbox disown me.
 	m_pPlayer = pPlayer;
 	m_bitsFlags |= WPNSTATE_DRAW_FIRST;	// play draw_first anim.
+
+	SetVariation(pPlayer->m_iRoleType);
 	return true;
 }
 
@@ -1035,7 +1041,7 @@ void CBaseWeapon::ReloadSound()
 		{
 			MESSAGE_BEGIN(MSG_ONE, gmsgReloadSound, nullptr, pPlayer->pev);
 			WRITE_BYTE(int((1.0f - (distance / MAX_DIST_RELOAD_SOUND)) * 255.0f));
-			if (m_iId == WEAPON_STRIKER || m_iId == WEAPON_KSG12)
+			if (m_iId == WEAPON_M1014 || m_iId == WEAPON_KSG12)
 				WRITE_BYTE(0);
 			else
 				WRITE_BYTE(1);

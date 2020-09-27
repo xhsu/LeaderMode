@@ -389,7 +389,7 @@ int CHudCrosshair::DrawCrosshair(float flTime, WeaponIdType weaponid)
 		break;
 	}
 
-	case WEAPON_STRIKER:
+	case WEAPON_M1014:
 	{
 		iDistance = 9;
 		iDeltaDistance = 4;

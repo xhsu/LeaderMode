@@ -82,7 +82,7 @@ d_scarl				640 cod8_scar	0	180	54	18
 d_ump45				640 cod8_ump45	0	180	45	23
 d_usp				640 cod8_usp	0	180	43	20
 d_mp7a1				640 cod8_mp7	0	180	52	23
-d_striker			640 cod8_striker	0	180	46	17
+d_m1014				640 cod8_striker	0	180	46	17
 d_skull				640 640hud1	224	240	32	16
 d_tracktrain		640 640hud1	192	240	32	16
 d_acr				640 cod8_acr    0	180	48	18

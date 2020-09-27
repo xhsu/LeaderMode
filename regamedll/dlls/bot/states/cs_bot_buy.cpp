@@ -144,7 +144,7 @@ struct BuyInfo
 BuyInfo primaryWeapons[] =
 {
 	{ SHOTGUN,          false, WEAPON_KSG12		},
-	{ SHOTGUN,          false, WEAPON_STRIKER	},
+	{ SHOTGUN,          false, WEAPON_M1014	},
 
 	{ SUB_MACHINE_GUN,  false, WEAPON_MP7A1		},
 	{ SUB_MACHINE_GUN,  false, WEAPON_PM9		},

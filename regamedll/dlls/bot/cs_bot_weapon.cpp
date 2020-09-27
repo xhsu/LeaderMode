@@ -366,7 +366,7 @@ bool CCSBot::IsUsingShotgun() const
 	if (!m_pActiveItem)
 		return false;
 
-	return (m_pActiveItem->m_iId == WEAPON_STRIKER || m_pActiveItem->m_iId == WEAPON_KSG12);
+	return (m_pActiveItem->m_iId == WEAPON_M1014 || m_pActiveItem->m_iId == WEAPON_KSG12);
 }
 
 // Returns true if using the big 'ol machinegun

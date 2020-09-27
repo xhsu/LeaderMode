@@ -7870,6 +7870,18 @@ void CBasePlayer::AssignRole(RoleTypes iNewRole)
 	// remember, this must be used after m_iRoleType be renewed.
 	CheckItemAccessibility();
 
+	// after the weapons are checked, variegate them.
+	for (auto pWeapon : CBaseWeapon::m_lstWeapons)
+	{
+		if (pWeapon->m_pPlayer != this)
+			continue;
+
+		if (pWeapon->IsDead())
+			continue;
+
+		pWeapon->SetVariation(m_iRoleType);
+	}
+
 	// tell client the fact.
 	MESSAGE_BEGIN(MSG_ALL, gmsgRole);
 	WRITE_BYTE(entindex());

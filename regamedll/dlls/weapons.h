@@ -102,6 +102,7 @@ struct MULTIDAMAGE
 
 #include "ammo.h"
 #include "weapontype.h"
+#include "player_classes.h"
 #include <list>
 
 // something can place on your hand.
@@ -147,6 +148,7 @@ public:
 	AmmoIdType		m_iPrimaryAmmoType;			// "primary" ammo index into players m_rgAmmo[]
 	AmmoIdType		m_iSecondaryAmmoType;		// "secondary" ammo index into players m_rgAmmo[]
 	bool			m_bInZoom;
+	RoleTypes		m_iVariation;	// weapons suppose to variegate accroading to their owner.
 
 	struct	// this structure is for anim push and pop. it save & restore weapon state.
 	{
@@ -231,6 +233,7 @@ public:	// util funcs
 	virtual void	KickBack		(float up_base, float lateral_base, float up_modifier, float lateral_modifier, float up_max, float lateral_max, int direction_change);	// recoil
 	virtual void	ResetModel		(void) { }	// used after Melee() and QuickThrowRelease().
 	virtual int		CalcBodyParam	(void) { return 0; }	// allow user to varient weapon body.
+	virtual bool	SetVariation	(RoleTypes iType) { m_iVariation = iType; return true; }
 };
 
 
@@ -1160,23 +1163,88 @@ public:	// new funcs
 	void MP7A1Fire(float flSpread, float flCycleTime = (60.0f / MP7A1_RPM));
 };
 
-#define STRIKER_VIEW_MODEL	"models/weapons/v_striker.mdl"
-#define STRIKER_WORLD_MODEL	"models/weapons/w_striker.mdl"
-#define STRIKER_FIRE_SFX	"weapons/striker/striker_fire.wav"
+#define M1014_VIEW_MODEL	"models/weapons/v_m1014.mdl"
+#define M1014_WORLD_MODEL	"models/w_xm1014.mdl"	// FIXME
+#define M1014_FIRE_SFX		"weapons/m1014/m1014_fire.wav"
 
-const float XM1014_MAX_SPEED   = 240.0f;
-const float XM1014_DAMAGE      = 20.0f;
-const Vector XM1014_CONE_VECTOR = Vector(0.0725, 0.0725, 0.0); // special shotgun spreads
+constexpr float M1014_MAX_SPEED			= 240.0f;
+constexpr float M1014_DAMAGE			= 20.0f;
+constexpr int	M1014_PROJECTILE_COUNT	= 6;
+constexpr float	M1014_EFFECTIVE_RANGE	= 3048.0f;
+constexpr float M1014_FIRE_INTERVAL		= 0.25f;
+constexpr float M1014_TIME_START_RELOAD	= 0.7f;
+constexpr float M1014_TIME_INSERT		= 0.867f;
+constexpr float M1014_TIME_ADD_AMMO		= 0.4f;
+constexpr float M1014_TIME_AFTER_RELOAD	= 1.0f;
+constexpr float M1014_TIME_AR_REC		= 1.314f;
+constexpr float M1014_DRAW_FIRST_TIME	= 2.0f;
+constexpr float M1014_DRAW_TIME			= 1.2f;
+constexpr float M1014_HOLSTER_TIME		= 1.033f;
+constexpr float M1014_DASH_ENTER_TIME	= 0.4f;
+constexpr float M1014_DASH_EXIT_TIME	= 0.52f;
+const	 Vector M1014_CONE_VECTOR		= Vector(0.0725, 0.0725, 0.0); // special shotgun spreads
 
-enum xm1014_e
+enum m1014_e
 {
-	XM1014_IDLE,
-	XM1014_FIRE1,
-	XM1014_FIRE2,
-	XM1014_RELOAD,
-	XM1014_PUMP,
-	XM1014_START_RELOAD,
-	XM1014_DRAW,
+	M1014_IDLE,
+	M1014_FIRE,
+	M1014_AIM_FIRE,
+	M1014_START_RELOAD,
+	M1014_INSERT,
+	M1014_AFTER_RELOAD,
+	M1014_AFTER_RELOAD_RECHAMBER,
+	M1014_DRAW_FIRST,
+	M1014_DRAW,
+	M1014_JUMP,
+	M1014_HOLSTER,
+	M1014_DASH_ENTER,
+	M1014_DASHING,
+	M1014_DASH_EXIT,
+};
+
+class CM1014 : public CBaseWeapon
+{
+#ifndef CLIENT_DLL
+public:	// SV exclusive variables.
+	static unsigned short m_usEvent;
+	static int m_iShell;
+
+public:	// SV exclusive functions.
+	virtual void	Precache		(void);
+#endif
+
+public:
+	bool	m_bAllowNextEmptySound;
+	float	m_flNextInsertAnim;
+	float	m_flNextAddAmmo;
+	bool	m_bSetForceStopReload;
+	bool	m_bStartFromEmpty;
+
+	struct	// shotgun needs to expand these push-pop stuff a little bit.
+	{
+		float	m_flNextInsertAnim;
+		float	m_flNextAddAmmo;
+	}
+	m_Stack2;
+
+public:	// basic logic funcs
+	virtual void	Think			(void);
+	virtual bool	Deploy			(void);
+	virtual void	PostFrame		(void);
+	virtual void	PrimaryAttack	(void);
+	virtual void	SecondaryAttack	(void);
+	virtual void	WeaponIdle		(void);
+	virtual	bool	Reload			(void);
+	virtual bool	HolsterStart	(void);
+	virtual	void	DashStart		(void);
+	virtual void	DashEnd			(void);
+
+public:	// util funcs
+	virtual	float	GetMaxSpeed		(void) { return M1014_MAX_SPEED; }
+	virtual	void	PlayEmptySound	(void);
+	virtual void	PushAnim		(void);
+	virtual void	PopAnim			(void);
+	virtual void	ResetModel		(void);
 };
 
 #define P99_VIEW_MODEL	"models/weapons/v_p99.mdl"
