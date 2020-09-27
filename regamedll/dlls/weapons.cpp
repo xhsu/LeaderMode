@@ -391,7 +391,7 @@ void CBaseWeapon::Think(void)
 	}
 
 	if (m_bitsFlags & WPNSTATE_DASHING &&
-		(m_pPlayer->m_afButtonReleased & IN_RUN || !(m_pPlayer->pev->button & IN_FORWARD) || m_pPlayer->pev->button & IN_DUCK || m_pPlayer->pev->velocity.Length2D() < 50.0f)
+		(m_pPlayer->m_afButtonReleased & IN_RUN || !(m_pPlayer->pev->button & IN_FORWARD) || m_pPlayer->pev->button & IN_DUCK/* || m_pPlayer->pev->velocity.Length2D() < 50.0f*/)
 		)
 	{
 		DashEnd();

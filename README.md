@@ -14,6 +14,8 @@ Compile both client.dll and mp.dll, replace the corresponding file in czero/. Ma
 ## Known Issues
 * Players have to press and hold CTRL to keep their speed while ducking.
 * Running into walls will cause a sudden stop of Dash_Out anim.
+* Models cannot emit sounds during weapon swapping, if the sound EVENT is assigned on the first frame.
+* WeaponsList HUD could flashback and forth during weapon swapping.
 
 ## Commands
 | Command                             | Description                                     |

@@ -27,7 +27,7 @@ const char* g_rgszRoleNames[ROLE_COUNT] =
 const int g_rgRoleWeaponsAccessibility[ROLE_COUNT][LAST_WEAPON] =
 {
 	//					      0                                  5                                  10                                 15                                 20                                 25                                 30
-	//					      NONE   G18C   USP    ANACO  DEAGLE FN57   P99    KSG12  STR    MP7A1  PM9    MP5    UMP45  P90    CM901  QBZ95  AK47   M4A1   SCARL  ACR    M200   M14    AWP    SVD    MK46   C4
+	//					      NONE   G18C   USP    ANACO  DEAGLE FN57   P99    KSG12  M1014  MP7A1  PM9    MP5    UMP45  P90    CM901  QBZ95  AK47   M4A1   SCARL  ACR    M200   M14    AWP    SVD    MK46   C4
 	/*Role_UNASSIGNED*/		{ WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_F },
 
 	/*Role_Commander = 1*/	{ WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_P, WPN_A, WPN_P, WPN_P, WPN_F },

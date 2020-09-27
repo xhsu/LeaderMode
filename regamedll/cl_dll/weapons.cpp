@@ -317,7 +317,7 @@ void CBaseWeapon::Think(void)
 	}
 
 	if (m_bitsFlags & WPNSTATE_DASHING &&
-		(m_pPlayer->m_afButtonReleased & IN_RUN || !(m_pPlayer->pev->button & IN_FORWARD) || m_pPlayer->pev->button & IN_DUCK || m_pPlayer->pev->velocity.Length2D() < 50.0f)
+		(m_pPlayer->m_afButtonReleased & IN_RUN || !(m_pPlayer->pev->button & IN_FORWARD) || m_pPlayer->pev->button & IN_DUCK/* || m_pPlayer->pev->velocity.Length2D() < 50.0f*/)
 		)
 	{
 		DashEnd();
@@ -424,9 +424,9 @@ void CBaseWeapon::PostFrame()
 				return;	// how did he get here???
 			}
 
-			// reduce the grenade inventory
-			if (*m_pPlayer->GetGrenadeInventoryPointer(m_pPlayer->m_iUsingGrenadeId))
-				(*m_pPlayer->GetGrenadeInventoryPointer(m_pPlayer->m_iUsingGrenadeId))--;
+			// we should remove a grenade from inventory... but no, not here.
+			// it would cause some trouble regarding Bombard(CSkillInfiniteGrenade) skill.
+			// reduced one from client, but not on SV. And we are lack of synchronizing method.
 
 			// we should spawn a grenade at this line... on SV.
 			// at client, we do nothing.

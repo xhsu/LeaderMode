@@ -53,7 +53,7 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 	m_pCurrentEntity = IEngineStudio.GetCurrentEntity();
 
 	// TODO : hide VMDL here.
-	if (gHUD::m_iFOV < 90)
+	/*if (gHUD::m_iFOV < 90)
 	{
 		if (m_pCurrentEntity->model)
 		{
@@ -69,7 +69,7 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 			if (Q_strstr(m_pCurrentEntity->model->name, "v_sg550"))
 				return 0;
 		}
-	}
+	}*/
 
 	IEngineStudio.GetTimes(&m_nFrameCount, &m_clTime, &m_clOldTime);
 	IEngineStudio.GetViewInfo(m_vRenderOrigin, m_vUp, m_vRight, m_vNormal);
