@@ -7,9 +7,12 @@ Assign roles to both CT and T, including skills.<br/>
 The goal is eliminate the other team. However, due to the redeployment mechanism, having their team leader killed is a quicker way.
 
 ## How to install?
-You must buy a CS:CZ copy from Valve.<br/>
-Download the resource pack from AMX version. In addition, you have to download the view model pack of WeaponSight.amxx which currently not avaliable.<br/>
-Compile both client.dll and mp.dll, replace the corresponding file in czero/. Make yourself a backup.
+1. You have to own copies of all these three games: [Half-Life](https://store.steampowered.com/app/70/HalfLife/), [Condition Zero](https://store.steampowered.com/app/80/CounterStrike_Condition_Zero/) and [Counter-Strike](https://store.steampowered.com/app/10/CounterStrike/).
+2. Create a folder in the GoldSrc engine folder.
+3. Rename the RESOURCE/ folder to "leadermode" or something like that.
+4. Install fonts located in RESOURCE/ folder into Windows.
+5. Build [metahook](https://github.com/nagist/metahook). Rename the .exe file to "leadermode" as well, and place it along with the GoldSrc engine.
+6. Start leadermode.exe and enjoy the game.
 
 ## Known Issues
 * Players have to press and hold CTRL to keep their speed while ducking.
@@ -43,7 +46,8 @@ Compile both client.dll and mp.dll, replace the corresponding file in czero/. Ma
 * Enter `-bots` option at the command line HLDS
 
 ### Credits
-Thanks to the project [ReGameDLL_CS](https://github.com/s1lentq/ReGameDLL_CS) ( This mod was created on the basis of ReGameDLL_CS )
+* [ReGameDLL_CS](https://github.com/s1lentq/ReGameDLL_CS) (This mod was created on the basis of ReGameDLL_CS)
+* [Metahook](https://github.com/nagist/metahook) (A total game changer. Literally and metaphorically.)
 
 ## How can I help the project?
 Just install it on your game server and report problems you faced.<br />

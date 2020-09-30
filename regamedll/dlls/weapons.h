@@ -441,6 +441,53 @@ public:	// new functions
 	void AK47Fire(float flSpread, float flCycleTime = (60.0f / AK47_RPM));
 };
 
+#define XM8_VIEW_MODEL	"models/weapons/v_xm8.mdl"
+#define XM8_WORLD_MODEL	"models/weapons/w_xm8.mdl"
+#define XM8_FIRE_SFX	"weapons/xm8/xm8_fire.wav"
+
+constexpr float XM8_MAX_SPEED = 240.0f;
+constexpr float XM8_DAMAGE = 32.0f;
+constexpr float XM8_RANGE_MODIFER = 0.96f;
+constexpr float XM8_RELOAD_TIME = 2.2F;
+constexpr float XM8_RELOAD_EMPTY_TIME = 3.033F;
+constexpr float XM8_DRAW_FIRST_TIME = 1.3F;
+constexpr float XM8_DRAW_TIME = 0.7F;
+constexpr float XM8_HOLSTER_TIME = 0.7F;
+constexpr float XM8_CHECKMAG_TIME = 2.2667F;
+constexpr float XM8_DASH_ENTER_TIME = 0.8F;
+constexpr float XM8_DASH_EXIT_TIME = 0.533F;
+constexpr float XM8_TO_SHARPSHOOTER_TIME = 8.8F;
+constexpr float XM8_TO_CARBIN_TIME = 8.8F;
+constexpr float XM8_RPM = 750.0f;
+constexpr int	XM8_PENETRATION = 2;
+constexpr float	XM8_EFFECTIVE_RANGE = 8192.0f;
+
+enum xm8_e
+{
+	XM8_IDLE = 0,
+	XM8_FIRE,
+	XM8_FIRE_LAST,
+	XM8_FIRE_AIM,
+	XM8_FIRE_AIM_LAST,
+	XM8_RELOAD,
+	XM8_RELOAD_EMPTY,
+	XM8_DRAW_FIRST,
+	XM8_DRAW,
+	XM8_HOLSTER,
+	XM8_CHECK_MAGAZINE,
+	XM8_SELECTOR_SEMI,
+	XM8_SELECTOR_AUTO,
+	XM8_BLOCK_UP,
+	XM8_BLOCK_DOWN,
+	XM8_LHAND_DOWN,
+	XM8_LHAND_UP,
+	XM8_DASH_ENTER,
+	XM8_DASH_IDLE,
+	XM8_DASH_EXIT,
+	XM8_SWITCH_TO_SHARPSHOOTER,
+	XM8_SWITCH_TO_CARBINE
+};
+
 #define ACR_VIEW_MODEL	"models/weapons/v_acr.mdl"
 #define ACR_WORLD_MODEL	"models/weapons/w_acr.mdl"
 #define ACR_FIRE_SFX	"weapons/acr/acr_fire.wav"
@@ -1245,6 +1292,53 @@ public:	// util funcs
 	virtual void	PushAnim		(void);
 	virtual void	PopAnim			(void);
 	virtual void	ResetModel		(void);
+};
+
+#define M45A1_VIEW_MODEL	"models/weapons/v_m45a1.mdl"
+#define M45A1_WORLD_MODEL	"models/weapons/w_m45a1.mdl"
+#define M45A1_FIRE_SFX		"weapons/m45a1/m45a1_fire.wav"
+
+constexpr float M45A1_MAX_SPEED = 250.0f;
+constexpr float M45A1_RELOAD_EMPYT_TIME = 2.6F;
+constexpr float M45A1_RELOAD_TIME = 2.167F;
+constexpr float M45A1_DRAW_FIRST_TIME = 1.067F;
+constexpr float M45A1_DRAW_TIME = 0.7F;
+constexpr float M45A1_HOLSTER_TIME = 0.5F;
+constexpr float M45A1_DASH_ENTER_TIME = 0.5333F;
+constexpr float M45A1_DASH_EXIT_TIME = 0.5333F;
+constexpr float M45A1_SH_RELOAD_EMPTY_TIME = 2.833F;
+constexpr float M45A1_SH_RELOAD_TIME = 2.1667F;
+constexpr float M45A1_SH_DASH_ENTER_TIME = 0.33333F;
+constexpr float M45A1_SH_DASH_EXIT_TIME = 0.65F;
+constexpr float M45A1_DAMAGE = 36.0f;
+constexpr float M45A1_RANGE_MODIFER = 0.75f;
+
+enum m45a1_e
+{
+	M45A1_IDLE = 0,
+	M45A1_SHOOT,
+	M45A1_SHOOT_LAST,
+	M45A1_AIM_SHOOT_A,
+	M45A1_AIM_SHOOT_B,
+	M45A1_AIM_SHOOT_LAST,
+	M45A1_RELOAD_EMPTY,
+	M45A1_RELOAD,
+	M45A1_DRAW_FIRST,
+	M45A1_DRAW,
+	M45A1_JUMP,
+	M45A1_HOLSTER,
+	M45A1_BLOCK_UP,
+	M45A1_BLOCK_DOWN,
+	M45A1_LHAND_DOWN,
+	M45A1_LHAND_UP,
+	M45A1_DASH_ENTER,
+	M45A1_DASH_IDLE,
+	M45A1_DASH_EXIT,
+	M45A1_SH_RELOAD_EMPTY,
+	M45A1_SH_RELOAD,
+	M45A1_SH_DASH_ENTER,
+	M45A1_SH_DASH_IDLE,
+	M45A1_SH_DASH_EXIT
 };
 
 #define P99_VIEW_MODEL	"models/weapons/v_p99.mdl"

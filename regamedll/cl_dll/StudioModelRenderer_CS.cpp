@@ -1111,7 +1111,8 @@ int R_StudioDrawModel(int flags)
 	{
 		// LUNA: fucking engine. when you apply anim via gEngfuncs.pfnWeaponAnim(), it secretly save a time without letting you know.
 		// then before the VMDL gets rendered, the engine suddenly re-apply this value back.
-		// this makes you cannot play VMDL anim halfway.
+		// this prevents you from start an anim from its half.
+		// however, this is the fix.
 		g_pViewEnt->curstate.animtime = g_flTimeViewModelAnimStart;
 	}
 

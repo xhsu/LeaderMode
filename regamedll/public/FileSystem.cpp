@@ -51,6 +51,14 @@ bool FileSystem_Init()
 	{
 		Sys_Error("Can not retrive filesystem interface version '" FILESYSTEM_INTERFACE_VERSION "'.");
 	}
+	else
+	{
+		// LUNA: add CZero and consequently, CStrike into resource lib.
+		// both client and server are required to do so.
+		// you have to write fallback_dir parameter in liblist.gam as well.
+		// check this link from Valve Inc.:https://developer.valvesoftware.com/wiki/IFileSystemV009
+		g_pFileSystem->AddSearchPath("czero", "GAME_FALLBACK");
+	}
 
 	return true;
 }

@@ -74,6 +74,14 @@ void CClientVGUI::Initialize(CreateInterfaceFn* factoryList, int count)
 	g_pVGuiLocalize = (vgui::ILocalize*)factoryList[1](VGUI_LOCALIZE_INTERFACE_VERSION, NULL);
 	g_pFileSystemInterface = (IFileSystem*)InitializeInterface(FILESYSTEM_INTERFACE_VERSION, factoryList, count);
 
+	if (FILE_SYSTEM)
+	{
+		// LUNA: add CZero and consequently, CStrike into resource lib.
+		// both client and server are required to do so.
+		// you have to write fallback_dir parameter in liblist.gam as well.
+		// check this link from Valve Inc.:https://developer.valvesoftware.com/wiki/IFileSystemV009
+		FILE_SYSTEM->AddSearchPath("czero", "GAME_FALLBACK");
+	}
 	/* UNDONE
 	if (!vgui::VGui_InitInterfacesList("ClientUI", factories, count))
 		return;
