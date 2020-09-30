@@ -80,7 +80,7 @@ void CClientVGUI::Initialize(CreateInterfaceFn* factoryList, int count)
 		// both client and server are required to do so.
 		// you have to write fallback_dir parameter in liblist.gam as well.
 		// check this link from Valve Inc.:https://developer.valvesoftware.com/wiki/IFileSystemV009
-		FILE_SYSTEM->AddSearchPath("czero", "GAME_FALLBACK");
+		/*FILE_SYSTEM->AddSearchPath("czero", "GAME_FALLBACK");*/
 	}
 	/* UNDONE
 	if (!vgui::VGui_InitInterfacesList("ClientUI", factories, count))

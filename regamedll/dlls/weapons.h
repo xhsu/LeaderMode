@@ -697,7 +697,7 @@ public:	// new functions
 };
 
 #define G18C_VIEW_MODEL		"models/weapons/v_glock18.mdl"
-#define G18C_WORLD_MODEL	"models/weapons/w_glock18.mdl"
+#define G18C_WORLD_MODEL	"models/w_glock18.mdl"	// FIXME
 #define G18C_FIRE_SFX		"weapons/glock18/glock18_fire.wav"
 
 constexpr float GLOCK18_MAX_SPEED		= 245.0f;
@@ -1371,7 +1371,7 @@ enum elite_e
 };
 
 #define FN57_VIEW_MODEL		"models/weapons/v_fiveseven.mdl"
-#define FN57_WORLD_MODEL	"models/weapons/w_fiveseven.mdl"
+#define FN57_WORLD_MODEL	"models/w_fiveseven.mdl"	// FIXME
 #define FN57_FIRE_SFX		"weapons/fiveseven/fiveseven_fire.wav"
 
 constexpr float FIVESEVEN_MAX_SPEED			= 250.0f;
@@ -1420,7 +1420,7 @@ public:	// new functions
 };
 
 #define UMP45_VIEW_MODEL	"models/weapons/v_ump45.mdl"
-#define UMP45_WORLD_MODEL	"models/weapons/w_ump45.mdl"
+#define UMP45_WORLD_MODEL	"models/w_ump45.mdl"	// FIXME
 #define UMP45_FIRE_SFX		"weapons/ump45/ump45_fire.wav"
 
 constexpr float UMP45_MAX_SPEED			= 250.0f;

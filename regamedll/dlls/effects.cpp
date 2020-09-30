@@ -2118,7 +2118,7 @@ LINK_ENTITY_TO_CLASS(ice_cube, CIceCube);
 CIceCube* CIceCube::Create(CBasePlayer* pPlayer)
 {
 	CIceCube* pEntity = GetClassPtr((CIceCube*)nullptr);
-	SET_MODEL(pEntity->edict(), "models/leadermode/ice_cube.mdl");
+	SET_MODEL(pEntity->edict(), "models/VFX/ice_cube.mdl");
 	SET_ORIGIN(pEntity->edict(), pPlayer->pev->origin + Vector(0, 0, -36));
 	SET_SIZE(pEntity->edict(), Vector(-32, -32, 0), Vector(32, 32, 80));
 	pEntity->pev->solid = SOLID_BBOX;
@@ -2136,7 +2136,7 @@ CIceCube* CIceCube::Create(CBasePlayer* pPlayer)
 
 void CIceCube::Precache()
 {
-	PRECACHE_MODEL("models/leadermode/ice_cube.mdl");
+	PRECACHE_MODEL("models/VFX/ice_cube.mdl");
 	PRECACHE_MODEL("sprites/lgtning.spr");
 	PRECACHE_SOUND(gFrozenDOTMgr::ICEGRE_NOVA_SFX);
 	PRECACHE_SOUND(gFrozenDOTMgr::ICEGRE_BREAKOUT_SFX);

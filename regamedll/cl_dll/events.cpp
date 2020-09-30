@@ -2021,7 +2021,7 @@ DECLARE_EVENT(CreateSmoke)
 DECLARE_EVENT(CryoExplo)
 {
 	const model_t* pGasModel = gEngfuncs.GetSpritePointer(gEngfuncs.pfnSPR_Load("sprites/gas_puff_01.spr"));
-	const model_t* pSnowModel = IEngineStudio.Mod_ForName("models/leadermode/snow.mdl", TRUE);
+	const model_t* pSnowModel = IEngineStudio.Mod_ForName("models/VFX/snow_particle.mdl", TRUE);
 	TEMPENTITY* pTemp = nullptr;
 
 	dlight_t* dl = gEngfuncs.pEfxAPI->CL_AllocDlight(0);

@@ -36,12 +36,12 @@ void CBaseSkill::Precache()
 	CSkillExplosiveBullets::m_rgidSmokeSprite[2] = PRECACHE_MODEL("sprites/black_smoke3.spr");
 	CSkillExplosiveBullets::m_rgidSmokeSprite[3] = PRECACHE_MODEL("sprites/black_smoke4.spr");
 
-	CSkillHealingShot::m_idHealingSpr = PRECACHE_MODEL("sprites/leadermode/heal.spr");
+	CSkillHealingShot::m_idHealingSpr = PRECACHE_MODEL("sprites/VFX/heal.spr");
 
-	CSkillIncendiaryAmmo::m_idSmokeTail = PRECACHE_MODEL("sprites/leadermode/FireSmoke.spr");
+	CSkillIncendiaryAmmo::m_idSmokeTail = PRECACHE_MODEL("sprites/VFX/FireSmoke.spr");
 	CSkillIncendiaryAmmo::m_idSpark = PRECACHE_MODEL("sprites/xspark4.spr");
 
-	m_idBulletTrace = PRECACHE_MODEL("sprites/leadermode/FireSmoke.spr");
+	m_idBulletTrace = PRECACHE_MODEL("sprites/VFX/FireSmoke.spr");
 }
 
 float CBaseSkill::GetHudPercentage() const

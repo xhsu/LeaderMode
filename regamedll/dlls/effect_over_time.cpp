@@ -588,7 +588,7 @@ void CIncendiaryGrenadeCentre::Precache()
 	PRECACHE_SOUND(FIRE_SFX_FADEOUT);
 	PRECACHE_SOUND_ARRAY(SCREAMS);
 
-	FLAME_SPR = PRECACHE_MODEL("sprites/leadermode/flame.spr");
+	FLAME_SPR = PRECACHE_MODEL("sprites/VFX/flame.spr");
 }
 
 void CIncendiaryGrenadeCentre::Think()
