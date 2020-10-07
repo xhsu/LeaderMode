@@ -1,10 +1,10 @@
 # Leader Mod
-Try [AMX Version](https://github.com/ShingekiNoRex/CS1.6-LeaderMode) before you decide to download this. The AMX version is utterly playable with almost same content.
+Try [AMX Version](https://github.com/ShingekiNoRex/CS1.6-LeaderMode) before you decide to download this. The AMX version is utterly playable with almost same contents.
 
 ## What is this?
 A gameplay mod originally wrote in Pawn(AmxModX).<br/>
-Assign roles to both CT and T, including skills.<br/>
-The goal is eliminate the other team. However, due to the redeployment mechanism, having their team leader killed is a quicker way.
+Exclusive roles will be assigned to each player in both teams. The roles mean unique skills, weapon limitations, and playstyles.<br/>
+The ultimate goal is to eliminate the other team. Use whatever strategies you want. Tips: kill their leader will stop their redeployment.
 
 ## How to install?
 1. You have to own copies of all these three games: [Half-Life](https://store.steampowered.com/app/70/HalfLife/), [Condition Zero](https://store.steampowered.com/app/80/CounterStrike_Condition_Zero/) and [Counter-Strike](https://store.steampowered.com/app/10/CounterStrike/).
@@ -41,14 +41,9 @@ The goal is eliminate the other team. However, due to the redeployment mechanism
 | UNDER CONSTRUCTION                 | :-----: | :-: | :----------: | :--------------------------------------------- |
 </details>
 
-## How to install zBot for CS 1.6?
-* Extract all the files from an [archive](regamedll/extra/zBot/bot_profiles.zip?raw=true)
-* Enter `-bots` option at the command line HLDS
-
 ### Credits
 * [ReGameDLL_CS](https://github.com/s1lentq/ReGameDLL_CS) (This mod was created on the basis of ReGameDLL_CS)
 * [Metahook](https://github.com/nagist/metahook) (A total game changer. Literally and metaphorically.)
 
 ## How can I help the project?
-Just install it on your game server and report problems you faced.<br />
-Merge requests are also welcome :shipit:
+Just try it and contact me if you have anything to say.
