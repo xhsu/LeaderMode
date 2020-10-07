@@ -161,9 +161,9 @@ void gOverHealingMgr::Think(CBasePlayer* pPlayer)
 // FROZEN //
 ////////////
 
-const char* gFrozenDOTMgr::ICEGRE_NOVA_SFX = "weapons/frostnova.wav";
-const char* gFrozenDOTMgr::ICEGRE_FLESH_SFX = "weapons/impalehit.wav";
-const char* gFrozenDOTMgr::ICEGRE_BREAKOUT_SFX = "weapons/impalelaunch1.wav";
+const char* gFrozenDOTMgr::ICEGRE_NOVA_SFX = "weapons/Cryogrenade/frostnova.wav";
+const char* gFrozenDOTMgr::ICEGRE_FLESH_SFX = "weapons/Cryogrenade/impalehit.wav";
+const char* gFrozenDOTMgr::ICEGRE_BREAKOUT_SFX = "weapons/Cryogrenade/impalelaunch1.wav";
 const int gFrozenDOTMgr::ICE_BLOOD_COLOUR = 45;
 
 void gFrozenDOTMgr::Set(CBasePlayer* pPlayer, int iDamage, entvars_t* pevInflictor, entvars_t* pevAttacker, float flFreezeTime)

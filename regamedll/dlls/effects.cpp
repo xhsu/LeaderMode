@@ -2113,7 +2113,7 @@ void CInfoIntermission::Think()
 	}
 }
 
-LINK_ENTITY_TO_CLASS(ice_cube, CIceCube);
+LINK_ENTITY_TO_CLASS(ice_cube, CIceCube)
 
 CIceCube* CIceCube::Create(CBasePlayer* pPlayer)
 {

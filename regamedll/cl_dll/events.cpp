@@ -589,10 +589,13 @@ void EV_HLDM_CreateSmoke(float* origin, float* dir, int speed, float scale, int 
 		{
 		case 0:
 			model_index = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/rifle_smoke1.spr");
+			break;
 		case 1:
 			model_index = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/rifle_smoke2.spr");
+			break;
 		case 2:
 			model_index = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/rifle_smoke3.spr");
+			break;
 		}
 		break;
 	}
