@@ -55,7 +55,7 @@ inline char *CloneString(const char *str)
 	}
 
 	char *cloneStr = new char [Q_strlen(str) + 1];
-	Q_strcpy(cloneStr, str);
+	strcpy(cloneStr, str);	// LUNA: strcpy_s is confirmed not used here.
 	return cloneStr;
 }
 
@@ -87,3 +87,6 @@ struct BodyEnumInfo_t
 };
 
 int CalcBody(BodyEnumInfo_t* info, int count);
+template<size_t N> int CalcBody(BodyEnumInfo_t (&info)[N]);
+
+#define ARRAY_ELEM_COUNT(arr)	sizeof(arr) / sizeof(arr[0])

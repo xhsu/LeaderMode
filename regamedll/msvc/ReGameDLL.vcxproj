@@ -264,13 +264,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Play|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tests|Win32'">false</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\dlls\wpn_shared\wpn_acr.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Play|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Play|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tests|Win32'">false</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\dlls\wpn_shared\wpn_awp.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
@@ -426,6 +419,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Play|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tests|Win32'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\dlls\wpn_shared\wpn_xm8.cpp" />
     <ClCompile Include="..\engine\unicode_strtools.cpp" />
     <ClCompile Include="..\game_shared\bot\bot.cpp" />
     <ClCompile Include="..\game_shared\bot\bot_manager.cpp" />
@@ -795,7 +789,7 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisRules />
     <CodeAnalysisRuleAssemblies />
-    <OutDir>C:\Program Files (x86)\Steam\steamapps\common\Half-Life\leadermode\dlls\</OutDir>
+    <OutDir>E:\SteamLibrary\steamapps\common\Half-Life\leadermode\dlls\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <TargetName>mp</TargetName>
@@ -803,7 +797,7 @@
     <CodeAnalysisRules />
     <CodeAnalysisRuleAssemblies />
     <LinkIncremental />
-    <OutDir>C:\Program Files (x86)\Steam\steamapps\common\Half-Life\leadermode\dlls\</OutDir>
+    <OutDir>E:\SteamLibrary\steamapps\common\Half-Life\leadermode\dlls\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Play|Win32'">
     <TargetName>mp</TargetName>
@@ -811,21 +805,21 @@
     <CodeAnalysisRules />
     <CodeAnalysisRuleAssemblies />
     <LinkIncremental />
-    <OutDir>C:\Program Files (x86)\Steam\steamapps\common\Half-Life\leadermode\dlls\</OutDir>
+    <OutDir>E:\SteamLibrary\steamapps\common\Half-Life\leadermode\dlls\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Play|Win32'">
     <TargetName>mp</TargetName>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisRules />
     <CodeAnalysisRuleAssemblies />
-    <OutDir>C:\Program Files (x86)\Steam\steamapps\common\Half-Life\leadermode\dlls\</OutDir>
+    <OutDir>E:\SteamLibrary\steamapps\common\Half-Life\leadermode\dlls\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Tests|Win32'">
     <TargetName>mp</TargetName>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisRules />
     <CodeAnalysisRuleAssemblies />
-    <OutDir>C:\Program Files (x86)\Steam\steamapps\common\Half-Life\leadermode\dlls\</OutDir>
+    <OutDir>E:\SteamLibrary\steamapps\common\Half-Life\leadermode\dlls\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <PreBuildEvent>

@@ -27,6 +27,10 @@ Modern Warfare Dev Team
 #include <gl/GL.h>
 #include <gl/GLU.h>
 
+// dxt
+#define FILE_SYSTEM	g_pInterface->FileSystem
+#include "../cl_dll/Graph/dxt.h"
+
 // for studiohdr_t and STUDIO_NF_FULLBRIGHT
 #include "../engine/studio.h"
 

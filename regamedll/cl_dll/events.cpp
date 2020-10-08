@@ -1031,7 +1031,7 @@ DECLARE_EVENT(FireAK47)
 	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, AK47_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_AK47].m_iAmmoType, AK47_PENETRATION);
 }
 
-DECLARE_EVENT(FireACR)
+DECLARE_EVENT(FireXM8)
 {
 	int idx = args->entindex;
 
@@ -1051,8 +1051,19 @@ DECLARE_EVENT(FireACR)
 		g_iShotsFired++;
 		EV_MuzzleFlash();
 
+		int iAnim = XM8_FIRE;
+		if (args->bparam2)	// m_bInZoom
+		{
+			iAnim = XM8_FIRE_AIM;
+
+			if (args->bparam1)	// !!(m_iClip <= 0)
+				iAnim = XM8_FIRE_AIM_LAST;
+		}
+		else if (args->bparam1)	// !!(m_iClip <= 0)
+			iAnim = XM8_FIRE_LAST;
+
 		if (g_pCurWeapon)
-			g_pCurWeapon->SendWeaponAnim(UTIL_SharedRandomLong(gPseudoPlayer.random_seed, ACR_SHOOT1, ACR_SHOOT3));
+			g_pCurWeapon->SendWeaponAnim(iAnim);
 
 		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 3, 0.26, 15, 15, 15, EV_RIFLE_SMOKE, velocity, false, 35);
 	}
@@ -1074,12 +1085,12 @@ DECLARE_EVENT(FireACR)
 
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iRShell, TE_BOUNCE_SHELL, 8);
 
-	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, ACR_FIRE_SFX, 1.0, 0.48, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
+	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, XM8_FIRE_SFX, 1.0, 0.48, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
 
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
-	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, ACR_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_ACR].m_iAmmoType, ACR_PENETRATION);
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, XM8_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_XM8].m_iAmmoType, XM8_PENETRATION);
 }
 
 DECLARE_EVENT(FireAWP)
@@ -2278,7 +2289,6 @@ DECLARE_EVENT(FireCM901)
 void Events_Init(void)
 {
 	HOOK_EVENT(ak47, FireAK47);
-	HOOK_EVENT(acr, FireACR);
 	HOOK_EVENT(awp, FireAWP);
 	HOOK_EVENT(deagle, FireDEagle);
 	HOOK_EVENT(elite_left, FireEliteLeft);
@@ -2303,6 +2313,7 @@ void Events_Init(void)
 	HOOK_EVENT(ump45, FireUMP45);
 	HOOK_EVENT(usp, FireUSP);
 	HOOK_EVENT(m1014, FireM1014);
+	HOOK_EVENT(xm8, FireXM8);
 
 	HOOK_EVENT(createexplo, CreateExplo);
 	HOOK_EVENT(createsmoke, CreateSmoke);

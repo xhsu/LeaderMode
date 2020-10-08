@@ -63,7 +63,7 @@ void CDEagle::SecondaryAttack()
 
 	if (!g_vecGunOfsGoal.LengthSquared())
 	{
-		g_vecGunOfsGoal = Vector(-6.18f, -5.0f, 0.6f);
+		g_vecGunOfsGoal = Vector(-1.93f, -0.5f, 0.15f);
 		gHUD::m_iFOV = 85;	// allow clients to predict the zoom.
 	}
 	else

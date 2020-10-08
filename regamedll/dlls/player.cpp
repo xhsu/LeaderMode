@@ -1020,7 +1020,7 @@ BOOL CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 
 			switch (iGunType)
 			{
-			case WEAPON_ACR:
+			case WEAPON_XM8:
 			case WEAPON_M4A1:		flRatio *= 1.4;  break;
 			case WEAPON_AWP:		flRatio *= 1.95; break;
 			case WEAPON_SVD:		flRatio *= 1.65; break;
@@ -6823,7 +6823,7 @@ BOOL CBasePlayer::ShouldDoLargeFlinch(int nHitGroup, int nGunType)
 		switch (nGunType)
 		{
 		case WEAPON_M200:
-		case WEAPON_ACR:
+		case WEAPON_XM8:
 		case WEAPON_M14EBR:
 		case WEAPON_CM901:
 		case WEAPON_QBZ95:

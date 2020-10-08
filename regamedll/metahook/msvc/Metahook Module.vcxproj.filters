@@ -8,6 +8,12 @@
     <Filter Include="common">
       <UniqueIdentifier>{45860301-291f-4a65-8d88-65fbb25b2ebf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="cl_dll">
+      <UniqueIdentifier>{10def174-8a0b-428b-9fac-7894a3e81614}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cl_dll\Graph">
+      <UniqueIdentifier>{f0fb44e4-eb31-41cb-9210-ebaf77824663}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\precompiled.cpp">
@@ -24,6 +30,9 @@
     </ClCompile>
     <ClCompile Include="..\fullbright_textures.cpp">
       <Filter>metahook</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\cl_dll\Graph\dxt.cpp">
+      <Filter>cl_dll\Graph</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -44,6 +53,9 @@
     </ClInclude>
     <ClInclude Include="..\fullbright_textures.h">
       <Filter>metahook</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\cl_dll\Graph\dxt.h">
+      <Filter>cl_dll\Graph</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -208,6 +208,9 @@ public:	// basic logic funcs
 public:	// SV exclusive functions.
 	virtual void	UpdateClientData(void);
 	virtual void	Precache		(void) {}
+#else
+public:	// CL xclusive functions.
+	virtual	bool	UsingInvertedVMDL(void) { return true; }	// by default, original CS/CZ vmdls are inverted displaying.
 #endif
 
 public:	// basic API and behaviour for weapons.
@@ -443,24 +446,24 @@ public:	// new functions
 
 #define XM8_VIEW_MODEL	"models/weapons/v_xm8.mdl"
 #define XM8_WORLD_MODEL	"models/weapons/w_xm8.mdl"
-#define XM8_FIRE_SFX	"weapons/xm8/xm8_fire.wav"
+#define XM8_FIRE_SFX	"weapons/xm8/xm8_shoot.wav"
 
-constexpr float XM8_MAX_SPEED = 240.0f;
-constexpr float XM8_DAMAGE = 32.0f;
-constexpr float XM8_RANGE_MODIFER = 0.96f;
-constexpr float XM8_RELOAD_TIME = 2.2F;
-constexpr float XM8_RELOAD_EMPTY_TIME = 3.033F;
-constexpr float XM8_DRAW_FIRST_TIME = 1.3F;
-constexpr float XM8_DRAW_TIME = 0.7F;
-constexpr float XM8_HOLSTER_TIME = 0.7F;
-constexpr float XM8_CHECKMAG_TIME = 2.2667F;
-constexpr float XM8_DASH_ENTER_TIME = 0.8F;
-constexpr float XM8_DASH_EXIT_TIME = 0.533F;
-constexpr float XM8_TO_SHARPSHOOTER_TIME = 8.8F;
-constexpr float XM8_TO_CARBIN_TIME = 8.8F;
-constexpr float XM8_RPM = 750.0f;
-constexpr int	XM8_PENETRATION = 2;
-constexpr float	XM8_EFFECTIVE_RANGE = 8192.0f;
+constexpr float XM8_MAX_SPEED				= 240.0f;
+constexpr float XM8_DAMAGE					= 32.0f;
+constexpr float XM8_RANGE_MODIFER			= 0.96f;
+constexpr float XM8_RELOAD_TIME				= 2.2F;
+constexpr float XM8_RELOAD_EMPTY_TIME		= 3.033F;
+constexpr float XM8_DRAW_FIRST_TIME			= 1.3F;
+constexpr float XM8_DRAW_TIME				= 0.7F;
+constexpr float XM8_HOLSTER_TIME			= 0.7F;
+constexpr float XM8_CHECKMAG_TIME			= 2.2667F;
+constexpr float XM8_DASH_ENTER_TIME			= 0.8F;
+constexpr float XM8_DASH_EXIT_TIME			= 0.533F;
+constexpr float XM8_TO_SHARPSHOOTER_TIME	= 8.8F;
+constexpr float XM8_TO_CARBIN_TIME			= 8.8F;
+constexpr float XM8_RPM						= 800.0f;
+constexpr int	XM8_PENETRATION				= 2;
+constexpr float	XM8_EFFECTIVE_RANGE			= 8192.0f;
 
 enum xm8_e
 {
@@ -482,35 +485,13 @@ enum xm8_e
 	XM8_LHAND_DOWN,
 	XM8_LHAND_UP,
 	XM8_DASH_ENTER,
-	XM8_DASH_IDLE,
+	XM8_DASHING,
 	XM8_DASH_EXIT,
 	XM8_SWITCH_TO_SHARPSHOOTER,
 	XM8_SWITCH_TO_CARBINE
 };
 
-#define ACR_VIEW_MODEL	"models/weapons/v_acr.mdl"
-#define ACR_WORLD_MODEL	"models/weapons/w_acr.mdl"
-#define ACR_FIRE_SFX	"weapons/acr/acr_fire.wav"
-
-constexpr float ACR_MAX_SPEED		= 240.0f;
-constexpr float ACR_DAMAGE			= 32.0f;
-constexpr float ACR_RANGE_MODIFER	= 0.96f;
-constexpr float ACR_RELOAD_TIME		= 3.2f;
-constexpr float ACR_RPM				= 750.0f;
-constexpr int	ACR_PENETRATION		= 2;
-constexpr float	ACR_EFFECTIVE_RANGE	= 8192.0f;
-
-enum acr_e
-{
-	ACR_IDLE1,
-	ACR_RELOAD,
-	ACR_DRAW,
-	ACR_SHOOT1,
-	ACR_SHOOT2,
-	ACR_SHOOT3,
-};
-
-class CACR : public CBaseWeapon
+class CXM8 : public CBaseWeapon
 {
 #ifndef CLIENT_DLL
 public:	// SV exclusive variables.
@@ -518,22 +499,30 @@ public:	// SV exclusive variables.
 	static int m_iShell;
 
 public:	// SV exclusive functions.
-	virtual void	Precache		(void);
+	virtual void	Precache(void);
+#else
+public:	// CL exclusive functions.
+	virtual void	Think(void);
+	virtual	bool	UsingInvertedVMDL(void) { return false; }	// Model designed by InnocentBlue is not inverted.
 #endif
 
 public:	// basic logic funcs
-	virtual bool	Deploy			(void);
-	virtual void	PrimaryAttack	(void);
-	virtual void	SecondaryAttack	(void);
-	virtual bool	Reload			(void);
-	virtual void	WeaponIdle		(void);
+	virtual bool	Deploy(void);
+	virtual void	PrimaryAttack(void);
+	virtual void	SecondaryAttack(void);
+	virtual bool	Reload(void);
+	virtual void	WeaponIdle(void);
+	virtual bool	HolsterStart(void);
+	virtual	void	DashStart(void);
+	virtual void	DashEnd(void);
 
 public:	// util funcs
-	virtual	float	GetMaxSpeed		(void) { return ACR_MAX_SPEED; }
-	virtual void	ResetModel		(void);
+	virtual	float	GetMaxSpeed(void) { return XM8_MAX_SPEED; }
+	virtual void	ResetModel(void);
+	virtual int		CalcBodyParam(void);
 
 public:	// new functions
-	void ACRFire(float flSpread, float flCycleTime = (60.0f / ACR_RPM));
+	void XM8Fire(float flSpread, float flCycleTime = (60.0f / XM8_RPM));
 };
 
 #define AWP_VIEW_MODEL	"models/weapons/v_awp.mdl"
@@ -619,6 +608,9 @@ public:	// SV exclusive variables.
 
 public:	// SV exclusive functions.
 	virtual void	Precache		(void);
+#else
+public:	// CL exclusive functions.
+	virtual	bool	UsingInvertedVMDL(void) { return false; }	// Model designed by InnocentBlue is not inverted.
 #endif
 
 public:	// basic logic funcs

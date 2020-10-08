@@ -1061,10 +1061,10 @@ int USENTENCEG_PickSequential(int isentenceg, char *szfound, int ipick, int fres
 	if (ipick >= count)
 		ipick = count - 1;
 
-	Q_strcpy(szfound, "!");
-	Q_strcat(szfound, szgroupname);
+	strcpy(szfound, "!");	// LUNA: strcpy_s is confirmed not used here.
+	strcat(szfound, szgroupname);	// LUNA: confirmed strcat() use.
 	Q_snprintf(sznum, sizeof(sznum), "%d", ipick);
-	Q_strcat(szfound, sznum);
+	strcat(szfound, sznum);
 
 	if (ipick >= count)
 	{
@@ -1119,10 +1119,10 @@ int USENTENCEG_Pick(int isentenceg, char *szfound)
 
 		if (ffound)
 		{
-			Q_strcpy(szfound, "!");
-			Q_strcat(szfound, szgroupname);
+			strcpy(szfound, "!");	// LUNA: strcpy_s is confirmed not used here.
+			strcat(szfound, szgroupname);	// LUNA: confirmed strcat() use.
 			Q_snprintf(sznum, sizeof(sznum), "%d", ipick);
-			Q_strcat(szfound, sznum);
+			strcat(szfound, sznum);
 
 			return ipick;
 		}
@@ -1394,9 +1394,9 @@ int SENTENCEG_Lookup(const char *sample, char *sentencenum)
 		{
 			if (sentencenum)
 			{
-				Q_strcpy(sentencenum, "!");
+				strcpy(sentencenum, "!");	// LUNA: strcpy_s is confirmed not used here.
 				Q_snprintf(sznum, sizeof(sznum), "%d", i);
-				Q_strcat(sentencenum, sznum);
+				strcat(sentencenum, sznum);	// LUNA: confirmed strcat() use.
 			}
 
 			return i;
@@ -1576,7 +1576,7 @@ void TEXTURETYPE_Init()
 		j = Q_min(j, MAX_TEXTURENAME_LENGHT - 1 + i);
 		buffer[j] = '\0';
 
-		Q_strcpy(&(grgszTextureName[gcTextures++][0]), &(buffer[i]));
+		strcpy(&(grgszTextureName[gcTextures++][0]), &(buffer[i]));	// LUNA: strcpy_s is confirmed not used here.
 	}
 
 	FREE_FILE(pMemFile);

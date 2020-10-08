@@ -135,7 +135,7 @@ void WeaponsPrecache()
 
 	UTIL_PrecacheOtherWeapon(WEAPON_M4A1);
 	UTIL_PrecacheOtherWeapon(WEAPON_SCARH);
-	UTIL_PrecacheOtherWeapon(WEAPON_ACR);
+	UTIL_PrecacheOtherWeapon(WEAPON_XM8);
 	UTIL_PrecacheOtherWeapon(WEAPON_M14EBR);
 	UTIL_PrecacheOtherWeapon(WEAPON_CM901);
 	UTIL_PrecacheOtherWeapon(WEAPON_QBZ95);
@@ -275,10 +275,6 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 
 	switch (iId)
 	{
-	case WEAPON_ACR:
-		p = new CACR;
-		break;
-
 	case WEAPON_AK47:
 		p = new CAK47;
 		break;
@@ -345,6 +341,10 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 
 	case WEAPON_USP:
 		p = new CUSP;
+		break;
+
+	case WEAPON_XM8:
+		p = new CXM8;
 		break;
 
 	default:

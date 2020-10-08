@@ -316,3 +316,41 @@ int CalcBody(BodyEnumInfo_t* info, int count)
 
 	return 0;
 }
+
+template<size_t N>
+int CalcBody(BodyEnumInfo_t (&info)[N])
+{
+	int		body = 0;
+	int		base;
+	bool	valid;
+
+	if (N <= 0)
+		return 0;
+
+	do
+	{
+		valid = true;
+
+		for (int i = 0; i < N; i++)
+		{
+			if (i)
+				base *= info[i - 1].nummodels;
+			else
+				base = 1;
+
+			if (body / base % info[i].nummodels != info[i].body)
+			{
+				valid = false;
+				break;
+			}
+		}
+
+		if (valid)
+			return body;
+
+		body++;
+	}
+	while (body <= 2147483647);	// originally: 255
+
+	return 0;
+}

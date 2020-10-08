@@ -3580,13 +3580,13 @@ void ExtractCommandString(char *s, char *szCommand)
 
 		*c = '\0';
 
-		Q_strcat(szCommand, pkey);
+		strcat(szCommand, pkey);	// LUNA: confirmed strcat() call.
 		if (Q_strlen(value) > 0)
 		{
-			Q_strcat(szCommand, " ");
-			Q_strcat(szCommand, value);
+			strcat(szCommand, " ");
+			strcat(szCommand, value);
 		}
-		Q_strcat(szCommand, "\n");
+		strcat(szCommand, "\n");
 
 		/*if (!*s)
 		{

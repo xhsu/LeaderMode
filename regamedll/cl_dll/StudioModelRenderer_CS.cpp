@@ -1114,6 +1114,10 @@ int R_StudioDrawModel(int flags)
 		// this prevents you from start an anim from its half.
 		// however, this is the fix.
 		g_pViewEnt->curstate.animtime = g_flTimeViewModelAnimStart;
+
+		// special treatment for certain weapons.
+		if (g_pCurWeapon)
+			gEngfuncs.Cvar_SetValue("cl_righthand", g_pCurWeapon->UsingInvertedVMDL());
 	}
 
 	return g_StudioRenderer.StudioDrawModel(flags);

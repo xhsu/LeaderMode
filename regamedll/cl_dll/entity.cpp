@@ -270,12 +270,12 @@ void HUD_StudioEvent2(const mstudioevent_s* pEvent, const cl_entity_s* pEntity)
 
 		// Client side sound
 	case 5004:
-		//gEngfuncs.pfnPlaySoundByName((char*)pEvent->options, VOL_NORM);	// no more engine sound API.
+		gEngfuncs.pfnPlaySoundByName((char*)pEvent->options, VOL_NORM);	// no more engine sound API.
 
-		char szFilePath[128];
-		Q_snprintf(szFilePath, charsmax(szFilePath), "sound/%s", pEvent->options);
+		//char szFilePath[128];
+		//Q_snprintf(szFilePath, charsmax(szFilePath), "sound/%s", pEvent->options);
 
-		PlaySoundViaWinmm(szFilePath);
+		//PlaySoundViaWinmm(szFilePath);
 		break;
 
 	default:

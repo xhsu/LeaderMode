@@ -4308,7 +4308,7 @@ int EXT_FUNC InconsistentFile(const edict_t *pEdict, const char *filename, char 
 		return 0;
 
 	// Default behavior is to kick the player
-	Q_sprintf(disconnect_message, "Server is enforcing file consistency for %s\n", filename);
+	sprintf(disconnect_message, "Server is enforcing file consistency for %s\n", filename);	// LUNA: confirmed usage of sprintf().
 
 	// Kick now with specified disconnect message.
 	return 1;
