@@ -62,7 +62,7 @@ int CHudScoreboard::VidInit(void)
 	m_pwszTeamName[TEAM_TERRORIST] = VGUI_LOCALISE->Find("#Cstrike_ScoreBoard_Ter");
 	m_pwszTeamName[TEAM_SPECTATOR] = VGUI_LOCALISE->Find("#Cstrike_TitlesTXT_Spectators");
 	m_pwszPlayerCalled = VGUI_LOCALISE->Find("#Cstrike_TitlesTXT_Player_plural");
-	m_pwszDeathCalled = VGUI_LOCALISE->Find("#Cstrike_TitlesTXT_DEAD");
+	m_pwszDeathCalled = VGUI_LOCALISE->Find("#LeaderMod_SBE_KIA");
 	m_pwcTeamWinsText = VGUI_LOCALISE->Find("#Cstrike_TitlesTXT_WINS");
 
 	if (!m_pwszTeamName[TEAM_CT])
@@ -78,7 +78,7 @@ int CHudScoreboard::VidInit(void)
 		m_pwszPlayerCalled = L"#Cstrike_TitlesTXT_Player_plural";
 
 	if (!m_pwszDeathCalled)
-		m_pwszDeathCalled = L"#Cstrike_TitlesTXT_DEAD";
+		m_pwszDeathCalled = L"#LeaderMod_SBE_KIA";
 
 	if (!m_pwcTeamWinsText)
 		m_pwcTeamWinsText = L"#Cstrike_TitlesTXT_WINS";
@@ -155,8 +155,8 @@ int CHudScoreboard::Draw(float flTime)
 	gFontFuncs.DrawSetTextColor(173, 201, 235, 255);	// colour of CT.
 	gFontFuncs.DrawPrintText(wszText);
 
-	float x2 = x + m_flChunkOffset;
-	for (int i = 2; i < 8; i++)
+	float x2 = x + m_flChunkOffset * 2; // starts from column #3, "MONEY".
+	for (int i = 3; i < 8; i++)
 	{
 		x2 += m_flChunkOffset;
 		gFontFuncs.DrawSetTextFont(m_hPlayerNameFont);
@@ -198,7 +198,8 @@ int CHudScoreboard::Draw(float flTime)
 		gFontFuncs.DrawPrintText(wszText);
 
 		// 1. Classes
-		x2 = x + m_flChunkOffset;
+		// since we are no longer showing HP, use a bit its spaces.
+		x2 = x + m_flChunkOffset * 1.5f;
 		if (g_PlayerExtraInfo[i].m_iTeam == g_iTeamNumber || g_iTeamNumber == TEAM_SPECTATOR)
 		{
 			gFontFuncs.DrawSetTextPos(x2, y);
@@ -206,13 +207,14 @@ int CHudScoreboard::Draw(float flTime)
 		}
 
 		// 2. HP
-		x2 += m_flChunkOffset;
-		if (g_PlayerExtraInfo[i].m_iTeam == g_iTeamNumber || g_iTeamNumber == TEAM_SPECTATOR)
+		// (placeholder)
+		x2 += m_flChunkOffset * 0.5f;
+		/*if (g_PlayerExtraInfo[i].m_iTeam == g_iTeamNumber || g_iTeamNumber == TEAM_SPECTATOR)
 		{
 			_snwprintf(wszText, wcharsmax(wszText), L"%d", g_PlayerExtraInfo[i].m_iHealth);
 			gFontFuncs.DrawSetTextPos(x2, y);
 			gFontFuncs.DrawPrintText(wszText);
-		}
+		}*/
 
 		// 3. Money
 		x2 += m_flChunkOffset;
@@ -262,8 +264,8 @@ int CHudScoreboard::Draw(float flTime)
 	gFontFuncs.DrawSetTextColor(216, 81, 80, 255);	// colour of T.
 	gFontFuncs.DrawPrintText(wszText);
 
-	x2 = x + m_flChunkOffset;
-	for (int i = 2; i < 8; i++)
+	x2 = x + m_flChunkOffset * 2; // starts from column #3, "MONEY".
+	for (int i = 3; i < 8; i++)
 	{
 		x2 += m_flChunkOffset;
 		gFontFuncs.DrawSetTextFont(m_hPlayerNameFont);
@@ -304,7 +306,8 @@ int CHudScoreboard::Draw(float flTime)
 		gFontFuncs.DrawPrintText(wszText);
 
 		// 1. Classes
-		x2 = x + m_flChunkOffset;
+		// since we are no longer showing HP, use a bit its spaces.
+		x2 = x + m_flChunkOffset * 1.5f;
 		if (g_PlayerExtraInfo[i].m_iTeam == g_iTeamNumber || g_iTeamNumber == TEAM_SPECTATOR)
 		{
 			_snwprintf(wszText, wcharsmax(wszText), L"%d", g_PlayerExtraInfo[i].m_iRoleType);
@@ -313,13 +316,14 @@ int CHudScoreboard::Draw(float flTime)
 		}
 
 		// 2. HP
-		x2 += m_flChunkOffset;
-		if (g_PlayerExtraInfo[i].m_iTeam == g_iTeamNumber || g_iTeamNumber == TEAM_SPECTATOR)
+		// (placeholder)
+		x2 += m_flChunkOffset * 0.5f;
+		/*if (g_PlayerExtraInfo[i].m_iTeam == g_iTeamNumber || g_iTeamNumber == TEAM_SPECTATOR)
 		{
 			_snwprintf(wszText, wcharsmax(wszText), L"%d", g_PlayerExtraInfo[i].m_iHealth);
 			gFontFuncs.DrawSetTextPos(x2, y);
 			gFontFuncs.DrawPrintText(wszText);
-		}
+		}*/
 
 		// 3. Money
 		x2 += m_flChunkOffset;

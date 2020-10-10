@@ -2825,6 +2825,11 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 
 				BuyWeapon(pPlayer, iId);
 			}
+			else if (FStrEq(pcmd, "changemode"))
+			{
+				if (pPlayer->m_pActiveItem)
+					pPlayer->m_pActiveItem->AlterAct();
+			}
 			else
 			{
 				if (HandleRadioAliasCommands(pPlayer, pcmd))

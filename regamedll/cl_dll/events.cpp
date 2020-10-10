@@ -1155,12 +1155,7 @@ DECLARE_EVENT(FireDEagle)
 		EV_MuzzleFlash();
 
 		if (g_pCurWeapon)
-		{
-			if (empty)
-				g_pCurWeapon->SendWeaponAnim(DEAGLE_SHOOT_EMPTY, 2);
-			else
-				g_pCurWeapon->SendWeaponAnim(UTIL_SharedRandomLong(gPseudoPlayer.random_seed, DEAGLE_SHOOT1, DEAGLE_SHOOT2));
-		}
+				g_pCurWeapon->SendWeaponAnim(empty ? DEAGLE_SHOOT_EMPTY : DEAGLE_SHOOT);
 
 		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 0, 0.25, 10, 10, 10, EV_PISTOL_SMOKE, velocity, false, 35);
 		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 25, 0.3, 15, 15, 15, EV_WALL_PUFF, velocity, false, 35);

@@ -240,6 +240,7 @@ void gHUD::Init(void)
 	gEngfuncs.pfnAddCommand("lastinv", CommandFunc_SelectLastItem);
 	gEngfuncs.pfnAddCommand("eqpnext", CommandFunc_NextEquipment);
 	gEngfuncs.pfnAddCommand("eqpprev", CommandFunc_PrevEquipment);
+	gEngfuncs.pfnAddCommand("changemode", CommandFunc_AlterAct);
 }
 
 void gHUD::Shutdown(void)
@@ -985,7 +986,7 @@ void CommandFunc_SelectLastItem(void)	// an equivlent function of void CBasePlay
 
 LAB_LASTINV_END:
 	// don't forget to forward this command to SV.
-	gEngfuncs.pfnServerCmd("lastinv");
+	gEngfuncs.pfnServerCmd("lastinv\n");
 }
 
 void CommandFunc_NextEquipment(void)
@@ -1066,6 +1067,13 @@ void CommandFunc_PrevEquipment(void)
 
 	gPseudoPlayer.m_iUsingGrenadeId = iCandidate;
 	gEngfuncs.pfnServerCmd(SharedVarArgs("eqpselect %d\n", iCandidate));
+}
+
+void CommandFunc_AlterAct(void)
+{
+	// only pass to server when it is allowed in client.
+	if (g_pCurWeapon && g_pCurWeapon->AlterAct())
+		gEngfuncs.pfnServerCmd("changemode\n");
 }
 
 /*

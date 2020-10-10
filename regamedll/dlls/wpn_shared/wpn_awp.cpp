@@ -57,7 +57,7 @@ void CAWP::SecondaryAttack()
 
 #ifdef CLIENT_DLL
 		// zoom out anim.
-		g_vecGunOfsGoal = Vector();
+		g_vecGunOfsGoal = g_vecZero;
 
 		// manually set fade.
 		gHUD::m_SniperScope.SetFadeFromBlack(5.0f, 0);

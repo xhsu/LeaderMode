@@ -213,6 +213,12 @@ void CM4A1::M4A1Fire(float flSpread, float flCycleTime)
 	}
 }
 
+void CM4A1::WeaponIdle()
+{
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
+	SendWeaponAnim((m_bitsFlags & WPNSTATE_DASHING) ? M4A1_DASHING : M4A1_IDLE);
+}
+
 bool CM4A1::Reload()
 {
 	if (DefaultReload(m_pItemInfo->m_iMaxClip, m_iClip ? M4A1_RELOAD : M4A1_RELOAD_EMPTY, m_iClip ? M4A1_RELOAD_TIME : M4A1_RELOAD_EMPTY_TIME))
@@ -232,12 +238,6 @@ bool CM4A1::Reload()
 	}
 
 	return false;
-}
-
-void CM4A1::WeaponIdle()
-{
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
-	SendWeaponAnim((m_bitsFlags & WPNSTATE_DASHING) ? M4A1_DASHING : M4A1_IDLE);
 }
 
 bool CM4A1::HolsterStart(void)

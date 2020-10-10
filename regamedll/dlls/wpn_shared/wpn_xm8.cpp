@@ -226,6 +226,12 @@ void CXM8::XM8Fire(float flSpread, float flCycleTime)
 	}
 }
 
+void CXM8::WeaponIdle()
+{
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
+	SendWeaponAnim((m_bitsFlags & WPNSTATE_DASHING) ? XM8_DASHING : XM8_IDLE);
+}
+
 bool CXM8::Reload()
 {
 	if (DefaultReload(m_pItemInfo->m_iMaxClip, m_iClip ? XM8_RELOAD : XM8_RELOAD_EMPTY, m_iClip ? XM8_RELOAD_TIME : XM8_RELOAD_EMPTY_TIME))
@@ -247,10 +253,17 @@ bool CXM8::Reload()
 	return false;
 }
 
-void CXM8::WeaponIdle()
+bool CXM8::AlterAct(void)
 {
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
-	SendWeaponAnim((m_bitsFlags & WPNSTATE_DASHING) ? XM8_DASHING : XM8_IDLE);
+	if (m_bitsFlags & WPNSTATE_BUSY)
+		return false;
+
+	SendWeaponAnim(m_iVariation == Role_Sharpshooter ? XM8_SWITCH_TO_CARBINE : XM8_SWITCH_TO_SHARPSHOOTER);
+	m_pPlayer->m_flNextAttack = m_iVariation == Role_Sharpshooter ? XM8_TO_CARBIN_TIME : XM8_TO_SHARPSHOOTER_TIME;
+	m_flTimeWeaponIdle = m_iVariation == Role_Sharpshooter ? XM8_TO_CARBIN_TIME : XM8_TO_SHARPSHOOTER_TIME;
+	m_bitsFlags |= WPNSTATE_XM8_CHANGING;
+
+	return true;
 }
 
 bool CXM8::HolsterStart(void)

@@ -193,6 +193,12 @@ void CSCARH::SCARHFire(float flSpread, float flCycleTime)
 	}
 }
 
+void CSCARH::WeaponIdle()
+{
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
+	SendWeaponAnim((m_bitsFlags & WPNSTATE_DASHING) ? SCARH_DASHING : SCARH_IDLE);
+}
+
 bool CSCARH::Reload()
 {
 	if (DefaultReload(m_pItemInfo->m_iMaxClip, m_iClip ? SCARH_RELOAD : SCARH_RELOAD_EMPTY, m_iClip ? SCARH_RELOAD_TIME : SCARH_RELOAD_EMPTY_TIME))
@@ -212,12 +218,6 @@ bool CSCARH::Reload()
 	}
 
 	return false;
-}
-
-void CSCARH::WeaponIdle()
-{
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
-	SendWeaponAnim((m_bitsFlags & WPNSTATE_DASHING) ? SCARH_DASHING : SCARH_IDLE);
 }
 
 bool CSCARH::HolsterStart(void)

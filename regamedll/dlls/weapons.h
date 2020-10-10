@@ -197,6 +197,7 @@ public:	// basic logic funcs
 	virtual bool	Melee			(void);		// quick knife.
 	virtual bool	QuickThrowStart	(EquipmentIdType iId);	// quick grenade (maybe something else in the future?).
 	virtual bool	QuickThrowRelease(void);	// triggered when +qtg button released.
+	virtual bool	AlterAct		(void) { return false; }	// special use. for instance, XM8 "morph".
 	virtual bool	HolsterStart	(void);		// play holster anim, initialize holstering.
 	virtual void	Holstered		(void);		// majorlly reset the weapon data. no visual stuff.
 	virtual	void	DashStart		(void) { m_bitsFlags |= WPNSTATE_DASHING; }		// called when system thinks it's time to dash.
@@ -216,10 +217,10 @@ public:	// CL xclusive functions.
 public:	// basic API and behaviour for weapons.
 	virtual	bool	DefaultDeploy	(const char* szViewModel, const char* szWeaponModel, int iAnim, const char* szAnimExt, float flDeployTime = 0.75f);
 	virtual	bool	DefaultReload	(int iClipSize, int iAnim, float fDelay);
-	virtual	void	DefaultSteelSight(const Vector& vecOfs, int iFOV, float flDriftingSpeed = 10.0f, float flNextSecondaryAttack = 0.3f)	{}
-	virtual	void	DefaultScopeSight(const Vector& vecOfs, int iFOV, float flEnterScopeDelay, float flDriftingSpeed = 10.0f, float flNextSecondaryAttack = 0.3f)	{}
-	virtual	void	DefaultDashStart(int iEnterAnim, float flEnterTime)	{}
-	virtual	void	DefaultDashEnd	(int iEnterAnim, float flEnterTime, int iExitAnim, float flExitTime)	{}
+	virtual	void	DefaultSteelSight(const Vector& vecOfs, int iFOV, float flDriftingSpeed = 10.0f, float flNextSecondaryAttack = 0.3f);
+	virtual	void	DefaultScopeSight(const Vector& vecOfs, int iFOV, float flEnterScopeDelay = 0.25f, float flFadeFromBlack = 5.0f, float flDriftingSpeed = 10.0f, float flNextSecondaryAttack = 0.3f);
+	virtual	void	DefaultDashStart(int iEnterAnim, float flEnterTime);
+	virtual	void	DefaultDashEnd	(int iEnterAnim, float flEnterTime, int iExitAnim, float flExitTime);
 
 public:	// util funcs
 	inline	bool	IsDead			(void) { return !!(m_bitsFlags & WPNSTATE_DEAD); }
@@ -381,8 +382,8 @@ public:	// basic logic funcs
 	virtual bool	Deploy			(void);
 	virtual void	PrimaryAttack	(void);
 	virtual void	SecondaryAttack	(void);
-	virtual bool	Reload			(void);
 	virtual void	WeaponIdle		(void);
+	virtual bool	Reload			(void);
 	virtual bool	HolsterStart	(void);
 	virtual	void	DashStart		(void);
 	virtual void	DashEnd			(void);
@@ -510,8 +511,9 @@ public:	// basic logic funcs
 	virtual bool	Deploy(void);
 	virtual void	PrimaryAttack(void);
 	virtual void	SecondaryAttack(void);
-	virtual bool	Reload(void);
 	virtual void	WeaponIdle(void);
+	virtual bool	Reload(void);
+	virtual bool	AlterAct(void);
 	virtual bool	HolsterStart(void);
 	virtual	void	DashStart(void);
 	virtual void	DashEnd(void);
@@ -580,23 +582,48 @@ public:	// new funcs
 #define DEagle_WORLD_MODEL	"models/weapons/w_deagle.mdl"
 #define DEagle_FIRE_SFX		"weapons/deagle/deagle_fire.wav"
 
-constexpr float DEAGLE_MAX_SPEED		= 245.0f;
-constexpr float DEAGLE_DAMAGE			= 57.0f;
-constexpr float DEAGLE_RANGE_MODIFER	= 0.86f;
-constexpr float DEAGLE_DEPLOY_TIME		= 0.34f;
-constexpr float DEAGLE_RELOAD_TIME		= 2.16f;
-constexpr float DEAGLE_FIRE_INTERVAL	= 0.225f;
-constexpr int	DEAGLE_PENETRATION		= 2;
-constexpr float	DEAGLE_EFFECTIVE_RANGE	= 4096.0f;
+constexpr float DEAGLE_MAX_SPEED			= 245.0f;
+constexpr float DEAGLE_DAMAGE				= 57.0f;
+constexpr float DEAGLE_RANGE_MODIFER		= 0.86f;
+constexpr float DEAGLE_RELOAD_TIME			= 1.97f;
+constexpr float DEAGLE_RELOAD_EMPTY_TIME	= 1.92f;
+constexpr float DEAGLE_DRAW_TIME			= 0.7f;
+constexpr float DEAGLE_DRAW_FIRST_TIME		= 1.8f;
+constexpr float DEAGLE_HOLSTER_TIME			= 0.7f;
+constexpr float DEAGLE_CHECKMAG_TIME		= 2.32f;
+constexpr float DEAGLE_DASH_ENTER_TIME		= 0.8667f;
+constexpr float DEAGLE_DASH_EXIT_TIME		= 0.3667f;
+constexpr float DEAGLE_SH_RELOAD_TIME		= 2.2333f;
+constexpr float DEAGLE_SH_RELOAD_EMPTY_TIME	= 2.7f;
+constexpr float DEAGLE_SH_DASH_ENTER_TIME	= 0.7f;
+constexpr float DEAGLE_SH_DASH_EXIT_TIME	= 0.7f;
+constexpr float DEAGLE_FIRE_INTERVAL		= 0.225f;
+constexpr int	DEAGLE_PENETRATION			= 2;
+constexpr float	DEAGLE_EFFECTIVE_RANGE		= 4096.0f;
 
 enum deagle_e
 {
-	DEAGLE_IDLE1,
-	DEAGLE_SHOOT1,
-	DEAGLE_SHOOT2,
+	DEAGLE_IDLE = 0,
+	DEAGLE_SHOOT,
 	DEAGLE_SHOOT_EMPTY,
 	DEAGLE_RELOAD,
+	DEAGLE_RELOAD_EMPTY,
 	DEAGLE_DRAW,
+	DEAGLE_DRAW_FIRST,
+	DEAGLE_HOLSTER,
+	DEAGLE_CHECK_MAGAZINE,
+	DEAGLE_LHAND_DOWN,
+	DEAGLE_LHAND_UP,
+	DEAGLE_BLOCK_UP,
+	DEAGLE_BLOCK_DOWN,
+	DEAGLE_DASH_ENTER,
+	DEAGLE_DASHING,
+	DEAGLE_DASH_EXIT,
+	DEAGLE_SH_RELOAD,
+	DEAGLE_SH_RELOAD_EMPTY,
+	DEAGLE_SH_DASH_ENTER,
+	DEAGLE_SH_DASHING,
+	DEAGLE_SH_DASH_EXIT,
 };
 
 class CDEagle : public CBaseWeapon
@@ -610,19 +637,34 @@ public:	// SV exclusive functions.
 	virtual void	Precache		(void);
 #else
 public:	// CL exclusive functions.
+	virtual void	Think(void);
 	virtual	bool	UsingInvertedVMDL(void) { return false; }	// Model designed by InnocentBlue is not inverted.
 #endif
 
+	// Slide stop available anims.
+	static constexpr int BITS_SLIDE_STOP_ANIM =	(1 << DEAGLE_IDLE) |
+												(1 << DEAGLE_DRAW) |
+												(1 << DEAGLE_HOLSTER) |
+												(1 << DEAGLE_CHECK_MAGAZINE) |
+												(1 << DEAGLE_LHAND_DOWN) | (1 << DEAGLE_LHAND_UP) |
+												(1 << DEAGLE_BLOCK_DOWN) | (1 << DEAGLE_BLOCK_UP) |
+												(1 << DEAGLE_DASH_ENTER) | (1 << DEAGLE_DASHING) | (1 << DEAGLE_DASH_EXIT) |
+												(1 << DEAGLE_SH_DASH_ENTER) | (1 << DEAGLE_SH_DASHING) | (1 << DEAGLE_SH_DASH_EXIT);
+
 public:	// basic logic funcs
-	virtual bool	Deploy			(void);
-	virtual void	PrimaryAttack	(void);
-	virtual void	SecondaryAttack	(void);
-	virtual	bool	Reload			(void);
-	virtual void	WeaponIdle		(void);
+	virtual bool	Deploy(void);
+	virtual void	PrimaryAttack(void);
+	virtual void	SecondaryAttack(void);
+	virtual bool	Reload(void);
+	virtual void	WeaponIdle(void);
+	virtual bool	HolsterStart(void);
+	virtual	void	DashStart(void);
+	virtual void	DashEnd(void);
 
 public:	// util funcs
-	virtual	float	GetMaxSpeed		(void) { return DEAGLE_MAX_SPEED; }
-	virtual void	ResetModel		(void);
+	virtual	float	GetMaxSpeed(void) { return DEAGLE_MAX_SPEED; }
+	virtual void	ResetModel(void);
+	virtual int		CalcBodyParam(void);
 
 public:	// new functions
 	void DEagleFire(float flSpread, float flCycleTime = DEAGLE_FIRE_INTERVAL);
