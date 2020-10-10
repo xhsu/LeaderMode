@@ -253,6 +253,7 @@ namespace gHUD
 	extern int m_iWeaponBits;
 	extern bool m_bPlayerDead;
 	extern int m_hCambriaFont;
+	extern int m_hTrajanProFont;
 	extern bool m_bCursorAllowed;
 	extern float m_flUCDTime;
 	extern float m_flUCDOldTime;

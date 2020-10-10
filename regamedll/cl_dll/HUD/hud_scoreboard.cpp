@@ -23,6 +23,30 @@ const char* CHudScoreboard::m_rgszScoreboardElemKeyName[8] =
 	"#Cstrike_TitlesTXT_LATENCY"
 };
 
+const char* CHudScoreboard::m_rgszRoleNamesKey[ROLE_COUNT] =
+{
+	"#LeaderMod_Role_UNASSIGNED",
+
+	"#LeaderMod_Role_Commander",
+	"#LeaderMod_Role_SWAT",
+	"#LeaderMod_Role_Breacher",
+	"#LeaderMod_Role_Sharpshooter",
+	"#LeaderMod_Role_Medic",
+
+	"#LeaderMod_Role_Godfather",
+	"#LeaderMod_Role_LeadEnforcer",
+	"#LeaderMod_Role_MadScientist",
+	"#LeaderMod_Role_Assassin",
+	"#LeaderMod_Role_Arsonist",
+};
+
+const wchar_t* CHudScoreboard::m_pwszTeamName[4] = { nullptr, nullptr, nullptr, nullptr };
+const wchar_t* CHudScoreboard::m_pwszPlayerCalled = nullptr;
+const wchar_t* CHudScoreboard::m_pwszDeathCalled = nullptr;
+const wchar_t* CHudScoreboard::m_rgpwcScoreboardElementName[8] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+const wchar_t* CHudScoreboard::m_pwcTeamWinsText = nullptr;
+const wchar_t* CHudScoreboard::m_rgpwcRoleNames[ROLE_COUNT] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+
 int CHudScoreboard::Init(void)
 {
 	m_bitsFlags = HUD_ENFORCE_THINK|HUD_INTERMISSION;	// this is what intermission for, right?
@@ -67,9 +91,17 @@ int CHudScoreboard::VidInit(void)
 			m_rgpwcScoreboardElementName[i] = L"TEXT NO FOUND!";
 	}
 
-	// player's font.
+	for (int i = 0; i < ROLE_COUNT; i++)
+	{
+		m_rgpwcRoleNames[i] = VGUI_LOCALISE->Find(m_rgszRoleNamesKey[i]);
+
+		if (!m_rgpwcRoleNames[i])
+			m_rgpwcRoleNames[i] = L"TEXT NO FOUND!";
+	}
+
+	// font.
 	m_hPlayerNameFont = gFontFuncs.CreateFont();
-	gFontFuncs.AddGlyphSetToFont(m_hPlayerNameFont, "FangSong", 18, FW_MEDIUM, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0xFFFF);
+	gFontFuncs.AddGlyphSetToFont(m_hPlayerNameFont, "Trajan Pro", 18, FW_MEDIUM, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0xFFFF);
 
 	// base board: translucent black
 	m_Baseboard.m_bitsFlags |= HUD_ACTIVE;
@@ -169,9 +201,8 @@ int CHudScoreboard::Draw(float flTime)
 		x2 = x + m_flChunkOffset;
 		if (g_PlayerExtraInfo[i].m_iTeam == g_iTeamNumber || g_iTeamNumber == TEAM_SPECTATOR)
 		{
-			_snwprintf(wszText, wcharsmax(wszText), L"%d", g_PlayerExtraInfo[i].m_iRoleType);
 			gFontFuncs.DrawSetTextPos(x2, y);
-			gFontFuncs.DrawPrintText(wszText);
+			gFontFuncs.DrawPrintText(m_rgpwcRoleNames[g_PlayerExtraInfo[i].m_iRoleType]);
 		}
 
 		// 2. HP

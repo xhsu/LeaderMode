@@ -82,6 +82,7 @@ namespace gHUD
 	int m_iWeaponBits = 0;
 	bool m_bPlayerDead = true;
 	int m_hCambriaFont = 0;
+	int m_hTrajanProFont = 0;
 	GLUquadric* m_pGLUquadricHandle = nullptr;
 	float m_flUCDTime = 1;
 	float m_flUCDOldTime = 0;
@@ -345,6 +346,8 @@ void gHUD::VidInit(void)
 	// custom font function set.
 	m_hCambriaFont = gFontFuncs.CreateFont();
 	gFontFuncs.AddGlyphSetToFont(m_hCambriaFont, "Cambria", 24, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0xFFFF);
+	m_hTrajanProFont = gFontFuncs.CreateFont();
+	gFontFuncs.AddGlyphSetToFont(m_hTrajanProFont, "Trajan Pro", 24, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0xFFFF);
 
 	// UNDONE
 	//if (gConfigs.bEnableClientUI)
