@@ -253,6 +253,7 @@ namespace gHUD
 	extern int m_iWeaponBits;
 	extern bool m_bPlayerDead;
 	extern int m_hCambriaFont;
+	extern int m_hTrajanProFont;
 	extern bool m_bCursorAllowed;
 	extern float m_flUCDTime;
 	extern float m_flUCDOldTime;
@@ -356,6 +357,7 @@ void CommandFunc_Adjust_Crosshair(void);
 void CommandFunc_SelectLastItem(void);
 void CommandFunc_NextEquipment(void);
 void CommandFunc_PrevEquipment(void);
+void CommandFunc_AlterAct(void);
 
 #define ScreenHeight (gHUD::m_scrinfo.iHeight)
 #define ScreenWidth (gHUD::m_scrinfo.iWidth)

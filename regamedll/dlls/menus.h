@@ -34,7 +34,7 @@ bool MenuHandler_DeclareRole(CBasePlayer* pPlayer, int iSlot);
 void OpenMenu_VoteTacticalSchemes(CBasePlayer* pPlayer);
 bool MenuHandler_VoteTacticalSchemes(CBasePlayer* pPlayer, int iSlot);
 
-bool AddMenuWeaponItem(CBasePlayer* pPlayer, WeaponIdType iId, char* pszMenuText);
+bool AddMenuWeaponItem(CBasePlayer* pPlayer, WeaponIdType iId, char* pszMenuText, size_t iMaxLength = 512);
 int GetWeaponPrice(RoleTypes iRoleIndex, WeaponIdType iId);
-bool AddMenuEquipmentItem(CBasePlayer* pPlayer, EquipmentIdType iId, char* pszMenuText);
+bool AddMenuEquipmentItem(CBasePlayer* pPlayer, EquipmentIdType iId, char* pszMenuText, size_t iMaxLength = 512);
 int GetEquipmentPrice(RoleTypes iRoleIndex, EquipmentIdType iId);

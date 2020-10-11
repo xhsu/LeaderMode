@@ -2213,9 +2213,9 @@ void CCSTutor::ConstructRecentDeathsList(TeamName team, char *buf, int buflen, T
 		if (pPlayer->m_iTeam != team)
 			continue;
 
-		Q_strcat(buf, "  %n");
+		strcat(buf, "  %n");	// LUNA: confirmed strcat() use.
 		Q_sprintf(scratch, "%d\n", i);
-		Q_strcat(buf, scratch);
+		strcat(buf, scratch);
 
 		m_playerDeathInfo[i].m_event = event;
 	}

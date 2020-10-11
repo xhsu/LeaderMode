@@ -109,9 +109,9 @@ inline char *_strlwr(char *start)
 	#define Q_memcmp memcmp
 	#define Q_memmove memmove
 	#define Q_strlen strlen
-	#define Q_strcpy strcpy
+	#define Q_strcpy strcpy_s
 	#define Q_strncpy strncpy
-	#define Q_strcat strcat
+	#define Q_strcat strcat_s
 	#define Q_strncat strncat
 	#define Q_strcmp strcmp
 	#define Q_strncmp strncmp
@@ -124,7 +124,7 @@ inline char *_strlwr(char *start)
 	#define Q_strtok strtok
 	#define Q_strlwr _strlwr
 	#define Q_strupr _strupr
-	#define Q_sprintf sprintf
+	#define Q_sprintf sprintf_s
 	#define Q_snprintf _snprintf
 	#define Q_vsnprintf _vsnprintf
 	#define Q_vsnwprintf _vsnwprintf

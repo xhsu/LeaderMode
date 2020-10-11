@@ -466,9 +466,6 @@
     <ClCompile Include="..\dlls\wpn_shared\wpn_qbz95.cpp">
       <Filter>dlls\wpn_shared</Filter>
     </ClCompile>
-    <ClCompile Include="..\dlls\wpn_shared\wpn_acr.cpp">
-      <Filter>dlls\wpn_shared</Filter>
-    </ClCompile>
     <ClCompile Include="..\dlls\wpn_shared\wpn_svd.cpp">
       <Filter>dlls\wpn_shared</Filter>
     </ClCompile>
@@ -483,6 +480,9 @@
     </ClCompile>
     <ClCompile Include="..\dlls\skills.cpp">
       <Filter>dlls</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dlls\wpn_shared\wpn_xm8.cpp">
+      <Filter>dlls\wpn_shared</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

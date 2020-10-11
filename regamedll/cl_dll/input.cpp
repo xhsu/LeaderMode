@@ -880,7 +880,7 @@ int KB_ConvertString(char* in, char** ppout)
 
 	*pOut = '\0';
 	pOut = (char*)malloc(Q_strlen(sz) + 1);
-	Q_strcpy(pOut, sz);
+	strcpy(pOut, sz);	// LUNA: strcpy_s is confirmed not used here.
 	*ppout = pOut;
 
 	return 1;

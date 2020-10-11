@@ -82,6 +82,7 @@ namespace gHUD
 	int m_iWeaponBits = 0;
 	bool m_bPlayerDead = true;
 	int m_hCambriaFont = 0;
+	int m_hTrajanProFont = 0;
 	GLUquadric* m_pGLUquadricHandle = nullptr;
 	float m_flUCDTime = 1;
 	float m_flUCDOldTime = 0;
@@ -239,6 +240,7 @@ void gHUD::Init(void)
 	gEngfuncs.pfnAddCommand("lastinv", CommandFunc_SelectLastItem);
 	gEngfuncs.pfnAddCommand("eqpnext", CommandFunc_NextEquipment);
 	gEngfuncs.pfnAddCommand("eqpprev", CommandFunc_PrevEquipment);
+	gEngfuncs.pfnAddCommand("changemode", CommandFunc_AlterAct);
 }
 
 void gHUD::Shutdown(void)
@@ -345,6 +347,8 @@ void gHUD::VidInit(void)
 	// custom font function set.
 	m_hCambriaFont = gFontFuncs.CreateFont();
 	gFontFuncs.AddGlyphSetToFont(m_hCambriaFont, "Cambria", 24, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0xFFFF);
+	m_hTrajanProFont = gFontFuncs.CreateFont();
+	gFontFuncs.AddGlyphSetToFont(m_hTrajanProFont, "Trajan Pro", 24, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0xFFFF);
 
 	// UNDONE
 	//if (gConfigs.bEnableClientUI)
@@ -982,7 +986,7 @@ void CommandFunc_SelectLastItem(void)	// an equivlent function of void CBasePlay
 
 LAB_LASTINV_END:
 	// don't forget to forward this command to SV.
-	gEngfuncs.pfnServerCmd("lastinv");
+	gEngfuncs.pfnServerCmd("lastinv\n");
 }
 
 void CommandFunc_NextEquipment(void)
@@ -1063,6 +1067,13 @@ void CommandFunc_PrevEquipment(void)
 
 	gPseudoPlayer.m_iUsingGrenadeId = iCandidate;
 	gEngfuncs.pfnServerCmd(SharedVarArgs("eqpselect %d\n", iCandidate));
+}
+
+void CommandFunc_AlterAct(void)
+{
+	// only pass to server when it is allowed in client.
+	if (g_pCurWeapon && g_pCurWeapon->AlterAct())
+		gEngfuncs.pfnServerCmd("changemode\n");
 }
 
 /*

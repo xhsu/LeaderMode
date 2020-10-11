@@ -135,7 +135,7 @@ void WeaponsPrecache()
 
 	UTIL_PrecacheOtherWeapon(WEAPON_M4A1);
 	UTIL_PrecacheOtherWeapon(WEAPON_SCARH);
-	UTIL_PrecacheOtherWeapon(WEAPON_ACR);
+	UTIL_PrecacheOtherWeapon(WEAPON_XM8);
 	UTIL_PrecacheOtherWeapon(WEAPON_M14EBR);
 	UTIL_PrecacheOtherWeapon(WEAPON_CM901);
 	UTIL_PrecacheOtherWeapon(WEAPON_QBZ95);
@@ -275,10 +275,6 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 
 	switch (iId)
 	{
-	case WEAPON_ACR:
-		p = new CACR;
-		break;
-
 	case WEAPON_AK47:
 		p = new CAK47;
 		break;
@@ -345,6 +341,10 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 
 	case WEAPON_USP:
 		p = new CUSP;
+		break;
+
+	case WEAPON_XM8:
+		p = new CXM8;
 		break;
 
 	default:
@@ -955,39 +955,6 @@ bool CBaseWeapon::DefaultDeploy(const char* szViewModel, const char* szWeaponMod
 	return true;
 }
 
-void CBaseWeapon::SendWeaponAnim(int iAnim, bool bSkipLocal)
-{
-	m_pPlayer->pev->weaponanim = iAnim;
-
-#ifdef CLIENT_WEAPONS
-	if (bSkipLocal && ENGINE_CANSKIP(m_pPlayer->edict()))
-		return;
-#endif
-
-	MESSAGE_BEGIN(MSG_ONE, SVC_WEAPONANIM, nullptr, m_pPlayer->pev);
-	WRITE_BYTE(iAnim);		// sequence number
-	WRITE_BYTE(CalcBodyParam());		// weaponmodel bodygroup.
-	MESSAGE_END();
-}
-
-void CBaseWeapon::PlayEmptySound()
-{
-	switch (m_iId)
-	{
-	case WEAPON_USP:
-	case WEAPON_GLOCK18:
-	case WEAPON_ANACONDA:
-	case WEAPON_DEAGLE:
-	case WEAPON_P99:
-	case WEAPON_FIVESEVEN:
-		EMIT_SOUND(m_pPlayer->edict(), CHAN_WEAPON, "weapons/dryfire_pistol.wav", 0.8, ATTN_NORM);
-		break;
-	default:
-		EMIT_SOUND(m_pPlayer->edict(), CHAN_WEAPON, "weapons/dryfire_rifle.wav", 0.8, ATTN_NORM);
-		break;
-	}
-}
-
 bool CBaseWeapon::DefaultReload(int iClipSize, int iAnim, float fDelay)
 {
 	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
@@ -1020,6 +987,185 @@ bool CBaseWeapon::DefaultReload(int iClipSize, int iAnim, float fDelay)
 		m_bitsFlags |= WPNSTATE_RELOAD_EMPTY;
 
 	return true;
+}
+
+void CBaseWeapon::DefaultSteelSight(const Vector& vecOfs, int iFOV, float flDriftingSpeed, float flNextSecondaryAttack)
+{
+	m_bInZoom = !m_bInZoom;
+	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flNextSecondaryAttack;
+
+#ifdef CLIENT_DLL
+	// due to some logic problem, we actually cannot use m_bInZoom here.
+	// it would be override.
+
+	if (!g_vecGunOfsGoal.LengthSquared())
+	{
+		g_vecGunOfsGoal = vecOfs;
+		gHUD::m_iFOV = iFOV;	// allow clients to predict the zoom.
+	}
+	else
+	{
+		g_vecGunOfsGoal = g_vecZero;
+		gHUD::m_iFOV = 90;
+	}
+
+	// this model needs faster.
+	g_flGunOfsMovingSpeed = flDriftingSpeed;
+#else
+	// just zoom a liiiiittle bit.
+	// this doesn't suffer from the same bug where the gunofs does, since the FOV was actually sent from SV.
+	if (m_bInZoom)
+	{
+		m_pPlayer->pev->fov = iFOV;
+		EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, "weapons/steelsight_in.wav", 0.75f, ATTN_STATIC);
+	}
+	else
+	{
+		m_pPlayer->pev->fov = 90;
+		EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, "weapons/steelsight_out.wav", 0.75f, ATTN_STATIC);
+	}
+#endif
+}
+
+void CBaseWeapon::DefaultScopeSight(const Vector& vecOfs, int iFOV, float flEnterScopeDelay, float flFadeFromBlack, float flDriftingSpeed, float flNextSecondaryAttack)
+{
+	// this is the delay for the m_bResumeZoom.
+	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + flEnterScopeDelay;
+
+	if (int(m_pPlayer->pev->fov) < 90)
+	{
+		m_pPlayer->pev->fov = 90;
+
+#ifdef CLIENT_DLL
+		// zoom out anim.
+		g_vecGunOfsGoal = g_vecZero;
+
+		// manually set fade.
+		gHUD::m_SniperScope.SetFadeFromBlack(flFadeFromBlack, 0);
+#endif
+	}
+	else
+	{
+		// get ready to zoom in.
+		m_pPlayer->m_iLastZoom = iFOV;
+		m_pPlayer->m_bResumeZoom = true;
+
+#ifdef CLIENT_DLL
+		// zoom in anim.
+		g_vecGunOfsGoal = vecOfs;
+#endif
+	}
+
+#ifndef CLIENT_DLL
+	if (TheBots)
+	{
+		TheBots->OnEvent(EVENT_WEAPON_ZOOMED, m_pPlayer);
+	}
+
+	// SFX only emitted from SV.
+	EMIT_SOUND(m_pPlayer->edict(), CHAN_ITEM, "weapons/zoom.wav", 0.2, 2.4);
+#else
+	g_flGunOfsMovingSpeed = flDriftingSpeed;
+#endif
+
+	// slow down while we zooming.
+	m_pPlayer->ResetMaxSpeed();
+
+	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flNextSecondaryAttack;
+}
+
+void CBaseWeapon::DefaultDashStart(int iEnterAnim, float flEnterTime)
+{
+	if (m_bInReload)
+		m_bInReload = false;
+
+	if (m_bInZoom || m_pPlayer->pev->fov < 90)
+	{
+#ifndef CLIENT_DLL
+		SecondaryAttack();
+#else
+		g_vecGunOfsGoal = g_vecZero;
+		g_flGunOfsMovingSpeed = 10.0f;
+		gHUD::m_iFOV = 90;
+#endif
+	}
+
+	SendWeaponAnim(iEnterAnim);
+	m_pPlayer->m_flNextAttack = flEnterTime;
+	m_flTimeWeaponIdle = flEnterTime;
+	m_bitsFlags |= WPNSTATE_DASHING;
+}
+
+void CBaseWeapon::DefaultDashEnd(int iEnterAnim, float flEnterTime, int iExitAnim, float flExitTime)
+{
+	if (m_pPlayer->m_flNextAttack > 0.0f && m_pPlayer->pev->weaponanim == iEnterAnim)
+	{
+		// this is how much you procees to the dashing phase.
+		// for example, assuming the whole length is 1.0s, you start 0.7s and decide to cancel.
+		// although there's only 0.3s to the dashing phase, but turning back still requires another equally 0.7s.
+		// "m_pPlayer->m_flNextAttack" is the 0.3s of full length. you need to get the rest part, i.e. the 70%.
+		float flRunStartUnplayedRatio = 1.0f - m_pPlayer->m_flNextAttack / flEnterTime;
+
+		// stick on the last instance in the comment: 70% * 1.0s(full length) = 0.7s, this is the time we need to turning back.
+		float flRunStopTimeLeft = flExitTime * flRunStartUnplayedRatio;
+
+		// play the anim.
+		SendWeaponAnim(iExitAnim);
+
+#ifdef CLIENT_DLL
+		// why we are using the "0.3s" here?
+		// this is because the g_flTimeViewModelAnimStart actually means how much time had passed since the anim was ordered to play.
+		// if we need to play 0.7s, we have to told system we only played it for 0.3s. right?
+		g_flTimeViewModelAnimStart = gEngfuncs.GetClientTime() - (flExitTime - flRunStopTimeLeft);
+#endif
+
+		// force everything else to wait.
+		m_pPlayer->m_flNextAttack = m_flNextPrimaryAttack = m_flNextSecondaryAttack = m_flTimeWeaponIdle = flRunStopTimeLeft;
+	}
+
+	// if RUN_START is normally played and finished, go normal.
+	else
+	{
+		SendWeaponAnim(iExitAnim);
+		m_pPlayer->m_flNextAttack = flExitTime;
+		m_flTimeWeaponIdle = flExitTime;
+	}
+
+	// either way, we have to remove this flag.
+	m_bitsFlags &= ~WPNSTATE_DASHING;
+}
+
+void CBaseWeapon::SendWeaponAnim(int iAnim, bool bSkipLocal)
+{
+	m_pPlayer->pev->weaponanim = iAnim;
+
+#ifdef CLIENT_WEAPONS
+	if (bSkipLocal && ENGINE_CANSKIP(m_pPlayer->edict()))
+		return;
+#endif
+
+	MESSAGE_BEGIN(MSG_ONE, SVC_WEAPONANIM, nullptr, m_pPlayer->pev);
+	WRITE_BYTE(iAnim);		// sequence number
+	WRITE_BYTE(CalcBodyParam());		// weaponmodel bodygroup.
+	MESSAGE_END();
+}
+
+void CBaseWeapon::PlayEmptySound()
+{
+	switch (m_iId)
+	{
+	case WEAPON_USP:
+	case WEAPON_GLOCK18:
+	case WEAPON_ANACONDA:
+	case WEAPON_DEAGLE:
+	case WEAPON_P99:
+	case WEAPON_FIVESEVEN:
+		EMIT_SOUND(m_pPlayer->edict(), CHAN_WEAPON, "weapons/dryfire_pistol.wav", 0.8, ATTN_NORM);
+		break;
+	default:
+		EMIT_SOUND(m_pPlayer->edict(), CHAN_WEAPON, "weapons/dryfire_rifle.wav", 0.8, ATTN_NORM);
+		break;
+	}
 }
 
 void CBaseWeapon::ReloadSound()

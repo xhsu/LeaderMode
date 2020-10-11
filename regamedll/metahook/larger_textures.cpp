@@ -4,6 +4,9 @@ Created Date: Mar 22 2020
 
 Transplantable function: make model loadable texture larger.
 
+Additional function is included:
+	- External texture loader.
+
 Modern Warfare Dev Team
  - Luna the Reborn
 
@@ -17,6 +20,38 @@ qboolean (*g_pfnLoadTGA)(char* szFilename, unsigned char* buffer, int bufferSize
 
 int GL_LoadTexture(char* identifier, int textureType, int width, int height, BYTE* data, int mipmap, int iType, BYTE* pPal)
 {
+	// external texture loader.
+
+	// analyze and decompose the name.
+	// the identifier parameter is given in the format "models/weapons/xxx.mdlyyy.bmp"
+	// we have to cut it down on the mark of ".mdl"
+	char* p = Q_strstr(identifier, ".mdl");
+	if (p != nullptr)
+	{
+		char* p2 = p + sizeof(char) * 4;	// 4 characters (i.e. ".mdl") later.
+
+		// get model 'path'
+		char szModel[128];
+		Q_strcpy(szModel, identifier);
+		Q_strtok(szModel, ".");	// only characters before ".mdl" can be saved.
+
+		// get texture.
+		char szTexture[64];
+		Q_strcpy(szTexture, p2);
+		Q_strtok(szTexture, ".");	// only characters before ".bmp" can be saved.
+		Q_strcat(szTexture, ".dds");
+
+		char szExternalTexturePath[192];
+		Q_sprintf(szExternalTexturePath, "texture/%s/%s", szModel, szTexture);	// it would looks like this: "texture/models/weapons/xxx/yyy.dds"
+
+		if (g_pInterface->FileSystem->FileExists(szExternalTexturePath))
+		{
+			return LoadDDS(szExternalTexturePath);
+		}
+	}
+
+	// large texture loader.
+	// it can't be both large and external texture at the same time. therefore, an elseif is used.
 	if (width * height > 294912)	// biggest known loadable: 768*384
 	{
 		static BYTE buffer[4096 * 4096 * 3];

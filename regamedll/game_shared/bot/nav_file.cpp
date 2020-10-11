@@ -631,7 +631,7 @@ void LoadLocationFile(const char *filename)
 	char *dot = Q_strchr(locFilename, '.');
 	if (dot)
 	{
-		Q_strcpy(dot, ".loc");
+		strcpy(dot, ".loc");	// LUNA: strcpy_s is confirmed not used here.
 
 		int locDataLength;
 		char *locDataFile = (char *)LOAD_FILE_FOR_ME(const_cast<char *>(locFilename), &locDataLength);

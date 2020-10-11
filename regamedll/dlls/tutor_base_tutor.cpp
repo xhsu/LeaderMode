@@ -72,7 +72,7 @@ void TutorMessageEvent::AddParameter(char *str)
 
 	if (param->m_data)
 	{
-		Q_strcpy(param->m_data, str);
+		strcpy(param->m_data, str);	// LUNA: strcpy_s is confirmed not used here.
 		param->m_data[Q_strlen(str)] = '\0';
 		m_numParameters++;
 

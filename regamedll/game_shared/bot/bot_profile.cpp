@@ -180,7 +180,7 @@ void BotProfileManager::Init(const char *filename, unsigned int *checksum)
 				// construct the model filename
 				m_skinModelnames[m_nextSkin] = CloneString(token);
 				m_skinFilenames[m_nextSkin] = new char[Q_strlen(token) * 2 + Q_strlen("models/player//.mdl") + 1];
-				Q_sprintf(m_skinFilenames[m_nextSkin], "models/player/%s/%s.mdl", token, token);
+				sprintf(m_skinFilenames[m_nextSkin], "models/player/%s/%s.mdl", token, token);	// LUNA: confirmed usage of sprintf().
 				m_nextSkin++;
 			}
 

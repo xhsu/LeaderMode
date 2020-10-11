@@ -156,7 +156,7 @@ BuyInfo primaryWeapons[] =
 	{ RIFLE,            true,  WEAPON_QBZ95		},
 	{ RIFLE,            true,  WEAPON_AK47		},
 	{ RIFLE,            true,  WEAPON_M4A1		},
-	{ RIFLE,            false, WEAPON_ACR		},
+	{ RIFLE,            false, WEAPON_XM8		},
 	{ RIFLE,            false, WEAPON_SCARH		},
 
 	{ SNIPER_RIFLE,     false, WEAPON_M200		},

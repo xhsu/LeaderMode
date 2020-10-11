@@ -123,7 +123,7 @@ void PM_InitTextureTypes()
 		j = Q_min(j, MAX_TEXTURENAME_LENGHT - 1 + i);
 		buffer[j] = '\0';
 
-		Q_strcpy(&(pm_grgszTextureName[pm_gcTextures++][0]), &(buffer[i]));
+		strcpy(&(pm_grgszTextureName[pm_gcTextures++][0]), &(buffer[i]));	// LUNA: strcpy_s is confirmed not used here.
 	}
 
 	// Must use engine to free since we are in a .dll

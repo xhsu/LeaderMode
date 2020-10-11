@@ -42,6 +42,7 @@ bool CM4A1::Deploy()
 {
 	m_flAccuracy = 0.2f;
 	m_iShotsFired = 0;
+
 	return DefaultDeploy(M4A1_VIEW_MODEL, M4A1_WORLD_MODEL, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? M4A1_DRAW_FIRST : M4A1_DRAW, "rifle", (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? M4A1_DRAW_FIRST_TIME : M4A1_DRAW_TIME);
 }
 
@@ -212,6 +213,12 @@ void CM4A1::M4A1Fire(float flSpread, float flCycleTime)
 	}
 }
 
+void CM4A1::WeaponIdle()
+{
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
+	SendWeaponAnim((m_bitsFlags & WPNSTATE_DASHING) ? M4A1_DASHING : M4A1_IDLE);
+}
+
 bool CM4A1::Reload()
 {
 	if (DefaultReload(m_pItemInfo->m_iMaxClip, m_iClip ? M4A1_RELOAD : M4A1_RELOAD_EMPTY, m_iClip ? M4A1_RELOAD_TIME : M4A1_RELOAD_EMPTY_TIME))
@@ -231,12 +238,6 @@ bool CM4A1::Reload()
 	}
 
 	return false;
-}
-
-void CM4A1::WeaponIdle()
-{
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
-	SendWeaponAnim((m_bitsFlags & WPNSTATE_DASHING) ? M4A1_DASHING : M4A1_IDLE);
 }
 
 bool CM4A1::HolsterStart(void)
@@ -361,9 +362,9 @@ int CM4A1::CalcBodyParam(void)
 	// in EMPTY reload, after we remove the empty mag, the new mag should be full of bullets.
 	if (m_bInReload && m_bitsFlags & WPNSTATE_RELOAD_EMPTY)
 	{
-		if (m_pPlayer->m_flNextAttack < 1.7f)	// in this anim, a new mag was taken out after around 0.3s. thus, 2.03f - 0.3f ~= 1.7f.
+		if (m_pPlayer->m_flNextAttack < 1.7f)	// in this anim, a new mag was taken out after around 0.9s. thus, 2.6f - 0.9f ~= 1.7f.
 		{
-			info[6].body = 0;	// empty mag.
+			info[6].body = 0;	// full mag.
 		}
 	}
 

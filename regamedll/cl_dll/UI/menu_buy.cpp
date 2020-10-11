@@ -43,8 +43,8 @@ int CUIBuyMenu::Init(void)
 
 int CUIBuyMenu::VidInit(void)
 {
-	int hFont = gFontFuncs.CreateFont();
-	gFontFuncs.AddGlyphSetToFont(hFont, "HYTangLiF", 20, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0xFFFF);
+	//int hFont = gFontFuncs.CreateFont();
+	//gFontFuncs.AddGlyphSetToFont(hFont, "HYTangLiF", 20, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0xFFFF);
 
 	// baseboard
 	m_Baseboard.m_bitsFlags |= HUD_ACTIVE;

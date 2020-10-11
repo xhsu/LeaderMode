@@ -2825,6 +2825,11 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 
 				BuyWeapon(pPlayer, iId);
 			}
+			else if (FStrEq(pcmd, "changemode"))
+			{
+				if (pPlayer->m_pActiveItem)
+					pPlayer->m_pActiveItem->AlterAct();
+			}
 			else
 			{
 				if (HandleRadioAliasCommands(pPlayer, pcmd))
@@ -4308,7 +4313,7 @@ int EXT_FUNC InconsistentFile(const edict_t *pEdict, const char *filename, char 
 		return 0;
 
 	// Default behavior is to kick the player
-	Q_sprintf(disconnect_message, "Server is enforcing file consistency for %s\n", filename);
+	sprintf(disconnect_message, "Server is enforcing file consistency for %s\n", filename);	// LUNA: confirmed usage of sprintf().
 
 	// Kick now with specified disconnect message.
 	return 1;

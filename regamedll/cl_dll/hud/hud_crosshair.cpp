@@ -294,7 +294,7 @@ int GetWeaponAccuracyFlags(WeaponIdType iId)
 	{
 		switch (iId)
 		{
-		case WEAPON_ACR:
+		case WEAPON_XM8:
 		case WEAPON_CM901:
 		case WEAPON_MK46:
 		case WEAPON_SCARH:
@@ -403,7 +403,7 @@ int CHudCrosshair::DrawCrosshair(float flTime, WeaponIdType weaponid)
 		break;
 	}
 
-	case WEAPON_ACR:
+	case WEAPON_XM8:
 	{
 		iDistance = 3;
 		iDeltaDistance = 3;

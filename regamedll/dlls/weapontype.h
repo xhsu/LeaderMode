@@ -71,7 +71,7 @@ enum WeaponIdType
 	WEAPON_AK47,
 	WEAPON_M4A1,
 	WEAPON_SCARH,
-	WEAPON_ACR,
+	WEAPON_XM8,
 
 	// SNIPER RIFLES,
 	WEAPON_M200,
@@ -122,11 +122,15 @@ enum WeaponState
 	WPNSTATE_HOLSTERING			= BIT(8),	// disable all other behaviours?
 	WPNSTATE_DASHING			= BIT(9),	// get a speed boost?
 
+	// Weapon-specific flags.
+	WPNSTATE_XM8_CHANGING		= BIT(10),
+
 	// Sets
-	WPNSTATE_BUSY				= WPNSTATE_MELEE | WPNSTATE_QUICK_THROWING | WPNSTATE_HOLSTERING | WPNSTATE_DASHING,	// unable to do other 'busy' things.
+	WPNSTATE_SPECIAL_STATE		= WPNSTATE_XM8_CHANGING,
+	WPNSTATE_BUSY				= WPNSTATE_MELEE | WPNSTATE_QUICK_THROWING | WPNSTATE_HOLSTERING | WPNSTATE_DASHING | WPNSTATE_SPECIAL_STATE,	// unable to do other 'busy' things.
 
 	// Disused
-	WPNSTATE_SHIELD_DRAWN		= BIT(30)	// disused.
+	WPNSTATE_SHIELD_DRAWN		= BIT(31)	// disused.
 };
 
 enum WeaponClassWeight
