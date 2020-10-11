@@ -47,39 +47,18 @@ bool CSCARH::Deploy()
 
 void CSCARH::SecondaryAttack()
 {
-	m_bInZoom = !m_bInZoom;
-	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.3f;
+	switch (m_iVariation)
+	{
+	case Role_Sharpshooter:
+		// ACOG
+		DefaultSteelSight(Vector(-3.62f, -5, 0.5f), 55, 8.0f);
+		break;
 
-#ifdef CLIENT_DLL
-	// due to some logic problem, we actually cannot use m_bInZoom here.
-	// it would be override.
-
-	if (!g_vecGunOfsGoal.LengthSquared())
-	{
-		g_vecGunOfsGoal = Vector(-3.725F, -2, 0.615F);
-		gHUD::m_iFOV = 85;	// allow clients to predict the zoom.
+	default:
+		// HOLO
+		DefaultSteelSight(Vector(-3.725F, -2, 0.615F), 85, 8.0f);
+		break;
 	}
-	else
-	{
-		g_vecGunOfsGoal = g_vecZero;
-		gHUD::m_iFOV = 90;
-	}
-
-	g_flGunOfsMovingSpeed = 8.0f;
-#else
-	// just zoom a liiiiittle bit.
-	// this doesn't suffer from the same bug where the gunofs does, since the FOV was actually sent from SV.
-	if (m_bInZoom)
-	{
-		m_pPlayer->pev->fov = 85;
-		EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, "weapons/steelsight_in.wav", 0.75f, ATTN_STATIC);
-	}
-	else
-	{
-		m_pPlayer->pev->fov = 90;
-		EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, "weapons/steelsight_out.wav", 0.75f, ATTN_STATIC);
-	}
-#endif
 }
 
 void CSCARH::PrimaryAttack()
@@ -193,12 +172,6 @@ void CSCARH::SCARHFire(float flSpread, float flCycleTime)
 	}
 }
 
-void CSCARH::WeaponIdle()
-{
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
-	SendWeaponAnim((m_bitsFlags & WPNSTATE_DASHING) ? SCARH_DASHING : SCARH_IDLE);
-}
-
 bool CSCARH::Reload()
 {
 	if (DefaultReload(m_pItemInfo->m_iMaxClip, m_iClip ? SCARH_RELOAD : SCARH_RELOAD_EMPTY, m_iClip ? SCARH_RELOAD_TIME : SCARH_RELOAD_EMPTY_TIME))
@@ -218,76 +191,6 @@ bool CSCARH::Reload()
 	}
 
 	return false;
-}
-
-bool CSCARH::HolsterStart(void)
-{
-	SendWeaponAnim(SCARH_HOLSTER);
-	m_pPlayer->m_flNextAttack = SCARH_HOLSTER_TIME;
-	m_bitsFlags |= WPNSTATE_HOLSTERING;
-
-	return true;
-}
-
-void CSCARH::DashStart(void)
-{
-	if (m_bInReload)
-		m_bInReload = false;
-
-	if (m_bInZoom || m_pPlayer->pev->fov < 90)
-	{
-#ifndef CLIENT_DLL
-		SecondaryAttack();
-#else
-		g_vecGunOfsGoal = g_vecZero;
-		g_flGunOfsMovingSpeed = 10.0f;
-		gHUD::m_iFOV = 90;
-#endif
-	}
-
-	SendWeaponAnim(SCARH_DASH_ENTER);
-	m_pPlayer->m_flNextAttack = SCARH_DASH_ENTER_TIME;
-	m_flTimeWeaponIdle = SCARH_DASH_ENTER_TIME;
-	m_bitsFlags |= WPNSTATE_DASHING;
-}
-
-void CSCARH::DashEnd(void)
-{
-	if (m_pPlayer->m_flNextAttack > 0.0f && m_pPlayer->pev->weaponanim == SCARH_DASH_ENTER)
-	{
-		// this is how much you procees to the dashing phase.
-		// for example, assuming the whole length is 1.0s, you start 0.7s and decide to cancel.
-		// although there's only 0.3s to the dashing phase, but turning back still requires another equally 0.7s.
-		// "m_pPlayer->m_flNextAttack" is the 0.3s of full length. you need to get the rest part, i.e. the 70%.
-		float flRunStartUnplayedRatio = 1.0f - m_pPlayer->m_flNextAttack / SCARH_DASH_ENTER_TIME;
-
-		// stick on the last instance in the comment: 70% * 1.0s(full length) = 0.7s, this is the time we need to turning back.
-		float flRunStopTimeLeft = SCARH_DASH_EXIT_TIME * flRunStartUnplayedRatio;
-
-		// play the anim.
-		SendWeaponAnim(SCARH_DASH_EXIT);
-
-#ifdef CLIENT_DLL
-		// why we are using the "0.3s" here?
-		// this is because the g_flTimeViewModelAnimStart actually means how much time had passed since the anim was ordered to play.
-		// if we need to play 0.7s, we have to told system we only played it for 0.3s. right?
-		g_flTimeViewModelAnimStart = gEngfuncs.GetClientTime() - (SCARH_DASH_EXIT_TIME - flRunStopTimeLeft);
-#endif
-
-		// force everything else to wait.
-		m_pPlayer->m_flNextAttack = m_flNextPrimaryAttack = m_flNextSecondaryAttack = m_flTimeWeaponIdle = flRunStopTimeLeft;
-	}
-
-	// if RUN_START is normally played and finished, go normal.
-	else
-	{
-		SendWeaponAnim(SCARH_DASH_EXIT);
-		m_pPlayer->m_flNextAttack = SCARH_DASH_EXIT_TIME;
-		m_flTimeWeaponIdle = SCARH_DASH_EXIT_TIME;
-	}
-
-	// either way, we have to remove this flag.
-	m_bitsFlags &= ~WPNSTATE_DASHING;
 }
 
 int CSCARH::CalcBodyParam(void)
@@ -311,14 +214,30 @@ int CSCARH::CalcBodyParam(void)
 		{ 0, 2 },	// laser		= 12;
 	};
 
-	// by default, this weapon has:
-	// filpped down steel sight.
-	// holographic sight.
-	// laser.
+	switch (m_iVariation)
+	{
+	case Role_Sharpshooter:
+		// the sharpshooter's version contains a ACOG and a laser.
+		// removed steel sight.
+		// ACOG.
+		// Recoil compensator.
+		// laser.
 
-	info[7].body = 1;
-	info[8].body = 2;
-	info[12].body = 1;
+		info[7].body = 2;
+		info[8].body = 4;
+		info[11].body = 2;
+		info[12].body = 1;
+		break;
+
+	default:
+		// by default, this weapon has:
+		// filpped down steel sight.
+		// holographic sight.
+
+		info[7].body = 1;
+		info[8].body = 2;
+		break;
+	}
 
 	if (!m_iClip)
 		info[6].body = 1;	// empty mag.
@@ -328,11 +247,11 @@ int CSCARH::CalcBodyParam(void)
 	{
 		if (m_pPlayer->m_flNextAttack < 2.18F)	// in this anim, a new mag was taken out after around 0.3s. thus, 2.9F - 0.72f ~= 2.18f.
 		{
-			info[6].body = 0;	// empty mag.
+			info[6].body = 0;	// full mag.
 		}
 	}
 
-	return CalcBody(info, 13);	// elements count of the info[].
+	return CalcBody(info, ARRAY_ELEM_COUNT(info));	// elements count of the info[].
 }
 
 DECLARE_STANDARD_RESET_MODEL_FUNC(SCARH)

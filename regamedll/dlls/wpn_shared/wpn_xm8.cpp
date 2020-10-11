@@ -48,63 +48,18 @@ bool CXM8::Deploy()
 
 void CXM8::SecondaryAttack()
 {
-	m_bInZoom = !m_bInZoom;
-	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.3f;
-
-#ifdef CLIENT_DLL
-	// due to some logic problem, we actually cannot use m_bInZoom here.
-	// it would be override.
-
-	if (!g_vecGunOfsGoal.LengthSquared())
+	switch (m_iVariation)
 	{
-		switch (m_iVariation)
-		{
-		case Role_Sharpshooter:
-			// OPTICAL.
-			g_vecGunOfsGoal = Vector(-3.035f, -2, 0.155f);
-			gHUD::m_iFOV = 50;
-			break;
+	case Role_Sharpshooter:
+		// OPTICAL.
+		DefaultSteelSight(Vector(-3.067f, -2, 0.14f), 50, 8.0f);
+		break;
 
-		default:
-			// STEEL.
-			g_vecGunOfsGoal = Vector(-3.03f, -2, 0.34f);
-			gHUD::m_iFOV = 85;	// allow clients to predict the zoom.
-			break;
-		}
+	default:
+		// STEEL.
+		DefaultSteelSight(Vector(-3.067f, -2, 0.34f), 85, 8.0f);
+		break;
 	}
-	else
-	{
-		g_vecGunOfsGoal = g_vecZero;
-		gHUD::m_iFOV = 90;
-	}
-
-	g_flGunOfsMovingSpeed = 8.0f;
-#else
-	// zoom according to the weapon variation.
-	// this doesn't suffer from the same bug where the gunofs does, since the FOV was actually sent from SV.
-	if (m_bInZoom)
-	{
-		switch (m_iVariation)
-		{
-		case Role_Sharpshooter:
-			// OPTICAL.
-			m_pPlayer->pev->fov = 50;
-			break;
-
-		default:
-			// STEEL.
-			m_pPlayer->pev->fov = 85;
-			break;
-		}
-
-		EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, "weapons/steelsight_in.wav", 0.75f, ATTN_STATIC);
-	}
-	else
-	{
-		m_pPlayer->pev->fov = 90;
-		EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, "weapons/steelsight_out.wav", 0.75f, ATTN_STATIC);
-	}
-#endif
 }
 
 void CXM8::PrimaryAttack()
@@ -226,12 +181,6 @@ void CXM8::XM8Fire(float flSpread, float flCycleTime)
 	}
 }
 
-void CXM8::WeaponIdle()
-{
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
-	SendWeaponAnim((m_bitsFlags & WPNSTATE_DASHING) ? XM8_DASHING : XM8_IDLE);
-}
-
 bool CXM8::Reload()
 {
 	if (DefaultReload(m_pItemInfo->m_iMaxClip, m_iClip ? XM8_RELOAD : XM8_RELOAD_EMPTY, m_iClip ? XM8_RELOAD_TIME : XM8_RELOAD_EMPTY_TIME))
@@ -264,76 +213,6 @@ bool CXM8::AlterAct(void)
 	m_bitsFlags |= WPNSTATE_XM8_CHANGING;
 
 	return true;
-}
-
-bool CXM8::HolsterStart(void)
-{
-	SendWeaponAnim(XM8_HOLSTER);
-	m_pPlayer->m_flNextAttack = XM8_HOLSTER_TIME;
-	m_bitsFlags |= WPNSTATE_HOLSTERING;
-
-	return true;
-}
-
-void CXM8::DashStart(void)
-{
-	if (m_bInReload)
-		m_bInReload = false;
-
-	if (m_bInZoom || m_pPlayer->pev->fov < 90)
-	{
-#ifndef CLIENT_DLL
-		SecondaryAttack();
-#else
-		g_vecGunOfsGoal = g_vecZero;
-		g_flGunOfsMovingSpeed = 10.0f;
-		gHUD::m_iFOV = 90;
-#endif
-	}
-
-	SendWeaponAnim(XM8_DASH_ENTER);
-	m_pPlayer->m_flNextAttack = XM8_DASH_ENTER_TIME;
-	m_flTimeWeaponIdle = XM8_DASH_ENTER_TIME;
-	m_bitsFlags |= WPNSTATE_DASHING;
-}
-
-void CXM8::DashEnd(void)
-{
-	if (m_pPlayer->m_flNextAttack > 0.0f && m_pPlayer->pev->weaponanim == XM8_DASH_ENTER)
-	{
-		// this is how much you procees to the dashing phase.
-		// for example, assuming the whole length is 1.0s, you start 0.7s and decide to cancel.
-		// although there's only 0.3s to the dashing phase, but turning back still requires another equally 0.7s.
-		// "m_pPlayer->m_flNextAttack" is the 0.3s of full length. you need to get the rest part, i.e. the 70%.
-		float flRunStartUnplayedRatio = 1.0f - m_pPlayer->m_flNextAttack / XM8_DASH_ENTER_TIME;
-
-		// stick on the last instance in the comment: 70% * 1.0s(full length) = 0.7s, this is the time we need to turning back.
-		float flRunStopTimeLeft = XM8_DASH_EXIT_TIME * flRunStartUnplayedRatio;
-
-		// play the anim.
-		SendWeaponAnim(XM8_DASH_EXIT);
-
-#ifdef CLIENT_DLL
-		// why we are using the "0.3s" here?
-		// this is because the g_flTimeViewModelAnimStart actually means how much time had passed since the anim was ordered to play.
-		// if we need to play 0.7s, we have to told system we only played it for 0.3s. right?
-		g_flTimeViewModelAnimStart = gEngfuncs.GetClientTime() - (XM8_DASH_EXIT_TIME - flRunStopTimeLeft);
-#endif
-
-		// force everything else to wait.
-		m_pPlayer->m_flNextAttack = m_flNextPrimaryAttack = m_flNextSecondaryAttack = m_flTimeWeaponIdle = flRunStopTimeLeft;
-	}
-
-	// if RUN_START is normally played and finished, go normal.
-	else
-	{
-		SendWeaponAnim(XM8_DASH_EXIT);
-		m_pPlayer->m_flNextAttack = XM8_DASH_EXIT_TIME;
-		m_flTimeWeaponIdle = XM8_DASH_EXIT_TIME;
-	}
-
-	// either way, we have to remove this flag.
-	m_bitsFlags &= ~WPNSTATE_DASHING;
 }
 
 int CXM8::CalcBodyParam(void)

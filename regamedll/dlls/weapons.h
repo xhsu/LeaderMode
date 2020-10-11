@@ -216,7 +216,9 @@ public:	// CL xclusive functions.
 
 public:	// basic API and behaviour for weapons.
 	virtual	bool	DefaultDeploy	(const char* szViewModel, const char* szWeaponModel, int iAnim, const char* szAnimExt, float flDeployTime = 0.75f);
+	virtual void	DefaultIdle		(int iDashingAnim, int iIdleAnim = 0, float flDashLoop = 20.0f, float flIdleLoop = 20.0f);
 	virtual	bool	DefaultReload	(int iClipSize, int iAnim, float fDelay);
+	virtual bool	DefaultHolster	(int iHolsterAnim, float flHolsterDelay);
 	virtual	void	DefaultSteelSight(const Vector& vecOfs, int iFOV, float flDriftingSpeed = 10.0f, float flNextSecondaryAttack = 0.3f);
 	virtual	void	DefaultScopeSight(const Vector& vecOfs, int iFOV, float flEnterScopeDelay = 0.25f, float flFadeFromBlack = 5.0f, float flDriftingSpeed = 10.0f, float flNextSecondaryAttack = 0.3f);
 	virtual	void	DefaultDashStart(int iEnterAnim, float flEnterTime);
@@ -382,11 +384,11 @@ public:	// basic logic funcs
 	virtual bool	Deploy			(void);
 	virtual void	PrimaryAttack	(void);
 	virtual void	SecondaryAttack	(void);
-	virtual void	WeaponIdle		(void);
+	virtual void	WeaponIdle		(void) { return DefaultIdle(SCARH_DASHING); }
 	virtual bool	Reload			(void);
-	virtual bool	HolsterStart	(void);
-	virtual	void	DashStart		(void);
-	virtual void	DashEnd			(void);
+	virtual bool	HolsterStart	(void) { return DefaultHolster(SCARH_HOLSTER, SCARH_HOLSTER_TIME); }
+	virtual	void	DashStart		(void) { return DefaultDashStart(SCARH_DASH_ENTER, SCARH_DASH_ENTER_TIME); }
+	virtual void	DashEnd			(void) { return DefaultDashEnd(SCARH_DASH_ENTER, SCARH_DASH_ENTER_TIME, SCARH_DASH_EXIT, SCARH_DASH_EXIT_TIME); }
 
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void) { return SCARH_MAX_SPEED; }
@@ -508,20 +510,20 @@ public:	// CL exclusive functions.
 #endif
 
 public:	// basic logic funcs
-	virtual bool	Deploy(void);
-	virtual void	PrimaryAttack(void);
-	virtual void	SecondaryAttack(void);
-	virtual void	WeaponIdle(void);
-	virtual bool	Reload(void);
-	virtual bool	AlterAct(void);
-	virtual bool	HolsterStart(void);
-	virtual	void	DashStart(void);
-	virtual void	DashEnd(void);
+	virtual bool	Deploy			(void);
+	virtual void	PrimaryAttack	(void);
+	virtual void	SecondaryAttack	(void);
+	virtual void	WeaponIdle		(void)	{ return DefaultIdle(XM8_DASHING); }
+	virtual bool	Reload			(void);
+	virtual bool	AlterAct		(void);
+	virtual bool	HolsterStart	(void)	{ return DefaultHolster(XM8_HOLSTER, XM8_HOLSTER_TIME); }
+	virtual	void	DashStart		(void)	{ return DefaultDashStart(XM8_DASH_ENTER, XM8_DASH_ENTER_TIME); }
+	virtual void	DashEnd			(void)	{ return DefaultDashEnd(XM8_DASH_ENTER, XM8_DASH_ENTER_TIME, XM8_DASH_EXIT, XM8_DASH_EXIT_TIME); }
 
 public:	// util funcs
-	virtual	float	GetMaxSpeed(void) { return XM8_MAX_SPEED; }
-	virtual void	ResetModel(void);
-	virtual int		CalcBodyParam(void);
+	virtual	float	GetMaxSpeed		(void)	{ return XM8_MAX_SPEED; }
+	virtual void	ResetModel		(void);
+	virtual int		CalcBodyParam	(void);
 
 public:	// new functions
 	void XM8Fire(float flSpread, float flCycleTime = (60.0f / XM8_RPM));
@@ -652,19 +654,19 @@ public:	// CL exclusive functions.
 												(1 << DEAGLE_SH_DASH_ENTER) | (1 << DEAGLE_SH_DASHING) | (1 << DEAGLE_SH_DASH_EXIT);
 
 public:	// basic logic funcs
-	virtual bool	Deploy(void);
-	virtual void	PrimaryAttack(void);
-	virtual void	SecondaryAttack(void);
-	virtual bool	Reload(void);
-	virtual void	WeaponIdle(void);
-	virtual bool	HolsterStart(void);
-	virtual	void	DashStart(void);
-	virtual void	DashEnd(void);
+	virtual bool	Deploy			(void);
+	virtual void	PrimaryAttack	(void);
+	virtual void	SecondaryAttack	(void)	{ return DefaultSteelSight(Vector(-1.93f, -0.5f, 0.15f), 85); }
+	virtual bool	Reload			(void);
+	virtual void	WeaponIdle		(void)	{ return DefaultIdle(DEAGLE_DASHING); }
+	virtual bool	HolsterStart	(void)	{ return DefaultHolster(DEAGLE_HOLSTER, DEAGLE_HOLSTER_TIME); }
+	virtual	void	DashStart		(void)	{ return DefaultDashStart(DEAGLE_DASH_ENTER, DEAGLE_DASH_ENTER_TIME); }
+	virtual void	DashEnd			(void)	{ return DefaultDashEnd(DEAGLE_DASH_ENTER, DEAGLE_DASH_ENTER_TIME, DEAGLE_DASH_EXIT, DEAGLE_DASH_EXIT_TIME); }
 
 public:	// util funcs
-	virtual	float	GetMaxSpeed(void) { return DEAGLE_MAX_SPEED; }
-	virtual void	ResetModel(void);
-	virtual int		CalcBodyParam(void);
+	virtual	float	GetMaxSpeed		(void)	{ return DEAGLE_MAX_SPEED; }
+	virtual void	ResetModel		(void);	// declare by marco.
+	virtual int		CalcBodyParam	(void);
 
 public:	// new functions
 	void DEagleFire(float flSpread, float flCycleTime = DEAGLE_FIRE_INTERVAL);
@@ -902,15 +904,15 @@ public:	// CL exclusive functions.
 public:	// basic logic funcs
 	virtual bool	Deploy			(void);
 	virtual void	PrimaryAttack	(void);
-	virtual void	SecondaryAttack	(void);
+	virtual void	SecondaryAttack	(void)	{ return DefaultSteelSight(Vector(-4.08f, -4, 0), 85, 7.5F); }
+	virtual void	WeaponIdle		(void)	{ return DefaultIdle(MK46_DASHING); }
 	virtual bool	Reload			(void);
-	virtual void	WeaponIdle		(void);
-	virtual bool	HolsterStart	(void);
-	virtual	void	DashStart		(void);
-	virtual void	DashEnd			(void);
+	virtual bool	HolsterStart	(void)	{ return DefaultHolster(MK46_HOLSTER, MK46_HOLSTER_TIME); }
+	virtual	void	DashStart		(void)	{ return DefaultDashStart(MK46_DASH_ENTER, MK46_DASH_ENTER_TIME); }
+	virtual void	DashEnd			(void)	{ return DefaultDashEnd(MK46_DASH_ENTER, MK46_DASH_ENTER_TIME, MK46_DASH_EXIT, MK46_DASH_EXIT_TIME); }
 
 public:	// util funcs
-	virtual	float	GetMaxSpeed		(void) { return MK46_MAX_SPEED; }
+	virtual	float	GetMaxSpeed		(void)	{ return MK46_MAX_SPEED; }
 	virtual void	ResetModel		(void);
 	virtual int		CalcBodyParam	(void);
 
@@ -1057,14 +1059,14 @@ public:	// basic logic funcs
 	virtual bool	Deploy			(void);
 	virtual void	PrimaryAttack	(void);
 	virtual void	SecondaryAttack	(void);
+	virtual void	WeaponIdle		(void)	{ return DefaultIdle(M4A1_DASHING); }
 	virtual bool	Reload			(void);
-	virtual void	WeaponIdle		(void);
-	virtual bool	HolsterStart	(void);
-	virtual	void	DashStart		(void);
-	virtual void	DashEnd			(void);
+	virtual bool	HolsterStart	(void)	{ return DefaultHolster(M4A1_HOLSTER, M4A1_HOLSTER_TIME); }
+	virtual	void	DashStart		(void)	{ return DefaultDashStart(M4A1_DASH_ENTER, M4A1_DASH_ENTER_TIME); }
+	virtual void	DashEnd			(void)	{ return DefaultDashEnd(M4A1_DASH_ENTER, M4A1_DASH_ENTER_TIME, M4A1_DASH_EXIT, M4A1_DASH_EXIT_TIME); }
 
 public:	// util funcs
-	virtual	float	GetMaxSpeed		(void) { return M4A1_MAX_SPEED; }
+	virtual	float	GetMaxSpeed		(void)	{ return M4A1_MAX_SPEED; }
 	virtual void	ResetModel		(void);
 	virtual int		CalcBodyParam	(void);
 
@@ -1314,18 +1316,19 @@ public:	// basic logic funcs
 	virtual void	PostFrame		(void);
 	virtual void	PrimaryAttack	(void);
 	virtual void	SecondaryAttack	(void);
-	virtual void	WeaponIdle		(void);
+	virtual void	WeaponIdle		(void)	{ return DefaultIdle(M1014_DASHING); }
 	virtual	bool	Reload			(void);
-	virtual bool	HolsterStart	(void);
-	virtual	void	DashStart		(void);
-	virtual void	DashEnd			(void);
+	virtual bool	HolsterStart	(void)	{ return DefaultHolster(M1014_HOLSTER, M1014_HOLSTER_TIME); }
+	virtual	void	DashStart		(void)	{ return DefaultDashStart(M1014_DASH_ENTER, M1014_DASH_ENTER_TIME); }
+	virtual void	DashEnd			(void)	{ return DefaultDashEnd(M1014_DASH_ENTER, M1014_DASH_ENTER_TIME, M1014_DASH_EXIT, M1014_DASH_EXIT_TIME); }
 
 public:	// util funcs
-	virtual	float	GetMaxSpeed		(void) { return M1014_MAX_SPEED; }
+	virtual	float	GetMaxSpeed		(void)	{ return M1014_MAX_SPEED; }
 	virtual	void	PlayEmptySound	(void);
 	virtual void	PushAnim		(void);
 	virtual void	PopAnim			(void);
 	virtual void	ResetModel		(void);
+	virtual int		CalcBodyParam	(void);
 };
 
 #define M45A1_VIEW_MODEL	"models/weapons/v_m45a1.mdl"

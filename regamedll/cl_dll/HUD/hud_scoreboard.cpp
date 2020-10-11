@@ -310,9 +310,8 @@ int CHudScoreboard::Draw(float flTime)
 		x2 = x + m_flChunkOffset * 1.5f;
 		if (g_PlayerExtraInfo[i].m_iTeam == g_iTeamNumber || g_iTeamNumber == TEAM_SPECTATOR)
 		{
-			_snwprintf(wszText, wcharsmax(wszText), L"%d", g_PlayerExtraInfo[i].m_iRoleType);
 			gFontFuncs.DrawSetTextPos(x2, y);
-			gFontFuncs.DrawPrintText(wszText);
+			gFontFuncs.DrawPrintText(m_rgpwcRoleNames[g_PlayerExtraInfo[i].m_iRoleType]);
 		}
 
 		// 2. HP
