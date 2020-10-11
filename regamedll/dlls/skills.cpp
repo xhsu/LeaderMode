@@ -1074,13 +1074,14 @@ bool CSkillEnfoceHeadshot::Terminate()
 
 void CSkillEnfoceHeadshot::OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr)
 {
-	if (!m_bUsingSkill)
+	if (!m_bUsingSkill || !m_pPlayer->m_pActiveItem)
 		return;
 
 	WeaponIdType iId = m_pPlayer->m_pActiveItem->m_iId;
 
 	// you have to use one of these weapon to trigger the enforced headshot.
-	if (iId != WEAPON_M200 && iId != WEAPON_M14EBR && iId != WEAPON_AWP && iId != WEAPON_SVD && iId != WEAPON_ANACONDA && iId != WEAPON_DEAGLE)
+	if (iId != WEAPON_M200 && iId != WEAPON_M14EBR && iId != WEAPON_AWP && iId != WEAPON_SVD && iId != WEAPON_ANACONDA && iId != WEAPON_DEAGLE
+		&& !(iId == WEAPON_XM8 && m_pPlayer->m_pActiveItem->m_iVariation == Role_Sharpshooter))	// XM8 is a special one.
 		return;
 
 	if (FNullEnt(tr.pHit))

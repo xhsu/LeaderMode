@@ -29,8 +29,8 @@ void CXM8::Think(void)
 {
 	CBaseWeapon::Think();
 
-	// TODO: update models during mode changing.
-	if (m_bInReload && m_bitsFlags & WPNSTATE_RELOAD_EMPTY)
+	// this model requires all parts set to 0 in order to play changing anim.
+	if ((m_bInReload && m_bitsFlags & WPNSTATE_RELOAD_EMPTY) || (m_bitsFlags & WPNSTATE_XM8_CHANGING))
 	{
 		g_pViewEnt->curstate.body = CalcBodyParam();
 	}
@@ -46,13 +46,37 @@ bool CXM8::Deploy()
 	return DefaultDeploy(XM8_VIEW_MODEL, XM8_WORLD_MODEL, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? XM8_DRAW_FIRST : XM8_DRAW, "carbine", (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? XM8_DRAW_FIRST_TIME : XM8_DRAW_TIME);
 }
 
+void CXM8::PostFrame(void)
+{
+	if (m_bitsFlags & WPNSTATE_XM8_CHANGING)
+	{
+		if (m_iVariation == Role_Sharpshooter)
+			SetVariation(Role_UNASSIGNED);
+		else
+			SetVariation(Role_Sharpshooter);
+
+		m_bitsFlags &= ~WPNSTATE_XM8_CHANGING;
+	}
+
+	// semi-auto for sharpshooter mode.
+	// release IN_ATTACK1 would clear fire flag instantly.
+	if (m_iVariation == Role_Sharpshooter && !(m_pPlayer->pev->button & IN_ATTACK))
+	{
+		m_iShotsFired = 0;
+		m_bDelayRecovery = false;
+	}
+
+	return CBaseWeapon::PostFrame();
+}
+
 void CXM8::SecondaryAttack()
 {
 	switch (m_iVariation)
 	{
 	case Role_Sharpshooter:
 		// OPTICAL.
-		DefaultSteelSight(Vector(-3.06f, -2, 1.142f), 50, 8.0f);
+		//DefaultSteelSight(Vector(-3.06f, -2, 1.142f), 50, 8.0f);
+		DefaultScopeSight(Vector(-3.06f, -2, 1.142f), 40);
 		break;
 
 	default:
@@ -64,27 +88,40 @@ void CXM8::SecondaryAttack()
 
 void CXM8::PrimaryAttack()
 {
+	float flInterval = 60.0f / XM8_RPM;
+
+	// slower fire interval for sharpshooter mode.
+	if (m_iVariation == Role_Sharpshooter)
+		flInterval = 0.2f;
+
 	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
 	{
-		XM8Fire(0.035f + (0.4f * m_flAccuracy));
+		XM8Fire(0.035f + (0.4f * m_flAccuracy), flInterval);
 	}
 	else if (m_pPlayer->pev->velocity.Length2D() > 140)
 	{
-		XM8Fire(0.035f + (0.07f * m_flAccuracy));
+		XM8Fire(0.035f + (0.07f * m_flAccuracy), flInterval);
 	}
 	else if (m_bInZoom)	// decrease spread while scoping.
 	{
-		XM8Fire(0.01f * m_flAccuracy);
+		XM8Fire(0.01f * m_flAccuracy, flInterval);
 	}
 	else
 	{
-		XM8Fire(0.02f * m_flAccuracy);
+		XM8Fire(0.02f * m_flAccuracy, flInterval);
 	}
 }
 
 void CXM8::XM8Fire(float flSpread, float flCycleTime)
 {
 	m_iShotsFired++;
+	m_bDelayRecovery = true;
+
+	// semi-auto for sharpshooter mode.
+	if (m_iVariation == Role_Sharpshooter && m_iShotsFired > 1)
+	{
+		return;
+	}
 
 	m_flAccuracy = (float(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 215.0f) + 0.3f;
 
@@ -204,6 +241,9 @@ bool CXM8::Reload()
 
 bool CXM8::AlterAct(void)
 {
+	if (m_pPlayer->m_iRoleType != Role_Sharpshooter)
+		return false;
+
 	if (m_bitsFlags & WPNSTATE_BUSY)
 		return false;
 
@@ -243,23 +283,33 @@ int CXM8::CalcBodyParam(void)
 		{ 0, 2 },	// selector		= 19;
 	};
 
-	switch (m_iVariation)
+	// this model requires all parts set to 0 in order to play changing anim.
+	if (m_bitsFlags & WPNSTATE_XM8_CHANGING)
 	{
-	case Role_Sharpshooter:
-		// the sharpshooter's version contains a XM8 sharpshooter optical sight.
-		// filpped down steel sight.
-
 		info[17].body = 0;
-		info[18].body = 1;
-		break;
-
-	default:
-		// by default, this weapon has no optical sight.
-		// filpped up steel sight.
-
-		info[17].body = 1;
 		info[18].body = 0;
-		break;
+	}
+	else
+	{
+		// only consider variation when not morphing..
+		switch (m_iVariation)
+		{
+		case Role_Sharpshooter:
+			// the sharpshooter's version contains a XM8 sharpshooter optical sight.
+			// filpped down steel sight.
+
+			info[17].body = 0;
+			info[18].body = 1;
+			break;
+
+		default:
+			// by default, this weapon has no optical sight.
+			// filpped up steel sight.
+
+			info[17].body = 1;
+			info[18].body = 0;
+			break;
+		}
 	}
 
 	if (!m_iClip)

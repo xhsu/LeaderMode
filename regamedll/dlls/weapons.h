@@ -149,6 +149,7 @@ public:
 	AmmoIdType		m_iSecondaryAmmoType;		// "secondary" ammo index into players m_rgAmmo[]
 	bool			m_bInZoom;
 	RoleTypes		m_iVariation;	// weapons suppose to variegate accroading to their owner.
+	bool			m_bDelayRecovery;
 
 	struct	// this structure is for anim push and pop. it save & restore weapon state.
 	{
@@ -511,6 +512,7 @@ public:	// CL exclusive functions.
 
 public:	// basic logic funcs
 	virtual bool	Deploy			(void);
+	virtual void	PostFrame		(void);
 	virtual void	PrimaryAttack	(void);
 	virtual void	SecondaryAttack	(void);
 	virtual void	WeaponIdle		(void)	{ return DefaultIdle(XM8_DASHING); }

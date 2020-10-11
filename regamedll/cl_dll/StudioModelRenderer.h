@@ -165,3 +165,11 @@ extern cl_entity_t* g_pViewEnt;
 // for EXPORTFUNC HUD_PostRunCmd
 void CounterStrike_SetSequence(int seq, int gaitseq);
 void CounterStrike_SetOrientation(float* o, float* a);
+
+// vmdl hands texture changing
+namespace gViewModelHandsTexture
+{
+	void	Initialization	(void);
+	void	Think			(void);
+	void	InferiorThink	(void);
+};

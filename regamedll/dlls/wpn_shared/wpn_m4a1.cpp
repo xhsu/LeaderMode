@@ -85,6 +85,7 @@ void CM4A1::PrimaryAttack()
 void CM4A1::M4A1Fire(float flSpread, float flCycleTime)
 {
 	m_iShotsFired++;
+	m_bDelayRecovery = true;
 
 	m_flAccuracy = (float(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 220.0f) + 0.3f;
 

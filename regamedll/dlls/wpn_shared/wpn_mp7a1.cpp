@@ -90,6 +90,7 @@ void CMP7A1::SecondaryAttack(void)
 void CMP7A1::MP7A1Fire(float flSpread, float flCycleTime)
 {
 	m_iShotsFired++;
+	m_bDelayRecovery = true;
 
 	m_flAccuracy = (float(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 200.0f) + 0.55f;
 

@@ -92,6 +92,7 @@ public:
 	Vector	m_vecVAngleShift;
 	EquipmentIdType m_iUsingGrenadeId;
 	WeaponIdType m_iWpnSwitchingTo;	// use this instead of g_iSelectedWeapon.
+	RoleTypes m_iRoleType;
 
 public:
 	void	SetAnimation(PLAYER_ANIM playerAnim)	{}

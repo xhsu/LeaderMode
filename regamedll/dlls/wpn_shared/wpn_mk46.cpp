@@ -70,6 +70,7 @@ void CMK46::PrimaryAttack()
 void CMK46::MK46Fire(float flSpread, float flCycleTime)
 {
 	m_iShotsFired++;
+	m_bDelayRecovery = true;
 
 	m_flAccuracy = (float(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 175.0f) + 0.4f;
 

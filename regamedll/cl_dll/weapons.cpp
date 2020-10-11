@@ -542,12 +542,15 @@ void CBaseWeapon::PostFrame()
 	{
 		// The following code prevents the player from tapping the firebutton repeatedly
 		// to simulate full auto and retaining the single shot accuracy of single fire
-		if (m_iShotsFired > 15)
+		if (m_bDelayRecovery)
 		{
-			m_iShotsFired = 15;
-		}
+			m_bDelayRecovery = false;
 
-		m_flDecreaseShotsFired = gpGlobals->time + 0.4f;
+			if (m_iShotsFired > 15)
+				m_iShotsFired = 15;
+
+			m_flDecreaseShotsFired = gpGlobals->time + 0.4;
+		}
 
 		// if it's a semi-auto weapon then set the shots fired to 0 after the player releases a button
 		if (IsSemiautoWeapon(m_iId))
@@ -1219,6 +1222,7 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	gPseudoPlayer.pev->weaponanim = from->client.weaponanim;
 	gPseudoPlayer.pev->viewmodel = from->client.viewmodel;
 	gPseudoPlayer.m_flNextAttack = from->client.m_flNextAttack;
+	gPseudoPlayer.m_iRoleType = g_iRoleType;	// synchronize local player role.
 
 	g_iPlayerFlags = gPseudoPlayer.pev->flags = from->client.flags;
 	g_vPlayerVelocity = gPseudoPlayer.pev->velocity = from->client.velocity;

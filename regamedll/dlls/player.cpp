@@ -7887,6 +7887,10 @@ void CBasePlayer::AssignRole(RoleTypes iNewRole)
 	WRITE_BYTE(entindex());
 	WRITE_BYTE(iNewRole);
 	MESSAGE_END();
+
+	// enforce the health and armor update.
+	m_iClientHealth = -1;
+	m_iClientBattery = -1;
 }
 
 void CBasePlayer::UpdateHudText()

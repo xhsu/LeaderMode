@@ -89,6 +89,7 @@ void CUMP45::SecondaryAttack(void)
 void CUMP45::UMP45Fire(float flSpread, float flCycleTime)
 {
 	m_iShotsFired++;
+	m_bDelayRecovery = true;
 
 	m_flAccuracy = ((m_iShotsFired * m_iShotsFired) / 210) + 0.5f;
 

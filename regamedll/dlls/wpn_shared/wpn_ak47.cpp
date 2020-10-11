@@ -93,6 +93,7 @@ void CAK47::PrimaryAttack()
 void CAK47::AK47Fire(float flSpread, float flCycleTime)
 {
 	m_iShotsFired++;
+	m_bDelayRecovery = true;
 
 	m_flAccuracy = (float(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 200.0f) + 0.35f;
 

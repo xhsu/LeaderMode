@@ -100,6 +100,7 @@ void CQBZ95::PrimaryAttack()
 void CQBZ95::QBZ95Fire(float flSpread, float flCycleTime)
 {
 	m_iShotsFired++;
+	m_bDelayRecovery = true;
 
 	m_flAccuracy = (float(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 215.0f) + 0.3f;
 

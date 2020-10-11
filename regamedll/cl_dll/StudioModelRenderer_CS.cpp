@@ -173,6 +173,73 @@ bool WeaponHasAttachments(entity_state_t* pplayer)
 	return (modelheader->numattachments != 0);
 }
 
+// ===================== Hands texture dynamic changing =====================
+
+namespace gViewModelHandsTexture
+{
+	bool	m_bAvailable = false;
+	model_t* m_pLastViewModel = nullptr;
+	GLuint	m_iCTHandTexture = NULL;
+	GLuint	m_iTRHandTexture = NULL;
+
+	void	Initialization	(void)
+	{
+		if (m_bAvailable)
+			return;
+
+		m_iCTHandTexture = LoadDDS("texture/Models/Hands/v_hands_CT.dds");
+		m_iTRHandTexture = LoadDDS("texture/Models/Hands/v_hands_TER.dds");
+
+		m_bAvailable = !!(m_iCTHandTexture && m_iTRHandTexture);
+	}
+
+	void	Think			(void)
+	{
+		if (!m_bAvailable || !g_pViewEnt || !g_pViewEnt->model || g_pViewEnt->model == m_pLastViewModel)
+			return;
+
+		studiohdr_t* pStudio = (studiohdr_t*)IEngineStudio.Mod_Extradata(g_pViewEnt->model);
+		mstudiotexture_t* pTexture = (mstudiotexture_t*)(((byte*)pStudio) + pStudio->textureindex);
+
+		for (int i = 0; i < pStudio->numtextures; i++)
+		{
+			if (!Q_strcmp(pTexture->name, "v_hands.bmp"))
+			{
+				pTexture->index = ((g_iTeamNumber == TEAM_CT) ? m_iCTHandTexture : m_iTRHandTexture);
+				break;
+			}
+
+			pTexture++;
+		}
+
+		m_pLastViewModel = g_pViewEnt->model;
+	}
+
+	model_t* m_pLastInfViewModel = nullptr;
+
+	void	InferiorThink	(void)
+	{
+		if (!m_bAvailable || !g_pViewEnt || !g_pViewEnt->model || g_pViewEnt->model == m_pLastInfViewModel)
+			return;
+
+		studiohdr_t* pStudio = (studiohdr_t*)IEngineStudio.Mod_Extradata(g_pViewEnt->model);
+		mstudiotexture_t* pTexture = (mstudiotexture_t*)(((byte*)pStudio) + pStudio->textureindex);
+
+		for (int i = 0; i < pStudio->numtextures; i++)
+		{
+			if (!Q_strcmp(pTexture->name, "v_hands.bmp"))
+			{
+				pTexture->index = ((g_iTeamNumber == TEAM_CT) ? m_iCTHandTexture : m_iTRHandTexture);
+				break;
+			}
+
+			pTexture++;
+		}
+
+		m_pLastInfViewModel = g_pViewEnt->model;
+	}
+};
+
 // ===================== CGameStudioModelRenderer =====================
 
 CGameStudioModelRenderer::CGameStudioModelRenderer(void)
@@ -1118,6 +1185,9 @@ int R_StudioDrawModel(int flags)
 		// special treatment for certain weapons.
 		if (g_pCurWeapon)
 			gEngfuncs.Cvar_SetValue("cl_righthand", g_pCurWeapon->UsingInvertedVMDL());
+
+		// detecting vmdl changing and swapping the vmdl v_hands.bmp texture.
+		gViewModelHandsTexture::Think();
 	}
 
 	return g_StudioRenderer.StudioDrawModel(flags);
