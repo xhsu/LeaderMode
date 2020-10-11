@@ -100,6 +100,12 @@ int CHudCrosshair::Draw(float flTime)
 {
 	static wrect_t nullrc;
 
+	// in steel sight calibrating mode.
+	if (cl_gun_ofs[0]->value || cl_gun_ofs[1]->value || cl_gun_ofs[2]->value)
+	{
+		gEngfuncs.pfnFillRGBA(ScreenWidth / 2 - 1, ScreenHeight / 2 - 1, 2, 2, 255, 255, 255, 255);
+	}
+
 	if (gEngfuncs.IsSpectateOnly())
 	{
 		if (g_iUser1 != OBS_IN_EYE)

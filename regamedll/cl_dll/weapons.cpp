@@ -743,6 +743,12 @@ bool CBaseWeapon::DefaultDeploy(const char* szViewModel, const char* szWeaponMod
 	return true;
 }
 
+void CBaseWeapon::DefaultIdle(int iDashingAnim, int iIdleAnim, float flDashLoop, float flIdleLoop)
+{
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + ((m_bitsFlags & WPNSTATE_DASHING) ? flDashLoop : flIdleLoop);
+	SendWeaponAnim((m_bitsFlags & WPNSTATE_DASHING) ? iDashingAnim : iIdleAnim);
+}
+
 bool CBaseWeapon::DefaultReload(int iClipSize, int iAnim, float fDelay)
 {
 	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
@@ -773,6 +779,15 @@ bool CBaseWeapon::DefaultReload(int iClipSize, int iAnim, float fDelay)
 	// it's currently useless.. but let's do it anyway.
 	if (!m_iClip)
 		m_bitsFlags |= WPNSTATE_RELOAD_EMPTY;
+
+	return true;
+}
+
+bool CBaseWeapon::DefaultHolster(int iHolsterAnim, float flHolsterDelay)
+{
+	SendWeaponAnim(iHolsterAnim);
+	m_pPlayer->m_flNextAttack = flHolsterDelay;
+	m_bitsFlags |= WPNSTATE_HOLSTERING;
 
 	return true;
 }

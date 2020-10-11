@@ -45,7 +45,7 @@ void CM1014::PostFrame(void)
 {
 	if (m_bInReload && !(m_bitsFlags & (WPNSTATE_MELEE | WPNSTATE_QUICK_THROWING)))
 	{
-		if (m_flNextInsertAnim <= gpGlobals->time && m_iClip < m_pItemInfo->m_iMaxClip)
+		if (m_flNextInsertAnim <= gpGlobals->time && m_iClip < m_pItemInfo->m_iMaxClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] > 0)
 		{
 			SendWeaponAnim(M1014_INSERT);
 			m_pPlayer->SetAnimation(PLAYER_RELOAD);
@@ -159,46 +159,19 @@ void CM1014::PrimaryAttack()
 
 void CM1014::SecondaryAttack(void)
 {
-	m_bInZoom = !m_bInZoom;
-	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.3f;
-
-#ifdef CLIENT_DLL
-	// due to some logic problem, we actually cannot use m_bInZoom here.
-	// it would be override.
-
-	if (!g_vecGunOfsGoal.LengthSquared())
+	switch (m_iVariation)
 	{
-		g_vecGunOfsGoal = Vector(-4.5f, -5.0f, 2.0f);
-		gHUD::m_iFOV = 85;	// allow clients to predict the zoom.
-	}
-	else
-	{
-		g_vecGunOfsGoal = g_vecZero;
-		gHUD::m_iFOV = 90;
-	}
+	case Role_LeadEnforcer:
+		// STEEL
+		// Vector(-4.57f, -5, 2.2f)
+		DefaultSteelSight(Vector(-4.5f, -5, 2), 85, 12.0f);
+		break;
 
-	// this model needs faster.
-	g_flGunOfsMovingSpeed = 12.0f;
-#else
-	// just zoom a liiiiittle bit.
-	// this doesn't suffer from the same bug where the gunofs does, since the FOV was actually sent from SV.
-	if (m_bInZoom)
-	{
-		m_pPlayer->pev->fov = 85;
-		EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, "weapons/steelsight_in.wav", 0.75f, ATTN_STATIC);
+	default:
+		// RED DOT
+		DefaultSteelSight(Vector(-4.505f, -5, -0.09f), 85, 12.0f);
+		break;
 	}
-	else
-	{
-		m_pPlayer->pev->fov = 90;
-		EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, "weapons/steelsight_out.wav", 0.75f, ATTN_STATIC);
-	}
-#endif
-}
-
-void CM1014::WeaponIdle()
-{
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
-	SendWeaponAnim((m_bitsFlags & WPNSTATE_DASHING) ? M1014_DASHING : M1014_IDLE);
 }
 
 bool CM1014::Reload(void)
@@ -218,76 +191,6 @@ bool CM1014::Reload(void)
 
 	SendWeaponAnim(M1014_START_RELOAD);
 	return true;
-}
-
-bool CM1014::HolsterStart(void)
-{
-	SendWeaponAnim(M1014_HOLSTER);
-	m_pPlayer->m_flNextAttack = M1014_HOLSTER_TIME;
-	m_bitsFlags |= WPNSTATE_HOLSTERING;
-
-	return true;
-}
-
-void CM1014::DashStart(void)
-{
-	if (m_bInReload)
-		m_bInReload = false;
-
-	if (m_bInZoom || m_pPlayer->pev->fov < 90)
-	{
-#ifndef CLIENT_DLL
-		SecondaryAttack();
-#else
-		g_vecGunOfsGoal = g_vecZero;
-		g_flGunOfsMovingSpeed = 12.0f;
-		gHUD::m_iFOV = 90;
-#endif
-	}
-
-	SendWeaponAnim(M1014_DASH_ENTER);
-	m_pPlayer->m_flNextAttack = M1014_DASH_ENTER_TIME;
-	m_flTimeWeaponIdle = M1014_DASH_ENTER_TIME;
-	m_bitsFlags |= WPNSTATE_DASHING;
-}
-
-void CM1014::DashEnd(void)
-{
-	if (m_pPlayer->m_flNextAttack > 0.0f && m_pPlayer->pev->weaponanim == M1014_DASH_ENTER)
-	{
-		// this is how much you procees to the dashing phase.
-		// for example, assuming the whole length is 1.0s, you start 0.7s and decide to cancel.
-		// although there's only 0.3s to the dashing phase, but turning back still requires another equally 0.7s.
-		// "m_pPlayer->m_flNextAttack" is the 0.3s of full length. you need to get the rest part, i.e. the 70%.
-		float flRunStartUnplayedRatio = 1.0f - m_pPlayer->m_flNextAttack / M1014_DASH_ENTER_TIME;
-
-		// stick on the last instance in the comment: 70% * 1.0s(full length) = 0.7s, this is the time we need to turning back.
-		float flRunStopTimeLeft = M1014_DASH_EXIT_TIME * flRunStartUnplayedRatio;
-
-		// play the anim.
-		SendWeaponAnim(M1014_DASH_EXIT);
-
-#ifdef CLIENT_DLL
-		// why we are using the "0.3s" here?
-		// this is because the g_flTimeViewModelAnimStart actually means how much time had passed since the anim was ordered to play.
-		// if we need to play 0.7s, we have to told system we only played it for 0.3s. right?
-		g_flTimeViewModelAnimStart = gEngfuncs.GetClientTime() - (M1014_DASH_EXIT_TIME - flRunStopTimeLeft);
-#endif
-
-		// force everything else to wait.
-		m_pPlayer->m_flNextAttack = m_flNextPrimaryAttack = m_flNextSecondaryAttack = m_flTimeWeaponIdle = flRunStopTimeLeft;
-	}
-
-	// if RUN_START is normally played and finished, go normal.
-	else
-	{
-		SendWeaponAnim(M1014_DASH_EXIT);
-		m_pPlayer->m_flNextAttack = M1014_DASH_EXIT_TIME;
-		m_flTimeWeaponIdle = M1014_DASH_EXIT_TIME;
-	}
-
-	// either way, we have to remove this flag.
-	m_bitsFlags &= ~WPNSTATE_DASHING;
 }
 
 void CM1014::PlayEmptySound(void)
@@ -315,6 +218,44 @@ void CM1014::PopAnim(void)
 	// by this, the time will look like "freezed" during the push-pop time frame.
 	m_flNextAddAmmo = gpGlobals->time - m_Stack2.m_flNextAddAmmo;
 	m_flNextInsertAnim = gpGlobals->time - m_Stack2.m_flNextInsertAnim;
+}
+
+int CM1014::CalcBodyParam(void)
+{
+	static BodyEnumInfo_t info[] =
+	{
+		{ 0, 1 },	// hands		= 0;
+		{ 0, 1 },
+		{ 0, 1 },	// mesh			= 2;
+		{ 0, 1 },
+
+		{ 0, 4 },	// scope		= 4;
+		{ 0, 2 },	// muzzle		= 5;
+		{ 0, 2 },	// laser		= 6;
+	};
+
+	switch (m_iVariation)
+	{
+	case Role_LeadEnforcer:
+		// the lead enforcer's version contains only a muzzle compensator.
+
+		info[4].body = 0;
+		info[5].body = 1;
+		info[6].body = 0;
+		break;
+
+	default:
+		// by default, this weapon has:
+		// reddot sight.
+		// laser.
+
+		info[4].body = 2;
+		info[5].body = 0;
+		info[6].body = 1;
+		break;
+	}
+
+	return CalcBody(info, ARRAY_ELEM_COUNT(info));	// elements count of the info[].
 }
 
 DECLARE_STANDARD_RESET_MODEL_FUNC(M1014)

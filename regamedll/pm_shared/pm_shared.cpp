@@ -669,6 +669,7 @@ int PM_FlyMove()
 		if (!pmove->velocity[0] && !pmove->velocity[1] && !pmove->velocity[2])
 			break;
 
+		// LUNA: BUGBUG: perhaps this is suffering NaN bug.
 		// Assume we can move all the way from the current origin to the
 		// end point.
 		for (i = 0; i < 3; i++)

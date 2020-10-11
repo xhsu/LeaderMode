@@ -48,63 +48,18 @@ bool CM4A1::Deploy()
 
 void CM4A1::SecondaryAttack()
 {
-	m_bInZoom = !m_bInZoom;
-	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.3f;
-
-#ifdef CLIENT_DLL
-	// due to some logic problem, we actually cannot use m_bInZoom here.
-	// it would be override.
-
-	if (!g_vecGunOfsGoal.LengthSquared())
+	switch (m_iVariation)
 	{
-		switch (m_iVariation)
-		{
-		case Role_Sharpshooter:
-			// ACOG.
-			g_vecGunOfsGoal = Vector(-3.77f, -3, 0.57f);
-			gHUD::m_iFOV = 55;
-			break;
+	case Role_Sharpshooter:
+		// ACOG
+		DefaultSteelSight(Vector(-3.77f, -3, 0.57f), 55, 8.0f);
+		break;
 
-		default:
-			// HOLO.
-			g_vecGunOfsGoal = Vector(-3.77f, -3, 0.37f);
-			gHUD::m_iFOV = 85;	// allow clients to predict the zoom.
-			break;
-		}
+	default:
+		// HOLO
+		DefaultSteelSight(Vector(-3.77f, -3, 0.37f), 85, 8.0f);
+		break;
 	}
-	else
-	{
-		g_vecGunOfsGoal = g_vecZero;
-		gHUD::m_iFOV = 90;
-	}
-
-	g_flGunOfsMovingSpeed = 8.0f;
-#else
-	// zoom according to the weapon variation.
-	// this doesn't suffer from the same bug where the gunofs does, since the FOV was actually sent from SV.
-	if (m_bInZoom)
-	{
-		switch (m_iVariation)
-		{
-		case Role_Sharpshooter:
-			// ACOG.
-			m_pPlayer->pev->fov = 55;
-			break;
-
-		default:
-			// HOLO.
-			m_pPlayer->pev->fov = 85;
-			break;
-		}
-
-		EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, "weapons/steelsight_in.wav", 0.75f, ATTN_STATIC);
-	}
-	else
-	{
-		m_pPlayer->pev->fov = 90;
-		EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, "weapons/steelsight_out.wav", 0.75f, ATTN_STATIC);
-	}
-#endif
 }
 
 void CM4A1::PrimaryAttack()
@@ -213,12 +168,6 @@ void CM4A1::M4A1Fire(float flSpread, float flCycleTime)
 	}
 }
 
-void CM4A1::WeaponIdle()
-{
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
-	SendWeaponAnim((m_bitsFlags & WPNSTATE_DASHING) ? M4A1_DASHING : M4A1_IDLE);
-}
-
 bool CM4A1::Reload()
 {
 	if (DefaultReload(m_pItemInfo->m_iMaxClip, m_iClip ? M4A1_RELOAD : M4A1_RELOAD_EMPTY, m_iClip ? M4A1_RELOAD_TIME : M4A1_RELOAD_EMPTY_TIME))
@@ -238,76 +187,6 @@ bool CM4A1::Reload()
 	}
 
 	return false;
-}
-
-bool CM4A1::HolsterStart(void)
-{
-	SendWeaponAnim(M4A1_HOLSTER);
-	m_pPlayer->m_flNextAttack = M4A1_HOLSTER_TIME;
-	m_bitsFlags |= WPNSTATE_HOLSTERING;
-
-	return true;
-}
-
-void CM4A1::DashStart(void)
-{
-	if (m_bInReload)
-		m_bInReload = false;
-
-	if (m_bInZoom || m_pPlayer->pev->fov < 90)
-	{
-#ifndef CLIENT_DLL
-		SecondaryAttack();
-#else
-		g_vecGunOfsGoal = g_vecZero;
-		g_flGunOfsMovingSpeed = 10.0f;
-		gHUD::m_iFOV = 90;
-#endif
-	}
-
-	SendWeaponAnim(M4A1_DASH_ENTER);
-	m_pPlayer->m_flNextAttack = M4A1_DASH_ENTER_TIME;
-	m_flTimeWeaponIdle = M4A1_DASH_ENTER_TIME;
-	m_bitsFlags |= WPNSTATE_DASHING;
-}
-
-void CM4A1::DashEnd(void)
-{
-	if (m_pPlayer->m_flNextAttack > 0.0f && m_pPlayer->pev->weaponanim == M4A1_DASH_ENTER)
-	{
-		// this is how much you procees to the dashing phase.
-		// for example, assuming the whole length is 1.0s, you start 0.7s and decide to cancel.
-		// although there's only 0.3s to the dashing phase, but turning back still requires another equally 0.7s.
-		// "m_pPlayer->m_flNextAttack" is the 0.3s of full length. you need to get the rest part, i.e. the 70%.
-		float flRunStartUnplayedRatio = 1.0f - m_pPlayer->m_flNextAttack / M4A1_DASH_ENTER_TIME;
-
-		// stick on the last instance in the comment: 70% * 1.0s(full length) = 0.7s, this is the time we need to turning back.
-		float flRunStopTimeLeft = M4A1_DASH_EXIT_TIME * flRunStartUnplayedRatio;
-
-		// play the anim.
-		SendWeaponAnim(M4A1_DASH_EXIT);
-
-#ifdef CLIENT_DLL
-		// why we are using the "0.3s" here?
-		// this is because the g_flTimeViewModelAnimStart actually means how much time had passed since the anim was ordered to play.
-		// if we need to play 0.7s, we have to told system we only played it for 0.3s. right?
-		g_flTimeViewModelAnimStart = gEngfuncs.GetClientTime() - (M4A1_DASH_EXIT_TIME - flRunStopTimeLeft);
-#endif
-
-		// force everything else to wait.
-		m_pPlayer->m_flNextAttack = m_flNextPrimaryAttack = m_flNextSecondaryAttack = m_flTimeWeaponIdle = flRunStopTimeLeft;
-	}
-
-	// if RUN_START is normally played and finished, go normal.
-	else
-	{
-		SendWeaponAnim(M4A1_DASH_EXIT);
-		m_pPlayer->m_flNextAttack = M4A1_DASH_EXIT_TIME;
-		m_flTimeWeaponIdle = M4A1_DASH_EXIT_TIME;
-	}
-
-	// either way, we have to remove this flag.
-	m_bitsFlags &= ~WPNSTATE_DASHING;
 }
 
 int CM4A1::CalcBodyParam(void)
@@ -368,7 +247,7 @@ int CM4A1::CalcBodyParam(void)
 		}
 	}
 
-	return CalcBody(info, 13);	// elements count of the info[].
+	return CalcBody(info, ARRAY_ELEM_COUNT(info));	// elements count of the info[].
 }
 
 DECLARE_STANDARD_RESET_MODEL_FUNC(M4A1)
