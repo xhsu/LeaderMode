@@ -8,9 +8,9 @@ The ultimate goal is to eliminate the other team. Use whatever strategies you wa
 
 ## How to install?
 1. You have to own copies of all these three games: [Half-Life](https://store.steampowered.com/app/70/HalfLife/), [Condition Zero](https://store.steampowered.com/app/80/CounterStrike_Condition_Zero/) and [Counter-Strike](https://store.steampowered.com/app/10/CounterStrike/).
-2. Create a folder in the GoldSrc engine folder.
-3. Rename the RESOURCE/ folder to "leadermode" or something like that.
-4. Install fonts located in RESOURCE/ folder into Windows.
+2. Rename the RESOURCE/ folder to "leadermode" or something like that, than place it along with GoldSrc engine like other mods..
+3. Install fonts located in RESOURCE/ folder into Windows.
+4. Download the released version or build the game DLLs by yourself. Place the game DLLs in their corresponding locations.
 5. Build [metahook](https://github.com/nagist/metahook). Rename the .exe file to "leadermode" as well, and place it along with the GoldSrc engine.
 6. Start leadermode.exe and enjoy the game.
 

@@ -454,7 +454,7 @@ public:	// new functions
 constexpr float XM8_MAX_SPEED				= 240.0f;
 constexpr float XM8_DAMAGE					= 32.0f;
 constexpr float XM8_RANGE_MODIFER			= 0.96f;
-constexpr float XM8_RELOAD_TIME				= 2.2F;
+constexpr float XM8_RELOAD_TIME				= 2.333F;
 constexpr float XM8_RELOAD_EMPTY_TIME		= 3.033F;
 constexpr float XM8_DRAW_FIRST_TIME			= 1.3F;
 constexpr float XM8_DRAW_TIME				= 0.7F;
@@ -656,7 +656,7 @@ public:	// CL exclusive functions.
 public:	// basic logic funcs
 	virtual bool	Deploy			(void);
 	virtual void	PrimaryAttack	(void);
-	virtual void	SecondaryAttack	(void)	{ return DefaultSteelSight(Vector(-1.93f, -0.5f, 0.15f), 85); }
+	virtual void	SecondaryAttack	(void)	{ return DefaultSteelSight(Vector(-1.905f, -2, 1.1f), 85); }
 	virtual bool	Reload			(void);
 	virtual void	WeaponIdle		(void)	{ return DefaultIdle(DEAGLE_DASHING); }
 	virtual bool	HolsterStart	(void)	{ return DefaultHolster(DEAGLE_HOLSTER, DEAGLE_HOLSTER_TIME); }

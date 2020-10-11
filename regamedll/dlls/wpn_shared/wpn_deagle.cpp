@@ -195,52 +195,55 @@ int CDEagle::CalcBodyParam(void)
 		{ 0, 1 },	// right sleeve	= 2;
 		{ 0, 2 },	// left sleeve	= 3;
 
-		{ 0, 1 },	// pistol		= 4;
-		{ 0, 1 },
-		{ 0, 1 },
-		{ 0, 1 },
-
-		{ 0, 2 },	// follower		= 8;
-		{ 0, 4 },	// bullets		= 9;
-		{ 0, 1 },
-		{ 0, 2 },	// slide_1		= 11;
-		{ 0, 2 },	// slide_2		= 12;
+		{ 0, 2 },	// slide_1		= 4;
+		{ 0, 2 },	// slide_2		= 5;
+		{ 0, 4 },	// bullets		= 6;
+		{ 0, 2 },	// laser		= 7;
+		
 	};
 
 	// mag state control.
 	switch (m_iClip)
 	{
 	case 0:	// empty mag. the follower is shown.
-		info[8].body = 1;
-		info[9].body = 3;
+		info[6].body = 3;
 		break;
 
 	case 1:
-		info[8].body = 0;
-		info[9].body = 2;
+		info[6].body = 2;
 		break;
 
 	case 2:
-		info[8].body = 0;
-		info[9].body = 1;
+		info[6].body = 1;
 		break;
 
 	default:	// m_iClip >= 3
-		info[8].body = 0;
-		info[9].body = 0;
+		info[6].body = 0;
 		break;
 	}
 
 	// slide stop vfx.
 	if (m_iClip <= 0 && (1 << m_pPlayer->pev->weaponanim) & BITS_SLIDE_STOP_ANIM)
 	{
-		info[11].body = 1;
-		info[12].body = 1;
+		info[4].body = 1;
+		info[5].body = 1;
 	}
 	else
 	{
-		info[11].body = 0;
-		info[12].body = 0;
+		info[4].body = 0;
+		info[5].body = 0;
+	}
+
+	switch (m_iVariation)
+	{
+	case Role_Sharpshooter:
+		// the sharpshooter version of DEagle contains a laser.
+		info[7].body = 1;
+		break;
+
+	default:
+		info[7].body = 0;
+		break;
 	}
 
 	// in current deagle model, there are two clips involved in normal reload anim. a full and an empty one.
@@ -249,8 +252,7 @@ int CDEagle::CalcBodyParam(void)
 	{
 		if (m_pPlayer->m_flNextAttack < 1.257)	// in this anim, a new mag was taken out after around 0.657s. thus, 1.91f - 0.657f ~= 1.257f.
 		{
-			info[8].body = 0;	// full mag.
-			info[9].body = 0;
+			info[6].body = 0;	// full mag.
 		}
 	}
 
