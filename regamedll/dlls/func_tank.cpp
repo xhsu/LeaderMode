@@ -240,7 +240,13 @@ BOOL CFuncTank::StartControl(CBasePlayer *pController)
 		m_pController->m_pActiveItem->Holstered();	// it's unlike any switching weapon.
 		m_pController->pev->weaponmodel = 0;
 		m_pController->pev->viewmodel = 0;
-		m_pController->pev->fov = DEFAULT_FOV;
+
+		// ReGameDLL Fixes: Version 5.16.0.465
+		// if (m_pController->m_iFOV != DEFAULT_FOV)
+		{
+			m_pController->pev->fov = m_pController->m_iLastZoom = DEFAULT_FOV;
+			m_pController->m_bResumeZoom = false;
+		}
 	}
 
 	m_pController->m_iHideHUD |= HIDEHUD_WEAPONS;

@@ -752,6 +752,14 @@ bool CCSBotManager::BotAddCommand(BotProfileTeamType team, bool isFromConsole)
 		if (!profile)
 		{
 			CONSOLE_ECHO("All bot profiles at this difficulty level are in use.\n");
+
+			// ReGameDLL Fixes: Version 5.18.0.468
+			// decrease the bot quota
+			if (!isFromConsole)
+			{
+				CVAR_SET_FLOAT("bot_quota", cv_bot_quota.value - 1);
+			}
+
 			return true;
 		}
 	}
@@ -787,8 +795,12 @@ bool CCSBotManager::BotAddCommand(BotProfileTeamType team, bool isFromConsole)
 	}
 	else
 	{
+		// ReGameDLL Fixes: Version 5.18.0.468
 		// decrease the bot quota
-		CVAR_SET_FLOAT("bot_quota", cv_bot_quota.value - 1);
+		if (!isFromConsole)
+		{
+			CVAR_SET_FLOAT("bot_quota", cv_bot_quota.value - 1);
+		}
 	}
 
 	return true;

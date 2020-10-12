@@ -203,7 +203,15 @@ void CCSBot::OnEvent(GameEventType event, CBaseEntity *pEntity, CBaseEntity *pOt
 		break;
 	}
 	default:
+	{
+		// ReGameDLL Fixes: Version 5.18.0.473
+		// Make sure that the entity is a player,
+		// because here the entity can come as CBreakable with event EVENT_BREAK_METAL
+		if (pPlayer && !pPlayer->IsPlayer())
+			return;
+
 		break;
+	}
 	}
 
 	// Process radio events from our team

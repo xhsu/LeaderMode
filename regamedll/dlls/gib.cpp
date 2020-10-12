@@ -292,3 +292,22 @@ void CGib::Spawn(const char *szGibModel)
 	// how many blood decals this gib can place (1 per bounce until none remain).
 	m_cBloodDecals = 5;
 }
+
+void CGib::WaitTillLand()
+{
+	if (!IsInWorld())
+	{
+		UTIL_Remove(this);
+		return;
+	}
+
+	if (pev->velocity == g_vecZero)
+	{
+		SetThink(&CBaseEntity::SUB_StartFadeOut);
+		pev->nextthink = gpGlobals->time + m_lifeTime;
+	}
+	else
+	{
+		pev->nextthink = gpGlobals->time + 0.5f;
+	}
+}

@@ -7,13 +7,10 @@
 // 
 
 // Version defines
-#define APP_VERSION "5.14.0.0-dev"
+#define APP_VERSION "5.18.0.474-LeaderMode"
 
-#define APP_COMMIT_DATE "Feb 25 2020"
-#define APP_COMMIT_TIME "14:10:58"
-
-#define APP_COMMIT_SHA ""
-#define APP_COMMIT_URL ""
+#define APP_COMMIT_DATE "Jul 16 2020"
+#define APP_COMMIT_TIME "00:00:00"
 
 #endif //__APPVERSION_H__
 

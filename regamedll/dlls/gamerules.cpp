@@ -2489,6 +2489,10 @@ void CHalfLifeMultiplay::ClientDisconnected(edict_t *pClient)
 					pObserver->Observer_SetMode(iMode);
 				}
 			}
+
+			// ReGameDLL Fixes: Version 5.18.0.474
+			// Client is gone, make sure that his body disappeared and became not solid
+			pPlayer->MakeDormant();
 		}
 	}
 

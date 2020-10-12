@@ -695,7 +695,7 @@ bool NavAreaBuildPath(CNavArea *startArea, CNavArea *goalArea, const Vector *goa
 				{
 					dir++;
 
-					if (dir >= NUM_DIRECTIONS)	// LUNA: if this line goes to '==' operator, it would cause "index out of bounce" error by accessing m_connect[] with 6.
+					if (dir >= NUM_DIRECTIONS)	// LUNA: if this line goes to '==' operator, it would cause "index out of bounce" error by accessing m_connect[] with 6. ReGameDLL fix this in their 5.18.0.472 after I noticed it...
 					{
 						// checked all directions on floor - check ladders next
 						searchFloor = false;

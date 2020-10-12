@@ -1297,6 +1297,13 @@ void CBasePlayer::RemoveAllItems(BOOL removeSuit)
 	m_pActiveItem = nullptr;
 	m_bHasPrimary = false;
 
+	// ReGameDLL Fixes: Version 5.16.0.465
+	// if (m_iFOV != DEFAULT_FOV)
+	{
+		pev->fov = m_iLastZoom = DEFAULT_FOV;
+		m_bResumeZoom = false;
+	}
+
 	pev->viewmodel = 0;
 	pev->weaponmodel = 0;
 
@@ -1314,6 +1321,7 @@ void CBasePlayer::RemoveAllItems(BOOL removeSuit)
 
 	m_bHasNightVision = false;
 	SendItemStatus();
+	ResetMaxSpeed();	// ReGameDLL Fixes: Version 5.16.0.465
 }
 
 void CBasePlayer::SetProgressBarTime(int time)
@@ -5330,7 +5338,11 @@ BOOL EXT_FUNC CBasePlayer::RemovePlayerItem(CBaseWeapon *pItem)	// this should b
 	if (m_pActiveItem == pItem)
 	{
 		ResetAutoaim();
+		ResetMaxSpeed();
 
+		// ReGameDLL Fixes: Version 5.16.0.465
+		pev->fov = m_iLastZoom = DEFAULT_FOV;
+		m_bResumeZoom = false;
 		m_pActiveItem = nullptr;
 
 		pev->viewmodel = 0;

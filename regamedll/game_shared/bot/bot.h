@@ -60,6 +60,14 @@ T *CreateBot(const BotProfile *profile)
 	else
 	{
 		T *pBot = nullptr;
+
+		// ReGameDLL Fixes. Version 5.16.0.465
+		auto name = pentBot->v.netname;
+		Q_memset(&pentBot->v, 0, sizeof(pentBot->v)); // Reset entvars data
+		pentBot->v.netname = name;
+		pentBot->v.flags = FL_FAKECLIENT | FL_CLIENT;
+		pentBot->v.pContainingEntity = pentBot;
+
 		FREE_PRIVATE(pentBot);
 		pBot = GetClassPtr((T *)VARS(pentBot));
 		pBot->Initialize(profile);
