@@ -73,6 +73,7 @@ void CL_DLLEXPORT HUD_DrawTransparentTriangles(void)
 
 void CL_DLLEXPORT HUD_Frame(double time)
 {
+	Sound_Think(time);
 }
 
 BOOL CL_DLLEXPORT HUD_GetHullBounds(int hullnumber, float* mins, float* maxs)
@@ -118,6 +119,7 @@ cl_entity_t CL_DLLEXPORT* HUD_GetUserEntity(int index)
 	return HUD_GetUserEntity2(index);
 }
 
+void TestFMOD();
 void CL_DLLEXPORT HUD_Init(void)
 {
 	InitInput();
@@ -129,6 +131,7 @@ void CL_DLLEXPORT HUD_Init(void)
 	Msg_Init();
 	gHUD::Init();
 	Wpn_Init();
+	gEngfuncs.pfnAddCommand("testfmod", &TestFMOD);
 }
 
 BOOL CL_DLLEXPORT HUD_Key_Event(int down, int keynum, const char* pszCurrentBinding)
@@ -175,6 +178,7 @@ void CL_DLLEXPORT HUD_Shutdown(void)
 {
 	gHUD::Shutdown();
 	gFontFuncs.Shutdown();
+	Sound_Exit();
 }
 
 void CL_DLLEXPORT HUD_StudioEvent(const mstudioevent_s* event, const cl_entity_s* entity)
