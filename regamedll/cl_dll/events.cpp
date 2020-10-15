@@ -1085,7 +1085,8 @@ DECLARE_EVENT(FireXM8)
 
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iRShell, TE_BOUNCE_SHELL, 8);
 
-	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, XM8_FIRE_SFX, 1.0, 0.48, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
+	// original goldsrc api: VOL = 1.0, ATTN = 0.48
+	Play3DSound(XM8_FIRE_SFX, 1.0f, XM8_GUN_VOLUME, origin);
 
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
@@ -1179,8 +1180,8 @@ DECLARE_EVENT(FireDEagle)
 
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iPShell, TE_BOUNCE_SHELL, 5);
 
-	// original api: VOL = 1.0, ATTN = 0.6
-	Play3DSound(DEagle_FIRE_SFX, 1.0f, BIG_EXPLOSION_VOLUME, origin);
+	// original goldsrc api: VOL = 1.0, ATTN = 0.6
+	Play3DSound(DEagle_FIRE_SFX, 1.0f, DEAGLE_GUN_VOLUME, origin);
 
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
@@ -1480,7 +1481,8 @@ DECLARE_EVENT(FireMK46)
 
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iRShell, TE_BOUNCE_SHELL, idx, 10);
 
-	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, MK46_FIRE_SFX, 1.0, 0.52, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
+	// original goldsrc api: VOL = 1.0, ATTN = 0.52
+	Play3DSound(MK46_FIRE_SFX, 1.0f, MK46_GUN_VOLUME, origin);
 
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
@@ -1570,7 +1572,8 @@ DECLARE_EVENT(FireM4A1)
 
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iRShell, TE_BOUNCE_SHELL, idx, 10);
 
-	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, M4A1_FIRE_SFX, 1.0, 0.52, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
+	// original goldsrc api: VOL = 1.0, ATTN = 0.52
+	Play3DSound(M4A1_FIRE_SFX, 1.0f, M4A1_GUN_VOLUME, origin);
 
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
@@ -1695,7 +1698,8 @@ DECLARE_EVENT(FireSCARH)
 
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iRShell, TE_BOUNCE_SHELL, idx, 15);
 
-	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, SCARH_FIRE_SFX, 1.0, 0.4, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
+	// original goldsrc api: VOL = 1.0, ATTN = 0.4
+	Play3DSound(SCARH_FIRE_SFX, 1.0f, SCARH_GUN_VOLUME, origin);
 
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
@@ -1921,7 +1925,8 @@ DECLARE_EVENT(FireM1014)
 
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, shell, TE_BOUNCE_SHOTSHELL, idx, 3);
 
-	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, M1014_FIRE_SFX, 1.0, 0.52, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
+	// original goldsrc api: VOL = 1.0, ATTN = 0.52
+	Play3DSound(M1014_FIRE_SFX, 1.0f, M1014_GUN_VOLUME, origin);
 
 	int shared_rand = args->iparam2;
 	Vector vecSrc = EV_GetGunPosition(args, origin);

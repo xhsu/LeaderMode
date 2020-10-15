@@ -1,9 +1,11 @@
 /*
 
-Remastered Date: Mar 27 2020
+Created Date: Mar 27 2020
+Remastered Date: Oct 15 2020
 
 Modern Warfare Dev Team
 Code - Luna the Reborn
+Audio engineer - Qian Ge
 
 */
 
@@ -13,7 +15,7 @@ Code - Luna the Reborn
 #include "../external/FMOD/fmod.hpp"
 
 #define FMOD_DEFAULT_IN_GOLDSRC		(FMOD_LOOP_OFF | FMOD_3D | FMOD_3D_WORLDRELATIVE | FMOD_3D_LINEARROLLOFF)
-#define FMOD_MAX_CHANNEL_GOLDSRC	256
+#define FMOD_MAX_CHANNEL_GOLDSRC	4093	// just... max it out, according to user manual.
 
 FMOD::System* gFModSystem = nullptr;
 
@@ -37,18 +39,30 @@ namespace gFMODChannelManager
 
 	} m_Channels[FMOD_MAX_CHANNEL_GOLDSRC];
 
-	FMOD::Channel** Allocate()
+	FMOD::Channel** Allocate(float flCooldown = 3.5f)
 	{
+		short iMin = 0;
+		double flMinTime = 99999999.0;
+
 		for (short i = 0; i < FMOD_MAX_CHANNEL_GOLDSRC; i++)
 		{
+			// record the time on the way.
+			if (m_Channels[i].m_flNextAvailable < flMinTime)
+			{
+				iMin = i;
+				flMinTime = m_Channels[i].m_flNextAvailable;
+			}
+
 			if (m_Channels[i].m_flNextAvailable > g_flClientTime)
 				continue;
 
-			m_Channels[i].m_flNextAvailable = g_flClientTime + 3.5f;	// since only gun fire SFX supported by FMOD... it quite enough.
+			m_Channels[i].m_flNextAvailable = g_flClientTime + flCooldown;	// since only gun fire SFX supported by FMOD... it quite enough.
 			return &m_Channels[i].m_pChannel;
 		}
 
-		return nullptr;
+		// just occuiped a furthest unused channel.
+		m_Channels[iMin].m_flNextAvailable = g_flClientTime + flCooldown;
+		return &m_Channels[iMin].m_pChannel;
 	}
 }
 
@@ -121,7 +135,7 @@ void Play3DSound(const char* szSound, float flMinDist, float flMaxDist, const Ve
 
 	// since this function is only used for gun sound playing, let's just randomize it here.
 	// original formula: 94 + gEngfuncs.pfnRandomLong(0, 0xf)
-	(*ppChannel)->setPitch(0.94f + RANDOM_FLOAT(0.0f, 0.16f));
+	(*ppChannel)->setPitch(RANDOM_FLOAT(0.94f, 1.1f));
 }
 
 void Sound_Think(double flTime)
@@ -144,6 +158,14 @@ void Sound_Think(double flTime)
 
 void Sound_Exit()
 {
+	// only sound precache needs to release. channels don't.
+	for (auto elem : g_mapSoundPrecache)
+	{
+		elem.second->release();
+	}
+
+	g_mapSoundPrecache.clear();
+
 	gFModSystem->close();
 	gFModSystem->release();
 }

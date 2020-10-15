@@ -332,6 +332,7 @@ constexpr float SCARH_DASH_EXIT_TIME	= 0.485F;
 constexpr float SCARH_RPM				= 600.0F;
 constexpr int	SCARH_PENETRATION		= 2;
 constexpr float	SCARH_EFFECTIVE_RANGE	= 8192.0f;
+constexpr int	SCARH_GUN_VOLUME		= NORMAL_GUN_VOLUME;
 
 enum scarh_e
 {
@@ -468,6 +469,7 @@ constexpr float XM8_TO_CARBIN_TIME			= 8.8F;
 constexpr float XM8_RPM						= 800.0f;
 constexpr int	XM8_PENETRATION				= 2;
 constexpr float	XM8_EFFECTIVE_RANGE			= 8192.0f;
+constexpr int	XM8_GUN_VOLUME				= NORMAL_GUN_VOLUME;
 
 enum xm8_e
 {
@@ -604,6 +606,7 @@ constexpr float DEAGLE_SH_DASH_EXIT_TIME	= 0.7f;
 constexpr float DEAGLE_FIRE_INTERVAL		= 0.225f;
 constexpr int	DEAGLE_PENETRATION			= 2;
 constexpr float	DEAGLE_EFFECTIVE_RANGE		= 4096.0f;
+constexpr int	DEAGLE_GUN_VOLUME			= BIG_EXPLOSION_VOLUME;
 
 enum deagle_e
 {
@@ -866,6 +869,7 @@ constexpr float MK46_DASH_EXIT_TIME		= 0.68F;
 constexpr float MK46_RPM				= 750.0f;
 constexpr int	MK46_PENETRATION		= 2;
 constexpr float	MK46_EFFECTIVE_RANGE	= 8192.0f;
+constexpr int	MK46_GUN_VOLUME			= NORMAL_GUN_VOLUME;
 
 enum mk46_e
 {
@@ -1009,6 +1013,7 @@ constexpr float M4A1_DASH_EXIT_TIME		= 0.485f;
 constexpr float M4A1_RPM				= 700.0f;	// 700~950 RPM
 constexpr int	M4A1_PENETRATION		= 2;
 constexpr float	M4A1_EFFECTIVE_RANGE	= 8192.0f;
+constexpr int	M4A1_GUN_VOLUME			= NORMAL_GUN_VOLUME;
 
 enum m4a1_e
 {
@@ -1268,6 +1273,7 @@ constexpr float M1014_HOLSTER_TIME		= 1.033f;
 constexpr float M1014_DASH_ENTER_TIME	= 0.4f;
 constexpr float M1014_DASH_EXIT_TIME	= 0.52f;
 const	 Vector M1014_CONE_VECTOR		= Vector(0.0725, 0.0725, 0.0); // special shotgun spreads
+constexpr int	M1014_GUN_VOLUME		= LOUD_GUN_VOLUME;
 
 enum m1014_e
 {
@@ -1351,6 +1357,7 @@ constexpr float M45A1_SH_DASH_ENTER_TIME = 0.33333F;
 constexpr float M45A1_SH_DASH_EXIT_TIME = 0.65F;
 constexpr float M45A1_DAMAGE = 36.0f;
 constexpr float M45A1_RANGE_MODIFER = 0.75f;
+constexpr int	M45A1_GUN_VOLUME = BIG_EXPLOSION_VOLUME;
 
 enum m45a1_e
 {

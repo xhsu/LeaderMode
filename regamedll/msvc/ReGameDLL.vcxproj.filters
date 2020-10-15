@@ -62,6 +62,9 @@
     <Filter Include="public\regamedll">
       <UniqueIdentifier>{e3b054d5-1065-49f1-95c2-71085ebaa6a9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="dlls\wpn_shared\Sanctioned">
+      <UniqueIdentifier>{75921f07-ace4-42be-8324-9fe98e483fcc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\version\version.cpp">
@@ -115,9 +118,6 @@
     <ClCompile Include="..\dlls\wpn_shared\wpn_awp.cpp">
       <Filter>dlls\wpn_shared</Filter>
     </ClCompile>
-    <ClCompile Include="..\dlls\wpn_shared\wpn_deagle.cpp">
-      <Filter>dlls\wpn_shared</Filter>
-    </ClCompile>
     <ClCompile Include="..\dlls\wpn_shared\wpn_elite.cpp">
       <Filter>dlls\wpn_shared</Filter>
     </ClCompile>
@@ -128,12 +128,6 @@
       <Filter>dlls\wpn_shared</Filter>
     </ClCompile>
     <ClCompile Include="..\dlls\wpn_shared\wpn_glock18.cpp">
-      <Filter>dlls\wpn_shared</Filter>
-    </ClCompile>
-    <ClCompile Include="..\dlls\wpn_shared\wpn_knife.cpp">
-      <Filter>dlls\wpn_shared</Filter>
-    </ClCompile>
-    <ClCompile Include="..\dlls\wpn_shared\wpn_m4a1.cpp">
       <Filter>dlls\wpn_shared</Filter>
     </ClCompile>
     <ClCompile Include="..\dlls\wpn_shared\wpn_mac10.cpp">
@@ -469,20 +463,29 @@
     <ClCompile Include="..\dlls\wpn_shared\wpn_svd.cpp">
       <Filter>dlls\wpn_shared</Filter>
     </ClCompile>
-    <ClCompile Include="..\dlls\wpn_shared\wpn_mk46.cpp">
-      <Filter>dlls\wpn_shared</Filter>
-    </ClCompile>
-    <ClCompile Include="..\dlls\wpn_shared\wpn_scarh.cpp">
-      <Filter>dlls\wpn_shared</Filter>
-    </ClCompile>
-    <ClCompile Include="..\dlls\wpn_shared\wpn_m1014.cpp">
-      <Filter>dlls\wpn_shared</Filter>
-    </ClCompile>
     <ClCompile Include="..\dlls\skills.cpp">
       <Filter>dlls</Filter>
     </ClCompile>
+    <ClCompile Include="..\dlls\wpn_shared\wpn_scarh.cpp">
+      <Filter>dlls\wpn_shared\Sanctioned</Filter>
+    </ClCompile>
     <ClCompile Include="..\dlls\wpn_shared\wpn_xm8.cpp">
-      <Filter>dlls\wpn_shared</Filter>
+      <Filter>dlls\wpn_shared\Sanctioned</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dlls\wpn_shared\wpn_deagle.cpp">
+      <Filter>dlls\wpn_shared\Sanctioned</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dlls\wpn_shared\wpn_mk46.cpp">
+      <Filter>dlls\wpn_shared\Sanctioned</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dlls\wpn_shared\wpn_m4a1.cpp">
+      <Filter>dlls\wpn_shared\Sanctioned</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dlls\wpn_shared\wpn_m1014.cpp">
+      <Filter>dlls\wpn_shared\Sanctioned</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dlls\wpn_shared\wpn_knife.cpp">
+      <Filter>dlls\wpn_shared\Sanctioned</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

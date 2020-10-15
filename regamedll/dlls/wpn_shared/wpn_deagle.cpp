@@ -120,7 +120,7 @@ void CDEagle::DEagleFire(float flSpread, float flCycleTime)
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 
-	m_pPlayer->m_iWeaponVolume = BIG_EXPLOSION_VOLUME;
+	m_pPlayer->m_iWeaponVolume = DEAGLE_GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = NORMAL_GUN_FLASH;
 
 	Vector vecSrc = m_pPlayer->GetGunPosition();
