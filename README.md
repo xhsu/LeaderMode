@@ -12,7 +12,8 @@ The ultimate goal is to eliminate the other team. Use whatever strategies you wa
 3. Install fonts located in RESOURCE/ folder into Windows.
 4. Download the released version or build the game DLLs by yourself. Place the game DLLs in their corresponding locations.
 5. Build [metahook](https://github.com/nagist/metahook). Rename the .exe file to "leadermode" as well, and place it along with the GoldSrc engine.
-6. Start leadermode.exe and enjoy the game.
+6. Move the fmod.dll in RESOURCE/ to where leadermode.exe currently located.
+7. Start leadermode.exe and enjoy the game.
 
 ## Known Issues
 * Players have to press and hold CTRL to keep their speed while ducking.

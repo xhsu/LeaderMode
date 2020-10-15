@@ -16,3 +16,4 @@ void Sound_Think(double flTime);
 void Sound_Exit();
 
 void PlaySound(const char* szSound);
+void Play3DSound(const char* szSound, float flMinDist, float flMaxDist, const Vector& vecOrigin);
