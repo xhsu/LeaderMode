@@ -45,6 +45,7 @@ The ultimate goal is to eliminate the other team. Use whatever strategies you wa
 ### Credits
 * [ReGameDLL_CS](https://github.com/s1lentq/ReGameDLL_CS) (This mod was created on the basis of ReGameDLL_CS)
 * [Metahook](https://github.com/nagist/metahook) (A total game changer. Literally and metaphorically.)
+* [FMOD] (https://www.fmod.com/) (Via whom we get rid of the original obsolete sound system of GoldSrc.)
 
 ## How can I help the project?
 Just try it and contact me if you have anything to say.
