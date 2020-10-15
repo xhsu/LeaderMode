@@ -12,7 +12,8 @@ The ultimate goal is to eliminate the other team. Use whatever strategies you wa
 3. Install fonts located in RESOURCE/ folder into Windows.
 4. Download the released version or build the game DLLs by yourself. Place the game DLLs in their corresponding locations.
 5. Build [metahook](https://github.com/nagist/metahook). Rename the .exe file to "leadermode" as well, and place it along with the GoldSrc engine.
-6. Start leadermode.exe and enjoy the game.
+6. Move the fmod.dll in RESOURCE/ to where leadermode.exe currently located.
+7. Start leadermode.exe and enjoy the game.
 
 ## Known Issues
 * Players have to press and hold CTRL to keep their speed while ducking.
@@ -44,6 +45,7 @@ The ultimate goal is to eliminate the other team. Use whatever strategies you wa
 ### Credits
 * [ReGameDLL_CS](https://github.com/s1lentq/ReGameDLL_CS) (This mod was created on the basis of ReGameDLL_CS)
 * [Metahook](https://github.com/nagist/metahook) (A total game changer. Literally and metaphorically.)
+* [FMOD] (https://www.fmod.com/) (Via whom we get rid of the original obsolete sound system of GoldSrc.)
 
 ## How can I help the project?
 Just try it and contact me if you have anything to say.

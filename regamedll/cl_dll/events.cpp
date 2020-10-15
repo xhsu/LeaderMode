@@ -1179,7 +1179,8 @@ DECLARE_EVENT(FireDEagle)
 
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iPShell, TE_BOUNCE_SHELL, 5);
 
-	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, DEagle_FIRE_SFX, 1.0, 0.6, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
+	// original api: VOL = 1.0, ATTN = 0.6
+	Play3DSound(DEagle_FIRE_SFX, 1.0f, BIG_EXPLOSION_VOLUME, origin);
 
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
