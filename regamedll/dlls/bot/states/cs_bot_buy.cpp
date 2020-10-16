@@ -74,7 +74,8 @@ void BuyState::OnEnter(CCSBot *me)
 
 	if (TheCSBots()->AllowGrenades())
 	{
-		m_buyGrenade = (RANDOM_FLOAT(0.0f, 100.0f) < 33.3f) ? true : false;
+		// LUNA: I have this change of buying grenade increased for more skill grenade showing up.
+		m_buyGrenade = (RANDOM_LONG(1, 100) < 66) ? true : false;
 	}
 	else
 	{
@@ -439,39 +440,63 @@ void BuyState::OnUpdate(CCSBot *me)
 			// buy a grenade if we wish, and we don't already have one
 			if (m_buyGrenade && !me->HasGrenade())
 			{
-				if (UTIL_IsTeamAllBots(me->m_iTeam))
+				// bot will defnately buy their skill tool no matter what.
+				switch (me->m_iRoleType)
 				{
-					// only allow Flashbangs if everyone on the team is a bot (dont want to blind our friendly humans)
-					float rnd = RANDOM_FLOAT(0, 100);
+				case Role_Sharpshooter:
+					BuyEquipment(me, EQP_CRYOGRENADE);
+					break;
 
-					if (rnd < 10.0f)
+				case Role_Arsonist:
+					BuyEquipment(me, EQP_INCENDIARY_GR);
+					break;
+
+				case Role_Medic:
+					BuyEquipment(me, EQP_HEALING_GR);
+					break;
+
+				case Role_MadScientist:
+					BuyEquipment(me, EQP_GAS_GR);
+					break;
+
+				default:
+				{
+					// buy original grenades only if you have no skill grenades options avaliable.
+					if (UTIL_IsTeamAllBots(me->m_iTeam))
 					{
-						// smoke grenade
-						BuyEquipment(me, EQP_SMOKEGRENADE);
-					}
-					else if (rnd < 35.0f)
-					{
-						// flashbang
-						BuyEquipment(me, EQP_FLASHBANG);
+						// only allow Flashbangs if everyone on the team is a bot (dont want to blind our friendly humans)
+						float rnd = RANDOM_FLOAT(0, 100);
+
+						if (rnd < 10.0f)
+						{
+							// smoke grenade
+							BuyEquipment(me, EQP_SMOKEGRENADE);
+						}
+						else if (rnd < 35.0f)
+						{
+							// flashbang
+							BuyEquipment(me, EQP_FLASHBANG);
+						}
+						else
+						{
+							// he grenade
+							BuyEquipment(me, EQP_HEGRENADE);
+						}
 					}
 					else
 					{
-						// he grenade
-						BuyEquipment(me, EQP_HEGRENADE);
+						if (RANDOM_FLOAT(0, 100) < 10.0f)
+						{
+							// smoke grenade
+							BuyEquipment(me, EQP_SMOKEGRENADE);
+						}
+						else
+						{
+							// he grenade
+							BuyEquipment(me, EQP_HEGRENADE);
+						}
 					}
 				}
-				else
-				{
-					if (RANDOM_FLOAT(0, 100) < 10.0f)
-					{
-						// smoke grenade
-						BuyEquipment(me, EQP_SMOKEGRENADE);
-					}
-					else
-					{
-						// he grenade
-						BuyEquipment(me, EQP_HEGRENADE);
-					}
 				}
 			}
 

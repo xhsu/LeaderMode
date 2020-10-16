@@ -5996,7 +5996,7 @@ void EXT_FUNC CBasePlayer::ResetMaxSpeed()
 	// hook it right before reset it.
 	OnResetPlayerMaxspeed(speed);
 
-	// since the addition of dashing mechanism, player are limited in around 35% of original speed.
+	// since the addition of dashing mechanism, players are limited in around 35% of original speed.
 	// however, BOTs are not. therefore, the speed set for players have to increase.
 	// the constant 40 is the threshold of sniper scoping. below that value, client would consider this player is using his full speed no matter what.
 	if (!IsBot() && int(pev->fov) > 40)

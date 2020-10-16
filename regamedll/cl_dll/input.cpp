@@ -412,7 +412,8 @@ void CL_CreateMove2(float frametime, usercmd_s* cmd, int active)
 		spd = gEngfuncs.GetClientMaxspeed();
 
 		// slow down if we are not running.
-		if (!IS_DASHING && !(in_duck.state & 1))
+		// don't interfere the speed control of a ducking player. PM_Shared.cpp line 1895 would mul 0.333 to original speed.
+		if (!IS_DASHING && !(pmove->flags & FL_DUCKING))
 			spd *= cl_walkingspeedmodifier->value;
 
 		if (spd != 0.0)

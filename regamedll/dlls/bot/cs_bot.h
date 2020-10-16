@@ -48,6 +48,19 @@ class BotChatterInterface;
 class BotState
 {
 public:
+	// avoid the complex memset();
+	void* operator new(size_t size)
+	{
+		return calloc(1, size);
+	}
+	void operator delete(void* ptr)
+	{
+		free(ptr);
+	}
+	BotState() {}
+	virtual ~BotState() {}	// attempting fix: C26436
+
+public:
 	virtual void OnEnter(CCSBot *me) {}
 	virtual void OnUpdate(CCSBot *me) {}
 	virtual void OnExit(CCSBot *me) {}
