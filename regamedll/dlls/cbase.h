@@ -575,6 +575,8 @@ EXT_FUNC void SaveReadFields(SAVERESTOREDATA *pSaveData, const char *pname, void
 EXT_FUNC void OnFreeEntPrivateData(edict_t *pEnt);
 EXT_FUNC void OnGameShutdown();
 EXT_FUNC int  ShouldCollide(edict_t* pentTouched, edict_t* pentOther);
+EXT_FUNC void CvarValue(const edict_t* pEnt, const char* value);
+EXT_FUNC void CvarValue2(const edict_t* pEnt, int requestID, const char* cvarName, const char* value);
 
 void SetObjectCollisionBox(entvars_t *pev);
 CBaseEntity *FindGlobalEntity(string_t classname, string_t globalname);

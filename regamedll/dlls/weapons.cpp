@@ -583,14 +583,21 @@ void CBaseWeapon::PostFrame()
 		m_bitsFlags &= ~WPNSTATE_RELOAD_EMPTY;	// remove it anyway.
 	}
 
-	if ((usableButtons & IN_ATTACK2) && m_flNextSecondaryAttack <= UTIL_WeaponTimeBase())	// UseDecrement()
+	if ((!m_pPlayer->m_bHoldToAim && usableButtons & IN_ATTACK2 && m_flNextSecondaryAttack <= UTIL_WeaponTimeBase()) ||	// PRESS to aim
+		(m_pPlayer->m_bHoldToAim && (m_pPlayer->m_afButtonPressed & IN_ATTACK2 || m_pPlayer->m_afButtonReleased & IN_ATTACK2))	// HOLD to aim
+		)	// UseDecrement()
 	{
+#ifndef CLIENT_PREDICT_AIM
 		MESSAGE_BEGIN(MSG_ONE, gmsgSteelSight, nullptr, m_pPlayer->pev);
 		WRITE_BYTE(m_bInZoom);
 		MESSAGE_END();
+#endif
 
 		SecondaryAttack();
-		m_pPlayer->pev->button &= ~IN_ATTACK2;
+
+		// only cancel this flag in PRESS mode.
+		if (!m_pPlayer->m_bHoldToAim)
+			m_pPlayer->pev->button &= ~IN_ATTACK2;
 	}
 	else if ((m_pPlayer->pev->button & IN_ATTACK) && CanAttack(m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), TRUE))	// UseDecrement()
 	{
@@ -614,7 +621,7 @@ void CBaseWeapon::PostFrame()
 		// reload when reload is pressed, or if no buttons are down and weapon is empty.
 		Reload();
 	}
-	else if (!(usableButtons & (IN_ATTACK | IN_ATTACK2)))	// no fire buttons down
+	else if (!(usableButtons & IN_ATTACK))	// no fire buttons down
 	{
 		// The following code prevents the player from tapping the firebutton repeatedly
 		// to simulate full auto and retaining the single shot accuracy of single fire

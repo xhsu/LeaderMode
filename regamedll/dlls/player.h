@@ -508,6 +508,9 @@ public:
 	void ResetUsingEquipment(void);
 	bool StartSwitchingWeapon(CBaseWeapon* pSwitchingTo);	// play normal holster anim.
 	bool SwitchWeapon(CBaseWeapon* pSwitchingTo);	// skip holster anim.
+	inline int QueryIndex(int i) { return i * gpGlobals->maxClients + entindex(); }
+	void QueryClientCvar(void);
+	void UpdateClientCvar(const char* cvarName, const char* value, int requestID);
 
 	// new functions from leader mod.
 	void AssignRole(RoleTypes iNewRole);	// this function is only for skill installation.
@@ -727,6 +730,8 @@ public:
 	EquipmentIdType m_iClientKnownUsingGrenadeId;
 	WeaponIdType m_iWpnSwitchingTo;
 	float m_flNextSkillTimerUpdate;
+	float m_flNextClientCvarQuery;
+	bool m_bHoldToAim;	// value should query from client.
 
 	// overhealing mechanism.
 	float m_flOHNextThink;

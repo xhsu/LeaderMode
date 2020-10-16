@@ -1102,15 +1102,17 @@ MSG_FUNC(Shoot)
 
 MSG_FUNC(SteelSight)
 {
+#ifndef CLIENT_PREDICT_AIM
 	BEGIN_READ(pbuf, iSize);
 
 	bool bInitialState = READ_BYTE();
 
 	if (g_pCurWeapon)
 	{
-		g_pCurWeapon->m_bInReload = bInitialState;
+		g_pCurWeapon->m_bInZoom = bInitialState;
 		g_pCurWeapon->SecondaryAttack();
 	}
+#endif
 
 	return TRUE;
 }

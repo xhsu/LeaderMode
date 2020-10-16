@@ -13,6 +13,7 @@ int g_iCurViewModelAnim = 0;
 CBaseWeapon* g_pCurWeapon = nullptr;
 WeaponIdType g_iSelectedWeapon = WEAPON_NONE;	// this means directly switch weapon. try to use gPseudoPlayer.StartSwitchingWeapon() instead!
 usercmd_t* g_pCurUserCmd = nullptr;	// WARNING: use this within weapon's prediction code only.
+cvar_t* cl_holdtoaim = nullptr;	// HOLD to aim vs. PRESS to aim.
 
 CBasePlayer gPseudoPlayer;
 std::shared_ptr<pseudo_global_vars_s> gpGlobals;
@@ -515,12 +516,19 @@ void CBaseWeapon::PostFrame()
 	// thus, I decide to use message instead. (gmsgShoot and gmsgSteelSight)
 	// UPDATE Mar 25: I managed to fix PrimAttack. However, due to many server-exclusive entity, the steelsight still can't be predict on client side.
 
-	/*if ((usableButtons & IN_ATTACK2) && m_flNextSecondaryAttack <= UTIL_WeaponTimeBase())	// UseDecrement()
+#ifdef CLIENT_PREDICT_AIM
+	if ((!cl_holdtoaim->value && usableButtons & IN_ATTACK2 && m_flNextSecondaryAttack <= UTIL_WeaponTimeBase()) ||	// PRESS to aim
+		(cl_holdtoaim->value && (m_pPlayer->m_afButtonPressed & IN_ATTACK2 || m_pPlayer->m_afButtonReleased & IN_ATTACK2))	// HOLD to aim
+		)	// UseDecrement()
 	{
 		SecondaryAttack();
-		m_pPlayer->pev->button &= ~IN_ATTACK2;
+
+		// only cancel this flag in PRESS mode.
+		if (!cl_holdtoaim->value)
+			m_pPlayer->pev->button &= ~IN_ATTACK2;
 	}
-	else */
+	else
+#endif
 #ifdef CLIENT_PREDICT_PRIM_ATK
 		if ((m_pPlayer->pev->button & IN_ATTACK) && CanAttack(m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), TRUE))	// UseDecrement()
 	{
@@ -538,7 +546,7 @@ void CBaseWeapon::PostFrame()
 		// reload when reload is pressed, or if no buttons are down and weapon is empty.
 		Reload();
 	}
-	else if (!(usableButtons & (IN_ATTACK | IN_ATTACK2)))	// no fire buttons down
+	else if (!(usableButtons & IN_ATTACK))	// no fire buttons down
 	{
 		// The following code prevents the player from tapping the firebutton repeatedly
 		// to simulate full auto and retaining the single shot accuracy of single fire
@@ -1491,6 +1499,8 @@ Wpn_Init
 */
 void Wpn_Init()
 {
+	cl_holdtoaim = gEngfuncs.pfnRegisterVariable("cl_holdtoaim", "0", FCVAR_ARCHIVE | FCVAR_CLIENTDLL | FCVAR_USERINFO);
+
 	gEngfuncs.pfnAddCommand("melee", CommandFunc_Melee);
 	gEngfuncs.pfnAddCommand("+qtg", CommandFunc_QuickThrowPress);
 	gEngfuncs.pfnAddCommand("-qtg", CommandFunc_QuickThrowRelease);

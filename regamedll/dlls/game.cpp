@@ -133,6 +133,8 @@ cvar_t ff_damage_reduction_other        = { "ff_damage_reduction_other",        
 cvar_t radio_timeout           = { "mp_radio_timeout", "1.5", FCVAR_SERVER, 1.5f, nullptr };
 cvar_t radio_maxinround        = { "mp_radio_maxinround", "60", FCVAR_SERVER, 60.0f, nullptr };
 
+cvar_t clientcvar_query_interval	= { "mp_client_cvar_query_inv", "10", FCVAR_SERVER, 10.0f, nullptr };
+
 // new cvars from leader mod.
 cvar_t commander_maxhealth		= { "lm_commander_maxhealth", "1000", FCVAR_SERVER, 1000.0f, nullptr };
 cvar_t godfather_maxhealth		= { "lm_godfather_maxhealth", "1000", FCVAR_SERVER, 1000.0f, nullptr };
@@ -278,6 +280,8 @@ void EXT_FUNC GameDLLInit()
 
 	CVAR_REGISTER(&radio_timeout);
 	CVAR_REGISTER(&radio_maxinround);
+
+	CVAR_REGISTER(&clientcvar_query_interval);
 
 	CVAR_REGISTER(&commander_maxhealth);
 	CVAR_REGISTER(&godfather_maxhealth);

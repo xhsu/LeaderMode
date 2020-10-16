@@ -3485,6 +3485,7 @@ void EXT_FUNC CBasePlayer::PreThink()
 
 	// JOHN: checks if new client data (for HUD and view control) needs to be sent to the client
 	UpdateClientData();
+	QueryClientCvar();
 
 	CheckTimeBasedDamage();
 	CheckSuitUpdate();
@@ -4624,6 +4625,7 @@ void EXT_FUNC CBasePlayer::Spawn()
 	gBurningDOTMgr::Free(this);
 
 	m_flNextSkillTimerUpdate = 0.0f;
+	m_flNextClientCvarQuery = 0.0f;
 
 	// everything that comes after this, this spawn of the player a the game.
 	if (m_bJustConnected)
@@ -5012,6 +5014,7 @@ void CBasePlayer::ForceClientDllUpdate()
 	// Now force all the necessary messages to be sent.
 	UpdateClientData();
 	HandleSignals();
+	QueryClientCvar();
 }
 
 void EXT_FUNC CBasePlayer::ImpulseCommands()
@@ -7789,6 +7792,26 @@ bool CBasePlayer::SwitchWeapon(CBaseWeapon* pSwitchingTo)
 	ResetMaxSpeed();
 
 	return true;
+}
+
+void CBasePlayer::QueryClientCvar(void)
+{
+	// never query BOTs. it would cause a CTD.
+	if (IsBot() || m_flNextClientCvarQuery > gpGlobals->time)
+		return;
+
+	m_flNextClientCvarQuery = gpGlobals->time + clientcvar_query_interval.value;
+
+	// the list of cvar query.
+	g_engfuncs.pfnQueryClientCvarValue2(edict(), "cl_holdtoaim", QueryIndex(0));
+}
+
+void CBasePlayer::UpdateClientCvar(const char* cvarName, const char* value, int requestID)
+{
+	if (requestID == QueryIndex(0))
+	{
+		m_bHoldToAim = !!Q_atoi(value);
+	}
 }
 
 void CBasePlayer::AssignRole(RoleTypes iNewRole)

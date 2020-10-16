@@ -116,6 +116,7 @@ extern std::array<CBaseWeapon*, LAST_WEAPON> g_rgpClientWeapons;
 extern CBaseWeapon* g_pCurWeapon;
 extern CBasePlayer gPseudoPlayer;
 extern WeaponIdType g_iSelectedWeapon;	// this means directly switch weapon. try to use gPseudoPlayer.StartSwitchingWeapon() instead!
+extern cvar_t* cl_holdtoaim;
 
 extern bool g_bHoldingKnife;
 extern bool g_bFreezeTimeOver;

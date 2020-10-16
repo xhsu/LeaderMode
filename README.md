@@ -16,10 +16,10 @@ The ultimate goal is to eliminate the other team. Use whatever strategies you wa
 7. Start leadermode.exe and enjoy the game.
 
 ## Known Issues
-* Players have to press and hold CTRL to keep their speed while ducking.
-* Running into walls will cause a sudden stop of Dash_Out anim.
-* Models cannot emit sounds during weapon swapping, if the sound EVENT is assigned on the first frame.
-* WeaponsList HUD could flashback and forth during weapon swapping.
+* ~~Players have to press and hold CTRL to keep their speed while ducking.~~<br/>
+* ~~Running into walls will cause a sudden stop of Dash_Out anim.~~<br/>
+* ~~Models cannot emit sounds during weapon swapping, if the sound EVENT is assigned on the first frame.~~<br/>
+* ~~WeaponsList HUD could flashback and forth during weapon swapping.~~
 
 ## Commands
 | Command                             | Description                                     |
@@ -33,19 +33,21 @@ The ultimate goal is to eliminate the other team. Use whatever strategies you wa
 | declarerole                         | Open a menu with which you may choose your role. |
 | votescheme                          | Vote the tactical scheme for your team. |
 
-## Configuration (cvars)
-<details>
-<summary>Click to expand</summary>
-
-| CVar                               | Default | Min | Max          | Description                                    |
-| :--------------------------------- | :-----: | :-: | :----------: | :--------------------------------------------- |
-| UNDER CONSTRUCTION                 | :-----: | :-: | :----------: | :--------------------------------------------- |
-</details>
+## Configuration (CVars)
+| CVar                               | Default | Min | Max | Type   | Description                                    |
+| :--------------------------------- | :-----: | :-: | :-: | :----: | :--------------------------------------------- |
+| mp_client_cvar_query_inv           | 10      | 0   | inf.| Server | The time interval of server querying cvar from clients. |
+| lm_commander_maxhealth             | 1000    | 0   | inf.| Server | Start HP of commander. |
+| lm_godfather_maxhealth             | 1000    | 0   | inf.| Server | Start HP of godfather. |
+| lm_human_role_priority             | 1       | 0   | 1   | Server | [0 - BOTs have equal chances of becoming important roles.]<br/>[1 - Humans first.] |
+| lm_menpower_per_player             | 1       | 0   | inf.| Server | Starting manpower per player in his corresponding team. |
+| lm_ballot_boxes_opening_interval   | 0       | 0   | inf.| Server | The time interval of team scheme renewal. |
+| cl_holdtoaim                       | 0       | 0   | 1   | Client | [0 - Click to switch aiming.]<br/>[1 - Press & hold to stay aiming.] |
 
 ### Credits
 * [ReGameDLL_CS](https://github.com/s1lentq/ReGameDLL_CS) (This mod was created on the basis of ReGameDLL_CS)
 * [Metahook](https://github.com/nagist/metahook) (A total game changer. Literally and metaphorically.)
-* [FMOD] (https://www.fmod.com/) (Via whom we get rid of the original obsolete sound system of GoldSrc.)
+* [FMOD](https://www.fmod.com/) (Via whom we get rid of the original obsolete sound system of GoldSrc.)
 
 ## How can I help the project?
 Just try it and contact me if you have anything to say.

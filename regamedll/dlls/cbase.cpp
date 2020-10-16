@@ -59,8 +59,8 @@ NEW_DLL_FUNCTIONS gNewDLLFunctions =
 	&OnFreeEntPrivateData,
 	&OnGameShutdown,
 	&ShouldCollide,
-	nullptr,
-	nullptr
+	&CvarValue,
+	&CvarValue2
 };
 
 CMemoryPool hashItemMemPool(sizeof(hash_item_t), 64);
@@ -1366,3 +1366,19 @@ int ShouldCollide(edict_t* pentTouched, edict_t* pentOther)
 	return FALSE;
 }
 
+// this is the return function of g_engfuncs.pfnQueryClientCvarValue().
+void CvarValue(const edict_t* pEnt, const char* value)
+{
+}
+
+// this is the return function of g_engfuncs.pfnQueryClientCvarValue2().
+void CvarValue2(const edict_t* pEnt, int requestID, const char* cvarName, const char* value)
+{
+	if (!pEnt)
+		return;
+
+	CBasePlayer* pPlayer = CBasePlayer::Instance((edict_t*)pEnt);
+
+	if (pPlayer)
+		pPlayer->UpdateClientCvar(cvarName, value, requestID);
+}

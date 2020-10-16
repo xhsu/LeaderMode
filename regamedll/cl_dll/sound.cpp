@@ -15,7 +15,7 @@ Audio engineer - Qian Ge
 #include "../external/FMOD/fmod.hpp"
 
 #define FMOD_DEFAULT_IN_GOLDSRC		(FMOD_LOOP_OFF | FMOD_3D | FMOD_3D_WORLDRELATIVE | FMOD_3D_LINEARROLLOFF)
-#define FMOD_MAX_CHANNEL_GOLDSRC	4093	// just... max it out, according to user manual.
+#define FMOD_MAX_CHANNEL_GOLDSRC	4092	// just... max it out, according to user manual. Reserve an additional channel for all other 2D first-personal SFX.
 
 FMOD::System* gFModSystem = nullptr;
 
@@ -80,7 +80,7 @@ void Sound_Init()
 		Create a System object and initialize.
 	*/
 	FMOD::System_Create(&gFModSystem);
-	gFModSystem->init(FMOD_MAX_CHANNEL_GOLDSRC, FMOD_INIT_NORMAL, nullptr);
+	gFModSystem->init(FMOD_MAX_CHANNEL_GOLDSRC + 1, FMOD_INIT_NORMAL, nullptr);	// plus an additional 2D first-personal SFX channel.
 	Q_memset(&gFMODChannelManager::m_Channels, NULL, sizeof(gFMODChannelManager::m_Channels));
 
 	/*
@@ -91,16 +91,6 @@ void Sound_Init()
 	gFModSystem->createSound("drumloop.wav", FMOD_LOOP_NORMAL | FMOD_3D | FMOD_3D_WORLDRELATIVE | FMOD_3D_LINEARSQUAREROLLOFF, 0, &sound1);
 	sound1->set3DMinMaxDistance(0.1f * SND_DISTANCEFACTOR, 200.0f * SND_DISTANCEFACTOR);
 	//gFModSystem->playSound(sound1, 0, false, &g_phLocal2DChannel);
-}
-
-void TestFMOD()
-{
-	bool paused;
-	g_phLocal2DChannel->getPaused(&paused);
-
-	gFModSystem->playSound(sound1, 0, true, &g_phLocal2DChannel);
-	g_phLocal2DChannel->set3DAttributes(&g_fmodvecZero, &g_fmodvecZero);
-	g_phLocal2DChannel->setPaused(!paused);
 }
 
 void PlaySound(const char* szSound)
