@@ -268,12 +268,16 @@ int CXM8::CalcBodyParam(void)
 		{ 0, 1 },
 		{ 0, 1 },
 		{ 0, 1 },
+
 		{ 0, 2 },	// bullets		= 8;
+
 		{ 0, 1 },
 		{ 0, 1 },
 		{ 0, 1 },
-		{ 0, 1 },
-		{ 0, 1 },
+
+		{ 0, 2 },	// barrel_1		= 12;
+		{ 0, 2 },	// barrel_2		= 13;
+
 		{ 0, 1 },
 		{ 0, 1 },
 		{ 0, 1 },
@@ -286,6 +290,8 @@ int CXM8::CalcBodyParam(void)
 	// this model requires all parts set to 0 in order to play changing anim.
 	if (m_bitsFlags & WPNSTATE_XM8_CHANGING)
 	{
+		info[12].body = 0;
+		info[13].body = 0;
 		info[17].body = 0;
 		info[18].body = 0;
 	}
@@ -298,6 +304,8 @@ int CXM8::CalcBodyParam(void)
 			// the sharpshooter's version contains a XM8 sharpshooter optical sight.
 			// filpped down steel sight.
 
+			info[12].body = 1;
+			info[13].body = 1;
 			info[17].body = 0;
 			info[18].body = 1;
 			break;
@@ -306,6 +314,8 @@ int CXM8::CalcBodyParam(void)
 			// by default, this weapon has no optical sight.
 			// filpped up steel sight.
 
+			info[12].body = 0;
+			info[13].body = 0;
 			info[17].body = 1;
 			info[18].body = 0;
 			break;
