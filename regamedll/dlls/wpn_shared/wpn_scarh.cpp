@@ -175,7 +175,7 @@ void CSCARH::SCARHFire(float flSpread, float flCycleTime)
 
 bool CSCARH::Reload()
 {
-	if (DefaultReload(m_pItemInfo->m_iMaxClip, m_iClip ? SCARH_RELOAD : SCARH_RELOAD_EMPTY, m_iClip ? SCARH_RELOAD_TIME : SCARH_RELOAD_EMPTY_TIME))
+	if (DefaultReload(m_pItemInfo->m_iMaxClip, m_iClip ? SCARH_RELOAD : SCARH_RELOAD_EMPTY, m_iClip ? SCARH_RELOAD_TIME : SCARH_RELOAD_EMPTY_TIME, 0.65f))
 	{
 		m_flAccuracy = 0.2f;
 		return true;

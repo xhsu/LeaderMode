@@ -166,7 +166,7 @@ bool CMK46::Reload()
 		m_iClip = 0;
 	}
 
-	if (DefaultReload(m_pItemInfo->m_iMaxClip, m_iClip ? MK46_RELOAD : MK46_RELOAD_EMPTY, m_iClip ? MK46_RELOAD_TIME : MK46_RELOAD_EMPTY_TIME))
+	if (DefaultReload(m_pItemInfo->m_iMaxClip, m_iClip ? MK46_RELOAD : MK46_RELOAD_EMPTY, m_iClip ? MK46_RELOAD_TIME : MK46_RELOAD_EMPTY_TIME, 1.18f))
 	{
 		m_flAccuracy = 0.2f;
 		return true;

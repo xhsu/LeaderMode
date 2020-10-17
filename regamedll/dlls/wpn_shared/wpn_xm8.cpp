@@ -220,7 +220,7 @@ void CXM8::XM8Fire(float flSpread, float flCycleTime)
 
 bool CXM8::Reload()
 {
-	if (DefaultReload(m_pItemInfo->m_iMaxClip, m_iClip ? XM8_RELOAD : XM8_RELOAD_EMPTY, m_iClip ? XM8_RELOAD_TIME : XM8_RELOAD_EMPTY_TIME))
+	if (DefaultReload(m_pItemInfo->m_iMaxClip, m_iClip ? XM8_RELOAD : XM8_RELOAD_EMPTY, m_iClip ? XM8_RELOAD_TIME : XM8_RELOAD_EMPTY_TIME, 0.65f))
 	{
 		m_flAccuracy = 0.2f;
 		return true;

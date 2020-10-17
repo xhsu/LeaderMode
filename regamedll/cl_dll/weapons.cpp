@@ -518,7 +518,7 @@ void CBaseWeapon::PostFrame()
 
 #ifdef CLIENT_PREDICT_AIM
 	if ((!cl_holdtoaim->value && usableButtons & IN_ATTACK2 && m_flNextSecondaryAttack <= UTIL_WeaponTimeBase()) ||	// PRESS to aim
-		(cl_holdtoaim->value && (m_pPlayer->m_afButtonPressed & IN_ATTACK2 || m_pPlayer->m_afButtonReleased & IN_ATTACK2))	// HOLD to aim
+		(cl_holdtoaim->value && ((m_pPlayer->m_afButtonPressed & IN_ATTACK2 && !m_bInZoom) || (m_pPlayer->m_afButtonReleased & IN_ATTACK2 && m_bInZoom)) )	// HOLD to aim
 		)	// UseDecrement()
 	{
 		SecondaryAttack();
@@ -760,7 +760,7 @@ void CBaseWeapon::DefaultIdle(int iDashingAnim, int iIdleAnim, float flDashLoop,
 	SendWeaponAnim((m_bitsFlags & WPNSTATE_DASHING) ? iDashingAnim : iIdleAnim);
 }
 
-bool CBaseWeapon::DefaultReload(int iClipSize, int iAnim, float fDelay)
+bool CBaseWeapon::DefaultReload(int iClipSize, int iAnim, float fDelay, float flExtraIdleDelay)
 {
 	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		return false;
@@ -781,7 +781,8 @@ bool CBaseWeapon::DefaultReload(int iClipSize, int iAnim, float fDelay)
 
 	// pause weapon actions
 	m_pPlayer->m_flNextAttack = fDelay;
-	m_flTimeWeaponIdle = fDelay + 0.5f;
+	m_flTimeWeaponIdle = fDelay + flExtraIdleDelay;
+	m_flNextPrimaryAttack = fDelay + flExtraIdleDelay * 0.8f;
 	m_bInReload = true;
 
 	// 1st personal anim

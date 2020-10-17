@@ -167,7 +167,8 @@ bool CDEagle::Reload()
 {
 	if (DefaultReload(m_pItemInfo->m_iMaxClip,
 		m_iClip ? DEAGLE_RELOAD : DEAGLE_RELOAD_EMPTY,
-		m_iClip ? DEAGLE_RELOAD_TIME : DEAGLE_RELOAD_EMPTY_TIME))
+		m_iClip ? DEAGLE_RELOAD_TIME : DEAGLE_RELOAD_EMPTY_TIME,
+		0.65f))
 	{
 		m_flAccuracy = 0.9f;
 		return true;

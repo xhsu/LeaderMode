@@ -32,6 +32,7 @@ The ultimate goal is to eliminate the other team. Use whatever strategies you wa
 | executeskill                        | Execute skills designed for your role. |
 | declarerole                         | Open a menu with which you may choose your role. |
 | votescheme                          | Vote the tactical scheme for your team. |
+| changemode                          | Use special function of current weapon. |
 
 ## Configuration (CVars)
 | CVar                               | Default | Min | Max | Type   | Description                                    |
