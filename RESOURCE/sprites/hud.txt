@@ -85,9 +85,9 @@ d_mp7a1				640 cod8_mp7	0	180	52	23
 d_m1014				640 cod8_striker	0	180	46	17
 d_skull				640 640hud1	224	240	32	16
 d_tracktrain		640 640hud1	192	240	32	16
-d_acr				640 cod8_acr    0	180	48	18
+d_xm8				640 cod8_acr    0	180	48	18
 d_pm9				640 cod8_pm9	0	180	34	22	
-d_p99				640 cod8_p99	0	180	30      20
+d_m45a1				640 cod8_p99	0	180	30      20
 d_headshot			640 640hud1 0     240   36    16
 item_battery		640 640hud2	176	0	44	44
 item_healthkit		640 640hud2	176	48	44	44

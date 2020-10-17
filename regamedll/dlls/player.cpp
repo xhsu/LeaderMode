@@ -1026,7 +1026,7 @@ BOOL CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 			case WEAPON_SVD:		flRatio *= 1.65; break;
 			case WEAPON_M14EBR:		flRatio *= 1.45; break;
 			case WEAPON_MK46:		flRatio *= 1.5;  break;
-			case WEAPON_P99:		flRatio *= 1.05; break;
+			case WEAPON_M45A1:		flRatio *= 1.05; break;
 			case WEAPON_DEAGLE:		flRatio *= 1.5;  break;
 			case WEAPON_GLOCK18:	flRatio *= 1.05; break;
 			case WEAPON_FIVESEVEN:

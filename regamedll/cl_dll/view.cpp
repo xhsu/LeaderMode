@@ -824,23 +824,14 @@ bob is presented when walking
 void V_CalcGunBob(ref_params_s* pparams)
 {
 	static Vector vecGoal = Vector();
+	static double t = 0.0;
 
 	if (g_flPlayerSpeed > 1.0f)	// start bob at this speed.
 	{
-		// scale the time.
-		double t = pparams->time * g_flGunBobOmegaModifier;
-
-		if (g_pCurWeapon)
-		{
-			if (!IS_DASHING || gPseudoPlayer.m_flNextAttack <= 0.0f)	// prevent over-shaking at dash_enter anim.
-			{
-				t *= g_pCurWeapon->GetMaxSpeed() * cl_walkingspeedmodifier->value * 0.035;
-			}
-			else
-			{
-				t *= g_pCurWeapon->GetMaxSpeed() * 0.035;
-			}
-		}
+		// integrate the time.
+		// if you attempts to directly scale time, it would cause the "weapon shake" in speed change.
+		// that's due to a sudden drop of speed will discontious the t curve.
+		t += pparams->frametime * g_flGunBobOmegaModifier * g_vPlayerVelocity.Length() * 0.035f;
 
 		// a fucking circle.
 		//vecGoal = Vector(Q_sin(t), 0, Q_cos(t));

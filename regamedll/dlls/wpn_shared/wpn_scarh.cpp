@@ -120,7 +120,7 @@ void CSCARH::SCARHFire(float flSpread, float flCycleTime)
 	auto vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, SCARH_EFFECTIVE_RANGE, SCARH_PENETRATION, m_iPrimaryAmmoType, SCARH_DAMAGE, SCARH_RANGE_MODIFER, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
-	int seq = UTIL_SharedRandomFloat(m_pPlayer->random_seed, SCARH_SHOOT1, SCARH_SHOOT3);
+	int seq = UTIL_SharedRandomLong(m_pPlayer->random_seed, SCARH_SHOOT1, SCARH_SHOOT3);
 	if (m_iClip == 0)
 		seq = SCARH_SHOOT_LAST;
 

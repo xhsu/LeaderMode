@@ -121,7 +121,7 @@ void CM4A1::M4A1Fire(float flSpread, float flCycleTime)
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 
 #ifndef CLIENT_DLL
-	SendWeaponAnim(UTIL_SharedRandomFloat(m_pPlayer->random_seed, M4A1_SHOOT_BACKWARD, M4A1_SHOOT_RIGHTWARD));
+	SendWeaponAnim(UTIL_SharedRandomLong(m_pPlayer->random_seed, M4A1_SHOOT_BACKWARD, M4A1_SHOOT_RIGHTWARD));
 	PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL, m_pPlayer->edict(), m_usEvent, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, int(m_pPlayer->pev->punchangle.x * 100), int(m_pPlayer->pev->punchangle.y * 100), FALSE, FALSE);
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)

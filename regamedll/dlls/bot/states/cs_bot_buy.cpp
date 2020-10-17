@@ -175,7 +175,7 @@ BuyInfo secondaryWeapon[] =
 	{ PISTOL, true,		WEAPON_ANACONDA	},
 	{ PISTOL, true,		WEAPON_DEAGLE	},
 	{ PISTOL, true,		WEAPON_FIVESEVEN},
-	{ PISTOL, true,		WEAPON_P99		},
+	{ PISTOL, true,		WEAPON_M45A1		},
 };
 
 // Given a weapon alias, return the kind of weapon it is

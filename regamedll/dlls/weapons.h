@@ -1341,24 +1341,27 @@ public:	// util funcs
 };
 
 #define M45A1_VIEW_MODEL	"models/weapons/v_m45a1.mdl"
-#define M45A1_WORLD_MODEL	"models/weapons/w_m45a1.mdl"
-#define M45A1_FIRE_SFX		"weapons/m45a1/m45a1_fire.wav"
+#define M45A1_WORLD_MODEL	"models/w_elite.mdl"	// FIXME, BUGBUG
+#define M45A1_FIRE_SFX		"weapons/M45A1/M45_Shoot.wav"
 
-constexpr float M45A1_MAX_SPEED = 250.0f;
-constexpr float M45A1_RELOAD_EMPYT_TIME = 2.6F;
-constexpr float M45A1_RELOAD_TIME = 2.167F;
-constexpr float M45A1_DRAW_FIRST_TIME = 1.067F;
-constexpr float M45A1_DRAW_TIME = 0.7F;
-constexpr float M45A1_HOLSTER_TIME = 0.5F;
-constexpr float M45A1_DASH_ENTER_TIME = 0.5333F;
-constexpr float M45A1_DASH_EXIT_TIME = 0.5333F;
-constexpr float M45A1_SH_RELOAD_EMPTY_TIME = 2.833F;
-constexpr float M45A1_SH_RELOAD_TIME = 2.1667F;
-constexpr float M45A1_SH_DASH_ENTER_TIME = 0.33333F;
-constexpr float M45A1_SH_DASH_EXIT_TIME = 0.65F;
-constexpr float M45A1_DAMAGE = 36.0f;
-constexpr float M45A1_RANGE_MODIFER = 0.75f;
-constexpr int	M45A1_GUN_VOLUME = BIG_EXPLOSION_VOLUME;
+constexpr float M45A1_MAX_SPEED				= 250.0f;
+constexpr float M45A1_RELOAD_EMPYT_TIME		= 2.1f;
+constexpr float M45A1_RELOAD_TIME			= 1.533f;
+constexpr float M45A1_DRAW_FIRST_TIME		= 1.067F;
+constexpr float M45A1_DRAW_TIME				= 0.7F;
+constexpr float M45A1_HOLSTER_TIME			= 0.5F;
+constexpr float M45A1_DASH_ENTER_TIME		= 0.5333F;
+constexpr float M45A1_DASH_EXIT_TIME		= 0.5333F;
+constexpr float M45A1_SH_RELOAD_EMPTY_TIME	= 2.833F;
+constexpr float M45A1_SH_RELOAD_TIME		= 2.1667F;
+constexpr float M45A1_SH_DASH_ENTER_TIME	= 0.33333F;
+constexpr float M45A1_SH_DASH_EXIT_TIME		= 0.65F;
+constexpr float M45A1_DAMAGE				= 36.0f;
+constexpr float M45A1_RANGE_MODIFER			= 0.75f;
+constexpr float M45A1_FIRE_INTERVAL			= 0.122F;
+constexpr int	M45A1_PENETRATION			= 1;
+constexpr float	M45A1_EFFECTIVE_RANGE		= 4096.0f;
+constexpr int	M45A1_GUN_VOLUME			= BIG_EXPLOSION_VOLUME;
 
 enum m45a1_e
 {
@@ -1379,42 +1382,56 @@ enum m45a1_e
 	M45A1_LHAND_DOWN,
 	M45A1_LHAND_UP,
 	M45A1_DASH_ENTER,
-	M45A1_DASH_IDLE,
+	M45A1_DASHING,
 	M45A1_DASH_EXIT,
 	M45A1_SH_RELOAD_EMPTY,
 	M45A1_SH_RELOAD,
 	M45A1_SH_DASH_ENTER,
-	M45A1_SH_DASH_IDLE,
+	M45A1_SH_DASHING,
 	M45A1_SH_DASH_EXIT
 };
 
-#define P99_VIEW_MODEL	"models/weapons/v_p99.mdl"
-#define P99_WORLD_MODEL	"models/weapons/w_p99.mdl"
-#define P99_FIRE_SFX	"weapons/p99/p99_fire.wav"
-
-const float ELITE_MAX_SPEED     = 250.0f;
-const float ELITE_RELOAD_TIME   = 4.5f;
-const float ELITE_DAMAGE        = 36.0f;
-const float ELITE_RANGE_MODIFER = 0.75f;
-
-enum elite_e
+class CM45A1 : public CBaseWeapon
 {
-	ELITE_IDLE,
-	ELITE_IDLE_LEFTEMPTY,
-	ELITE_SHOOTLEFT1,
-	ELITE_SHOOTLEFT2,
-	ELITE_SHOOTLEFT3,
-	ELITE_SHOOTLEFT4,
-	ELITE_SHOOTLEFT5,
-	ELITE_SHOOTLEFTLAST,
-	ELITE_SHOOTRIGHT1,
-	ELITE_SHOOTRIGHT2,
-	ELITE_SHOOTRIGHT3,
-	ELITE_SHOOTRIGHT4,
-	ELITE_SHOOTRIGHT5,
-	ELITE_SHOOTRIGHTLAST,
-	ELITE_RELOAD,
-	ELITE_DRAW,
+#ifndef CLIENT_DLL
+public:	// SV exclusive variables.
+	static unsigned short m_usEvent;
+	static int m_iShell;
+
+public:	// SV exclusive functions.
+	virtual void	Precache(void);
+#else
+public:	// CL exclusive functions.
+	virtual void	Think(void);
+#endif
+
+	// Slide stop available anims.
+	static constexpr int BITS_SLIDE_STOP_ANIM = (1 << M45A1_IDLE) |
+												(1 << M45A1_DRAW) |
+												(1 << M45A1_HOLSTER) |
+												/*(1 << M45A1_CHECK_MAGAZINE) |*/	// FIXME, TODO
+												(1 << M45A1_LHAND_DOWN) | (1 << M45A1_LHAND_UP) |
+												(1 << M45A1_BLOCK_DOWN) | (1 << M45A1_BLOCK_UP) |
+												(1 << M45A1_DASH_ENTER) | (1 << M45A1_DASHING) | (1 << M45A1_DASH_EXIT) |
+												(1 << M45A1_SH_DASH_ENTER) | (1 << M45A1_SH_DASHING) | (1 << M45A1_SH_DASH_EXIT);
+
+public:	// basic logic funcs
+	virtual bool	Deploy(void);
+	virtual void	PrimaryAttack(void);
+	virtual void	SecondaryAttack(void);
+	virtual bool	Reload(void);
+	virtual void	WeaponIdle(void)		{ return DefaultIdle(M45A1_DASHING); }
+	virtual bool	HolsterStart(void)		{ return DefaultHolster(M45A1_HOLSTER, M45A1_HOLSTER_TIME); }
+	virtual	void	DashStart(void)			{ return DefaultDashStart(M45A1_DASH_ENTER, M45A1_DASH_ENTER_TIME); }
+	virtual void	DashEnd(void)			{ return DefaultDashEnd(M45A1_DASH_ENTER, M45A1_DASH_ENTER_TIME, M45A1_DASH_EXIT, M45A1_DASH_EXIT_TIME); }
+
+public:	// util funcs
+	virtual	float	GetMaxSpeed(void)		{ return M45A1_MAX_SPEED; }
+	virtual void	ResetModel(void);	// declare by marco.
+	virtual int		CalcBodyParam(void);
+
+public:	// new functions
+	void M45A1Fire(float flSpread, float flCycleTime = M45A1_FIRE_INTERVAL);
 };
 
 #define FN57_VIEW_MODEL		"models/weapons/v_fiveseven.mdl"

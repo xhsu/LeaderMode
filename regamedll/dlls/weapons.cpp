@@ -163,7 +163,7 @@ void WeaponsPrecache()
 	UTIL_PrecacheOtherWeapon(WEAPON_GLOCK18);
 	UTIL_PrecacheOtherWeapon(WEAPON_MP5N);
 	UTIL_PrecacheOtherWeapon(WEAPON_MP7A1);
-	UTIL_PrecacheOtherWeapon(WEAPON_P99);
+	UTIL_PrecacheOtherWeapon(WEAPON_M45A1);
 
 	PRECACHE_MODEL(THROWABLE_VIEW_MODEL);
 	PRECACHE_SOUND("items/ammopickup1.wav");	// grenade purchasing SFX.
@@ -293,6 +293,10 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 
 	case WEAPON_DEAGLE:
 		p = new CDEagle;
+		break;
+
+	case WEAPON_M45A1:
+		p = new CM45A1;
 		break;
 
 	case WEAPON_FIVESEVEN:
@@ -967,6 +971,11 @@ bool CBaseWeapon::DefaultDeploy(const char* szViewModel, const char* szWeaponMod
 
 void CBaseWeapon::DefaultIdle(int iDashingAnim, int iIdleAnim, float flDashLoop, float flIdleLoop)
 {
+#ifdef CLIENT_DLL
+	// common sense: running will cause your hands shake more.
+	g_flGunBobAmplitudeModifier = (m_bitsFlags & WPNSTATE_DASHING) ? 10.0f : 1.0f;
+#endif
+
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + ((m_bitsFlags & WPNSTATE_DASHING) ? flDashLoop : flIdleLoop);
 	SendWeaponAnim((m_bitsFlags & WPNSTATE_DASHING) ? iDashingAnim : iIdleAnim);
 }
@@ -1159,6 +1168,11 @@ void CBaseWeapon::DefaultDashEnd(int iEnterAnim, float flEnterTime, int iExitAni
 
 	// either way, we have to remove this flag.
 	m_bitsFlags &= ~WPNSTATE_DASHING;
+
+#ifdef CLIENT_DLL
+	// remove the exaggerating shaking vfx.
+	g_flGunBobAmplitudeModifier = 1.0f;
+#endif
 }
 
 void CBaseWeapon::SendWeaponAnim(int iAnim, bool bSkipLocal)
@@ -1184,7 +1198,7 @@ void CBaseWeapon::PlayEmptySound()
 	case WEAPON_GLOCK18:
 	case WEAPON_ANACONDA:
 	case WEAPON_DEAGLE:
-	case WEAPON_P99:
+	case WEAPON_M45A1:
 	case WEAPON_FIVESEVEN:
 		EMIT_SOUND(m_pPlayer->edict(), CHAN_WEAPON, "weapons/dryfire_pistol.wav", 0.8, ATTN_NORM);
 		break;

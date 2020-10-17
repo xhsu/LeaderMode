@@ -46,8 +46,8 @@ bool CDEagle::Deploy()
 	if (m_iClip <= 0)
 		m_bitsFlags &= ~WPNSTATE_DRAW_FIRST;
 
-	return DefaultDeploy(DEagle_VIEW_MODEL,
-		DEagle_WORLD_MODEL,
+	return DefaultDeploy(
+		DEagle_VIEW_MODEL, DEagle_WORLD_MODEL,
 		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DEAGLE_DRAW_FIRST : DEAGLE_DRAW,
 		"onehanded",
 		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DEAGLE_DRAW_FIRST_TIME : DEAGLE_DRAW_TIME);
@@ -79,9 +79,6 @@ void CDEagle::DEagleFire(float flSpread, float flCycleTime)
 	{
 		return;
 	}
-
-	if (m_bInZoom)	// decrease spread while scoping.
-		flSpread *= 0.5f;
 
 	if (m_flLastFire != 0.0)
 	{
@@ -161,6 +158,8 @@ void CDEagle::DEagleFire(float flSpread, float flCycleTime)
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.8f;
 
 	m_pPlayer->m_vecVAngleShift.x -= 2.5f;
+	m_pPlayer->pev->punchangle.x -= UTIL_SharedRandomFloat(m_pPlayer->random_seed + 4, 1.0f, 2.5f);
+	m_pPlayer->pev->punchangle.y += UTIL_SharedRandomFloat(m_pPlayer->random_seed + 5, -1.0f, 1.0f);
 }
 
 bool CDEagle::Reload()

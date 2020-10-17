@@ -9,12 +9,12 @@ weapon_m1014			640 cod8_striker	0	0	170	45
 weapon_m1014_s			640 cod8_striker	0	90	170	45
 weapon_pm9				640 cod8_pm9		0	0	170	67
 weapon_pm9_s			640 cod8_pm9		0	90	170	67
-weapon_acr				640 cod8_acr		0	0	170	55
-weapon_acr_s			640 cod8_acr		0	90	170	60
+weapon_xm8				640 cod8_acr		0	0	170	55
+weapon_xm8_s			640 cod8_acr		0	90	170	60
 weapon_smokegrenade		640 battery_frag1	0	90	170	45
 weapon_smokegrenade_s	640 battery_frag2	0	90	170	45
-weapon_p99				640 cod8_p99		0	0	170	45
-weapon_p99_s			640 cod8_p99		0	90	170	45
+weapon_m45a1			640 cod8_p99		0	0	170	45
+weapon_m45a1_s			640 cod8_p99		0	90	170	45
 weapon_fiveseven		640 cod8_57			0	0	170	45
 weapon_fiveseven_s		640 cod8_57			0	90	170	45
 weapon_ump45			640 cod8_ump45		0	0	170	66

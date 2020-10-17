@@ -3036,13 +3036,7 @@ bool CHalfLifeMultiplay::CanHavePlayerItem(CBasePlayer* pPlayer, WeaponIdType iI
 		return false;
 	}
 
-	if (pPlayer->HasShield() && iId == WEAPON_P99)
-		return false;
-
 	if (pPlayer->HasShield() && iId == WEAPON_SHIELDGUN)
-		return false;
-
-	if (pPlayer->m_rgpPlayerItems[PISTOL_SLOT] && pPlayer->m_rgpPlayerItems[PISTOL_SLOT]->m_iId == WEAPON_P99 && iId == WEAPON_SHIELDGUN)
 		return false;
 
 	if (pPlayer->m_rgpPlayerItems[PRIMARY_WEAPON_SLOT] && pPlayer->m_rgpPlayerItems[PRIMARY_WEAPON_SLOT]->m_iId == iId)

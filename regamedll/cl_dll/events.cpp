@@ -1085,11 +1085,11 @@ DECLARE_EVENT(FireXM8)
 
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iRShell, TE_BOUNCE_SHELL, 8);
 
-	// original goldsrc api: VOL = 1.0, ATTN = 0.48
-	Play3DSound(XM8_FIRE_SFX, 1.0f, XM8_GUN_VOLUME, origin);
-
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
+
+	// original goldsrc api: VOL = 1.0, ATTN = 0.48
+	Play3DSound(XM8_FIRE_SFX, 1.0f, XM8_GUN_VOLUME, vecSrc + forward * 10.0f);
 
 	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, XM8_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_XM8].m_iAmmoType, XM8_PENETRATION);
 }
@@ -1180,23 +1180,86 @@ DECLARE_EVENT(FireDEagle)
 
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iPShell, TE_BOUNCE_SHELL, 5);
 
-	// original goldsrc api: VOL = 1.0, ATTN = 0.6
-	Play3DSound(DEagle_FIRE_SFX, 1.0f, DEAGLE_GUN_VOLUME, origin);
-
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
+
+	// original goldsrc api: VOL = 1.0, ATTN = 0.6
+	Play3DSound(DEagle_FIRE_SFX, 1.0f, DEAGLE_GUN_VOLUME, vecSrc + forward * 10.0f);
 
 	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, DEAGLE_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_DEAGLE].m_iAmmoType, DEAGLE_PENETRATION);
 }
 
-DECLARE_EVENT(FireEliteLeft)
+DECLARE_EVENT(FireM45A1)
 {
+	int idx = args->entindex;
+	bool empty = args->bparam1;
 
-}
+	Vector origin, angles, velocity;
+	VectorCopy(args->origin, origin);
+	VectorCopy(args->angles, angles);
+	VectorCopy(args->velocity, velocity);
 
-DECLARE_EVENT(FireEliteRight)
-{
+	angles[0] += args->iparam1 / 100.0;
+	angles[1] += args->iparam2 / 100.0;
 
+	Vector forward, right, up;
+	gEngfuncs.pfnAngleVectors(angles, forward, right, up);
+
+	if (EV_IsLocal(idx))
+	{
+		g_iShotsFired++;
+		EV_MuzzleFlash();
+
+		if (g_pCurWeapon)
+		{
+			int iAnim = 0;
+			if (args->bparam1)	// m_iClip >= 0
+			{
+				if (args->bparam2)	// m_bInZoom
+					iAnim = UTIL_SharedRandomLong(gPseudoPlayer.random_seed, M45A1_AIM_SHOOT_A, M45A1_AIM_SHOOT_B);
+				else
+					iAnim = M45A1_SHOOT;
+			}
+			else
+			{
+				if (args->bparam2)	// m_bInZoom
+					iAnim = M45A1_AIM_SHOOT_LAST;
+				else
+					iAnim = M45A1_SHOOT_LAST;
+			}
+
+			g_pCurWeapon->SendWeaponAnim(iAnim);
+		}
+
+		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 0, 0.25, 10, 10, 10, EV_PISTOL_SMOKE, velocity, false, 35);
+		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 25, 0.3, 15, 15, 15, EV_WALL_PUFF, velocity, false, 35);
+		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 50, 0.2, 25, 25, 25, EV_WALL_PUFF, velocity, false, 35);
+	}
+
+	Vector ShellVelocity, ShellOrigin;
+	if (EV_IsLocal(idx))
+	{
+		if (cl_righthand->value == 0)
+			EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 35.0, -11.0, -16.0);
+		else
+			EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 35.0, -11.0, 16.0);
+
+		VectorCopy(g_pViewEnt->attachment[1], ShellOrigin);
+		VectorScale(ShellVelocity, 0.75, ShellVelocity);
+		ShellVelocity[2] -= 25;
+	}
+	else
+		EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -12.0, -4.0);
+
+	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iPShell, TE_BOUNCE_SHELL, 5);
+
+	Vector vecSrc = EV_GetGunPosition(args, origin);
+	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
+
+	// original goldsrc api: VOL = 1.0, ATTN = 0.6
+	Play3DSound(M45A1_FIRE_SFX, 1.0f, M45A1_GUN_VOLUME, vecSrc + forward * 10.0f);
+
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, M45A1_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_DEAGLE].m_iAmmoType, M45A1_PENETRATION);
 }
 
 DECLARE_EVENT(FireQBZ95)
@@ -1481,11 +1544,11 @@ DECLARE_EVENT(FireMK46)
 
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iRShell, TE_BOUNCE_SHELL, idx, 10);
 
-	// original goldsrc api: VOL = 1.0, ATTN = 0.52
-	Play3DSound(MK46_FIRE_SFX, 1.0f, MK46_GUN_VOLUME, origin);
-
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
+
+	// original goldsrc api: VOL = 1.0, ATTN = 0.52
+	Play3DSound(MK46_FIRE_SFX, 1.0f, MK46_GUN_VOLUME, vecSrc + forward * 10.0f);
 
 	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, MK46_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_MK46].m_iAmmoType, MK46_PENETRATION);
 }
@@ -1572,11 +1635,11 @@ DECLARE_EVENT(FireM4A1)
 
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iRShell, TE_BOUNCE_SHELL, idx, 10);
 
-	// original goldsrc api: VOL = 1.0, ATTN = 0.52
-	Play3DSound(M4A1_FIRE_SFX, 1.0f, M4A1_GUN_VOLUME, origin);
-
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
+
+	// original goldsrc api: VOL = 1.0, ATTN = 0.52
+	Play3DSound(M4A1_FIRE_SFX, 1.0f, M4A1_GUN_VOLUME, vecSrc + forward * 10.0f);
 
 	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, M4A1_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_M4A1].m_iAmmoType, M4A1_PENETRATION);
 }
@@ -1698,13 +1761,13 @@ DECLARE_EVENT(FireSCARH)
 
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iRShell, TE_BOUNCE_SHELL, idx, 15);
 
-	// original goldsrc api: VOL = 1.0, ATTN = 0.4
-	Play3DSound(SCARH_FIRE_SFX, 1.0f, SCARH_GUN_VOLUME, origin);
-
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
 	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, SCARH_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_SCARH].m_iAmmoType, SCARH_PENETRATION);
+
+	// original goldsrc api: VOL = 1.0, ATTN = 0.4
+	Play3DSound(SCARH_FIRE_SFX, 1.0f, SCARH_GUN_VOLUME, vecSrc + forward * 10.0f);
 }
 
 DECLARE_EVENT(FireMP7A1)
@@ -1925,12 +1988,12 @@ DECLARE_EVENT(FireM1014)
 
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, shell, TE_BOUNCE_SHOTSHELL, idx, 3);
 
-	// original goldsrc api: VOL = 1.0, ATTN = 0.52
-	Play3DSound(M1014_FIRE_SFX, 1.0f, M1014_GUN_VOLUME, origin);
-
 	int shared_rand = args->iparam2;
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	EV_HLDM_FireBullets(idx, forward, right, up, M1014_PROJECTILE_COUNT, vecSrc, forward, M1014_CONE_VECTOR, M1014_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_M1014].m_iAmmoType, 1, shared_rand);
+
+	// original goldsrc api: VOL = 1.0, ATTN = 0.52
+	Play3DSound(M1014_FIRE_SFX, 1.0f, M1014_GUN_VOLUME, vecSrc + forward * 10.0f);
 }
 
 DECLARE_EVENT(CreateExplo)
@@ -2292,8 +2355,7 @@ void Events_Init(void)
 	HOOK_EVENT(ak47, FireAK47);
 	HOOK_EVENT(awp, FireAWP);
 	HOOK_EVENT(deagle, FireDEagle);
-	HOOK_EVENT(elite_left, FireEliteLeft);
-	HOOK_EVENT(elite_right, FireEliteRight);
+	HOOK_EVENT(m45a1, FireM45A1);
 	HOOK_EVENT(qbz95, FireQBZ95);
 	HOOK_EVENT(fiveseven, Fire57);
 	HOOK_EVENT(svd, FireSVD);

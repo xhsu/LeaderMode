@@ -10,7 +10,7 @@ const WeaponInfo g_rgWpnInfo[LAST_WEAPON] =
 	{WEAPON_ANACONDA,		"weapon_anaconda",		"Colt Anaconda",				AMMO_44Magnum,		6,	PISTOL_SLOT,			ITEM_FLAG_NONE,			PISTOL_BASIC_WEIGHT + 3,		WEAPONCLASS_PISTOL,			600},
 	{WEAPON_DEAGLE,			"weapon_deagle",		"IMI Desert Eagle",				AMMO_50AE,			7,	PISTOL_SLOT,			ITEM_FLAG_NONE,			PISTOL_BASIC_WEIGHT + 4,		WEAPONCLASS_PISTOL,			650},
 	{WEAPON_FIVESEVEN,		"weapon_fiveseven",		"FiveseveN",					AMMO_57mm,			20,	PISTOL_SLOT,			ITEM_FLAG_NONE,			PISTOL_BASIC_WEIGHT + 5,		WEAPONCLASS_PISTOL,			750},
-	{WEAPON_P99,			"weapon_p99",			"Walther P99",					AMMO_9mm,			30,	PISTOL_SLOT,			ITEM_FLAG_NONE,			PISTOL_BASIC_WEIGHT + 6,		WEAPONCLASS_PISTOL,			800},
+	{WEAPON_M45A1,			"weapon_m45a1",			"Colt M45 MEU(SOC)",			AMMO_45acp,			7,	PISTOL_SLOT,			ITEM_FLAG_NONE,			PISTOL_BASIC_WEIGHT + 6,		WEAPONCLASS_PISTOL,			800},
 
 	// SHOTGUNS
 	{WEAPON_KSG12,			"weapon_ksg12",			"Kel-Tec KSG-12",				AMMO_Buckshot,		14,	PRIMARY_WEAPON_SLOT,	ITEM_FLAG_NONE,			SHOTGUN_BASIC_WEIGHT + 1,		WEAPONCLASS_SHOTGUN,		1700},
@@ -148,7 +148,7 @@ bool IsGrenadeWeapon(int id)
 	return g_rgWpnInfo[id].m_iSlot == GRENADE_SLOT;
 }
 
-constexpr int BITS_SEMIAUTO_WEAPON = ((1 << WEAPON_USP) | (1 << WEAPON_ANACONDA) | (1 << WEAPON_DEAGLE) | (1 << WEAPON_FIVESEVEN) | (1 << WEAPON_P99) | (1 << WEAPON_M14EBR) | (1 << WEAPON_SVD));
+constexpr int BITS_SEMIAUTO_WEAPON = ((1 << WEAPON_USP) | (1 << WEAPON_ANACONDA) | (1 << WEAPON_DEAGLE) | (1 << WEAPON_FIVESEVEN) | (1 << WEAPON_M45A1) | (1 << WEAPON_M14EBR) | (1 << WEAPON_SVD));
 
 bool IsSemiautoWeapon(WeaponIdType iId)
 {
