@@ -25,6 +25,67 @@ void CM4A1::Precache()
 
 #else
 
+int CM4A1::CalcBodyParam(void)
+{
+	BodyEnumInfo_t info[] =
+	{
+		{ 0, 2 },	// hands		= 0;
+		{ 0, 1 },
+		{ 0, 1 },
+
+		{ 0, 1 },	// rifle		= 3;
+		{ 0, 1 },
+		{ 0, 1 },
+
+		{ 0, 2 },	// magazine		= 6;
+		{ 0, 3 },	// steel sight	= 7;
+		{ 0, 6 },	// scopes		= 8;
+		{ 0, 4 },	// attachments	= 9;
+		{ 0, 2 },	// nail/shell	= 10;
+		{ 0, 4 },	// muzzle		= 11;
+		{ 0, 2 },	// laser		= 12;
+	};
+
+	switch (m_iVariation)
+	{
+	case Role_Sharpshooter:
+		// the sharpshooter's version contains a ACOG and a laser.
+		// filpped down steel sight.
+		// ACOG.
+		// Recoil compensator.
+		// laser.
+
+		info[7].body = 1;
+		info[8].body = 4;
+		info[11].body = 2;
+		info[12].body = 1;
+		break;
+
+	default:
+		// by default, this weapon has:
+		// filpped down steel sight.
+		// holographic sight.
+
+		info[7].body = 1;
+		info[8].body = 2;
+		break;
+	}
+
+	if (!m_iClip)
+		info[6].body = 1;	// empty mag.
+
+	// in EMPTY reload, after we remove the empty mag, the new mag should be full of bullets.
+	if (m_bInReload && m_bitsFlags & WPNSTATE_RELOAD_EMPTY)
+	{
+		if (m_pPlayer->m_flNextAttack < 1.7f)	// in this anim, a new mag was taken out after around 0.9s. thus, 2.6f - 0.9f ~= 1.7f.
+		{
+			info[6].body = 0;	// full mag.
+		}
+	}
+
+	return CalcBody(info, ARRAY_ELEM_COUNT(info));	// elements count of the info[].
+}
+
 void CM4A1::Think(void)
 {
 	CBaseWeapon::Think();
@@ -188,67 +249,6 @@ bool CM4A1::Reload()
 	}
 
 	return false;
-}
-
-int CM4A1::CalcBodyParam(void)
-{
-	BodyEnumInfo_t info[] =
-	{
-		{ 0, 2 },	// hands		= 0;
-		{ 0, 1 },
-		{ 0, 1 },
-
-		{ 0, 1 },	// rifle		= 3;
-		{ 0, 1 },
-		{ 0, 1 },
-
-		{ 0, 2 },	// magazine		= 6;
-		{ 0, 3 },	// steel sight	= 7;
-		{ 0, 6 },	// scopes		= 8;
-		{ 0, 4 },	// attachments	= 9;
-		{ 0, 2 },	// nail/shell	= 10;
-		{ 0, 4 },	// muzzle		= 11;
-		{ 0, 2 },	// laser		= 12;
-	};
-
-	switch (m_iVariation)
-	{
-	case Role_Sharpshooter:
-		// the sharpshooter's version contains a ACOG and a laser.
-		// filpped down steel sight.
-		// ACOG.
-		// Recoil compensator.
-		// laser.
-
-		info[7].body = 1;
-		info[8].body = 4;
-		info[11].body = 2;
-		info[12].body = 1;
-		break;
-
-	default:
-		// by default, this weapon has:
-		// filpped down steel sight.
-		// holographic sight.
-
-		info[7].body = 1;
-		info[8].body = 2;
-		break;
-	}
-
-	if (!m_iClip)
-		info[6].body = 1;	// empty mag.
-
-	// in EMPTY reload, after we remove the empty mag, the new mag should be full of bullets.
-	if (m_bInReload && m_bitsFlags & WPNSTATE_RELOAD_EMPTY)
-	{
-		if (m_pPlayer->m_flNextAttack < 1.7f)	// in this anim, a new mag was taken out after around 0.9s. thus, 2.6f - 0.9f ~= 1.7f.
-		{
-			info[6].body = 0;	// full mag.
-		}
-	}
-
-	return CalcBody(info, ARRAY_ELEM_COUNT(info));	// elements count of the info[].
 }
 
 DECLARE_STANDARD_RESET_MODEL_FUNC(M4A1)

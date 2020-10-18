@@ -481,10 +481,10 @@
     <ClCompile Include="..\dlls\wpn_shared\wpn_knife.cpp">
       <Filter>dlls\wpn_shared\Sanctioned</Filter>
     </ClCompile>
-    <ClCompile Include="..\dlls\wpn_shared\wpn_m45a1.cpp">
-      <Filter>dlls\wpn_shared</Filter>
-    </ClCompile>
     <ClCompile Include="..\dlls\wpn_shared\wpn_deagle.cpp">
+      <Filter>dlls\wpn_shared\Sanctioned</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dlls\wpn_shared\wpn_m45a1.cpp">
       <Filter>dlls\wpn_shared\Sanctioned</Filter>
     </ClCompile>
   </ItemGroup>

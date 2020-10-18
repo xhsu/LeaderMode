@@ -26,6 +26,45 @@ void CMK46::Precache()
 
 #else
 
+int CMK46::CalcBodyParam(void)
+{
+	BodyEnumInfo_t info[] =
+	{
+		{ 0, 2 },	// hands		= 0;
+		{ 0, 1 },
+
+		{ 0, 1 },	// weapon		= 2;
+		{ 0, 1 },
+		{ 0, 1 },
+
+		{ 0, 16 },	// bullets		= 5;
+		{ 0, 6 },	// optical sight= 6;
+		{ 0, 4 },	// muzzle		= 7;
+		{ 0, 2 },	// laser		= 8;
+	};
+
+	// by default, this weapon has:
+	// red dot optical sight.
+	// laser.
+
+	info[6].body = 3;
+	info[8].body = 1;
+
+	// as the magazine is getting lesser, this number is getting bigger. (later model)
+	info[5].body = Q_clamp(16 - m_iClip, 0, 15);
+
+	// in EMPTY reload, after we remove the empty mag, the new mag should be full of bullets.
+	if (m_bInReload && m_bitsFlags & WPNSTATE_RELOAD_EMPTY)
+	{
+		if (m_pPlayer->m_flNextAttack < 3.77f)	// in this anim, a new mag was taken out after around 2.46. thus, 6.23 - 2.46 ~= 3.77f.
+		{
+			info[5].body = 0;	// a full loaded bullets chain.
+		}
+	}
+
+	return CalcBody(info, sizeof(info) / sizeof(BodyEnumInfo_t));	// elements count of the info[].
+}
+
 void CMK46::Think(void)
 {
 	CBaseWeapon::Think();
@@ -173,45 +212,6 @@ bool CMK46::Reload()
 	}
 
 	return false;
-}
-
-int CMK46::CalcBodyParam(void)
-{
-	BodyEnumInfo_t info[] =
-	{
-		{ 0, 2 },	// hands		= 0;
-		{ 0, 1 },
-
-		{ 0, 1 },	// weapon		= 2;
-		{ 0, 1 },
-		{ 0, 1 },
-
-		{ 0, 16 },	// bullets		= 5;
-		{ 0, 6 },	// optical sight= 6;
-		{ 0, 4 },	// muzzle		= 7;
-		{ 0, 2 },	// laser		= 8;
-	};
-
-	// by default, this weapon has:
-	// red dot optical sight.
-	// laser.
-
-	info[6].body = 3;
-	info[8].body = 1;
-
-	// as the magazine is getting lesser, this number is getting bigger. (later model)
-	info[5].body = Q_clamp(16 - m_iClip, 0, 15);
-
-	// in EMPTY reload, after we remove the empty mag, the new mag should be full of bullets.
-	if (m_bInReload && m_bitsFlags & WPNSTATE_RELOAD_EMPTY)
-	{
-		if (m_pPlayer->m_flNextAttack < 3.77f)	// in this anim, a new mag was taken out after around 2.46. thus, 6.23 - 2.46 ~= 3.77f.
-		{
-			info[5].body = 0;	// a full loaded bullets chain.
-		}
-	}
-
-	return CalcBody(info, sizeof(info) / sizeof(BodyEnumInfo_t));	// elements count of the info[].
 }
 
 DECLARE_STANDARD_RESET_MODEL_FUNC(MK46)

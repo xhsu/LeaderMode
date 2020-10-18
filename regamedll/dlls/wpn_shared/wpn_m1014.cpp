@@ -24,6 +24,46 @@ void CM1014::Precache()
 	m_iShell = PRECACHE_MODEL("models/shotgunshell.mdl");
 }
 
+#else
+
+int CM1014::CalcBodyParam(void)
+{
+	static BodyEnumInfo_t info[] =
+	{
+		{ 0, 1 },	// hands		= 0;
+		{ 0, 1 },
+		{ 0, 1 },	// mesh			= 2;
+		{ 0, 1 },
+
+		{ 0, 4 },	// scope		= 4;
+		{ 0, 2 },	// muzzle		= 5;
+		{ 0, 2 },	// laser		= 6;
+	};
+
+	switch (m_iVariation)
+	{
+	case Role_LeadEnforcer:
+		// the lead enforcer's version contains only a muzzle compensator.
+
+		info[4].body = 0;
+		info[5].body = 1;
+		info[6].body = 0;
+		break;
+
+	default:
+		// by default, this weapon has:
+		// reddot sight.
+		// laser.
+
+		info[4].body = 2;
+		info[5].body = 0;
+		info[6].body = 1;
+		break;
+	}
+
+	return CalcBody(info, ARRAY_ELEM_COUNT(info));	// elements count of the info[].
+}
+
 #endif
 
 void CM1014::Think(void)
@@ -218,44 +258,6 @@ void CM1014::PopAnim(void)
 	// by this, the time will look like "freezed" during the push-pop time frame.
 	m_flNextAddAmmo = gpGlobals->time - m_Stack2.m_flNextAddAmmo;
 	m_flNextInsertAnim = gpGlobals->time - m_Stack2.m_flNextInsertAnim;
-}
-
-int CM1014::CalcBodyParam(void)
-{
-	static BodyEnumInfo_t info[] =
-	{
-		{ 0, 1 },	// hands		= 0;
-		{ 0, 1 },
-		{ 0, 1 },	// mesh			= 2;
-		{ 0, 1 },
-
-		{ 0, 4 },	// scope		= 4;
-		{ 0, 2 },	// muzzle		= 5;
-		{ 0, 2 },	// laser		= 6;
-	};
-
-	switch (m_iVariation)
-	{
-	case Role_LeadEnforcer:
-		// the lead enforcer's version contains only a muzzle compensator.
-
-		info[4].body = 0;
-		info[5].body = 1;
-		info[6].body = 0;
-		break;
-
-	default:
-		// by default, this weapon has:
-		// reddot sight.
-		// laser.
-
-		info[4].body = 2;
-		info[5].body = 0;
-		info[6].body = 1;
-		break;
-	}
-
-	return CalcBody(info, ARRAY_ELEM_COUNT(info));	// elements count of the info[].
 }
 
 DECLARE_STANDARD_RESET_MODEL_FUNC(M1014)

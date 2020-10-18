@@ -25,6 +25,79 @@ void CDEagle::Precache()
 
 #else
 
+int CDEagle::CalcBodyParam(void)
+{
+	static BodyEnumInfo_t info[] =
+	{
+		{ 0, 1 },	// right hand	= 0;
+		{ 0, 2 },	// left hand	= 1;
+		{ 0, 1 },	// right sleeve	= 2;
+		{ 0, 2 },	// left sleeve	= 3;
+
+		{ 0, 2 },	// slide_1		= 4;
+		{ 0, 2 },	// slide_2		= 5;
+		{ 0, 4 },	// bullets		= 6;
+		{ 0, 2 },	// laser		= 7;
+
+	};
+
+	// mag state control.
+	switch (m_iClip)
+	{
+	case 0:	// empty mag. the follower is shown.
+		info[6].body = 3;
+		break;
+
+	case 1:
+		info[6].body = 2;
+		break;
+
+	case 2:
+		info[6].body = 1;
+		break;
+
+	default:	// m_iClip >= 3
+		info[6].body = 0;
+		break;
+	}
+
+	// slide stop vfx.
+	if (m_iClip <= 0 && (1 << m_pPlayer->pev->weaponanim) & BITS_SLIDE_STOP_ANIM)
+	{
+		info[4].body = 1;
+		info[5].body = 1;
+	}
+	else
+	{
+		info[4].body = 0;
+		info[5].body = 0;
+	}
+
+	switch (m_iVariation)
+	{
+	case Role_Sharpshooter:
+		// the sharpshooter version of DEagle contains a laser.
+		info[7].body = 1;
+		break;
+
+	default:
+		info[7].body = 0;
+		break;
+	}
+
+	// in current deagle model, there are two clips involved in normal reload anim. a full and an empty one.
+	// in EMPTY reload, after we remove the empty mag, the new mag should be full of bullets.
+	if (m_bInReload && m_bitsFlags & WPNSTATE_RELOAD_EMPTY)
+	{
+		if (m_pPlayer->m_flNextAttack < 1.257)	// in this anim, a new mag was taken out after around 0.657s. thus, 1.91f - 0.657f ~= 1.257f.
+		{
+			info[6].body = 0;	// full mag.
+		}
+	}
+
+	return CalcBody(info, ARRAY_ELEM_COUNT(info));	// elements count of the info[].
+}
+
 void CDEagle::Think(void)
 {
 	CBaseWeapon::Think();
@@ -184,79 +257,6 @@ bool CDEagle::Reload()
 	}
 
 	return false;
-}
-
-int CDEagle::CalcBodyParam(void)
-{
-	static BodyEnumInfo_t info[] =
-	{
-		{ 0, 1 },	// right hand	= 0;
-		{ 0, 2 },	// left hand	= 1;
-		{ 0, 1 },	// right sleeve	= 2;
-		{ 0, 2 },	// left sleeve	= 3;
-
-		{ 0, 2 },	// slide_1		= 4;
-		{ 0, 2 },	// slide_2		= 5;
-		{ 0, 4 },	// bullets		= 6;
-		{ 0, 2 },	// laser		= 7;
-		
-	};
-
-	// mag state control.
-	switch (m_iClip)
-	{
-	case 0:	// empty mag. the follower is shown.
-		info[6].body = 3;
-		break;
-
-	case 1:
-		info[6].body = 2;
-		break;
-
-	case 2:
-		info[6].body = 1;
-		break;
-
-	default:	// m_iClip >= 3
-		info[6].body = 0;
-		break;
-	}
-
-	// slide stop vfx.
-	if (m_iClip <= 0 && (1 << m_pPlayer->pev->weaponanim) & BITS_SLIDE_STOP_ANIM)
-	{
-		info[4].body = 1;
-		info[5].body = 1;
-	}
-	else
-	{
-		info[4].body = 0;
-		info[5].body = 0;
-	}
-
-	switch (m_iVariation)
-	{
-	case Role_Sharpshooter:
-		// the sharpshooter version of DEagle contains a laser.
-		info[7].body = 1;
-		break;
-
-	default:
-		info[7].body = 0;
-		break;
-	}
-
-	// in current deagle model, there are two clips involved in normal reload anim. a full and an empty one.
-	// in EMPTY reload, after we remove the empty mag, the new mag should be full of bullets.
-	if (m_bInReload && m_bitsFlags & WPNSTATE_RELOAD_EMPTY)
-	{
-		if (m_pPlayer->m_flNextAttack < 1.257)	// in this anim, a new mag was taken out after around 0.657s. thus, 1.91f - 0.657f ~= 1.257f.
-		{
-			info[6].body = 0;	// full mag.
-		}
-	}
-
-	return CalcBody(info, ARRAY_ELEM_COUNT(info));	// elements count of the info[].
 }
 
 DECLARE_STANDARD_RESET_MODEL_FUNC(DEagle)

@@ -809,8 +809,8 @@ void V_CalcGunAimingOfs(ref_params_s* pparams)
 	g_vecTranslatedCurGunOfs = g_vecGunCurOfs.x * pparams->right + g_vecGunCurOfs.y * pparams->forward + g_vecGunCurOfs.z * pparams->up;
 }
 
-Vector g_vecGunBob = Vector();
-Vector g_vecTranslatedGunBob = Vector();
+Vector g_vecGunBob = g_vecZero;
+Vector g_vecTranslatedGunBob = g_vecZero;
 double g_flGunBobAmplitudeModifier = 1.0;
 double g_flGunBobOmegaModifier = 1.0;
 
@@ -823,7 +823,7 @@ bob is presented when walking
 */
 void V_CalcGunBob(ref_params_s* pparams)
 {
-	static Vector vecGoal = Vector();
+	static Vector vecGoal = g_vecZero;
 	static double t = 0.0;
 
 	if (g_flPlayerSpeed > 1.0f)	// start bob at this speed.
@@ -846,7 +846,7 @@ void V_CalcGunBob(ref_params_s* pparams)
 	}
 	else
 	{
-		vecGoal = Vector();
+		vecGoal = g_vecZero;
 	}
 
 	g_vecGunBob += (vecGoal - g_vecGunBob) * pparams->frametime * 6.0f;
@@ -855,7 +855,7 @@ void V_CalcGunBob(ref_params_s* pparams)
 	g_vecTranslatedGunBob = g_vecGunBob.x * pparams->right + g_vecGunBob.y * pparams->forward + g_vecGunBob.z * pparams->up;
 }
 
-Vector g_vecGunLag = Vector();	// doesn't need to translate.
+Vector g_vecGunLag = g_vecZero;	// doesn't need to translate.
 
 /*
 ==============

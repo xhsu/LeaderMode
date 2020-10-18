@@ -25,6 +25,74 @@ void CM45A1::Precache()
 
 #else
 
+int CM45A1::CalcBodyParam(void)
+{
+	BodyEnumInfo_t info[] =
+	{
+		{ 0, 2 },	// left hand	= 0;
+		{ 0, 1 },	// right hand	= 1;
+		{ 0, 1 },	// sleeve		= 2;
+
+		{ 0, 1 },	// weapon		= 3;
+		{ 0, 1 },
+		{ 0, 1 },
+
+		{ 0, 2 },	// slide		= 6;
+		{ 0, 3 },	// sight		= 7;
+		{ 0, 3 },	// muzzle		= 8;
+		{ 0, 2 },	// laser		= 9;
+	};
+
+	switch (m_iVariation)
+	{
+	case Role_Sharpshooter:
+		// laser.
+		// optical sight.
+
+		info[7].body = 1;
+		info[9].body = 1;
+		break;
+
+	case Role_Assassin:
+		// silencer.
+		// optical sight.
+
+		info[7].body = 1;
+		info[8].body = 1;
+		break;
+
+	case Role_LeadEnforcer:
+		// muzzle breaker.
+
+		info[8].body = 2;
+		break;
+
+	default:
+		info[7].body = 0;
+		info[8].body = 0;
+		info[9].body = 0;
+		break;
+	}
+
+	// slide stop vfx.
+	if (m_iClip <= 0 && (1 << m_pPlayer->pev->weaponanim) & BITS_SLIDE_STOP_ANIM)
+	{
+		info[6].body = 1;
+
+		// also move the sight.
+		if (m_iVariation == Role_Sharpshooter || m_iVariation == Role_Assassin)
+			info[7].body = 2;
+	}
+	else
+	{
+		info[6].body = 0;
+	}
+
+	// TODO: checkmag anim & body parts.
+
+	return CalcBody(info, ARRAY_ELEM_COUNT(info));	// elements count of the info[].
+}
+
 void CM45A1::Think(void)
 {
 	CBaseWeapon::Think();
@@ -203,74 +271,6 @@ bool CM45A1::Reload()
 	// TODO: add a magcheck anim.
 
 	return false;
-}
-
-int CM45A1::CalcBodyParam(void)
-{
-	BodyEnumInfo_t info[] =
-	{
-		{ 0, 2 },	// left hand	= 0;
-		{ 0, 1 },	// right hand	= 1;
-		{ 0, 1 },	// sleeve		= 2;
-
-		{ 0, 1 },	// weapon		= 3;
-		{ 0, 1 },
-		{ 0, 1 },
-
-		{ 0, 2 },	// slide		= 6;
-		{ 0, 3 },	// sight		= 7;
-		{ 0, 3 },	// muzzle		= 8;
-		{ 0, 2 },	// laser		= 9;
-	};
-
-	switch (m_iVariation)
-	{
-	case Role_Sharpshooter:
-		// laser.
-		// optical sight.
-
-		info[7].body = 1;
-		info[9].body = 1;
-		break;
-
-	case Role_Assassin:
-		// silencer.
-		// optical sight.
-
-		info[7].body = 1;
-		info[8].body = 1;
-		break;
-
-	case Role_LeadEnforcer:
-		// muzzle breaker.
-
-		info[8].body = 2;
-		break;
-
-	default:
-		info[7].body = 0;
-		info[8].body = 0;
-		info[9].body = 0;
-		break;
-	}
-
-	// slide stop vfx.
-	if (m_iClip <= 0 && (1 << m_pPlayer->pev->weaponanim) & BITS_SLIDE_STOP_ANIM)
-	{
-		info[6].body = 1;
-
-		// also move the sight.
-		if (m_iVariation == Role_Sharpshooter || m_iVariation == Role_Assassin)
-			info[7].body = 2;
-	}
-	else
-	{
-		info[6].body = 0;
-	}
-
-	// TODO: checkmag anim & body parts.
-
-	return CalcBody(info, ARRAY_ELEM_COUNT(info));	// elements count of the info[].
 }
 
 DECLARE_STANDARD_RESET_MODEL_FUNC(M45A1)

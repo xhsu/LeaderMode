@@ -25,6 +25,88 @@ void CXM8::Precache()
 
 #else
 
+int CXM8::CalcBodyParam(void)
+{
+	static BodyEnumInfo_t info[] =
+	{
+		{ 0, 1 },	// right hand	= 0;
+		{ 0, 2 },	// left hand	= 1;
+		{ 0, 1 },	// right sleeve	= 2;
+		{ 0, 2 },	// left sleeve	= 3;
+
+		{ 0, 1 },	// weapon		= 4;
+		{ 0, 1 },
+		{ 0, 1 },
+		{ 0, 1 },
+
+		{ 0, 2 },	// bullets		= 8;
+
+		{ 0, 1 },
+		{ 0, 1 },
+		{ 0, 1 },
+
+		{ 0, 2 },	// barrel_1		= 12;
+		{ 0, 2 },	// barrel_2		= 13;
+
+		{ 0, 1 },
+		{ 0, 1 },
+		{ 0, 1 },
+
+		{ 0, 2 },	// optical sight= 17;
+		{ 0, 2 },	// steel sight	= 18;
+		{ 0, 2 },	// selector		= 19;
+	};
+
+	// this model requires all parts set to 0 in order to play changing anim.
+	if (m_bitsFlags & WPNSTATE_XM8_CHANGING)
+	{
+		info[12].body = 0;
+		info[13].body = 0;
+		info[17].body = 0;
+		info[18].body = 0;
+	}
+	else
+	{
+		// only consider variation when not morphing..
+		switch (m_iVariation)
+		{
+		case Role_Sharpshooter:
+			// the sharpshooter's version contains a XM8 sharpshooter optical sight.
+			// filpped down steel sight.
+
+			info[12].body = 1;
+			info[13].body = 1;
+			info[17].body = 0;
+			info[18].body = 1;
+			break;
+
+		default:
+			// by default, this weapon has no optical sight.
+			// filpped up steel sight.
+
+			info[12].body = 0;
+			info[13].body = 0;
+			info[17].body = 1;
+			info[18].body = 0;
+			break;
+		}
+	}
+
+	if (!m_iClip)
+		info[8].body = 1;	// empty mag.
+
+	// in EMPTY reload, after we remove the empty mag, the new mag should be full of bullets.
+	if (m_bInReload && m_bitsFlags & WPNSTATE_RELOAD_EMPTY)
+	{
+		if (m_pPlayer->m_flNextAttack < 2.03F)	// in this anim, a new mag was taken out after around 1.0s. thus, 3.03f - 1.0f ~= 2.03f.
+		{
+			info[8].body = 0;	// full mag.
+		}
+	}
+
+	return CalcBody(info, ARRAY_ELEM_COUNT(info));
+}
+
 void CXM8::Think(void)
 {
 	CBaseWeapon::Think();
@@ -253,88 +335,6 @@ bool CXM8::AlterAct(void)
 	m_bitsFlags |= WPNSTATE_XM8_CHANGING;
 
 	return true;
-}
-
-int CXM8::CalcBodyParam(void)
-{
-	static BodyEnumInfo_t info[] =
-	{
-		{ 0, 1 },	// right hand	= 0;
-		{ 0, 2 },	// left hand	= 1;
-		{ 0, 1 },	// right sleeve	= 2;
-		{ 0, 2 },	// left sleeve	= 3;
-
-		{ 0, 1 },	// weapon		= 4;
-		{ 0, 1 },
-		{ 0, 1 },
-		{ 0, 1 },
-
-		{ 0, 2 },	// bullets		= 8;
-
-		{ 0, 1 },
-		{ 0, 1 },
-		{ 0, 1 },
-
-		{ 0, 2 },	// barrel_1		= 12;
-		{ 0, 2 },	// barrel_2		= 13;
-
-		{ 0, 1 },
-		{ 0, 1 },
-		{ 0, 1 },
-
-		{ 0, 2 },	// optical sight= 17;
-		{ 0, 2 },	// steel sight	= 18;
-		{ 0, 2 },	// selector		= 19;
-	};
-
-	// this model requires all parts set to 0 in order to play changing anim.
-	if (m_bitsFlags & WPNSTATE_XM8_CHANGING)
-	{
-		info[12].body = 0;
-		info[13].body = 0;
-		info[17].body = 0;
-		info[18].body = 0;
-	}
-	else
-	{
-		// only consider variation when not morphing..
-		switch (m_iVariation)
-		{
-		case Role_Sharpshooter:
-			// the sharpshooter's version contains a XM8 sharpshooter optical sight.
-			// filpped down steel sight.
-
-			info[12].body = 1;
-			info[13].body = 1;
-			info[17].body = 0;
-			info[18].body = 1;
-			break;
-
-		default:
-			// by default, this weapon has no optical sight.
-			// filpped up steel sight.
-
-			info[12].body = 0;
-			info[13].body = 0;
-			info[17].body = 1;
-			info[18].body = 0;
-			break;
-		}
-	}
-
-	if (!m_iClip)
-		info[8].body = 1;	// empty mag.
-
-	// in EMPTY reload, after we remove the empty mag, the new mag should be full of bullets.
-	if (m_bInReload && m_bitsFlags & WPNSTATE_RELOAD_EMPTY)
-	{
-		if (m_pPlayer->m_flNextAttack < 2.03F)	// in this anim, a new mag was taken out after around 1.0s. thus, 3.03f - 1.0f ~= 2.03f.
-		{
-			info[8].body = 0;	// full mag.
-		}
-	}
-
-	return CalcBody(info, ARRAY_ELEM_COUNT(info));
 }
 
 DECLARE_STANDARD_RESET_MODEL_FUNC(XM8)

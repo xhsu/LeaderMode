@@ -213,7 +213,9 @@ public:	// SV exclusive functions.
 	virtual void	Precache		(void) {}
 #else
 public:	// CL xclusive functions.
-	virtual	bool	UsingInvertedVMDL(void) { return true; }	// by default, original CS/CZ vmdls are inverted displaying.
+	virtual	bool	UsingInvertedVMDL(void)		{ return true; }	// by default, original CS/CZ vmdls are inverted displaying.
+	virtual int		CalcBodyParam(void)			{ return 0; }		// allow user to varient weapon body.
+	virtual	void	UpdateBobParameters(void);						// in which you may set some bob parameters.
 #endif
 
 public:	// basic API and behaviour for weapons.
@@ -240,7 +242,6 @@ public:	// util funcs
 	virtual	bool	CanDrop			(void) { return true; }
 	virtual void	KickBack		(float up_base, float lateral_base, float up_modifier, float lateral_modifier, float up_max, float lateral_max, int direction_change);	// recoil
 	virtual void	ResetModel		(void) { }	// used after Melee() and QuickThrowRelease().
-	virtual int		CalcBodyParam	(void) { return 0; }	// allow user to varient weapon body.
 	virtual bool	SetVariation	(RoleTypes iType) { m_iVariation = iType; return true; }
 };
 
@@ -381,6 +382,7 @@ public:	// SV exclusive functions.
 #else
 public:	// CL exclusive functions.
 	virtual void	Think			(void);
+	virtual int		CalcBodyParam	(void);
 #endif
 
 public:	// basic logic funcs
@@ -396,7 +398,6 @@ public:	// basic logic funcs
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void) { return SCARH_MAX_SPEED; }
 	virtual void	ResetModel		(void);
-	virtual int		CalcBodyParam	(void);
 
 public:	// new functions
 	void SCARHFire(float flSpread, float flCycleTime = (60.0f / SCARH_RPM));
@@ -509,8 +510,9 @@ public:	// SV exclusive functions.
 	virtual void	Precache(void);
 #else
 public:	// CL exclusive functions.
-	virtual void	Think(void);
+	virtual void	Think			(void);
 	virtual	bool	UsingInvertedVMDL(void) { return false; }	// Model designed by InnocentBlue is not inverted.
+	virtual int		CalcBodyParam	(void);
 #endif
 
 public:	// basic logic funcs
@@ -528,7 +530,6 @@ public:	// basic logic funcs
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void)	{ return XM8_MAX_SPEED; }
 	virtual void	ResetModel		(void);
-	virtual int		CalcBodyParam	(void);
 
 public:	// new functions
 	void XM8Fire(float flSpread, float flCycleTime = (60.0f / XM8_RPM));
@@ -645,8 +646,9 @@ public:	// SV exclusive functions.
 	virtual void	Precache		(void);
 #else
 public:	// CL exclusive functions.
-	virtual void	Think(void);
+	virtual void	Think			(void);
 	virtual	bool	UsingInvertedVMDL(void) { return false; }	// Model designed by InnocentBlue is not inverted.
+	virtual int		CalcBodyParam	(void);
 #endif
 
 	// Slide stop available anims.
@@ -672,7 +674,6 @@ public:	// basic logic funcs
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void)	{ return DEAGLE_MAX_SPEED; }
 	virtual void	ResetModel		(void);	// declare by marco.
-	virtual int		CalcBodyParam	(void);
 
 public:	// new functions
 	void DEagleFire(float flSpread, float flCycleTime = DEAGLE_FIRE_INTERVAL);
@@ -906,6 +907,7 @@ public:	// SV exclusive functions.
 #else
 public:	// CL exclusive functions.
 	virtual void	Think			(void);
+	virtual int		CalcBodyParam	(void);
 #endif
 
 public:	// basic logic funcs
@@ -921,7 +923,6 @@ public:	// basic logic funcs
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void)	{ return MK46_MAX_SPEED; }
 	virtual void	ResetModel		(void);
-	virtual int		CalcBodyParam	(void);
 
 public:	// new functions
 	void MK46Fire(float flSpread, float flCycleTime = (60.0f / MK46_RPM));
@@ -1061,6 +1062,7 @@ public:	// SV exclusive functions.
 #else
 public:	// CL exclusive functions.
 	virtual void	Think			(void);
+	virtual int		CalcBodyParam	(void);
 #endif
 
 public:	// basic logic funcs
@@ -1076,7 +1078,6 @@ public:	// basic logic funcs
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void)	{ return M4A1_MAX_SPEED; }
 	virtual void	ResetModel		(void);
-	virtual int		CalcBodyParam	(void);
 
 public:	// new functions
 	void M4A1Fire(float flSpread, float flCycleTime = (60.0f / M4A1_RPM));
@@ -1303,6 +1304,9 @@ public:	// SV exclusive variables.
 
 public:	// SV exclusive functions.
 	virtual void	Precache		(void);
+#else
+public:	// CL exclusive functions.
+	virtual int		CalcBodyParam	(void);
 #endif
 
 public:
@@ -1337,7 +1341,6 @@ public:	// util funcs
 	virtual void	PushAnim		(void);
 	virtual void	PopAnim			(void);
 	virtual void	ResetModel		(void);
-	virtual int		CalcBodyParam	(void);
 };
 
 #define M45A1_VIEW_MODEL	"models/weapons/v_m45a1.mdl"
@@ -1403,6 +1406,7 @@ public:	// SV exclusive functions.
 #else
 public:	// CL exclusive functions.
 	virtual void	Think(void);
+	virtual int		CalcBodyParam(void);
 #endif
 
 	// Slide stop available anims.
@@ -1428,7 +1432,6 @@ public:	// basic logic funcs
 public:	// util funcs
 	virtual	float	GetMaxSpeed(void)		{ return M45A1_MAX_SPEED; }
 	virtual void	ResetModel(void);	// declare by marco.
-	virtual int		CalcBodyParam(void);
 
 public:	// new functions
 	void M45A1Fire(float flSpread, float flCycleTime = M45A1_FIRE_INTERVAL);

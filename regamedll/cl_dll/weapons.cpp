@@ -734,6 +734,26 @@ bool CBaseWeapon::AddPrimaryAmmo(int iCount)
 	return false;
 }
 
+void CBaseWeapon::UpdateBobParameters(void)
+{
+	// normally we don'touch any Omega stuff.
+	g_flGunBobAmplitudeModifier = 1.0;
+
+	// less shake when scoping.
+	if (m_bInZoom)
+		g_flGunBobAmplitudeModifier = 0.35f;
+
+	// common sense: running will cause your hands shake more.
+	else if (m_bitsFlags & WPNSTATE_DASHING)
+		g_flGunBobAmplitudeModifier = 10.0f;
+
+	// normal walking shake.
+	else
+	{
+		g_flGunBobAmplitudeModifier = 0.75f;
+	}
+}
+
 bool CBaseWeapon::DefaultDeploy(const char* szViewModel, const char* szWeaponModel, int iAnim, const char* szAnimExt, float flDeployTime)
 {
 	// TODO
@@ -761,8 +781,7 @@ bool CBaseWeapon::DefaultDeploy(const char* szViewModel, const char* szWeaponMod
 void CBaseWeapon::DefaultIdle(int iDashingAnim, int iIdleAnim, float flDashLoop, float flIdleLoop)
 {
 #ifdef CLIENT_DLL
-	// common sense: running will cause your hands shake more.
-	g_flGunBobAmplitudeModifier = (m_bitsFlags & WPNSTATE_DASHING) ? 10.0f : 1.0f;
+	UpdateBobParameters();
 #endif
 
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + ((m_bitsFlags & WPNSTATE_DASHING) ? flDashLoop : flIdleLoop);
@@ -817,6 +836,7 @@ void CBaseWeapon::DefaultSteelSight(const Vector& vecOfs, int iFOV, float flDrif
 {
 	m_bInZoom = !m_bInZoom;
 	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flNextSecondaryAttack;
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + flNextSecondaryAttack;	// set/reset the gun bob amp.
 
 #ifdef CLIENT_DLL
 	// due to some logic problem, we actually cannot use m_bInZoom here.

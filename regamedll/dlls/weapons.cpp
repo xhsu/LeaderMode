@@ -972,8 +972,7 @@ bool CBaseWeapon::DefaultDeploy(const char* szViewModel, const char* szWeaponMod
 void CBaseWeapon::DefaultIdle(int iDashingAnim, int iIdleAnim, float flDashLoop, float flIdleLoop)
 {
 #ifdef CLIENT_DLL
-	// common sense: running will cause your hands shake more.
-	g_flGunBobAmplitudeModifier = (m_bitsFlags & WPNSTATE_DASHING) ? 10.0f : 1.0f;
+	UpdateBobParameters();
 #endif
 
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + ((m_bitsFlags & WPNSTATE_DASHING) ? flDashLoop : flIdleLoop);
@@ -1028,6 +1027,7 @@ void CBaseWeapon::DefaultSteelSight(const Vector& vecOfs, int iFOV, float flDrif
 {
 	m_bInZoom = !m_bInZoom;
 	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flNextSecondaryAttack;
+	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + flNextSecondaryAttack;	// set/reset the gun bob amp.
 
 #ifdef CLIENT_DLL
 	// due to some logic problem, we actually cannot use m_bInZoom here.
@@ -1186,7 +1186,7 @@ void CBaseWeapon::SendWeaponAnim(int iAnim, bool bSkipLocal)
 
 	MESSAGE_BEGIN(MSG_ONE, SVC_WEAPONANIM, nullptr, m_pPlayer->pev);
 	WRITE_BYTE(iAnim);		// sequence number
-	WRITE_BYTE(CalcBodyParam());		// weaponmodel bodygroup.
+	WRITE_BYTE(0);			// weaponmodel bodygroup. it doesn't matter at SV side, since the client will override it anyway.
 	MESSAGE_END();
 }
 
