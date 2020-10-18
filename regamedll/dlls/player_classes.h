@@ -14,64 +14,210 @@ enum RoleTypes
 	Role_UNASSIGNED = 0,
 
 	Role_Commander = 1,
-	// WeaponEnhance:	CSkillFireRate
-	// Attack:			-
-	// Defense:			CSkillReduceDamage
-	// Auxiliary:		CSkillRadarScan
+	/**
+	* Skill Set:
+	[Information centre, lead of assault.]
+	[LUNA: will become a shield eventually.]
+		WeaponEnhance:	CSkillFireRate
+		Attack:			-
+		Defense:		CSkillReduceDamage
+		Auxiliary:		CSkillRadarScan
+
+	* Weapon Choice:
+	[Any.]
+		Encouraged:	-
+		Allowed:	[The rest part.]
+		Penalized:	M14, SVD, Lmgs.
+
+	* Weapon Style:
+		Regular.
+	**/
 
 	Role_SWAT,
-	// WeaponEnhance:	-
-	// Attack:			-
-	// Defense:			CSkillBulletproof
-	// Auxiliary:		CSkillArmorRegen
+	/**
+	* Skill Set:
+	[Heavy infantry and frontline-defender. Armour, protection & team ammunition supply.]
+		WeaponEnhance:	-
+		Attack:			-
+		Defense:		CSkillBulletproof
+		Auxiliary:		CSkillArmorRegen
+
+	* Weapon Choice:
+	[Gears used in counter-terrorism operations.]
+	[LUNA: his access of Assault Rifles should be reevaluate.]
+		Encouraged:	Shotguns, Smgs, FB, SG
+		Allowed:	Pistols
+		Penalized:	SCARH, XM8
+
+	* Weapon Style:
+	[Modifications used in counter-terrorism operations.]
+		Tactically modified.
+	**/
 
 	Role_Breacher,
-	// WeaponEnhance:	CSkillExplosiveBullets
-	// Attack:			CSkillInfiniteGrenade
-	// Defense:			-
-	// Auxiliary:		-
+	/**
+	* Skill Set:
+	[AOE damage inflictor.]
+		WeaponEnhance:	CSkillExplosiveBullets
+		Attack:			CSkillInfiniteGrenade
+		Defense:		-
+		Auxiliary:		-
+
+	* Weapon Choice:
+	[Shotguns inserted with HE rounds.]
+	[LUNA: Independent GR launcher and attached GR launcher should be considered.]
+	[LUNA: C4 & detonator pending.]
+		Encouraged:	Shotguns, P90, HE, FB, SG
+		Allowed:	Pistols, Smgs
+		Penalized:	-
+
+	* Weapon Style:
+	[Grenade launcher, C4, HE rounds, and stuffs like those.]
+		Explosive-related modifications.
+	**/
 
 	Role_Sharpshooter,
-	// WeaponEnhance:	CSkillEnfoceHeadshot
-	// Attack:			CSkillHighlightSight
-	// Defense:			-
-	// Auxiliary:		-
+	/**
+	* Skill Set:
+	[Located, Freezed & Snip down.]
+		WeaponEnhance:	CSkillEnfoceHeadshot
+		Attack:			CSkillHighlightSight
+		Defense:		-
+		Auxiliary:		-
+
+	* Weapon Choice:
+	[Sniper rifles, high damage & precision weapons.]
+		Encouraged:	ANACO, DEAGLE, M200, AWP
+		Allowed:	Pistols, M14, SVD, SG, CRYO
+		Penalized:	Assault rifles
+
+	* Weapon Style:
+	[Mounted with laser and optical scopes.]
+		Precision modifications.
+	**/
 
 	Role_Medic,
-	// WeaponEnhance:	-
-	// Attack:			-
-	// Defense:			-
-	// Auxiliary:		CSkillHealingShot
+	/**
+	* Skill Set:
+	[Heal up teammates and elongate assault operations.]
+		WeaponEnhance:	-
+		Attack:			-
+		Defense:		-
+		Auxiliary:		CSkillHealingShot
+
+	* Weapon Choice:
+	[Simple, self-defense & user-friendly weapons.]
+		Encouraged:	Smgs
+		Allowed:	Pistols, Shotguns, M4A1, SCARH, HSG
+		Penalized:	-
+
+	* Weapon Style:
+	[Simple modifications making weapon easy to use.]
+		Foregrip, simple optical sight.
+	**/
 
 	Role_Godfather = 6,
-	// WeaponEnhance:	-
-	// Attack:			-
-	// Defense:			CSkillReduceDamage
-	// Auxiliary:		CSkillGavelkind
+	/**
+	* Skill Set:
+	[Supporter, boost his teammates before their assault charging.]
+	[LUNA: Dual-pistol pending.]
+		WeaponEnhance:	-
+		Attack:			-
+		Defense:		CSkillReduceDamage
+		Auxiliary:		CSkillGavelkind
+
+	* Weapon Choice:
+	[Any.]
+		Encouraged:	Pistols
+		Allowed:	[The rest part.], HE, FB, SG
+		Penalized:	M14, SVD, Lmgs.
+
+	* Weapon Style:
+	[Dual pistols. Luxury skin.]
+		Retexture with luxury skin.
+	**/
 
 	Role_LeadEnforcer,
-	// WeaponEnhance:	CSkillDmgIncByHP
-	// Attack:			CSkillResistDeath
-	// Defense:			-
-	// Auxiliary:		-
+	/**
+	* Skill Set:
+	[Sacrifice himself to make a breakthrough point for the team.]
+		WeaponEnhance:	CSkillDmgIncByHP
+		Attack:			CSkillResistDeath
+		Defense:		-
+		Auxiliary:		-
+
+	* Weapon Choice:
+	[Any full-automatic firearms are welcomed.]
+		Encouraged:	Shotguns, Smgs, Assault rifles
+		Allowed:	Pistols, Lmgs, HE
+		Penalized:	-
+
+	* Weapon Style:
+	[No scope or any expensive modification.]
+		Simple muzzle modification without anything else.
+	**/
 
 	Role_MadScientist,
-	// WeaponEnhance:	CSkillTaserGun
-	// Attack:			-
-	// Defense:			CSkillRetribution
-	// Auxiliary:		-
+	/**
+	* Skill Set:
+	[Blocker. Drag & slow the other team down. Occasionally weaken them.]
+		WeaponEnhance:	CSkillTaserGun
+		Attack:			-
+		Defense:		CSkillRetribution
+		Auxiliary:		-
 
-	Role_Assassin,
-	// WeaponEnhance:	CSkillCriticalHit
-	// Attack:			-
-	// Defense:			CSkillInvisible
-	// Auxiliary:		CSkillRadarScan2
+	* Weapon Choice:
+	[Extremely limited weapon choices. Simple self-defense weapons only.]
+		Encouraged:	-
+		Allowed:	USP, ANACO, FN57, M45A1, KSG12, UMP45, TOX
+		Penalized:	-
+
+	* Weapon Style:
+	[Hi-tech retexture. Modifications makes it easier to use.]
+	[LUNA: Pending. Overlapping with sharpshooter?]
+		Helper scope, laser.
+	**/
+
+	Role_Assassin,	// [Hitman]
+	/**
+	* Skill Set:
+	[Information collector, sneaky approach, hit & run.]
+		WeaponEnhance:	CSkillCriticalHit
+		Attack:			-
+		Defense:		CSkillInvisible
+		Auxiliary:		CSkillRadarScan2
+
+	* Weapon Choice:
+	[Handy & conceal weapons.]
+		Encouraged:	USP, MP7A1, M200
+		Allowed:	Pistols, Smgs, FB, SG
+		Penalized:	M14
+
+	* Weapon Style:
+	[Modifications that make assassination easier.]
+		Silencer and scope.
+	**/
 
 	Role_Arsonist,
-	// WeaponEnhance:	CSkillIncendiaryAmmo
-	// Attack:			-
-	// Defense:			CSkillReduceDamage
-	// Auxiliary:		-
+	/**
+	* Skill Set:
+	[Blocker. Trap, damage & weaken enemies.]
+		WeaponEnhance:	CSkillIncendiaryAmmo
+		Attack:			-
+		Defense:		CSkillReduceDamage
+		Auxiliary:		-
+
+	* Weapon Choice:
+	[Weapons that filled with incendiary ammo.]
+	[LUNA: Independent flamethrower?]
+		Encouraged:	Shotguns
+		Allowed:	Pistols, SG, INCEN
+		Penalized:	AK47
+
+	* Weapon Style:
+	[Burner skin. Fire-related attachments.]
+		Retexture with bondage and burn marks. Flamethrower attachments?
+	**/
 
 	ROLE_COUNT
 };

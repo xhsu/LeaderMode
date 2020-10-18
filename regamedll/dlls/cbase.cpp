@@ -1182,7 +1182,7 @@ Vector2D CBaseEntity::FireBullets3(Vector vecSrc, Vector vecDirShooting, float v
 			iPenetration--;
 
 			flCurrentDistance = tr.flFraction * flDistance;
-			iCurrentDamage *= Q_pow(flRangeModifier, flCurrentDistance / 500);
+			iCurrentDamage *= Q_pow(flRangeModifier, flCurrentDistance / 500.0f);
 
 			if (flCurrentDistance > flPenetrationDistance)
 			{

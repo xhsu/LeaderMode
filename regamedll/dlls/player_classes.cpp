@@ -27,18 +27,18 @@ const char* g_rgszRoleNames[ROLE_COUNT] =
 const int g_rgRoleWeaponsAccessibility[ROLE_COUNT][LAST_WEAPON] =
 {
 	//					      0                                  5                                  10                                 15                                 20                                 25                                 30
-	//					      NONE   G18C   USP    ANACO  DEAGLE FN57   P99    KSG12  M1014  MP7A1  PM9    MP5    UMP45  P90    CM901  QBZ95  AK47   M4A1   SCARL  XM8    M200   M14    AWP    SVD    MK46   C4
+	//					      NONE   G18C   USP    ANACO  DEAGLE FN57   M45A1  KSG12  M1014  MP7A1  PM9    MP5    UMP45  P90    CM901  QBZ95  AK47   M4A1   SCARH  XM8    M200   M14    AWP    SVD    MK46   C4
 	/*Role_UNASSIGNED*/		{ WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_F },
 
 	/*Role_Commander = 1*/	{ WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_P, WPN_A, WPN_P, WPN_P, WPN_F },
 	/*Role_SWAT*/			{ WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_F, WPN_F, WPN_F, WPN_F, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F },
-	/*Role_Blaster*/		{ WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_D, WPN_D, WPN_A, WPN_A, WPN_A, WPN_A, WPN_D, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F },
+	/*Role_Breacher*/		{ WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_D, WPN_D, WPN_A, WPN_A, WPN_A, WPN_A, WPN_D, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F },
 	/*Role_Sharpshooter*/	{ WPN_F, WPN_A, WPN_A, WPN_D, WPN_D, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_P, WPN_P, WPN_P, WPN_P, WPN_P, WPN_P, WPN_D, WPN_A, WPN_D, WPN_A, WPN_F, WPN_F },
 	/*Role_Medic = 5*/		{ WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_F, WPN_F, WPN_F, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F },
 
 	/*Role_Godfather = 6*/	{ WPN_F, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_P, WPN_A, WPN_P, WPN_P, WPN_F },
 	/*Role_LeadEnforcer*/	{ WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_D, WPN_F, WPN_F, WPN_F, WPN_F, WPN_A, WPN_F },
-	/*Role_MadScientist*/	{ WPN_F, WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_F, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F },
+	/*Role_MadScientist*/	{ WPN_F, WPN_F, WPN_A, WPN_A, WPN_F, WPN_A, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F },
 	/*Role_Assassin*/		{ WPN_F, WPN_A, WPN_D, WPN_A, WPN_A, WPN_A, WPN_A, WPN_F, WPN_F, WPN_D, WPN_A, WPN_A, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_D, WPN_P, WPN_F, WPN_F, WPN_F, WPN_F },
 	/*Role_Arsonist = 10*/	{ WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_D, WPN_D, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_P, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F },
 };
@@ -46,12 +46,12 @@ const int g_rgRoleWeaponsAccessibility[ROLE_COUNT][LAST_WEAPON] =
 const int g_rgRoleEquipmentsAccessibility[ROLE_COUNT][EQP_COUNT] =
 {
 	//					      0                                  5                                  10                                 15                                 20                                 25                                 30
-	//					      NONE   VEST   V_H    HE     FB     SG     CRYO   INCEN  HEAL_G TOX    NVG
+	//					      NONE   VEST   V_H    HE     FB     SG     CRYO   INCEN  HSG    TOX    NVG
 	/*Role_UNASSIGNED*/		{ WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_A },
 
 	/*Role_Commander = 1*/	{ WPN_F, WPN_A, WPN_A, WPN_A, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_A },
 	/*Role_SWAT*/			{ WPN_F, WPN_A, WPN_A, WPN_F, WPN_D, WPN_D, WPN_F, WPN_F, WPN_F, WPN_F, WPN_D },
-	/*Role_Blaster*/		{ WPN_F, WPN_A, WPN_A, WPN_D, WPN_D, WPN_D, WPN_F, WPN_F, WPN_F, WPN_F, WPN_A },
+	/*Role_Breacher*/		{ WPN_F, WPN_A, WPN_A, WPN_D, WPN_D, WPN_D, WPN_F, WPN_F, WPN_F, WPN_F, WPN_A },
 	/*Role_Sharpshooter*/	{ WPN_F, WPN_A, WPN_A, WPN_F, WPN_F, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_A },
 	/*Role_Medic = 5*/		{ WPN_F, WPN_A, WPN_A, WPN_F, WPN_F, WPN_F, WPN_F, WPN_F, WPN_A, WPN_F, WPN_A },
 

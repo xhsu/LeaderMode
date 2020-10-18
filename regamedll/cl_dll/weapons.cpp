@@ -741,17 +741,15 @@ void CBaseWeapon::UpdateBobParameters(void)
 
 	// less shake when scoping.
 	if (m_bInZoom)
-		g_flGunBobAmplitudeModifier = 0.35f;
+		g_flGunBobAmplitudeModifier = 0.35;
 
 	// common sense: running will cause your hands shake more.
 	else if (m_bitsFlags & WPNSTATE_DASHING)
-		g_flGunBobAmplitudeModifier = 10.0f;
+		g_flGunBobAmplitudeModifier = 10.0;
 
 	// normal walking shake.
 	else
-	{
-		g_flGunBobAmplitudeModifier = 0.75f;
-	}
+		g_flGunBobAmplitudeModifier = 0.75;
 }
 
 bool CBaseWeapon::DefaultDeploy(const char* szViewModel, const char* szWeaponModel, int iAnim, const char* szAnimExt, float flDeployTime)
