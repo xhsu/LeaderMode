@@ -737,7 +737,7 @@ bool CBaseWeapon::AddPrimaryAmmo(int iCount)
 void CBaseWeapon::UpdateBobParameters(void)
 {
 	// normally we don'touch any Omega stuff.
-	g_flGunBobAmplitudeModifier = 1.0;
+	g_flGunBobOmegaModifier = 1.0;
 
 	// less shake when scoping.
 	if (m_bInZoom)
