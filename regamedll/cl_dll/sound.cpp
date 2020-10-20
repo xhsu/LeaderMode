@@ -69,7 +69,7 @@ namespace gFMODChannelManager
 inline FMOD_VECTOR VecConverts(const Vector& v, bool bScale = false)
 {
 	if (bScale)
-		return FMOD_VECTOR({ v.x * SND_DISTANCEFACTOR, v.z * SND_DISTANCEFACTOR, v.y * SND_DISTANCEFACTOR });
+		return FMOD_VECTOR({ v.x / SND_DISTANCEFACTOR, v.z / SND_DISTANCEFACTOR, v.y / SND_DISTANCEFACTOR });
 
 	return FMOD_VECTOR({ v.x, v.z, v.y });
 }
@@ -89,7 +89,7 @@ void Sound_Init()
 	gFModSystem->set3DSettings(1.0, SND_DISTANCEFACTOR, 1.0f);
 
 	gFModSystem->createSound("drumloop.wav", FMOD_LOOP_NORMAL | FMOD_3D | FMOD_3D_WORLDRELATIVE | FMOD_3D_LINEARSQUAREROLLOFF, 0, &sound1);
-	sound1->set3DMinMaxDistance(0.1f * SND_DISTANCEFACTOR, 200.0f * SND_DISTANCEFACTOR);
+	sound1->set3DMinMaxDistance(0.1f / SND_DISTANCEFACTOR, 200.0f / SND_DISTANCEFACTOR);
 	//gFModSystem->playSound(sound1, 0, false, &g_phLocal2DChannel);
 }
 
@@ -116,7 +116,7 @@ void Play3DSound(const char* szSound, float flMinDist, float flMaxDist, const Ve
 		gFModSystem->createSound(strKey.c_str(), FMOD_DEFAULT_IN_GOLDSRC, 0, &g_mapSoundPrecache[strKey]);
 	}
 
-	g_mapSoundPrecache[strKey]->set3DMinMaxDistance(flMinDist * SND_DISTANCEFACTOR, flMaxDist * SND_DISTANCEFACTOR);
+	g_mapSoundPrecache[strKey]->set3DMinMaxDistance(flMinDist / SND_DISTANCEFACTOR, flMaxDist / SND_DISTANCEFACTOR);
 
 	auto ppChannel = gFMODChannelManager::Allocate();
 	FMOD_VECTOR	pos = VecConverts(vecOrigin);

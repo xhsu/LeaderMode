@@ -981,6 +981,19 @@ void EV_HLDM_FireBullets(int idx, Vector& forward, Vector& right, Vector& up, in
 	return EV_HLDM_FireBullets(idx, forward, right, up, cShots, vecSrc, vecDirShooting, vecSpread, flDistance, iBulletType, 0, 0, iPenetration, 0, false, 0.0f, shared_rand);
 }
 
+void EV_PlayGunFire(int idx, const char* sample, float flMaxDistance, const Vector& src)
+{
+	// to avoid the weird first personal gun fire effect, we have to determind whether we should use 3D sound.
+	if (EV_IsLocal(idx))
+	{
+		PlaySound(sample);
+	}
+	else
+	{
+		Play3DSound(sample, 1.0f, flMaxDistance, src);
+	}
+}
+
 DECLARE_EVENT(FireAK47)
 {
 	int idx = args->entindex;
@@ -1089,7 +1102,7 @@ DECLARE_EVENT(FireXM8)
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
 	// original goldsrc api: VOL = 1.0, ATTN = 0.48
-	Play3DSound(XM8_FIRE_SFX, 1.0f, XM8_GUN_VOLUME, vecSrc + forward * 10.0f);
+	EV_PlayGunFire(idx, XM8_FIRE_SFX, XM8_GUN_VOLUME, vecSrc + forward * 10.0f);
 
 	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, XM8_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_XM8].m_iAmmoType, XM8_PENETRATION);
 }
@@ -1184,7 +1197,7 @@ DECLARE_EVENT(FireDEagle)
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
 	// original goldsrc api: VOL = 1.0, ATTN = 0.6
-	Play3DSound(DEagle_FIRE_SFX, 1.0f, DEAGLE_GUN_VOLUME, vecSrc + forward * 10.0f);
+	EV_PlayGunFire(idx, DEagle_FIRE_SFX, DEAGLE_GUN_VOLUME, vecSrc + forward * 10.0f);
 
 	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, DEAGLE_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_DEAGLE].m_iAmmoType, DEAGLE_PENETRATION);
 }
@@ -1548,7 +1561,7 @@ DECLARE_EVENT(FireMK46)
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
 	// original goldsrc api: VOL = 1.0, ATTN = 0.52
-	Play3DSound(MK46_FIRE_SFX, 1.0f, MK46_GUN_VOLUME, vecSrc + forward * 10.0f);
+	EV_PlayGunFire(idx, MK46_FIRE_SFX, MK46_GUN_VOLUME, vecSrc + forward * 10.0f);
 
 	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, MK46_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_MK46].m_iAmmoType, MK46_PENETRATION);
 }
@@ -1639,7 +1652,7 @@ DECLARE_EVENT(FireM4A1)
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
 	// original goldsrc api: VOL = 1.0, ATTN = 0.52
-	Play3DSound(M4A1_FIRE_SFX, 1.0f, M4A1_GUN_VOLUME, vecSrc + forward * 10.0f);
+	EV_PlayGunFire(idx, M4A1_FIRE_SFX, M4A1_GUN_VOLUME, vecSrc + forward * 10.0f);
 
 	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, M4A1_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_M4A1].m_iAmmoType, M4A1_PENETRATION);
 }
@@ -1767,7 +1780,7 @@ DECLARE_EVENT(FireSCARH)
 	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, SCARH_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_SCARH].m_iAmmoType, SCARH_PENETRATION);
 
 	// original goldsrc api: VOL = 1.0, ATTN = 0.4
-	Play3DSound(SCARH_FIRE_SFX, 1.0f, SCARH_GUN_VOLUME, vecSrc + forward * 10.0f);
+	EV_PlayGunFire(idx, SCARH_FIRE_SFX, SCARH_GUN_VOLUME, vecSrc + forward * 10.0f);
 }
 
 DECLARE_EVENT(FireMP7A1)
@@ -1927,11 +1940,11 @@ DECLARE_EVENT(FireUSP)
 
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iPShell, TE_BOUNCE_SHELL);
 
-	// gunshot sound.
-	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, USP_FIRE_SFX, 1.0, ATTN_NORM, 0, 87 + gEngfuncs.pfnRandomLong(0, 0x12));
-
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
+
+	// original API: vol = 1.0, attn = 0.8, pitch = 87~105
+	EV_PlayGunFire(idx, USP_FIRE_SFX, QUIET_GUN_VOLUME, vecSrc + forward * 10.0f);
 
 	EV_HLDM_FireBullets(idx,
 		forward, right, up,
@@ -1993,7 +2006,7 @@ DECLARE_EVENT(FireM1014)
 	EV_HLDM_FireBullets(idx, forward, right, up, M1014_PROJECTILE_COUNT, vecSrc, forward, M1014_CONE_VECTOR, M1014_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_M1014].m_iAmmoType, 1, shared_rand);
 
 	// original goldsrc api: VOL = 1.0, ATTN = 0.52
-	Play3DSound(M1014_FIRE_SFX, 1.0f, M1014_GUN_VOLUME, vecSrc + forward * 10.0f);
+	EV_PlayGunFire(idx, M1014_FIRE_SFX, M1014_GUN_VOLUME, vecSrc + forward * 10.0f);
 }
 
 DECLARE_EVENT(CreateExplo)

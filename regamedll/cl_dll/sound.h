@@ -9,7 +9,7 @@ Code - Luna the Reborn
 
 #pragma once
 
-constexpr float SND_DISTANCEFACTOR = 3.28f;          // Units per meter.  I.e feet would = 3.28.  centimeters would = 100.
+constexpr float SND_DISTANCEFACTOR = 39.3701f;          // Units per meter.  I.e feet would = 3.28.  centimeters would = 100.
 
 void Sound_Init();
 void Sound_Think(double flTime);
