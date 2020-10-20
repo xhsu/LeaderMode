@@ -138,11 +138,11 @@ void CDEagle::PrimaryAttack()
 	}
 	else if (m_pPlayer->pev->flags & FL_DUCKING)
 	{
-		DEagleFire(0.115f * (1.0f - m_flAccuracy));
+		DEagleFire(0.115f * (1.0f - m_flAccuracy) * (m_bInZoom ? 0.5f : 1.0f));
 	}
 	else
 	{
-		DEagleFire(0.13f * (1.0f - m_flAccuracy));
+		DEagleFire(0.13f * (1.0f - m_flAccuracy) * (m_bInZoom ? 0.5f : 1.0f));
 	}
 }
 

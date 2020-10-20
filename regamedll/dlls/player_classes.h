@@ -26,7 +26,7 @@ enum RoleTypes
 	* Weapon Choice:
 	[Any.]
 		Encouraged:	-
-		Allowed:	[The rest part.]
+		Allowed:	[The rest part.], HE, FB, SG
 		Penalized:	M14, SVD, Lmgs.
 
 	* Weapon Style:
@@ -44,7 +44,7 @@ enum RoleTypes
 
 	* Weapon Choice:
 	[Gears used in counter-terrorism operations.]
-	[LUNA: his access of Assault Rifles should be reevaluate.]
+	[LUNA: his access to Assault Rifles should be reevaluated.]
 		Encouraged:	Shotguns, Smgs, FB, SG
 		Allowed:	Pistols
 		Penalized:	SCARH, XM8

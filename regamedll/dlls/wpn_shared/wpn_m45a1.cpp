@@ -146,11 +146,11 @@ void CM45A1::PrimaryAttack()
 	}
 	else if (m_pPlayer->pev->flags & FL_DUCKING)
 	{
-		M45A1Fire(0.08f * (1.0f - m_flAccuracy));
+		M45A1Fire(0.08f * (1.0f - m_flAccuracy) * (m_bInZoom ? 0.5f : 1.0f));
 	}
 	else
 	{
-		M45A1Fire(0.1f * (1.0f - m_flAccuracy));
+		M45A1Fire(0.1f * (1.0f - m_flAccuracy) * (m_bInZoom ? 0.5f : 1.0f));
 	}
 }
 
