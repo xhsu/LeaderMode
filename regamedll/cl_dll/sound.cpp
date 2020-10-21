@@ -21,7 +21,6 @@ FMOD::System* gFModSystem = nullptr;
 
 static double g_flClientTime = 0;
 static double g_flClientTimeDelta = 0;
-static Vector g_vecPlayerLastPos = g_vecZero;
 
 static FMOD::Sound* sound1;
 static FMOD::Channel* g_phLocal2DChannel;
@@ -119,7 +118,7 @@ void Play3DSound(const char* szSound, float flMinDist, float flMaxDist, const Ve
 	g_mapSoundPrecache[strKey]->set3DMinMaxDistance(flMinDist / SND_DISTANCEFACTOR, flMaxDist / SND_DISTANCEFACTOR);
 
 	auto ppChannel = gFMODChannelManager::Allocate();
-	FMOD_VECTOR	pos = VecConverts(vecOrigin);
+	FMOD_VECTOR	pos = VecConverts(vecOrigin, true);
 	(*ppChannel)->set3DAttributes(&pos, &g_fmodvecZero);
 	gFModSystem->playSound(g_mapSoundPrecache[strKey], nullptr, false, ppChannel);
 
@@ -137,12 +136,13 @@ void Sound_Think(double flTime)
 	gEngfuncs.pfnAngleVectors(gPseudoPlayer.pev->v_angle, vecFwd, vecRight, vecUp);
 
 	FMOD_VECTOR pos = VecConverts(gPseudoPlayer.GetGunPosition(), true);
+	FMOD_VECTOR vel = VecConverts(g_vPlayerVelocity, true);
 	FMOD_VECTOR forward = VecConverts(vecFwd);
 	FMOD_VECTOR up = VecConverts(vecUp);
 
 	// this velocity stuff is only for making Doppler effect.
 	// [reference] https://en.wikipedia.org/wiki/Doppler_effect
-	gFModSystem->set3DListenerAttributes(0, &pos, nullptr, &forward, &up);
+	gFModSystem->set3DListenerAttributes(0, &pos, &vel, &forward, &up);
 	gFModSystem->update();
 }
 

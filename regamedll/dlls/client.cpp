@@ -2830,6 +2830,16 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 				if (pPlayer->m_pActiveItem)
 					pPlayer->m_pActiveItem->AlterAct();
 			}
+			else if (FStrEq(pcmd, "tp"))
+			{
+				Vector vecOrg = Vector(Q_atoi(CMD_ARGV(1)), Q_atoi(CMD_ARGV(2)), Q_atoi(CMD_ARGV(3)));
+				SET_ORIGIN(pEntity, vecOrg);
+			}
+			else if (FStrEq(pcmd, "shift"))
+			{
+				Vector vecOrg = Vector(Q_atoi(CMD_ARGV(1)), Q_atoi(CMD_ARGV(2)), Q_atoi(CMD_ARGV(3)));
+				SET_ORIGIN(pEntity, pEntity->v.origin + vecOrg);
+			}
 			else
 			{
 				if (HandleRadioAliasCommands(pPlayer, pcmd))
