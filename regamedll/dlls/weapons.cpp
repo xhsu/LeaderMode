@@ -123,47 +123,12 @@ void WeaponsPrecache()
 	UTIL_PrecacheOther("item_assaultsuit");
 	UTIL_PrecacheOther("item_thighpack");
 
-	// awp magnum
-	UTIL_PrecacheOtherWeapon(WEAPON_AWP);
-
-	UTIL_PrecacheOtherWeapon(WEAPON_SVD);
-	UTIL_PrecacheOtherWeapon(WEAPON_AK47);
-	UTIL_PrecacheOtherWeapon(WEAPON_M200);
-
-	// m249
-	UTIL_PrecacheOtherWeapon(WEAPON_MK46);
-
-	UTIL_PrecacheOtherWeapon(WEAPON_M4A1);
-	UTIL_PrecacheOtherWeapon(WEAPON_SCARH);
-	UTIL_PrecacheOtherWeapon(WEAPON_XM8);
-	UTIL_PrecacheOtherWeapon(WEAPON_M14EBR);
-	UTIL_PrecacheOtherWeapon(WEAPON_CM901);
-	UTIL_PrecacheOtherWeapon(WEAPON_QBZ95);
-
-	// shotgun
-	UTIL_PrecacheOtherWeapon(WEAPON_KSG12);
-	UTIL_PrecacheOtherWeapon(WEAPON_M1014);
-
-	UTIL_PrecacheOtherWeapon(WEAPON_USP);
-	UTIL_PrecacheOtherWeapon(WEAPON_PM9);
-	UTIL_PrecacheOtherWeapon(WEAPON_UMP45);
-
-	UTIL_PrecacheOtherWeapon(WEAPON_FIVESEVEN);
-	UTIL_PrecacheOtherWeapon(WEAPON_P90);
-
-	// deagle
-	UTIL_PrecacheOtherWeapon(WEAPON_DEAGLE);
-
-	// p228
-	UTIL_PrecacheOtherWeapon(WEAPON_ANACONDA);
+	// guns
+	for (int i = WEAPON_NONE; i < LAST_WEAPON; i++)
+		UTIL_PrecacheOtherWeapon((WeaponIdType)i);
 
 	// knife
 	BasicKnife::Precache();
-
-	UTIL_PrecacheOtherWeapon(WEAPON_GLOCK18);
-	UTIL_PrecacheOtherWeapon(WEAPON_MP5N);
-	UTIL_PrecacheOtherWeapon(WEAPON_MP7A1);
-	UTIL_PrecacheOtherWeapon(WEAPON_M45A1);
 
 	PRECACHE_MODEL(THROWABLE_VIEW_MODEL);
 	PRECACHE_SOUND("items/ammopickup1.wav");	// grenade purchasing SFX.
@@ -287,10 +252,6 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 		p = new CAWP;
 		break;
 
-	case WEAPON_CM901:
-		p = new CCM901;
-		break;
-
 	case WEAPON_DEAGLE:
 		p = new CDEagle;
 		break;
@@ -325,10 +286,6 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 
 	case WEAPON_MP7A1:
 		p = new CMP7A1;
-		break;
-
-	case WEAPON_QBZ95:
-		p = new CQBZ95;
 		break;
 
 	case WEAPON_SCARH:

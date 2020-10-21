@@ -13,7 +13,6 @@ Modern Warfare Dev Team
 #define ACCURACY_SPEED				(1 << 1)
 #define ACCURACY_DUCK				(1 << 2) // more accurate when ducking
 #define ACCURACY_MULTIPLY_BY_14		(1 << 3) // accuracy multiply to 1.4
-#define ACCURACY_MULTIPLY_BY_14_2	(1 << 4) // accuracy multiply to 1.4
 
 extern int g_iShotsFired;
 

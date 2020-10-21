@@ -293,11 +293,14 @@ bool isSniperRifle(CBaseWeapon *item)
 {
 	switch (item->m_iId)
 	{
-	case WEAPON_M200:
-	case WEAPON_M14EBR:
+	case WEAPON_SRS:
+	case WEAPON_PSG1:
 	case WEAPON_AWP:
 	case WEAPON_SVD:
 		return true;
+
+	case WEAPON_XM8:	// only consider it's a sniper rifle when it's using by a sharpshooter.
+		return !!(item->m_iVariation == Role_Sharpshooter);
 
 	default:
 		return false;
@@ -318,7 +321,8 @@ bool CCSBot::DoesActiveWeaponHaveSilencer() const
 	if (!m_pActiveItem)
 		return false;
 
-	if (m_pActiveItem->m_iId == WEAPON_M4A1 || m_pActiveItem->m_iId == WEAPON_USP || m_pActiveItem->m_iId == WEAPON_MP7A1 || m_pActiveItem->m_iId == WEAPON_M200)
+	// TODO, FIXME, UNDONE
+	if (m_pActiveItem->m_iId == WEAPON_USP || m_pActiveItem->m_iId == WEAPON_MP7A1 || m_pActiveItem->m_iId == WEAPON_SRS)
 		return true;
 
 	return false;

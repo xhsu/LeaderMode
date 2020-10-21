@@ -2563,7 +2563,7 @@ void CHalfLifeMultiplay::PlayerThink(CBasePlayer *pPlayer)
 				iClipAdd = 3;
 			else if (pPlayer->m_pActiveItem->m_pItemInfo->m_iMaxClip >= 38)
 				iClipAdd = 2;
-			else if (pPlayer->m_pActiveItem->m_pItemInfo->m_iMaxClip >= 13 && pPlayer->m_pActiveItem->m_iId != WEAPON_M14EBR)	// nerf the stupit semi-auto sharpshooter rifle.
+			else if (pPlayer->m_pActiveItem->m_pItemInfo->m_iMaxClip >= 13)
 				iClipAdd = 1;
 
 			if (iClipAdd > 0 && pPlayer->m_pActiveItem->m_iClip < 127)

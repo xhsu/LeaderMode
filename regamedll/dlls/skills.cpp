@@ -1080,7 +1080,7 @@ void CSkillEnfoceHeadshot::OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr
 	WeaponIdType iId = m_pPlayer->m_pActiveItem->m_iId;
 
 	// you have to use one of these weapon to trigger the enforced headshot.
-	if (iId != WEAPON_M200 && iId != WEAPON_M14EBR && iId != WEAPON_AWP && iId != WEAPON_SVD	// Sniper rifles
+	if (iId != WEAPON_SRS && iId != WEAPON_PSG1 && iId != WEAPON_AWP && iId != WEAPON_SVD		// Sniper rifles
 		&& iId != WEAPON_ANACONDA && iId != WEAPON_DEAGLE										// Large caliber pistols
 		&& !(iId == WEAPON_XM8 && m_pPlayer->m_pActiveItem->m_iVariation == Role_Sharpshooter))	// XM8 in sharpshooter mode
 		return;
@@ -1984,7 +1984,7 @@ void CSkillInvisible::OnTouched(CBaseEntity* pOther)
 
 const float CSkillCriticalHit::NORMAL_CHANCE = 0.01f;
 const float CSkillCriticalHit::BACKSTAB_CHANCE = 0.10f;
-const int CSkillCriticalHit::ALLOWED_WEAPONS = (1 << WEAPON_MP7A1) | (1 << WEAPON_M14EBR) | (1 << WEAPON_USP) | (1 << WEAPON_M200);
+const int CSkillCriticalHit::ALLOWED_WEAPONS = (1 << WEAPON_MP7A1) | (1 << WEAPON_SRS) | (1 << WEAPON_USP);
 
 void CSkillCriticalHit::OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr)
 {

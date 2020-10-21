@@ -1024,7 +1024,7 @@ BOOL CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 			case WEAPON_M4A1:		flRatio *= 1.4;  break;
 			case WEAPON_AWP:		flRatio *= 1.95; break;
 			case WEAPON_SVD:		flRatio *= 1.65; break;
-			case WEAPON_M14EBR:		flRatio *= 1.45; break;
+			case WEAPON_PSG1:		flRatio *= 1.45; break;
 			case WEAPON_MK46:		flRatio *= 1.5;  break;
 			case WEAPON_M45A1:		flRatio *= 1.05; break;
 			case WEAPON_DEAGLE:		flRatio *= 1.5;  break;
@@ -1033,20 +1033,20 @@ BOOL CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 			case WEAPON_P90:
 				flRatio *= 1.5;
 				break;
-			case WEAPON_PM9:
+			case WEAPON_VECTOR:
+			case WEAPON_MAC10:
 				flRatio *= 0.95;
 				break;
 			case WEAPON_ANACONDA:
 				flRatio *= 1.25;
 				break;
-			case WEAPON_M200:
+			case WEAPON_SRS:
 				flRatio *= 1.7;
 				break;
-			case WEAPON_QBZ95:
 			case WEAPON_SCARH:
 				flRatio *= 1.4;
 				break;
-			case WEAPON_CM901:
+			case WEAPON_RPD:
 			case WEAPON_AK47:
 				flRatio *= 1.55;
 				break;
@@ -4436,25 +4436,6 @@ void EXT_FUNC CBasePlayer::Spawn()
 	for (i = 0; i < MAX_RECENT_PATH; i++)
 		m_vRecentPath[i] = Vector(0, 0, 0);
 
-	if (m_pActiveItem && !pev->viewmodel)
-	{
-		switch (m_pActiveItem->m_iId)
-		{
-		case WEAPON_AWP:
-			pev->viewmodel = MAKE_STRING("models/v_awp.mdl");
-			break;
-		case WEAPON_SVD:
-			pev->viewmodel = MAKE_STRING("models/v_g3sg1.mdl");
-			break;
-		case WEAPON_M200:
-			pev->viewmodel = MAKE_STRING("models/v_scout.mdl");
-			break;
-		case WEAPON_M14EBR:
-			pev->viewmodel = MAKE_STRING("models/v_sg550.mdl");
-			break;
-		}
-	}
-
 	pev->fov = DEFAULT_FOV;
 	m_flNextDecalTime = 0;
 	m_flTimeStepSound = 0;
@@ -6837,11 +6818,10 @@ BOOL CBasePlayer::ShouldDoLargeFlinch(int nHitGroup, int nGunType)
 	{
 		switch (nGunType)
 		{
-		case WEAPON_M200:
+		case WEAPON_SRS:
 		case WEAPON_XM8:
-		case WEAPON_M14EBR:
-		case WEAPON_CM901:
-		case WEAPON_QBZ95:
+		case WEAPON_AA12:
+		case WEAPON_PSG1:
 		case WEAPON_AWP:
 		case WEAPON_KSG12:
 		case WEAPON_M4A1:
@@ -7189,9 +7169,12 @@ void CBasePlayer::ParseAutoBuy()
 	switch (m_iRoleType)
 	{
 	case Role_Commander:
+		iRecommandedPrim = WEAPON_M4A1;
+		break;
+
 	case Role_Godfather:
 	case Role_LeadEnforcer:
-		iRecommandedPrim = WEAPON_QBZ95;	// UNDONE, should be cm901.
+		iRecommandedPrim = WEAPON_AK47;
 		break;
 
 	case Role_SWAT:

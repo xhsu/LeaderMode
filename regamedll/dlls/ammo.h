@@ -34,13 +34,14 @@ enum AmmoIdType
 
 	// Sniper & Hunter
 	AMMO_338Magnum = 1,
-	AMMO_408CheyTac,
+	AMMO_762SovietR,
 
 	// Assault
 	AMMO_762Nato,
 	AMMO_556NatoBox,
 	AMMO_556Nato,
-	AMMO_58mmCN,
+	AMMO_762Soviet,
+	AMMO_762SovietBox,
 
 	// Buckshot
 	AMMO_Buckshot,

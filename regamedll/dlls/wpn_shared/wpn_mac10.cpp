@@ -6,7 +6,7 @@ void CMAC10::Spawn()
 {
 	Precache();
 
-	m_iId = WEAPON_PM9;
+	m_iId = WEAPON_MAC10;
 	SET_MODEL(edict(), "models/w_mac10.mdl");
 
 	m_iDefaultAmmo = iinfo()->m_iMaxClip;

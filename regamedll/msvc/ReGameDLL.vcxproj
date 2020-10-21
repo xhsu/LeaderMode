@@ -271,7 +271,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Play|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tests|Win32'">false</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\dlls\wpn_shared\wpn_cm901.cpp" />
     <ClCompile Include="..\dlls\wpn_shared\wpn_deagle.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
@@ -280,13 +279,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tests|Win32'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\dlls\wpn_shared\wpn_m45a1.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Play|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Play|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Tests|Win32'">false</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\dlls\wpn_shared\wpn_qbz95.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Play|Win32'">false</ExcludedFromBuild>

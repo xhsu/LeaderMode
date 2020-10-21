@@ -12,10 +12,10 @@ const int g_rgiBuyMenuClassify[] =
 {
 	WEAPON_NONE,
 	(1 << WEAPON_GLOCK18) | (1 << WEAPON_USP) | (1 << WEAPON_ANACONDA) | (1 << WEAPON_DEAGLE) | (1 << WEAPON_FIVESEVEN) | (1 << WEAPON_M45A1),
-	(1 << WEAPON_KSG12) | (1 << WEAPON_M1014),
-	(1 << WEAPON_MP7A1) | (1 << WEAPON_PM9) | (1 << WEAPON_MP5N) | (1 << WEAPON_UMP45) | (1 << WEAPON_P90),
-	(1 << WEAPON_QBZ95) | (1 << WEAPON_CM901) | (1 << WEAPON_AK47) | (1 << WEAPON_M4A1) | (1 << WEAPON_SCARH) | (1 << WEAPON_XM8) | (1 << WEAPON_MK46),
-	(1 << WEAPON_M200) | (1 << WEAPON_M14EBR) | (1 << WEAPON_AWP) | (1 << WEAPON_SVD),
+	(1 << WEAPON_KSG12) | (1 << WEAPON_M1014)|(1<<WEAPON_AA12),
+	(1 << WEAPON_MP7A1) | (1 << WEAPON_MAC10) | (1 << WEAPON_MP5N) | (1 << WEAPON_UMP45) | (1 << WEAPON_P90)|(1<<WEAPON_VECTOR),
+	(1 << WEAPON_AK47) | (1 << WEAPON_M4A1) | (1 << WEAPON_SCARH) | (1 << WEAPON_XM8) | (1 << WEAPON_MK46) | (1<<WEAPON_RPD),
+	(1 << WEAPON_SRS) | (1 << WEAPON_SVD) | (1 << WEAPON_AWP) | (1 << WEAPON_PSG1),
 };
 
 const char* g_rgszBuyMenuItemName[] =
@@ -145,7 +145,7 @@ bool MenuHandler_Buy3(CBasePlayer* pPlayer, int iSlot)
 			AddMenuWeaponItem(pPlayer, WEAPON_ANACONDA, szMenuText);	// 3
 			AddMenuWeaponItem(pPlayer, WEAPON_DEAGLE, szMenuText);		// 4
 			AddMenuWeaponItem(pPlayer, WEAPON_FIVESEVEN, szMenuText);	// 5
-			AddMenuWeaponItem(pPlayer, WEAPON_M45A1, szMenuText);			// 6
+			AddMenuWeaponItem(pPlayer, WEAPON_M45A1, szMenuText);		// 6
 
 			Q_strlcat(szMenuText,	"\n"
 									"\\r0. \\wExit\n");
@@ -163,6 +163,7 @@ bool MenuHandler_Buy3(CBasePlayer* pPlayer, int iSlot)
 			g_iMenuItemCount = 0;
 			AddMenuWeaponItem(pPlayer, WEAPON_KSG12, szMenuText);		// 1
 			AddMenuWeaponItem(pPlayer, WEAPON_M1014, szMenuText);		// 2
+			AddMenuWeaponItem(pPlayer, WEAPON_AA12,	szMenuText);		// 3
 
 			Q_strlcat(szMenuText,	"\n"
 									"\\r0. \\wExit\n");
@@ -179,10 +180,11 @@ bool MenuHandler_Buy3(CBasePlayer* pPlayer, int iSlot)
 
 			g_iMenuItemCount = 0;
 			AddMenuWeaponItem(pPlayer, WEAPON_MP7A1, szMenuText);	// 1
-			AddMenuWeaponItem(pPlayer, WEAPON_PM9, szMenuText);		// 2
+			AddMenuWeaponItem(pPlayer, WEAPON_MAC10, szMenuText);	// 2
 			AddMenuWeaponItem(pPlayer, WEAPON_MP5N, szMenuText);	// 3
 			AddMenuWeaponItem(pPlayer, WEAPON_UMP45, szMenuText);	// 4
 			AddMenuWeaponItem(pPlayer, WEAPON_P90, szMenuText);		// 5
+			AddMenuWeaponItem(pPlayer, WEAPON_VECTOR, szMenuText);	// 6
 
 			Q_strlcat(szMenuText,	"\n"
 									"\\r0. \\wExit\n");
@@ -198,13 +200,12 @@ bool MenuHandler_Buy3(CBasePlayer* pPlayer, int iSlot)
 									"\\yRole: \\w%s\n\n", g_rgszRoleNames[pPlayer->m_iRoleType]);
 
 			g_iMenuItemCount = 0;
-			AddMenuWeaponItem(pPlayer, WEAPON_CM901, szMenuText);	// 2
-			AddMenuWeaponItem(pPlayer, WEAPON_QBZ95,	szMenuText);	// 1
-			AddMenuWeaponItem(pPlayer, WEAPON_AK47,		szMenuText);	// 3
-			AddMenuWeaponItem(pPlayer, WEAPON_M4A1,		szMenuText);	// 4
-			AddMenuWeaponItem(pPlayer, WEAPON_XM8,		szMenuText);	// 5
-			AddMenuWeaponItem(pPlayer, WEAPON_SCARH,	szMenuText);	// 6
-			AddMenuWeaponItem(pPlayer, WEAPON_MK46,		szMenuText);	// 7
+			AddMenuWeaponItem(pPlayer, WEAPON_AK47,		szMenuText);	// 1
+			AddMenuWeaponItem(pPlayer, WEAPON_M4A1,		szMenuText);	// 2
+			AddMenuWeaponItem(pPlayer, WEAPON_XM8,		szMenuText);	// 3
+			AddMenuWeaponItem(pPlayer, WEAPON_SCARH,	szMenuText);	// 4
+			AddMenuWeaponItem(pPlayer, WEAPON_MK46,		szMenuText);	// 5
+			AddMenuWeaponItem(pPlayer, WEAPON_RPD,		szMenuText);	// 6
 
 			Q_strlcat(szMenuText,	"\n"
 									"\\r0. \\wExit\n");
@@ -220,10 +221,10 @@ bool MenuHandler_Buy3(CBasePlayer* pPlayer, int iSlot)
 									"\\yRole: \\w%s\n\n", g_rgszRoleNames[pPlayer->m_iRoleType]);
 
 			g_iMenuItemCount = 0;
-			AddMenuWeaponItem(pPlayer, WEAPON_M200, szMenuText);	// 1
-			AddMenuWeaponItem(pPlayer, WEAPON_M14EBR, szMenuText);	// 2
+			AddMenuWeaponItem(pPlayer, WEAPON_SRS, szMenuText);		// 1
+			AddMenuWeaponItem(pPlayer, WEAPON_SVD, szMenuText);		// 2
 			AddMenuWeaponItem(pPlayer, WEAPON_AWP, szMenuText);		// 3
-			AddMenuWeaponItem(pPlayer, WEAPON_SVD, szMenuText);		// 4
+			AddMenuWeaponItem(pPlayer, WEAPON_PSG1, szMenuText);	// 4
 
 			Q_strlcat(szMenuText,	"\n"
 									"\\r0. \\wExit\n");
@@ -313,6 +314,9 @@ bool MenuHandler_BuyShotguns(CBasePlayer* pPlayer, int iSlot)
 	case 2:
 		return BuyWeapon(pPlayer, WEAPON_M1014);
 
+	case 3:
+		return BuyWeapon(pPlayer, WEAPON_AA12);
+
 	default:
 		return false;
 	}
@@ -326,7 +330,7 @@ bool MenuHandler_BuySMGs(CBasePlayer* pPlayer, int iSlot)
 		return BuyWeapon(pPlayer, WEAPON_MP7A1);
 
 	case 2:
-		return BuyWeapon(pPlayer, WEAPON_PM9);
+		return BuyWeapon(pPlayer, WEAPON_MAC10);
 
 	case 3:
 		return BuyWeapon(pPlayer, WEAPON_MP5N);
@@ -336,6 +340,9 @@ bool MenuHandler_BuySMGs(CBasePlayer* pPlayer, int iSlot)
 
 	case 5:
 		return BuyWeapon(pPlayer, WEAPON_P90);
+
+	case 6:
+		return BuyWeapon(pPlayer, WEAPON_VECTOR);
 
 	default:
 		return false;
@@ -347,25 +354,22 @@ bool MenuHandler_BuyAssaultFirearms(CBasePlayer* pPlayer, int iSlot)
 	switch (iSlot)
 	{
 	case 1:
-		return BuyWeapon(pPlayer, WEAPON_CM901);
-
-	case 2:
-		return BuyWeapon(pPlayer, WEAPON_QBZ95);
-
-	case 3:
 		return BuyWeapon(pPlayer, WEAPON_AK47);
 
-	case 4:
+	case 2:
 		return BuyWeapon(pPlayer, WEAPON_M4A1);
 
-	case 5:
+	case 3:
 		return BuyWeapon(pPlayer, WEAPON_XM8);
 
-	case 6:
+	case 4:
 		return BuyWeapon(pPlayer, WEAPON_SCARH);
 
-	case 7:
+	case 5:
 		return BuyWeapon(pPlayer, WEAPON_MK46);
+
+	case 6:
+		return BuyWeapon(pPlayer, WEAPON_RPD);
 
 	default:
 		return false;
@@ -377,16 +381,16 @@ bool MenuHandler_BuySniperRifles(CBasePlayer* pPlayer, int iSlot)
 	switch (iSlot)
 	{
 	case 1:
-		return BuyWeapon(pPlayer, WEAPON_M200);
+		return BuyWeapon(pPlayer, WEAPON_SRS);
 
 	case 2:
-		return BuyWeapon(pPlayer, WEAPON_M14EBR);
+		return BuyWeapon(pPlayer, WEAPON_SVD);
 
 	case 3:
 		return BuyWeapon(pPlayer, WEAPON_AWP);
 
 	case 4:
-		return BuyWeapon(pPlayer, WEAPON_SVD);
+		return BuyWeapon(pPlayer, WEAPON_PSG1);
 
 	default:
 		return false;

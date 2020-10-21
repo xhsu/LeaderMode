@@ -145,36 +145,37 @@ struct BuyInfo
 BuyInfo primaryWeapons[] =
 {
 	{ SHOTGUN,          false,	WEAPON_KSG12	},
-	{ SHOTGUN,          true,	WEAPON_M1014	},
+	{ SHOTGUN,          false,	WEAPON_M1014	},
+	{ SHOTGUN,          true,	WEAPON_AA12		},
 
 	{ SUB_MACHINE_GUN,  false,	WEAPON_MP7A1	},
-	{ SUB_MACHINE_GUN,  false,	WEAPON_PM9		},
+	{ SUB_MACHINE_GUN,  false,	WEAPON_MAC10	},
 	{ SUB_MACHINE_GUN,  false,	WEAPON_MP5N		},
 	{ SUB_MACHINE_GUN,  false,	WEAPON_UMP45	},
 	{ SUB_MACHINE_GUN,  false,	WEAPON_P90		},
+	{ SUB_MACHINE_GUN,  true,	WEAPON_VECTOR	},
 
-	{ RIFLE,            true,	WEAPON_CM901	},
-	{ RIFLE,            true,	WEAPON_QBZ95	},
 	{ RIFLE,            true,	WEAPON_AK47		},
 	{ RIFLE,            true,	WEAPON_M4A1		},
 	{ RIFLE,            true,	WEAPON_XM8		},
 	{ RIFLE,            true,	WEAPON_SCARH	},
 
-	{ SNIPER_RIFLE,     false,	WEAPON_M200		},
-	{ SNIPER_RIFLE,     true,	WEAPON_M14EBR	},
-	{ SNIPER_RIFLE,     true,	WEAPON_AWP		},
+	{ SNIPER_RIFLE,     false,	WEAPON_SRS		},
 	{ SNIPER_RIFLE,     true,	WEAPON_SVD		},
+	{ SNIPER_RIFLE,     true,	WEAPON_AWP		},
+	{ SNIPER_RIFLE,     true,	WEAPON_PSG1		},
 
-	{ MACHINE_GUN,      false,	WEAPON_MK46		},
+	{ MACHINE_GUN,      true,	WEAPON_MK46		},
+	{ MACHINE_GUN,      true,	WEAPON_RPD		},
 };
 
 BuyInfo secondaryWeapon[] =
 {
-	{ PISTOL, false,	WEAPON_GLOCK18	},
+	{ PISTOL, true,		WEAPON_GLOCK18	},
 	{ PISTOL, false,	WEAPON_USP		},
 	{ PISTOL, true,		WEAPON_ANACONDA	},
 	{ PISTOL, true,		WEAPON_DEAGLE	},
-	{ PISTOL, true,		WEAPON_FIVESEVEN},
+	{ PISTOL, false,	WEAPON_FIVESEVEN},
 	{ PISTOL, true,		WEAPON_M45A1	},
 };
 

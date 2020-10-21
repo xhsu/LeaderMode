@@ -646,8 +646,7 @@ bool IsGameEventAudible(GameEventType event, CBaseEntity *pEntity, CBaseEntity *
 
 		// quiet
 		case WEAPON_MP7A1:
-		case WEAPON_M14EBR:
-		case WEAPON_M200:
+		case WEAPON_SRS:
 		case WEAPON_USP:
 			*range = ShortRange;
 			break;
@@ -655,6 +654,7 @@ bool IsGameEventAudible(GameEventType event, CBaseEntity *pEntity, CBaseEntity *
 		// loud
 		case WEAPON_AWP:
 		case WEAPON_SVD:
+		case WEAPON_PSG1:
 		case WEAPON_DEAGLE:
 			*range = 99999.0f;
 			break;

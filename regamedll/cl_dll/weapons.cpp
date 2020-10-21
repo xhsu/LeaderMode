@@ -225,10 +225,6 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 		p = new CAWP;
 		break;
 
-	case WEAPON_CM901:
-		p = new CCM901;
-		break;
-
 	case WEAPON_DEAGLE:
 		p = new CDEagle;
 		break;
@@ -263,10 +259,6 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 
 	case WEAPON_MP7A1:
 		p = new CMP7A1;
-		break;
-
-	case WEAPON_QBZ95:
-		p = new CQBZ95;
 		break;
 
 	case WEAPON_SCARH:

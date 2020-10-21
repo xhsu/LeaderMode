@@ -354,16 +354,12 @@ const char* CWeaponBox::GetCSModelName(WeaponIdType iId)
 	switch (iId)
 	{
 	case WEAPON_ANACONDA:		modelName = Anaconda_WORLD_MODEL; break;
-	case WEAPON_M200:			modelName = M200_WORLD_MODEL; break;
 	case WEAPON_M1014:			modelName = M1014_WORLD_MODEL; break;
-	case WEAPON_PM9:			modelName = PM9_WORLD_MODEL; break;
+	case WEAPON_MAC10:			modelName = PM9_WORLD_MODEL; break;
 	case WEAPON_XM8:			modelName = XM8_WORLD_MODEL; break;
 	case WEAPON_M45A1:			modelName = M45A1_WORLD_MODEL; break;
 	case WEAPON_FIVESEVEN:		modelName = FN57_WORLD_MODEL; break;
 	case WEAPON_UMP45:			modelName = UMP45_WORLD_MODEL; break;
-	case WEAPON_M14EBR:			modelName = M14EBR_WORLD_MODEL; break;
-	case WEAPON_CM901:			modelName = CM901_WORLD_MODEL; break;
-	case WEAPON_QBZ95:			modelName = QBZ95_WORLD_MODEL; break;
 	case WEAPON_USP:			modelName = USP_WORLD_MODEL; break;
 	case WEAPON_GLOCK18:		modelName = G18C_WORLD_MODEL; break;
 	case WEAPON_AWP:			modelName = AWP_WORLD_MODEL; break;

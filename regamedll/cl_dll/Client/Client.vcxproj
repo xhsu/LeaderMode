@@ -175,7 +175,6 @@
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_ak47.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_anaconda.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_awp.cpp" />
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_cm901.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_deagle.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_fiveseven.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_glock18.cpp" />
@@ -187,7 +186,6 @@
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_m4a1.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_mk46.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_mp7a1.cpp" />
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_qbz95.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_scarh.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_svd.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_ump45.cpp" />

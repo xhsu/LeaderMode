@@ -130,7 +130,7 @@ int CHudCrosshair::Draw(float flTime)
 
 	if (gHUD::m_iFOV >= 40)
 	{
-		if (g_pCurWeapon->m_iId != WEAPON_SVD && g_pCurWeapon->m_iId != WEAPON_AWP && g_pCurWeapon->m_iId != WEAPON_M200 && g_pCurWeapon->m_iId != WEAPON_M14EBR)
+		if (g_pCurWeapon->m_iId != WEAPON_SVD && g_pCurWeapon->m_iId != WEAPON_AWP && g_pCurWeapon->m_iId != WEAPON_SRS && g_pCurWeapon->m_iId != WEAPON_PSG1)
 		{
 			if (!(gHUD::m_bitsHideHUDDisplay & HIDEHUD_CROSSHAIR))
 				DrawCrosshair(flTime, g_pCurWeapon->m_iId);
@@ -292,6 +292,9 @@ void CHudCrosshair::CalculateCrosshairSize(void)
 	}
 }
 
+// UNDONE, TODO
+// finish this list for new weapons. VECTOR, PSG1 and RPD.
+
 int GetWeaponAccuracyFlags(WeaponIdType iId)
 {
 	int result = 0;
@@ -301,7 +304,6 @@ int GetWeaponAccuracyFlags(WeaponIdType iId)
 		switch (iId)
 		{
 		case WEAPON_XM8:
-		case WEAPON_CM901:
 		case WEAPON_MK46:
 		case WEAPON_SCARH:
 		case WEAPON_AK47:
@@ -317,7 +319,7 @@ int GetWeaponAccuracyFlags(WeaponIdType iId)
 			result = ACCURACY_AIR | ACCURACY_SPEED | ACCURACY_DUCK;
 			break;
 
-		case WEAPON_PM9:
+		case WEAPON_MAC10:
 		case WEAPON_UMP45:
 		case WEAPON_MP5N:
 		case WEAPON_MP7A1:
@@ -326,10 +328,6 @@ int GetWeaponAccuracyFlags(WeaponIdType iId)
 
 		case WEAPON_M4A1:
 			result = ACCURACY_AIR | ACCURACY_SPEED | ACCURACY_MULTIPLY_BY_14;
-			break;
-
-		case WEAPON_QBZ95:
-			result = ACCURACY_AIR | ACCURACY_SPEED | ACCURACY_MULTIPLY_BY_14_2;
 			break;
 		}
 	}
@@ -402,7 +400,7 @@ int CHudCrosshair::DrawCrosshair(float flTime, WeaponIdType weaponid)
 		break;
 	}
 
-	case WEAPON_PM9:
+	case WEAPON_MAC10:
 	{
 		iDistance = 9;
 		iDeltaDistance = 3;
@@ -425,8 +423,8 @@ int CHudCrosshair::DrawCrosshair(float flTime, WeaponIdType weaponid)
 		break;
 	}
 
-	case WEAPON_M200:
-	case WEAPON_M14EBR:
+	case WEAPON_SRS:
+	case WEAPON_PSG1:
 	case WEAPON_SCARH:
 	{
 		iDistance = 5;
@@ -458,9 +456,9 @@ int CHudCrosshair::DrawCrosshair(float flTime, WeaponIdType weaponid)
 
 				switch (weaponid)
 				{
-				case WEAPON_PM9:
-				case WEAPON_M14EBR:
-				case WEAPON_CM901:
+				case WEAPON_SRS:
+				case WEAPON_PSG1:
+				case WEAPON_MAC10:
 				case WEAPON_MP5N:
 				case WEAPON_KSG12:
 				case WEAPON_DEAGLE:
@@ -485,9 +483,6 @@ int CHudCrosshair::DrawCrosshair(float flTime, WeaponIdType weaponid)
 			iDistance *= 2;
 
 		if (iWeaponAccuracyFlags & ACCURACY_MULTIPLY_BY_14)
-			iDistance *= 1.4;
-
-		if (iWeaponAccuracyFlags & ACCURACY_MULTIPLY_BY_14_2)
 			iDistance *= 1.4;
 	}
 

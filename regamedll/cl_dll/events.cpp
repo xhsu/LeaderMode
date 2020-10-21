@@ -1270,61 +1270,9 @@ DECLARE_EVENT(FireM45A1)
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
 	// original goldsrc api: VOL = 1.0, ATTN = 0.6
-	Play3DSound(M45A1_FIRE_SFX, 1.0f, M45A1_GUN_VOLUME, vecSrc + forward * 10.0f);
+	EV_PlayGunFire(idx, M45A1_FIRE_SFX, M45A1_GUN_VOLUME, vecSrc + forward * 10.0f);
 
 	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, M45A1_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_DEAGLE].m_iAmmoType, M45A1_PENETRATION);
-}
-
-DECLARE_EVENT(FireQBZ95)
-{
-	int idx = args->entindex;
-
-	Vector origin, angles, velocity;
-	VectorCopy(args->origin, origin);
-	VectorCopy(args->angles, angles);
-	VectorCopy(args->velocity, velocity);
-
-	angles[0] += args->iparam1 / 10000000.0;
-	angles[1] += args->iparam2 / 10000000.0;
-
-	Vector forward, right, up;
-	gEngfuncs.pfnAngleVectors(angles, forward, right, up);
-
-	if (EV_IsLocal(idx))
-	{
-		g_iShotsFired++;
-		EV_MuzzleFlash();
-
-		if (g_pCurWeapon)
-			g_pCurWeapon->SendWeaponAnim(UTIL_SharedRandomLong(gPseudoPlayer.random_seed, QBZ95_SHOOT1, QBZ95_SHOOT3));
-
-		// original CS1.6 FAMAS had no gun smoke. This is copied from GALIL.
-		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 3, 0.26, 15, 15, 15, EV_RIFLE_SMOKE, velocity, false, 35);
-	}
-
-	Vector ShellVelocity, ShellOrigin;
-	if (EV_IsLocal(idx))
-	{
-		if (cl_righthand->value == 0)
-			EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 17.0, -8.0, -14.0);
-		else
-			EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 17.0, -8.0, 14.0);
-
-		VectorCopy(g_pViewEnt->attachment[1], ShellOrigin);
-		VectorScale(ShellVelocity, 1.25, ShellVelocity);
-		ShellVelocity[2] -= 122;
-	}
-	else
-		EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -12.0, -4.0);
-
-	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iRShell, TE_BOUNCE_SHELL, 8);
-
-	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, QBZ95_FIRE_SFX, 1.0, 0.48, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
-
-	Vector vecSrc = EV_GetGunPosition(args, origin);
-	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
-
-	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, QBZ95_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_QBZ95].m_iAmmoType, QBZ95_PENETRATION);
 }
 
 DECLARE_EVENT(Fire57)
@@ -2285,96 +2233,15 @@ DECLARE_EVENT(Vehicle)
 
 }
 
-DECLARE_EVENT(FireCM901)
-{
-	Vector ShellVelocity;
-	Vector ShellOrigin;
-
-	bool silencer_on = !args->bparam2;
-	bool empty = !args->bparam1;
-	int    idx = args->entindex;
-	Vector origin(args->origin);
-	Vector angles(
-		args->iparam1 / 100.0f + args->angles[0],
-		args->iparam2 / 100.0f + args->angles[1],
-		args->angles[2]
-	);
-	Vector velocity(args->velocity);
-	Vector forward, right, up;
-
-	AngleVectors(angles, forward, right, up);
-
-	if (EV_IsLocal(idx))
-	{
-		++g_iShotsFired;
-
-		int seq;
-		if (silencer_on)
-		{
-			if (!empty)
-				seq = RANDOM_LONG(CM901_SHOOT1, CM901_SHOOT1);
-			else seq = CM901_SHOOT1;
-		}
-		else
-		{
-			EV_MuzzleFlash();
-			if (!empty)
-				seq = RANDOM_LONG(CM901_SHOOT1, CM901_SHOOT1);
-			else seq = CM901_SHOOT1;
-		}
-
-		// first personal gun smoke.
-		auto ent = gEngfuncs.GetViewModel();
-
-		Vector smoke_origin = ent->attachment[0] - forward * 3.0f;
-		float base_scale = RANDOM_FLOAT(0.1, 0.25);
-
-		EV_HLDM_CreateSmoke(smoke_origin, forward, 0, base_scale, 7, 7, 7, EV_RIFLE_SMOKE, velocity, false, 35);
-		EV_HLDM_CreateSmoke(ent->attachment[0], forward, 20, base_scale + 0.1, 10, 10, 10, EV_WALL_PUFF, velocity, false, 35);
-		EV_HLDM_CreateSmoke(ent->attachment[0], forward, 40, base_scale, 13, 13, 13, EV_WALL_PUFF, velocity, false, 35);
-
-		// shoot anim.
-		gEngfuncs.pEventAPI->EV_WeaponAnimation(seq, 2);
-
-		if (!cl_righthand->value)
-			EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 36.0, -14.0, -14.0);
-		else
-			EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 36.0, -14.0, 14.0);
-
-		ShellOrigin = ent->attachment[1];	// use the weapon attachment instead.
-		VectorScale(ShellVelocity, 0.5, ShellVelocity);
-		ShellVelocity[2] += 45.0;
-	}
-	else
-		EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -12.0, 4.0);
-
-	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iPShell, TE_BOUNCE_SHELL);
-
-	// gunshot sound.
-	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, CM901_FIRE_SFX, 1.0, ATTN_NORM, 0, 87 + gEngfuncs.pfnRandomLong(0, 0x12));
-
-	Vector vecSrc = EV_GetGunPosition(args, origin);
-	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
-
-	EV_HLDM_FireBullets(idx,
-		forward, right, up,
-		1, vecSrc, forward,
-		vSpread, CM901_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_CM901].m_iAmmoType,
-		CM901_PENETRATION);
-}
-
 void Events_Init(void)
 {
 	HOOK_EVENT(ak47, FireAK47);
 	HOOK_EVENT(awp, FireAWP);
 	HOOK_EVENT(deagle, FireDEagle);
 	HOOK_EVENT(m45a1, FireM45A1);
-	HOOK_EVENT(qbz95, FireQBZ95);
 	HOOK_EVENT(fiveseven, Fire57);
 	HOOK_EVENT(svd, FireSVD);
-	HOOK_EVENT(galil, FireGALIL);
 	HOOK_EVENT(glock18, Fireglock18);
-	HOOK_EVENT(knife, Knife);
 	HOOK_EVENT(mk46, FireMK46);
 	HOOK_EVENT(ksg12, FireKSG12);
 	HOOK_EVENT(m4a1, FireM4A1);
@@ -2382,8 +2249,6 @@ void Events_Init(void)
 	HOOK_EVENT(mp5n, FireMP5);
 	HOOK_EVENT(anaconda, FireAnaconda);
 	HOOK_EVENT(p90, FireP90);
-	HOOK_EVENT(scout, FireScout);
-	HOOK_EVENT(sg550, FireSG550);
 	HOOK_EVENT(scarh, FireSCARH);
 	HOOK_EVENT(mp7a1, FireMP7A1);
 	HOOK_EVENT(ump45, FireUMP45);

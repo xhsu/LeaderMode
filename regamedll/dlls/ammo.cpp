@@ -6,13 +6,14 @@ const AmmoInfo g_rgAmmoInfo[AMMO_MAXTYPE] =
 
 	// Sniper & Hunter
 	{AMMO_338Magnum,	"338Magnum",	20,		10,		125,	45,		8000.0f},
-	{AMMO_408CheyTac,	"408CheyTac",	14,		7,		95,		45,		8000.0f},
+	{AMMO_762SovietR,	"762SovietR",	20,		10,		95,		40,		5500.0f},
 
 	// Assault
 	{AMMO_762Nato,		"762Nato",		60,		30,		80,		39,		5000.0f},
 	{AMMO_556NatoBox,	"556NatoBox",	200,	100,	250,	35,		4000.0f},
 	{AMMO_556Nato,		"556Nato",		60,		30,		60,		35,		4000.0f},
-	{AMMO_58mmCN,		"58mmCN",		60,		30,		60,		35,		4000.0f},
+	{AMMO_762Soviet,	"762Soviet",	60,		30,		80,		36,		4500.0f},
+	{AMMO_762SovietBox,	"762SovietBox",	200,	100,	270,	36,		4500.0f},
 
 	// Buckshot
 	{AMMO_Buckshot,		"buckshot",		14,		7,		65,		0,		0.0f},
