@@ -117,23 +117,6 @@ bool CM45A1::Deploy()
 		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? M45A1_DRAW_FIRST_TIME : M45A1_DRAW_TIME);
 }
 
-void CM45A1::SecondaryAttack()
-{
-	switch (m_iVariation)
-	{
-	case Role_Assassin:
-	case Role_Sharpshooter:
-		// Optical sight
-		DefaultSteelSight(Vector(-2.71f, -5, 1.45f), 75, 8.0f);
-		break;
-
-	default:
-		// Steel sight
-		DefaultSteelSight(Vector(-2.71f, -5, 2.13f), 85, 8.0f);
-		break;
-	}
-}
-
 void CM45A1::PrimaryAttack()
 {
 	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
@@ -151,6 +134,23 @@ void CM45A1::PrimaryAttack()
 	else
 	{
 		M45A1Fire(0.1f * (1.0f - m_flAccuracy) * (m_bInZoom ? 0.5f : 1.0f));
+	}
+}
+
+void CM45A1::SecondaryAttack()
+{
+	switch (m_iVariation)
+	{
+	case Role_Assassin:
+	case Role_Sharpshooter:
+		// Electronic Sight
+		DefaultSteelSight(Vector(-2.71f, -5, 1.45f), 75, 8.0f);
+		break;
+
+	default:
+		// Steel Sight
+		DefaultSteelSight(Vector(-2.71f, -5, 2.13f), 85, 8.0f);
+		break;
 	}
 }
 
@@ -195,7 +195,7 @@ void CM45A1::M45A1Fire(float flSpread, float flCycleTime)
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
 
 	m_iClip--;
-	m_pPlayer->m_iWeaponVolume = BIG_EXPLOSION_VOLUME;
+	m_pPlayer->m_iWeaponVolume = M45A1_GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = DIM_GUN_FLASH;
 
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
@@ -227,7 +227,7 @@ void CM45A1::M45A1Fire(float flSpread, float flCycleTime)
 
 	SendWeaponAnim(iAnim);	// LUNA: I don't know why, but this has to be done on SV side, or client fire anim would be override.
 	PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL, m_pPlayer->edict(), m_usEvent, 0, (float*)&g_vecZero, (float*)&g_vecZero, vecDir.x, vecDir.y,
-		int(m_pPlayer->pev->punchangle.x * 100), int(m_pPlayer->pev->punchangle.y * 100), m_iClip == 0, FALSE);
+		int(m_pPlayer->pev->punchangle.x * 100), int(m_pPlayer->pev->punchangle.y * 100), m_iVariation == Role_Assassin, FALSE);	// on non-host sending, the bparam1 is reserved for silencer status.
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 	{
@@ -238,7 +238,7 @@ void CM45A1::M45A1Fire(float flSpread, float flCycleTime)
 	Q_memset(&args, NULL, sizeof(args));
 
 	args.angles = m_pPlayer->pev->v_angle;
-	args.bparam1 = m_iClip > 0;
+	args.bparam1 = m_iClip > 0;	// on host ev sending, the bparams are used for first-personal shooting anim.
 	args.bparam2 = m_bInZoom;
 	args.ducking = gEngfuncs.pEventAPI->EV_LocalPlayerDucking();
 	args.entindex = gEngfuncs.GetLocalPlayer()->index;

@@ -1444,20 +1444,44 @@ public:	// new functions
 constexpr float FIVESEVEN_MAX_SPEED			= 250.0f;
 constexpr float FIVESEVEN_DAMAGE			= 20.0f;
 constexpr float FIVESEVEN_RANGE_MODIFER		= 0.885f;
-constexpr float FIVESEVEN_RELOAD_TIME		= 2.03f;
-constexpr float FIVESEVEN_DEPLOY_TIME		= 0.34f;
+constexpr float FIVESEVEN_RELOAD_TIME		= 1.94F;
+constexpr float FIVESEVEN_RELOAD_EMPTY_TIME	= 1.86F;
+constexpr float FIVESEVEN_DRAW_FIRST_TIME	= 1.56F;
+constexpr float FIVESEVEN_DRAW_TIME			= 0.7F;
+constexpr float FIVESEVEN_HOLSTER_TIME		= 0.7F;
+constexpr float FIVESEVEN_CHECKMAG_TIME		= 1.86F;
+constexpr float FIVESEVEN_DASH_ENTER_TIME	= 0.8F;
+constexpr float FIVESEVEN_DASH_EXIT_TIME	= 0.37F;
 constexpr float FIVESEVEN_FIRE_INTERVAL		= 0.1f;
 constexpr float	FIVESEVEN_EFFECTIVE_RANGE	= 4096.0f;
-constexpr int	FIVESEVEN_PENETRATION		= 2;
+constexpr int	FIVESEVEN_PENETRATION		= 1;
+constexpr int	FIVESEVEN_GUN_VOLUME		= NORMAL_GUN_VOLUME;
 
 enum fiveseven_e
 {
-	FIVESEVEN_IDLE,
-	FIVESEVEN_SHOOT1,
-	FIVESEVEN_SHOOT2,
-	FIVESEVEN_SHOOT_EMPTY,
+	FIVESEVEN_IDLE = 0,
+	FIVESEVEN_SHOOT,
+	FIVESEVEN_SHOOT_LAST,
+	FIVESEVEN_AIM_SHOOT,
+	FIVESEVEN_AIM_SHOOT_LAST,
 	FIVESEVEN_RELOAD,
+	FIVESEVEN_RELOAD_EMPTY,
 	FIVESEVEN_DRAW,
+	FIVESEVEN_DRAW_FIRST,
+	FIVESEVEN_HOLSTER,
+	FIVESEVEN_CHECK_MAGAZINE,
+	FIVESEVEN_BLOCK_UP,
+	FIVESEVEN_BLOCK_DOWN,
+	FIVESEVEN_LHAND_UP,
+	FIVESEVEN_LHAND_DOWN,
+	FIVESEVEN_DASH_ENTER,
+	FIVESEVEN_DASHING,
+	FIVESEVEN_DASH_EXIT,
+	FIVESEVEN_SH_RELOAD,
+	FIVESEVEN_SH_RELOAD_EMPTY,
+	FIVESEVEN_SH_DASH_ENTER,
+	FIVESEVEN_SH_DASHING,
+	FIVESEVEN_SH_DASH_EXIT,
 };
 
 class CFN57 : public CBaseWeapon
@@ -1468,22 +1492,39 @@ public:	// SV exclusive variables.
 	static int m_iShell;
 
 public:	// SV exclusive functions.
-	virtual void	Precache		(void);
+	virtual void	Precache(void);
+#else
+public:	// CL exclusive functions.
+	virtual	bool	UsingInvertedVMDL(void) { return false; }	// Model designed by InnocentBlue is not inverted.
+	virtual int		CalcBodyParam(void);
 #endif
+
+	// Slide stop available anims.
+	static constexpr int BITS_SLIDE_STOP_ANIM = (1 << FIVESEVEN_IDLE) |
+												(1 << FIVESEVEN_DRAW) |
+												(1 << FIVESEVEN_HOLSTER) |
+												(1 << FIVESEVEN_CHECK_MAGAZINE) |
+												(1 << FIVESEVEN_LHAND_DOWN) | (1 << FIVESEVEN_LHAND_UP) |
+												(1 << FIVESEVEN_BLOCK_DOWN) | (1 << FIVESEVEN_BLOCK_UP) |
+												(1 << FIVESEVEN_DASH_ENTER) | (1 << FIVESEVEN_DASHING) | (1 << FIVESEVEN_DASH_EXIT) |
+												(1 << FIVESEVEN_SH_DASH_ENTER) | (1 << FIVESEVEN_SH_DASHING) | (1 << FIVESEVEN_SH_DASH_EXIT);
 
 public:	// basic logic funcs
 	virtual bool	Deploy			(void);
 	virtual void	PrimaryAttack	(void);
 	virtual void	SecondaryAttack	(void);
-	virtual	bool	Reload			(void);
-	virtual void	WeaponIdle		(void);
+	virtual bool	Reload			(void);
+	virtual void	WeaponIdle		(void) { return DefaultIdle(FIVESEVEN_DASHING); }
+	virtual bool	HolsterStart	(void) { return DefaultHolster(FIVESEVEN_HOLSTER, FIVESEVEN_HOLSTER_TIME); }
+	virtual	void	DashStart		(void) { return DefaultDashStart(FIVESEVEN_DASH_ENTER, FIVESEVEN_DASH_ENTER_TIME); }
+	virtual void	DashEnd			(void) { return DefaultDashEnd(FIVESEVEN_DASH_ENTER, FIVESEVEN_DASH_ENTER_TIME, FIVESEVEN_DASH_EXIT, FIVESEVEN_DASH_EXIT_TIME); }
 
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void) { return FIVESEVEN_MAX_SPEED; }
-	virtual void	ResetModel		(void);
+	virtual void	ResetModel		(void);	// declare by marco.
 
 public:	// new functions
-	void FiveSevenFire(float flSpread, float flCycleTime = FIVESEVEN_FIRE_INTERVAL);
+	void FiveSevenFire(float flSpread, float flCycleTime = DEAGLE_FIRE_INTERVAL);
 };
 
 #define UMP45_VIEW_MODEL	"models/weapons/v_ump45.mdl"

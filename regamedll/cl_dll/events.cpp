@@ -1225,6 +1225,7 @@ DECLARE_EVENT(FireM45A1)
 
 		if (g_pCurWeapon)
 		{
+			// on host ev sending, the bparams are used for first-personal shooting anim.
 			int iAnim = 0;
 			if (args->bparam1)	// m_iClip >= 0
 			{
@@ -1270,7 +1271,8 @@ DECLARE_EVENT(FireM45A1)
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
 	// original goldsrc api: VOL = 1.0, ATTN = 0.6
-	EV_PlayGunFire(idx, M45A1_FIRE_SFX, M45A1_GUN_VOLUME, vecSrc + forward * 10.0f);
+	// on non-host sending, the bparam1 is reserved for silencer status.
+	EV_PlayGunFire(idx, M45A1_FIRE_SFX, args->bparam1 ? QUIET_GUN_VOLUME : M45A1_GUN_VOLUME, vecSrc + forward * 10.0f);
 
 	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, M45A1_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_DEAGLE].m_iAmmoType, M45A1_PENETRATION);
 }
@@ -1296,14 +1298,27 @@ DECLARE_EVENT(Fire57)
 		g_iShotsFired++;
 		EV_MuzzleFlash();
 
-		int seq = FIVESEVEN_SHOOT1;
-		if (empty)
-			seq = FIVESEVEN_SHOOT_EMPTY;
-		else
-			seq = UTIL_SharedRandomLong(gPseudoPlayer.random_seed, FIVESEVEN_SHOOT1, FIVESEVEN_SHOOT2);
-
 		if (g_pCurWeapon)
-			g_pCurWeapon->SendWeaponAnim(seq);
+		{
+			// on host ev sending, the bparams are used for first-personal shooting anim.
+			int iAnim = 0;
+			if (args->bparam1)	// m_iClip >= 0
+			{
+				if (args->bparam2)	// m_bInZoom
+					iAnim = FIVESEVEN_AIM_SHOOT;
+				else
+					iAnim = FIVESEVEN_SHOOT;
+			}
+			else
+			{
+				if (args->bparam2)	// m_bInZoom
+					iAnim = FIVESEVEN_AIM_SHOOT_LAST;
+				else
+					iAnim = FIVESEVEN_SHOOT_LAST;
+			}
+
+			g_pCurWeapon->SendWeaponAnim(iAnim);
+		}
 
 		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 0, 0.25, 10, 10, 10, EV_PISTOL_SMOKE, velocity, false, 35);
 		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 25, 0.3, 15, 15, 15, EV_WALL_PUFF, velocity, false, 35);
@@ -1327,10 +1342,12 @@ DECLARE_EVENT(Fire57)
 
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iPShell, TE_BOUNCE_SHELL, idx, 4);
 
-	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, FN57_FIRE_SFX, 1.0, ATTN_NORM, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
-
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
+
+	// original goldsrc api: VOL = 1.0, ATTN = 0.8
+	// on non-host sending, the bparam1 is reserved for silencer status.
+	EV_PlayGunFire(idx, FN57_FIRE_SFX, args->bparam1 ? QUIET_GUN_VOLUME : FIVESEVEN_GUN_VOLUME, vecSrc + forward * 10.0f);
 
 	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, FIVESEVEN_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_FIVESEVEN].m_iAmmoType, FIVESEVEN_PENETRATION);
 }
