@@ -1364,7 +1364,7 @@ constexpr float M45A1_RANGE_MODIFER			= 0.75f;
 constexpr float M45A1_FIRE_INTERVAL			= 0.2f;
 constexpr int	M45A1_PENETRATION			= 1;
 constexpr float	M45A1_EFFECTIVE_RANGE		= 4096.0f;
-constexpr int	M45A1_GUN_VOLUME			= BIG_EXPLOSION_VOLUME;
+constexpr int	M45A1_GUN_VOLUME			= NORMAL_GUN_VOLUME;
 
 enum m45a1_e
 {
@@ -1438,7 +1438,7 @@ public:	// new functions
 };
 
 #define FN57_VIEW_MODEL		"models/weapons/v_fiveseven.mdl"
-#define FN57_WORLD_MODEL	"models/w_fiveseven.mdl"	// FIXME
+#define FN57_WORLD_MODEL	"models/weapons/w_fiveseven.mdl"
 #define FN57_FIRE_SFX		"weapons/fiveseven/fiveseven_fire.wav"
 
 constexpr float FIVESEVEN_MAX_SPEED			= 250.0f;
@@ -1524,7 +1524,7 @@ public:	// util funcs
 	virtual void	ResetModel		(void);	// declare by marco.
 
 public:	// new functions
-	void FiveSevenFire(float flSpread, float flCycleTime = DEAGLE_FIRE_INTERVAL);
+	void FiveSevenFire(float flSpread, float flCycleTime = FIVESEVEN_FIRE_INTERVAL);
 };
 
 #define UMP45_VIEW_MODEL	"models/weapons/v_ump45.mdl"
