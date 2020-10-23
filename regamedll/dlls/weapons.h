@@ -1405,7 +1405,6 @@ public:	// SV exclusive functions.
 	virtual void	Precache(void);
 #else
 public:	// CL exclusive functions.
-	virtual void	Think(void);
 	virtual int		CalcBodyParam(void);
 #endif
 
@@ -1452,7 +1451,7 @@ constexpr float FIVESEVEN_HOLSTER_TIME		= 0.7F;
 constexpr float FIVESEVEN_CHECKMAG_TIME		= 1.86F;
 constexpr float FIVESEVEN_DASH_ENTER_TIME	= 0.8F;
 constexpr float FIVESEVEN_DASH_EXIT_TIME	= 0.37F;
-constexpr float FIVESEVEN_FIRE_INTERVAL		= 0.1f;
+constexpr float FIVESEVEN_FIRE_INTERVAL		= 0.132f;
 constexpr float	FIVESEVEN_EFFECTIVE_RANGE	= 4096.0f;
 constexpr int	FIVESEVEN_PENETRATION		= 1;
 constexpr int	FIVESEVEN_GUN_VOLUME		= NORMAL_GUN_VOLUME;

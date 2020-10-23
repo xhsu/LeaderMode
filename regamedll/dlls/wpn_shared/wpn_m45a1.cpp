@@ -25,9 +25,17 @@ void CM45A1::Precache()
 
 #else
 
+static constexpr int SLIDE = 6;
+static constexpr int SIGHT = 7;
+static constexpr int MUZZLE = 8;
+static constexpr int LASER = 9;
+
+static constexpr int SILENCER = 1;
+static constexpr int BREAKER = 2;
+
 int CM45A1::CalcBodyParam(void)
 {
-	BodyEnumInfo_t info[] =
+	static BodyEnumInfo_t info[] =
 	{
 		{ 0, 2 },	// left hand	= 0;
 		{ 0, 1 },	// right hand	= 1;
@@ -43,61 +51,65 @@ int CM45A1::CalcBodyParam(void)
 		{ 0, 2 },	// laser		= 9;
 	};
 
+	// variation
 	switch (m_iVariation)
 	{
-	case Role_Sharpshooter:
-		// laser.
-		// optical sight.
+	case Role_SWAT:
+	case Role_Medic:
+	case Role_MadScientist:
+		// sight
+		info[LASER].body = FALSE;
+		info[MUZZLE].body = FALSE;
+		info[SIGHT].body = TRUE;
+		break;
 
-		info[7].body = 1;
-		info[9].body = 1;
+	case Role_Sharpshooter:
+		// laser
+		// sight
+		info[LASER].body = TRUE;
+		info[MUZZLE].body = FALSE;
+		info[SIGHT].body = TRUE;
+		break;
+
+	case Role_Godfather:
+	case Role_LeadEnforcer:
+		// muzzle breaker
+		info[LASER].body = FALSE;
+		info[MUZZLE].body = BREAKER;
+		info[SIGHT].body = FALSE;
 		break;
 
 	case Role_Assassin:
-		// silencer.
-		// optical sight.
-
-		info[7].body = 1;
-		info[8].body = 1;
-		break;
-
-	case Role_LeadEnforcer:
-		// muzzle breaker.
-
-		info[8].body = 2;
+		// silencer
+		// sight
+		info[LASER].body = FALSE;
+		info[MUZZLE].body = SILENCER;
+		info[SIGHT].body = TRUE;
 		break;
 
 	default:
-		info[7].body = 0;
-		info[8].body = 0;
-		info[9].body = 0;
+		// nothing
+		info[LASER].body = FALSE;
+		info[MUZZLE].body = FALSE;
+		info[SIGHT].body = FALSE;
 		break;
 	}
 
 	// slide stop vfx.
 	if (m_iClip <= 0 && (1 << m_pPlayer->pev->weaponanim) & BITS_SLIDE_STOP_ANIM)
 	{
-		info[6].body = 1;
+		info[SLIDE].body = TRUE;
 
-		// also move the sight.
-		if (m_iVariation == Role_Sharpshooter || m_iVariation == Role_Assassin)
-			info[7].body = 2;
+		// also move the sight, if it exists.
+		if (info[SIGHT].body == TRUE)
+			info[SIGHT].body = 2;
 	}
 	else
-	{
-		info[6].body = 0;
-	}
+		info[SLIDE].body = 0;
 
 	// TODO: checkmag anim & body parts.
 
-	return CalcBody(info, ARRAY_ELEM_COUNT(info));	// elements count of the info[].
-}
-
-void CM45A1::Think(void)
-{
-	CBaseWeapon::Think();
-
-	g_pViewEnt->curstate.body = CalcBodyParam();
+	return CalcBody(info, _countof(info));	// elements count of the info[].
 }
 
 #endif
@@ -141,8 +153,11 @@ void CM45A1::SecondaryAttack()
 {
 	switch (m_iVariation)
 	{
-	case Role_Assassin:
+	case Role_SWAT:
 	case Role_Sharpshooter:
+	case Role_Medic:
+	case Role_MadScientist:
+	case Role_Assassin:
 		// Electronic Sight
 		DefaultSteelSight(Vector(-2.71f, -5, 1.45f), 75, 8.0f);
 		break;

@@ -96,7 +96,7 @@ int CDEagle::CalcBodyParam(void)
 		}
 	}
 
-	return CalcBody(info, ARRAY_ELEM_COUNT(info));	// elements count of the info[].
+	return CalcBody(info, _countof(info));	// elements count of the info[].
 }
 
 void CDEagle::Think(void)

@@ -62,7 +62,7 @@ int CMK46::CalcBodyParam(void)
 		}
 	}
 
-	return CalcBody(info, sizeof(info) / sizeof(BodyEnumInfo_t));	// elements count of the info[].
+	return CalcBody(info, _countof(info));	// elements count of the info[].
 }
 
 void CMK46::Think(void)

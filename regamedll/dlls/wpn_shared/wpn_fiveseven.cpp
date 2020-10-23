@@ -115,7 +115,7 @@ int CFN57::CalcBodyParam(void)
 	{
 		info[SLIDE].body = 1;
 
-		// this varient has a sight! move it back to match the slide!
+		// also move the sight, if it exists.
 		if (info[SIGHT].body == TRUE)
 			info[SIGHT].body = 2;
 	}
@@ -188,9 +188,6 @@ void CFN57::FiveSevenFire(float flSpread, float flCycleTime)
 	{
 		return;
 	}
-
-	if (m_bInZoom)	// decrease spread while scoping.
-		flSpread *= 0.5f;
 
 	if (m_flLastFire != 0.0f)
 	{

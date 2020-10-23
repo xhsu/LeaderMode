@@ -104,7 +104,7 @@ int CXM8::CalcBodyParam(void)
 		}
 	}
 
-	return CalcBody(info, ARRAY_ELEM_COUNT(info));
+	return CalcBody(info, _countof(info));
 }
 
 void CXM8::Think(void)

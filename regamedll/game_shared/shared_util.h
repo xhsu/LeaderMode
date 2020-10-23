@@ -88,5 +88,3 @@ struct BodyEnumInfo_t
 
 int CalcBody(BodyEnumInfo_t* info, int count);
 template<size_t N> int CalcBody(BodyEnumInfo_t (&info)[N]);
-
-#define ARRAY_ELEM_COUNT(arr)	sizeof(arr) / sizeof(arr[0])
