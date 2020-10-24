@@ -277,7 +277,7 @@ bool CM45A1::Reload()
 	if (DefaultReload(m_pItemInfo->m_iMaxClip,
 		m_iClip ? M45A1_RELOAD : M45A1_RELOAD_EMPTY,
 		m_iClip ? M45A1_RELOAD_TIME : M45A1_RELOAD_EMPYT_TIME,
-		0.65f))
+		m_iClip ? 0.566f : 0.5f))
 	{
 		m_flAccuracy = 0.88f;
 		return true;

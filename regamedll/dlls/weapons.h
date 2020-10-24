@@ -121,7 +121,11 @@ public:
 	}
 
 protected:	// you can remove weapons only via its manager function.
-	CBaseWeapon() {}
+	CBaseWeapon() noexcept {}
+	CBaseWeapon(const CBaseWeapon& s) = default;
+	CBaseWeapon(CBaseWeapon&& s) = default;
+	CBaseWeapon& operator=(const CBaseWeapon& s) = default;
+	CBaseWeapon& operator=(CBaseWeapon&& s) = default;
 	virtual ~CBaseWeapon() {}
 
 public:
@@ -132,25 +136,25 @@ public:
 	static std::list<CBaseWeapon*>	m_lstWeapons;
 
 public:
-	WeaponIdType	m_iId;
-	const WeaponInfo*	m_pItemInfo;
-	const AmmoInfo*	m_pAmmoInfo;
-	float			m_flNextPrimaryAttack;
-	float			m_flNextSecondaryAttack;
-	float			m_flTimeWeaponIdle;
-	unsigned		m_bitsFlags;
-	int				m_iClip;
-	bool			m_bInReload;
-	int				m_iShotsFired;
-	float			m_flDecreaseShotsFired;
-	bool			m_bDirection;
-	float			m_flAccuracy;	// TODO: this should be remove later.
-	float			m_flLastFire;
-	AmmoIdType		m_iPrimaryAmmoType;			// "primary" ammo index into players m_rgAmmo[]
-	AmmoIdType		m_iSecondaryAmmoType;		// "secondary" ammo index into players m_rgAmmo[]
-	bool			m_bInZoom;
-	RoleTypes		m_iVariation;	// weapons suppose to variegate accroading to their owner.
-	bool			m_bDelayRecovery;
+	WeaponIdType	m_iId					{ WEAPON_NONE };
+	const WeaponInfo* m_pItemInfo			{ &g_rgWpnInfo[WEAPON_NONE] };
+	const AmmoInfo* m_pAmmoInfo				{ &g_rgAmmoInfo[AMMO_NONE] };
+	float			m_flNextPrimaryAttack	{ 0.0f };
+	float			m_flNextSecondaryAttack	{ 0.0f };
+	float			m_flTimeWeaponIdle		{ 0.0f };
+	unsigned		m_bitsFlags				{ 0 };
+	int				m_iClip					{ 0 };
+	bool			m_bInReload				{ false };
+	int				m_iShotsFired			{ 0 };
+	float			m_flDecreaseShotsFired	{ 0.0f };
+	bool			m_bDirection			{ false };
+	float			m_flAccuracy			{ 0.0f };	// TODO: this should be remove later.
+	float			m_flLastFire			{ 0.0f };
+	AmmoIdType		m_iPrimaryAmmoType		{ AMMO_NONE };			// "primary" ammo index into players m_rgAmmo[]
+	AmmoIdType		m_iSecondaryAmmoType	{ AMMO_NONE };		// "secondary" ammo index into players m_rgAmmo[]
+	bool			m_bInZoom				{ false };
+	RoleTypes		m_iVariation			{ Role_UNASSIGNED };	// weapons suppose to variegate accroading to their owner.
+	bool			m_bDelayRecovery		{ false };
 
 	struct	// this structure is for anim push and pop. it save & restore weapon state.
 	{
@@ -178,13 +182,11 @@ public:
 public:	// SV exclusive variables.
 	EntityHandle<CBasePlayer>	m_pPlayer;		// one of these two must be valid. or this weapon will be removed.
 	EntityHandle<CWeaponBox>	m_pWeaponBox;
-	int		m_iClientClip;
-	int		m_iClientWeaponState;
+	int		m_iClientClip		{ 0 };
+	int		m_iClientWeaponState{ 0 };
 #else
 public:	// CL exclusive variables.
-	CBasePlayer*	m_pPlayer;	// local pseudo-player
-	bool			m_bServerInZoom;
-	int				m_iServerShotsFired;
+	CBasePlayer* m_pPlayer		{ nullptr };	// local pseudo-player
 #endif
 
 public:	// basic logic funcs
@@ -221,7 +223,7 @@ public:	// CL xclusive functions.
 public:	// basic API and behaviour for weapons.
 	virtual	bool	DefaultDeploy	(const char* szViewModel, const char* szWeaponModel, int iAnim, const char* szAnimExt, float flDeployTime = 0.75f);
 	virtual void	DefaultIdle		(int iDashingAnim, int iIdleAnim = 0, float flDashLoop = 20.0f, float flIdleLoop = 20.0f);
-	virtual	bool	DefaultReload	(int iClipSize, int iAnim, float fDelay, float flExtraIdleDelay = 0.5f);
+	virtual	bool	DefaultReload	(int iClipSize, int iAnim, float flTotalDelay, float flSoftDelay = 0.5f);
 	virtual bool	DefaultHolster	(int iHolsterAnim, float flHolsterDelay);
 	virtual	void	DefaultSteelSight(const Vector& vecOfs, int iFOV, float flDriftingSpeed = 10.0f, float flNextSecondaryAttack = 0.3f);
 	virtual	void	DefaultScopeSight(const Vector& vecOfs, int iFOV, float flEnterScopeDelay = 0.25f, float flFadeFromBlack = 5.0f, float flDriftingSpeed = 10.0f, float flNextSecondaryAttack = 0.3f);
@@ -325,8 +327,8 @@ constexpr float SCARH_DAMAGE			= 39.0f;
 constexpr float SCARH_RANGE_MODIFER		= 0.955f;
 constexpr float SCARH_DEPLOY_TIME		= 0.97F;
 constexpr float SCARH_DRAW_FIRST_TIME	= 2.61F;
-constexpr float SCARH_RELOAD_TIME		= 1.94f;
-constexpr float SCARH_RELOAD_EMPTY_TIME	= 2.36f;
+constexpr float SCARH_RELOAD_TIME		= 2.6f;
+constexpr float SCARH_RELOAD_EMPTY_TIME	= 2.9f;
 constexpr float SCARH_CHECK_MAGAZINE_TIME = 3.06F;
 constexpr float SCARH_HOLSTER_TIME		= 0.74F;
 constexpr float SCARH_DASH_ENTER_TIME	= 0.485F;
@@ -458,8 +460,8 @@ public:	// new functions
 constexpr float XM8_MAX_SPEED				= 240.0f;
 constexpr float XM8_DAMAGE					= 32.0f;
 constexpr float XM8_RANGE_MODIFER			= 0.96f;
-constexpr float XM8_RELOAD_TIME				= 1.867F;
-constexpr float XM8_RELOAD_EMPTY_TIME		= 2.4F;
+constexpr float XM8_RELOAD_TIME				= 2.33f;
+constexpr float XM8_RELOAD_EMPTY_TIME		= 3.03f;
 constexpr float XM8_DRAW_FIRST_TIME			= 1.3F;
 constexpr float XM8_DRAW_TIME				= 0.7F;
 constexpr float XM8_HOLSTER_TIME			= 0.7F;
@@ -593,8 +595,8 @@ public:	// new funcs
 constexpr float DEAGLE_MAX_SPEED			= 245.0f;
 constexpr float DEAGLE_DAMAGE				= 57.0f;
 constexpr float DEAGLE_RANGE_MODIFER		= 0.86f;
-constexpr float DEAGLE_RELOAD_TIME			= 1.34f;
-constexpr float DEAGLE_RELOAD_EMPTY_TIME	= 1.34f;
+constexpr float DEAGLE_RELOAD_TIME			= 1.97f;
+constexpr float DEAGLE_RELOAD_EMPTY_TIME	= 2.02f;
 constexpr float DEAGLE_DRAW_TIME			= 0.7f;
 constexpr float DEAGLE_DRAW_FIRST_TIME		= 1.8f;
 constexpr float DEAGLE_HOLSTER_TIME			= 0.7f;
@@ -863,8 +865,8 @@ constexpr float MK46_DAMAGE				= 32.0f;
 constexpr float MK46_RANGE_MODIFER		= 0.97f;
 constexpr float MK46_DEPLOY_TIME		= 1.0F;
 constexpr float MK46_DRAW_FIRST_TIME	= 1.68F;
-constexpr float MK46_RELOAD_TIME		= 5.58f;
-constexpr float MK46_RELOAD_EMPTY_TIME	= 5.07f;
+constexpr float MK46_RELOAD_TIME		= 6.767f;
+constexpr float MK46_RELOAD_EMPTY_TIME	= 6.232f;
 constexpr float MK46_HOLSTER_TIME		= 0.6F;
 constexpr float MK46_DASH_ENTER_TIME	= 0.68F;
 constexpr float MK46_DASH_EXIT_TIME		= 0.68F;
@@ -1006,8 +1008,8 @@ constexpr float M4A1_DAMAGE				= 32.0f;
 constexpr float M4A1_RANGE_MODIFER		= 0.97f;
 constexpr float M4A1_DRAW_TIME			= 0.743f;
 constexpr float M4A1_DRAW_FIRST_TIME	= 2.45f;
-constexpr float M4A1_RELOAD_TIME		= 1.333f;
-constexpr float M4A1_RELOAD_EMPTY_TIME	= 2.1f;
+constexpr float M4A1_RELOAD_TIME		= 2.033f;
+constexpr float M4A1_RELOAD_EMPTY_TIME	= 2.6f;
 constexpr float M4A1_CHECK_MAGAZINE_TIME= 3.06f;
 constexpr float M4A1_HOLSTER_TIME		= 0.6f;
 constexpr float M4A1_DASH_ENTER_TIME	= 0.485f;
@@ -1256,40 +1258,52 @@ public:	// new funcs
 };
 
 #define M1014_VIEW_MODEL	"models/weapons/v_m1014.mdl"
-#define M1014_WORLD_MODEL	"models/w_xm1014.mdl"	// FIXME
+#define M1014_WORLD_MODEL	"models/weapons/w_m1014.mdl"
 #define M1014_FIRE_SFX		"weapons/m1014/m1014_fire.wav"
 
-constexpr float M1014_MAX_SPEED			= 240.0f;
-constexpr float M1014_DAMAGE			= 20.0f;
-constexpr int	M1014_PROJECTILE_COUNT	= 6;
-constexpr float	M1014_EFFECTIVE_RANGE	= 3048.0f;
-constexpr float M1014_FIRE_INTERVAL		= 0.25f;
-constexpr float M1014_TIME_START_RELOAD	= 0.7f;
-constexpr float M1014_TIME_INSERT		= 0.867f;
-constexpr float M1014_TIME_ADD_AMMO		= 0.4f;
-constexpr float M1014_TIME_AFTER_RELOAD	= 1.0f;
-constexpr float M1014_TIME_AR_REC		= 1.314f;
-constexpr float M1014_DRAW_FIRST_TIME	= 2.0f;
-constexpr float M1014_DRAW_TIME			= 1.2f;
-constexpr float M1014_HOLSTER_TIME		= 1.033f;
-constexpr float M1014_DASH_ENTER_TIME	= 0.4f;
-constexpr float M1014_DASH_EXIT_TIME	= 0.52f;
-const	 Vector M1014_CONE_VECTOR		= Vector(0.0725, 0.0725, 0.0); // special shotgun spreads
-constexpr int	M1014_GUN_VOLUME		= LOUD_GUN_VOLUME;
+constexpr float M1014_MAX_SPEED					= 240.0f;
+constexpr float M1014_DAMAGE					= 20.0f;
+constexpr int	M1014_PROJECTILE_COUNT			= 6;
+constexpr float	M1014_EFFECTIVE_RANGE			= 3048.0f;
+constexpr float M1014_FIRE_INTERVAL				= 0.25f;
+constexpr float M1014_TIME_START_RELOAD			= 0.8f;
+constexpr float M1014_TIME_START_RELOAD_FIRST	= 2.633f;
+constexpr float M1014_TIME_INSERT				= 0.933f;
+constexpr float M1014_TIME_ADD_AMMO				= 0.514f;
+constexpr float M1014_TIME_ADD_AMMO_FIRST		= 1.433f;
+constexpr float M1014_TIME_AFTER_RELOAD			= 0.8f;
+constexpr float M1014_DRAW_FIRST_TIME			= 1.9f;
+constexpr float M1014_DRAW_TIME					= 0.833f;
+constexpr float M1014_HOLSTER_TIME				= 0.833f;
+constexpr float M1014_CHECKMAG_TIME				= 2.3f;
+constexpr float M1014_INSPECTION_TIME			= 1.8f;
+constexpr float M1014_BLOCK_UP_TIME				= 0.366F;
+constexpr float M1014_BLOCK_DOWN_TIME			= 0.366F;
+constexpr float M1014_DASH_ENTER_TIME			= 0.833F;
+constexpr float M1014_DASH_EXIT_TIME			= 0.366F;
+const	 Vector M1014_CONE_VECTOR				= Vector(0.0725, 0.0725, 0.0); // special shotgun spreads
+constexpr int	M1014_GUN_VOLUME				= LOUD_GUN_VOLUME;
 
 enum m1014_e
 {
 	M1014_IDLE,
-	M1014_FIRE,
-	M1014_AIM_FIRE,
+	M1014_SHOOT,
+	M1014_SHOOT_LAST,
+	M1014_AIM_SHOOT,
+	M1014_AIM_SHOOT_LAST,
 	M1014_START_RELOAD,
+	M1014_START_RELOAD_FIRST,
 	M1014_INSERT,
 	M1014_AFTER_RELOAD,
-	M1014_AFTER_RELOAD_RECHAMBER,
 	M1014_DRAW_FIRST,
 	M1014_DRAW,
-	M1014_JUMP,
 	M1014_HOLSTER,
+	M1014_CHECKMAG,
+	M1014_INSPECTION,
+	M1014_BLOCK_UP,
+	M1014_BLOCK_DOWN,
+	M1014_LHAND_UP,
+	M1014_LHAND_DOWN,
 	M1014_DASH_ENTER,
 	M1014_DASHING,
 	M1014_DASH_EXIT,
@@ -1306,8 +1320,20 @@ public:	// SV exclusive functions.
 	virtual void	Precache		(void);
 #else
 public:	// CL exclusive functions.
+	virtual	bool	UsingInvertedVMDL(void) { return false; }	// Model designed by InnocentBlue is not inverted.
 	virtual int		CalcBodyParam	(void);
 #endif
+
+public:
+	// Bolt stop available anims.
+	static constexpr int BITS_BOLT_STOP_ANIM =	(1 << M1014_IDLE) |
+												(1 << M1014_DRAW) |
+												(1 << M1014_HOLSTER) |
+												(1 << M1014_INSPECTION) |
+												(1 << M1014_BLOCK_UP) | (1 << M1014_BLOCK_DOWN) |
+												(1 << M1014_LHAND_UP) | (1 << M1014_LHAND_DOWN) |
+												(1 << M1014_DASH_ENTER) | (1 << M1014_DASHING) | (1 << M1014_DASH_EXIT);
+
 
 public:
 	bool	m_bAllowNextEmptySound;
@@ -1348,8 +1374,8 @@ public:	// util funcs
 #define M45A1_FIRE_SFX		"weapons/M45A1/M45_Shoot.wav"
 
 constexpr float M45A1_MAX_SPEED				= 250.0f;
-constexpr float M45A1_RELOAD_EMPYT_TIME		= 2.1f;
-constexpr float M45A1_RELOAD_TIME			= 1.533f;
+constexpr float M45A1_RELOAD_EMPYT_TIME		= 2.6f;
+constexpr float M45A1_RELOAD_TIME			= 2.166f;
 constexpr float M45A1_DRAW_FIRST_TIME		= 1.067F;
 constexpr float M45A1_DRAW_TIME				= 0.7F;
 constexpr float M45A1_HOLSTER_TIME			= 0.5F;
@@ -1448,7 +1474,7 @@ constexpr float FIVESEVEN_RELOAD_EMPTY_TIME	= 1.86F;
 constexpr float FIVESEVEN_DRAW_FIRST_TIME	= 1.56F;
 constexpr float FIVESEVEN_DRAW_TIME			= 0.7F;
 constexpr float FIVESEVEN_HOLSTER_TIME		= 0.7F;
-constexpr float FIVESEVEN_CHECKMAG_TIME		= 1.86F;
+constexpr float FIVESEVEN_CHECKMAG_TIME		= 2.033F;
 constexpr float FIVESEVEN_DASH_ENTER_TIME	= 0.8F;
 constexpr float FIVESEVEN_DASH_EXIT_TIME	= 0.37F;
 constexpr float FIVESEVEN_FIRE_INTERVAL		= 0.132f;

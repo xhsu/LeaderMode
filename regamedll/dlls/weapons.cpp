@@ -936,7 +936,7 @@ void CBaseWeapon::DefaultIdle(int iDashingAnim, int iIdleAnim, float flDashLoop,
 	SendWeaponAnim((m_bitsFlags & WPNSTATE_DASHING) ? iDashingAnim : iIdleAnim);
 }
 
-bool CBaseWeapon::DefaultReload(int iClipSize, int iAnim, float fDelay, float flExtraIdleDelay)
+bool CBaseWeapon::DefaultReload(int iClipSize, int iAnim, float flTotalDelay, float flSoftDelay)
 {
 	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		return false;
@@ -956,9 +956,10 @@ bool CBaseWeapon::DefaultReload(int iClipSize, int iAnim, float fDelay, float fl
 	m_iShotsFired = 0;
 
 	// pause weapon actions
-	m_pPlayer->m_flNextAttack = fDelay;
-	m_flTimeWeaponIdle = fDelay + flExtraIdleDelay;
-	m_flNextPrimaryAttack = fDelay + flExtraIdleDelay * 0.8f;
+	m_pPlayer->m_flNextAttack = flTotalDelay - flSoftDelay;
+	m_flTimeWeaponIdle = flTotalDelay;
+	m_flNextPrimaryAttack = flTotalDelay;
+	m_flNextSecondaryAttack = flTotalDelay - flSoftDelay;
 	m_bInReload = true;
 
 	// 1st personal anim

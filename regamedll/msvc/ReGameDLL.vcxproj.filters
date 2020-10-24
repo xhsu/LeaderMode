@@ -481,6 +481,9 @@
     <ClCompile Include="..\dlls\wpn_shared\wpn_fiveseven.cpp">
       <Filter>dlls\wpn_shared\Sanctioned</Filter>
     </ClCompile>
+    <ClCompile Include="..\dlls\lefthandmgr.cpp">
+      <Filter>dlls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\version\version.h">
@@ -952,6 +955,9 @@
       <Filter>dlls</Filter>
     </ClInclude>
     <ClInclude Include="..\dlls\skills.h">
+      <Filter>dlls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\dlls\lefthandmgr.h">
       <Filter>dlls</Filter>
     </ClInclude>
   </ItemGroup>

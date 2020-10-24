@@ -232,7 +232,10 @@ void CM4A1::M4A1Fire(float flSpread, float flCycleTime)
 
 bool CM4A1::Reload()
 {
-	if (DefaultReload(m_pItemInfo->m_iMaxClip, m_iClip ? M4A1_RELOAD : M4A1_RELOAD_EMPTY, m_iClip ? M4A1_RELOAD_TIME : M4A1_RELOAD_EMPTY_TIME, 0.7f))
+	if (DefaultReload(m_pItemInfo->m_iMaxClip,
+		m_iClip ? M4A1_RELOAD : M4A1_RELOAD_EMPTY,
+		m_iClip ? M4A1_RELOAD_TIME : M4A1_RELOAD_EMPTY_TIME,
+		m_iClip ? 0.7f : 0.6f))
 	{
 		m_flAccuracy = 0.2f;
 		return true;

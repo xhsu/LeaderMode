@@ -1938,10 +1938,27 @@ DECLARE_EVENT(FireM1014)
 	{
 		EV_MuzzleFlash();
 
-		if (g_pCurWeapon && g_pCurWeapon->m_bInZoom)
-			g_pCurWeapon->SendWeaponAnim(M1014_AIM_FIRE);
-		else if (g_pCurWeapon)
-			g_pCurWeapon->SendWeaponAnim(M1014_FIRE);
+		if (g_pCurWeapon)
+		{
+			// on host ev sending, the bparams are used for first-personal shooting anim.
+			int iAnim = 0;
+			if (args->bparam1)	// m_iClip >= 0
+			{
+				if (args->bparam2)	// m_bInZoom
+					iAnim = M1014_AIM_SHOOT;
+				else
+					iAnim = M1014_SHOOT;
+			}
+			else
+			{
+				if (args->bparam2)	// m_bInZoom
+					iAnim = M1014_AIM_SHOOT_LAST;
+				else
+					iAnim = M1014_SHOOT_LAST;
+			}
+
+			g_pCurWeapon->SendWeaponAnim(iAnim);
+		}
 
 		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 3, 0.45, 15, 15, 15, EV_PISTOL_SMOKE, velocity, false, 35);
 		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 40, 0.35, 9, 9, 9, EV_WALL_PUFF, velocity, false, 35);

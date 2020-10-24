@@ -83,6 +83,7 @@ using FloatRef = float;
 #include "debug.h"
 #include "observer.h"
 #include "client.h"
+#include "lefthandmgr.h"
 
 #include "trains.h"
 #include "pathcorner.h"

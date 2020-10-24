@@ -227,6 +227,7 @@
     <ClCompile Include="..\dlls\h_cycler.cpp" />
     <ClCompile Include="..\dlls\h_export.cpp" />
     <ClCompile Include="..\dlls\items.cpp" />
+    <ClCompile Include="..\dlls\lefthandmgr.cpp" />
     <ClCompile Include="..\dlls\lights.cpp" />
     <ClCompile Include="..\dlls\mapinfo.cpp" />
     <ClCompile Include="..\dlls\maprules.cpp" />
@@ -579,6 +580,7 @@
     <ClInclude Include="..\dlls\h_battery.h" />
     <ClInclude Include="..\dlls\h_cycler.h" />
     <ClInclude Include="..\dlls\items.h" />
+    <ClInclude Include="..\dlls\lefthandmgr.h" />
     <ClInclude Include="..\dlls\lights.h" />
     <ClInclude Include="..\dlls\mapinfo.h" />
     <ClInclude Include="..\dlls\maprules.h" />

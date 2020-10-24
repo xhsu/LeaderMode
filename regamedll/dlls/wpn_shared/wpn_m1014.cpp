@@ -18,7 +18,6 @@ int CM1014::m_iShell = 0;
 void CM1014::Precache()
 {
 	PRECACHE_NECESSARY_FILES(M1014);
-	PRECACHE_SOUND("weapons/m1014/m1014_insert.wav");
 
 	m_usEvent = PRECACHE_EVENT(1, "events/m1014.sc");
 	m_iShell = PRECACHE_MODEL("models/shotgunshell.mdl");
@@ -26,40 +25,57 @@ void CM1014::Precache()
 
 #else
 
+static constexpr int BOLT	= 5;
+static constexpr int SIGHT	= 6;
+static constexpr int LASER	= 7;
+static constexpr int SHELL	= 8;
+
 int CM1014::CalcBodyParam(void)
 {
 	static BodyEnumInfo_t info[] =
 	{
-		{ 0, 1 },	// hands		= 0;
-		{ 0, 1 },
-		{ 0, 1 },	// mesh			= 2;
-		{ 0, 1 },
+		{ 0, 1 },	// right hand	= 0;
+		{ 0, 2 },	// left hand	= 1;
+		{ 0, 1 },	// right sleeve	= 2;
+		{ 0, 2 },	// left sleeve	= 3;
 
-		{ 0, 4 },	// scope		= 4;
-		{ 0, 2 },	// muzzle		= 5;
-		{ 0, 2 },	// laser		= 6;
+		{ 0, 1 },	// body			= 4;
+
+		{ 0, 2 },	// bolt			= 5;
+		{ 0, 2 },	// sight		= 6;
+		{ 0, 2 },	// laser		= 7;
+		{ 0, 2 },	// shell		= 8;
 	};
 
 	switch (m_iVariation)
 	{
-	case Role_LeadEnforcer:
-		// the lead enforcer's version contains only a muzzle compensator.
+	case Role_SWAT:
+	case Role_Breacher:
+	case Role_Sharpshooter:
+		// sight
+		// laser
+		info[SIGHT].body = TRUE;
+		info[LASER].body = TRUE;
+		break;
 
-		info[4].body = 0;
-		info[5].body = 1;
-		info[6].body = 0;
+	case Role_Medic:
+	case Role_MadScientist:
+		// sight
+		info[SIGHT].body = TRUE;
+		info[LASER].body = FALSE;
 		break;
 
 	default:
-		// by default, this weapon has:
-		// reddot sight.
-		// laser.
-
-		info[4].body = 2;
-		info[5].body = 0;
-		info[6].body = 1;
+		info[SIGHT].body = FALSE;
+		info[LASER].body = FALSE;
 		break;
 	}
+
+	// bolt stop vfx.
+	if (m_iClip <= 0 && (1 << m_pPlayer->pev->weaponanim) & BITS_BOLT_STOP_ANIM)
+		info[BOLT].body = TRUE;
+	else
+		info[BOLT].body = FALSE;
 
 	return CalcBody(info, _countof(info));	// elements count of the info[].
 }
@@ -98,7 +114,14 @@ void CM1014::PostFrame(void)
 			m_iClip++;
 			m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
 
-			m_flNextAddAmmo = gpGlobals->time + M1014_TIME_INSERT;	// yeah, that's right, not M1014_TIME_ADD_AMMO.
+			if (m_bStartFromEmpty)
+			{
+				// this needs to treat specially.
+				m_flNextAddAmmo = gpGlobals->time + (M1014_TIME_START_RELOAD_FIRST - M1014_TIME_ADD_AMMO_FIRST) + (M1014_TIME_INSERT - M1014_TIME_ADD_AMMO);
+				m_bStartFromEmpty = false;
+			}
+			else
+				m_flNextAddAmmo = gpGlobals->time + M1014_TIME_INSERT;	// yeah, that's right, not M1014_TIME_ADD_AMMO.
 
 #ifndef CLIENT_DLL
 			// SFX should be played at SV
@@ -109,12 +132,11 @@ void CM1014::PostFrame(void)
 		if (((m_iClip >= m_pItemInfo->m_iMaxClip || m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0) && m_flNextInsertAnim <= gpGlobals->time)
 			|| m_bSetForceStopReload || m_pPlayer->pev->button & (IN_ATTACK | IN_RUN))
 		{
-			SendWeaponAnim(m_bStartFromEmpty ? M1014_AFTER_RELOAD_RECHAMBER : M1014_AFTER_RELOAD);
-			m_pPlayer->m_flNextAttack = m_bStartFromEmpty ? M1014_TIME_AR_REC : M1014_TIME_AFTER_RELOAD;
-			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + (m_bStartFromEmpty ? M1014_TIME_AR_REC : M1014_TIME_AFTER_RELOAD);
+			SendWeaponAnim(M1014_AFTER_RELOAD);
+			m_pPlayer->m_flNextAttack = M1014_TIME_AFTER_RELOAD;
+			m_flTimeWeaponIdle = M1014_TIME_AFTER_RELOAD;
 
 			m_bInReload = false;
-			m_bStartFromEmpty = false;
 		}
 	}
 	else
@@ -159,8 +181,24 @@ void CM1014::PrimaryAttack()
 	int iSeedOfs = m_pPlayer->FireBuckshots(M1014_PROJECTILE_COUNT, m_pPlayer->GetGunPosition(), gpGlobals->v_forward, M1014_CONE_VECTOR, M1014_EFFECTIVE_RANGE, M1014_DAMAGE, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
+	int iAnim = 0;
+	if (m_iClip > 0)
+	{
+		if (m_bInZoom)
+			iAnim = M1014_AIM_SHOOT;
+		else
+			iAnim = M1014_SHOOT;
+	}
+	else
+	{
+		if (m_bInZoom)
+			iAnim = M1014_AIM_SHOOT_LAST;
+		else
+			iAnim = M1014_SHOOT_LAST;
+	}
+
 	// LUNA: I don't know why, but this has to be done on SV side, or client fire anim would be override.
-	SendWeaponAnim(m_bInZoom ? M1014_AIM_FIRE : M1014_FIRE);
+	SendWeaponAnim(iAnim);
 	PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL, m_pPlayer->edict(), m_usEvent, 0, (float*)&g_vecZero, (float*)&g_vecZero, 0, 0, int(m_pPlayer->pev->punchangle.x * 100.0f), m_pPlayer->random_seed, FALSE, FALSE);
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
@@ -173,8 +211,8 @@ void CM1014::PrimaryAttack()
 	Q_memset(&args, NULL, sizeof(args));
 
 	args.angles = m_pPlayer->pev->v_angle;
-	args.bparam1 = false;
-	args.bparam2 = false;
+	args.bparam1 = m_iClip > 0;	// on host ev sending, the bparams are used for first-personal shooting anim.
+	args.bparam2 = m_bInZoom;
 	args.ducking = gEngfuncs.pEventAPI->EV_LocalPlayerDucking();
 	args.entindex = gEngfuncs.GetLocalPlayer()->index;
 	args.flags = FEV_NOTHOST | FEV_RELIABLE | FEV_CLIENT | FEV_GLOBAL;
@@ -201,23 +239,41 @@ void CM1014::SecondaryAttack(void)
 {
 	switch (m_iVariation)
 	{
-	case Role_LeadEnforcer:
-		// STEEL
-		// Vector(-4.57f, -5, 2.2f)
-		DefaultSteelSight(Vector(-4.5f, -5, 2), 85, 12.0f);
+	case Role_SWAT:
+	case Role_Breacher:
+	case Role_Sharpshooter:
+	case Role_Medic:
+	case Role_MadScientist:
+		DefaultSteelSight(Vector(-2.66f, -2, 0.07f), 80, 8.0f);
 		break;
 
 	default:
-		// RED DOT
-		DefaultSteelSight(Vector(-4.505f, -5, -0.09f), 85, 12.0f);
+		DefaultSteelSight(Vector(-2.64, 0, 1.05f), 85, 10.0f);
 		break;
 	}
 }
 
 bool CM1014::Reload(void)
 {
-	if (m_iClip >= m_pItemInfo->m_iMaxClip || m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
+	if (m_bInReload)
 		return false;
+
+	if (m_iClip >= m_pItemInfo->m_iMaxClip || m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
+	{
+		// KF2 ???
+		if (m_iClip <= 0 && m_pPlayer->pev->weaponanim != M1014_INSPECTION)	// inspection anim.
+		{
+			SendWeaponAnim(M1014_INSPECTION);
+			m_flTimeWeaponIdle = M1014_INSPECTION_TIME;
+		}
+		else if (m_iClip > 0 && m_pPlayer->pev->weaponanim != M1014_CHECKMAG)
+		{
+			SendWeaponAnim(M1014_CHECKMAG);
+			m_flTimeWeaponIdle = M1014_CHECKMAG_TIME;
+		}
+
+		return false;
+	}
 
 	if (m_bInZoom)
 		SecondaryAttack();	// close scope when we reload.
@@ -225,11 +281,11 @@ bool CM1014::Reload(void)
 	m_iShotsFired = 0;
 	m_bInReload = true;
 	m_bStartFromEmpty = !!(m_iClip <= 0);
-	m_pPlayer->m_flNextAttack = M1014_TIME_START_RELOAD;
-	m_flNextInsertAnim = gpGlobals->time + M1014_TIME_START_RELOAD;
-	m_flNextAddAmmo = gpGlobals->time + M1014_TIME_ADD_AMMO + M1014_TIME_START_RELOAD;
+	m_pPlayer->m_flNextAttack = 0;//m_bStartFromEmpty ? M1014_TIME_START_RELOAD_FIRST : M1014_TIME_START_RELOAD;
+	m_flNextInsertAnim = gpGlobals->time + (m_bStartFromEmpty ? M1014_TIME_START_RELOAD_FIRST : M1014_TIME_START_RELOAD);
+	m_flNextAddAmmo = gpGlobals->time + (m_bStartFromEmpty ? M1014_TIME_ADD_AMMO_FIRST : (M1014_TIME_ADD_AMMO + M1014_TIME_START_RELOAD));
 
-	SendWeaponAnim(M1014_START_RELOAD);
+	SendWeaponAnim(m_bStartFromEmpty ? M1014_START_RELOAD_FIRST : M1014_START_RELOAD);
 	return true;
 }
 

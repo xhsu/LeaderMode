@@ -290,9 +290,9 @@ bool CFN57::Reload()
 	if (DefaultReload(m_pItemInfo->m_iMaxClip,
 		m_iClip ? FIVESEVEN_RELOAD : FIVESEVEN_RELOAD_EMPTY,
 		m_iClip ? FIVESEVEN_RELOAD_TIME : FIVESEVEN_RELOAD_EMPTY_TIME,
-		0.65f))
+		m_iClip ? 0.48f : 0.47f))
 	{
-		m_flAccuracy = 0.9f;
+		m_flAccuracy = 0.92f;
 		return true;
 	}
 
