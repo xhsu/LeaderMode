@@ -94,7 +94,7 @@ bool CM1014::Deploy()
 {
 	m_bAllowNextEmptySound = true;
 
-	return DefaultDeploy(M1014_VIEW_MODEL, M1014_WORLD_MODEL, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? M1014_DRAW_FIRST : M1014_DRAW, "m249", (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? M1014_DRAW_FIRST_TIME : M1014_DRAW_TIME);
+	return DefaultDeploy(M1014_VIEW_MODEL, M1014_WORLD_MODEL, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? M1014_DRAW_FIRST : M1014_DRAW, "mp5", (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? M1014_DRAW_FIRST_TIME : M1014_DRAW_TIME);
 }
 
 void CM1014::PostFrame(void)
