@@ -244,11 +244,11 @@ void CM1014::SecondaryAttack(void)
 	case Role_Sharpshooter:
 	case Role_Medic:
 	case Role_MadScientist:
-		DefaultSteelSight(Vector(-2.66f, -2, 0.07f), 80, 8.0f);
+		DefaultSteelSight(Vector(-5.32f, -2, 0.14f), 80, 8.0f);
 		break;
 
 	default:
-		DefaultSteelSight(Vector(-2.64, 0, 1.05f), 85, 10.0f);
+		DefaultSteelSight(Vector(-5.28, 0, 2.10f), 85, 10.0f);
 		break;
 	}
 }
