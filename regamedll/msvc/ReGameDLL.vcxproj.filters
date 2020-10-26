@@ -484,6 +484,9 @@
     <ClCompile Include="..\dlls\lefthandmgr.cpp">
       <Filter>dlls</Filter>
     </ClCompile>
+    <ClCompile Include="..\game_shared\shared_string.cpp">
+      <Filter>game_shared</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\version\version.h">
@@ -959,6 +962,9 @@
     </ClInclude>
     <ClInclude Include="..\dlls\lefthandmgr.h">
       <Filter>dlls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\game_shared\shared_string.h">
+      <Filter>game_shared</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -193,6 +193,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_xm8.cpp" />
+    <ClCompile Include="..\..\game_shared\shared_string.cpp" />
     <ClCompile Include="..\..\game_shared\shared_util.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
     </ClCompile>
@@ -292,6 +293,7 @@
     <ClInclude Include="..\..\dlls\cdll_dll.h" />
     <ClInclude Include="..\..\dlls\player_classes.h" />
     <ClInclude Include="..\..\dlls\weapontype.h" />
+    <ClInclude Include="..\..\game_shared\shared_string.h" />
     <ClInclude Include="..\..\game_shared\shared_util.h" />
     <ClInclude Include="..\..\pm_shared\pm_debug.h" />
     <ClInclude Include="..\..\pm_shared\pm_defs.h" />

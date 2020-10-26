@@ -288,6 +288,9 @@
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_m45a1.cpp">
       <Filter>dlls\wpn_shared</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\game_shared\shared_string.cpp">
+      <Filter>game_shared</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\cdll_int.h">
@@ -502,6 +505,9 @@
     </ClInclude>
     <ClInclude Include="..\..\dlls\player_classes.h">
       <Filter>dlls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\game_shared\shared_string.h">
+      <Filter>game_shared</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

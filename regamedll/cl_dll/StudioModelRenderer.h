@@ -169,7 +169,59 @@ void CounterStrike_SetOrientation(float* o, float* a);
 // vmdl hands texture changing
 namespace gViewModelHandsTexture
 {
-	void	Initialization	(void);
+	void	Initiation	(void);
 	void	Think			(void);
 	void	InferiorThink	(void);
 };
+
+extern const Vector g_vecZero;
+
+class CSecondaryViewModelManager
+{
+public:
+	void* operator new(size_t size)
+	{
+		return calloc(1, size);
+	}
+	void operator delete(void* ptr)
+	{
+		free(ptr);
+	}
+
+private:
+	bool		m_bIsDrawing		{ false };
+
+public:
+	model_t*	m_pModel			{ nullptr };
+	int			m_iSequence			{ 0 };
+	float		m_flAnimtime		{ 0.0f };
+	float		m_flFramerate		{ 0.0f };
+	float		m_flFrame			{ 0.0f };
+	bool		m_bReflect			{ false };
+	int*		m_piBody			{ nullptr };
+	bool		m_bVisible			{ false };
+	Vector		m_vecOfs			{ g_vecZero };
+	int			m_iController[4]	{ 0, 0, 0, 0 };
+	Vector		m_vecAttachments[4]	{ g_vecZero, g_vecZero, g_vecZero, g_vecZero };
+	Vector		m_vecRawOrg			{ g_vecZero };
+
+	struct
+	{
+		int	m_iSequence;
+		float m_flAnimtime;
+		float m_flFramerate;
+		float m_flFrame;
+	}
+	m_Stack { 0, 0.0f, 0.0f, 0.0f };
+
+public:
+	void	Reset			(void);	// this is also an initiation
+	void	SetModel		(const char* sz);
+	void	Draw			(int flags);
+	void	SetAnim			(int iSeq);
+	bool	GetDrawing		(void) { return m_bIsDrawing; }
+	void	PushAnim		(void);
+	void	PopAnim			(void);
+};
+
+extern CSecondaryViewModelManager gSecViewModelMgr;

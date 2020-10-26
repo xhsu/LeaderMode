@@ -39,7 +39,7 @@ public:
 	inline CBaseWeapon* RIGHT_HAND() { return m_ppRighthand ? *m_ppRighthand : nullptr; }
 
 public:
-	void	Initialization	(CBasePlayer* pPlayer);
+	void	Initiation		(CBasePlayer* pPlayer);
 	void	Think			(void);
 	void	PostFrame		(void);
 

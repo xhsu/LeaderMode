@@ -210,7 +210,7 @@ BOOL CL_DLLEXPORT HUD_VidInit(void)
 
 	gHUD::VidInit();
 	gFontFuncs.Init();
-	gViewModelHandsTexture::Initialization();
+	gViewModelHandsTexture::Initiation();
 	return TRUE;
 }
 

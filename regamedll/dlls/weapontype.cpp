@@ -41,9 +41,6 @@ const WeaponInfo g_rgWpnInfo[LAST_WEAPON] =
 	{WEAPON_MK46,			"weapon_mk46",			"FN Mk.46 Mod.0",				AMMO_556NatoBox,	100,PRIMARY_WEAPON_SLOT,	ITEM_FLAG_NOAUTORELOAD,	MACHINE_GUN_BASIC_WEIGHT + 1,	WEAPONCLASS_MACHINEGUN,		5750},
 	{WEAPON_RPD,			"weapon_rpd",			"Vasily Degtyaryov RPD",		AMMO_762SovietBox,	100,PRIMARY_WEAPON_SLOT,	ITEM_FLAG_NOAUTORELOAD,	MACHINE_GUN_BASIC_WEIGHT + 2,	WEAPONCLASS_MACHINEGUN,		5750},
 
-	// DISUSED
-	{WEAPON_C4, "weapon_c4", "C4", AMMO_C4, WEAPON_NOCLIP, SLOT_NO, ITEM_FLAG_NONE, -1, WEAPONCLASS_NONE, 0},
-
 	//{LAST_WEAPON, nullptr, AMMO_NONE, WEAPON_NOCLIP, SLOT_NO, ITEM_FLAG_NONE, -1, 0},	// vest, should never use it.
 };
 
@@ -63,6 +60,7 @@ const EquipmentInfo g_rgEquipmentInfo[EQP_COUNT] =
 	{EQP_INCENDIARY_GR,	"weapon_incendiary_gr",	"Incendiary Grenade",	HEGRENADE_PRICE * 2},
 	{EQP_HEALING_GR,	"weapon_healing_gr",	"Healing Grenade",		SMOKEGRENADE_PRICE * 2},
 	{EQP_GAS_GR,		"weapon_gasgrenade",	"Nerve Gas Grenade",	SMOKEGRENADE_PRICE * 2},
+	{EQP_C4,			"weapon_c4",			"Remote-Controlled C4",	HEGRENADE_PRICE * 2},
 
 	// misc
 	{EQP_NVG,			"item_nvg",				"Nightvision",			NVG_PRICE},

@@ -83,6 +83,8 @@ int gmsgShoot = 0;
 int gmsgSteelSight = 0;
 int gmsgEqpSelect = 0;
 int gmsgSkillTimer = 0;
+int gmsgSound = 0;
+int gmsgSecVMDL = 0;
 
 bool g_bClientPrintEnable = true;
 
@@ -226,6 +228,8 @@ void LinkUserMessages()
 	gmsgSteelSight	  = REG_USER_MSG("SteelSight", 1);
 	gmsgEqpSelect	  = REG_USER_MSG("EqpSelect", 1);
 	gmsgSkillTimer	  = REG_USER_MSG("SkillTimer", 6);
+	gmsgSound		  = REG_USER_MSG("Sound", -1);
+	gmsgSecVMDL		  = REG_USER_MSG("SecVMDL", -1);
 }
 
 void WriteSigonMessages()
@@ -1056,6 +1060,7 @@ void BuyEquipment(CBasePlayer *pPlayer, EquipmentIdType iSlot)
 		case EQP_INCENDIARY_GR:
 		case EQP_HEALING_GR:
 		case EQP_GAS_GR:
+		case EQP_C4:
 		{
 			AmmoIdType iAmmoId = GetAmmoIdOfEquipment(iSlot);
 

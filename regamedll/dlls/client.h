@@ -262,3 +262,5 @@ extern int gmsgShoot;
 extern int gmsgSteelSight;
 extern int gmsgEqpSelect;
 extern int gmsgSkillTimer;
+extern int gmsgSound;
+extern int gmsgSecVMDL;

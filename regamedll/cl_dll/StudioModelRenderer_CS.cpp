@@ -182,7 +182,7 @@ namespace gViewModelHandsTexture
 	GLuint	m_iCTHandTexture = NULL;
 	GLuint	m_iTRHandTexture = NULL;
 
-	void	Initialization	(void)
+	void	Initiation		(void)
 	{
 		if (m_bAvailable)
 			return;
@@ -219,10 +219,10 @@ namespace gViewModelHandsTexture
 
 	void	InferiorThink	(void)
 	{
-		if (!m_bAvailable || !g_pViewEnt || !g_pViewEnt->model || g_pViewEnt->model == m_pLastInfViewModel)
+		if (!m_bAvailable || !gSecViewModelMgr.m_bVisible || !gSecViewModelMgr.m_pModel || gSecViewModelMgr.m_pModel == m_pLastInfViewModel)
 			return;
 
-		studiohdr_t* pStudio = (studiohdr_t*)IEngineStudio.Mod_Extradata(g_pViewEnt->model);
+		studiohdr_t* pStudio = (studiohdr_t*)IEngineStudio.Mod_Extradata(gSecViewModelMgr.m_pModel);
 		mstudiotexture_t* pTexture = (mstudiotexture_t*)(((byte*)pStudio) + pStudio->textureindex);
 
 		for (int i = 0; i < pStudio->numtextures; i++)
@@ -236,7 +236,7 @@ namespace gViewModelHandsTexture
 			pTexture++;
 		}
 
-		m_pLastInfViewModel = g_pViewEnt->model;
+		m_pLastInfViewModel = gSecViewModelMgr.m_pModel;
 	}
 };
 
@@ -1165,6 +1165,95 @@ bool CGameStudioModelRenderer::GetPlayerBoneWorldPosition(BoneIndex whichBone, V
 	return true;
 }
 
+// ===================== Secondary V-Model Manager =====================
+
+CSecondaryViewModelManager gSecViewModelMgr;
+
+void CSecondaryViewModelManager::Reset(void)
+{
+	m_bIsDrawing = NULL;
+	m_pModel = NULL;
+	m_iSequence = NULL;
+	m_flAnimtime = NULL;
+	m_flFramerate = NULL;
+	m_flFrame = NULL;
+	m_bReflect = NULL;
+	m_piBody = NULL;
+	m_bVisible = NULL;
+	m_vecOfs = g_vecZero;
+	m_vecRawOrg = g_vecZero;
+
+	Q_memset(m_iController, NULL, sizeof(m_iController));
+	Q_memset(m_vecAttachments, NULL, sizeof(m_vecAttachments));
+
+	//memset(&m_sAnimStack, NULL, sizeof(m_sAnimStack));
+}
+
+void CSecondaryViewModelManager::SetModel(const char* sz)
+{
+	m_pModel = IEngineStudio.Mod_ForName(sz, TRUE);
+}
+
+void CSecondaryViewModelManager::Draw(int flags)
+{
+	static cl_entity_t save;
+	static Vector vecTemp;
+
+	if (!m_pModel || !m_bVisible)
+		return;
+
+	save = *g_pViewEnt;
+
+	//prevent from bothering by others.
+	m_bIsDrawing = true;
+
+	g_pViewEnt->model = m_pModel;
+	g_pViewEnt->curstate.sequence = m_iSequence;
+	g_pViewEnt->curstate.animtime = m_flAnimtime;
+	g_pViewEnt->curstate.framerate = m_flFramerate;
+	g_pViewEnt->curstate.frame = m_flFrame;
+	g_pViewEnt->curstate.body = (m_piBody ? (*m_piBody) : 0);
+
+	// reflecting model
+	cl_righthand->value = m_bReflect;
+
+	// UNDONE
+	// for inferior weapon hand texture.
+	gViewModelHandsTexture::InferiorThink();
+
+	// draw
+	g_StudioRenderer.StudioDrawModel(flags);
+
+	// restore
+	*g_pViewEnt = save;
+
+	m_bIsDrawing = false;
+}
+
+void CSecondaryViewModelManager::SetAnim(int iSeq)
+{
+	m_iSequence = iSeq;
+	m_flAnimtime = gEngfuncs.GetClientTime();
+	m_flFramerate = 1;
+	m_flFrame = 0;
+}
+
+void CSecondaryViewModelManager::PushAnim(void)
+{
+	m_Stack.m_flAnimtime	= m_flAnimtime;
+	m_Stack.m_flFrame		= m_flFrame;
+	m_Stack.m_flFramerate	= m_flFramerate;
+	m_Stack.m_iSequence		= m_iSequence;
+}
+
+void CSecondaryViewModelManager::PopAnim(void)
+{
+	m_flAnimtime	= m_Stack.m_flAnimtime;
+	m_flFrame		= m_Stack.m_flFrame;
+	m_flFramerate	= m_Stack.m_flFramerate;
+	m_iSequence		= m_Stack.m_iSequence;
+}
+
 // ===================== EXPORT FUNCS =====================
 
 int R_StudioDrawPlayer(int flags, entity_state_t* pplayer)
@@ -1176,6 +1265,9 @@ int R_StudioDrawModel(int flags)
 {
 	if (IEngineStudio.GetCurrentEntity() == g_pViewEnt)
 	{
+		// draw secondary model first.
+		gSecViewModelMgr.Draw(flags);
+
 		// LUNA: fucking engine. when you apply anim via gEngfuncs.pfnWeaponAnim(), it secretly save a time without letting you know.
 		// then before the VMDL gets rendered, the engine suddenly re-apply this value back.
 		// this prevents you from start an anim from its half.
@@ -1184,7 +1276,7 @@ int R_StudioDrawModel(int flags)
 
 		// special treatment for certain weapons.
 		if (g_pCurWeapon)
-			gEngfuncs.Cvar_SetValue("cl_righthand", g_pCurWeapon->UsingInvertedVMDL());
+			cl_righthand->value = g_pCurWeapon->UsingInvertedVMDL();
 
 		// detecting vmdl changing and swapping the vmdl v_hands.bmp texture.
 		gViewModelHandsTexture::Think();
@@ -1196,6 +1288,7 @@ int R_StudioDrawModel(int flags)
 void R_StudioInit(void)
 {
 	g_StudioRenderer.Init();
+	gSecViewModelMgr.Reset();
 }
 
 r_studio_interface_t studio =

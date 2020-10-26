@@ -9,7 +9,7 @@ Code - Luna the Reborn
 
 #include "precompiled.h"
 
-void CPlayerLeftHand::Initialization(CBasePlayer* pPlayer)
+void CPlayerLeftHand::Initiation(CBasePlayer* pPlayer)
 {
 	m_pPlayer = pPlayer;
 	m_ppRighthand = &pPlayer->m_pActiveItem;

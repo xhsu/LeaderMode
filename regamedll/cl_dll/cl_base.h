@@ -88,6 +88,7 @@ Created Date: 05 Mar 2020
 
 // some stuff I don't even know.
 #include "../game_shared/shared_util.h"
+#include "../game_shared/shared_string.h"
 
 // for ISurface
 #include "../common/interface.h"

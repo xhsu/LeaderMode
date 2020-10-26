@@ -634,6 +634,7 @@ void CGrenade::Precache()
 	m_rgusEvents[EQP_INCENDIARY_GR] = PRECACHE_EVENT(1, "events/Molotov.sc");
 	m_rgusEvents[EQP_HEALING_GR] = PRECACHE_EVENT(1, "events/createsmoke.sc");	// UNDONE
 	m_rgusEvents[EQP_GAS_GR] = PRECACHE_EVENT(1, "events/createsmoke.sc");	// UNDONE
+	m_rgusEvents[EQP_C4] = PRECACHE_EVENT(1, "events/createexplo.sc");	// UNDONE
 
 	PRECACHE_SOUND("weapons/hegrenade-1.wav");
 	PRECACHE_SOUND("weapons/hegrenade-2.wav");

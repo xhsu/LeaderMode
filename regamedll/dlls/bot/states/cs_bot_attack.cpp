@@ -159,10 +159,6 @@ void AttackState::OnUpdate(CCSBot *me)
 	if (pWeapon)
 	{
 		// item to avoid.
-		if (pWeapon->m_iId == WEAPON_C4)
-		{
-			me->EquipBestWeapon();
-		}
 	}
 
 	CBasePlayer *pEnemy = me->GetEnemy();

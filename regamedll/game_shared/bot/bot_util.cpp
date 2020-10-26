@@ -641,8 +641,6 @@ bool IsGameEventAudible(GameEventType event, CBaseEntity *pEntity, CBaseEntity *
 		{
 		// silent "firing"
 		case WEAPON_SHIELDGUN:
-		case WEAPON_C4:
-			return false;
 
 		// quiet
 		case WEAPON_MP7A1:
@@ -650,6 +648,17 @@ bool IsGameEventAudible(GameEventType event, CBaseEntity *pEntity, CBaseEntity *
 		case WEAPON_USP:
 			*range = ShortRange;
 			break;
+
+		// potential silenced
+		case WEAPON_FIVESEVEN:
+		{
+			if (pPlayer->m_pActiveItem->m_iVariation == Role_Assassin)
+				*range = ShortRange;
+			else
+				*range = NormalRange;
+
+			break;
+		}
 
 		// loud
 		case WEAPON_AWP:

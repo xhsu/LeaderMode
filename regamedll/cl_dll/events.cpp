@@ -1205,7 +1205,6 @@ DECLARE_EVENT(FireDEagle)
 DECLARE_EVENT(FireM45A1)
 {
 	int idx = args->entindex;
-	bool empty = args->bparam1;
 
 	Vector origin, angles, velocity;
 	VectorCopy(args->origin, origin);
@@ -1272,6 +1271,9 @@ DECLARE_EVENT(FireM45A1)
 
 	// original goldsrc api: VOL = 1.0, ATTN = 0.6
 	// on non-host sending, the bparam1 is reserved for silencer status.
+	if (EV_IsLocal(idx))
+		args->bparam1 = g_iRoleType == Role_Assassin;	// needs convertion for local EV.
+
 	EV_PlayGunFire(idx, M45A1_FIRE_SFX, args->bparam1 ? QUIET_GUN_VOLUME : M45A1_GUN_VOLUME, vecSrc + forward * 10.0f);
 
 	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, M45A1_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_DEAGLE].m_iAmmoType, M45A1_PENETRATION);
@@ -1280,7 +1282,6 @@ DECLARE_EVENT(FireM45A1)
 DECLARE_EVENT(Fire57)
 {
 	int idx = args->entindex;
-	bool empty = args->bparam1;
 
 	Vector origin, angles, velocity;
 	VectorCopy(args->origin, origin);
@@ -1347,7 +1348,13 @@ DECLARE_EVENT(Fire57)
 
 	// original goldsrc api: VOL = 1.0, ATTN = 0.8
 	// on non-host sending, the bparam1 is reserved for silencer status.
-	EV_PlayGunFire(idx, FN57_FIRE_SFX, args->bparam1 ? QUIET_GUN_VOLUME : FIVESEVEN_GUN_VOLUME, vecSrc + forward * 10.0f);
+	if (EV_IsLocal(idx))
+		args->bparam1 = g_iRoleType == Role_Assassin;
+
+	EV_PlayGunFire(idx,
+		args->bparam1 ? FN57_FIRE_SIL_SFX : FN57_FIRE_SFX,
+		args->bparam1 ? QUIET_GUN_VOLUME : FIVESEVEN_GUN_VOLUME,
+		vecSrc + forward * 10.0f);
 
 	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, FIVESEVEN_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_FIVESEVEN].m_iAmmoType, FIVESEVEN_PENETRATION);
 }

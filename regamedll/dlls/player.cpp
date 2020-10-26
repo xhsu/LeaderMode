@@ -5194,10 +5194,6 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 			// Give weapons
 			for (int wpnid = WEAPON_NONE + 1; wpnid < LAST_WEAPON; wpnid++)
 			{
-				// unwanted candidates
-				if (wpnid == WEAPON_C4)
-					continue;
-
 				// If by some case the weapon got invalid
 				const auto pInfo = GetWeaponInfo(wpnid);
 				if (pInfo) {

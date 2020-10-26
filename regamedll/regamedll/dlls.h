@@ -49,6 +49,7 @@ using FloatRef = float;
 // Globals vars
 #include "globals.h"
 #include "saverestore.h"
+#include "game_shared/shared_string.h"
 
 // GameInit
 #include "game.h"

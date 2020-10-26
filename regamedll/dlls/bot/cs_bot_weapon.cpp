@@ -563,7 +563,8 @@ bool CCSBot::IsUsingGrenade() const
 
 bool CCSBot::IsUsingHEGrenade() const
 {
-	if (IsUsingGrenade() && m_iUsingGrenadeId == EQP_HEGRENADE)
+	if (IsUsingGrenade() &&
+		(m_iUsingGrenadeId == EQP_HEGRENADE || m_iUsingGrenadeId == EQP_CRYOGRENADE || m_iUsingGrenadeId == EQP_INCENDIARY_GR || m_iUsingGrenadeId == EQP_C4))
 		return true;
 
 	return false;

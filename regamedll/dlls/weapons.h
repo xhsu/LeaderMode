@@ -245,6 +245,7 @@ public:	// util funcs
 	virtual void	KickBack		(float up_base, float lateral_base, float up_modifier, float lateral_modifier, float up_max, float lateral_max, int direction_change);	// recoil
 	virtual void	ResetModel		(void) { }	// used after Melee() and QuickThrowRelease().
 	virtual bool	SetVariation	(RoleTypes iType) { m_iVariation = iType; return true; }
+	virtual void	SetLeftHand		(bool bAppear) { }
 };
 
 
@@ -1268,9 +1269,11 @@ constexpr float	M1014_EFFECTIVE_RANGE			= 3048.0f;
 constexpr float M1014_FIRE_INTERVAL				= 0.25f;
 constexpr float M1014_TIME_START_RELOAD			= 0.8f;
 constexpr float M1014_TIME_START_RELOAD_FIRST	= 2.633f;
-constexpr float M1014_TIME_INSERT				= 0.933f;
-constexpr float M1014_TIME_ADD_AMMO				= 0.514f;
+constexpr float M1014_TIME_INSERT				= 0.8f;
+constexpr float M1014_TIME_ADD_AMMO				= 0.485f;
 constexpr float M1014_TIME_ADD_AMMO_FIRST		= 1.433f;
+constexpr float M1014_TIME_INSERT_SFX			= 0.27f;
+constexpr float M1014_TIME_SIDELOAD_SFX			= 1.0f;
 constexpr float M1014_TIME_AFTER_RELOAD			= 0.8f;
 constexpr float M1014_DRAW_FIRST_TIME			= 1.9f;
 constexpr float M1014_DRAW_TIME					= 0.833f;
@@ -1279,6 +1282,8 @@ constexpr float M1014_CHECKMAG_TIME				= 2.3f;
 constexpr float M1014_INSPECTION_TIME			= 1.8f;
 constexpr float M1014_BLOCK_UP_TIME				= 0.366F;
 constexpr float M1014_BLOCK_DOWN_TIME			= 0.366F;
+constexpr float M1014_LHAND_UP_TIME				= 0.7f;
+constexpr float M1014_LHAND_DOWN_TIME			= 0.7f;
 constexpr float M1014_DASH_ENTER_TIME			= 0.833F;
 constexpr float M1014_DASH_EXIT_TIME			= 0.366F;
 const	 Vector M1014_CONE_VECTOR				= Vector(0.0725, 0.0725, 0.0); // special shotgun spreads
@@ -1339,6 +1344,7 @@ public:
 	bool	m_bAllowNextEmptySound;
 	float	m_flNextInsertAnim;
 	float	m_flNextAddAmmo;
+	float	m_flNextInsertionSFX;
 	bool	m_bSetForceStopReload;
 	bool	m_bStartFromEmpty;
 
@@ -1346,6 +1352,7 @@ public:
 	{
 		float	m_flNextInsertAnim;
 		float	m_flNextAddAmmo;
+		float	m_flNextInsertionSFX;
 	}
 	m_Stack2;
 
@@ -1367,6 +1374,7 @@ public:	// util funcs
 	virtual void	PushAnim		(void);
 	virtual void	PopAnim			(void);
 	virtual void	ResetModel		(void);
+	virtual void	SetLeftHand		(bool bAppear);
 };
 
 #define M45A1_VIEW_MODEL	"models/weapons/v_m45a1.mdl"
@@ -1465,6 +1473,7 @@ public:	// new functions
 #define FN57_VIEW_MODEL		"models/weapons/v_fiveseven.mdl"
 #define FN57_WORLD_MODEL	"models/weapons/w_fiveseven.mdl"
 #define FN57_FIRE_SFX		"weapons/fiveseven/fiveseven_fire.wav"
+#define FN57_FIRE_SIL_SFX	"weapons/fiveseven/fiveseven_fire-sil.wav"
 
 constexpr float FIVESEVEN_MAX_SPEED			= 250.0f;
 constexpr float FIVESEVEN_DAMAGE			= 20.0f;
@@ -1617,6 +1626,27 @@ enum sg550_e
 	SG550_SHOOT2,
 	SG550_RELOAD,
 	SG550_DRAW,
+};
+
+#define C4_VIEW_MODEL	"models/weapons/v_c4.mdl"
+#define C4_WORLD_MODEL	"models/weapons/w_c4.mdl"
+
+constexpr float C4_TIME_DRAW		= 0.7f;
+constexpr float C4_TIME_HOLSTER		= 0.7f;
+constexpr float C4_TIME_THROW		= 1.0333f;
+constexpr float C4_TIME_THROW_SPAWN = 0.5f;
+constexpr float C4_TIME_PLACE		= 1.0333f;
+constexpr float C4_TIME_PLACE_SPAWN = 0.5f;
+constexpr float C4_TIME_DETONATE	= 1.0333f;
+
+enum c4_e
+{
+	C4_IDLE = 0,
+	C4_DRAW,
+	C4_HOLSTER,
+	C4_THROW,
+	C4_PLACE,
+	C4_DETONATE,
 };
 
 #ifndef CLIENT_DLL

@@ -4231,10 +4231,13 @@ EquipmentIdType CHalfLifeMultiplay::SelectProperGrenade(CBasePlayer* pPlayer)
 	switch (pPlayer->m_iRoleType)
 	{
 	case Role_Commander:
-	case Role_Breacher:
 	case Role_Godfather:
 	case Role_LeadEnforcer:
 		iId = EQP_HEGRENADE;
+		break;
+
+	case Role_Breacher:
+		iId = EQP_C4;
 		break;
 
 	case Role_SWAT:

@@ -1920,3 +1920,89 @@ void UTIL_LieFlat(CBaseEntity* pEntity)
 	vecAngles.z = -vecAngles2.x;
 	pEntity->pev->angles = vecAngles;
 }
+
+void UTIL_Play3DSound(Vector vecOrigin, float flRange, const char* szSample)
+{
+
+}
+
+void UTIL_Play3DSound(Vector vecOrigin, float flRange, SharedString iSample)
+{
+
+}
+
+void UTIL_Play3DSoundWithHost2D(CBasePlayer* pHost, Vector vecSrc, float flRange, SharedString iSample)
+{
+	CBaseEntity* pEntity = nullptr;
+	CBasePlayer* pPlayer = nullptr;
+
+	while ((pEntity = UTIL_FindEntityInSphere(pEntity, vecSrc, flRange)))
+	{
+		if (!pEntity->IsPlayer())
+			continue;
+
+		pPlayer = (CBasePlayer*)pEntity;
+
+		if (pPlayer != pHost)
+		{
+			MESSAGE_BEGIN(MSG_ONE, gmsgSound, vecSrc, pPlayer->pev);
+			WRITE_BYTE(TRUE);	// using 3D.
+			WRITE_COORD(vecSrc.x);
+			WRITE_COORD(vecSrc.y);
+			WRITE_COORD(vecSrc.z);
+			WRITE_COORD(flRange);
+			WRITE_BYTE(TRUE);	// using SharedString.
+			WRITE_BYTE(iSample);
+			MESSAGE_END();
+		}
+		else
+		{
+			MESSAGE_BEGIN(MSG_ONE, gmsgSound, vecSrc, pPlayer->pev);
+			WRITE_BYTE(FALSE);	// not using 3D.
+			WRITE_BYTE(TRUE);	// using SharedString.
+			WRITE_BYTE(iSample);
+			MESSAGE_END();
+		}
+	}
+}
+
+void UTIL_HideSecondaryVMDL(CBasePlayer* pPlayer, bool bSkipLocal)
+{
+#ifdef CLIENT_WEAPONS
+	if (bSkipLocal && ENGINE_CANSKIP(pPlayer->edict()))
+		return;
+#endif
+
+	MESSAGE_BEGIN(MSG_ONE, gmsgSecVMDL, nullptr, pPlayer->pev);
+	WRITE_BYTE(FALSE);	// VISIBLE
+	MESSAGE_END();	// nothing rest to say.
+}
+
+void UTIL_SetSecondaryVMDL(CBasePlayer* pPlayer, SharedString iModel, int iSeq, bool bSkipLocal)
+{
+#ifdef CLIENT_WEAPONS
+	if (bSkipLocal && ENGINE_CANSKIP(pPlayer->edict()))
+		return;
+#endif
+
+	MESSAGE_BEGIN(MSG_ONE, gmsgSecVMDL, nullptr, pPlayer->pev);
+	WRITE_BYTE(TRUE);	// VISIBLE
+	WRITE_BYTE(TRUE);	// using SharedString
+	WRITE_BYTE(iModel);
+	WRITE_BYTE(iSeq);
+	MESSAGE_END();
+}
+
+void UTIL_SendSecondaryVMDLAnim(CBasePlayer* pPlayer, int iSeq, bool bSkipLocal)
+{
+#ifdef CLIENT_WEAPONS
+	if (bSkipLocal && ENGINE_CANSKIP(pPlayer->edict()))
+		return;
+#endif
+
+	MESSAGE_BEGIN(MSG_ONE, gmsgSecVMDL, nullptr, pPlayer->pev);
+	WRITE_BYTE(TRUE);	// VISIBLE
+	WRITE_BYTE(255);	// Not sending model info.
+	WRITE_BYTE(iSeq);
+	MESSAGE_END();
+}

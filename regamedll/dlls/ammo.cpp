@@ -36,7 +36,7 @@ const AmmoInfo g_rgAmmoInfo[AMMO_MAXTYPE] =
 	{AMMO_Molotov,		"Molotov",		1,		1,		HEGRENADE_PRICE * 2,	0,		0.0f},
 	{AMMO_HealingGr,	"HealingGr",	1,		1,		SMOKEGRENADE_PRICE * 2,	0,		0.0f},
 	{AMMO_GasGrenade,	"GasGrenade",	1,		1,		SMOKEGRENADE_PRICE * 2,	0,		0.0f},
-	{AMMO_C4,			"C4",			1,		1,		0,		0,		0.0f},
+	{AMMO_C4,			"C4",			3,		1,		HEGRENADE_PRICE * 2,	0,		0.0f},
 };
 
 const AmmoInfo* GetAmmoInfo(const char* ammoName)
@@ -82,6 +82,9 @@ AmmoIdType GetAmmoIdOfEquipment(EquipmentIdType iId)
 
 	case EQP_GAS_GR:
 		return AMMO_GasGrenade;
+
+	case EQP_C4:
+		return AMMO_C4;
 
 	default:
 		return AMMO_NONE;

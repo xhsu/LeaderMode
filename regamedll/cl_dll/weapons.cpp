@@ -390,9 +390,19 @@ void CBaseWeapon::PostFrame()
 			// remove all flags.
 			m_bitsFlags &= ~(WPNSTATE_QUICK_THROWING | WPNSTATE_QT_RELEASE | WPNSTATE_QT_SHOULD_SPAWN | WPNSTATE_QT_EXIT);
 
-			// back to our weapon.
-			Holstered();
-			Deploy();
+			switch (m_pPlayer->m_iUsingGrenadeId)
+			{
+			case EQP_C4:	// left handed model.
+				gSecViewModelMgr.m_bVisible = false;
+				SetLeftHand(true);
+				break;
+
+			default:
+				// back to our weapon.
+				Holstered();
+				Deploy();
+				break;
+			}
 
 			// don't do this on CL side.
 			// we don't have CSGameRules() on client.
@@ -420,6 +430,14 @@ void CBaseWeapon::PostFrame()
 			case EQP_HEALING_GR:
 				flTime = TIME_QT_THROWING_SOFT - TIME_SP_QT_THROWING_SOFT;
 				break;
+
+			case EQP_C4:	// UNDONE, treat specially.
+			{
+				m_bitsFlags |= WPNSTATE_QT_EXIT;
+				m_pPlayer->m_flNextAttack = C4_TIME_THROW - C4_TIME_THROW_SPAWN;
+
+				return;
+			}
 
 			default:
 				return;	// how did he get here???
@@ -458,6 +476,15 @@ void CBaseWeapon::PostFrame()
 				flTime = TIME_SP_QT_THROWING_SOFT;
 				break;
 
+			case EQP_C4:	// special treatment.
+			{
+				m_bitsFlags |= WPNSTATE_QT_SHOULD_SPAWN;
+				gSecViewModelMgr.SetAnim(C4_THROW);
+				m_pPlayer->m_flNextAttack = C4_TIME_THROW_SPAWN;
+
+				return;
+			}
+
 			default:
 				return;	// how did he get here???
 			}
@@ -470,7 +497,14 @@ void CBaseWeapon::PostFrame()
 		// hold and do nothing.
 		else
 		{
+			switch (m_pPlayer->m_iUsingGrenadeId)
+			{
+			case EQP_C4:
+				break;
 
+			default:
+				return;
+			}
 		}
 
 		return;
@@ -648,6 +682,23 @@ bool CBaseWeapon::QuickThrowStart(EquipmentIdType iId)
 		flTime = TIME_SG_QT_READY;
 		break;
 
+	case EQP_C4:	// this one is really special.
+	{
+		m_bitsFlags |= WPNSTATE_QUICK_THROWING;
+		m_pPlayer->m_iUsingGrenadeId = iId;
+		// no 3rd personal model setting here, as below.
+
+		Q_strlcpy(m_pPlayer->m_szAnimExtention, "grenade");
+		SetLeftHand(false);	// holster L hand. The freeze time (m_flNextAttack) should be included.
+
+		// totally different from SV.
+		gSecViewModelMgr.m_bVisible = true;
+		gSecViewModelMgr.SetModel(g_rgpszSharedString[SSZ_C4_VMDL]);
+		gSecViewModelMgr.SetAnim(C4_DRAW);
+
+		goto TAG_C4_SKIPPING;
+	}
+
 	default:
 		return false;	// how did he get here???
 	}
@@ -661,6 +712,7 @@ bool CBaseWeapon::QuickThrowStart(EquipmentIdType iId)
 
 	m_pPlayer->m_flNextAttack = flTime;
 	m_flTimeWeaponIdle = flTime + 0.75f;
+TAG_C4_SKIPPING:
 	m_flDecreaseShotsFired = gpGlobals->time;
 	m_bInReload = false;	// the reload has to stop this time.
 
@@ -1219,7 +1271,10 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		//pCurrent->m_flStartThrow = time_point_t (duration_t (pfrom->fuser2));
 		//pCurrent->m_flReleaseThrow = time_point_t (duration_t (pfrom->fuser3));
 		//pCurrent->m_iSwing = pfrom->iuser1;
-		pCurrent->m_bitsFlags = pfrom->m_iWeaponState;
+
+		if (!(pCurrent->m_bitsFlags & WPNSTATE_QUICK_THROWING))	// FIXME: this line will block the grenade throwing function.
+			pCurrent->m_bitsFlags = pfrom->m_iWeaponState;
+
 		pCurrent->m_flLastFire = pfrom->m_fAimedDamage;
 		pCurrent->m_iShotsFired = pfrom->m_fInZoom;	// not directly used.
 	}
@@ -1348,9 +1403,9 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	// FIXME: this was working fine until the push-pop anim comes out. Why my predict code being override right on next frame?
 	// Make sure that weapon animation matches what the game .dll is telling us
 	//  over the wire ( fixes some animation glitches )
-	if (g_runfuncs && (g_iCurViewModelAnim != to->client.weaponanim))
+	//if (g_runfuncs && (g_iCurViewModelAnim != to->client.weaponanim))
 		// Force a fixed anim down to viewmodel. LUNA: FIXME: wired, how did that happens? it seems impossible.
-		g_pCurWeapon->SendWeaponAnim(to->client.weaponanim);
+		//g_pCurWeapon->SendWeaponAnim(to->client.weaponanim);
 
 	if (g_pCurWeapon->m_iPrimaryAmmoType < AMMO_MAXTYPE)
 	{

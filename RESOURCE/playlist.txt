@@ -1,0 +1,9 @@
+"Playlist"
+{
+	"Splash"	"sound\\music\\Mountains_Of_Home.mp3"
+	"RoundWin"	"sound\\music\\Tally-ho.mp3"
+	"RoundLose"	"sound\\music\\Warrior_s_Tomb.mp3"
+	"MatchWin"	"sound\\music\\Tally-ho.mp3"
+	"MatchLose"	"sound\\music\\Warrior_s_Tomb.mp3"
+	"Credits"	"sound\\music\\train_work1.mp3"
+}

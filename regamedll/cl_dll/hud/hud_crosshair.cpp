@@ -414,7 +414,6 @@ int CHudCrosshair::DrawCrosshair(float flTime, WeaponIdType weaponid)
 		break;
 	}
 
-	case WEAPON_C4:
 	case WEAPON_UMP45:
 	case WEAPON_MK46:
 	{

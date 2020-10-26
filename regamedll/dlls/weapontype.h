@@ -83,9 +83,6 @@ enum WeaponIdType
 	WEAPON_MK46,
 	WEAPON_RPD,
 
-	//DISUSED
-	WEAPON_C4,
-
 	LAST_WEAPON,
 	WEAPON_SHIELDGUN = 99
 };
@@ -122,9 +119,10 @@ enum WeaponState
 	WPNSTATE_RELOAD_EMPTY		= BIT(7),	// play reload_empty?
 	WPNSTATE_HOLSTERING			= BIT(8),	// disable all other behaviours?
 	WPNSTATE_DASHING			= BIT(9),	// get a speed boost?
+	WPNSTATE_NO_LHAND			= BIT(10),	// left hand is currently doing something...
 
 	// Weapon-specific flags.
-	WPNSTATE_XM8_CHANGING		= BIT(10),
+	WPNSTATE_XM8_CHANGING		= BIT(11),
 
 	// Sets
 	WPNSTATE_SPECIAL_STATE		= WPNSTATE_XM8_CHANGING,
@@ -199,6 +197,7 @@ enum EquipmentIdType
 	EQP_INCENDIARY_GR,
 	EQP_HEALING_GR,
 	EQP_GAS_GR,
+	EQP_C4,
 
 	// misc
 	EQP_NVG,

@@ -424,6 +424,7 @@
     <ClCompile Include="..\game_shared\bot\nav_path.cpp" />
     <ClCompile Include="..\game_shared\shared_util.cpp" />
     <ClCompile Include="..\game_shared\voice_gamemgr.cpp" />
+    <ClCompile Include="..\game_shared\shared_string.cpp" />
     <ClCompile Include="..\pm_shared\pm_debug.cpp" />
     <ClCompile Include="..\pm_shared\pm_math.cpp" />
     <ClCompile Include="..\pm_shared\pm_shared.cpp" />
@@ -646,6 +647,7 @@
     <ClInclude Include="..\game_shared\bot\simple_state_machine.h" />
     <ClInclude Include="..\game_shared\counter.h" />
     <ClInclude Include="..\game_shared\GameEvent.h" />
+    <ClInclude Include="..\game_shared\shared_string.h" />
     <ClInclude Include="..\game_shared\shared_util.h" />
     <ClInclude Include="..\game_shared\simple_checksum.h" />
     <ClInclude Include="..\game_shared\steam_util.h" />

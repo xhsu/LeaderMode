@@ -1140,6 +1140,93 @@ MSG_FUNC(SkillTimer)
 	return TRUE;
 }
 
+MSG_FUNC(Sound)
+{
+	BEGIN_READ(pbuf, iSize);
+
+	bool bUsing3D = !!READ_BYTE();
+	Vector vecSrc = g_vecZero;
+	float flRange = 0;
+
+	if (bUsing3D)
+	{
+		vecSrc.x = READ_COORD();
+		vecSrc.y = READ_COORD();
+		vecSrc.z = READ_COORD();
+		flRange = READ_COORD();
+	}
+
+	bool bUsingSharedString = !!READ_BYTE();
+	char szSample[192];
+	if (bUsingSharedString)
+	{
+		int index = READ_BYTE();
+		Q_strcpy(szSample, g_rgpszSharedString[index]);
+	}
+	else
+	{
+		Q_strcpy(szSample, READ_STRING());
+	}
+
+	// play the sound
+	if (bUsing3D)
+	{
+		Play3DSound(szSample, 1.0f, flRange, vecSrc);
+	}
+	else
+	{
+		PlaySound(szSample);
+	}
+
+	return TRUE;
+}
+
+MSG_FUNC(SecVMDL)
+{
+	BEGIN_READ(pbuf, iSize);
+
+	bool bVisible = !!READ_BYTE();
+	if (!bVisible)
+	{
+		gSecViewModelMgr.m_bVisible = false;
+		return TRUE;
+	}
+
+	// set it visible first.
+	gSecViewModelMgr.m_bVisible = true;
+
+	int iModelReadMode = READ_BYTE();
+	char szModel[192];
+
+	// switch-case doesnot applied here. C2360 and C2361.
+	switch (iModelReadMode)
+	{
+	case FALSE:
+		Q_strcpy(szModel, READ_STRING());
+		break;
+
+	case TRUE:
+	{
+		int index = READ_BYTE();
+		Q_strcpy(szModel, g_rgpszSharedString[index]);
+		break;
+	}
+
+	case 255:	// not updating model info.
+	default:
+		break;
+	}
+
+	// update the model.
+	gSecViewModelMgr.SetModel(szModel);
+
+	// update the anim.
+	int iSeq = READ_BYTE();
+	gSecViewModelMgr.SetAnim(iSeq);
+
+	return TRUE;
+}
+
 
 // player.cpp
 MSG_FUNC(Logo)
@@ -1257,6 +1344,8 @@ void Msg_Init(void)
 	HOOK_USER_MSG(SteelSight);
 	HOOK_USER_MSG(EqpSelect);
 	HOOK_USER_MSG(SkillTimer);
+	HOOK_USER_MSG(Sound);
+	HOOK_USER_MSG(SecVMDL);
 
 	// player.cpp
 	HOOK_USER_MSG(Logo);

@@ -131,6 +131,7 @@ void WeaponsPrecache()
 	BasicKnife::Precache();
 
 	PRECACHE_MODEL(THROWABLE_VIEW_MODEL);
+	PRECACHE_MODEL(C4_WORLD_MODEL);
 	PRECACHE_SOUND("items/ammopickup1.wav");	// grenade purchasing SFX.
 
 	// container for dropped deathmatch weapons
@@ -429,9 +430,19 @@ void CBaseWeapon::PostFrame()
 			// remove all flags.
 			m_bitsFlags &= ~(WPNSTATE_QUICK_THROWING | WPNSTATE_QT_RELEASE | WPNSTATE_QT_SHOULD_SPAWN | WPNSTATE_QT_EXIT);
 
-			// back to our weapon.
-			Holstered();
-			Deploy();
+			switch (m_pPlayer->m_iUsingGrenadeId)
+			{
+			case EQP_C4:	// left handed model.
+				UTIL_HideSecondaryVMDL(m_pPlayer);
+				SetLeftHand(true);
+				break;
+
+			default:
+				// back to our weapon.
+				Holstered();
+				Deploy();
+				break;
+			}
 
 			// check inventory of current equipment.
 			m_pPlayer->ResetUsingEquipment();
@@ -458,6 +469,15 @@ void CBaseWeapon::PostFrame()
 			case EQP_HEALING_GR:
 				flTime = TIME_QT_THROWING_SOFT - TIME_SP_QT_THROWING_SOFT;
 				break;
+
+			case EQP_C4:	// UNDONE, treat specially.
+			{
+				m_bitsFlags |= WPNSTATE_QT_EXIT;
+				m_pPlayer->m_flNextAttack = C4_TIME_THROW - C4_TIME_THROW_SPAWN;
+				SERVER_PRINT(SharedVarArgs("%f\n", m_pPlayer->m_flNextAttack));
+
+				return;
+			}
 
 			default:
 				return;	// how did he get here???
@@ -494,6 +514,15 @@ void CBaseWeapon::PostFrame()
 				flTime = TIME_SP_QT_THROWING_SOFT;
 				break;
 
+			case EQP_C4:	// special treatment.
+			{
+				m_bitsFlags |= WPNSTATE_QT_SHOULD_SPAWN;
+				UTIL_SendSecondaryVMDLAnim(m_pPlayer, C4_THROW);
+				m_pPlayer->m_flNextAttack = C4_TIME_THROW_SPAWN;
+
+				return;
+			}
+
 			default:
 				return;	// how did he get here???
 			}
@@ -503,10 +532,17 @@ void CBaseWeapon::PostFrame()
 			m_pPlayer->m_flNextAttack = flTime;
 		}
 
-		// hold and do nothing.
+		// hold and do nothing. except C4.
 		else
 		{
+			switch (m_pPlayer->m_iUsingGrenadeId)
+			{
+			case EQP_C4:
+				break;
 
+			default:
+				return;
+			}
 		}
 
 		return;
@@ -686,6 +722,20 @@ bool CBaseWeapon::QuickThrowStart(EquipmentIdType iId)
 		flTime = TIME_SG_QT_READY;
 		break;
 
+	case EQP_C4:	// this one is really special.
+	{
+		m_bitsFlags |= WPNSTATE_QUICK_THROWING;
+		m_pPlayer->m_iUsingGrenadeId = iId;
+		m_pPlayer->pev->weaponmodel = MAKE_STRING("models/weapons/w_c4.mdl");
+
+		Q_strlcpy(m_pPlayer->m_szAnimExtention, "grenade");
+		SetLeftHand(false);	// holster L hand. The freeze time (m_flNextAttack) should be included.
+
+		UTIL_SetSecondaryVMDL(m_pPlayer, SSZ_C4_VMDL, C4_DRAW);
+
+		goto TAG_C4_SKIPPING;
+	}
+
 	default:
 		return false;	// how did he get here???
 	}
@@ -700,6 +750,7 @@ bool CBaseWeapon::QuickThrowStart(EquipmentIdType iId)
 
 	m_pPlayer->m_flNextAttack = flTime;
 	m_flTimeWeaponIdle = flTime + 0.75f;
+TAG_C4_SKIPPING:
 	m_flDecreaseShotsFired = gpGlobals->time;
 	m_bInReload = false;	// the reload has to stop this time.
 

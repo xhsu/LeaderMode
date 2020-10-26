@@ -94,7 +94,10 @@ bool CM1014::Deploy()
 {
 	m_bAllowNextEmptySound = true;
 
-	return DefaultDeploy(M1014_VIEW_MODEL, M1014_WORLD_MODEL, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? M1014_DRAW_FIRST : M1014_DRAW, "mp5", (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? M1014_DRAW_FIRST_TIME : M1014_DRAW_TIME);
+	return DefaultDeploy(M1014_VIEW_MODEL, M1014_WORLD_MODEL,
+		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? M1014_DRAW_FIRST : M1014_DRAW,
+		"mp5",
+		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? M1014_DRAW_FIRST_TIME : M1014_DRAW_TIME);
 }
 
 void CM1014::PostFrame(void)
@@ -109,7 +112,17 @@ void CM1014::PostFrame(void)
 			m_flNextInsertAnim = gpGlobals->time + M1014_TIME_INSERT;
 		}
 
-		if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] > 0 && m_flNextAddAmmo <= gpGlobals->time && m_iClip < m_pItemInfo->m_iMaxClip)
+		if (m_flNextInsertionSFX <= gpGlobals->time && m_iClip < m_pItemInfo->m_iMaxClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] > 0)	// place this before the ammo add. Or the m_bStartFromEmpty flag will be erased.
+		{
+#ifndef CLIENT_DLL
+			// SFX should be played at SV
+			// original API: pitch: 85 + RANDOM(0, 31)
+			UTIL_Play3DSoundWithHost2D(m_pPlayer, m_pPlayer->GetGunPosition(), 512, m_bStartFromEmpty ? SSZ_M1014_SIDELOAD_SFX : SSZ_M1014_INSERT_SFX);
+#endif
+			m_flNextInsertionSFX = gpGlobals->time + M1014_TIME_INSERT;
+		}
+
+		if (m_flNextAddAmmo <= gpGlobals->time && m_iClip < m_pItemInfo->m_iMaxClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] > 0)
 		{
 			m_iClip++;
 			m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
@@ -122,11 +135,6 @@ void CM1014::PostFrame(void)
 			}
 			else
 				m_flNextAddAmmo = gpGlobals->time + M1014_TIME_INSERT;	// yeah, that's right, not M1014_TIME_ADD_AMMO.
-
-#ifndef CLIENT_DLL
-			// SFX should be played at SV
-			EMIT_SOUND_DYN(m_pPlayer->edict(), CHAN_ITEM, "weapons/ksg12/ksg12_insert.wav", VOL_NORM, ATTN_NORM, 0, 85 + RANDOM_LONG(0, 31));
-#endif
 		}
 
 		if (((m_iClip >= m_pItemInfo->m_iMaxClip || m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0) && m_flNextInsertAnim <= gpGlobals->time)
@@ -284,6 +292,7 @@ bool CM1014::Reload(void)
 	m_pPlayer->m_flNextAttack = 0;//m_bStartFromEmpty ? M1014_TIME_START_RELOAD_FIRST : M1014_TIME_START_RELOAD;
 	m_flNextInsertAnim = gpGlobals->time + (m_bStartFromEmpty ? M1014_TIME_START_RELOAD_FIRST : M1014_TIME_START_RELOAD);
 	m_flNextAddAmmo = gpGlobals->time + (m_bStartFromEmpty ? M1014_TIME_ADD_AMMO_FIRST : (M1014_TIME_ADD_AMMO + M1014_TIME_START_RELOAD));
+	m_flNextInsertionSFX = gpGlobals->time + (m_bStartFromEmpty ? M1014_TIME_SIDELOAD_SFX : (M1014_TIME_INSERT_SFX + M1014_TIME_START_RELOAD));
 
 	SendWeaponAnim(m_bStartFromEmpty ? M1014_START_RELOAD_FIRST : M1014_START_RELOAD);
 	return true;
@@ -305,6 +314,7 @@ void CM1014::PushAnim(void)
 	// the way that time being store is a little bit different.
 	m_Stack2.m_flNextAddAmmo = gpGlobals->time - m_flNextAddAmmo;
 	m_Stack2.m_flNextInsertAnim = gpGlobals->time - m_flNextInsertAnim;
+	m_Stack2.m_flNextInsertionSFX = gpGlobals->time - m_flNextInsertionSFX;
 }
 
 void CM1014::PopAnim(void)
@@ -314,6 +324,23 @@ void CM1014::PopAnim(void)
 	// by this, the time will look like "freezed" during the push-pop time frame.
 	m_flNextAddAmmo = gpGlobals->time - m_Stack2.m_flNextAddAmmo;
 	m_flNextInsertAnim = gpGlobals->time - m_Stack2.m_flNextInsertAnim;
+	m_flNextInsertionSFX = gpGlobals->time - m_Stack2.m_flNextInsertionSFX;
+}
+
+void CM1014::SetLeftHand(bool bAppear)
+{
+	if (bAppear && m_bitsFlags & WPNSTATE_NO_LHAND)
+	{
+		SendWeaponAnim(M1014_LHAND_UP);
+		m_pPlayer->m_flNextAttack = Q_max(M1014_LHAND_UP_TIME, C4_TIME_DRAW);
+		m_bitsFlags &= ~WPNSTATE_NO_LHAND;
+	}
+	else if (!(m_bitsFlags & WPNSTATE_NO_LHAND))
+	{
+		SendWeaponAnim(M1014_LHAND_DOWN);
+		m_pPlayer->m_flNextAttack = Q_max(M1014_LHAND_DOWN_TIME, C4_TIME_HOLSTER);
+		m_bitsFlags |= WPNSTATE_NO_LHAND;
+	}
 }
 
 DECLARE_STANDARD_RESET_MODEL_FUNC(M1014)
