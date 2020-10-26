@@ -158,12 +158,12 @@ void CXM8::SecondaryAttack()
 	case Role_Sharpshooter:
 		// OPTICAL.
 		//DefaultSteelSight(Vector(-3.06f, -2, 1.142f), 50, 8.0f);
-		DefaultScopeSight(Vector(-3.06f, -2, 1.142f), 40);
+		DefaultScopeSight(Vector(-6.12f, -4, 2.284f), 40);
 		break;
 
 	default:
 		// STEEL.
-		DefaultSteelSight(Vector(-3.067f, -2, 1.35f), 85, 8.0f);
+		DefaultSteelSight(Vector(-6.12f, -4, 2.70f), 85, 8.0f);
 		break;
 	}
 }
