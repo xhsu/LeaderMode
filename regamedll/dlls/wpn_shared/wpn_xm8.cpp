@@ -25,6 +25,21 @@ void CXM8::Precache()
 
 #else
 
+static constexpr int BARREL1 = 12;
+static constexpr int BARREL2 = 13;
+static constexpr int SIGHT = 17;
+static constexpr int LASER = 18;
+static constexpr int MUZZLE = 19;
+static constexpr int STEELSIGHT = 20;
+
+static constexpr int OPTIC = 0;
+static constexpr int FLIPPED_UP = 0;
+static constexpr int CARBINE = 0;
+static constexpr int SHARPSHOOTER = 1;
+static constexpr int NONE = 1;
+static constexpr int SILENCER = 1;
+static constexpr int HOLOGRAPHIC = 2;
+
 int CXM8::CalcBodyParam(void)
 {
 	static BodyEnumInfo_t info[] =
@@ -52,42 +67,72 @@ int CXM8::CalcBodyParam(void)
 		{ 0, 1 },
 		{ 0, 1 },
 
-		{ 0, 2 },	// optical sight= 17;
-		{ 0, 2 },	// steel sight	= 18;
-		{ 0, 2 },	// selector		= 19;
+		{ 0, 3 },	// sight		= 17;
+		{ 0, 2 },	// laser		= 18;
+		{ 0, 2 },	// muzzle		= 19;
+		{ 0, 2 },	// steel sight	= 20;
+		{ 0, 2 },	// selector		= 21;
 	};
 
 	// this model requires all parts set to 0 in order to play changing anim.
 	if (m_bitsFlags & WPNSTATE_XM8_CHANGING)
 	{
-		info[12].body = 0;
-		info[13].body = 0;
-		info[17].body = 0;
-		info[18].body = 0;
+		info[BARREL1].body = CARBINE;
+		info[BARREL2].body = CARBINE;
+		info[SIGHT].body = OPTIC;
+		info[STEELSIGHT].body = FLIPPED_UP;
 	}
 	else
 	{
 		// only consider variation when not morphing..
 		switch (m_iVariation)
 		{
-		case Role_Sharpshooter:
-			// the sharpshooter's version contains a XM8 sharpshooter optical sight.
-			// filpped down steel sight.
+		case Role_SWAT:
+		case Role_Medic:
+		case Role_MadScientist:
+			// electronic sight
+			info[BARREL1].body = CARBINE;
+			info[BARREL2].body = CARBINE;
+			info[SIGHT].body = HOLOGRAPHIC;
+			info[LASER].body = FALSE;
+			info[MUZZLE].body = FALSE;
+			info[STEELSIGHT].body = NONE;
+			break;
 
-			info[12].body = 1;
-			info[13].body = 1;
-			info[17].body = 0;
-			info[18].body = 1;
+		case Role_Assassin:
+			// silencer
+			// electronic sight
+			info[BARREL1].body = CARBINE;
+			info[BARREL2].body = CARBINE;
+			info[SIGHT].body = HOLOGRAPHIC;
+			info[LASER].body = FALSE;
+			info[MUZZLE].body = SILENCER;
+			info[STEELSIGHT].body = NONE;
+			break;
+
+		case Role_Sharpshooter:
+			// sharpshooter barrel.
+			// optic
+			// laser
+
+			info[BARREL1].body = SHARPSHOOTER;
+			info[BARREL2].body = SHARPSHOOTER;
+			info[SIGHT].body = OPTIC;
+			info[LASER].body = TRUE;
+			info[MUZZLE].body = FALSE;
+			info[STEELSIGHT].body = NONE;
 			break;
 
 		default:
 			// by default, this weapon has no optical sight.
 			// filpped up steel sight.
 
-			info[12].body = 0;
-			info[13].body = 0;
-			info[17].body = 1;
-			info[18].body = 0;
+			info[BARREL1].body = CARBINE;
+			info[BARREL2].body = CARBINE;
+			info[SIGHT].body = NONE;
+			info[LASER].body = FALSE;
+			info[MUZZLE].body = FALSE;
+			info[STEELSIGHT].body = FLIPPED_UP;
 			break;
 		}
 	}
@@ -155,9 +200,16 @@ void CXM8::SecondaryAttack()
 {
 	switch (m_iVariation)
 	{
+	case Role_SWAT:
+	case Role_Medic:
+	case Role_MadScientist:
+	case Role_Assassin:
+		// ELECTRONIC.
+		DefaultSteelSight(Vector(-6.12f, -4, 2.05f), 80, 8.0f);
+		break;
+
 	case Role_Sharpshooter:
 		// OPTICAL.
-		//DefaultSteelSight(Vector(-3.06f, -2, 1.142f), 50, 8.0f);
 		DefaultScopeSight(Vector(-6.12f, -4, 2.284f), 40);
 		break;
 

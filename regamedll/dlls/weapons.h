@@ -869,6 +869,7 @@ constexpr float MK46_DRAW_FIRST_TIME	= 1.68F;
 constexpr float MK46_RELOAD_TIME		= 6.767f;
 constexpr float MK46_RELOAD_EMPTY_TIME	= 6.232f;
 constexpr float MK46_HOLSTER_TIME		= 0.6F;
+constexpr float MK46_INSPECTION_TIME	= 1.5556f;
 constexpr float MK46_DASH_ENTER_TIME	= 0.68F;
 constexpr float MK46_DASH_EXIT_TIME		= 0.68F;
 constexpr float MK46_RPM				= 750.0f;
@@ -889,6 +890,7 @@ enum mk46_e
 	MK46_DRAW,
 	MK46_JUMP,
 	MK46_HOLSTER,
+	MK46_INSPECTION,
 	MK46_BLOCK_UP,
 	MK46_BLOCK_DOWN,
 	MK46_HANDS_ON,
@@ -916,7 +918,7 @@ public:	// CL exclusive functions.
 public:	// basic logic funcs
 	virtual bool	Deploy			(void);
 	virtual void	PrimaryAttack	(void);
-	virtual void	SecondaryAttack	(void)	{ return DefaultSteelSight(Vector(-4.08f, -4, 0), 85, 7.5F); }
+	virtual void	SecondaryAttack	(void);
 	virtual void	WeaponIdle		(void)	{ return DefaultIdle(MK46_DASHING); }
 	virtual bool	Reload			(void);
 	virtual bool	HolsterStart	(void)	{ return DefaultHolster(MK46_HOLSTER, MK46_HOLSTER_TIME); }

@@ -26,29 +26,89 @@ void CMK46::Precache()
 
 #else
 
+static constexpr int	SIGHT = 7;
+static constexpr int	MUZZLE = 8;
+static constexpr int	LASER = 9;
+
+static constexpr int	REDDOT = 3;
+static constexpr int	ROUNDED = 1;
+static constexpr int	HOLOGRAPHIC = 2;
+static constexpr int	ACOG = 4;
+static constexpr int	BREAKER = 2;
+static constexpr int	SILENCER = 1;
+
 int CMK46::CalcBodyParam(void)
 {
-	BodyEnumInfo_t info[] =
+	static BodyEnumInfo_t info[] =
 	{
 		{ 0, 2 },	// hands		= 0;
 		{ 0, 1 },
+		{ 0, 1 },	// sleeve		= 2;
 
-		{ 0, 1 },	// weapon		= 2;
+		{ 0, 1 },	// weapon		= 3;
 		{ 0, 1 },
 		{ 0, 1 },
 
-		{ 0, 16 },	// bullets		= 5;
-		{ 0, 6 },	// optical sight= 6;
-		{ 0, 4 },	// muzzle		= 7;
-		{ 0, 2 },	// laser		= 8;
+		{ 0, 16 },	// bullets		= 6;
+		{ 0, 6 },	// optical sight= 7;
+		{ 0, 4 },	// muzzle		= 8;
+		{ 0, 2 },	// laser		= 9;
 	};
 
-	// by default, this weapon has:
-	// red dot optical sight.
-	// laser.
+	switch (m_iVariation)
+	{
+	case Role_Commander:
+	case Role_Godfather:
+		// holographic
+		info[SIGHT].body = HOLOGRAPHIC;
+		info[MUZZLE].body = FALSE;
+		info[LASER].body = FALSE;
+		break;
 
-	info[6].body = 3;
-	info[8].body = 1;
+	case Role_SWAT:
+		// openned red dot.
+		info[SIGHT].body = REDDOT;
+		info[MUZZLE].body = FALSE;
+		info[LASER].body = FALSE;
+		break;
+
+	case Role_Medic:
+	case Role_MadScientist:
+		// rounded red dot.
+		info[SIGHT].body = ROUNDED;
+		info[MUZZLE].body = FALSE;
+		info[LASER].body = FALSE;
+		break;
+
+	case Role_Sharpshooter:
+		// laser
+		// acog
+		info[SIGHT].body = ACOG;
+		info[MUZZLE].body = FALSE;
+		info[LASER].body = TRUE;
+		break;
+
+	case Role_LeadEnforcer:
+		// breaker
+		info[SIGHT].body = FALSE;
+		info[MUZZLE].body = BREAKER;
+		info[LASER].body = FALSE;
+		break;
+
+	case Role_Assassin:
+		// holographic
+		// silencer
+		info[SIGHT].body = HOLOGRAPHIC;
+		info[MUZZLE].body = SILENCER;
+		info[LASER].body = FALSE;
+		break;
+
+	default:
+		info[SIGHT].body = FALSE;
+		info[MUZZLE].body = FALSE;
+		info[LASER].body = FALSE;
+		break;
+	}
 
 	// as the magazine is getting lesser, this number is getting bigger. (later model)
 	info[5].body = Q_clamp(16 - m_iClip, 0, 15);
@@ -103,6 +163,35 @@ void CMK46::PrimaryAttack()
 	else
 	{
 		MK46Fire(0.03F * m_flAccuracy);
+	}
+}
+
+void CMK46::SecondaryAttack(void)
+{
+	switch (m_iVariation)
+	{
+	case Role_Commander:
+	case Role_Godfather:
+	case Role_Assassin:
+		DefaultSteelSight(Vector(-4.08f, -4, 0), 80, 7.5F);
+		break;
+
+	case Role_SWAT:
+		DefaultSteelSight(Vector(-4.04f, -4, -0.015f), 80, 10.0f);
+		break;
+
+	case Role_Medic:
+	case Role_MadScientist:
+		DefaultSteelSight(Vector(-4.025f, -4, 0.045f), 80, 7.5F);
+		break;
+
+	case Role_Sharpshooter:
+		DefaultSteelSight(Vector(-4.007f, -5, -0.7f), 55, 7.5F);
+		break;
+
+	default:
+		DefaultSteelSight(Vector(-4.02f, -4, 2.03f), 85, 7.5F);
+		break;
 	}
 }
 
@@ -212,6 +301,16 @@ bool CMK46::Reload()
 	{
 		m_flAccuracy = 0.2f;
 		return true;
+	}
+
+	// KF2 ???
+	if (m_pPlayer->pev->weaponanim != MK46_INSPECTION)
+	{
+		if (m_bInReload)
+			SecondaryAttack();
+
+		SendWeaponAnim(MK46_INSPECTION);
+		m_flTimeWeaponIdle = MK46_INSPECTION_TIME;
 	}
 
 	return false;

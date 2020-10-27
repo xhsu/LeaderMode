@@ -112,14 +112,25 @@ void CM1014::PostFrame(void)
 			m_flNextInsertAnim = gpGlobals->time + M1014_TIME_INSERT;
 		}
 
-		if (m_flNextInsertionSFX <= gpGlobals->time && m_iClip < m_pItemInfo->m_iMaxClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] > 0)	// place this before the ammo add. Or the m_bStartFromEmpty flag will be erased.
+		// place this before the ammo add. Or the m_bStartFromEmpty flag will be erased.
+		// the additional clip and ammo condition is not needed in this case.
+		if (m_flNextInsertionSFX <= gpGlobals->time)	
 		{
 #ifndef CLIENT_DLL
 			// SFX should be played at SV
 			// original API: pitch: 85 + RANDOM(0, 31)
 			UTIL_Play3DSoundWithHost2D(m_pPlayer, m_pPlayer->GetGunPosition(), 512, m_bStartFromEmpty ? SSZ_M1014_SIDELOAD_SFX : SSZ_M1014_INSERT_SFX);
 #endif
-			m_flNextInsertionSFX = gpGlobals->time + M1014_TIME_INSERT;
+			if (m_bStartFromEmpty)
+			{
+				// this needs to treat specially.
+				m_flNextInsertionSFX = gpGlobals->time + (M1014_TIME_START_RELOAD_FIRST - M1014_TIME_SIDELOAD_SFX) + (M1014_TIME_INSERT - M1014_TIME_INSERT_SFX);
+
+				// do not cancel the m_bStartFromEmpty flag.
+				// the function below still needs it.
+			}
+			else
+				m_flNextInsertionSFX = gpGlobals->time + M1014_TIME_INSERT;
 		}
 
 		if (m_flNextAddAmmo <= gpGlobals->time && m_iClip < m_pItemInfo->m_iMaxClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] > 0)
@@ -266,7 +277,7 @@ bool CM1014::Reload(void)
 	if (m_bInReload)
 		return false;
 
-	if (m_iClip >= m_pItemInfo->m_iMaxClip || m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
+	if (m_iClip >= m_pItemInfo->m_iMaxClip || m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_pPlayer->pev->button & IN_ATTACK)	// you just can't hold ATTACK and attempts reload.
 	{
 		// KF2 ???
 		if (m_iClip <= 0 && m_pPlayer->pev->weaponanim != M1014_INSPECTION)	// inspection anim.
