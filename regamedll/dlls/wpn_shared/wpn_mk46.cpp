@@ -26,6 +26,7 @@ void CMK46::Precache()
 
 #else
 
+static constexpr int	BULLETS = 6;
 static constexpr int	SIGHT = 7;
 static constexpr int	MUZZLE = 8;
 static constexpr int	LASER = 9;
@@ -111,14 +112,14 @@ int CMK46::CalcBodyParam(void)
 	}
 
 	// as the magazine is getting lesser, this number is getting bigger. (later model)
-	info[5].body = Q_clamp(16 - m_iClip, 0, 15);
+	info[BULLETS].body = Q_clamp(16 - m_iClip, 0, 15);
 
 	// in EMPTY reload, after we remove the empty mag, the new mag should be full of bullets.
 	if (m_bInReload && m_bitsFlags & WPNSTATE_RELOAD_EMPTY)
 	{
 		if (m_pPlayer->m_flNextAttack < 3.77f)	// in this anim, a new mag was taken out after around 2.46. thus, 6.23 - 2.46 ~= 3.77f.
 		{
-			info[5].body = 0;	// a full loaded bullets chain.
+			info[BULLETS].body = 0;	// a full loaded bullets chain.
 		}
 	}
 
@@ -173,7 +174,7 @@ void CMK46::SecondaryAttack(void)
 	case Role_Commander:
 	case Role_Godfather:
 	case Role_Assassin:
-		DefaultSteelSight(Vector(-4.08f, -4, 0), 80, 7.5F);
+		DefaultSteelSight(Vector(-4.02f, -4, 0.505f), 80, 7.5F);
 		break;
 
 	case Role_SWAT:
@@ -186,7 +187,7 @@ void CMK46::SecondaryAttack(void)
 		break;
 
 	case Role_Sharpshooter:
-		DefaultSteelSight(Vector(-4.007f, -5, -0.7f), 55, 7.5F);
+		DefaultSteelSight(Vector(-4.007f, -5, 0.7f), 55, 7.5F);
 		break;
 
 	default:
@@ -289,7 +290,7 @@ void CMK46::MK46Fire(float flSpread, float flCycleTime)
 
 bool CMK46::Reload()
 {
-	if (m_iClip < 13)	// at this point, we shall use full_reload. (accroading to model)
+	if (m_iClip < 13 && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] > 0)	// at this point, we shall use full_reload. (accroading to model)
 	{
 		m_iClip = 0;
 	}
