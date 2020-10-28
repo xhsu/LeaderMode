@@ -341,7 +341,7 @@ void CBaseWeapon::Think(void)
 		Vector vecRight = RANDOM_FLOAT(50, 70) * gpGlobals->v_right;
 
 		Vector vecShellVelocity = (m_pPlayer->pev->velocity + vecRight + vecUp) + gpGlobals->v_forward * 25;
-		int soundType = (m_iId == WEAPON_M1014 || m_iId == WEAPON_KSG12) ? 2 : 1;
+		int soundType = (m_iId == WEAPON_M1014 || m_iId == WEAPON_KSG12 || m_iId == WEAPON_AA12) ? 2 : 1;
 
 		EjectBrass(m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs + gpGlobals->v_up * -9 + gpGlobals->v_forward * 16,
 			vecShellVelocity, m_pPlayer->pev->angles.yaw, m_pPlayer->m_iShellModelIndex, soundType, m_pPlayer->entindex());
@@ -358,6 +358,12 @@ void CBaseWeapon::Think(void)
 	{
 		DashEnd();
 	}
+
+	// non other condition matters. it's all packed in the QTS/QTR function.
+	if (m_pPlayer->m_afButtonPressed & IN_THROW)
+		QuickThrowStart(m_pPlayer->m_iUsingGrenadeId);
+	else if (m_pPlayer->m_afButtonReleased & IN_THROW)
+		QuickThrowRelease();
 }
 
 bool CBaseWeapon::AddToPlayer(CBasePlayer* pPlayer)
@@ -474,7 +480,6 @@ void CBaseWeapon::PostFrame()
 			{
 				m_bitsFlags |= WPNSTATE_QT_EXIT;
 				m_pPlayer->m_flNextAttack = C4_TIME_THROW - C4_TIME_THROW_SPAWN;
-				SERVER_PRINT(SharedVarArgs("%f\n", m_pPlayer->m_flNextAttack));
 
 				return;
 			}

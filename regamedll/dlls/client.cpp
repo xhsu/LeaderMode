@@ -2776,16 +2776,6 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 			{
 				OpenMenu_VoteTacticalSchemes(pPlayer);
 			}
-			else if (FStrEq(pcmd, "+qtg"))
-			{
-				if (pPlayer->m_pActiveItem)
-					pPlayer->m_pActiveItem->QuickThrowStart(pPlayer->m_iUsingGrenadeId);
-			}
-			else if (FStrEq(pcmd, "-qtg"))
-			{
-				if (pPlayer->m_pActiveItem)
-					pPlayer->m_pActiveItem->QuickThrowRelease();
-			}
 			else if (FStrEq(pcmd, "eqpselect"))
 			{
 				EquipmentIdType iId = (EquipmentIdType)Q_atoi(parg1);

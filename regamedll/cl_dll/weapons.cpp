@@ -323,6 +323,12 @@ void CBaseWeapon::Think(void)
 	{
 		DashEnd();
 	}
+
+	// non other condition matters. it's all packed in the QTS/QTR function.
+	if (m_pPlayer->m_afButtonPressed & IN_THROW)
+		QuickThrowStart(m_pPlayer->m_iUsingGrenadeId);
+	else if (m_pPlayer->m_afButtonReleased & IN_THROW)
+		QuickThrowRelease();
 }
 
 bool CBaseWeapon::AddToPlayer(CBasePlayer* pPlayer)
@@ -1271,10 +1277,7 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		//pCurrent->m_flStartThrow = time_point_t (duration_t (pfrom->fuser2));
 		//pCurrent->m_flReleaseThrow = time_point_t (duration_t (pfrom->fuser3));
 		//pCurrent->m_iSwing = pfrom->iuser1;
-
-		if (!(pCurrent->m_bitsFlags & WPNSTATE_QUICK_THROWING))	// FIXME: this line will block the grenade throwing function.
-			pCurrent->m_bitsFlags = pfrom->m_iWeaponState;
-
+		pCurrent->m_bitsFlags = pfrom->m_iWeaponState;
 		pCurrent->m_flLastFire = pfrom->m_fAimedDamage;
 		pCurrent->m_iShotsFired = pfrom->m_fInZoom;	// not directly used.
 	}
@@ -1403,9 +1406,9 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	// FIXME: this was working fine until the push-pop anim comes out. Why my predict code being override right on next frame?
 	// Make sure that weapon animation matches what the game .dll is telling us
 	//  over the wire ( fixes some animation glitches )
-	//if (g_runfuncs && (g_iCurViewModelAnim != to->client.weaponanim))
+	if (g_runfuncs && (g_iCurViewModelAnim != to->client.weaponanim))
 		// Force a fixed anim down to viewmodel. LUNA: FIXME: wired, how did that happens? it seems impossible.
-		//g_pCurWeapon->SendWeaponAnim(to->client.weaponanim);
+		g_pCurWeapon->SendWeaponAnim(to->client.weaponanim);
 
 	if (g_pCurWeapon->m_iPrimaryAmmoType < AMMO_MAXTYPE)
 	{
@@ -1553,32 +1556,6 @@ void CommandFunc_Melee(void)
 
 /*
 =====================
-CommandFunc_QuickThrowPress
-=====================
-*/
-void CommandFunc_QuickThrowPress(void)
-{
-	if (g_pCurWeapon)
-		g_pCurWeapon->QuickThrowStart(gPseudoPlayer.m_iUsingGrenadeId);
-
-	gEngfuncs.pfnServerCmd("+qtg\n");
-}
-
-/*
-=====================
-CommandFunc_QuickThrowRelease
-=====================
-*/
-void CommandFunc_QuickThrowRelease(void)
-{
-	if (g_pCurWeapon)
-		g_pCurWeapon->QuickThrowRelease();
-
-	gEngfuncs.pfnServerCmd("-qtg\n");
-}
-
-/*
-=====================
 Wpn_Init
 =====================
 */
@@ -1587,6 +1564,4 @@ void Wpn_Init()
 	cl_holdtoaim = gEngfuncs.pfnRegisterVariable("cl_holdtoaim", "0", FCVAR_ARCHIVE | FCVAR_CLIENTDLL | FCVAR_USERINFO);
 
 	gEngfuncs.pfnAddCommand("melee", CommandFunc_Melee);
-	gEngfuncs.pfnAddCommand("+qtg", CommandFunc_QuickThrowPress);
-	gEngfuncs.pfnAddCommand("-qtg", CommandFunc_QuickThrowRelease);
 }
