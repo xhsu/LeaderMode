@@ -11,8 +11,6 @@ cvar_t* m_yaw;
 cvar_t* m_forward;
 cvar_t* m_side;
 
-cvar_t* lookstrafe;
-cvar_t* lookspring;
 cvar_t* cl_pitchup;
 cvar_t* cl_pitchdown;
 cvar_t* cl_upspeed;
@@ -36,7 +34,6 @@ kbutton_t	in_lookup;
 kbutton_t	in_lookdown;
 kbutton_t	in_moveleft;
 kbutton_t	in_moveright;
-kbutton_t	in_strafe;
 kbutton_t	in_speed;
 kbutton_t	in_use;
 kbutton_t	in_jump;
@@ -46,7 +43,6 @@ kbutton_t	in_up;
 kbutton_t	in_down;
 kbutton_t	in_duck;
 kbutton_t	in_reload;
-kbutton_t	in_alt1;
 kbutton_t	in_score;
 kbutton_t	in_break;
 kbutton_t	in_graph;  // Display the netgraph
@@ -54,7 +50,6 @@ kbutton_t	in_graph;  // Display the netgraph
 kblist_t* g_kbkeys = NULL;
 
 int	in_impulse = 0;
-int	in_cancel = 0;
 
 /*
 ============
@@ -184,12 +179,10 @@ void CL_AdjustAngles(float frametime, Vector viewangles)
 		speed = frametime * cl_anglespeedkey->value;
 	}
 
-	if (!(in_strafe.state & 1))
-	{
-		viewangles[YAW] -= speed * cl_yawspeed->value * CL_KeyState(&in_right);
-		viewangles[YAW] += speed * cl_yawspeed->value * CL_KeyState(&in_left);
-		viewangles[YAW] = anglemod(viewangles[YAW]);
-	}
+	viewangles[YAW] -= speed * cl_yawspeed->value * CL_KeyState(&in_right);
+	viewangles[YAW] += speed * cl_yawspeed->value * CL_KeyState(&in_left);
+	viewangles[YAW] = anglemod(viewangles[YAW]);
+
 	if (in_klook.state & 1)
 	{
 		//V_StopPitchDrift ();
@@ -263,11 +256,6 @@ int CL_ButtonBits(bool bResetState)
 		bits |= IN_USE;
 	}
 
-	if (in_cancel)
-	{
-		bits |= IN_CANCEL;
-	}
-
 	if (in_left.state & 3)
 	{
 		bits |= IN_LEFT;
@@ -296,11 +284,6 @@ int CL_ButtonBits(bool bResetState)
 	if (in_reload.state & 3)
 	{
 		bits |= IN_RELOAD;
-	}
-
-	if (in_alt1.state & 3)
-	{
-		bits |= IN_ALT1;
 	}
 
 	if (in_score.state & 3)
@@ -333,7 +316,6 @@ int CL_ButtonBits(bool bResetState)
 		in_moveright.state &= ~2;
 		in_attack2.state &= ~2;
 		in_reload.state &= ~2;
-		in_alt1.state &= ~2;
 		in_score.state &= ~2;
 		in_speed.state &= ~2;
 	}
@@ -367,12 +349,6 @@ void CL_CreateMove2(float frametime, usercmd_s* cmd, int active)
 		memset(cmd, 0, sizeof(*cmd));
 
 		gEngfuncs.SetViewAngles((float*)viewangles);
-
-		if (in_strafe.state & 1)
-		{
-			cmd->sidemove += cl_sidespeed->value * CL_KeyState (&in_right);
-			cmd->sidemove -= cl_sidespeed->value * CL_KeyState (&in_left);
-		}
 
 		cmd->sidemove += cl_sidespeed->value * CL_KeyState (&in_moveright);
 		cmd->sidemove -= cl_sidespeed->value * CL_KeyState (&in_moveleft);
@@ -624,8 +600,6 @@ void IN_MoverightUp(void)
 }
 void IN_SpeedDown(void) { KeyDown(&in_speed); }
 void IN_SpeedUp(void) { KeyUp(&in_speed); }
-void IN_StrafeDown(void) { KeyDown(&in_strafe); }
-void IN_StrafeUp(void) { KeyUp(&in_strafe); }
 
 void IN_Attack2Down(void)
 {
@@ -656,8 +630,6 @@ void IN_DuckDown(void)
 void IN_DuckUp(void) { KeyUp(&in_duck); }
 void IN_ReloadDown(void) { KeyDown(&in_reload); }
 void IN_ReloadUp(void) { KeyUp(&in_reload); }
-void IN_Alt1Down(void) { KeyDown(&in_alt1); }
-void IN_Alt1Up(void) { KeyUp(&in_alt1); }
 void IN_GraphDown(void) { KeyDown(&in_graph); }
 void IN_GraphUp(void) { KeyUp(&in_graph); }
 
@@ -670,18 +642,11 @@ void IN_AttackDown(void)
 void IN_AttackUp(void)
 {
 	KeyUp(&in_attack);
-	in_cancel = 0;
-}
-
-// Special handling
-void IN_Cancel(void)
-{
-	in_cancel = 1;
 }
 
 void IN_Impulse (void)
 {
-	in_impulse = atoi(gEngfuncs.Cmd_Argv(1));
+	in_impulse = Q_atoi(gEngfuncs.Cmd_Argv(1));
 }
 
 void IN_ScoreDown(void) { KeyDown(&in_score); }
@@ -721,8 +686,6 @@ void InitInput(void)
 	gEngfuncs.pfnAddCommand ("-lookup", IN_LookupUp);
 	gEngfuncs.pfnAddCommand ("+lookdown", IN_LookdownDown);
 	gEngfuncs.pfnAddCommand ("-lookdown", IN_LookdownUp);
-	gEngfuncs.pfnAddCommand ("+strafe", IN_StrafeDown);
-	gEngfuncs.pfnAddCommand ("-strafe", IN_StrafeUp);
 	gEngfuncs.pfnAddCommand ("+moveleft", IN_MoveleftDown);
 	gEngfuncs.pfnAddCommand ("-moveleft", IN_MoveleftUp);
 	gEngfuncs.pfnAddCommand ("+moveright", IN_MoverightDown);
@@ -748,8 +711,6 @@ void InitInput(void)
 	gEngfuncs.pfnAddCommand ("-duck", IN_DuckUp);
 	gEngfuncs.pfnAddCommand ("+reload", IN_ReloadDown);
 	gEngfuncs.pfnAddCommand ("-reload", IN_ReloadUp);
-	gEngfuncs.pfnAddCommand ("+alt1", IN_Alt1Down);
-	gEngfuncs.pfnAddCommand ("-alt1", IN_Alt1Up);
 	gEngfuncs.pfnAddCommand ("+score", IN_ScoreDown);
 	gEngfuncs.pfnAddCommand ("-score", IN_ScoreUp);
 	gEngfuncs.pfnAddCommand ("+graph", IN_GraphDown);
@@ -757,8 +718,6 @@ void InitInput(void)
 	gEngfuncs.pfnAddCommand ("+break", IN_BreakDown);
 	gEngfuncs.pfnAddCommand ("-break", IN_BreakUp);
 
-	lookstrafe = gEngfuncs.pfnRegisterVariable ("lookstrafe", "0", FCVAR_ARCHIVE);
-	lookspring = gEngfuncs.pfnRegisterVariable ("lookspring", "0", FCVAR_ARCHIVE);
 	cl_anglespeedkey = gEngfuncs.pfnRegisterVariable ("cl_anglespeedkey", "0.67", 0);
 	cl_yawspeed = gEngfuncs.pfnRegisterVariable ("cl_yawspeed", "210", 0);
 	cl_pitchspeed = gEngfuncs.pfnRegisterVariable ("cl_pitchspeed", "225", 0);

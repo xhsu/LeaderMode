@@ -20,15 +20,11 @@ struct kblist_t
 };
 
 extern kbutton_t	in_mlook;
-extern kbutton_t	in_strafe;
 
 extern cvar_t* m_pitch;
 extern cvar_t* m_yaw;
 extern cvar_t* m_forward;
 extern cvar_t* m_side;
-
-extern cvar_t* lookstrafe;
-extern cvar_t* lookspring;
 extern cvar_t* cl_pitchup;
 extern cvar_t* cl_pitchdown;
 extern cvar_t* cl_upspeed;

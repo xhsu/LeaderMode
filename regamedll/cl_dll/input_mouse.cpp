@@ -291,29 +291,15 @@ void IN_MouseMove (float frametime, usercmd_t* cmd)
 		IN_ScaleMouse(&mouse_x, &mouse_y);
 
 		// add mouse X/Y movement to cmd
-		if ((in_strafe.state & 1) || (lookstrafe->value && (in_mlook.state & 1)))
-			cmd->sidemove += m_side->value * mouse_x;
-		else
-			viewangles[YAW] -= m_yaw->value * mouse_x;
+		viewangles[YAW] -= m_yaw->value * mouse_x;
 
-		if ((in_mlook.state & 1) && !(in_strafe.state & 1))
+		if ((in_mlook.state & 1))
 		{
 			viewangles[PITCH] += m_pitch->value * mouse_y;
 			if (viewangles[PITCH] > cl_pitchdown->value)
 				viewangles[PITCH] = cl_pitchdown->value;
 			if (viewangles[PITCH] < -cl_pitchup->value)
 				viewangles[PITCH] = -cl_pitchup->value;
-		}
-		else
-		{
-			if ((in_strafe.state & 1) && gEngfuncs.IsNoClipping())
-			{
-				cmd->upmove -= m_forward->value * mouse_y;
-			}
-			else
-			{
-				cmd->forwardmove -= m_forward->value * mouse_y;
-			}
 		}
 
 		// if the mouse has moved, force it to the center, so there's room to move
