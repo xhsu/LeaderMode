@@ -121,7 +121,7 @@ int CFN57::CalcBodyParam(void)
 			info[SIGHT].body = 2;
 	}
 	else
-		info[5].body = 0;
+		info[SLIDE].body = 0;
 
 	return CalcBody(info, _countof(info));	// elements count of the info[].
 }
@@ -265,7 +265,7 @@ void CFN57::FiveSevenFire(float flSpread, float flCycleTime)
 	Q_memset(&args, NULL, sizeof(args));
 
 	args.angles = m_pPlayer->pev->v_angle;
-	args.bparam1 = m_iClip == 0;	// on host ev sending, the bparams are used for first-personal shooting anim.
+	args.bparam1 = m_iClip > 0;	// on host ev sending, the bparams are used for first-personal shooting anim.
 	args.bparam2 = m_bInZoom;
 	args.ducking = gEngfuncs.pEventAPI->EV_LocalPlayerDucking();
 	args.entindex = gEngfuncs.GetLocalPlayer()->index;

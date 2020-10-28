@@ -1303,7 +1303,7 @@ DECLARE_EVENT(Fire57)
 		{
 			// on host ev sending, the bparams are used for first-personal shooting anim.
 			int iAnim = 0;
-			if (args->bparam1)	// m_iClip >= 0
+			if (args->bparam1)	// m_iClip > 0
 			{
 				if (args->bparam2)	// m_bInZoom
 					iAnim = FIVESEVEN_AIM_SHOOT;
