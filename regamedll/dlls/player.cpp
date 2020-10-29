@@ -2942,8 +2942,6 @@ void CBasePlayer::PlayerDeathThink()
 	StopAnimation();
 	pev->effects |= EF_NOINTERP;
 
-	BOOL fAnyButtonDown = (pev->button & ~IN_SCORE);
-
 	// do not make a corpse if the player goes to respawn.
 	// LUNA: never make a body if the body is not there.
 	if (pev->deadflag != DEAD_RESPAWNABLE && !(pev->effects & EF_NODRAW))
@@ -2963,7 +2961,7 @@ void CBasePlayer::PlayerDeathThink()
 	// wait for all buttons released
 	if (pev->deadflag == DEAD_DEAD && m_iTeam != UNASSIGNED && m_iTeam != SPECTATOR)
 	{
-		if (fAnyButtonDown)
+		if (pev->button)
 			return;
 
 		pev->nextthink = gpGlobals->time + 0.1f;

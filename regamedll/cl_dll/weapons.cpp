@@ -28,6 +28,7 @@ bool g_bHoldingKnife = false;
 bool g_bFreezeTimeOver = false;
 bool g_bInBombZone = false;
 bool g_bHoldingShield = false;
+bool g_bIsBlocked = false;	// this should be override, but tell the server!
 
 // the construction function of pseudo player and gpGlobals
 CBasePlayer::CBasePlayer()
@@ -551,6 +552,43 @@ void CBaseWeapon::PostFrame()
 		m_bitsFlags &= ~WPNSTATE_RELOAD_EMPTY;	// remove it anyway.
 	}
 
+	// CL EXCLUSIVE!!
+	// Muzzle block check. Prevent players from hiding or peaking between covers/murder holes.
+	// That's a DISHONOUR behavior. I want to stop it.
+	if (m_flBlockCheck <= gpGlobals->time)
+	{
+		pmtrace_t tr;
+		Vector vecMuzzle = g_pViewEnt->attachment[0]; // this is always the muzzle.
+		Vector vecLastMuzzle = g_pparams.vieworg + g_pparams.forward * m_vecBlockOffset.x + g_pparams.right * m_vecBlockOffset.y + g_pparams.up * m_vecBlockOffset.z;
+
+		// Why we have to use offsets?
+		// If you directly Trace from player eyes to muzzle, once the BLOCK_UP anim is played, the muzzle origin will change due to this new animation.
+		// Hence, the BLOCKED flag will imminently be removed because of the BLOCK_UP anim. Which leads to BLOCK_DOWN to be played.
+		// It would become a "twitch" on screen.
+		if (m_vecBlockOffset.LengthSquared() < 0.1f)
+			vecLastMuzzle = vecMuzzle;	// first use, avoid bug.
+
+		/*UTIL_TraceLine(g_pparams.vieworg, vecMuzzle, PM_STUDIO_BOX, -1, &tr, m_pPlayer->index, 2);*/
+
+		gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(false, true);
+		gEngfuncs.pEventAPI->EV_SetTraceHull(2);
+		gEngfuncs.pEventAPI->EV_PlayerTrace(g_pparams.vieworg, vecLastMuzzle, PM_STUDIO_BOX, -1, &tr);
+
+		bool save = m_bBlocked;
+		m_bBlocked = !!(tr.fraction < 1);
+
+		if (!save && m_bBlocked)	// a new blocked situation.
+		{
+			vecMuzzle -= g_pparams.vieworg;	// become a offset first.
+			m_vecBlockOffset.x = DotProduct(vecMuzzle, g_pparams.forward);
+			m_vecBlockOffset.y = DotProduct(vecMuzzle, g_pparams.right);
+			m_vecBlockOffset.z = DotProduct(vecMuzzle, g_pparams.up);
+		}
+
+		// check interval.
+		m_flBlockCheck = gpGlobals->time + 0.05f;
+	}
+
 	// LUNA: there are some problems regarding client prediction.
 	// sometimes, the client side m_flNextPrimaryAttack and m_flNextSecondaryAttack would be wirely re-zero and induce multiple bullet hole VFX bug.
 	// thus, I decide to use message instead. (gmsgShoot and gmsgSteelSight)
@@ -1035,6 +1073,30 @@ void CBaseWeapon::DefaultDashEnd(int iEnterAnim, float flEnterTime, int iExitAni
 	// remove the exaggerating shaking vfx.
 	g_flGunBobAmplitudeModifier = 1.0f;
 #endif
+}
+
+bool CBaseWeapon::DefaultSetLHand(bool bAppear, int iLHandUpAnim, float flLHandUpTime, int iLHandDownAnim, float flLHandDownTime)
+{
+	if (bAppear && m_bitsFlags & WPNSTATE_NO_LHAND)
+	{
+		SendWeaponAnim(iLHandUpAnim);
+		m_pPlayer->m_flNextAttack = flLHandUpTime;
+		m_flTimeWeaponIdle = flLHandUpTime;
+		m_bitsFlags &= ~WPNSTATE_NO_LHAND;
+
+		return true;
+	}
+	else if (!(m_bitsFlags & WPNSTATE_NO_LHAND))
+	{
+		SendWeaponAnim(iLHandDownAnim);
+		m_pPlayer->m_flNextAttack = flLHandDownTime;
+		m_flTimeWeaponIdle = flLHandDownTime;
+		m_bitsFlags |= WPNSTATE_NO_LHAND;
+
+		return true;
+	}
+
+	return false;
 }
 
 void CBaseWeapon::SendWeaponAnim(int iAnim, bool bSkipLocal)

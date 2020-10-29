@@ -287,11 +287,6 @@ int CL_ButtonBits(bool bResetState)
 		bits |= IN_RELOAD;
 	}
 
-	if (in_score.state & 3)
-	{
-		bits |= IN_SCORE;
-	}
-
 	if (in_speed.state & 3)
 	{
 		bits |= IN_RUN;
@@ -302,10 +297,9 @@ int CL_ButtonBits(bool bResetState)
 		bits |= IN_THROW;
 	}
 
-	// Dead or in intermission? Shore scoreboard, too
-	if (CL_IsDead() || gHUD::m_bIntermission)
+	if (g_bIsBlocked)
 	{
-		bits |= IN_SCORE;
+		bits |= IN_BLOCK;
 	}
 
 	if (bResetState)

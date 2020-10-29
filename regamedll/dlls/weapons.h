@@ -52,6 +52,27 @@
 												}
 #endif
 
+#define DECLARE_STANDARD_LHAND_FUNC(x)			bool C##x::SetLeftHand(bool bAppear)	\
+												{	\
+													if (bAppear && m_bitsFlags & WPNSTATE_NO_LHAND)	\
+													{	\
+														SendWeaponAnim(x##_LHAND_UP);	\
+														m_pPlayer->m_flNextAttack = x##_LHAND_UP_TIME;	\
+														m_flTimeWeaponIdle = x##_LHAND_UP_TIME;	\
+														m_bitsFlags &= ~WPNSTATE_NO_LHAND;	\
+														return true;	\
+													}	\
+													else if (!(m_bitsFlags & WPNSTATE_NO_LHAND))	\
+													{	\
+														SendWeaponAnim(x##_LHAND_DOWN);	\
+														m_pPlayer->m_flNextAttack = x##_LHAND_DOWN_TIME;	\
+														m_flTimeWeaponIdle = x##_LHAND_DOWN_TIME;	\
+														m_bitsFlags |= WPNSTATE_NO_LHAND;	\
+														return true;	\
+													}	\
+													return false;	\
+												}
+
 class CBaseEntity;
 class CBasePlayer;
 class CWeaponBox;
@@ -229,6 +250,7 @@ public:	// basic API and behaviour for weapons.
 	virtual	void	DefaultScopeSight(const Vector& vecOfs, int iFOV, float flEnterScopeDelay = 0.25f, float flFadeFromBlack = 5.0f, float flDriftingSpeed = 10.0f, float flNextSecondaryAttack = 0.3f);
 	virtual	void	DefaultDashStart(int iEnterAnim, float flEnterTime);
 	virtual	void	DefaultDashEnd	(int iEnterAnim, float flEnterTime, int iExitAnim, float flExitTime);
+	virtual bool	DefaultSetLHand	(bool bAppear, int iLHandUpAnim, float flLHandUpTime, int iLHandDownAnim, float flLHandDownTime);
 
 public:	// util funcs
 	inline	bool	IsDead			(void) { return !!(m_bitsFlags & WPNSTATE_DEAD); }
@@ -245,7 +267,7 @@ public:	// util funcs
 	virtual void	KickBack		(float up_base, float lateral_base, float up_modifier, float lateral_modifier, float up_max, float lateral_max, int direction_change);	// recoil
 	virtual void	ResetModel		(void) { }	// used after Melee() and QuickThrowRelease().
 	virtual bool	SetVariation	(RoleTypes iType) { m_iVariation = iType; return true; }
-	virtual void	SetLeftHand		(bool bAppear) { }
+	virtual bool	SetLeftHand		(bool bAppear) { return false; }
 };
 
 
@@ -1376,7 +1398,7 @@ public:	// util funcs
 	virtual void	PushAnim		(void);
 	virtual void	PopAnim			(void);
 	virtual void	ResetModel		(void);
-	virtual void	SetLeftHand		(bool bAppear);
+	virtual bool	SetLeftHand		(bool bAppear);
 };
 
 #define M45A1_VIEW_MODEL	"models/weapons/v_m45a1.mdl"

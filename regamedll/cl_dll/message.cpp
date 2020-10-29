@@ -1168,14 +1168,16 @@ MSG_FUNC(Sound)
 		Q_strcpy(szSample, READ_STRING());
 	}
 
+	int iPitch = READ_BYTE();
+
 	// play the sound
 	if (bUsing3D)
 	{
-		Play3DSound(szSample, 1.0f, flRange, vecSrc);
+		Play3DSound(szSample, 1.0f, flRange, vecSrc, iPitch);
 	}
 	else
 	{
-		PlaySound(szSample);
+		PlaySound(szSample, iPitch);
 	}
 
 	return TRUE;

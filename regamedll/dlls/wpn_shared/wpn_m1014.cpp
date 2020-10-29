@@ -119,7 +119,7 @@ void CM1014::PostFrame(void)
 #ifndef CLIENT_DLL
 			// SFX should be played at SV
 			// original API: pitch: 85 + RANDOM(0, 31)
-			UTIL_Play3DSoundWithHost2D(m_pPlayer, m_pPlayer->GetGunPosition(), 512, m_bStartFromEmpty ? SSZ_M1014_SIDELOAD_SFX : SSZ_M1014_INSERT_SFX);
+			UTIL_Play3DSoundWithHost2D(m_pPlayer, m_pPlayer->GetGunPosition(), 512, m_bStartFromEmpty ? SSZ_M1014_SIDELOAD_SFX : SSZ_M1014_INSERT_SFX, RANDOM_LONG(85, 116));
 #endif
 			if (m_bStartFromEmpty)
 			{
@@ -338,20 +338,6 @@ void CM1014::PopAnim(void)
 	m_flNextInsertionSFX = gpGlobals->time - m_Stack2.m_flNextInsertionSFX;
 }
 
-void CM1014::SetLeftHand(bool bAppear)
-{
-	if (bAppear && m_bitsFlags & WPNSTATE_NO_LHAND)
-	{
-		SendWeaponAnim(M1014_LHAND_UP);
-		m_pPlayer->m_flNextAttack = Q_max(M1014_LHAND_UP_TIME, C4_TIME_DRAW);
-		m_bitsFlags &= ~WPNSTATE_NO_LHAND;
-	}
-	else if (!(m_bitsFlags & WPNSTATE_NO_LHAND))
-	{
-		SendWeaponAnim(M1014_LHAND_DOWN);
-		m_pPlayer->m_flNextAttack = Q_max(M1014_LHAND_DOWN_TIME, C4_TIME_HOLSTER);
-		m_bitsFlags |= WPNSTATE_NO_LHAND;
-	}
-}
-
 DECLARE_STANDARD_RESET_MODEL_FUNC(M1014)
+
+DECLARE_STANDARD_LHAND_FUNC(M1014)

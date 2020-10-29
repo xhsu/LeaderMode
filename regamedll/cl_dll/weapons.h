@@ -122,6 +122,7 @@ extern bool g_bHoldingKnife;
 extern bool g_bFreezeTimeOver;
 extern bool g_bInBombZone;
 extern bool g_bHoldingShield;
+extern bool g_bIsBlocked;	// this should be override, but tell the server!
 
 // pseudo-utils
 void UTIL_MakeVectors(const Vector& vec);

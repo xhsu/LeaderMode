@@ -1189,6 +1189,30 @@ void CBaseWeapon::DefaultDashEnd(int iEnterAnim, float flEnterTime, int iExitAni
 #endif
 }
 
+bool CBaseWeapon::DefaultSetLHand(bool bAppear, int iLHandUpAnim, float flLHandUpTime, int iLHandDownAnim, float flLHandDownTime)
+{
+	if (bAppear && m_bitsFlags & WPNSTATE_NO_LHAND)
+	{
+		SendWeaponAnim(iLHandUpAnim);
+		m_pPlayer->m_flNextAttack = flLHandUpTime;
+		m_flTimeWeaponIdle = flLHandUpTime;
+		m_bitsFlags &= ~WPNSTATE_NO_LHAND;
+
+		return true;
+	}
+	else if (!(m_bitsFlags & WPNSTATE_NO_LHAND))
+	{
+		SendWeaponAnim(iLHandDownAnim);
+		m_pPlayer->m_flNextAttack = flLHandDownTime;
+		m_flTimeWeaponIdle = flLHandDownTime;
+		m_bitsFlags |= WPNSTATE_NO_LHAND;
+
+		return true;
+	}
+
+	return false;
+}
+
 void CBaseWeapon::SendWeaponAnim(int iAnim, bool bSkipLocal)
 {
 	m_pPlayer->pev->weaponanim = iAnim;

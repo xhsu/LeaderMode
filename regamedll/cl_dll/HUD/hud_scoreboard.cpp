@@ -394,7 +394,8 @@ int CHudScoreboard::Draw(float flTime)
 
 void CHudScoreboard::Think(void)
 {
-	if (CL_ButtonBits() & IN_SCORE)
+	// Dead or in intermission? Shore scoreboard, too
+	if (in_score.state & 3 || gHUD::m_bIntermission)
 		m_bitsFlags |= HUD_ACTIVE;
 	else
 		m_bitsFlags &= ~HUD_ACTIVE;

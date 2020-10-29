@@ -981,17 +981,22 @@ void EV_HLDM_FireBullets(int idx, Vector& forward, Vector& right, Vector& up, in
 	return EV_HLDM_FireBullets(idx, forward, right, up, cShots, vecSrc, vecDirShooting, vecSpread, flDistance, iBulletType, 0, 0, iPenetration, 0, false, 0.0f, shared_rand);
 }
 
-void EV_PlayGunFire(int idx, const char* sample, float flMaxDistance, const Vector& src)
+void EV_PlayGunFire(int idx, const char* sample, float flMaxDistance, const Vector& src, int iPitch)
 {
 	// to avoid the weird first personal gun fire effect, we have to determind whether we should use 3D sound.
 	if (EV_IsLocal(idx))
 	{
-		PlaySound(sample);
+		PlaySound(sample, iPitch);
 	}
 	else
 	{
-		Play3DSound(sample, 1.0f, flMaxDistance, src);
+		Play3DSound(sample, 1.0f, flMaxDistance, src, iPitch);
 	}
+}
+
+inline void EV_PlayGunFire(int idx, const char* sample, float flMaxDistance, const Vector& src)
+{
+	return EV_PlayGunFire(idx, sample, flMaxDistance, src, RANDOM_LONG(94, 110));
 }
 
 DECLARE_EVENT(FireAK47)
@@ -1269,11 +1274,11 @@ DECLARE_EVENT(FireM45A1)
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
-	// original goldsrc api: VOL = 1.0, ATTN = 0.6
 	// on non-host sending, the bparam1 is reserved for silencer status.
 	if (EV_IsLocal(idx))
 		args->bparam1 = g_iRoleType == Role_Assassin;	// needs convertion for local EV.
 
+	// original goldsrc api: VOL = 1.0, ATTN = 0.6
 	EV_PlayGunFire(idx, M45A1_FIRE_SFX, args->bparam1 ? QUIET_GUN_VOLUME : M45A1_GUN_VOLUME, vecSrc + forward * 10.0f);
 
 	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, M45A1_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_DEAGLE].m_iAmmoType, M45A1_PENETRATION);
@@ -1346,11 +1351,11 @@ DECLARE_EVENT(Fire57)
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
-	// original goldsrc api: VOL = 1.0, ATTN = 0.8
 	// on non-host sending, the bparam1 is reserved for silencer status.
 	if (EV_IsLocal(idx))
 		args->bparam1 = g_iRoleType == Role_Assassin;
 
+	// original goldsrc api: VOL = 1.0, ATTN = 0.8
 	EV_PlayGunFire(idx,
 		args->bparam1 ? FN57_FIRE_SIL_SFX : FN57_FIRE_SFX,
 		args->bparam1 ? QUIET_GUN_VOLUME : FIVESEVEN_GUN_VOLUME,
@@ -1916,7 +1921,7 @@ DECLARE_EVENT(FireUSP)
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
 	// original API: vol = 1.0, attn = 0.8, pitch = 87~105
-	EV_PlayGunFire(idx, USP_FIRE_SFX, QUIET_GUN_VOLUME, vecSrc + forward * 10.0f);
+	EV_PlayGunFire(idx, USP_FIRE_SFX, QUIET_GUN_VOLUME, vecSrc + forward * 10.0f, RANDOM_LONG(87, 105));
 
 	EV_HLDM_FireBullets(idx,
 		forward, right, up,

@@ -91,7 +91,7 @@ void Sound_Init()
 	gFModSystem->set3DSettings(1.0, SND_DISTANCEFACTOR, 1.0f);
 }
 
-void PlaySound(const char* szSound)
+void PlaySound(const char* szSound, int iPitch)
 {
 	auto strKey = gEngfuncs.pfnGetGameDirectory() + std::string("/sound/") + std::string(szSound);
 
@@ -102,9 +102,10 @@ void PlaySound(const char* szSound)
 	}
 
 	gFModSystem->playSound(g_mapSoundPrecache[strKey], nullptr, false, &g_phLocal2DChannel);
+	g_phLocal2DChannel->setPitch(float(iPitch) / 100.0f);
 }
 
-void Play3DSound(const char* szSound, float flMinDist, float flMaxDist, const Vector& vecOrigin)
+void Play3DSound(const char* szSound, float flMinDist, float flMaxDist, const Vector& vecOrigin, int iPitch)
 {
 	auto strKey = gEngfuncs.pfnGetGameDirectory() + std::string("/sound/") + std::string(szSound);
 
@@ -123,7 +124,8 @@ void Play3DSound(const char* szSound, float flMinDist, float flMaxDist, const Ve
 
 	// since this function is only used for gun sound playing, let's just randomize it here.
 	// original formula: 94 + gEngfuncs.pfnRandomLong(0, 0xf)
-	(*ppChannel)->setPitch(RANDOM_FLOAT(0.94f, 1.1f));
+	// 10/29/2020 update: We are no longer doing it. It's now opened for settings.
+	(*ppChannel)->setPitch(float(iPitch) / 100.0f);
 }
 
 void Sound_Think(double flTime)

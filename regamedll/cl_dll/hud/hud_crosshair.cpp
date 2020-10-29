@@ -474,7 +474,7 @@ int CHudCrosshair::DrawCrosshair(float flTime, WeaponIdType weaponid)
 				}
 				}
 
-				if (g_flPlayerSpeed > flLimitSpeed && (iWeaponAccuracyFlags & 2))
+				if (g_flPlayerSpeed > flLimitSpeed && (iWeaponAccuracyFlags & ACCURACY_SPEED))
 					iDistance *= 1.5;
 			}
 		}
