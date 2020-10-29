@@ -44,6 +44,7 @@ kbutton_t	in_down;
 kbutton_t	in_duck;
 kbutton_t	in_reload;
 kbutton_t	in_score;
+kbutton_t	in_throw;
 kbutton_t	in_break;
 kbutton_t	in_graph;  // Display the netgraph
 
@@ -296,6 +297,11 @@ int CL_ButtonBits(bool bResetState)
 		bits |= IN_RUN;
 	}
 
+	if (in_throw.state & 3)
+	{
+		bits |= IN_THROW;
+	}
+
 	// Dead or in intermission? Shore scoreboard, too
 	if (CL_IsDead() || gHUD::m_bIntermission)
 	{
@@ -318,6 +324,7 @@ int CL_ButtonBits(bool bResetState)
 		in_reload.state &= ~2;
 		in_score.state &= ~2;
 		in_speed.state &= ~2;
+		in_throw.state &= ~2;
 	}
 
 	return bits;
@@ -652,6 +659,9 @@ void IN_Impulse (void)
 void IN_ScoreDown(void) { KeyDown(&in_score); }
 void IN_ScoreUp(void) { KeyUp(&in_score); }
 
+void IN_ThrowDown(void) { KeyDown(&in_throw); }
+void IN_ThrowUp(void) { KeyUp(&in_throw); }
+
 void IN_MLookUp (void)
 {
 	KeyUp(&in_mlook);
@@ -717,6 +727,8 @@ void InitInput(void)
 	gEngfuncs.pfnAddCommand ("-graph", IN_GraphUp);
 	gEngfuncs.pfnAddCommand ("+break", IN_BreakDown);
 	gEngfuncs.pfnAddCommand ("-break", IN_BreakUp);
+	gEngfuncs.pfnAddCommand("+qtg", IN_ThrowDown);
+	gEngfuncs.pfnAddCommand("-qtg", IN_ThrowUp);
 
 	cl_anglespeedkey = gEngfuncs.pfnRegisterVariable ("cl_anglespeedkey", "0.67", 0);
 	cl_yawspeed = gEngfuncs.pfnRegisterVariable ("cl_yawspeed", "210", 0);
