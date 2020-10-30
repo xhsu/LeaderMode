@@ -207,7 +207,9 @@ public:	// SV exclusive variables.
 	int		m_iClientWeaponState{ 0 };
 #else
 public:	// CL exclusive variables.
-	CBasePlayer* m_pPlayer		{ nullptr };	// local pseudo-player
+	CBasePlayer*	m_pPlayer		{ nullptr };	// local pseudo-player
+	float			m_flBlockCheck	{ 0.0f };
+	Vector			m_vecBlockOffset{ g_vecZero };
 #endif
 
 public:	// basic logic funcs
@@ -251,6 +253,7 @@ public:	// basic API and behaviour for weapons.
 	virtual	void	DefaultDashStart(int iEnterAnim, float flEnterTime);
 	virtual	void	DefaultDashEnd	(int iEnterAnim, float flEnterTime, int iExitAnim, float flExitTime);
 	virtual bool	DefaultSetLHand	(bool bAppear, int iLHandUpAnim, float flLHandUpTime, int iLHandDownAnim, float flLHandDownTime);
+	virtual void	DefaultBlock	(int iEnterAnim, float flEnterTime, int iExitAnim, float flExitTime);
 
 public:	// util funcs
 	inline	bool	IsDead			(void) { return !!(m_bitsFlags & WPNSTATE_DEAD); }
@@ -268,6 +271,7 @@ public:	// util funcs
 	virtual void	ResetModel		(void) { }	// used after Melee() and QuickThrowRelease().
 	virtual bool	SetVariation	(RoleTypes iType) { m_iVariation = iType; return true; }
 	virtual bool	SetLeftHand		(bool bAppear) { return false; }
+	virtual void	PlayBlockAnim	(void) { }
 };
 
 
@@ -1399,6 +1403,7 @@ public:	// util funcs
 	virtual void	PopAnim			(void);
 	virtual void	ResetModel		(void);
 	virtual bool	SetLeftHand		(bool bAppear);
+	virtual void	PlayBlockAnim	(void)	{ return DefaultBlock(M1014_BLOCK_UP, M1014_BLOCK_UP_TIME, M1014_BLOCK_DOWN, M1014_BLOCK_DOWN_TIME); }
 };
 
 #define M45A1_VIEW_MODEL	"models/weapons/v_m45a1.mdl"

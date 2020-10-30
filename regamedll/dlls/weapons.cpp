@@ -585,9 +585,18 @@ void CBaseWeapon::PostFrame()
 		m_bitsFlags &= ~WPNSTATE_RELOAD_EMPTY;	// remove it anyway.
 	}
 
-	if ((!m_pPlayer->m_bHoldToAim && usableButtons & IN_ATTACK2 && m_flNextSecondaryAttack <= UTIL_WeaponTimeBase()) ||	// PRESS to aim
+	// handle block situation.
+	if ((m_pPlayer->m_afButtonPressed | m_pPlayer->m_afButtonReleased) & IN_BLOCK)
+	{
+		// let the idle function handle it.
+		// we cannot let the block anims interfere other normal anims.
+		m_flTimeWeaponIdle = -1;
+	}
+
+	if (!(usableButtons & IN_BLOCK) && (	// you cannot aim if you are blocked.
+		(!m_pPlayer->m_bHoldToAim && usableButtons & IN_ATTACK2 && m_flNextSecondaryAttack <= UTIL_WeaponTimeBase()) ||	// PRESS to aim
 		(m_pPlayer->m_bHoldToAim && ((m_pPlayer->m_afButtonPressed & IN_ATTACK2 && !m_bInZoom) || (m_pPlayer->m_afButtonReleased & IN_ATTACK2 && m_bInZoom)) )	// HOLD to aim
-		)	// UseDecrement()
+		))	// UseDecrement()
 	{
 #ifndef CLIENT_PREDICT_AIM
 		MESSAGE_BEGIN(MSG_ONE, gmsgSteelSight, nullptr, m_pPlayer->pev);
@@ -601,10 +610,10 @@ void CBaseWeapon::PostFrame()
 		if (!m_pPlayer->m_bHoldToAim)
 			m_pPlayer->pev->button &= ~IN_ATTACK2;
 	}
-	else if ((m_pPlayer->pev->button & IN_ATTACK) && CanAttack(m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), TRUE))	// UseDecrement()
+	else if ((m_pPlayer->pev->button & IN_ATTACK) && CanAttack(m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), TRUE) && !(usableButtons & IN_BLOCK))	// UseDecrement()
 	{
-		// Can't shoot during the freeze period
-		// Always allow firing in single player
+		// Can't shoot during the freeze period, but always allow firing in single player.
+		// Neither can you if blocked.
 		if ((m_pPlayer->m_bCanShoot && CSGameRules()->IsMultiplayer() && !CSGameRules()->IsFreezePeriod()) || !CSGameRules()->IsMultiplayer())
 		{
 #ifndef CLIENT_PREDICT_PRIM_ATK
@@ -987,9 +996,30 @@ void CBaseWeapon::DefaultIdle(int iDashingAnim, int iIdleAnim, float flDashLoop,
 #ifdef CLIENT_DLL
 	UpdateBobParameters();
 #endif
+	// the priority of these anims:
+	// 1. Running first. You can't be BLOCKED during a RUN.
+	// 2. Block. You can't aimming if you are blocked.
+	// 3. Aim.
 
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + ((m_bitsFlags & WPNSTATE_DASHING) ? flDashLoop : flIdleLoop);
-	SendWeaponAnim((m_bitsFlags & WPNSTATE_DASHING) ? iDashingAnim : iIdleAnim);
+	if (m_bitsFlags & WPNSTATE_DASHING)
+	{
+		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + flDashLoop;
+		SendWeaponAnim(iDashingAnim);
+	}
+	if ((m_pPlayer->m_afButtonPressed | m_pPlayer->m_afButtonReleased) & IN_BLOCK)
+	{
+		// you can't aim during a BLOCK section.
+		if (m_bInZoom)
+			SecondaryAttack();
+
+		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
+		PlayBlockAnim();
+	}
+	else
+	{
+		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + flIdleLoop;
+		SendWeaponAnim(iIdleAnim);
+	}
 }
 
 bool CBaseWeapon::DefaultReload(int iClipSize, int iAnim, float flTotalDelay, float flSoftDelay)
@@ -1211,6 +1241,24 @@ bool CBaseWeapon::DefaultSetLHand(bool bAppear, int iLHandUpAnim, float flLHandU
 	}
 
 	return false;
+}
+
+void CBaseWeapon::DefaultBlock(int iEnterAnim, float flEnterTime, int iExitAnim, float flExitTime)
+{
+	// we are using "play anim mid-way" method.
+	// go check CBaseWeapon::DefaultDashEnd() for detailed commentary.
+	bool bBlocked = !!(m_pPlayer->pev->button & IN_BLOCK);
+
+	if (bBlocked && m_pPlayer->pev->weaponanim != iEnterAnim)
+	{
+		SendWeaponAnim(iEnterAnim);
+	}
+
+	// therefore, you should not keep calling it in Think() or Frame().
+	else if (!bBlocked && m_pPlayer->pev->weaponanim != iExitAnim)
+	{
+		SendWeaponAnim(iExitAnim);
+	}
 }
 
 void CBaseWeapon::SendWeaponAnim(int iAnim, bool bSkipLocal)
