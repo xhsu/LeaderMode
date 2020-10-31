@@ -2008,6 +2008,34 @@ void UTIL_Play3DSoundWithHost2D(CBasePlayer* pHost, Vector vecSrc, float flRange
 	}
 }
 
+void UTIL_Play3DSoundWithoutHost(CBasePlayer* pHost, Vector vecSrc, float flRange, SharedString iSample, int iPitch)
+{
+	CBaseEntity* pEntity = nullptr;
+	CBasePlayer* pPlayer = nullptr;
+
+	while ((pEntity = UTIL_FindEntityInSphere(pEntity, vecSrc, flRange)))
+	{
+		if (!pEntity->IsPlayer())
+			continue;
+
+		pPlayer = (CBasePlayer*)pEntity;
+
+		if (pPlayer != pHost)
+		{
+			MESSAGE_BEGIN(MSG_ONE, gmsgSound, vecSrc, pPlayer->pev);
+			WRITE_BYTE(TRUE);	// using 3D.
+			WRITE_COORD(vecSrc.x);
+			WRITE_COORD(vecSrc.y);
+			WRITE_COORD(vecSrc.z);
+			WRITE_COORD(flRange);
+			WRITE_BYTE(TRUE);	// using SharedString.
+			WRITE_BYTE(iSample);
+			WRITE_BYTE(iPitch);
+			MESSAGE_END();
+		}
+	}
+}
+
 void UTIL_HideSecondaryVMDL(CBasePlayer* pPlayer, bool bSkipLocal)
 {
 #ifdef CLIENT_WEAPONS

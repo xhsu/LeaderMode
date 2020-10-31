@@ -11,6 +11,7 @@ engine_studio_api_t IEngineStudio;
 CGameStudioModelRenderer g_StudioRenderer;
 
 float g_flTimeViewModelAnimStart = 0.0f;	// LUNA: stupit engine. You can't just override g_pViewEnt->curstate.animtime anywhere, you must override it right before it's render.
+float g_flViewModelFramerate = 1.0f;	// LUNA: same as above.
 float g_flStartScaleTime;
 int iPrevRenderState;
 int iRenderStateChanged;
@@ -1273,6 +1274,7 @@ int R_StudioDrawModel(int flags)
 		// this prevents you from start an anim from its half.
 		// however, this is the fix.
 		g_pViewEnt->curstate.animtime = g_flTimeViewModelAnimStart;
+		g_pViewEnt->curstate.framerate = g_flViewModelFramerate;
 
 		// special treatment for certain weapons.
 		if (g_pCurWeapon)

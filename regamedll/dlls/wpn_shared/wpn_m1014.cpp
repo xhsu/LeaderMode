@@ -117,9 +117,9 @@ void CM1014::PostFrame(void)
 		if (m_flNextInsertionSFX <= gpGlobals->time)	
 		{
 #ifndef CLIENT_DLL
-			// SFX should be played at SV
+			// SFX should be played to other players at SV
 			// original API: pitch: 85 + RANDOM(0, 31)
-			UTIL_Play3DSoundWithHost2D(m_pPlayer, m_pPlayer->GetGunPosition(), 512, m_bStartFromEmpty ? SSZ_M1014_SIDELOAD_SFX : SSZ_M1014_INSERT_SFX, RANDOM_LONG(85, 116));
+			UTIL_Play3DSoundWithoutHost(m_pPlayer, m_pPlayer->GetGunPosition(), 512, m_bStartFromEmpty ? SSZ_M1014_SIDELOAD_SFX : SSZ_M1014_INSERT_SFX, RANDOM_LONG(85, 116));
 #endif
 			if (m_bStartFromEmpty)
 			{

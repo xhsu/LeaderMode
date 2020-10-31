@@ -245,7 +245,7 @@ public:	// CL xclusive functions.
 
 public:	// basic API and behaviour for weapons.
 	virtual	bool	DefaultDeploy	(const char* szViewModel, const char* szWeaponModel, int iAnim, const char* szAnimExt, float flDeployTime = 0.75f);
-	virtual void	DefaultIdle		(int iDashingAnim, int iIdleAnim = 0, float flDashLoop = 20.0f, float flIdleLoop = 20.0f);
+	virtual void	DefaultIdle		(int iDashingAnim, int iIdleAnim = 0, float flDashLoop = 20.0f);
 	virtual	bool	DefaultReload	(int iClipSize, int iAnim, float flTotalDelay, float flSoftDelay = 0.5f);
 	virtual bool	DefaultHolster	(int iHolsterAnim, float flHolsterDelay);
 	virtual	void	DefaultSteelSight(const Vector& vecOfs, int iFOV, float flDriftingSpeed = 10.0f, float flNextSecondaryAttack = 0.3f);

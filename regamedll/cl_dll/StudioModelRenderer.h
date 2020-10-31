@@ -160,6 +160,7 @@ private:
 
 extern CGameStudioModelRenderer g_StudioRenderer;
 extern float g_flTimeViewModelAnimStart;
+extern float g_flViewModelFramerate;
 extern cl_entity_t* g_pViewEnt;
 
 // for EXPORTFUNC HUD_PostRunCmd

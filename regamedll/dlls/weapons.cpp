@@ -991,7 +991,7 @@ bool CBaseWeapon::DefaultDeploy(const char* szViewModel, const char* szWeaponMod
 	return true;
 }
 
-void CBaseWeapon::DefaultIdle(int iDashingAnim, int iIdleAnim, float flDashLoop, float flIdleLoop)
+void CBaseWeapon::DefaultIdle(int iDashingAnim, int iIdleAnim, float flDashLoop)
 {
 #ifdef CLIENT_DLL
 	UpdateBobParameters();
@@ -1006,7 +1006,8 @@ void CBaseWeapon::DefaultIdle(int iDashingAnim, int iIdleAnim, float flDashLoop,
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + flDashLoop;
 		SendWeaponAnim(iDashingAnim);
 	}
-	if ((m_pPlayer->m_afButtonPressed | m_pPlayer->m_afButtonReleased) & IN_BLOCK)
+	else if ((m_pPlayer->m_afButtonPressed | m_pPlayer->m_afButtonReleased) & IN_BLOCK
+		|| (m_pPlayer->pev->button & IN_BLOCK && m_pPlayer->pev->weaponanim == iIdleAnim))
 	{
 		// you can't aim during a BLOCK section.
 		if (m_bInZoom)
@@ -1015,9 +1016,8 @@ void CBaseWeapon::DefaultIdle(int iDashingAnim, int iIdleAnim, float flDashLoop,
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
 		PlayBlockAnim();
 	}
-	else
+	else if (m_pPlayer->pev->weaponanim != iIdleAnim)
 	{
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + flIdleLoop;
 		SendWeaponAnim(iIdleAnim);
 	}
 }
