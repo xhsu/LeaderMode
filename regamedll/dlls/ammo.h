@@ -33,7 +33,7 @@ enum AmmoIdType
 	AMMO_NONE = 0,
 
 	// Sniper & Hunter
-	AMMO_338Magnum = 1,
+	AMMO_338Magnum,
 	AMMO_762SovietR,
 
 	// Assault

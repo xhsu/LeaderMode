@@ -212,7 +212,8 @@ namespace gHUD
 	float GetSensitivity(void);
 	hSprite GetSprite(int index);
 	wrect_t GetSpriteRect(int index);
-	client_sprite_t* GetSpriteFromList(client_sprite_t* pList, const char* psz, int iRes, int iCount);
+	client_sprite_t* GetSpriteFromList(client_sprite_t* pList, const char* psz, int iRes, int iCount);	// get a specific SPR from a list. i.e., a TXT file list.
+	void GetSprite(client_sprite_t* pSprite, hSprite& hSPR, wrect_t& rcSPR);
 
 	// HUD bridges
 	void SlotInput(int iSlot);

@@ -6,6 +6,7 @@ Reflash Date: Oct 11 2020
 Modern Warfare Dev Team
 Code - Luna the Reborn
 Model - Miracle(Innocent Blue)
+Sound - iDkGK
 
 */
 

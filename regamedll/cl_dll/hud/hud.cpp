@@ -782,7 +782,7 @@ wrect_t gHUD::GetSpriteRect(int index)
 client_sprite_t* gHUD::GetSpriteFromList(client_sprite_t* pList, const char* psz, int iRes, int iCount)
 {
 	if (!pList)
-		return NULL;
+		return nullptr;
 
 	int i = iCount;
 	client_sprite_t* p = pList;
@@ -795,7 +795,24 @@ client_sprite_t* gHUD::GetSpriteFromList(client_sprite_t* pList, const char* psz
 		p++;
 	}
 
-	return NULL;
+	return nullptr;
+}
+
+void gHUD::GetSprite(client_sprite_t* p, hSprite& hSPR, wrect_t& rcSPR)
+{
+	char sz[128];
+
+	if (p)
+	{
+		Q_snprintf(sz, charsmax(sz), "sprites/%s.spr", p->szSprite);
+		hSPR = gEngfuncs.pfnSPR_Load(sz);
+		rcSPR = p->rc;
+	}
+	else
+	{
+		hSPR = NULL;
+		Q_memset(&rcSPR, NULL, sizeof(rcSPR));
+	}
 }
 
 void gHUD::SlotInput(int iSlot)
@@ -1002,9 +1019,12 @@ void CommandFunc_NextEquipment(void)
 
 	for (int i = gPseudoPlayer.m_iUsingGrenadeId; i < EQP_COUNT; i++)
 	{
+		if (i == gPseudoPlayer.m_iUsingGrenadeId)
+			continue;
+
 		iAmmoId = GetAmmoIdOfEquipment((EquipmentIdType)i);
 
-		if (i == gPseudoPlayer.m_iUsingGrenadeId || !iAmmoId || gPseudoPlayer.m_rgAmmo[iAmmoId] <= 0)
+		if ((!iAmmoId || gPseudoPlayer.m_rgAmmo[iAmmoId] <= 0) && !gPseudoPlayer.m_rgbHasEquipment[i])	// you can still selection some item even if it has no ammo. These items are not to be consumed.
 			continue;
 
 		iCandidate = (EquipmentIdType)i;
@@ -1017,7 +1037,7 @@ void CommandFunc_NextEquipment(void)
 		{
 			iAmmoId = GetAmmoIdOfEquipment((EquipmentIdType)i);
 
-			if (!iAmmoId || gPseudoPlayer.m_rgAmmo[iAmmoId] <= 0)
+			if ((!iAmmoId || gPseudoPlayer.m_rgAmmo[iAmmoId] <= 0) && !gPseudoPlayer.m_rgbHasEquipment[i])
 				continue;
 
 			iCandidate = (EquipmentIdType)i;
@@ -1042,9 +1062,12 @@ void CommandFunc_PrevEquipment(void)
 
 	for (int i = gPseudoPlayer.m_iUsingGrenadeId; i > EQP_NONE; i--)
 	{
+		if (i == gPseudoPlayer.m_iUsingGrenadeId)
+			continue;
+
 		iAmmoId = GetAmmoIdOfEquipment((EquipmentIdType)i);
 
-		if (i == gPseudoPlayer.m_iUsingGrenadeId || !iAmmoId || gPseudoPlayer.m_rgAmmo[iAmmoId] <= 0)
+		if ((!iAmmoId || gPseudoPlayer.m_rgAmmo[iAmmoId] <= 0) && !gPseudoPlayer.m_rgbHasEquipment[i])	// you can still selection some item even if it has no ammo. These items are not to be consumed.
 			continue;
 
 		iCandidate = (EquipmentIdType)i;
@@ -1057,7 +1080,7 @@ void CommandFunc_PrevEquipment(void)
 		{
 			iAmmoId = GetAmmoIdOfEquipment((EquipmentIdType)i);
 
-			if (!iAmmoId || gPseudoPlayer.m_rgAmmo[iAmmoId] <= 0)
+			if ((!iAmmoId || gPseudoPlayer.m_rgAmmo[iAmmoId] <= 0) && !gPseudoPlayer.m_rgbHasEquipment[i])
 				continue;
 
 			iCandidate = (EquipmentIdType)i;

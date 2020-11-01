@@ -6,12 +6,19 @@ Created Date: Mar 13 2020
 
 #pragma once
 
+// combat.cpp
+float GetAmountOfPlayerVisible(Vector vecSrc, CBaseEntity* pEntity);
+
 class CGrenade : public CBaseMonster
 {
 public:
-	static const float CRYOGR_DAMAGE;
-	static const float CRYOGR_RADIUS;
-	static const float CRYOGR_EFTIME;
+	static constexpr float CRYOGR_DAMAGE = 20.0f;
+	static constexpr float CRYOGR_RADIUS = 240.0f;
+	static constexpr float CRYOGR_EFTIME = 4.0f;
+
+	static constexpr float C4_INIT_SPEED = 290.0f;
+	static constexpr float C4_EXPLO_RADIUS = 300.0f;
+	static constexpr float C4_EXPLO_DAMAGE = 500.0f;
 
 public:
 	virtual void Spawn();
@@ -33,6 +40,7 @@ public:
 	static CGrenade* HealingGrenade(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity);
 	static CGrenade* NerveGasGrenade(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity);
 	static CGrenade* IncendiaryGrenade(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity);
+	static CGrenade* C4(CBasePlayer* pPlayer);
 
 public:
 	void Explode(Vector vecSrc, Vector vecAim);
@@ -45,28 +53,42 @@ public:
 	void EXPORT Smoke3_B();
 	void EXPORT Smoke3_C();
 	void EXPORT SG_Smoke();
+
+	void EXPORT Detonate();
+	void EXPORT SG_Detonate();
+	void EXPORT HE_Detonate();
+	void EXPORT C4_Detonate();
+	static void EXPORT C4_Detonate(CBasePlayer* pPlayer);	// detonate all C4 belongs to a player.
+
+	void EXPORT TumbleThink();
+	void EXPORT SG_TumbleThink();
+	void EXPORT IncendiaryThink();
+
 	void EXPORT BounceTouch(CBaseEntity* pOther);
 	void EXPORT SlideTouch(CBaseEntity* pOther);
 	void EXPORT ExplodeTouch(CBaseEntity* pOther);
-	void EXPORT DangerSoundThink();
-	void EXPORT PreDetonate();
-	void EXPORT Detonate();
-	void EXPORT SG_Detonate();
-	void EXPORT Detonate3();
-	void EXPORT DetonateUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
-	void EXPORT TumbleThink();
-	void EXPORT SG_TumbleThink();
-
 	void EXPORT CryoTouch(CBaseEntity* pOther);
 	void EXPORT IncendiaryTouch(CBaseEntity* pOther);
-	void EXPORT IncendiaryThink();
+	void EXPORT C4Touch(CBaseEntity* pOther);
 
 public:
 	static TYPEDESCRIPTION m_SaveData[];
 	static unsigned short m_rgusEvents[];
 	static const float m_rgflFuseTime[];
 
-	bool m_bJustBlew;
+	enum
+	{
+		HE = 0,
+		FLASHBANG,
+		SMOKE,
+		CRYO,
+		HEALING,
+		NERVE_GAS,
+		INCENDIARY,
+		RCC4,
+	}
+	m_iType;
+
 	int m_iTeam;
 	int m_iCurWave;
 	int m_SGSmoke;
@@ -77,6 +99,4 @@ public:
 	Vector m_vSmokeDetonate;
 	int m_iBounceCount;
 	BOOL m_fRegisteredSound;
-	bool m_bHealing;
-	bool m_bPoisoned;
 };

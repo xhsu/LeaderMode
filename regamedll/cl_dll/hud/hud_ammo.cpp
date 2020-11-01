@@ -23,10 +23,9 @@ int CHudAmmo::Init(void)
 
 int CHudAmmo::VidInit(void)
 {
-	int i;
-	client_sprite_t* pList = gEngfuncs.pfnSPR_GetList("sprites/ammo.txt", &i);
+	m_pTxtList = gEngfuncs.pfnSPR_GetList("sprites/ammo.txt", &m_iTxtListCount);
 
-	if (pList)
+	if (m_pTxtList)
 	{
 		char sz[128];
 		client_sprite_t* p = nullptr;
@@ -36,7 +35,7 @@ int CHudAmmo::VidInit(void)
 			if (!g_rgAmmoInfo[j].m_pszName || g_rgAmmoInfo[j].m_pszName[0] == '\0')
 				continue;
 
-			p = gHUD::GetSpriteFromList(pList, g_rgAmmoInfo[j].m_pszName, 640, i);
+			p = gHUD::GetSpriteFromList(m_pTxtList, g_rgAmmoInfo[j].m_pszName, 640, m_iTxtListCount);
 
 			if (p)
 			{

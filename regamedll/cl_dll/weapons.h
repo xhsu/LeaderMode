@@ -93,6 +93,7 @@ public:
 	EquipmentIdType m_iUsingGrenadeId;
 	WeaponIdType m_iWpnSwitchingTo;	// use this instead of g_iSelectedWeapon.
 	RoleTypes m_iRoleType;
+	std::array<bool, EQP_COUNT> m_rgbHasEquipment;
 
 public:
 	void	SetAnimation(PLAYER_ANIM playerAnim)	{}

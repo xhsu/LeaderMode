@@ -200,6 +200,7 @@ enum EquipmentIdType
 	EQP_C4,
 
 	// misc
+	EQP_DETONATOR,
 	EQP_NVG,
 
 	EQP_COUNT,

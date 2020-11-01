@@ -1659,6 +1659,7 @@ enum sg550_e
 
 #define C4_VIEW_MODEL	"models/weapons/v_c4.mdl"
 #define C4_WORLD_MODEL	"models/weapons/w_c4.mdl"
+#define C4_PLACED_SFX	"zombieriot/plant.wav"
 
 constexpr float C4_TIME_DRAW		= 0.7f;
 constexpr float C4_TIME_HOLSTER		= 0.7f;
@@ -1666,7 +1667,8 @@ constexpr float C4_TIME_THROW		= 1.0333f;
 constexpr float C4_TIME_THROW_SPAWN = 0.5f;
 constexpr float C4_TIME_PLACE		= 1.0333f;
 constexpr float C4_TIME_PLACE_SPAWN = 0.5f;
-constexpr float C4_TIME_DETONATE	= 1.0333f;
+constexpr float C4_TIME_DET_ANIM	= 1.0333f;
+constexpr float C4_TIME_DETONATE	= 0.4f;
 
 enum c4_e
 {

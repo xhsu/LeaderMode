@@ -5,6 +5,7 @@ Remastered Date: Sep 27 2020
 Modern Warfare Dev Team
 Code - Luna the Reborn
 Model - Matoilet
+Sound - iDkGK
 
 */
 
@@ -300,7 +301,8 @@ bool CM1014::Reload(void)
 	m_iShotsFired = 0;
 	m_bInReload = true;
 	m_bStartFromEmpty = !!(m_iClip <= 0);
-	m_pPlayer->m_flNextAttack = 0;//m_bStartFromEmpty ? M1014_TIME_START_RELOAD_FIRST : M1014_TIME_START_RELOAD;
+	m_pPlayer->m_flNextAttack = 0;
+	m_flTimeWeaponIdle = m_bStartFromEmpty ? M1014_TIME_START_RELOAD_FIRST : M1014_TIME_START_RELOAD;
 	m_flNextInsertAnim = gpGlobals->time + (m_bStartFromEmpty ? M1014_TIME_START_RELOAD_FIRST : M1014_TIME_START_RELOAD);
 	m_flNextAddAmmo = gpGlobals->time + (m_bStartFromEmpty ? M1014_TIME_ADD_AMMO_FIRST : (M1014_TIME_ADD_AMMO + M1014_TIME_START_RELOAD));
 	m_flNextInsertionSFX = gpGlobals->time + (m_bStartFromEmpty ? M1014_TIME_SIDELOAD_SFX : (M1014_TIME_INSERT_SFX + M1014_TIME_START_RELOAD));

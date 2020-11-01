@@ -774,14 +774,6 @@ MSG_FUNC(ForceCam)
 	return TRUE;
 }
 
-MSG_FUNC(ADStop)
-{
-	// this msg have no arguments.
-	// this function in MoE is empty.
-
-	return TRUE;
-}
-
 MSG_FUNC(ReceiveW)
 {
 	BEGIN_READ(pbuf, iSize);
@@ -1229,6 +1221,18 @@ MSG_FUNC(SecVMDL)
 	return TRUE;
 }
 
+MSG_FUNC(Equipment)
+{
+	BEGIN_READ(pbuf, iSize);
+
+	EquipmentIdType iEquipmentId = (EquipmentIdType)READ_BYTE();
+	bool bCanUse = !!READ_BYTE();
+
+	gPseudoPlayer.m_rgbHasEquipment[iEquipmentId] = bCanUse;
+
+	return TRUE;
+}
+
 
 // player.cpp
 MSG_FUNC(Logo)
@@ -1320,7 +1324,6 @@ void Msg_Init(void)
 	HOOK_USER_MSG(HLTV);
 	HOOK_USER_MSG(SpecHealth);
 	HOOK_USER_MSG(ForceCam);
-	HOOK_USER_MSG(ADStop);
 	HOOK_USER_MSG(ReceiveW);
 	HOOK_USER_MSG(CZCareer);
 	HOOK_USER_MSG(CZCareerHUD);
@@ -1348,6 +1351,7 @@ void Msg_Init(void)
 	HOOK_USER_MSG(SkillTimer);
 	HOOK_USER_MSG(Sound);
 	HOOK_USER_MSG(SecVMDL);
+	HOOK_USER_MSG(Equipment);
 
 	// player.cpp
 	HOOK_USER_MSG(Logo);

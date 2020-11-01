@@ -87,6 +87,8 @@ void CBasePlayer::SendItemStatus()
 	int itemStatus = 0;
 	if (m_bHasNightVision)
 		itemStatus |= ITEM_STATUS_NIGHTVISION;
+	if (m_rgbHasEquipment[EQP_DETONATOR])
+		itemStatus |= ITEM_STATUS_DETONATOR;
 
 	MESSAGE_BEGIN(MSG_ONE, gmsgItemStatus, nullptr, pev);
 		WRITE_BYTE(itemStatus);
@@ -1611,9 +1613,6 @@ void EXT_FUNC CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 
 		m_hObserverTarget = UTIL_PlayerByIndexSafe(pev->iuser3);
 
-		MESSAGE_BEGIN(MSG_ONE, gmsgADStop, nullptr, pev);
-		MESSAGE_END();
-
 		break;
 	}
 	case 1:
@@ -1628,9 +1627,6 @@ void EXT_FUNC CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 		pev->iuser3 = ENTINDEX(ENT(pevAttacker));
 
 		m_hObserverTarget = UTIL_PlayerByIndexSafe(pev->iuser3);
-
-		MESSAGE_BEGIN(MSG_ONE, gmsgADStop, nullptr, pev);
-		MESSAGE_END();
 
 		for (int i = 1; i <= gpGlobals->maxClients; i++)
 		{
@@ -4606,6 +4602,8 @@ void EXT_FUNC CBasePlayer::Spawn()
 	m_flNextSkillTimerUpdate = 0.0f;
 	m_flNextClientCvarQuery = 0.0f;
 
+	m_rgbHasEquipment.fill(false);	// clear it.
+
 	// everything that comes after this, this spawn of the player a the game.
 	if (m_bJustConnected)
 		return;
@@ -5864,6 +5862,19 @@ void EXT_FUNC CBasePlayer::UpdateClientData()
 		WRITE_BYTE(iMode + 1);	// the BYTE type contains only 0~255.
 		WRITE_LONG(iTimerSent);
 		MESSAGE_END();
+	}
+
+	for (byte i = 0; i < EQP_COUNT; i++)
+	{
+		if (m_rgbHasEquipment[i] != m_rgbClientHasEquipment[i])
+		{
+			MESSAGE_BEGIN(MSG_ONE, gmsgEquipment, nullptr, pev);
+			WRITE_BYTE(i);
+			WRITE_BYTE(m_rgbHasEquipment[i]);
+			MESSAGE_END();
+
+			m_rgbClientHasEquipment[i] = m_rgbHasEquipment[i];
+		}
 	}
 }
 
@@ -7684,6 +7695,10 @@ void CBasePlayer::ResetUsingEquipment(void)
 {
 	// the stock is ok.
 	if (GetGrenadeInventory(m_iUsingGrenadeId) > 0)
+		return;
+
+	// if this is a non-consumable accessory, it's also fine.
+	if (m_rgbHasEquipment[m_iUsingGrenadeId])
 		return;
 
 	AmmoIdType iAmmoId = AMMO_NONE;

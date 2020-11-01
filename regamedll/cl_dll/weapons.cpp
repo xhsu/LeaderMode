@@ -400,6 +400,7 @@ void CBaseWeapon::PostFrame()
 			switch (m_pPlayer->m_iUsingGrenadeId)
 			{
 			case EQP_C4:	// left handed model.
+			case EQP_DETONATOR:
 				gSecViewModelMgr.m_bVisible = false;
 				SetLeftHand(true);
 				break;
@@ -438,13 +439,13 @@ void CBaseWeapon::PostFrame()
 				flTime = TIME_QT_THROWING_SOFT - TIME_SP_QT_THROWING_SOFT;
 				break;
 
-			case EQP_C4:	// UNDONE, treat specially.
-			{
-				m_bitsFlags |= WPNSTATE_QT_EXIT;
-				m_pPlayer->m_flNextAttack = C4_TIME_THROW - C4_TIME_THROW_SPAWN;
+			case EQP_C4:
+				flTime = C4_TIME_THROW - C4_TIME_THROW_SPAWN;
+				break;	// unlike SV, we can safely use the original line here.
 
-				return;
-			}
+			case EQP_DETONATOR:
+				flTime = C4_TIME_DET_ANIM - C4_TIME_DETONATE;
+				break;	// unlike SV, we can safely use the original line here.
 
 			default:
 				return;	// how did he get here???
@@ -707,7 +708,7 @@ bool CBaseWeapon::QuickThrowStart(EquipmentIdType iId)
 	if (m_bitsFlags & WPNSTATE_BUSY)
 		return false;
 
-	if (!m_pPlayer->GetGrenadeInventory(iId))
+	if (!m_pPlayer->GetGrenadeInventory(iId) && !m_pPlayer->m_rgbHasEquipment[iId])
 		return false;
 
 	if (m_bInZoom)
@@ -750,6 +751,23 @@ bool CBaseWeapon::QuickThrowStart(EquipmentIdType iId)
 		gSecViewModelMgr.m_bVisible = true;
 		gSecViewModelMgr.SetModel(g_rgpszSharedString[SSZ_C4_VMDL]);
 		gSecViewModelMgr.SetAnim(C4_DRAW);
+
+		goto TAG_C4_SKIPPING;
+	}
+
+	case EQP_DETONATOR:
+	{
+		m_bitsFlags |= WPNSTATE_QUICK_THROWING | WPNSTATE_QT_RELEASE | WPNSTATE_QT_SHOULD_SPAWN;	// consider detonator is already "released" on start.
+		m_pPlayer->m_iUsingGrenadeId = iId;
+		// no 3rd personal model setting needed.
+
+		SetLeftHand(false);	// holster L hand. The freeze time (m_flNextAttack) should be included.
+		m_pPlayer->m_flNextAttack = C4_TIME_DETONATE;	// however, we have to overwrite it.
+
+		// totally different from SV.
+		gSecViewModelMgr.m_bVisible = true;
+		gSecViewModelMgr.SetModel(g_rgpszSharedString[SSZ_C4_VMDL]);
+		gSecViewModelMgr.SetAnim(C4_DETONATE);
 
 		goto TAG_C4_SKIPPING;
 	}

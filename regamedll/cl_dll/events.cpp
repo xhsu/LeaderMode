@@ -984,14 +984,14 @@ void EV_HLDM_FireBullets(int idx, Vector& forward, Vector& right, Vector& up, in
 void EV_PlayGunFire(int idx, const char* sample, float flMaxDistance, const Vector& src, int iPitch)
 {
 	// to avoid the weird first personal gun fire effect, we have to determind whether we should use 3D sound.
-	if (EV_IsLocal(idx))
+	/*if (EV_IsLocal(idx))
 	{
 		PlaySound(sample, iPitch);
 	}
 	else
-	{
+	{*/
 		Play3DSound(sample, 1.0f, flMaxDistance, src, iPitch);
-	}
+	//}
 }
 
 inline void EV_PlayGunFire(int idx, const char* sample, float flMaxDistance, const Vector& src)

@@ -71,9 +71,12 @@ void CL_DLLEXPORT HUD_DrawTransparentTriangles(void)
 	HUD_DrawTransparentTriangles2();
 }
 
-void CL_DLLEXPORT HUD_Frame(double time)
+void CL_DLLEXPORT HUD_Frame(double flDeltaTime)
 {
-	Sound_Think(time);
+	g_flClientTimeDelta = flDeltaTime;
+	g_flClientTime += flDeltaTime;
+
+	Sound_Think(flDeltaTime);
 }
 
 BOOL CL_DLLEXPORT HUD_GetHullBounds(int hullnumber, float* mins, float* maxs)

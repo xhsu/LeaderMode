@@ -316,14 +316,46 @@ public:
 
 	Vector MakeVector() const
 	{
-		vec_t rad_pitch = (x * M_PI / 180.0f);
-		vec_t rad_yaw = (y * M_PI / 180.0f);
+		vec_t rad_pitch = (pitch * M_PI / 180.0f);
+		vec_t rad_yaw = (yaw * M_PI / 180.0f);
 		vec_t tmp = Q_cos(rad_pitch);
 
 		return Vector(	(-tmp * -Q_cos(rad_yaw)),	// x
 						(Q_sin(rad_yaw) * tmp),		// y
 						-Q_sin(rad_pitch)			// z
 		);
+	}
+
+	Vector VectorAngles(void) const
+	{
+		Vector a;
+		a.pitch = 0;
+		a.yaw = 0;
+		a.roll = 0;
+
+		if (y == 0 && x == 0)
+		{
+			a.yaw = 0;
+			if (z > 0)
+				a.pitch = 90;
+			else
+				a.pitch = 270;
+		}
+		else
+		{
+			a.yaw = (Q_atan2(-y, x) * 180.0f / M_PI);
+			if (a.yaw < 0)
+				a.yaw += 360;
+
+			a.yaw = 360.0f - a.yaw;	// LUNA: why???
+
+			auto tmp = Q_sqrt(x * x + y * y);
+			a.pitch = (Q_atan2(z, tmp) * 180.0f / M_PI);
+			if (a.pitch < 0)
+				a.pitch += 360;
+		}
+
+		return a;
 	}
 
 	Vector RotateX(float angle) const

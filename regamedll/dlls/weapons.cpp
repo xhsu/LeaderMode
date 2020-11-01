@@ -132,6 +132,8 @@ void WeaponsPrecache()
 
 	PRECACHE_MODEL(THROWABLE_VIEW_MODEL);
 	PRECACHE_MODEL(C4_WORLD_MODEL);
+	PRECACHE_SOUND(C4_PLACED_SFX);
+
 	PRECACHE_SOUND("items/ammopickup1.wav");	// grenade purchasing SFX.
 
 	// container for dropped deathmatch weapons
@@ -439,6 +441,7 @@ void CBaseWeapon::PostFrame()
 			switch (m_pPlayer->m_iUsingGrenadeId)
 			{
 			case EQP_C4:	// left handed model.
+			case EQP_DETONATOR:
 				UTIL_HideSecondaryVMDL(m_pPlayer);
 				SetLeftHand(true);
 				break;
@@ -476,10 +479,23 @@ void CBaseWeapon::PostFrame()
 				flTime = TIME_QT_THROWING_SOFT - TIME_SP_QT_THROWING_SOFT;
 				break;
 
-			case EQP_C4:	// UNDONE, treat specially.
+			case EQP_C4:	// treat specially.
 			{
+				m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+				CGrenade::C4(m_pPlayer);
+
 				m_bitsFlags |= WPNSTATE_QT_EXIT;
 				m_pPlayer->m_flNextAttack = C4_TIME_THROW - C4_TIME_THROW_SPAWN;
+
+				return;
+			}
+
+			case EQP_DETONATOR:
+			{
+				CGrenade::C4_Detonate(m_pPlayer);
+
+				m_bitsFlags |= WPNSTATE_QT_EXIT;
+				m_pPlayer->m_flNextAttack = C4_TIME_DET_ANIM - C4_TIME_DETONATE;
 
 				return;
 			}
@@ -706,7 +722,7 @@ bool CBaseWeapon::QuickThrowStart(EquipmentIdType iId)
 	if (m_bitsFlags & WPNSTATE_BUSY)
 		return false;
 
-	if (!m_pPlayer->GetGrenadeInventory(iId))
+	if (!m_pPlayer->GetGrenadeInventory(iId) && !m_pPlayer->m_rgbHasEquipment[iId])
 		return false;
 
 	if (m_bInZoom)
@@ -746,6 +762,20 @@ bool CBaseWeapon::QuickThrowStart(EquipmentIdType iId)
 		SetLeftHand(false);	// holster L hand. The freeze time (m_flNextAttack) should be included.
 
 		UTIL_SetSecondaryVMDL(m_pPlayer, SSZ_C4_VMDL, C4_DRAW);
+
+		goto TAG_C4_SKIPPING;
+	}
+
+	case EQP_DETONATOR:
+	{
+		m_bitsFlags |= WPNSTATE_QUICK_THROWING | WPNSTATE_QT_RELEASE | WPNSTATE_QT_SHOULD_SPAWN;	// consider detonator is already "released" on start.
+		m_pPlayer->m_iUsingGrenadeId = iId;
+		// no 3rd personal model setting needed.
+
+		SetLeftHand(false);	// holster L hand. The freeze time (m_flNextAttack) should be included.
+		m_pPlayer->m_flNextAttack = C4_TIME_DETONATE;	// however, we have to overwrite it.
+
+		UTIL_SetSecondaryVMDL(m_pPlayer, SSZ_C4_VMDL, C4_DETONATE);
 
 		goto TAG_C4_SKIPPING;
 	}

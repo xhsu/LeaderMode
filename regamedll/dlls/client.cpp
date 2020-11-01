@@ -62,7 +62,6 @@ int gmsgSendCorpse = 0;
 int gmsgHLTV = 0;
 int gmsgSpecHealth = 0;
 int gmsgForceCam = 0;
-int gmsgADStop = 0;
 int gmsgReceiveW = 0;
 int gmsgScenarioIcon = 0;
 int gmsgBotVoice = 0;
@@ -85,6 +84,7 @@ int gmsgEqpSelect = 0;
 int gmsgSkillTimer = 0;
 int gmsgSound = 0;
 int gmsgSecVMDL = 0;
+int gmsgEquipment = 0;
 
 bool g_bClientPrintEnable = true;
 
@@ -202,7 +202,6 @@ void LinkUserMessages()
 	gmsgHLTV          = REG_USER_MSG("HLTV", 2);
 	gmsgSpecHealth    = REG_USER_MSG("SpecHealth", 1);
 	gmsgForceCam      = REG_USER_MSG("ForceCam", 3);
-	gmsgADStop        = REG_USER_MSG("ADStop", 0);
 	gmsgReceiveW      = REG_USER_MSG("ReceiveW", 1);
 	gmsgCZCareer      = REG_USER_MSG("CZCareer", -1);
 	gmsgCZCareerHUD   = REG_USER_MSG("CZCareerHUD", -1);
@@ -230,6 +229,7 @@ void LinkUserMessages()
 	gmsgSkillTimer	  = REG_USER_MSG("SkillTimer", 6);
 	gmsgSound		  = REG_USER_MSG("Sound", -1);
 	gmsgSecVMDL		  = REG_USER_MSG("SecVMDL", -1);
+	gmsgEquipment	  = REG_USER_MSG("Equipment", 2);
 }
 
 void WriteSigonMessages()
@@ -1085,6 +1085,13 @@ void BuyEquipment(CBasePlayer *pPlayer, EquipmentIdType iSlot)
 
 				if (!pPlayer->m_iUsingGrenadeId || pPlayer->m_rgAmmo[GetAmmoIdOfEquipment(pPlayer->m_iUsingGrenadeId)] <= 0)	// choose the new grenade as our grenade.
 					pPlayer->m_iUsingGrenadeId = iSlot;
+
+				// give a detonator if player is buying a C4.
+				if (iSlot == EQP_C4)
+				{
+					pPlayer->m_rgbHasEquipment[EQP_DETONATOR] = true;
+					pPlayer->SendItemStatus();
+				}
 			}
 
 			break;
@@ -1113,6 +1120,7 @@ void BuyEquipment(CBasePlayer *pPlayer, EquipmentIdType iSlot)
 
 				bEnoughMoney = true;
 				pPlayer->m_bHasNightVision = true;
+				pPlayer->m_rgbHasEquipment[EQP_NVG] = true;
 				pPlayer->AddAccount(-NVG_PRICE, RT_PLAYER_BOUGHT_SOMETHING);
 				pPlayer->SendItemStatus();
 			}
@@ -2397,12 +2405,6 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 			pPlayer->Observer_SetMode(mode);
 		else
 			pPlayer->m_iObserverLastMode = mode;
-
-		if (mode == OBS_CHASE_FREE)
-		{
-			MESSAGE_BEGIN(MSG_ONE, gmsgADStop, nullptr, pPlayer->pev);
-			MESSAGE_END();
-		}
 	}
 	else if (FStrEq(pcmd, "spec_set_ad"))
 	{
@@ -2688,44 +2690,6 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 					}
 				}
 			}
-			else if (FStrEq(pcmd, "learn"))
-			{
-				switch (atoi(parg1))
-				{
-				case 1:	// Role_Commander: Battlefield Analysis
-					CBaseSkill::Grand<CSkillRadarScan>(pPlayer);
-					break;
-
-				case 2:	// Role_Commander: Haste
-					CBaseSkill::Grand<CSkillFireRate>(pPlayer);
-					break;
-
-				default:
-					break;
-				}
-			}
-			else if (FStrEq(pcmd, "forget"))
-			{
-				int iSkillType = atoi(parg1);
-
-				switch (iSkillType)
-				{
-				case SkillType_Attack:
-				case SkillType_Defense:
-				case SkillType_Auxiliary:
-				case SkillType_UNASSIGNED:
-				case SkillType_WeaponEnhance:
-					if (pPlayer->m_rgpSkills[iSkillType])
-					{
-						delete pPlayer->m_rgpSkills[iSkillType];
-						pPlayer->m_rgpSkills[iSkillType] = nullptr;
-						break;
-					}
-
-				default:
-					break;
-				}
-			}
 			else if (FStrEq(pcmd, "executeskill"))
 			{
 				if (!Q_strlen(parg1))
@@ -2834,6 +2798,10 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 			{
 				Vector vecOrg = Vector(Q_atoi(CMD_ARGV(1)), Q_atoi(CMD_ARGV(2)), Q_atoi(CMD_ARGV(3)));
 				SET_ORIGIN(pEntity, pEntity->v.origin + vecOrg);
+			}
+			else if (FStrEq(pcmd, "detonate"))
+			{
+				CGrenade::C4_Detonate(pPlayer);
 			}
 			else
 			{
