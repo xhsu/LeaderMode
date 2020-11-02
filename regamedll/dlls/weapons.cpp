@@ -537,8 +537,19 @@ void CBaseWeapon::PostFrame()
 
 			case EQP_C4:	// special treatment.
 			{
+				iAnim = C4_THROW;
+				Vector vecSrc = m_pPlayer->GetGunPosition();
+				Vector vecEnd = vecSrc + 32.0f * (m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle).MakeVector();
+
+				TraceResult tr;
+				UTIL_TraceLine(vecSrc, vecEnd, ignore_monsters, m_pPlayer->edict(), &tr);
+
+				// if you near a wall that much...
+				if (tr.flFraction < 1.0f)
+					iAnim = C4_PLACE;
+
 				m_bitsFlags |= WPNSTATE_QT_SHOULD_SPAWN;
-				UTIL_SendSecondaryVMDLAnim(m_pPlayer, C4_THROW);
+				UTIL_SendSecondaryVMDLAnim(m_pPlayer, iAnim);
 				m_pPlayer->m_flNextAttack = C4_TIME_THROW_SPAWN;
 
 				return;
@@ -556,14 +567,6 @@ void CBaseWeapon::PostFrame()
 		// hold and do nothing. except C4.
 		else
 		{
-			switch (m_pPlayer->m_iUsingGrenadeId)
-			{
-			case EQP_C4:
-				break;
-
-			default:
-				return;
-			}
 		}
 
 		return;

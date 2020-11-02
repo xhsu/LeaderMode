@@ -1921,7 +1921,7 @@ void UTIL_LieFlat(CBaseEntity* pEntity)
 	pEntity->pev->angles = vecAngles;
 }
 
-void UTIL_Play3DSound(Vector vecSrc, float flRange, const char* szSample, int iPitch)
+void UTIL_Play3DSound(const Vector& vecSrc, float flRange, const char* szSample, int iPitch)
 {
 	CBaseEntity* pEntity = nullptr;
 	CBasePlayer* pPlayer = nullptr;
@@ -1946,7 +1946,7 @@ void UTIL_Play3DSound(Vector vecSrc, float flRange, const char* szSample, int iP
 	}
 }
 
-void UTIL_Play3DSound(Vector vecSrc, float flRange, SharedString iSample, int iPitch)
+void UTIL_Play3DSound(const Vector& vecSrc, float flRange, SharedString iSample, int iPitch)
 {
 	CBaseEntity* pEntity = nullptr;
 	CBasePlayer* pPlayer = nullptr;
@@ -1971,7 +1971,7 @@ void UTIL_Play3DSound(Vector vecSrc, float flRange, SharedString iSample, int iP
 	}
 }
 
-void UTIL_Play3DSoundWithHost2D(CBasePlayer* pHost, Vector vecSrc, float flRange, SharedString iSample, int iPitch)
+void UTIL_Play3DSoundWithHost2D(CBasePlayer* pHost, const Vector& vecSrc, float flRange, SharedString iSample, int iPitch)
 {
 	CBaseEntity* pEntity = nullptr;
 	CBasePlayer* pPlayer = nullptr;
@@ -2008,7 +2008,7 @@ void UTIL_Play3DSoundWithHost2D(CBasePlayer* pHost, Vector vecSrc, float flRange
 	}
 }
 
-void UTIL_Play3DSoundWithoutHost(CBasePlayer* pHost, Vector vecSrc, float flRange, SharedString iSample, int iPitch)
+void UTIL_Play3DSoundWithoutHost(CBasePlayer* pHost, const Vector& vecSrc, float flRange, SharedString iSample, int iPitch)
 {
 	CBaseEntity* pEntity = nullptr;
 	CBasePlayer* pPlayer = nullptr;

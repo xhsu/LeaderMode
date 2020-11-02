@@ -327,3 +327,26 @@ bool CalcScreen(Vector& in, Vector2D& out)
 	Q_clamp(out[1], 0.0f, float(ScreenHeight));
 	return true;
 }
+
+void UTIL_TraceLine(Vector& vecSrc, Vector& vecEnd, int traceFlags, int ignore_pe, struct pmtrace_s* ptr, int index, int hull)
+{
+	/*
+	in order to have tents collide with players, we have to run the player prediction code so
+	that the client has the player list. We run this code once when we detect any COLLIDEALL
+	tent, then set this BOOL to true so the code doesn't get run again if there's more than
+	one COLLIDEALL ent for this update. (often are).
+	*/
+	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(false, true);
+
+	// Store off the old count
+	gEngfuncs.pEventAPI->EV_PushPMStates();
+
+	// index - 1 for specific player, -1 for all players.
+	gEngfuncs.pEventAPI->EV_SetSolidPlayers(index - 1);
+
+	gEngfuncs.pEventAPI->EV_SetTraceHull(hull);
+	gEngfuncs.pEventAPI->EV_PlayerTrace(vecSrc, vecEnd, traceFlags, ignore_pe, ptr);
+
+	// Restore state info
+	gEngfuncs.pEventAPI->EV_PopPMStates();
+}

@@ -26,6 +26,9 @@ extern int iJumpSpectator;
 extern float vJumpOrigin[3];
 extern float vJumpAngles[3];
 
+// from input_mouse.cpp
+extern float mouse_x, mouse_y;
+
 cvar_t* cl_bobcycle;
 cvar_t* cl_bob;
 cvar_t* cl_bobup;
@@ -856,6 +859,7 @@ void V_CalcGunBob(ref_params_s* pparams)
 }
 
 Vector g_vecGunLag = g_vecZero;	// doesn't need to translate.
+Vector2D g_vecMouseLag = Vector2D(0, 0);
 
 /*
 ==============
@@ -866,7 +870,12 @@ lag is presented when player is turning.
 */
 void V_CalcGunLag(ref_params_s* pparams)
 {
-	g_vecGunLag += (pparams->forward - g_vecGunLag) * pparams->frametime * 2.0f;
+	static Vector2D vecGoal;
+	vecGoal.x = Q_clamp(mouse_x / 50.0f, -5.0f, 5.0f);
+	vecGoal.y = Q_clamp(mouse_y / 100.0f, -2.0f, 2.0f);
+
+	g_vecMouseLag += (vecGoal - g_vecMouseLag) * pparams->frametime * 3;
+	g_vecGunLag = pparams->right * g_vecMouseLag.x + pparams->up * g_vecMouseLag.y;
 }
 
 /*
