@@ -925,6 +925,9 @@ void CGrenade::C4Touch(CBaseEntity* pOther)
 	if (POINT_CONTENTS(pev->origin) == CONTENTS_SKY)
 		return;
 
+	if (pev->movetype == MOVETYPE_NONE)
+		return;
+
 	TraceResult tr;
 	UTIL_TraceLine(pev->origin, pev->origin + pev->velocity, ignore_monsters, edict(), &tr);
 

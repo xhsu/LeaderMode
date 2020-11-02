@@ -75,7 +75,7 @@ int CHudGrenade::Draw(float flTime)
 		y = ScreenHeight - (m_rgrcGrenadeIcons[i].bottom - m_rgrcGrenadeIcons[i].top);	// Y is not a constant, it depents on icon.
 		iIconWidth = m_rgrcGrenadeIcons[i].right - m_rgrcGrenadeIcons[i].left;
 
-		iAlphaStep = 255 / (gPseudoPlayer.m_rgAmmo[iAmmoId] + 1);	// CAREFUL! don't divide it by naught!
+		iAlphaStep = 255 / Q_max(gPseudoPlayer.m_rgAmmo[iAmmoId], 1);	// CAREFUL! don't divide it by naught!
 
 		for (iAlpha = 255; iAlpha > 0; iAlpha -= iAlphaStep)
 		{
