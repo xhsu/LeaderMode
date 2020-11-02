@@ -132,6 +132,8 @@ void WeaponsPrecache()
 
 	PRECACHE_MODEL(THROWABLE_VIEW_MODEL);
 	PRECACHE_MODEL(C4_WORLD_MODEL);
+	PRECACHE_SOUND(C4_PLACED_SFX);
+
 	PRECACHE_SOUND("items/ammopickup1.wav");	// grenade purchasing SFX.
 
 	// container for dropped deathmatch weapons
@@ -439,6 +441,7 @@ void CBaseWeapon::PostFrame()
 			switch (m_pPlayer->m_iUsingGrenadeId)
 			{
 			case EQP_C4:	// left handed model.
+			case EQP_DETONATOR:
 				UTIL_HideSecondaryVMDL(m_pPlayer);
 				SetLeftHand(true);
 				break;
@@ -476,10 +479,23 @@ void CBaseWeapon::PostFrame()
 				flTime = TIME_QT_THROWING_SOFT - TIME_SP_QT_THROWING_SOFT;
 				break;
 
-			case EQP_C4:	// UNDONE, treat specially.
+			case EQP_C4:	// treat specially.
 			{
+				m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+				CGrenade::C4(m_pPlayer);
+
 				m_bitsFlags |= WPNSTATE_QT_EXIT;
 				m_pPlayer->m_flNextAttack = C4_TIME_THROW - C4_TIME_THROW_SPAWN;
+
+				return;
+			}
+
+			case EQP_DETONATOR:
+			{
+				CGrenade::C4_Detonate(m_pPlayer);
+
+				m_bitsFlags |= WPNSTATE_QT_EXIT;
+				m_pPlayer->m_flNextAttack = C4_TIME_DET_ANIM - C4_TIME_DETONATE;
 
 				return;
 			}
@@ -585,9 +601,18 @@ void CBaseWeapon::PostFrame()
 		m_bitsFlags &= ~WPNSTATE_RELOAD_EMPTY;	// remove it anyway.
 	}
 
-	if ((!m_pPlayer->m_bHoldToAim && usableButtons & IN_ATTACK2 && m_flNextSecondaryAttack <= UTIL_WeaponTimeBase()) ||	// PRESS to aim
+	// handle block situation.
+	if ((m_pPlayer->m_afButtonPressed | m_pPlayer->m_afButtonReleased) & IN_BLOCK)
+	{
+		// let the idle function handle it.
+		// we cannot let the block anims interfere other normal anims.
+		m_flTimeWeaponIdle = -1;
+	}
+
+	if (!(usableButtons & IN_BLOCK) && (	// you cannot aim if you are blocked.
+		(!m_pPlayer->m_bHoldToAim && usableButtons & IN_ATTACK2 && m_flNextSecondaryAttack <= UTIL_WeaponTimeBase()) ||	// PRESS to aim
 		(m_pPlayer->m_bHoldToAim && ((m_pPlayer->m_afButtonPressed & IN_ATTACK2 && !m_bInZoom) || (m_pPlayer->m_afButtonReleased & IN_ATTACK2 && m_bInZoom)) )	// HOLD to aim
-		)	// UseDecrement()
+		))	// UseDecrement()
 	{
 #ifndef CLIENT_PREDICT_AIM
 		MESSAGE_BEGIN(MSG_ONE, gmsgSteelSight, nullptr, m_pPlayer->pev);
@@ -601,10 +626,10 @@ void CBaseWeapon::PostFrame()
 		if (!m_pPlayer->m_bHoldToAim)
 			m_pPlayer->pev->button &= ~IN_ATTACK2;
 	}
-	else if ((m_pPlayer->pev->button & IN_ATTACK) && CanAttack(m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), TRUE))	// UseDecrement()
+	else if ((m_pPlayer->pev->button & IN_ATTACK) && CanAttack(m_flNextPrimaryAttack, UTIL_WeaponTimeBase(), TRUE) && !(usableButtons & IN_BLOCK))	// UseDecrement()
 	{
-		// Can't shoot during the freeze period
-		// Always allow firing in single player
+		// Can't shoot during the freeze period, but always allow firing in single player.
+		// Neither can you if blocked.
 		if ((m_pPlayer->m_bCanShoot && CSGameRules()->IsMultiplayer() && !CSGameRules()->IsFreezePeriod()) || !CSGameRules()->IsMultiplayer())
 		{
 #ifndef CLIENT_PREDICT_PRIM_ATK
@@ -697,7 +722,7 @@ bool CBaseWeapon::QuickThrowStart(EquipmentIdType iId)
 	if (m_bitsFlags & WPNSTATE_BUSY)
 		return false;
 
-	if (!m_pPlayer->GetGrenadeInventory(iId))
+	if (!m_pPlayer->GetGrenadeInventory(iId) && !m_pPlayer->m_rgbHasEquipment[iId])
 		return false;
 
 	if (m_bInZoom)
@@ -737,6 +762,20 @@ bool CBaseWeapon::QuickThrowStart(EquipmentIdType iId)
 		SetLeftHand(false);	// holster L hand. The freeze time (m_flNextAttack) should be included.
 
 		UTIL_SetSecondaryVMDL(m_pPlayer, SSZ_C4_VMDL, C4_DRAW);
+
+		goto TAG_C4_SKIPPING;
+	}
+
+	case EQP_DETONATOR:
+	{
+		m_bitsFlags |= WPNSTATE_QUICK_THROWING | WPNSTATE_QT_RELEASE | WPNSTATE_QT_SHOULD_SPAWN;	// consider detonator is already "released" on start.
+		m_pPlayer->m_iUsingGrenadeId = iId;
+		// no 3rd personal model setting needed.
+
+		SetLeftHand(false);	// holster L hand. The freeze time (m_flNextAttack) should be included.
+		m_pPlayer->m_flNextAttack = C4_TIME_DETONATE;	// however, we have to overwrite it.
+
+		UTIL_SetSecondaryVMDL(m_pPlayer, SSZ_C4_VMDL, C4_DETONATE);
 
 		goto TAG_C4_SKIPPING;
 	}
@@ -982,14 +1021,35 @@ bool CBaseWeapon::DefaultDeploy(const char* szViewModel, const char* szWeaponMod
 	return true;
 }
 
-void CBaseWeapon::DefaultIdle(int iDashingAnim, int iIdleAnim, float flDashLoop, float flIdleLoop)
+void CBaseWeapon::DefaultIdle(int iDashingAnim, int iIdleAnim, float flDashLoop)
 {
 #ifdef CLIENT_DLL
 	UpdateBobParameters();
 #endif
+	// the priority of these anims:
+	// 1. Running first. You can't be BLOCKED during a RUN.
+	// 2. Block. You can't aimming if you are blocked.
+	// 3. Aim.
 
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + ((m_bitsFlags & WPNSTATE_DASHING) ? flDashLoop : flIdleLoop);
-	SendWeaponAnim((m_bitsFlags & WPNSTATE_DASHING) ? iDashingAnim : iIdleAnim);
+	if (m_bitsFlags & WPNSTATE_DASHING)
+	{
+		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + flDashLoop;
+		SendWeaponAnim(iDashingAnim);
+	}
+	else if ((m_pPlayer->m_afButtonPressed | m_pPlayer->m_afButtonReleased) & IN_BLOCK
+		|| (m_pPlayer->pev->button & IN_BLOCK && m_pPlayer->pev->weaponanim == iIdleAnim))
+	{
+		// you can't aim during a BLOCK section.
+		if (m_bInZoom)
+			SecondaryAttack();
+
+		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
+		PlayBlockAnim();
+	}
+	else if (m_pPlayer->pev->weaponanim != iIdleAnim)
+	{
+		SendWeaponAnim(iIdleAnim);
+	}
 }
 
 bool CBaseWeapon::DefaultReload(int iClipSize, int iAnim, float flTotalDelay, float flSoftDelay)
@@ -1187,6 +1247,48 @@ void CBaseWeapon::DefaultDashEnd(int iEnterAnim, float flEnterTime, int iExitAni
 	// remove the exaggerating shaking vfx.
 	g_flGunBobAmplitudeModifier = 1.0f;
 #endif
+}
+
+bool CBaseWeapon::DefaultSetLHand(bool bAppear, int iLHandUpAnim, float flLHandUpTime, int iLHandDownAnim, float flLHandDownTime)
+{
+	if (bAppear && m_bitsFlags & WPNSTATE_NO_LHAND)
+	{
+		SendWeaponAnim(iLHandUpAnim);
+		m_pPlayer->m_flNextAttack = flLHandUpTime;
+		m_flTimeWeaponIdle = flLHandUpTime;
+		m_bitsFlags &= ~WPNSTATE_NO_LHAND;
+
+		return true;
+	}
+	else if (!(m_bitsFlags & WPNSTATE_NO_LHAND))
+	{
+		SendWeaponAnim(iLHandDownAnim);
+		m_pPlayer->m_flNextAttack = flLHandDownTime;
+		m_flTimeWeaponIdle = flLHandDownTime;
+		m_bitsFlags |= WPNSTATE_NO_LHAND;
+
+		return true;
+	}
+
+	return false;
+}
+
+void CBaseWeapon::DefaultBlock(int iEnterAnim, float flEnterTime, int iExitAnim, float flExitTime)
+{
+	// we are using "play anim mid-way" method.
+	// go check CBaseWeapon::DefaultDashEnd() for detailed commentary.
+	bool bBlocked = !!(m_pPlayer->pev->button & IN_BLOCK);
+
+	if (bBlocked && m_pPlayer->pev->weaponanim != iEnterAnim)
+	{
+		SendWeaponAnim(iEnterAnim);
+	}
+
+	// therefore, you should not keep calling it in Think() or Frame().
+	else if (!bBlocked && m_pPlayer->pev->weaponanim != iExitAnim)
+	{
+		SendWeaponAnim(iExitAnim);
+	}
 }
 
 void CBaseWeapon::SendWeaponAnim(int iAnim, bool bSkipLocal)

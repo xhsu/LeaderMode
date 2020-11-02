@@ -63,6 +63,7 @@ const EquipmentInfo g_rgEquipmentInfo[EQP_COUNT] =
 	{EQP_C4,			"weapon_c4",			"Remote-Controlled C4",	HEGRENADE_PRICE * 2},
 
 	// misc
+	{EQP_DETONATOR,		"item_detonator",		"C4 Detonator",			0},
 	{EQP_NVG,			"item_nvg",				"Nightvision",			NVG_PRICE},
 };
 

@@ -93,6 +93,7 @@ public:
 	EquipmentIdType m_iUsingGrenadeId;
 	WeaponIdType m_iWpnSwitchingTo;	// use this instead of g_iSelectedWeapon.
 	RoleTypes m_iRoleType;
+	std::array<bool, EQP_COUNT> m_rgbHasEquipment;
 
 public:
 	void	SetAnimation(PLAYER_ANIM playerAnim)	{}
@@ -122,6 +123,7 @@ extern bool g_bHoldingKnife;
 extern bool g_bFreezeTimeOver;
 extern bool g_bInBombZone;
 extern bool g_bHoldingShield;
+extern bool g_bIsBlocked;	// this should be override, but tell the server!
 
 // pseudo-utils
 void UTIL_MakeVectors(const Vector& vec);

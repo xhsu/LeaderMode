@@ -1060,7 +1060,7 @@ int CBaseEntity::FireBuckshots(ULONG cShots, const Vector& vecSrc, const Vector&
 
 // Go to the trouble of combining multiple pellets into a single damage call.
 // This version is used by Players, uses the random seed generator to sync client and server side shots.
-Vector2D CBaseEntity::FireBullets3(Vector vecSrc, Vector vecDirShooting, float vecSpread, float flDistance, int iPenetration, AmmoIdType iBulletType, int iDamage, float flRangeModifier, int shared_rand)
+Vector2D CBaseEntity::FireBullets3(Vector vecSrc, Vector vecDirShooting, float flSpread, float flDistance, int iPenetration, AmmoIdType iBulletType, int iDamage, float flRangeModifier, int shared_rand)
 {
 	int iOriginalPenetration = iPenetration;
 	int iPenetrationPower;
@@ -1109,7 +1109,7 @@ Vector2D CBaseEntity::FireBullets3(Vector vecSrc, Vector vecDirShooting, float v
 	Vector vecDir, vecEnd;
 	Vector vecOldSrc, vecNewSrc;
 
-	vecDir = vecDirShooting + x * vecSpread * vecRight + y * vecSpread * vecUp;
+	vecDir = vecDirShooting + x * flSpread * vecRight + y * flSpread * vecUp;
 	vecEnd = vecSrc + vecDir * flDistance;
 
 	float flDamageModifier = 0.5;
@@ -1246,7 +1246,7 @@ Vector2D CBaseEntity::FireBullets3(Vector vecSrc, Vector vecDirShooting, float v
 		ApplyMultiDamage(pev, pev);
 	}
 
-	return Vector2D(x * vecSpread, y * vecSpread);
+	return Vector2D(x * flSpread, y * flSpread);
 }
 
 void CBaseEntity::TraceBleed(float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)

@@ -661,8 +661,8 @@ public:
 	CBaseWeapon* m_pActiveItem;
 	CBaseWeapon* m_pClientActiveItem;
 	CBaseWeapon* m_pLastItem;
-	int m_rgAmmo[MAX_AMMO_SLOTS];
-	int m_rgAmmoLast[MAX_AMMO_SLOTS];
+	std::array<int, MAX_AMMO_SLOTS> m_rgAmmo;
+	std::array<int, MAX_AMMO_SLOTS> m_rgAmmoLast;
 	Vector m_vecAutoAim;
 	BOOL m_fOnTarget;
 	int m_iDeaths;
@@ -732,6 +732,8 @@ public:
 	float m_flNextSkillTimerUpdate;
 	float m_flNextClientCvarQuery;
 	bool m_bHoldToAim;	// value should query from client.
+	std::array<bool, EQP_COUNT> m_rgbHasEquipment;	// designed for some equipments mean to be used(taken) in hand, but not occupied a slot.
+	std::array<bool, EQP_COUNT> m_rgbClientHasEquipment;
 
 	// overhealing mechanism.
 	float m_flOHNextThink;

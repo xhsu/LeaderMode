@@ -52,6 +52,27 @@
 												}
 #endif
 
+#define DECLARE_STANDARD_LHAND_FUNC(x)			bool C##x::SetLeftHand(bool bAppear)	\
+												{	\
+													if (bAppear && m_bitsFlags & WPNSTATE_NO_LHAND)	\
+													{	\
+														SendWeaponAnim(x##_LHAND_UP);	\
+														m_pPlayer->m_flNextAttack = x##_LHAND_UP_TIME;	\
+														m_flTimeWeaponIdle = x##_LHAND_UP_TIME;	\
+														m_bitsFlags &= ~WPNSTATE_NO_LHAND;	\
+														return true;	\
+													}	\
+													else if (!(m_bitsFlags & WPNSTATE_NO_LHAND))	\
+													{	\
+														SendWeaponAnim(x##_LHAND_DOWN);	\
+														m_pPlayer->m_flNextAttack = x##_LHAND_DOWN_TIME;	\
+														m_flTimeWeaponIdle = x##_LHAND_DOWN_TIME;	\
+														m_bitsFlags |= WPNSTATE_NO_LHAND;	\
+														return true;	\
+													}	\
+													return false;	\
+												}
+
 class CBaseEntity;
 class CBasePlayer;
 class CWeaponBox;
@@ -186,7 +207,9 @@ public:	// SV exclusive variables.
 	int		m_iClientWeaponState{ 0 };
 #else
 public:	// CL exclusive variables.
-	CBasePlayer* m_pPlayer		{ nullptr };	// local pseudo-player
+	CBasePlayer*	m_pPlayer		{ nullptr };	// local pseudo-player
+	float			m_flBlockCheck	{ 0.0f };
+	Vector			m_vecBlockOffset{ g_vecZero };
 #endif
 
 public:	// basic logic funcs
@@ -222,13 +245,15 @@ public:	// CL xclusive functions.
 
 public:	// basic API and behaviour for weapons.
 	virtual	bool	DefaultDeploy	(const char* szViewModel, const char* szWeaponModel, int iAnim, const char* szAnimExt, float flDeployTime = 0.75f);
-	virtual void	DefaultIdle		(int iDashingAnim, int iIdleAnim = 0, float flDashLoop = 20.0f, float flIdleLoop = 20.0f);
+	virtual void	DefaultIdle		(int iDashingAnim, int iIdleAnim = 0, float flDashLoop = 20.0f);
 	virtual	bool	DefaultReload	(int iClipSize, int iAnim, float flTotalDelay, float flSoftDelay = 0.5f);
 	virtual bool	DefaultHolster	(int iHolsterAnim, float flHolsterDelay);
 	virtual	void	DefaultSteelSight(const Vector& vecOfs, int iFOV, float flDriftingSpeed = 10.0f, float flNextSecondaryAttack = 0.3f);
 	virtual	void	DefaultScopeSight(const Vector& vecOfs, int iFOV, float flEnterScopeDelay = 0.25f, float flFadeFromBlack = 5.0f, float flDriftingSpeed = 10.0f, float flNextSecondaryAttack = 0.3f);
 	virtual	void	DefaultDashStart(int iEnterAnim, float flEnterTime);
 	virtual	void	DefaultDashEnd	(int iEnterAnim, float flEnterTime, int iExitAnim, float flExitTime);
+	virtual bool	DefaultSetLHand	(bool bAppear, int iLHandUpAnim, float flLHandUpTime, int iLHandDownAnim, float flLHandDownTime);
+	virtual void	DefaultBlock	(int iEnterAnim, float flEnterTime, int iExitAnim, float flExitTime);
 
 public:	// util funcs
 	inline	bool	IsDead			(void) { return !!(m_bitsFlags & WPNSTATE_DEAD); }
@@ -245,7 +270,8 @@ public:	// util funcs
 	virtual void	KickBack		(float up_base, float lateral_base, float up_modifier, float lateral_modifier, float up_max, float lateral_max, int direction_change);	// recoil
 	virtual void	ResetModel		(void) { }	// used after Melee() and QuickThrowRelease().
 	virtual bool	SetVariation	(RoleTypes iType) { m_iVariation = iType; return true; }
-	virtual void	SetLeftHand		(bool bAppear) { }
+	virtual bool	SetLeftHand		(bool bAppear) { return false; }
+	virtual void	PlayBlockAnim	(void) { }
 };
 
 
@@ -1376,7 +1402,8 @@ public:	// util funcs
 	virtual void	PushAnim		(void);
 	virtual void	PopAnim			(void);
 	virtual void	ResetModel		(void);
-	virtual void	SetLeftHand		(bool bAppear);
+	virtual bool	SetLeftHand		(bool bAppear);
+	virtual void	PlayBlockAnim	(void)	{ return DefaultBlock(M1014_BLOCK_UP, M1014_BLOCK_UP_TIME, M1014_BLOCK_DOWN, M1014_BLOCK_DOWN_TIME); }
 };
 
 #define M45A1_VIEW_MODEL	"models/weapons/v_m45a1.mdl"
@@ -1632,6 +1659,7 @@ enum sg550_e
 
 #define C4_VIEW_MODEL	"models/weapons/v_c4.mdl"
 #define C4_WORLD_MODEL	"models/weapons/w_c4.mdl"
+#define C4_PLACED_SFX	"zombieriot/plant.wav"
 
 constexpr float C4_TIME_DRAW		= 0.7f;
 constexpr float C4_TIME_HOLSTER		= 0.7f;
@@ -1639,7 +1667,8 @@ constexpr float C4_TIME_THROW		= 1.0333f;
 constexpr float C4_TIME_THROW_SPAWN = 0.5f;
 constexpr float C4_TIME_PLACE		= 1.0333f;
 constexpr float C4_TIME_PLACE_SPAWN = 0.5f;
-constexpr float C4_TIME_DETONATE	= 1.0333f;
+constexpr float C4_TIME_DET_ANIM	= 1.0333f;
+constexpr float C4_TIME_DETONATE	= 0.4f;
 
 enum c4_e
 {

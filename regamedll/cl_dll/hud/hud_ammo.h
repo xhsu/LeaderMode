@@ -21,6 +21,8 @@ public:
 	void Reset(void);
 
 public:
+	client_sprite_t* m_pTxtList;	// original data. for others to inquiry.
+	int m_iTxtListCount;
 	hSprite m_rghAmmoSprite[AMMO_MAXTYPE];
 	wrect_t	m_rgrcAmmoSprite[AMMO_MAXTYPE];
 	float m_flAlpha;

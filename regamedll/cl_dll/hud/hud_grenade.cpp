@@ -41,6 +41,11 @@ int CHudGrenade::VidInit(void)
 			m_rghGrenadeIcons[i] = gHUD::m_Ammo.m_rghAmmoSprite[iAmmoId];
 			m_rgrcGrenadeIcons[i] = gHUD::m_Ammo.m_rgrcAmmoSprite[iAmmoId];
 		}
+		else
+		{
+			auto p = gHUD::GetSpriteFromList(gHUD::m_Ammo.m_pTxtList, g_rgEquipmentInfo[i].m_pszInternalName, 640, gHUD::m_Ammo.m_iTxtListCount);
+			gHUD::GetSprite(p, m_rghGrenadeIcons[i], m_rgrcGrenadeIcons[i]);
+		}
 	}
 
 	return 1;
@@ -64,13 +69,13 @@ int CHudGrenade::Draw(float flTime)
 			continue;
 
 		iAmmoId = GetAmmoIdOfEquipment((EquipmentIdType)i);	// no grenade, no drawing.
-		if (!iAmmoId || gPseudoPlayer.m_rgAmmo[iAmmoId] <= 0)
+		if ((!iAmmoId || gPseudoPlayer.m_rgAmmo[iAmmoId] <= 0) && !gPseudoPlayer.m_rgbHasEquipment[i])	// Alternatively, if this is a special usable item, you can take it on your hand.
 			continue;
 
 		y = ScreenHeight - (m_rgrcGrenadeIcons[i].bottom - m_rgrcGrenadeIcons[i].top);	// Y is not a constant, it depents on icon.
 		iIconWidth = m_rgrcGrenadeIcons[i].right - m_rgrcGrenadeIcons[i].left;
 
-		iAlphaStep = 255 / gPseudoPlayer.m_rgAmmo[iAmmoId] + 1;	// CAREFUL! don't divide it by naught!
+		iAlphaStep = 255 / (gPseudoPlayer.m_rgAmmo[iAmmoId] + 1);	// CAREFUL! don't divide it by naught!
 
 		for (iAlpha = 255; iAlpha > 0; iAlpha -= iAlphaStep)
 		{

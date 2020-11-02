@@ -45,8 +45,8 @@
 #define IN_ATTACK2		(1<<10)
 #define IN_RUN			(1<<11)
 #define IN_RELOAD		(1<<12)
-#define IN_SCORE		(1<<13)	// Used by client.dll for when scoreboard is held down
-#define IN_THROW		(1<<14)	// Actually it just means using equipments...
+#define IN_THROW		(1<<13)	// Actually it just means using equipments...
+#define IN_BLOCK		(1<<15)	// It not a button, just a upload flag towards server.
 
 #define IN_ACTIVE		(IN_ATTACK | IN_ATTACK2 | IN_JUMP | IN_DUCK | IN_RUN | IN_FORWARD | IN_BACK | IN_MOVELEFT | IN_MOVERIGHT)
 

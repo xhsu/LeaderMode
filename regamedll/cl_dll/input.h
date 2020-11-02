@@ -20,6 +20,7 @@ struct kblist_t
 };
 
 extern kbutton_t	in_mlook;
+extern kbutton_t	in_score;
 
 extern cvar_t* m_pitch;
 extern cvar_t* m_yaw;

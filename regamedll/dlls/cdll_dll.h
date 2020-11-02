@@ -59,6 +59,7 @@ const int DEFAULT_FOV      = 90;	// the default field of view
 
 #define ITEM_STATUS_NIGHTVISION BIT(0)
 #define ITEM_STATUS_DEFUSER     BIT(1)
+#define ITEM_STATUS_DETONATOR	BIT(2)
 
 #define SCORE_STATUS_DEAD       BIT(0)
 #define SCORE_STATUS_GODFATHER       BIT(1)

@@ -1921,17 +1921,57 @@ void UTIL_LieFlat(CBaseEntity* pEntity)
 	pEntity->pev->angles = vecAngles;
 }
 
-void UTIL_Play3DSound(Vector vecOrigin, float flRange, const char* szSample)
+void UTIL_Play3DSound(Vector vecSrc, float flRange, const char* szSample, int iPitch)
 {
+	CBaseEntity* pEntity = nullptr;
+	CBasePlayer* pPlayer = nullptr;
 
+	while ((pEntity = UTIL_FindEntityInSphere(pEntity, vecSrc, flRange)))
+	{
+		if (!pEntity->IsPlayer())
+			continue;
+
+		pPlayer = (CBasePlayer*)pEntity;
+
+		MESSAGE_BEGIN(MSG_ONE, gmsgSound, vecSrc, pPlayer->pev);
+		WRITE_BYTE(TRUE);	// using 3D.
+		WRITE_COORD(vecSrc.x);
+		WRITE_COORD(vecSrc.y);
+		WRITE_COORD(vecSrc.z);
+		WRITE_COORD(flRange);
+		WRITE_BYTE(FALSE);	// not using SharedString.
+		WRITE_STRING(szSample);
+		WRITE_BYTE(iPitch);
+		MESSAGE_END();
+	}
 }
 
-void UTIL_Play3DSound(Vector vecOrigin, float flRange, SharedString iSample)
+void UTIL_Play3DSound(Vector vecSrc, float flRange, SharedString iSample, int iPitch)
 {
+	CBaseEntity* pEntity = nullptr;
+	CBasePlayer* pPlayer = nullptr;
 
+	while ((pEntity = UTIL_FindEntityInSphere(pEntity, vecSrc, flRange)))
+	{
+		if (!pEntity->IsPlayer())
+			continue;
+
+		pPlayer = (CBasePlayer*)pEntity;
+
+		MESSAGE_BEGIN(MSG_ONE, gmsgSound, vecSrc, pPlayer->pev);
+		WRITE_BYTE(TRUE);	// using 3D.
+		WRITE_COORD(vecSrc.x);
+		WRITE_COORD(vecSrc.y);
+		WRITE_COORD(vecSrc.z);
+		WRITE_COORD(flRange);
+		WRITE_BYTE(TRUE);	// using SharedString.
+		WRITE_BYTE(iSample);
+		WRITE_BYTE(iPitch);
+		MESSAGE_END();
+	}
 }
 
-void UTIL_Play3DSoundWithHost2D(CBasePlayer* pHost, Vector vecSrc, float flRange, SharedString iSample)
+void UTIL_Play3DSoundWithHost2D(CBasePlayer* pHost, Vector vecSrc, float flRange, SharedString iSample, int iPitch)
 {
 	CBaseEntity* pEntity = nullptr;
 	CBasePlayer* pPlayer = nullptr;
@@ -1953,6 +1993,7 @@ void UTIL_Play3DSoundWithHost2D(CBasePlayer* pHost, Vector vecSrc, float flRange
 			WRITE_COORD(flRange);
 			WRITE_BYTE(TRUE);	// using SharedString.
 			WRITE_BYTE(iSample);
+			WRITE_BYTE(iPitch);
 			MESSAGE_END();
 		}
 		else
@@ -1961,6 +2002,35 @@ void UTIL_Play3DSoundWithHost2D(CBasePlayer* pHost, Vector vecSrc, float flRange
 			WRITE_BYTE(FALSE);	// not using 3D.
 			WRITE_BYTE(TRUE);	// using SharedString.
 			WRITE_BYTE(iSample);
+			WRITE_BYTE(iPitch);
+			MESSAGE_END();
+		}
+	}
+}
+
+void UTIL_Play3DSoundWithoutHost(CBasePlayer* pHost, Vector vecSrc, float flRange, SharedString iSample, int iPitch)
+{
+	CBaseEntity* pEntity = nullptr;
+	CBasePlayer* pPlayer = nullptr;
+
+	while ((pEntity = UTIL_FindEntityInSphere(pEntity, vecSrc, flRange)))
+	{
+		if (!pEntity->IsPlayer())
+			continue;
+
+		pPlayer = (CBasePlayer*)pEntity;
+
+		if (pPlayer != pHost)
+		{
+			MESSAGE_BEGIN(MSG_ONE, gmsgSound, vecSrc, pPlayer->pev);
+			WRITE_BYTE(TRUE);	// using 3D.
+			WRITE_COORD(vecSrc.x);
+			WRITE_COORD(vecSrc.y);
+			WRITE_COORD(vecSrc.z);
+			WRITE_COORD(flRange);
+			WRITE_BYTE(TRUE);	// using SharedString.
+			WRITE_BYTE(iSample);
+			WRITE_BYTE(iPitch);
 			MESSAGE_END();
 		}
 	}

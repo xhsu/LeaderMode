@@ -1,4 +1,4 @@
-32
+64
 338Magnum		640 640hud7			24	96	24	24
 408CheyTac		640 640hud7			72	72	24	24
 50BMG			640	ammo_csol		192	205	24	24
@@ -20,4 +20,6 @@ Cryogrenade		640	ammo_cryo		222	96	24	24
 Molotov			640	ammo_incendiary	24	231	24	24
 HealingGr		640	ammo_csol		231	48	24	24
 GasGrenade		640	ammo_nervegas	1	232	24	24
-C4				640 icon_c4			0	45	170	45
+C4				640 640hud7			96	96	24	24
+item_detonator	640 accessories		120	60	59	59
+item_nvg		640 640hud7			0	180	45	32

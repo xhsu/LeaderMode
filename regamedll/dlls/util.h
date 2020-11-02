@@ -386,8 +386,9 @@ inline void UTIL_FixupAngles(Vector &v)
 extern int g_groupmask;
 extern int g_groupop;
 
-void UTIL_Play3DSound(Vector vecOrigin, float flRange, SharedString iSample);
-void UTIL_Play3DSoundWithHost2D(CBasePlayer* pHost, Vector vecSrc, float flRange, SharedString iSample);
+void UTIL_Play3DSound(Vector vecOrigin, float flRange, SharedString iSample, int iPitch = 100);
+void UTIL_Play3DSoundWithHost2D(CBasePlayer* pHost, Vector vecSrc, float flRange, SharedString iSample, int iPitch = 100);
+void UTIL_Play3DSoundWithoutHost(CBasePlayer* pHost, Vector vecSrc, float flRange, SharedString iSample, int iPitch = 100);
 
 void UTIL_HideSecondaryVMDL(CBasePlayer* pPlayer, bool bSkipLocal = true);
 void UTIL_SetSecondaryVMDL(CBasePlayer* pPlayer, SharedString iModel, int iSeq = 0, bool bSkipLocal = true);

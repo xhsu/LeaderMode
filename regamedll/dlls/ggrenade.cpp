@@ -2,8 +2,8 @@
 
 TYPEDESCRIPTION CGrenade::m_SaveData[] =
 {
+	DEFINE_FIELD(CGrenade, m_iType, FIELD_INTEGER),
 	DEFINE_FIELD(CGrenade, m_SGSmoke, FIELD_INTEGER),
-	DEFINE_FIELD(CGrenade, m_bJustBlew, FIELD_BOOLEAN),
 	DEFINE_FIELD(CGrenade, m_bLightSmoke, FIELD_BOOLEAN),
 	DEFINE_FIELD(CGrenade, m_usEvent, FIELD_INTEGER),
 };
@@ -23,6 +23,7 @@ const float CGrenade::m_rgflFuseTime[EQP_COUNT] =
 	9999.0f,	// EQP_INCENDIARY_GR, explode on touch.
 	1.5f,	// EQP_HEALING_GR,
 	1.5f,	// EQP_GAS_GR,
+	9999.0f,	// EQP_C4, explode on execute.
 
 	0,
 };
@@ -343,19 +344,6 @@ void CGrenade::Killed(entvars_t *pevAttacker, int iGib)
 	Detonate();
 }
 
-// Timed grenade, this think is called when time runs out.
-void CGrenade::DetonateUse(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
-{
-	SetThink(&CGrenade::Detonate);
-	pev->nextthink = gpGlobals->time;
-}
-
-void CGrenade::PreDetonate()
-{
-	SetThink(&CGrenade::Detonate);
-	pev->nextthink = gpGlobals->time + 1.0f;
-}
-
 void CGrenade::Detonate()
 {
 	TraceResult tr;
@@ -414,14 +402,22 @@ void CGrenade::SG_Detonate()
 	pev->nextthink = gpGlobals->time + 0.1f;
 	SetThink(&CGrenade::SG_Smoke);
 
-	if (m_bHealing)	// is this a healing grenade?
+	switch (m_iType)
+	{
+	case HEALING:
 		CHealingSmokeCenter::Create(vecSpot, CBasePlayer::Instance(pev->owner));
+		break;
 
-	if (m_bPoisoned)	// is this a nerve gas grenade?
+	case NERVE_GAS:
 		CPoisonedSmokeCentre::Create(vecSpot, CBasePlayer::Instance(pev->owner));
+		break;
+
+	default:
+		break;
+	}
 }
 
-void CGrenade::Detonate3()
+void CGrenade::HE_Detonate()
 {
 	TraceResult tr;
 	Vector vecSpot;// trace starts here!
@@ -429,6 +425,86 @@ void CGrenade::Detonate3()
 	vecSpot = pev->origin + Vector(0, 0, 8);
 	UTIL_TraceLine(vecSpot, vecSpot + Vector(0, 0, -40), ignore_monsters, ENT(pev), &tr);
 	Explode3(&tr, DMG_EXPLOSION);
+}
+
+void CGrenade::C4_Detonate()
+{
+	CBasePlayer* pPlayer = CBasePlayer::Instance(pev->owner);
+	CBaseEntity* pEntity = nullptr;
+
+	while ((pEntity = UTIL_FindEntityInSphere(pEntity, pev->origin, C4_EXPLO_RADIUS)))
+	{
+		if (pEntity == this)
+			continue;
+
+		if (pEntity->pev->takedamage == DAMAGE_NO)
+			continue;
+
+		if (FClassnameIs(pEntity->pev, "func_breakable"))
+		{
+			pEntity->TakeDamage(pev, pPlayer->pev, C4_EXPLO_DAMAGE, DMG_EXPLOSION);
+			continue;
+		}
+
+		if (!friendlyfire.value && pEntity->IsPlayer())
+		{
+			CBasePlayer* pVictim = CBasePlayer::Instance(pEntity->pev);
+
+			if (pVictim->m_iTeam == pPlayer->m_iTeam)
+				continue;
+		}
+
+		float flDistance = (pev->origin - pEntity->pev->origin).Length();
+		float flDamage = C4_EXPLO_DAMAGE * Q_pow(50.0f, -flDistance / C4_EXPLO_RADIUS);	// this math model makes sure that at this exact point, the damage goes down to 1/50 i.e. 2% of the original..
+
+		if (pEntity->IsPlayer())
+			flDamage *= GetAmountOfPlayerVisible(pev->origin, pEntity);
+
+		if (flDamage <= 1.0f)
+			continue;
+
+		pEntity->TakeDamage(pev, pPlayer->pev, flDamage, DMG_EXPLOSION);
+	}
+
+	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
+	WRITE_BYTE(TE_EXPLOSION);
+	WRITE_COORD(pev->origin.x + pev->v_angle.x * RANDOM_FLOAT(50, 55));	// the v_angle is norm of its attached surface.
+	WRITE_COORD(pev->origin.y + pev->v_angle.y * RANDOM_FLOAT(50, 55));
+	WRITE_COORD(pev->origin.z + pev->v_angle.z * RANDOM_FLOAT(50, 55));
+	WRITE_SHORT(g_sModelIndexFireball3);
+	WRITE_BYTE(25);
+	WRITE_BYTE(30);
+	WRITE_BYTE(TE_EXPLFLAG_NOSOUND);
+	MESSAGE_END();
+
+	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
+	WRITE_BYTE(TE_EXPLOSION);
+	WRITE_COORD(pev->origin.x + pev->v_angle.x * RANDOM_FLOAT(70, 95));	// the v_angle is norm of its attached surface.
+	WRITE_COORD(pev->origin.y + pev->v_angle.y * RANDOM_FLOAT(70, 95));
+	WRITE_COORD(pev->origin.z + pev->v_angle.z * RANDOM_FLOAT(70, 95));
+	WRITE_SHORT(g_sModelIndexFireball2);
+	WRITE_BYTE(30);
+	WRITE_BYTE(30);
+	WRITE_BYTE(TE_EXPLFLAG_NONE);
+	MESSAGE_END();
+
+	// LUNA: Why DSHGFHDS always likes to remove entity this way?
+	pev->flags |= FL_KILLME;
+}
+
+void CGrenade::C4_Detonate(CBasePlayer* pPlayer)
+{
+	CGrenade* pC4 = nullptr;
+	while ((pC4 = UTIL_FindEntityByClassname(pC4, "grenade")))
+	{
+		if (pC4->m_iType != RCC4)
+			continue;
+
+		if (pC4->pev->owner != pPlayer->edict())
+			continue;
+
+		pC4->C4_Detonate();
+	}
 }
 
 void CGrenade::ExplodeTouch(CBaseEntity *pOther)
@@ -441,22 +517,6 @@ void CGrenade::ExplodeTouch(CBaseEntity *pOther)
 
 	if (!Q_strcmp(STRING(pev->model), "models/w_smokegrenade.mdl"))
 		pev->flags |= FL_ONGROUND;	// SG is a little bit different.
-}
-
-void CGrenade::DangerSoundThink()
-{
-	if (!IsInWorld())
-	{
-		UTIL_Remove(this);
-		return;
-	}
-
-	pev->nextthink = gpGlobals->time + 0.2f;
-
-	if (pev->waterlevel != 0)
-	{
-		pev->velocity = pev->velocity * 0.5f;
-	}
 }
 
 void CGrenade::BounceTouch(CBaseEntity *pOther)
@@ -567,7 +627,7 @@ void CGrenade::TumbleThink()
 		}
 		else
 		{
-			SetThink(&CGrenade::Detonate3);
+			SetThink(&CGrenade::HE_Detonate);
 		}
 	}
 
@@ -669,8 +729,6 @@ CGrenade *CGrenade::HEGrenade(entvars_t *pevOwner, Vector vecStart, Vector vecVe
 	pGrenade->pev->sequence = RANDOM_LONG(3, 6);
 	pGrenade->pev->framerate = 1.0f;
 
-	pGrenade->m_bJustBlew = true;
-
 	pGrenade->pev->gravity = 0.55f;
 	pGrenade->pev->friction = 0.7f;
 
@@ -679,6 +737,7 @@ CGrenade *CGrenade::HEGrenade(entvars_t *pevOwner, Vector vecStart, Vector vecVe
 	SET_MODEL(ENT(pGrenade->pev), "models/w_hegrenade.mdl");
 	pGrenade->pev->dmg = 100.0f;
 
+	pGrenade->m_iType = HE;
 	return pGrenade;
 }
 
@@ -712,14 +771,13 @@ CGrenade *CGrenade::Flashbang(entvars_t *pevOwner, Vector vecStart, Vector vecVe
 	pGrenade->pev->sequence = RANDOM_LONG(3, 6);
 	pGrenade->pev->framerate = 1.0f;
 
-	pGrenade->m_bJustBlew = true;
-
 	pGrenade->pev->gravity = 0.5f;
 	pGrenade->pev->friction = 0.8f;
 
 	SET_MODEL(ENT(pGrenade->pev), "models/w_flashbang.mdl");
 	pGrenade->pev->dmg = 35.0f;
 
+	pGrenade->m_iType = FLASHBANG;
 	return pGrenade;
 }
 
@@ -748,7 +806,6 @@ CGrenade *CGrenade::SmokeGrenade(entvars_t *pevOwner, Vector vecStart, Vector ve
 
 	pGrenade->pev->sequence = RANDOM_LONG(3, 6);
 	pGrenade->pev->framerate = 1.0f;
-	pGrenade->m_bJustBlew = true;
 	pGrenade->pev->gravity = 0.5f;
 	pGrenade->pev->friction = 0.8f;
 	pGrenade->m_SGSmoke = 0;
@@ -756,12 +813,9 @@ CGrenade *CGrenade::SmokeGrenade(entvars_t *pevOwner, Vector vecStart, Vector ve
 	SET_MODEL(ENT(pGrenade->pev), "models/w_smokegrenade.mdl");
 	pGrenade->pev->dmg = 35.0f;
 
+	pGrenade->m_iType = SMOKE;
 	return pGrenade;
 }
-
-const float CGrenade::CRYOGR_DAMAGE = 20.0f;
-const float CGrenade::CRYOGR_RADIUS = 240.0f;
-const float CGrenade::CRYOGR_EFTIME = 4.0f;
 
 CGrenade* CGrenade::Cryogrenade(CBasePlayer* pPlayer)
 {
@@ -807,6 +861,7 @@ CGrenade* CGrenade::Cryogrenade(CBasePlayer* pPlayer)
 	MESSAGE_END();
 
 	pGrenade->m_usEvent = m_rgusEvents[EQP_CRYOGRENADE];
+	pGrenade->m_iType = CRYO;
 	return pGrenade;
 }
 
@@ -859,6 +914,30 @@ void CGrenade::IncendiaryTouch(CBaseEntity* pOther)
 	PLAYBACK_EVENT_FULL(FEV_GLOBAL | FEV_RELIABLE, nullptr, m_usEvent, 0, pev->origin, (float*)&g_vecZero, CIncendiaryGrenadeCentre::RADIUS, CIncendiaryGrenadeCentre::DURATION, 0, 0, FALSE, FALSE);
 }
 
+void CGrenade::C4Touch(CBaseEntity* pOther)
+{
+	if (pOther->IsPlayer())
+		return;
+
+	if (FClassnameIs(pOther->pev, "func_breakable") || FClassnameIs(pOther->pev, "func_ladder") || FClassnameIs(pOther->pev, "func_wall"))
+		return;
+
+	if (POINT_CONTENTS(pev->origin) == CONTENTS_SKY)
+		return;
+
+	TraceResult tr;
+	UTIL_TraceLine(pev->origin, pev->origin + pev->velocity, ignore_monsters, edict(), &tr);
+
+	Vector angle;
+	VEC_TO_ANGLES(tr.vecPlaneNormal, angle);
+	pev->angles = tr.vecPlaneNormal.VectorAngles();
+	pev->sequence = 1;
+	pev->v_angle = tr.vecPlaneNormal;	// LUNA: save for C4_Detonate() later.
+	pev->movetype = MOVETYPE_NONE;
+
+	EMIT_SOUND(edict(), CHAN_ITEM, C4_PLACED_SFX, 0.2f, ATTN_NORM);
+}
+
 void CGrenade::IncendiaryThink()
 {
 	if (POINT_CONTENTS(pev->origin) == CONTENT_WATER)	// this cannot be in water, right?
@@ -873,7 +952,7 @@ void CGrenade::IncendiaryThink()
 CGrenade* CGrenade::HealingGrenade(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity)
 {
 	CGrenade* pGrenade = SmokeGrenade(pevOwner, vecStart, vecVelocity);
-	pGrenade->m_bHealing = true;
+	pGrenade->m_iType = HEALING;
 	pGrenade->pev->dmgtime = gpGlobals->time + m_rgflFuseTime[EQP_HEALING_GR];
 
 	return pGrenade;
@@ -882,7 +961,7 @@ CGrenade* CGrenade::HealingGrenade(entvars_t* pevOwner, Vector vecStart, Vector 
 CGrenade* CGrenade::NerveGasGrenade(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity)
 {
 	CGrenade* pGrenade = SmokeGrenade(pevOwner, vecStart, vecVelocity);
-	pGrenade->m_bPoisoned = true;
+	pGrenade->m_iType = NERVE_GAS;
 	pGrenade->pev->dmgtime = gpGlobals->time + m_rgflFuseTime[EQP_GAS_GR];
 
 	return pGrenade;
@@ -931,6 +1010,30 @@ CGrenade* CGrenade::IncendiaryGrenade(entvars_t* pevOwner, Vector vecStart, Vect
 	MESSAGE_END();
 
 	pGrenade->m_usEvent = m_rgusEvents[EQP_INCENDIARY_GR];
+	pGrenade->m_iType = INCENDIARY;
+	return pGrenade;
+}
+
+CGrenade* CGrenade::C4(CBasePlayer* pPlayer)
+{
+	CGrenade* pGrenade = GetClassPtr((CGrenade*)nullptr);
+	pGrenade->Spawn();
+
+	UTIL_MakeVectors(pPlayer->pev->v_angle + pPlayer->pev->punchangle);
+	pGrenade->pev->angles = gpGlobals->v_up.VectorAngles();
+	pGrenade->pev->solid = SOLID_TRIGGER;
+	pGrenade->pev->movetype = MOVETYPE_TOSS;
+	pGrenade->pev->owner = pPlayer->edict();
+	SET_MODEL(pGrenade->edict(), C4_WORLD_MODEL);
+	SET_ORIGIN(pGrenade->edict(), pPlayer->GetGunPosition() + gpGlobals->v_forward * 16.0f);
+	pGrenade->pev->velocity = pPlayer->pev->velocity + gpGlobals->v_forward * C4_INIT_SPEED;
+	pGrenade->pev->avelocity = Vector(C4_INIT_SPEED, RANDOM_FLOAT(-C4_INIT_SPEED, C4_INIT_SPEED), 0.0f);
+
+	pGrenade->SetTouch(&CGrenade::C4Touch);
+	pGrenade->SetThink(&CGrenade::SUB_DoNothing);
+
+	pGrenade->m_usEvent = m_rgusEvents[EQP_C4];
+	pGrenade->m_iType = RCC4;
 	return pGrenade;
 }
 

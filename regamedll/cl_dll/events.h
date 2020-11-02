@@ -19,6 +19,7 @@ enum EV_SmokeTypes
 
 void EV_EjectBrass(float* origin, float* velocity, float rotation, int model, int soundtype, float flAngularVel = 4.0f, float life = 15.0f);
 bool EV_IsLocal(int idx);
+void EV_PlayGunFire(int idx, const char* sample, float flMaxDistance, const Vector& src, int iPitch);
 
 extern int g_iRShell;
 extern int g_iPShell;
