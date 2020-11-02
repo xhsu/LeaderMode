@@ -1,6 +1,7 @@
 /*
 
 Remastered Date: Mar 20 2020
+Reflesh Date: Nov 02 2020
 
 Modern Warfare Dev Team
 Code - Luna the Reborn
@@ -23,74 +24,91 @@ void CAWP::Precache()
 	m_usEvent = PRECACHE_EVENT(1, "events/awp.sc");
 }
 
+#else
+
+static constexpr int MAGAZINE = 9;
+static constexpr int EMPTY = 3;
+static constexpr int FULL = 0;
+static constexpr int TWO_LEFT = 1;
+static constexpr int ONE_LEFT = 2;
+
+static constexpr int MUZZLE = 7;
+static constexpr int SILENCER = 2;
+static constexpr int BREAKER = 1;
+
+int CAWP::CalcBodyParam(void)
+{
+	static BodyEnumInfo_t info[] =
+	{
+		{ 0, 1 },	// right hand	= 0;
+		{ 0, 2 },	// left hand	= 1;
+		{ 0, 1 },	// right sleeve	= 2;
+		{ 0, 2 },	// left sleeve	= 3;
+
+		{ 0, 1 },	// weapon		= 4;
+		{ 0, 1 },
+		{ 0, 1 },
+
+		{ 0, 3 },	// muzzle		= 7;
+		{ 0, 2 },	// pin			= 8;
+		{ 0, 4 },	// magazine		= 9;
+	};
+
+	// mag state control.
+	switch (m_iClip)
+	{
+	case 0:	// empty mag. the follower is shown.
+		info[MAGAZINE].body = EMPTY;
+		break;
+
+	case 1:
+		info[MAGAZINE].body = ONE_LEFT;
+		break;
+
+	case 2:
+		info[MAGAZINE].body = TWO_LEFT;
+		break;
+
+	default:	// m_iClip >= 3
+		info[MAGAZINE].body = FULL;
+		break;
+	}
+
+	// only consider variation when not morphing..
+	switch (m_iVariation)
+	{
+	case Role_Sharpshooter:
+		// muzzle breaker
+
+		info[MUZZLE].body = BREAKER;
+		break;
+
+	case Role_Assassin:
+		// silencer
+		info[MUZZLE].body = SILENCER;
+		break;
+
+	default:
+		info[MUZZLE].body = FALSE;
+		break;
+	}
+
+	return CalcBody(info, _countof(info));
+}
+
 #endif
 
 bool CAWP::Deploy()
 {
-	if (DefaultDeploy(AWP_VIEW_MODEL, AWP_WORLD_MODEL, AWP_DRAW, "rifle"))
-	{
-		m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + AWP_DEPLOY_TIME;
-		m_flNextPrimaryAttack = m_pPlayer->m_flNextAttack;
-		m_flNextSecondaryAttack = m_pPlayer->m_flNextAttack;
-
-#ifndef CLIENT_DLL
-		// VFX corespounding to model anim.
-		// we can only do this on SV side.
-		m_pPlayer->m_flEjectBrass = gpGlobals->time + 0.43f;
-		m_pPlayer->m_iShellModelIndex = m_iShell;
-#endif
-
-		return true;
-	}
-
-	return false;
+	return DefaultDeploy(AWP_VIEW_MODEL, AWP_WORLD_MODEL,
+						(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? AWP_DRAW_FIRST : AWP_DRAW,
+						"rifle",
+						(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? AWP_DRAW_FIRST_TIME : AWP_DEPLOY_TIME);
 }
 
 void CAWP::SecondaryAttack()
 {
-	// this is the delay for the m_bResumeZoom.
-	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.25f;
-
-	if (int(m_pPlayer->pev->fov) < 90)
-	{
-		m_pPlayer->pev->fov = 90;
-
-#ifdef CLIENT_DLL
-		// zoom out anim.
-		g_vecGunOfsGoal = g_vecZero;
-
-		// manually set fade.
-		gHUD::m_SniperScope.SetFadeFromBlack(5.0f, 0);
-#endif
-	}
-	else
-	{
-		// get ready to zoom in.
-		m_pPlayer->m_iLastZoom = 40;
-		m_pPlayer->m_bResumeZoom = true;
-
-#ifdef CLIENT_DLL
-		// zoom in anim.
-		g_vecGunOfsGoal = Vector(-6.3f, -5.0f, 1.6f);
-#endif
-	}
-
-#ifndef CLIENT_DLL
-	if (TheBots)
-	{
-		TheBots->OnEvent(EVENT_WEAPON_ZOOMED, m_pPlayer);
-	}
-
-	// SFX only emitted from SV.
-	EMIT_SOUND(m_pPlayer->edict(), CHAN_ITEM, "weapons/zoom.wav", 0.2, 2.4);
-#else
-	g_flGunOfsMovingSpeed = 10.0f;
-#endif
-
-	// slow down while we zooming.
-	m_pPlayer->ResetMaxSpeed();
-
-	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.3f;
+	DefaultScopeSight(Vector(-6.3f, -5.0f, 1.6f), 25);
 }
 
 void CAWP::PrimaryAttack()
@@ -214,16 +232,17 @@ bool CAWP::Reload()
 		return true;
 	}
 
-	return false;
-}
-
-void CAWP::WeaponIdle()
-{
-	if (m_flTimeWeaponIdle <= UTIL_WeaponTimeBase() && m_iClip)
+	// KF2 ???
+	if (m_pPlayer->pev->weaponanim != AWP_CHECK_MAGAZINE)
 	{
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 60.0f;
-		SendWeaponAnim(AWP_IDLE);
+		if (m_bInReload)
+			SecondaryAttack();
+
+		SendWeaponAnim(AWP_CHECK_MAGAZINE);
+		m_flTimeWeaponIdle = AWP_CHECKMAG_TIME;
 	}
+
+	return false;
 }
 
 float CAWP::GetMaxSpeed()

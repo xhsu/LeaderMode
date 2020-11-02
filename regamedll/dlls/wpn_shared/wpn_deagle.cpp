@@ -1,7 +1,7 @@
 /*
 
 Remastered Date: Mar 22 2020
-Reflash Date: Oct 11 2020
+Reflesh Date: Oct 11 2020
 
 Modern Warfare Dev Team
 Code - Luna the Reborn

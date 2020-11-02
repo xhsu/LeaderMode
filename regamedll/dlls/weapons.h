@@ -568,25 +568,49 @@ public:	// new functions
 #define AWP_WORLD_MODEL	"models/weapons/w_awp.mdl"
 #define AWP_FIRE_SFX	"weapons/awp/awp_fire.wav"
 
-constexpr float AWP_MAX_SPEED		= 210.0f;
-constexpr float AWP_MAX_SPEED_ZOOM	= 150.0f;
-constexpr float AWP_DAMAGE			= 125.0f;
-constexpr float AWP_RANGE_MODIFER	= 0.99f;
-constexpr float	AWP_RELOAD_TIME		= 4.0f;
-constexpr float	AWP_DEPLOY_TIME		= 1.39f;
-constexpr float AWP_FIRE_INTERVAL	= 1.5f;
-constexpr float AWP_TIME_SHELL_EJ	= 0.85f;
-constexpr int	AWP_PENETRATION		= 3;
-constexpr float	AWP_EFFECTIVE_RANGE = 8192.0f;
+constexpr float AWP_MAX_SPEED			= 210.0f;
+constexpr float AWP_MAX_SPEED_ZOOM		= 150.0f;
+constexpr float AWP_DAMAGE				= 125.0f;
+constexpr float AWP_RANGE_MODIFER		= 0.99f;
+constexpr float AWP_FIRE_INTERVAL		= 1.5f;
+constexpr float AWP_TIME_SHELL_EJ		= 0.666F;
+constexpr float AWP_TIME_RECHAMBER		= 1.2F;
+constexpr float AWP_TIME_REC_SHELL_EJ	= 0.3667F;
+constexpr float	AWP_RELOAD_TIME			= 3.566F;
+constexpr float	AWP_RELOAD_EMPTY_TIME	= 4.5F;
+constexpr float	AWP_DEPLOY_TIME			= 0.733F;
+constexpr float	AWP_DRAW_FIRST_TIME		= 1.533F;
+constexpr float	AWP_HOLSTER_TIME		= 0.7333F;
+constexpr float	AWP_CHECKMAG_TIME		= 2.0333F;
+constexpr float	AWP_BLOCK_UP_TIME		= 0.5333F;
+constexpr float	AWP_BLOCK_DOWN_TIME		= 0.5333F;
+constexpr float	AWP_LHAND_UP_TIME		= 0.7F;
+constexpr float	AWP_LHAND_DOWN_TIME		= 0.7F;
+constexpr float	AWP_DASH_ENTER_TIME		= 0.4667F;
+constexpr float	AWP_DASH_EXIT_TIME		= 0.4667F;
+constexpr int	AWP_PENETRATION			= 3;
+constexpr float	AWP_EFFECTIVE_RANGE		= 8192.0f;
+constexpr int	AWP_GUN_VOLUME			= BIG_EXPLOSION_VOLUME;
 
 enum awp_e
 {
-	AWP_IDLE,
-	AWP_SHOOT1,
-	AWP_SHOOT2,
-	AWP_SHOOT3,
+	AWP_IDLE = 0,
+	AWP_SHOOT_REC,
+	AWP_RECHAMBER,
+	AWP_SHOOT_LAST,
 	AWP_RELOAD,
+	AWP_RELOAD_EMPTY,
 	AWP_DRAW,
+	AWP_DRAW_FIRST,
+	AWP_HOLSTER,
+	AWP_CHECK_MAGAZINE,
+	AWP_BLOCK_UP,
+	AWP_BLOCK_DOWN,
+	AWP_LHAND_UP,
+	AWP_LHAND_DOWN,
+	AWP_DASH_ENTER,
+	AWP_DASHING,
+	AWP_DASH_EXIT
 };
 
 class CAWP : public CBaseWeapon
@@ -597,18 +621,25 @@ public:	// SV exclusive variables.
 	static int m_iShell;
 
 public:	// SV exclusive functions.
-	virtual void	Precache		(void);
+	virtual void	Precache(void);
+#else
+public:	// CL exclusive functions.
+	virtual	bool	UsingInvertedVMDL(void) { return false; }	// Model designed by InnocentBlue is not inverted.
+	virtual int		CalcBodyParam(void);
 #endif
 
 public:	// basic logic funcs
 	virtual bool	Deploy			(void);
 	virtual void	PrimaryAttack	(void);
 	virtual void	SecondaryAttack	(void);
+	virtual void	WeaponIdle		(void)	{ return DefaultIdle(AWP_DASHING); }
 	virtual bool	Reload			(void);
-	virtual void	WeaponIdle		(void);
+	virtual bool	HolsterStart	(void)	{ return DefaultHolster(AWP_HOLSTER, AWP_HOLSTER_TIME); }
+	virtual	void	DashStart		(void)	{ return DefaultDashStart(AWP_DASH_ENTER, AWP_DASH_ENTER_TIME); }
+	virtual void	DashEnd			(void)	{ return DefaultDashEnd(AWP_DASH_ENTER, AWP_DASH_ENTER_TIME, AWP_DASH_EXIT, AWP_DASH_EXIT_TIME); }
 
 public:	// util funcs
-	virtual float GetMaxSpeed		(void);
+	virtual float	GetMaxSpeed		(void);
 	virtual void	ResetModel		(void);
 
 public:	// new funcs

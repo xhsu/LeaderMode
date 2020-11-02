@@ -163,6 +163,9 @@ void WeaponsPrecache()
 	PRECACHE_MODEL("models/grenade.mdl");
 	PRECACHE_MODEL("sprites/explode1.spr");
 
+	// used by cryogrenade
+	PRECACHE_MODEL("models/glassgibs.mdl");
+
 	PRECACHE_SOUND("weapons/debris1.wav"); // explosion aftermaths
 	PRECACHE_SOUND("weapons/debris2.wav"); // explosion aftermaths
 	PRECACHE_SOUND("weapons/debris3.wav"); // explosion aftermaths
