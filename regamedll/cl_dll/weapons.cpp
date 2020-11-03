@@ -313,13 +313,13 @@ void CBaseWeapon::Think(void)
 		// that's because the brass ejected is visible globally, thus, it should be managed by SV.
 	}
 
-	if (!(m_bitsFlags & WPNSTATE_BUSY) && m_pPlayer->pev->button & IN_RUN && m_pPlayer->pev->button & IN_FORWARD && !(m_pPlayer->pev->button & IN_DUCK))
+	if (!(m_bitsFlags & WPNSTATE_BUSY) && m_pPlayer->pev->button & IN_RUN && m_pPlayer->pev->button & IN_FORWARD && !(m_pPlayer->pev->flags & FL_DUCKING) && m_pPlayer->pev->flags & FL_ONGROUND)
 	{
 		DashStart();
 	}
 
 	if (m_bitsFlags & WPNSTATE_DASHING &&
-		(m_pPlayer->m_afButtonReleased & IN_RUN || !(m_pPlayer->pev->button & IN_FORWARD) || m_pPlayer->pev->button & IN_DUCK/* || m_pPlayer->pev->velocity.Length2D() < 50.0f*/)
+		(m_pPlayer->m_afButtonReleased & IN_RUN || !(m_pPlayer->pev->button & IN_FORWARD) || m_pPlayer->pev->flags & FL_DUCKING || !(m_pPlayer->pev->flags & FL_ONGROUND)/* || m_pPlayer->pev->velocity.Length2D() < 50.0f*/)
 		)
 	{
 		DashEnd();
@@ -969,6 +969,8 @@ bool CBaseWeapon::DefaultReload(int iClipSize, int iAnim, float flTotalDelay, fl
 
 bool CBaseWeapon::DefaultHolster(int iHolsterAnim, float flHolsterDelay)
 {
+	// no m_flEjectBrass re-zero for player on client side.
+
 	SendWeaponAnim(iHolsterAnim);
 	m_pPlayer->m_flNextAttack = flHolsterDelay;
 	m_bitsFlags |= WPNSTATE_HOLSTERING;

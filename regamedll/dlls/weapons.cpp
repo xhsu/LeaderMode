@@ -348,17 +348,19 @@ void CBaseWeapon::Think(void)
 		Vector vecShellVelocity = (m_pPlayer->pev->velocity + vecRight + vecUp) + gpGlobals->v_forward * 25;
 		int soundType = (m_iId == WEAPON_M1014 || m_iId == WEAPON_KSG12 || m_iId == WEAPON_AA12) ? 2 : 1;
 
+		// never worry about those origin settings on first personal VFX.
+		// the message will detect whether it belongs to a local player, if so, replace the origin here with g_pViewEnt->attachments[1].
 		EjectBrass(m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs + gpGlobals->v_up * -9 + gpGlobals->v_forward * 16,
 			vecShellVelocity, m_pPlayer->pev->angles.yaw, m_pPlayer->m_iShellModelIndex, soundType, m_pPlayer->entindex());
 	}
 
-	if (!(m_bitsFlags & WPNSTATE_BUSY) && m_pPlayer->pev->button & IN_RUN && m_pPlayer->pev->button & IN_FORWARD && !(m_pPlayer->pev->button & IN_DUCK))
+	if (!(m_bitsFlags & WPNSTATE_BUSY) && m_pPlayer->pev->button & IN_RUN && m_pPlayer->pev->button & IN_FORWARD && !(m_pPlayer->pev->flags & FL_DUCKING) && m_pPlayer->pev->flags & FL_ONGROUND)
 	{
 		DashStart();
 	}
 
 	if (m_bitsFlags & WPNSTATE_DASHING &&
-		(m_pPlayer->m_afButtonReleased & IN_RUN || !(m_pPlayer->pev->button & IN_FORWARD) || m_pPlayer->pev->button & IN_DUCK/* || m_pPlayer->pev->velocity.Length2D() < 50.0f*/)
+		(m_pPlayer->m_afButtonReleased & IN_RUN || !(m_pPlayer->pev->button & IN_FORWARD) || m_pPlayer->pev->flags & FL_DUCKING || !(m_pPlayer->pev->flags & FL_ONGROUND)/* || m_pPlayer->pev->velocity.Length2D() < 50.0f*/)
 		)
 	{
 		DashEnd();
@@ -842,8 +844,6 @@ void CBaseWeapon::Holstered(void)
 	m_pPlayer->pev->viewmodel = 0;
 	m_pPlayer->pev->weaponmodel = 0;
 	m_pPlayer->pev->fov = DEFAULT_FOV;
-
-	m_pPlayer->m_flEjectBrass = 0;	// prevents famous AWP bug.
 }
 
 bool CBaseWeapon::Drop(void** ppWeaponBoxReturned)
@@ -1096,6 +1096,8 @@ bool CBaseWeapon::DefaultReload(int iClipSize, int iAnim, float flTotalDelay, fl
 
 bool CBaseWeapon::DefaultHolster(int iHolsterAnim, float flHolsterDelay)
 {
+	m_pPlayer->m_flEjectBrass = 0;	// prevents famous AWP-shell-ejecting bug.
+
 	SendWeaponAnim(iHolsterAnim);
 	m_pPlayer->m_flNextAttack = flHolsterDelay;
 	m_bitsFlags |= WPNSTATE_HOLSTERING;

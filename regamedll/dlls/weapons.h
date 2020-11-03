@@ -244,16 +244,16 @@ public:	// CL xclusive functions.
 #endif
 
 public:	// basic API and behaviour for weapons.
-	virtual	bool	DefaultDeploy	(const char* szViewModel, const char* szWeaponModel, int iAnim, const char* szAnimExt, float flDeployTime = 0.75f);
-	virtual void	DefaultIdle		(int iDashingAnim, int iIdleAnim = 0, float flDashLoop = 20.0f);
-	virtual	bool	DefaultReload	(int iClipSize, int iAnim, float flTotalDelay, float flSoftDelay = 0.5f);
-	virtual bool	DefaultHolster	(int iHolsterAnim, float flHolsterDelay);
-	virtual	void	DefaultSteelSight(const Vector& vecOfs, int iFOV, float flDriftingSpeed = 10.0f, float flNextSecondaryAttack = 0.3f);
-	virtual	void	DefaultScopeSight(const Vector& vecOfs, int iFOV, float flEnterScopeDelay = 0.25f, float flFadeFromBlack = 5.0f, float flDriftingSpeed = 10.0f, float flNextSecondaryAttack = 0.3f);
-	virtual	void	DefaultDashStart(int iEnterAnim, float flEnterTime);
-	virtual	void	DefaultDashEnd	(int iEnterAnim, float flEnterTime, int iExitAnim, float flExitTime);
-	virtual bool	DefaultSetLHand	(bool bAppear, int iLHandUpAnim, float flLHandUpTime, int iLHandDownAnim, float flLHandDownTime);
-	virtual void	DefaultBlock	(int iEnterAnim, float flEnterTime, int iExitAnim, float flExitTime);
+	bool	DefaultDeploy	(const char* szViewModel, const char* szWeaponModel, int iAnim, const char* szAnimExt, float flDeployTime = 0.75f);
+	void	DefaultIdle		(int iDashingAnim, int iIdleAnim = 0, float flDashLoop = 20.0f);
+	bool	DefaultReload	(int iClipSize, int iAnim, float flTotalDelay, float flSoftDelay = 0.5f);
+	bool	DefaultHolster	(int iHolsterAnim, float flHolsterDelay);
+	void	DefaultSteelSight(const Vector& vecOfs, int iFOV, float flDriftingSpeed = 10.0f, float flNextSecondaryAttack = 0.3f);
+	void	DefaultScopeSight(const Vector& vecOfs, int iFOV, float flEnterScopeDelay = 0.25f, float flFadeFromBlack = 5.0f, float flDriftingSpeed = 10.0f, float flNextSecondaryAttack = 0.3f);
+	void	DefaultDashStart(int iEnterAnim, float flEnterTime);
+	void	DefaultDashEnd	(int iEnterAnim, float flEnterTime, int iExitAnim, float flExitTime);
+	bool	DefaultSetLHand	(bool bAppear, int iLHandUpAnim, float flLHandUpTime, int iLHandDownAnim, float flLHandDownTime);
+	void	DefaultBlock	(int iEnterAnim, float flEnterTime, int iExitAnim, float flExitTime);
 
 public:	// util funcs
 	inline	bool	IsDead			(void) { return !!(m_bitsFlags & WPNSTATE_DEAD); }
@@ -573,11 +573,13 @@ constexpr float AWP_MAX_SPEED_ZOOM		= 150.0f;
 constexpr float AWP_DAMAGE				= 125.0f;
 constexpr float AWP_RANGE_MODIFER		= 0.99f;
 constexpr float AWP_FIRE_INTERVAL		= 1.5f;
+constexpr float AWP_FIRE_LAST_INV		= 0.5666f;
 constexpr float AWP_TIME_SHELL_EJ		= 0.666F;
 constexpr float AWP_TIME_RECHAMBER		= 1.2F;
 constexpr float AWP_TIME_REC_SHELL_EJ	= 0.3667F;
 constexpr float	AWP_RELOAD_TIME			= 3.566F;
 constexpr float	AWP_RELOAD_EMPTY_TIME	= 4.5F;
+constexpr float	AWP_RELOAD_EMPTY_SHELL	= 0.4333f;
 constexpr float	AWP_DEPLOY_TIME			= 0.733F;
 constexpr float	AWP_DRAW_FIRST_TIME		= 1.533F;
 constexpr float	AWP_HOLSTER_TIME		= 0.7333F;
@@ -591,6 +593,7 @@ constexpr float	AWP_DASH_EXIT_TIME		= 0.4667F;
 constexpr int	AWP_PENETRATION			= 3;
 constexpr float	AWP_EFFECTIVE_RANGE		= 8192.0f;
 constexpr int	AWP_GUN_VOLUME			= BIG_EXPLOSION_VOLUME;
+constexpr float AWP_SPREAD_BASELINE		= 0.001f;
 
 enum awp_e
 {
@@ -628,6 +631,9 @@ public:	// CL exclusive functions.
 	virtual int		CalcBodyParam(void);
 #endif
 
+public: // shared new vars.
+	bool m_bRechambered;
+
 public:	// basic logic funcs
 	virtual bool	Deploy			(void);
 	virtual void	PrimaryAttack	(void);
@@ -641,6 +647,8 @@ public:	// basic logic funcs
 public:	// util funcs
 	virtual float	GetMaxSpeed		(void);
 	virtual void	ResetModel		(void);
+	virtual bool	SetLeftHand		(bool bAppear)	{ return DefaultSetLHand(bAppear, AWP_LHAND_UP, AWP_LHAND_UP_TIME, AWP_LHAND_DOWN, AWP_LHAND_DOWN_TIME); }
+	virtual void	PlayBlockAnim	(void)	{ return DefaultBlock(AWP_BLOCK_UP, AWP_BLOCK_UP_TIME, AWP_BLOCK_DOWN, AWP_BLOCK_DOWN_TIME); }
 
 public:	// new funcs
 	void AWPFire(float flSpread, float flCycleTime = AWP_FIRE_INTERVAL);

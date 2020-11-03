@@ -113,44 +113,37 @@ void CAWP::SecondaryAttack()
 
 void CAWP::PrimaryAttack()
 {
+	float flSpread = AWP_SPREAD_BASELINE;
+
 	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
+		flSpread *= 5;
+	if (m_pPlayer->pev->velocity.Length2D() > 10)
+		flSpread *= 2;
+	if (m_pPlayer->pev->flags & FL_DUCKING)
+		flSpread *= 0.75f;
+	if (m_bInZoom)
+		flSpread *= 0.25f;
+
+	// PRE: use 1 to compare whether it is the last shot.
+	AWPFire(flSpread, m_iClip == 1 ? AWP_FIRE_LAST_INV : AWP_FIRE_INTERVAL);
+
+	// POST: unzoom. suggested by InnocentBlue.
+	if (m_bInZoom)
+		SecondaryAttack();
+
+#ifndef CLIENT_DLL
+	// only make a shell during a normal shoot.
+	// the AWP_SHOOT_LAST anim does not contain a shell ejecting behaviour.
+	if (m_iClip)
 	{
-		AWPFire(0.85f);
+		m_pPlayer->m_flEjectBrass = gpGlobals->time + AWP_TIME_SHELL_EJ;
+		m_pPlayer->m_iShellModelIndex = m_iShell;
 	}
-	else if (m_pPlayer->pev->velocity.Length2D() > 140)
-	{
-		AWPFire(0.25f);
-	}
-	else if (m_pPlayer->pev->velocity.Length2D() > 10)
-	{
-		AWPFire(0.1f);
-	}
-	else if (m_pPlayer->pev->flags & FL_DUCKING)
-	{
-		AWPFire(0.0f);
-	}
-	else
-	{
-		AWPFire(0.001f);
-	}
+#endif
 }
 
 void CAWP::AWPFire(float flSpread, float flCycleTime)
 {
-	if (m_pPlayer->pev->fov != DEFAULT_FOV)
-	{
-		m_pPlayer->m_bResumeZoom = true;
-		m_pPlayer->m_iLastZoom = m_pPlayer->pev->fov;
-
-		// reset a fov
-		m_pPlayer->pev->fov = DEFAULT_FOV;
-	}
-	// If we are not zoomed in, the bullet diverts more.
-	else
-	{
-		flSpread += 0.08f;
-	}
-
 	if (m_iClip <= 0)
 	{
 		PlayEmptySound();
@@ -172,7 +165,7 @@ void CAWP::AWPFire(float flSpread, float flCycleTime)
 
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 
-	m_pPlayer->m_iWeaponVolume = BIG_EXPLOSION_VOLUME;
+	m_pPlayer->m_iWeaponVolume = AWP_GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = NORMAL_GUN_FLASH;
 
 	Vector vecSrc = m_pPlayer->GetGunPosition();
@@ -181,9 +174,13 @@ void CAWP::AWPFire(float flSpread, float flCycleTime)
 	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, AWP_EFFECTIVE_RANGE, AWP_PENETRATION, m_iPrimaryAmmoType, AWP_DAMAGE, AWP_RANGE_MODIFER, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
-	SendWeaponAnim(UTIL_SharedRandomLong(m_pPlayer->random_seed, AWP_SHOOT1, AWP_SHOOT3));
+	if (m_iClip > 0)
+		SendWeaponAnim(AWP_SHOOT_REC);
+	else
+		SendWeaponAnim(AWP_SHOOT_LAST);
+
 	PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL, m_pPlayer->edict(), m_usEvent, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y,
-		int(m_pPlayer->pev->punchangle.x * 100), int(m_pPlayer->pev->punchangle.x * 100), FALSE, FALSE);
+		int(m_pPlayer->pev->punchangle.x * 100), int(m_pPlayer->pev->punchangle.x * 100), m_iClip > 0, m_iVariation == Role_Assassin);
 	
 	m_pPlayer->m_flEjectBrass = gpGlobals->time + AWP_TIME_SHELL_EJ;
 	m_pPlayer->m_iShellModelIndex = m_iShell;
@@ -197,8 +194,8 @@ void CAWP::AWPFire(float flSpread, float flCycleTime)
 	Q_memset(&args, NULL, sizeof(args));
 
 	args.angles = m_pPlayer->pev->v_angle;
-	args.bparam1 = false;	// unused
-	args.bparam2 = false;	// unused
+	args.bparam1 = m_iClip > 0;
+	args.bparam2 = m_iVariation == Role_Assassin;
 	args.ducking = gEngfuncs.pEventAPI->EV_LocalPlayerDucking();
 	args.entindex = gEngfuncs.GetLocalPlayer()->index;
 	args.flags = FEV_NOTHOST | FEV_RELIABLE | FEV_CLIENT | FEV_GLOBAL;
@@ -221,12 +218,15 @@ void CAWP::AWPFire(float flSpread, float flCycleTime)
 
 bool CAWP::Reload()
 {
-	if (DefaultReload(m_pItemInfo->m_iMaxClip, AWP_RELOAD, AWP_RELOAD_TIME))
+	if (DefaultReload(m_pItemInfo->m_iMaxClip,
+		m_iClip ? AWP_RELOAD : AWP_RELOAD_EMPTY,
+		m_iClip ? AWP_RELOAD_TIME : AWP_RELOAD_EMPTY_TIME,
+		m_iClip ? 1.066f : 0.6f))
 	{
 #ifndef CLIENT_DLL
 		// VFX corespounding to model anim.
 		// we can only do this on SV side.
-		m_pPlayer->m_flEjectBrass = gpGlobals->time + 3.2f;	// rechamber portion of reload anim.
+		m_pPlayer->m_flEjectBrass = gpGlobals->time + AWP_RELOAD_EMPTY_SHELL;	// rechamber portion of reload anim.
 		m_pPlayer->m_iShellModelIndex = m_iShell;
 #endif
 		return true;

@@ -1114,17 +1114,11 @@ DECLARE_EVENT(FireXM8)
 
 DECLARE_EVENT(FireAWP)
 {
-	int idx;
-	Vector origin;
-	Vector angles;
-	Vector velocity;
-	Vector up, right, forward;
-
-	idx = args->entindex;
-
-	VectorCopy(args->origin, origin);
-	VectorCopy(args->angles, angles);
-	VectorCopy(args->velocity, velocity);
+	int idx = args->entindex;
+	Vector origin = args->origin;
+	Vector angles = args->angles;
+	Vector velocity = args->velocity;
+	Vector forward = args->angles.MakeVector(), right, up;
 
 	angles.pitch += args->iparam1 / 100.0;
 	angles.yaw += args->iparam2 / 100.0;
@@ -1137,17 +1131,24 @@ DECLARE_EVENT(FireAWP)
 		EV_MuzzleFlash();
 
 		if (g_pCurWeapon)
-			g_pCurWeapon->SendWeaponAnim(UTIL_SharedRandomLong(gPseudoPlayer.random_seed, AWP_SHOOT1, AWP_SHOOT3));
+		{
+			if (args->bparam1)	// m_iClip > 0
+				g_pCurWeapon->SendWeaponAnim(AWP_SHOOT_REC);
+			else
+				g_pCurWeapon->SendWeaponAnim(AWP_SHOOT_LAST);
+		}
 
 		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 3, 0.5, 20, 20, 20, EV_PISTOL_SMOKE, velocity, false, 35);
 		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 40, 0.5, 15, 15, 15, EV_WALL_PUFF, velocity, false, 35);
 		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 80, 0.5, 10, 10, 10, EV_WALL_PUFF, velocity, false, 35);
 	}
 
-	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, AWP_FIRE_SFX, 1.0, 0.28, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
-
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
+
+	// in awp, bparam2 is SILENCER.
+	// original goldsrc api: VOL = 1.0, ATTN = 0.28
+	EV_PlayGunFire(idx, AWP_FIRE_SFX, args->bparam2 ? NORMAL_GUN_VOLUME : AWP_GUN_VOLUME, vecSrc + forward * 10.0f);
 
 	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, AWP_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_AWP].m_iAmmoType, AWP_PENETRATION);
 }
