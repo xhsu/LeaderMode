@@ -36,6 +36,10 @@ static constexpr int MUZZLE = 7;
 static constexpr int SILENCER = 2;
 static constexpr int BREAKER = 1;
 
+static constexpr int PIN = 8;
+static constexpr int UP = 0;
+static constexpr int DOWN = 1;
+
 int CAWP::CalcBodyParam(void)
 {
 	static BodyEnumInfo_t info[] =
@@ -93,6 +97,12 @@ int CAWP::CalcBodyParam(void)
 		break;
 	}
 
+	// pin downed vfx.
+	if ((m_iClip <= 0 || m_flTimeChamberCleared) && (1 << m_pPlayer->pev->weaponanim) & BITS_PIN_UNINVOLVED_ANIM)
+		info[PIN].body = DOWN;
+	else
+		info[PIN].body = UP;
+
 	return CalcBody(info, _countof(info));
 }
 
@@ -117,18 +127,18 @@ bool CAWP::Deploy()
 						(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? AWP_DRAW_FIRST_TIME : AWP_DEPLOY_TIME);
 }
 
-void CAWP::SecondaryAttack()
-{
-	DefaultScopeSight(Vector(-6.3f, -5.0f, 1.6f), 25);
-}
-
 void CAWP::PrimaryAttack()
 {
 	// no rechamber, not shoot.
 	if (m_flTimeChamberCleared)
 	{
+		// unscope during this anim.
+		if (m_pPlayer->pev->fov != DEFAULT_FOV)
+			SecondaryAttack();
+
 		SendWeaponAnim(AWP_RECHAMBER);
 		m_pPlayer->m_flNextAttack = AWP_TIME_RECHAMBER;
+		m_flTimeWeaponIdle = AWP_TIME_RECHAMBER;	// prevent anim instant break.
 		m_flTimeChamberCleared = gpGlobals->time + AWP_TIME_REC_SHELL_EJ;
 
 #ifndef CLIENT_DLL
@@ -154,7 +164,8 @@ void CAWP::PrimaryAttack()
 	AWPFire(flSpread, m_iClip == 1 ? AWP_FIRE_LAST_INV : AWP_FIRE_INTERVAL);
 
 	// POST: unzoom. suggested by InnocentBlue.
-	if (m_bInZoom)
+	// don't do it unless bullets still left.
+	if (m_iClip && m_pPlayer->pev->fov != DEFAULT_FOV)
 		SecondaryAttack();
 
 	// only make shells during a normal shoot.
@@ -210,9 +221,6 @@ void CAWP::AWPFire(float flSpread, float flCycleTime)
 	PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL, m_pPlayer->edict(), m_usEvent, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y,
 		int(m_pPlayer->pev->punchangle.x * 100), int(m_pPlayer->pev->punchangle.x * 100), m_iClip > 0, m_iVariation == Role_Assassin);
 	
-	m_pPlayer->m_flEjectBrass = gpGlobals->time + AWP_TIME_SHELL_EJ;
-	m_pPlayer->m_iShellModelIndex = m_iShell;
-
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 	{
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", SUIT_SENTENCE, SUIT_REPEAT_OK);
@@ -252,11 +260,19 @@ bool CAWP::Reload()
 		m_iClip ? 1.066f : 0.6f))
 	{
 #ifndef CLIENT_DLL
-		// VFX corespounding to model anim.
-		// we can only do this on SV side.
-		m_pPlayer->m_flEjectBrass = gpGlobals->time + AWP_RELOAD_EMPTY_SHELL;	// rechamber portion of reload anim.
-		m_pPlayer->m_iShellModelIndex = m_iShell;
+		if (!m_iClip)
+		{
+			// only the RELOAD_EMPTY involves a rechamber action.
+			m_pPlayer->m_flEjectBrass = gpGlobals->time + AWP_RELOAD_EMPTY_SHELL;
+			m_pPlayer->m_iShellModelIndex = m_iShell;
+		}
+		else
 #endif
+			// this should be decide on both side.
+			// you can't use reload to avoid rechamber.
+			if (m_iClip > 0 && m_flTimeChamberCleared)
+				m_flTimeChamberCleared = gpGlobals->time + 9999.0f;
+
 		return true;
 	}
 
@@ -271,6 +287,15 @@ bool CAWP::Reload()
 	}
 
 	return false;
+}
+
+bool CAWP::HolsterStart(void)
+{
+	// hold this flag. unlike what we do to m_pPlayer->m_flEjectBrass.
+	if (m_flTimeChamberCleared)
+		m_flTimeChamberCleared = gpGlobals->time + 9999.0f;
+
+	return DefaultHolster(AWP_HOLSTER, AWP_HOLSTER_TIME);
 }
 
 float CAWP::GetMaxSpeed()

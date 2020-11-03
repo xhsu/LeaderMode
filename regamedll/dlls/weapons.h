@@ -631,6 +631,16 @@ public:	// CL exclusive functions.
 	virtual int		CalcBodyParam(void);
 #endif
 
+	// Slide stop available anims.
+	static constexpr int BITS_PIN_UNINVOLVED_ANIM = (1 << AWP_IDLE) |
+													(1 << AWP_DRAW) |
+													(1 << AWP_RELOAD) |	// normal reload could not bypass this rechamber flag.
+													(1 << AWP_HOLSTER) |
+													(1 << AWP_CHECK_MAGAZINE) |
+													(1 << AWP_LHAND_DOWN) | (1 << AWP_LHAND_UP) |
+													(1 << AWP_BLOCK_DOWN) | (1 << AWP_BLOCK_UP) |
+													(1 << AWP_DASH_ENTER) | (1 << AWP_DASHING) | (1 << AWP_DASH_EXIT);
+
 public: // shared new vars.
 	float m_flTimeChamberCleared;
 
@@ -638,10 +648,10 @@ public:	// basic logic funcs
 	virtual void	Think			(void);
 	virtual bool	Deploy			(void);
 	virtual void	PrimaryAttack	(void);
-	virtual void	SecondaryAttack	(void);
+	virtual void	SecondaryAttack	(void)	{ return DefaultScopeSight(Vector(-3.1f, 0.5f, 0.55f), 25); }
 	virtual void	WeaponIdle		(void)	{ return DefaultIdle(AWP_DASHING); }
 	virtual bool	Reload			(void);
-	virtual bool	HolsterStart	(void)	{ return DefaultHolster(AWP_HOLSTER, AWP_HOLSTER_TIME); }
+	virtual bool	HolsterStart	(void);
 	virtual	void	DashStart		(void)	{ return DefaultDashStart(AWP_DASH_ENTER, AWP_DASH_ENTER_TIME); }
 	virtual void	DashEnd			(void)	{ return DefaultDashEnd(AWP_DASH_ENTER, AWP_DASH_ENTER_TIME, AWP_DASH_EXIT, AWP_DASH_EXIT_TIME); }
 
