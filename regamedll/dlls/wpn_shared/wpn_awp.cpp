@@ -98,6 +98,17 @@ int CAWP::CalcBodyParam(void)
 
 #endif
 
+void CAWP::Think(void)
+{
+	CBaseWeapon::Think();
+
+	if (m_flTimeChamberCleared != 0 && m_flTimeChamberCleared <= gpGlobals->time)
+	{
+		// flag cleared. you may shoot now.
+		m_flTimeChamberCleared = 0;
+	}
+}
+
 bool CAWP::Deploy()
 {
 	return DefaultDeploy(AWP_VIEW_MODEL, AWP_WORLD_MODEL,
@@ -113,6 +124,21 @@ void CAWP::SecondaryAttack()
 
 void CAWP::PrimaryAttack()
 {
+	// no rechamber, not shoot.
+	if (m_flTimeChamberCleared)
+	{
+		SendWeaponAnim(AWP_RECHAMBER);
+		m_pPlayer->m_flNextAttack = AWP_TIME_RECHAMBER;
+		m_flTimeChamberCleared = gpGlobals->time + AWP_TIME_REC_SHELL_EJ;
+
+#ifndef CLIENT_DLL
+		// display the shell.
+		m_pPlayer->m_flEjectBrass = gpGlobals->time + AWP_TIME_SHELL_EJ;
+		m_pPlayer->m_iShellModelIndex = m_iShell;
+#endif
+		return;
+	}
+
 	float flSpread = AWP_SPREAD_BASELINE;
 
 	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
@@ -131,15 +157,17 @@ void CAWP::PrimaryAttack()
 	if (m_bInZoom)
 		SecondaryAttack();
 
-#ifndef CLIENT_DLL
-	// only make a shell during a normal shoot.
+	// only make shells during a normal shoot.
 	// the AWP_SHOOT_LAST anim does not contain a shell ejecting behaviour.
 	if (m_iClip)
 	{
+		m_flTimeChamberCleared = gpGlobals->time + AWP_TIME_SHELL_EJ;
+
+#ifndef CLIENT_DLL
 		m_pPlayer->m_flEjectBrass = gpGlobals->time + AWP_TIME_SHELL_EJ;
 		m_pPlayer->m_iShellModelIndex = m_iShell;
-	}
 #endif
+	}
 }
 
 void CAWP::AWPFire(float flSpread, float flCycleTime)

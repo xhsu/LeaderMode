@@ -632,9 +632,10 @@ public:	// CL exclusive functions.
 #endif
 
 public: // shared new vars.
-	bool m_bRechambered;
+	float m_flTimeChamberCleared;
 
 public:	// basic logic funcs
+	virtual void	Think			(void);
 	virtual bool	Deploy			(void);
 	virtual void	PrimaryAttack	(void);
 	virtual void	SecondaryAttack	(void);
