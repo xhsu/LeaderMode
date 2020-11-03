@@ -571,7 +571,7 @@ public:	// new functions
 constexpr float AWP_MAX_SPEED			= 210.0f;
 constexpr float AWP_MAX_SPEED_ZOOM		= 150.0f;
 constexpr float AWP_DAMAGE				= 125.0f;
-constexpr float AWP_RANGE_MODIFER		= 0.99f;
+constexpr float AWP_RANGE_MODIFER		= 1.122462f;	// root[3000/500](2), decay to half damage at 3000 inches.
 constexpr float AWP_FIRE_INTERVAL		= 1.5f;
 constexpr float AWP_FIRE_LAST_INV		= 0.5666f;
 constexpr float AWP_TIME_SHELL_EJ		= 0.666F;
@@ -641,6 +641,9 @@ public:	// CL exclusive functions.
 													(1 << AWP_BLOCK_DOWN) | (1 << AWP_BLOCK_UP) |
 													(1 << AWP_DASH_ENTER) | (1 << AWP_DASHING) | (1 << AWP_DASH_EXIT);
 
+	// Rechamber acceptable anims.
+	static constexpr int BITS_RECHAMBER_ANIM = (1 << AWP_RECHAMBER) | (1 << AWP_SHOOT_REC) | (1 << AWP_RELOAD_EMPTY);
+
 public: // shared new vars.
 	float m_flTimeChamberCleared;
 
@@ -651,7 +654,7 @@ public:	// basic logic funcs
 	virtual void	SecondaryAttack	(void)	{ return DefaultScopeSight(Vector(-3.1f, 0.5f, 0.55f), 25); }
 	virtual void	WeaponIdle		(void)	{ return DefaultIdle(AWP_DASHING); }
 	virtual bool	Reload			(void);
-	virtual bool	HolsterStart	(void);
+	virtual bool	HolsterStart	(void)	{ return DefaultHolster(AWP_HOLSTER, AWP_HOLSTER_TIME); }
 	virtual	void	DashStart		(void)	{ return DefaultDashStart(AWP_DASH_ENTER, AWP_DASH_ENTER_TIME); }
 	virtual void	DashEnd			(void)	{ return DefaultDashEnd(AWP_DASH_ENTER, AWP_DASH_ENTER_TIME, AWP_DASH_EXIT, AWP_DASH_EXIT_TIME); }
 

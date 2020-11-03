@@ -1060,27 +1060,25 @@ int CBaseEntity::FireBuckshots(ULONG cShots, const Vector& vecSrc, const Vector&
 
 // Go to the trouble of combining multiple pellets into a single damage call.
 // This version is used by Players, uses the random seed generator to sync client and server side shots.
-Vector2D CBaseEntity::FireBullets3(Vector vecSrc, Vector vecDirShooting, float flSpread, float flDistance, int iPenetration, AmmoIdType iBulletType, int iDamage, float flRangeModifier, int shared_rand)
+Vector2D CBaseEntity::FireBullets3(const Vector& vecOrigin, const Vector& vecDirShooting, float flSpread, float flDistance, int iPenetration, AmmoIdType iBulletType, int iDamage, float flRangeModifier, int shared_rand)
 {
 	int iOriginalPenetration = iPenetration;
-	int iPenetrationPower;
-	float flPenetrationDistance;
 	int iCurrentDamage = iDamage;
-	float flCurrentDistance;
+	float flCurrentDistance = 0, flTotalDistance = 0;
 
 	TraceResult tr, tr2;
-	Vector vecRight, vecUp;
 
 	bool bHitMetal = false;
 	int iSparksAmount = 1;
 
-	vecRight = gpGlobals->v_right;
-	vecUp = gpGlobals->v_up;
-
+	// determind bullets type.
+	int iPenetrationPower = 0;	// how thick can we penetrate?
+	float flPenetrationDistance = 0;
 	DescribeBulletTypeParameters(iBulletType, iPenetrationPower, flPenetrationDistance);
 
 	gMultiDamage.type = (DMG_BULLET | DMG_NEVERGIB);
 
+	// determind the diviation.
 	float x, y, z;
 
 	if (IsPlayer())
@@ -1106,13 +1104,12 @@ Vector2D CBaseEntity::FireBullets3(Vector vecSrc, Vector vecDirShooting, float f
 		while (z > 1);
 	}
 
-	Vector vecDir, vecEnd;
-	Vector vecOldSrc, vecNewSrc;
-
-	vecDir = vecDirShooting + x * flSpread * vecRight + y * flSpread * vecUp;
-	vecEnd = vecSrc + vecDir * flDistance;
+	Vector vecSrc = vecOrigin;
+	Vector vecDir = vecDirShooting + x * flSpread * gpGlobals->v_right + y * flSpread * gpGlobals->v_up;	// it's in the same frame with PrimaryAttack().
+	Vector vecEnd = vecSrc + vecDir * flDistance;
 
 	float flDamageModifier = 0.5;
+	float flAccumulatedDamageModifier = 1.0f;
 
 	while (iPenetration != 0)
 	{
@@ -1142,9 +1139,11 @@ Vector2D CBaseEntity::FireBullets3(Vector vecSrc, Vector vecDirShooting, float f
 			iPenetrationPower *= 0.15;
 			flDamageModifier = 0.2;
 			break;
+
 		case CHAR_TEX_CONCRETE:
 			iPenetrationPower *= 0.25;
 			break;
+
 		case CHAR_TEX_GRATE:
 			bHitMetal = true;
 			bSparks = true;
@@ -1152,6 +1151,7 @@ Vector2D CBaseEntity::FireBullets3(Vector vecSrc, Vector vecDirShooting, float f
 			iPenetrationPower *= 0.5;
 			flDamageModifier = 0.4;
 			break;
+
 		case CHAR_TEX_VENT:
 			bHitMetal = true;
 			bSparks = true;
@@ -1159,10 +1159,12 @@ Vector2D CBaseEntity::FireBullets3(Vector vecSrc, Vector vecDirShooting, float f
 			iPenetrationPower *= 0.5;
 			flDamageModifier = 0.45;
 			break;
+
 		case CHAR_TEX_TILE:
 			iPenetrationPower *= 0.65;
 			flDamageModifier = 0.3;
 			break;
+
 		case CHAR_TEX_COMPUTER:
 			bHitMetal = true;
 			bSparks = true;
@@ -1170,19 +1172,23 @@ Vector2D CBaseEntity::FireBullets3(Vector vecSrc, Vector vecDirShooting, float f
 			iPenetrationPower *= 0.4;
 			flDamageModifier = 0.45;
 			break;
+
 		case CHAR_TEX_WOOD:
 			flDamageModifier = 0.6;
 			break;
+
 		default:
+			flDamageModifier = 0.5;
 			break;
 		}
+
 		if (tr.flFraction != 1.0f)
 		{
 			CBaseEntity *pEntity = CBaseEntity::Instance(tr.pHit);
 			iPenetration--;
 
 			flCurrentDistance = tr.flFraction * flDistance;
-			iCurrentDamage *= Q_pow(flRangeModifier, flCurrentDistance / 500.0f);
+			flTotalDistance = (tr.vecEndPos - vecOrigin).Length();
 
 			if (flCurrentDistance > flPenetrationDistance)
 			{
@@ -1231,8 +1237,12 @@ Vector2D CBaseEntity::FireBullets3(Vector vecSrc, Vector vecDirShooting, float f
 			flDistance = (flDistance - flCurrentDistance) * flDistanceModifier;
 			vecEnd = vecSrc + (vecDir * flDistance);
 
+			iCurrentDamage = Q_max(float(iDamage) * Q_pow(flRangeModifier, -flTotalDistance / 500.0f) * flAccumulatedDamageModifier, 1.0f);	// makes sure that at least 1 point of damage is dealt. avoid the famous Fake Death bug.
 			pEntity->TraceAttack(pev, iCurrentDamage, vecDir, &tr, (DMG_BULLET | DMG_NEVERGIB));
-			iCurrentDamage *= flDamageModifier;
+
+			flAccumulatedDamageModifier *= flDamageModifier;	// post-multiply.
+
+			//SERVER_PRINT(SharedVarArgs("Original Damage: %d; Distance: %f; MatModifier: %.2f; Result: %d\n", iDamage, flTotalDistance, flDamageModifier, iCurrentDamage));
 		}
 		else
 			iPenetration = 0;

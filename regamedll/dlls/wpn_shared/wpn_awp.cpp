@@ -114,8 +114,16 @@ void CAWP::Think(void)
 
 	if (m_flTimeChamberCleared != 0 && m_flTimeChamberCleared <= gpGlobals->time)
 	{
-		// flag cleared. you may shoot now.
-		m_flTimeChamberCleared = 0;
+		if ((1 << m_pPlayer->pev->weaponanim) & BITS_RECHAMBER_ANIM)
+		{
+			// flag cleared. you may shoot now.
+			m_flTimeChamberCleared = 0;
+		}
+		else
+		{
+			// sorry, you're doing something else to trick the system.
+			m_flTimeChamberCleared = gpGlobals->time + 9999.0f;
+		}
 	}
 }
 
@@ -179,6 +187,10 @@ void CAWP::PrimaryAttack()
 		m_pPlayer->m_iShellModelIndex = m_iShell;
 #endif
 	}
+
+	// since m_flNextPrimaryAttack is involved in DefaultScopeSight(), we have to place a limit.
+	// although m_flNextSecondaryAttack is set in AWPFire(), but actually after the SecondaryAttack() above, it's already invalid.
+	m_flNextSecondaryAttack = m_iClip == 1 ? AWP_FIRE_LAST_INV : AWP_FIRE_INTERVAL;
 }
 
 void CAWP::AWPFire(float flSpread, float flCycleTime)
@@ -248,7 +260,7 @@ void CAWP::AWPFire(float flSpread, float flCycleTime)
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
 
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.0f;
-	m_pPlayer->m_vecVAngleShift.x -= 4.0f;
+	m_pPlayer->m_vecVAngleShift.x -= 12.0f;
 	m_pPlayer->m_vecVAngleShift.y -= UTIL_SharedRandomFloat(m_pPlayer->random_seed + AWP_PENETRATION, -2.0f, 2.0f);
 }
 
@@ -287,15 +299,6 @@ bool CAWP::Reload()
 	}
 
 	return false;
-}
-
-bool CAWP::HolsterStart(void)
-{
-	// hold this flag. unlike what we do to m_pPlayer->m_flEjectBrass.
-	if (m_flTimeChamberCleared)
-		m_flTimeChamberCleared = gpGlobals->time + 9999.0f;
-
-	return DefaultHolster(AWP_HOLSTER, AWP_HOLSTER_TIME);
 }
 
 float CAWP::GetMaxSpeed()
