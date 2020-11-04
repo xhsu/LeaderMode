@@ -949,9 +949,6 @@ MSG_FUNC(Brass)
 
 	if (EV_IsLocal(iPlayerId))
 	{
-		if (!cl_righthand->value)
-			vecVelocity *= -1.0f;
-
 		vecOrigin = gEngfuncs.GetViewModel()->attachment[1];	// use the weapon attachment instead.
 		vecVelocity *= 1.5f;
 	}

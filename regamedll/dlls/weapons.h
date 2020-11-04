@@ -649,12 +649,12 @@ public: // shared new vars.
 
 public:	// basic logic funcs
 	virtual void	Think			(void);
-	virtual bool	Deploy			(void);
+	virtual bool	Deploy			(void)	{ return DefaultDeploy(AWP_VIEW_MODEL, AWP_WORLD_MODEL, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? AWP_DRAW_FIRST : AWP_DRAW, "rifle", (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? AWP_DRAW_FIRST_TIME : AWP_DEPLOY_TIME); }
 	virtual void	PrimaryAttack	(void);
 	virtual void	SecondaryAttack	(void)	{ return DefaultScopeSight(Vector(-6.2f, -2, 1.1f), 25); }
 	virtual void	WeaponIdle		(void)	{ return DefaultIdle(AWP_DASHING); }
 	virtual bool	Reload			(void);
-	virtual bool	HolsterStart	(void)	{ return DefaultHolster(AWP_HOLSTER, AWP_HOLSTER_TIME); }
+	virtual bool	HolsterStart	(void);
 	virtual	void	DashStart		(void)	{ return DefaultDashStart(AWP_DASH_ENTER, AWP_DASH_ENTER_TIME); }
 	virtual void	DashEnd			(void)	{ return DefaultDashEnd(AWP_DASH_ENTER, AWP_DASH_ENTER_TIME, AWP_DASH_EXIT, AWP_DASH_EXIT_TIME); }
 

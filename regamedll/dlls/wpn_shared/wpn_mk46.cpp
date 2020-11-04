@@ -4,7 +4,9 @@ Remastered Date: Mar 28 2020
 
 Modern Warfare Dev Team
 Code - Luna the Reborn
-Model - Matoilet
+Mesh/Animation - Matoilet
+Animation - Innocent Blue
+Sound - iDkGK
 
 */
 

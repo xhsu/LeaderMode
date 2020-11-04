@@ -6,6 +6,7 @@ Reflesh Date: Nov 02 2020
 Modern Warfare Dev Team
 Code - Luna the Reborn
 Model - Miracle(Innocent Blue)
+Sound - iDkGK
 
 */
 
@@ -126,14 +127,6 @@ void CAWP::Think(void)
 			m_flTimeChamberCleared = gpGlobals->time + 9999.0f;
 		}
 	}
-}
-
-bool CAWP::Deploy()
-{
-	return DefaultDeploy(AWP_VIEW_MODEL, AWP_WORLD_MODEL,
-						(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? AWP_DRAW_FIRST : AWP_DRAW,
-						"rifle",
-						(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? AWP_DRAW_FIRST_TIME : AWP_DEPLOY_TIME);
 }
 
 void CAWP::PrimaryAttack()
@@ -302,6 +295,16 @@ bool CAWP::Reload()
 	}
 
 	return false;
+}
+
+bool CAWP::HolsterStart(void)
+{
+	// unzoom before holster.
+	if (m_pPlayer->pev->fov != DEFAULT_FOV)
+		SecondaryAttack();
+
+	// then holster.
+	return DefaultHolster(AWP_HOLSTER, AWP_HOLSTER_TIME);
 }
 
 float CAWP::GetMaxSpeed()

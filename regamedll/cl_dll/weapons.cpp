@@ -578,6 +578,11 @@ void CBaseWeapon::PostFrame()
 		gEngfuncs.pEventAPI->EV_SetTraceHull(2);
 		gEngfuncs.pEventAPI->EV_PlayerTrace(g_pparams.vieworg, vecLastMuzzle, PM_STUDIO_BOX, -1, &tr);
 
+		// stick into enemy's face?
+		if (tr.ent < gEngfuncs.GetMaxClients() && tr.ent > 0)
+			if (g_PlayerExtraInfo[tr.ent].m_iTeam != g_iTeamNumber)
+				tr.fraction = 1.0f;
+
 		// the BLOCKED condition is a player attribute.
 		bool save = g_bIsBlocked;
 		g_bIsBlocked = !!(tr.fraction < 1);
@@ -919,7 +924,7 @@ void CBaseWeapon::DefaultIdle(int iDashingAnim, int iIdleAnim, float flDashLoop)
 		|| (m_pPlayer->pev->button & IN_BLOCK && m_pPlayer->pev->weaponanim == iIdleAnim))
 	{
 		// you can't aim during a BLOCK section.
-		if (m_bInZoom)
+		if (m_bInZoom || m_pPlayer->pev->fov != DEFAULT_FOV)
 			SecondaryAttack();
 
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;

@@ -668,7 +668,7 @@ void V_CalcSpectatorRefdef(ref_params_s* pparams)
 
 /*
 ==================
-V_CalcSpectatorRefdef
+V_CalcBob
 
 Quakeworld bob code, this fixes jitters in the mutliplayer since the clock (pparams->time) isn't quite linear
 ==================

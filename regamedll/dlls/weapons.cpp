@@ -1046,7 +1046,7 @@ void CBaseWeapon::DefaultIdle(int iDashingAnim, int iIdleAnim, float flDashLoop)
 		|| (m_pPlayer->pev->button & IN_BLOCK && m_pPlayer->pev->weaponanim == iIdleAnim))
 	{
 		// you can't aim during a BLOCK section.
-		if (m_bInZoom)
+		if (m_bInZoom || m_pPlayer->pev->fov != DEFAULT_FOV)
 			SecondaryAttack();
 
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
