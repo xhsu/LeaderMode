@@ -566,7 +566,7 @@ public:	// new functions
 
 #define AWP_VIEW_MODEL	"models/weapons/v_awp.mdl"
 #define AWP_WORLD_MODEL	"models/weapons/w_awp.mdl"
-#define AWP_FIRE_SFX	"weapons/awp/awp_fire.wav"
+#define AWP_FIRE_SFX	"weapons/l115a3/l115a3_fire.wav"
 
 constexpr float AWP_MAX_SPEED			= 210.0f;
 constexpr float AWP_MAX_SPEED_ZOOM		= 150.0f;
@@ -651,7 +651,7 @@ public:	// basic logic funcs
 	virtual void	Think			(void);
 	virtual bool	Deploy			(void);
 	virtual void	PrimaryAttack	(void);
-	virtual void	SecondaryAttack	(void)	{ return DefaultScopeSight(Vector(-3.1f, 0.5f, 0.55f), 25); }
+	virtual void	SecondaryAttack	(void)	{ return DefaultScopeSight(Vector(-6.2f, -2, 1.1f), 25); }
 	virtual void	WeaponIdle		(void)	{ return DefaultIdle(AWP_DASHING); }
 	virtual bool	Reload			(void);
 	virtual bool	HolsterStart	(void)	{ return DefaultHolster(AWP_HOLSTER, AWP_HOLSTER_TIME); }
