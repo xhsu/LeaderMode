@@ -1223,15 +1223,13 @@ Vector2D CBaseEntity::FireBullets3(const Vector& vecOrigin, const Vector& vecDir
 				break;
 			}
 
-			float flDistanceModifier;
+			float flDistanceModifier = 0.5f;
 			if (VARS(tr.pHit)->solid != SOLID_BSP || !iPenetration)
 			{
 				iPenetrationPower = 42;
 				flDamageModifier = 0.75;
 				flDistanceModifier = 0.75;
 			}
-			else
-				flDistanceModifier = 0.5;
 
 			vecSrc = tr.vecEndPos + (vecDir * iPenetrationPower);
 			flDistance = (flDistance - flCurrentDistance) * flDistanceModifier;
@@ -1242,7 +1240,7 @@ Vector2D CBaseEntity::FireBullets3(const Vector& vecOrigin, const Vector& vecDir
 
 			flAccumulatedDamageModifier *= flDamageModifier;	// post-multiply.
 
-			//SERVER_PRINT(SharedVarArgs("Original Damage: %d; Distance: %f; MatModifier: %.2f; Result: %d\n", iDamage, flTotalDistance, flDamageModifier, iCurrentDamage));
+			SERVER_PRINT(SharedVarArgs("[%s] Original Damage: %d; Distance: %f; AccumulatedModifier: %.2f; Result: %d\n", STRING(tr.pHit->v.classname), iDamage, flTotalDistance, flAccumulatedDamageModifier, iCurrentDamage));
 		}
 		else
 			iPenetration = 0;

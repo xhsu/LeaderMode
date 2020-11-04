@@ -114,7 +114,8 @@ void CAWP::Think(void)
 
 	if (m_flTimeChamberCleared != 0 && m_flTimeChamberCleared <= gpGlobals->time)
 	{
-		if ((1 << m_pPlayer->pev->weaponanim) & BITS_RECHAMBER_ANIM)
+		// you must playing designated anim to cancel this flag. also, you cannot in-scope.
+		if ((1 << m_pPlayer->pev->weaponanim) & BITS_RECHAMBER_ANIM && m_pPlayer->pev->fov == DEFAULT_FOV)
 		{
 			// flag cleared. you may shoot now.
 			m_flTimeChamberCleared = 0;
@@ -160,20 +161,22 @@ void CAWP::PrimaryAttack()
 	float flSpread = AWP_SPREAD_BASELINE;
 
 	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
-		flSpread *= 5;
+		flSpread *= 50;
 	if (m_pPlayer->pev->velocity.Length2D() > 10)
-		flSpread *= 2;
+		flSpread *= 20;
 	if (m_pPlayer->pev->flags & FL_DUCKING)
 		flSpread *= 0.75f;
 	if (m_bInZoom)
 		flSpread *= 0.25f;
+	else	// unzoom penalty
+		flSpread *= 20;
 
 	// PRE: use 1 to compare whether it is the last shot.
 	AWPFire(flSpread, m_iClip == 1 ? AWP_FIRE_LAST_INV : AWP_FIRE_INTERVAL);
 
 	// POST: unzoom. suggested by InnocentBlue.
 	// don't do it unless bullets still left.
-	if (m_iClip && m_pPlayer->pev->fov != DEFAULT_FOV)
+	if (m_pPlayer->pev->fov != DEFAULT_FOV)
 		SecondaryAttack();
 
 	// only make shells during a normal shoot.
@@ -257,9 +260,9 @@ void CAWP::AWPFire(float flSpread, float flCycleTime)
 	EV_FireAWP(&args);
 #endif
 
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + flCycleTime;
+	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + flCycleTime;	// LUNA: ultimate prevention against evil players.
 
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.0f;
 	m_pPlayer->m_vecVAngleShift.x -= 12.0f;
 	m_pPlayer->m_vecVAngleShift.y -= UTIL_SharedRandomFloat(m_pPlayer->random_seed + AWP_PENETRATION, -2.0f, 2.0f);
 }
