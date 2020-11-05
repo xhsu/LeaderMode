@@ -51,11 +51,44 @@ void HUD_DrawNormalTriangles2(void)
 	gHUD::m_Spectator.DrawOverview();
 }
 
+#define glVertex3fVec(vec)	glVertex3f(vec.x, vec.y, vec.z)
+
 void HUD_DrawTransparentTriangles2(void)
 {
 	// UNDONE
 	/*if (gConfigs.bEnableClientUI)
 		g_pViewPort->RenderMapSprite();*/
+
+	/*if (CL_IsDead() || !g_pCurWeapon)
+		return;
+	g_flSpread = g_pCurWeapon->GetSpread();
+	Vector vecOrigin = gPseudoPlayer.GetGunPosition();
+	Vector vDir = g_pparams.viewangles.MakeVector();
+
+	Vector vUp = vecOrigin + (vDir + g_pparams.up * g_flSpread) * 4096;
+	Vector vDown = vecOrigin + (vDir - g_pparams.up * g_flSpread) * 4096;
+	Vector vRight = vecOrigin + (vDir + g_pparams.right * g_flSpread) * 4096;
+	Vector vLeft = vecOrigin + (vDir - g_pparams.right * g_flSpread) * 4096;
+
+	glPushAttrib(GL_ALL_ATTRIB_BITS);				// Save current depth range value
+	glDepthRange(0.0001, 0.0002);					// Change depth range for 3D HUD drawing
+
+	glDisable(GL_TEXTURE_2D);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glColor4f(1, 1, 1, 1);
+
+	glBegin(GL_LINE_LOOP);
+	glVertex3fVec(vUp);
+	glVertex3fVec(vRight);
+	glVertex3fVec(vDown);
+	glVertex3fVec(vLeft);
+	glEnd();
+
+	glDisable(GL_BLEND);
+	glEnable(GL_TEXTURE_2D);
+
+	glPopAttrib();*/									// Restore depth range value
 
 	RenderFog();
 }

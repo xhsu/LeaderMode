@@ -1450,3 +1450,20 @@ void CBaseWeapon::KickBack(float up_base, float lateral_base, float up_modifier,
 	if (m_bInZoom)
 		m_pPlayer->m_vecVAngleShift *= 0.5f;
 }
+
+float CBaseWeapon::DefaultSpread(float flBaseline, float flAimingMul, float flDuckingMul, float flWalkingMul, float flJumpingMul)
+{
+	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
+		flBaseline *= flJumpingMul;
+
+	if (m_pPlayer->pev->velocity.Length2D() > 0)	// z speed does not included.
+		flBaseline *= flWalkingMul;
+
+	if (m_pPlayer->pev->flags & FL_DUCKING)
+		flBaseline *= flDuckingMul;
+
+	if (m_bInZoom || m_pPlayer->pev->fov < DEFAULT_FOV)
+		flBaseline *= flAimingMul;
+
+	return flBaseline;	// it's already be modified.
+}

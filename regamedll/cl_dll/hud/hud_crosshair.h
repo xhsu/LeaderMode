@@ -15,6 +15,7 @@ Modern Warfare Dev Team
 #define ACCURACY_MULTIPLY_BY_14		(1 << 3) // accuracy multiply to 1.4
 
 extern int g_iShotsFired;
+extern float g_flSpread;
 
 class CHudCrosshair : public CBaseHudElement
 {

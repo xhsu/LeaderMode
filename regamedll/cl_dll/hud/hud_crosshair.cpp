@@ -10,6 +10,7 @@ Modern Warfare Dev Team
 #include "precompiled.h"
 
 int g_iShotsFired = 0;
+float g_flSpread = 0;
 
 int CHudCrosshair::Init(void)
 {
@@ -352,7 +353,7 @@ int CHudCrosshair::DrawCrosshair(float flTime, WeaponIdType weaponid)
 	case WEAPON_AWP:
 	case WEAPON_DEAGLE:
 	{
-		iDistance = 8;
+		iDistance = round(float(ScreenWidth) * g_flSpread / 4.0f);	// 8
 		iDeltaDistance = 3;
 		break;
 	}
@@ -507,6 +508,7 @@ int CHudCrosshair::DrawCrosshair(float flTime, WeaponIdType weaponid)
 
 	m_iAmmoLastCheck = g_iShotsFired;
 
+	iDistance = round(float(ScreenWidth) * g_flSpread / 4.0f);
 	if (iDistance > m_flCrosshairDistance)
 		m_flCrosshairDistance = iDistance;
 

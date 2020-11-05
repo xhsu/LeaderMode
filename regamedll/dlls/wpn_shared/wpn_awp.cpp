@@ -151,21 +151,8 @@ void CAWP::PrimaryAttack()
 		return;
 	}
 
-	float flSpread = AWP_SPREAD_BASELINE;
-
-	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
-		flSpread *= 50;
-	if (m_pPlayer->pev->velocity.Length2D() > 10)
-		flSpread *= 20;
-	if (m_pPlayer->pev->flags & FL_DUCKING)
-		flSpread *= 0.75f;
-	if (m_pPlayer->pev->fov < DEFAULT_FOV)	// in scoping. you cannot use m_bInZoom here.
-		flSpread *= 0.25f;
-	else	// unzoom penalty
-		flSpread *= 20;
-
 	// PRE: use 1 to compare whether it is the last shot.
-	AWPFire(flSpread, m_iClip == 1 ? AWP_FIRE_LAST_INV : AWP_FIRE_INTERVAL);
+	AWPFire(GetSpread(), m_iClip == 1 ? AWP_FIRE_LAST_INV : AWP_FIRE_INTERVAL);
 
 	// POST: unzoom. suggested by InnocentBlue.
 	// don't do it unless bullets still left.
@@ -314,6 +301,16 @@ float CAWP::GetMaxSpeed()
 
 	// Slower speed when zoomed in.
 	return AWP_MAX_SPEED_ZOOM;
+}
+
+float CAWP::GetSpread(void)
+{
+	float flSpread = DefaultSpread(AWP_SPREAD_BASELINE, 0.25f, 0.75f, 20, 50);
+
+	if (m_pPlayer->pev->fov >= DEFAULT_FOV)
+		flSpread *= 20;	// additional 2000% penalty for unscope shooting.
+
+	return flSpread;
 }
 
 DECLARE_STANDARD_RESET_MODEL_FUNC(AWP)

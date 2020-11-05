@@ -579,9 +579,10 @@ void CBaseWeapon::PostFrame()
 		gEngfuncs.pEventAPI->EV_PlayerTrace(g_pparams.vieworg, vecLastMuzzle, PM_STUDIO_BOX, -1, &tr);
 
 		// stick into enemy's face?
-		if (tr.ent < gEngfuncs.GetMaxClients() && tr.ent > 0)
-			if (g_PlayerExtraInfo[tr.ent].m_iTeam != g_iTeamNumber)
-				tr.fraction = 1.0f;
+		int iEntIndex = PM_GetPhysEntInfo(tr.ent);	// the TR result does not directly implies ENTINDEX() in edict or cl_entity. it needs a conversion.
+		if (iEntIndex < gEngfuncs.GetMaxClients() && iEntIndex > 0)
+			if (g_PlayerExtraInfo[iEntIndex].m_iTeam != g_iTeamNumber)
+				tr.fraction = 1.0f;	// "nothing happens here, let's shoot!"
 
 		// the BLOCKED condition is a player attribute.
 		bool save = g_bIsBlocked;
@@ -1332,6 +1333,23 @@ void CBaseWeapon::KickBack(float up_base, float lateral_base, float up_modifier,
 
 	if (m_bInZoom)
 		m_pPlayer->m_vecVAngleShift *= 0.5f;
+}
+
+float CBaseWeapon::DefaultSpread(float flBaseline, float flAimingMul, float flDuckingMul, float flWalkingMul, float flJumpingMul)
+{
+	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
+		flBaseline *= flJumpingMul;
+
+	if (m_pPlayer->pev->velocity.Length2D() > 0)	// z speed does not included.
+		flBaseline *= flWalkingMul;
+
+	if (m_pPlayer->pev->flags & FL_DUCKING)
+		flBaseline *= flDuckingMul;
+
+	if (m_bInZoom || m_pPlayer->pev->fov < DEFAULT_FOV)
+		flBaseline *= flAimingMul;
+
+	return flBaseline;	// it's already be modified.
 }
 
 //

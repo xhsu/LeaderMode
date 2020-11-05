@@ -254,6 +254,7 @@ public:	// basic API and behaviour for weapons.
 	void	DefaultDashEnd	(int iEnterAnim, float flEnterTime, int iExitAnim, float flExitTime);
 	bool	DefaultSetLHand	(bool bAppear, int iLHandUpAnim, float flLHandUpTime, int iLHandDownAnim, float flLHandDownTime);
 	void	DefaultBlock	(int iEnterAnim, float flEnterTime, int iExitAnim, float flExitTime);
+	float	DefaultSpread	(float flBaseline, float flAimingMul, float flDuckingMul, float flWalkingMul, float flJumpingMul);
 
 public:	// util funcs
 	inline	bool	IsDead			(void) { return !!(m_bitsFlags & WPNSTATE_DEAD); }
@@ -272,6 +273,7 @@ public:	// util funcs
 	virtual bool	SetVariation	(RoleTypes iType) { m_iVariation = iType; return true; }
 	virtual bool	SetLeftHand		(bool bAppear) { return false; }
 	virtual void	PlayBlockAnim	(void) { }
+	virtual float	GetSpread		(void) { return 0.0f; }
 };
 
 
@@ -663,6 +665,7 @@ public:	// util funcs
 	virtual void	ResetModel		(void);
 	virtual bool	SetLeftHand		(bool bAppear)	{ return DefaultSetLHand(bAppear, AWP_LHAND_UP, AWP_LHAND_UP_TIME, AWP_LHAND_DOWN, AWP_LHAND_DOWN_TIME); }
 	virtual void	PlayBlockAnim	(void)	{ return DefaultBlock(AWP_BLOCK_UP, AWP_BLOCK_UP_TIME, AWP_BLOCK_DOWN, AWP_BLOCK_DOWN_TIME); }
+	virtual float	GetSpread		(void);
 
 public:	// new funcs
 	void AWPFire(float flSpread, float flCycleTime = AWP_FIRE_INTERVAL);
@@ -691,6 +694,7 @@ constexpr float DEAGLE_FIRE_INTERVAL		= 0.225f;
 constexpr int	DEAGLE_PENETRATION			= 2;
 constexpr float	DEAGLE_EFFECTIVE_RANGE		= 4096.0f;
 constexpr int	DEAGLE_GUN_VOLUME			= BIG_EXPLOSION_VOLUME;
+constexpr float	DEAGLE_SPREAD_BASELINE		= 0.13f;
 
 enum deagle_e
 {
@@ -745,7 +749,7 @@ public:	// CL exclusive functions.
 
 public:	// basic logic funcs
 	virtual bool	Deploy			(void);
-	virtual void	PrimaryAttack	(void);
+	virtual void	PrimaryAttack	(void)	{ return DEagleFire(GetSpread()); }
 	virtual void	SecondaryAttack	(void)	{ return DefaultSteelSight(Vector(-1.905f, -2, 1.1f), 85); }
 	virtual bool	Reload			(void);
 	virtual void	WeaponIdle		(void)	{ return DefaultIdle(DEAGLE_DASHING); }
@@ -756,6 +760,7 @@ public:	// basic logic funcs
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void)	{ return DEAGLE_MAX_SPEED; }
 	virtual void	ResetModel		(void);	// declare by marco.
+	virtual float	GetSpread		(void)	{ return DefaultSpread(DEAGLE_SPREAD_BASELINE * (1.0f - m_flAccuracy), 0.25f, 0.75f, 2.0f, 5.0f); }
 
 public:	// new functions
 	void DEagleFire(float flSpread, float flCycleTime = DEAGLE_FIRE_INTERVAL);

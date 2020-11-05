@@ -128,26 +128,6 @@ bool CDEagle::Deploy()
 		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DEAGLE_DRAW_FIRST_TIME : DEAGLE_DRAW_TIME);
 }
 
-void CDEagle::PrimaryAttack()
-{
-	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
-	{
-		DEagleFire(1.5f * (1.0f - m_flAccuracy));
-	}
-	else if (m_pPlayer->pev->velocity.Length2D() > 0)
-	{
-		DEagleFire(0.25f * (1.0f - m_flAccuracy));
-	}
-	else if (m_pPlayer->pev->flags & FL_DUCKING)
-	{
-		DEagleFire(0.115f * (1.0f - m_flAccuracy) * (m_bInZoom ? 0.5f : 1.0f));
-	}
-	else
-	{
-		DEagleFire(0.13f * (1.0f - m_flAccuracy) * (m_bInZoom ? 0.5f : 1.0f));
-	}
-}
-
 void CDEagle::DEagleFire(float flSpread, float flCycleTime)
 {
 	if (++m_iShotsFired > 1)
