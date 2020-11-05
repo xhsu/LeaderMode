@@ -69,7 +69,7 @@ Vector2D CBasePlayer::FireBullets3(Vector vecSrc, Vector vecDirShooting, float v
 	return Vector2D(x * vecSpread, y * vecSpread);
 }
 
-int CBasePlayer::FireBuckshots(ULONG cShots, const Vector& vecSrc, const Vector& vecDirShooting, const Vector& vecSpread, float flDistance, int iDamage, int shared_rand)
+int CBasePlayer::FireBuckshots(ULONG cShots, const Vector& vecSrc, const Vector& vecDirShooting, const Vector& vecSpread, float flDistance, int iDamage, float flExponentialBase, int shared_rand)
 {
 	int iSeedOfs = 0;	// keep track how many times we used the shared_rand.
 

@@ -988,7 +988,7 @@ void CBaseEntity::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vec
 	}
 }
 
-int CBaseEntity::FireBuckshots(ULONG cShots, const Vector& vecSrc, const Vector& vecDirShooting, const Vector& vecSpread, float flDistance, int iDamage, int shared_rand)
+int CBaseEntity::FireBuckshots(ULONG cShots, const Vector& vecSrc, const Vector& vecDirShooting, const Vector& vecSpread, float flDistance, int iDamage, float flExponentialBase, int shared_rand)
 {
 	int iSeedOfs = 0;	// keep track how many times we used the shared_rand. 
 
@@ -1039,7 +1039,8 @@ int CBaseEntity::FireBuckshots(ULONG cShots, const Vector& vecSrc, const Vector&
 		if (tr.flFraction != 1.0f)
 		{
 			CBaseEntity* pEntity = CBaseEntity::Instance(tr.pHit);
-			float flDamage = ((1 - tr.flFraction) * iDamage);
+			float flTotalDistance = (tr.vecEndPos - vecSrc).Length();
+			float flDamage = Q_max(float(iDamage) * Q_pow(flExponentialBase, -flTotalDistance / 500.0f), 1.0f);	// makes sure that at least 1 point of damage is dealt. avoid the famous Fake Death bug.
 
 			if (IsPlayer())
 			{
@@ -1048,6 +1049,8 @@ int CBaseEntity::FireBuckshots(ULONG cShots, const Vector& vecSrc, const Vector&
 			}
 
 			pEntity->TraceAttack(pev, int(flDamage), vecDir, &tr, DMG_BULLET);
+
+			SERVER_PRINT(SharedVarArgs("[%s] Original Damage: %d; Distance: %f; Result: %.1f\n", STRING(tr.pHit->v.classname), iDamage, flTotalDistance, flDamage));
 		}
 
 		// make bullet trails

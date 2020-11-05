@@ -198,7 +198,7 @@ void CM1014::PrimaryAttack()
 
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 
-	int iSeedOfs = m_pPlayer->FireBuckshots(M1014_PROJECTILE_COUNT, m_pPlayer->GetGunPosition(), gpGlobals->v_forward, M1014_CONE_VECTOR, M1014_EFFECTIVE_RANGE, M1014_DAMAGE, m_pPlayer->random_seed);
+	int iSeedOfs = m_pPlayer->FireBuckshots(M1014_PROJECTILE_COUNT, m_pPlayer->GetGunPosition(), gpGlobals->v_forward, M1014_CONE_VECTOR, M1014_EFFECTIVE_RANGE, M1014_DAMAGE, M1014_RANGE_MODIFIER, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
 	int iAnim = 0;

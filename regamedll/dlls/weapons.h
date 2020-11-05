@@ -281,8 +281,8 @@ public:	// util funcs
 #define USP_FIRE_SFX		"weapons/usp/usp_fire.wav"
 
 constexpr float USP_MAX_SPEED       = 250.0f;
-constexpr float USP_DAMAGE          = 30.0f;
-constexpr float USP_RANGE_MODIFER   = 0.79f;
+constexpr float USP_DAMAGE          = 32;
+constexpr float USP_RANGE_MODIFER   = 1.187260896;	// 80% damage @650 inches.
 constexpr float USP_DEPLOY_TIME		= 0.34f;
 constexpr float USP_RELOAD_TIME		= 1.87f;
 constexpr float USP_FIRE_INTERVAL	= 0.15f;
@@ -332,7 +332,7 @@ public:	// new functions
 
 constexpr float MP5N_MAX_SPEED     = 250.0f;
 constexpr float MP5N_DAMAGE        = 26.0f;
-constexpr float MP5N_RANGE_MODIFER = 0.84f;
+constexpr float MP5N_RANGE_MODIFER = 1.124618621;	// 80% damage @950 inches.
 constexpr float MP5N_RELOAD_TIME   = 2.63f;
 
 enum mp5n_e
@@ -350,8 +350,8 @@ enum mp5n_e
 #define SCARH_FIRE_SFX		"weapons/SCARH/mk17_shoot.wav"
 
 constexpr float SCARH_MAX_SPEED			= 235.0f;
-constexpr float SCARH_DAMAGE			= 39.0f;
-constexpr float SCARH_RANGE_MODIFER		= 0.955f;
+constexpr float SCARH_DAMAGE			= 54;
+constexpr float SCARH_RANGE_MODIFER		= 1.057371263;	// 80% damage @2000 inches.
 constexpr float SCARH_DEPLOY_TIME		= 0.97F;
 constexpr float SCARH_DRAW_FIRST_TIME	= 2.61F;
 constexpr float SCARH_RELOAD_TIME		= 2.6f;
@@ -437,8 +437,8 @@ public:	// new functions
 #define AK47_FIRE_SFX		"weapons/ak47/ak47_fire.wav"
 
 constexpr float AK47_MAX_SPEED			= 221.0f;
-constexpr float AK47_DAMAGE				= 36.0f;
-constexpr float AK47_RANGE_MODIFER		= 0.98f;
+constexpr float AK47_DAMAGE				= 48;
+constexpr float AK47_RANGE_MODIFER		= 1.077217345;	// 80% damage @1500 inches.
 constexpr float AK47_RELOAD_TIME		= 2.44f;
 constexpr float AK47_RPM				= 600.0f;
 constexpr float	AK47_EFFECTIVE_RANGE	= 8192.0f;
@@ -486,7 +486,7 @@ public:	// new functions
 
 constexpr float XM8_MAX_SPEED				= 240.0f;
 constexpr float XM8_DAMAGE					= 32.0f;
-constexpr float XM8_RANGE_MODIFER			= 0.96f;
+constexpr float XM8_RANGE_MODIFER			= 1.057371263;	// 80% damage @2000 inches
 constexpr float XM8_RELOAD_TIME				= 2.33f;
 constexpr float XM8_RELOAD_EMPTY_TIME		= 3.03f;
 constexpr float XM8_DRAW_FIRST_TIME			= 1.3F;
@@ -571,7 +571,7 @@ public:	// new functions
 constexpr float AWP_MAX_SPEED			= 210.0f;
 constexpr float AWP_MAX_SPEED_ZOOM		= 150.0f;
 constexpr float AWP_DAMAGE				= 125.0f;
-constexpr float AWP_RANGE_MODIFER		= 1.122462f;	// root[3000/500](2), decay to half damage at 3000 inches.
+constexpr float AWP_RANGE_MODIFER		= 1.047585759;	// 80% damage @2400 inches.
 constexpr float AWP_FIRE_INTERVAL		= 1.5f;
 constexpr float AWP_FIRE_LAST_INV		= 0.5666f;
 constexpr float AWP_TIME_SHELL_EJ		= 0.666F;
@@ -673,8 +673,8 @@ public:	// new funcs
 #define DEagle_FIRE_SFX		"weapons/deagle/deagle_fire.wav"
 
 constexpr float DEAGLE_MAX_SPEED			= 245.0f;
-constexpr float DEAGLE_DAMAGE				= 57.0f;
-constexpr float DEAGLE_RANGE_MODIFER		= 0.86f;
+constexpr float DEAGLE_DAMAGE				= 60;
+constexpr float DEAGLE_RANGE_MODIFER		= 1.106751211;	// 80% damage @1100 inches.
 constexpr float DEAGLE_RELOAD_TIME			= 1.97f;
 constexpr float DEAGLE_RELOAD_EMPTY_TIME	= 2.02f;
 constexpr float DEAGLE_DRAW_TIME			= 0.7f;
@@ -778,8 +778,8 @@ enum flashbang_e
 
 constexpr float SVD_MAX_SPEED		= 210.0f;
 constexpr float SVD_MAX_SPEED_ZOOM	= 150.0f;
-constexpr float SVD_DAMAGE			= 80.0f;
-constexpr float SVD_RANGE_MODIFER	= 0.98f;
+constexpr float SVD_DAMAGE			= 115;
+constexpr float SVD_RANGE_MODIFER	= 1.077137738;	// 70% damage @2400 inches.
 constexpr float SVD_DEPLOY_TIME		= 1.13f;
 constexpr float SVD_RELOAD_TIME		= 3.2f;
 constexpr float SVD_FIRE_INTERVAL	= 0.25f;
@@ -826,8 +826,8 @@ public:	// new functions
 #define G18C_FIRE_SFX		"weapons/glock18/glock18_fire.wav"
 
 constexpr float GLOCK18_MAX_SPEED		= 245.0f;
-constexpr float GLOCK18_DAMAGE			= 25.0f;
-constexpr float GLOCK18_RANGE_MODIFER	= 0.75f;
+constexpr float GLOCK18_DAMAGE			= 17;
+constexpr float GLOCK18_RANGE_MODIFER	= 1.187260896;	// 80% damage @650 inches.
 constexpr float GLOCK18_DEPLOY_TIME		= 0.34f;
 constexpr float GLOCK18_RELOAD_TIME		= 1.87f;
 constexpr float GLOCK18_RPM				= 1200.0f;
@@ -942,7 +942,7 @@ namespace BasicKnife
 
 constexpr float MK46_MAX_SPEED			= 210.0f;
 constexpr float MK46_DAMAGE				= 32.0f;
-constexpr float MK46_RANGE_MODIFER		= 0.97f;
+constexpr float MK46_RANGE_MODIFER		= 1.077217345;	// 80% damage @1500 inches.
 constexpr float MK46_DEPLOY_TIME		= 1.0F;
 constexpr float MK46_DRAW_FIRST_TIME	= 1.68F;
 constexpr float MK46_RELOAD_TIME		= 6.767f;
@@ -1027,6 +1027,7 @@ constexpr float KSG12_TIME_INSERT		= 0.75f;
 constexpr float KSG12_TIME_ADD_AMMO		= 0.3f;
 constexpr float KSG12_TIME_AFTER_RELOAD = 1.033f;
 const	Vector	KSG12_CONE_VECTOR		= Vector(0.0675f, 0.0675f, 0.0f); // special shotgun spreads
+constexpr float KSG12_RANGE_MODIFIER	= 1.172793196; // 80% damage @700 inches.
 
 enum ksg12_e
 {
@@ -1087,7 +1088,7 @@ public:	// util funcs
 
 constexpr float M4A1_MAX_SPEED			= 230.0f;
 constexpr float M4A1_DAMAGE				= 32.0f;
-constexpr float M4A1_RANGE_MODIFER		= 0.97f;
+constexpr float M4A1_RANGE_MODIFER		= 1.072221173;	// 80% damage @1600 inches.
 constexpr float M4A1_DRAW_TIME			= 0.743f;
 constexpr float M4A1_DRAW_FIRST_TIME	= 2.45f;
 constexpr float M4A1_RELOAD_TIME		= 2.033f;
@@ -1173,7 +1174,7 @@ public:	// new functions
 
 const float MAC10_MAX_SPEED     = 250.0f;
 const float MAC10_DAMAGE        = 29.0f;
-const float MAC10_RANGE_MODIFER = 0.82f;
+const float MAC10_RANGE_MODIFER = 1.149658245;	// 80% damage @800 inches.
 const float MAC10_RELOAD_TIME   = 3.15f;
 
 enum mac10_e
@@ -1191,8 +1192,8 @@ enum mac10_e
 #define Anaconda_FIRE_SFX		"weapons/anaconda/anaconda_fire.wav"
 
 constexpr float ANACONDA_MAX_SPEED			= 250.0f;
-constexpr float ANACONDA_DAMAGE				= 64.0f;
-constexpr float ANACONDA_RANGE_MODIFER		= 0.8f;
+constexpr float ANACONDA_DAMAGE				= 55;
+constexpr float ANACONDA_RANGE_MODIFER		= 1.052022439;	// 80% damage @2200 inches.
 constexpr float ANACONDA_RELOAD_TIME		= 2.68f;
 constexpr float ANACONDA_DEPLOY_TIME		= 0.367f;	// this gun has a extremely short deploy time.
 constexpr float ANACONDA_FIRE_INTERVAL		= 0.15f;
@@ -1247,8 +1248,8 @@ public:	// new funcs
 #define P90_FIRE_SFX	"weapons/p90/p90_fire.wav"
 
 const float P90_MAX_SPEED     = 245.0f;
-const float P90_DAMAGE        = 21.0f;
-const float P90_RANGE_MODIFER = 0.885f;
+const float P90_DAMAGE        = 24;
+const float P90_RANGE_MODIFER = 1.106751211;	// 80% damage @1100 inches.
 const float P90_RELOAD_TIME   = 3.4f;
 
 enum p90_e
@@ -1267,8 +1268,8 @@ enum p90_e
 
 const float SCOUT_MAX_SPEED      = 260.0f;
 const float SCOUT_MAX_SPEED_ZOOM = 220.0f;
-const float SCOUT_DAMAGE         = 75.0f;
-const float SCOUT_RANGE_MODIFER  = 0.98f;
+const float SCOUT_DAMAGE         = 100;
+const float SCOUT_RANGE_MODIFER  = 1.061766218;	// 75% damage @2400 inches.
 const float SCOUT_RELOAD_TIME    = 2.0f;
 
 enum scout_e
@@ -1296,8 +1297,8 @@ enum smokegrenade_e
 #define MP7A1_FIRE_SFX		"weapons/mp7a1/mp7a1_fire.wav"
 
 constexpr float MP7A1_MAX_SPEED			= 250.0f;
-constexpr float MP7A1_DAMAGE			= 20.0f;
-constexpr float MP7A1_RANGE_MODIFER		= 0.85f;
+constexpr float MP7A1_DAMAGE			= 22;
+constexpr float MP7A1_RANGE_MODIFER		= 1.106751211;	// 80% damage @1100 inches.
 constexpr float MP7A1_RELOAD_TIME		= 2.575f;
 constexpr float MP7A1_RPM				= 850.0f;
 constexpr int	MP7A1_PENETRATION		= 1;
@@ -1369,6 +1370,7 @@ constexpr float M1014_DASH_ENTER_TIME			= 0.833F;
 constexpr float M1014_DASH_EXIT_TIME			= 0.366F;
 const	 Vector M1014_CONE_VECTOR				= Vector(0.0725, 0.0725, 0.0); // special shotgun spreads
 constexpr int	M1014_GUN_VOLUME				= LOUD_GUN_VOLUME;
+constexpr float M1014_RANGE_MODIFIER			= 1.172793196;	// 80% damage @700 inches.
 
 enum m1014_e
 {
@@ -1476,7 +1478,7 @@ constexpr float M45A1_SH_RELOAD_TIME		= 2.1667F;
 constexpr float M45A1_SH_DASH_ENTER_TIME	= 0.33333F;
 constexpr float M45A1_SH_DASH_EXIT_TIME		= 0.65F;
 constexpr float M45A1_DAMAGE				= 36.0f;
-constexpr float M45A1_RANGE_MODIFER			= 0.75f;
+constexpr float M45A1_RANGE_MODIFER			= 1.131980371;	// 80% damage @900 inches.
 constexpr float M45A1_FIRE_INTERVAL			= 0.2f;
 constexpr int	M45A1_PENETRATION			= 1;
 constexpr float	M45A1_EFFECTIVE_RANGE		= 4096.0f;
@@ -1558,8 +1560,8 @@ public:	// new functions
 #define FN57_FIRE_SIL_SFX	"weapons/fiveseven/fiveseven_fire-sil.wav"
 
 constexpr float FIVESEVEN_MAX_SPEED			= 250.0f;
-constexpr float FIVESEVEN_DAMAGE			= 20.0f;
-constexpr float FIVESEVEN_RANGE_MODIFER		= 0.885f;
+constexpr float FIVESEVEN_DAMAGE			= 24;
+constexpr float FIVESEVEN_RANGE_MODIFER		= 1.149658245;	// 80% damage @800 inches.
 constexpr float FIVESEVEN_RELOAD_TIME		= 1.94F;
 constexpr float FIVESEVEN_RELOAD_EMPTY_TIME	= 1.86F;
 constexpr float FIVESEVEN_DRAW_FIRST_TIME	= 1.56F;
@@ -1648,8 +1650,8 @@ public:	// new functions
 #define UMP45_FIRE_SFX		"weapons/ump45/ump45_fire.wav"
 
 constexpr float UMP45_MAX_SPEED			= 250.0f;
-constexpr float UMP45_DAMAGE			= 30.0f;
-constexpr float UMP45_RANGE_MODIFER		= 0.82f;
+constexpr float UMP45_DAMAGE			= 32;
+constexpr float UMP45_RANGE_MODIFER		= 1.149658245;	// 80% damage @800 inches.
 constexpr float UMP45_RELOAD_TIME		= 3.2f;
 constexpr float UMP45_RPM				= 600.0f;
 constexpr float	UMP45_EFFECTIVE_RANGE	= 8192.0f;
@@ -1697,8 +1699,8 @@ public:	// new functions
 
 const float SG550_MAX_SPEED      = 210.0f;
 const float SG550_MAX_SPEED_ZOOM = 150.0f;
-const float SG550_DAMAGE         = 70.0f;
-const float SG550_RANGE_MODIFER  = 0.98f;
+const float SG550_DAMAGE         = 90;
+const float SG550_RANGE_MODIFER  = 0.98f;	// 85% damage @2400 inches.
 const float SG550_RELOAD_TIME    = 3.35f;
 
 enum sg550_e

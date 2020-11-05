@@ -159,7 +159,7 @@ void CAWP::PrimaryAttack()
 		flSpread *= 20;
 	if (m_pPlayer->pev->flags & FL_DUCKING)
 		flSpread *= 0.75f;
-	if (m_bInZoom)
+	if (m_pPlayer->pev->fov < DEFAULT_FOV)	// in scoping. you cannot use m_bInZoom here.
 		flSpread *= 0.25f;
 	else	// unzoom penalty
 		flSpread *= 20;
