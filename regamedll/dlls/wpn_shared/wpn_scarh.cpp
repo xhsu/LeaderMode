@@ -122,26 +122,6 @@ void CSCARH::SecondaryAttack()
 	}
 }
 
-void CSCARH::PrimaryAttack()
-{
-	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
-	{
-		SCARHFire(0.035f + (0.45f * m_flAccuracy));
-	}
-	else if (m_pPlayer->pev->velocity.Length2D() > 140)
-	{
-		SCARHFire(0.035f + (0.075f * m_flAccuracy));
-	}
-	else if (m_bInZoom)	// decrease spread while scoping.
-	{
-		SCARHFire(0.01f * m_flAccuracy);
-	}
-	else
-	{
-		SCARHFire(0.02f * m_flAccuracy);
-	}
-}
-
 void CSCARH::SCARHFire(float flSpread, float flCycleTime)
 {
 	m_iShotsFired++;

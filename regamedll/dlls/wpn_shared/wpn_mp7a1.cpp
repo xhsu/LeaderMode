@@ -33,22 +33,6 @@ bool CMP7A1::Deploy()
 	return DefaultDeploy(MP7A1_VIEW_MODEL, MP7A1_WORLD_MODEL, MP7A1_DRAW, "onehanded");
 }
 
-void CMP7A1::PrimaryAttack()
-{
-	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
-	{
-		MP7A1Fire(0.25f * m_flAccuracy);
-	}
-	else if (m_bInZoom)	// decrease spread while scoping.
-	{
-		MP7A1Fire(0.015f * m_flAccuracy);
-	}
-	else
-	{
-		MP7A1Fire(0.03f * m_flAccuracy);
-	}
-}
-
 void CMP7A1::SecondaryAttack(void)
 {
 	m_bInZoom = !m_bInZoom;

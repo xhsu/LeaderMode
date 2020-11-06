@@ -32,22 +32,6 @@ bool CUMP45::Deploy()
 	return DefaultDeploy(UMP45_VIEW_MODEL, UMP45_WORLD_MODEL, UMP45_DRAW, "carbine");
 }
 
-void CUMP45::PrimaryAttack()
-{
-	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
-	{
-		UMP45Fire(0.24f * m_flAccuracy);
-	}
-	else if (m_bInZoom)	// decrease spread while scoping.
-	{
-		UMP45Fire(0.02f * m_flAccuracy);
-	}
-	else
-	{
-		UMP45Fire(0.04f * m_flAccuracy);
-	}
-}
-
 void CUMP45::SecondaryAttack(void)
 {
 	m_bInZoom = !m_bInZoom;

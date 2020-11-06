@@ -144,26 +144,6 @@ bool CFN57::Deploy()
 		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? FIVESEVEN_DRAW_FIRST_TIME : FIVESEVEN_DRAW_TIME);
 }
 
-void CFN57::PrimaryAttack()
-{
-	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
-	{
-		FiveSevenFire(1.5f * (1.0f - m_flAccuracy));
-	}
-	else if (m_pPlayer->pev->velocity.Length2D() > 0)
-	{
-		FiveSevenFire(0.255f * (1.0f - m_flAccuracy));
-	}
-	else if (m_pPlayer->pev->flags & FL_DUCKING)
-	{
-		FiveSevenFire(0.075f * (1.0f - m_flAccuracy) * (m_bInZoom ? 0.5f : 1.0f));
-	}
-	else
-	{
-		FiveSevenFire(0.15f * (1.0f - m_flAccuracy) * (m_bInZoom ? 0.5f : 1.0f));
-	}
-}
-
 void CFN57::SecondaryAttack()
 {
 	switch (m_iVariation)

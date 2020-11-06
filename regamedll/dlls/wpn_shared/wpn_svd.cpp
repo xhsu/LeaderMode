@@ -79,26 +79,6 @@ void CSVD::SecondaryAttack()
 	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.3f;
 }
 
-void CSVD::PrimaryAttack()
-{
-	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
-	{
-		SVDFire(0.45f);
-	}
-	else if (m_pPlayer->pev->velocity.Length2D() > 0)
-	{
-		SVDFire(0.15f);
-	}
-	else if (m_pPlayer->pev->flags & FL_DUCKING)
-	{
-		SVDFire(0.035f);
-	}
-	else
-	{
-		SVDFire(0.055f);
-	}
-}
-
 void CSVD::SVDFire(float flSpread, float flCycleTime)
 {
 	// semi-auto is NOT full-auto with a lower fire rate.

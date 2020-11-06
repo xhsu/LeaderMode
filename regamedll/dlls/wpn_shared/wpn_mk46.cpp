@@ -149,26 +149,6 @@ bool CMK46::Deploy()
 	return DefaultDeploy(MK46_VIEW_MODEL, MK46_WORLD_MODEL, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? MK46_DRAW_FIRST : MK46_DRAW, "m249", (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? MK46_DRAW_FIRST_TIME : MK46_DEPLOY_TIME);
 }
 
-void CMK46::PrimaryAttack()
-{
-	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
-	{
-		MK46Fire(0.045F + (0.5F * m_flAccuracy));
-	}
-	else if (m_pPlayer->pev->velocity.Length2D() > 140)
-	{
-		MK46Fire(0.045F + (0.095F * m_flAccuracy));
-	}
-	else if (m_bInZoom)	// decrease spread while scoping.
-	{
-		MK46Fire(0.015f * m_flAccuracy);
-	}
-	else
-	{
-		MK46Fire(0.03F * m_flAccuracy);
-	}
-}
-
 void CMK46::SecondaryAttack(void)
 {
 	switch (m_iVariation)

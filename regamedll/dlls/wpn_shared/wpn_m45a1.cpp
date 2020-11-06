@@ -129,26 +129,6 @@ bool CM45A1::Deploy()
 		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? M45A1_DRAW_FIRST_TIME : M45A1_DRAW_TIME);
 }
 
-void CM45A1::PrimaryAttack()
-{
-	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
-	{
-		M45A1Fire(1.3f * (1.0f - m_flAccuracy));
-	}
-	else if (m_pPlayer->pev->velocity.Length2D() > 0)
-	{
-		M45A1Fire(0.175f * (1.0f - m_flAccuracy));
-	}
-	else if (m_pPlayer->pev->flags & FL_DUCKING)
-	{
-		M45A1Fire(0.08f * (1.0f - m_flAccuracy) * (m_bInZoom ? 0.5f : 1.0f));
-	}
-	else
-	{
-		M45A1Fire(0.1f * (1.0f - m_flAccuracy) * (m_bInZoom ? 0.5f : 1.0f));
-	}
-}
-
 void CM45A1::SecondaryAttack()
 {
 	switch (m_iVariation)

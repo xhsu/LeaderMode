@@ -70,26 +70,6 @@ void CAK47::SecondaryAttack()
 #endif
 }
 
-void CAK47::PrimaryAttack()
-{
-	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
-	{
-		AK47Fire(0.04f + (0.4f * m_flAccuracy));
-	}
-	else if (m_pPlayer->pev->velocity.Length2D() > 140)
-	{
-		AK47Fire(0.04f + (0.07f * m_flAccuracy));
-	}
-	else if (m_bInZoom)	// decrease spread while scoping.
-	{
-		AK47Fire(0.015f * m_flAccuracy);
-	}
-	else
-	{
-		AK47Fire(0.0275f * m_flAccuracy);
-	}
-}
-
 void CAK47::AK47Fire(float flSpread, float flCycleTime)
 {
 	m_iShotsFired++;

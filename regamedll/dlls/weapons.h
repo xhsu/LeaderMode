@@ -290,7 +290,7 @@ constexpr float USP_RELOAD_TIME		= 1.87f;
 constexpr float USP_FIRE_INTERVAL	= 0.15f;
 constexpr float	USP_EFFECTIVE_RANGE = 4096.0f;
 constexpr int	USP_PENETRATION		= 1;	// 1 means it can't penetrate anything.
-constexpr float	USP_SPREAD_BASELINE	= 0.1f;
+constexpr float	USP_SPREAD_BASELINE	= 0.12f;
 
 enum usp_e
 {
@@ -364,10 +364,15 @@ constexpr float SCARH_CHECK_MAGAZINE_TIME = 3.06F;
 constexpr float SCARH_HOLSTER_TIME		= 0.74F;
 constexpr float SCARH_DASH_ENTER_TIME	= 0.485F;
 constexpr float SCARH_DASH_EXIT_TIME	= 0.485F;
-constexpr float SCARH_RPM				= 600.0F;
+constexpr float SCARH_BLOCK_UP_TIME		= 0.3333f;
+constexpr float SCARH_BLOCK_DOWN_TIME	= 0.3939f;
+constexpr float SCARH_LHAND_UP_TIME		= 0.5526f;
+constexpr float SCARH_LHAND_DOWN_TIME	= 0.4210f;
+constexpr float SCARH_RPM				= 550.0f;
 constexpr int	SCARH_PENETRATION		= 2;
 constexpr float	SCARH_EFFECTIVE_RANGE	= 8192.0f;
 constexpr int	SCARH_GUN_VOLUME		= NORMAL_GUN_VOLUME;
+constexpr float	SCARH_SPREAD_BASELINE	= 0.015f;
 
 enum scarh_e
 {
@@ -394,8 +399,8 @@ enum scarh_e
 	SCARH_CHECK_MAGAZINE,
 	SCARH_SWITCH_SELECTOR,
 	SCARH_HOLSTER,
-	SCARH_BLOCKED_UP,
-	SCARH_BLOCKED_DOWN,
+	SCARH_BLOCK_UP,
+	SCARH_BLOCK_DOWN,
 	SCARH_LHAND_UP,
 	SCARH_LHAND_DOWN,
 	SCARH_DASH_ENTER,
@@ -420,7 +425,7 @@ public:	// CL exclusive functions.
 
 public:	// basic logic funcs
 	virtual bool	Deploy			(void);
-	virtual void	PrimaryAttack	(void);
+	virtual void	PrimaryAttack	(void) { return SCARHFire(GetSpread()); }
 	virtual void	SecondaryAttack	(void);
 	virtual void	WeaponIdle		(void) { return DefaultIdle(SCARH_DASHING); }
 	virtual bool	Reload			(void);
@@ -431,6 +436,9 @@ public:	// basic logic funcs
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void) { return SCARH_MAX_SPEED; }
 	virtual void	ResetModel		(void);
+	virtual bool	SetLeftHand		(bool bAppear) { return DefaultSetLHand(bAppear, SCARH_LHAND_UP, SCARH_LHAND_UP_TIME, SCARH_LHAND_DOWN, SCARH_LHAND_DOWN_TIME); }
+	virtual void	PlayBlockAnim	(void) { return DefaultBlock(SCARH_BLOCK_UP, SCARH_BLOCK_UP_TIME, SCARH_BLOCK_DOWN, SCARH_BLOCK_DOWN_TIME); }
+	virtual float	GetSpread		(void) { return DefaultSpread(SCARH_SPREAD_BASELINE * m_flAccuracy, 0.25f, 0.75f, 2.0f, 5.0f); }
 
 public:	// new functions
 	void SCARHFire(float flSpread, float flCycleTime = (60.0f / SCARH_RPM));
@@ -447,6 +455,7 @@ constexpr float AK47_RELOAD_TIME		= 2.44f;
 constexpr float AK47_RPM				= 600.0f;
 constexpr float	AK47_EFFECTIVE_RANGE	= 8192.0f;
 constexpr int	AK47_PENETRATION		= 2;
+constexpr float	AK47_SPREAD_BASELINE	= 0.04f;
 
 enum ak47_e
 {
@@ -471,7 +480,7 @@ public:	// SV exclusive functions.
 
 public:	// basic logic funcs
 	virtual bool	Deploy			(void);
-	virtual void	PrimaryAttack	(void);
+	virtual void	PrimaryAttack	(void) { return AK47Fire(GetSpread()); }
 	virtual void	SecondaryAttack	(void);
 	virtual bool	Reload			(void);
 	virtual void	WeaponIdle		(void);
@@ -479,6 +488,7 @@ public:	// basic logic funcs
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void) { return AK47_MAX_SPEED; }
 	virtual void	ResetModel		(void);
+	virtual float	GetSpread		(void) { return DefaultSpread(AK47_SPREAD_BASELINE * m_flAccuracy, 0.25f, 0.75f, 2.0f, 5.0f); }
 
 public:	// new functions
 	void AK47Fire(float flSpread, float flCycleTime = (60.0f / AK47_RPM));
@@ -501,10 +511,15 @@ constexpr float XM8_DASH_ENTER_TIME			= 0.8F;
 constexpr float XM8_DASH_EXIT_TIME			= 0.533F;
 constexpr float XM8_TO_SHARPSHOOTER_TIME	= 8.8F;
 constexpr float XM8_TO_CARBIN_TIME			= 8.8F;
+constexpr float XM8_BLOCK_UP_TIME			= 0.5333f;
+constexpr float XM8_BLOCK_DOWN_TIME			= 0.5333f;
+constexpr float XM8_LHAND_UP_TIME			= 0.5333f;
+constexpr float XM8_LHAND_DOWN_TIME			= 0.5333f;
 constexpr float XM8_RPM						= 800.0f;
 constexpr int	XM8_PENETRATION				= 2;
 constexpr float	XM8_EFFECTIVE_RANGE			= 8192.0f;
 constexpr int	XM8_GUN_VOLUME				= NORMAL_GUN_VOLUME;
+constexpr float	XM8_SPREAD_BASELINE			= 0.01f;
 
 enum xm8_e
 {
@@ -563,6 +578,9 @@ public:	// basic logic funcs
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void)	{ return XM8_MAX_SPEED; }
 	virtual void	ResetModel		(void);
+	virtual bool	SetLeftHand		(bool bAppear) { return DefaultSetLHand(bAppear, XM8_LHAND_UP, XM8_LHAND_UP_TIME, XM8_LHAND_DOWN, XM8_LHAND_DOWN_TIME); }
+	virtual void	PlayBlockAnim	(void)	{ return DefaultBlock(XM8_BLOCK_UP, XM8_BLOCK_UP_TIME, XM8_BLOCK_DOWN, XM8_BLOCK_DOWN_TIME); }
+	virtual float	GetSpread		(void)	{ return DefaultSpread(XM8_SPREAD_BASELINE * m_flAccuracy, 0.25f, 0.75f, 2.0f, 5.0f); }
 
 public:	// new functions
 	void XM8Fire(float flSpread, float flCycleTime = (60.0f / XM8_RPM));
@@ -686,6 +704,10 @@ constexpr float DEAGLE_DRAW_TIME			= 0.7f;
 constexpr float DEAGLE_DRAW_FIRST_TIME		= 1.8f;
 constexpr float DEAGLE_HOLSTER_TIME			= 0.7f;
 constexpr float DEAGLE_CHECKMAG_TIME		= 2.32f;
+constexpr float	DEAGLE_BLOCK_UP_TIME		= 0.5333F;
+constexpr float	DEAGLE_BLOCK_DOWN_TIME		= 0.5333F;
+constexpr float	DEAGLE_LHAND_UP_TIME		= 0.6666F;
+constexpr float	DEAGLE_LHAND_DOWN_TIME		= 0.6666F;
 constexpr float DEAGLE_DASH_ENTER_TIME		= 0.8667f;
 constexpr float DEAGLE_DASH_EXIT_TIME		= 0.3667f;
 constexpr float DEAGLE_SH_RELOAD_TIME		= 2.2333f;
@@ -696,7 +718,7 @@ constexpr float DEAGLE_FIRE_INTERVAL		= 0.225f;
 constexpr int	DEAGLE_PENETRATION			= 2;
 constexpr float	DEAGLE_EFFECTIVE_RANGE		= 4096.0f;
 constexpr int	DEAGLE_GUN_VOLUME			= BIG_EXPLOSION_VOLUME;
-constexpr float	DEAGLE_SPREAD_BASELINE		= 0.13f;
+constexpr float	DEAGLE_SPREAD_BASELINE		= 0.4f;
 
 enum deagle_e
 {
@@ -762,6 +784,8 @@ public:	// basic logic funcs
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void)	{ return DEAGLE_MAX_SPEED; }
 	virtual void	ResetModel		(void);	// declare by marco.
+	virtual bool	SetLeftHand		(bool bAppear)	{ return DefaultSetLHand(bAppear, DEAGLE_LHAND_UP, DEAGLE_LHAND_UP_TIME, DEAGLE_LHAND_DOWN, DEAGLE_LHAND_DOWN_TIME); }
+	virtual void	PlayBlockAnim	(void)	{ return DefaultBlock(DEAGLE_BLOCK_UP, DEAGLE_BLOCK_UP_TIME, DEAGLE_BLOCK_DOWN, DEAGLE_BLOCK_DOWN_TIME); }
 	virtual float	GetSpread		(void)	{ return DefaultSpread(DEAGLE_SPREAD_BASELINE * (1.0f - m_flAccuracy), 0.25f, 0.75f, 2.0f, 5.0f); }
 
 public:	// new functions
@@ -792,6 +816,7 @@ constexpr float SVD_RELOAD_TIME		= 3.2f;
 constexpr float SVD_FIRE_INTERVAL	= 0.25f;
 constexpr int	SVD_PENETRATION		= 3;
 constexpr float	SVD_EFFECTIVE_RANGE	= 8192.0f;
+constexpr float	SVD_SPREAD_BASELINE = 0.025f;
 
 enum svd_e
 {
@@ -815,7 +840,7 @@ public:	// SV exclusive functions.
 
 public:	// basic logic funcs
 	virtual bool	Deploy			(void);
-	virtual void	PrimaryAttack	(void);
+	virtual void	PrimaryAttack	(void)	{ return SVDFire(GetSpread()); }
 	virtual void	SecondaryAttack	(void);
 	virtual	bool	Reload			(void);
 	virtual void	WeaponIdle		(void);
@@ -823,6 +848,7 @@ public:	// basic logic funcs
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void);
 	virtual void	ResetModel		(void);
+	virtual float	GetSpread		(void)	{ return DefaultSpread(SVD_SPREAD_BASELINE, 0.25f, 0.75f, 2.0f, 5.0f); }
 
 public:	// new functions
 	void SVDFire(float flSpread, float flCycleTime = SVD_FIRE_INTERVAL);
@@ -840,6 +866,7 @@ constexpr float GLOCK18_RELOAD_TIME		= 1.87f;
 constexpr float GLOCK18_RPM				= 1200.0f;
 constexpr int	GLOCK18_PENETRATION		= 1;
 constexpr float	GLOCK18_EFFECTIVE_RANGE	= 4096.0f;
+constexpr float	GLOCK18_SPREAD_BASELINE = 0.33f;
 
 enum glock18_e
 {
@@ -871,14 +898,15 @@ public:	// SV exclusive functions.
 
 public:	// basic logic funcs
 	virtual bool	Deploy			(void);
-	virtual void	PrimaryAttack	(void);
+	virtual void	PrimaryAttack	(void)	{ return GLOCK18Fire(GetSpread()); }
 	virtual void	SecondaryAttack	(void);
 	virtual	bool	Reload			(void);
 	virtual void	WeaponIdle		(void);
 
 public:	// util funcs
-	virtual	float	GetMaxSpeed		(void) { return GLOCK18_MAX_SPEED; }
+	virtual	float	GetMaxSpeed		(void)	{ return GLOCK18_MAX_SPEED; }
 	virtual void	ResetModel		(void);
+	virtual float	GetSpread		(void)	{ return DefaultSpread(GLOCK18_SPREAD_BASELINE * (1.0f - m_flAccuracy), 0.25f, 0.75f, 2.0f, 5.0f); }
 
 public:	// new functions
 	void GLOCK18Fire(float flSpread, float flCycleTime = 60.0f / GLOCK18_RPM);
@@ -956,12 +984,17 @@ constexpr float MK46_RELOAD_TIME		= 6.767f;
 constexpr float MK46_RELOAD_EMPTY_TIME	= 6.232f;
 constexpr float MK46_HOLSTER_TIME		= 0.6F;
 constexpr float MK46_INSPECTION_TIME	= 1.5556f;
+constexpr float	MK46_BLOCK_UP_TIME		= 0.525f;
+constexpr float	MK46_BLOCK_DOWN_TIME	= 0.6f;
+constexpr float	MK46_LHAND_UP_TIME		= 0.7333f;
+constexpr float	MK46_LHAND_DOWN_TIME	= 0.7333f;
 constexpr float MK46_DASH_ENTER_TIME	= 0.68F;
 constexpr float MK46_DASH_EXIT_TIME		= 0.68F;
 constexpr float MK46_RPM				= 750.0f;
 constexpr int	MK46_PENETRATION		= 2;
 constexpr float	MK46_EFFECTIVE_RANGE	= 8192.0f;
 constexpr int	MK46_GUN_VOLUME			= NORMAL_GUN_VOLUME;
+constexpr float	MK46_SPREAD_BASELINE	= 0.03f;
 
 enum mk46_e
 {
@@ -979,8 +1012,8 @@ enum mk46_e
 	MK46_INSPECTION,
 	MK46_BLOCK_UP,
 	MK46_BLOCK_DOWN,
-	MK46_HANDS_ON,
-	MK46_HANDS_OFF,
+	MK46_LHAND_UP,
+	MK46_LHAND_DOWN,
 	MK46_DASH_ENTER,
 	MK46_DASHING,
 	MK46_DASH_EXIT,
@@ -1003,7 +1036,7 @@ public:	// CL exclusive functions.
 
 public:	// basic logic funcs
 	virtual bool	Deploy			(void);
-	virtual void	PrimaryAttack	(void);
+	virtual void	PrimaryAttack	(void)	{ return MK46Fire(GetSpread()); }
 	virtual void	SecondaryAttack	(void);
 	virtual void	WeaponIdle		(void)	{ return DefaultIdle(MK46_DASHING); }
 	virtual bool	Reload			(void);
@@ -1014,6 +1047,9 @@ public:	// basic logic funcs
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void)	{ return MK46_MAX_SPEED; }
 	virtual void	ResetModel		(void);
+	virtual bool	SetLeftHand		(bool bAppear)	{ return DefaultSetLHand(bAppear, MK46_LHAND_UP, MK46_LHAND_UP_TIME, MK46_LHAND_DOWN, MK46_LHAND_DOWN_TIME); }
+	virtual void	PlayBlockAnim	(void)	{ return DefaultBlock(MK46_BLOCK_UP, MK46_BLOCK_UP_TIME, MK46_BLOCK_DOWN, MK46_BLOCK_DOWN_TIME); }
+	virtual float	GetSpread		(void)	{ return DefaultSpread(MK46_SPREAD_BASELINE * m_flAccuracy, 0.25f, 0.75f, 2.0f, 5.0f); }
 
 public:	// new functions
 	void MK46Fire(float flSpread, float flCycleTime = (60.0f / MK46_RPM));
@@ -1082,11 +1118,12 @@ public:	// basic logic funcs
 	virtual	bool	Reload			(void);
 
 public:	// util funcs
-	virtual	float	GetMaxSpeed		(void) { return KSG12_MAX_SPEED; }
+	virtual	float	GetMaxSpeed		(void)	{ return KSG12_MAX_SPEED; }
 	virtual	void	PlayEmptySound	(void);
 	virtual void	PushAnim		(void);
 	virtual void	PopAnim			(void);
 	virtual void	ResetModel		(void);
+	virtual float	GetSpread		(void)	{ return KSG12_CONE_VECTOR.x; }
 };
 
 #define M4A1_VIEW_MODEL		"models/weapons/v_m4a1.mdl"
@@ -1102,12 +1139,17 @@ constexpr float M4A1_RELOAD_TIME		= 2.033f;
 constexpr float M4A1_RELOAD_EMPTY_TIME	= 2.6f;
 constexpr float M4A1_CHECK_MAGAZINE_TIME= 3.06f;
 constexpr float M4A1_HOLSTER_TIME		= 0.6f;
+constexpr float	M4A1_BLOCK_UP_TIME		= 0.3333f;
+constexpr float	M4A1_BLOCK_DOWN_TIME	= 0.3333f;
+constexpr float	M4A1_LHAND_UP_TIME		= 0.5526f;
+constexpr float	M4A1_LHAND_DOWN_TIME	= 0.4210f;
 constexpr float M4A1_DASH_ENTER_TIME	= 0.485f;
 constexpr float M4A1_DASH_EXIT_TIME		= 0.485f;
 constexpr float M4A1_RPM				= 700.0f;	// 700~950 RPM
 constexpr int	M4A1_PENETRATION		= 2;
 constexpr float	M4A1_EFFECTIVE_RANGE	= 8192.0f;
 constexpr int	M4A1_GUN_VOLUME			= NORMAL_GUN_VOLUME;
+constexpr float	M4A1_SPREAD_BASELINE	= 0.014f;
 
 enum m4a1_e
 {
@@ -1133,8 +1175,8 @@ enum m4a1_e
 	M4A1_CHECK_MAGAZINE,
 	M4A1_SWITCH_SELECTOR,
 	M4A1_HOLSTER,
-	M4A1_BLOCKED_UP,
-	M4A1_BLOCKED_DOWN,
+	M4A1_BLOCK_UP,
+	M4A1_BLOCK_DOWN,
 	M4A1_LHAND_UP,
 	M4A1_LHAND_DOWN,
 	M4A1_DASH_ENTER,
@@ -1159,7 +1201,7 @@ public:	// CL exclusive functions.
 
 public:	// basic logic funcs
 	virtual bool	Deploy			(void);
-	virtual void	PrimaryAttack	(void);
+	virtual void	PrimaryAttack	(void)	{ return M4A1Fire(GetSpread()); }
 	virtual void	SecondaryAttack	(void);
 	virtual void	WeaponIdle		(void)	{ return DefaultIdle(M4A1_DASHING); }
 	virtual bool	Reload			(void);
@@ -1170,6 +1212,9 @@ public:	// basic logic funcs
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void)	{ return M4A1_MAX_SPEED; }
 	virtual void	ResetModel		(void);
+	virtual bool	SetLeftHand		(bool bAppear)	{ return DefaultSetLHand(bAppear, M4A1_LHAND_UP, M4A1_LHAND_UP_TIME, M4A1_LHAND_DOWN, M4A1_LHAND_DOWN_TIME); }
+	virtual void	PlayBlockAnim	(void)	{ return DefaultBlock(M4A1_BLOCK_UP, M4A1_BLOCK_UP_TIME, M4A1_BLOCK_DOWN, M4A1_BLOCK_DOWN_TIME); }
+	virtual float	GetSpread		(void)	{ return DefaultSpread(M4A1_SPREAD_BASELINE * m_flAccuracy, 0.25f, 0.75f, 2.0f, 5.0f); }
 
 public:	// new functions
 	void M4A1Fire(float flSpread, float flCycleTime = (60.0f / M4A1_RPM));
@@ -1206,6 +1251,7 @@ constexpr float ANACONDA_DEPLOY_TIME		= 0.367f;	// this gun has a extremely shor
 constexpr float ANACONDA_FIRE_INTERVAL		= 0.15f;
 constexpr int	ANACONDA_PENETRATION		= 1;
 constexpr float	ANACONDA_EFFECTIVE_RANGE	= 4096.0f;
+constexpr float ANACONDA_SPREAD_BASELINE	= 0.024;
 
 enum anaconda_e
 {
@@ -1237,14 +1283,15 @@ public:	// we need some CL-exclusive VFX.
 
 public:	// basic logic funcs
 	virtual bool	Deploy			(void);
-	virtual void	PrimaryAttack	(void);
+	virtual void	PrimaryAttack	(void) { return AnacondaFire(GetSpread()); }
 	virtual void	SecondaryAttack	(void);
 	virtual bool	Reload			(void);
 	virtual void	WeaponIdle		(void);
 
 public:	// util funcs
-	virtual float GetMaxSpeed		(void) { return ANACONDA_MAX_SPEED; }
+	virtual float	GetMaxSpeed		(void) { return ANACONDA_MAX_SPEED; }
 	virtual void	ResetModel		(void);
+	virtual float	GetSpread		(void) { return DefaultSpread(ANACONDA_SPREAD_BASELINE * (1.0f - m_flAccuracy), 0.25f, 0.75f, 2.0f, 5.0f); }
 
 public:	// new funcs
 	void AnacondaFire(float flSpread, float flCycleTime = ANACONDA_FIRE_INTERVAL);
@@ -1310,6 +1357,7 @@ constexpr float MP7A1_RELOAD_TIME		= 2.575f;
 constexpr float MP7A1_RPM				= 850.0f;
 constexpr int	MP7A1_PENETRATION		= 1;
 constexpr float	MP7A1_EFFECTIVE_RANGE	= 8192.0f;
+constexpr float MP7A1_SPREAD_BASELINE	= 0.02f;
 
 enum mp7a1_e
 {
@@ -1334,7 +1382,7 @@ public:	// SV exclusive functions.
 
 public:
 	virtual bool	Deploy			(void);
-	virtual void	PrimaryAttack	(void);
+	virtual void	PrimaryAttack	(void) { return MP7A1Fire(GetSpread()); }
 	virtual void	SecondaryAttack	(void);
 	virtual bool	Reload			(void);
 	virtual void	WeaponIdle		(void);
@@ -1342,6 +1390,7 @@ public:
 public:	// util funcs
 	virtual float	GetMaxSpeed		(void) { return MP7A1_MAX_SPEED; }
 	virtual void	ResetModel		(void);
+	virtual float	GetSpread		(void) { return DefaultSpread(MP7A1_SPREAD_BASELINE * m_flAccuracy, 0.25f, 0.75f, 1.0f, 5.0f); }	// no additional spread on running.
 
 public:	// new funcs
 	void MP7A1Fire(float flSpread, float flCycleTime = (60.0f / MP7A1_RPM));
@@ -1464,8 +1513,9 @@ public:	// util funcs
 	virtual void	PushAnim		(void);
 	virtual void	PopAnim			(void);
 	virtual void	ResetModel		(void);
-	virtual bool	SetLeftHand		(bool bAppear);
+	virtual bool	SetLeftHand		(bool bAppear) { return DefaultSetLHand(bAppear, M1014_LHAND_UP, M1014_LHAND_UP_TIME, M1014_LHAND_DOWN, M1014_LHAND_DOWN_TIME); }
 	virtual void	PlayBlockAnim	(void)	{ return DefaultBlock(M1014_BLOCK_UP, M1014_BLOCK_UP_TIME, M1014_BLOCK_DOWN, M1014_BLOCK_DOWN_TIME); }
+	virtual float	GetSpread		(void)	{ return M1014_CONE_VECTOR.x; }
 };
 
 #define M45A1_VIEW_MODEL	"models/weapons/v_m45a1.mdl"
@@ -1480,6 +1530,10 @@ constexpr float M45A1_DRAW_TIME				= 0.7F;
 constexpr float M45A1_HOLSTER_TIME			= 0.5F;
 constexpr float M45A1_DASH_ENTER_TIME		= 0.5333F;
 constexpr float M45A1_DASH_EXIT_TIME		= 0.5333F;
+constexpr float	M45A1_BLOCK_UP_TIME			= 0.4f;
+constexpr float	M45A1_BLOCK_DOWN_TIME		= 0.4333f;
+constexpr float	M45A1_LHAND_UP_TIME			= 0.4f;
+constexpr float	M45A1_LHAND_DOWN_TIME		= 0.3333f;
 constexpr float M45A1_SH_RELOAD_EMPTY_TIME	= 2.833F;
 constexpr float M45A1_SH_RELOAD_TIME		= 2.1667F;
 constexpr float M45A1_SH_DASH_ENTER_TIME	= 0.33333F;
@@ -1490,6 +1544,7 @@ constexpr float M45A1_FIRE_INTERVAL			= 0.2f;
 constexpr int	M45A1_PENETRATION			= 1;
 constexpr float	M45A1_EFFECTIVE_RANGE		= 4096.0f;
 constexpr int	M45A1_GUN_VOLUME			= NORMAL_GUN_VOLUME;
+constexpr float M45A1_SPREAD_BASELINE		= 0.09f;
 
 enum m45a1_e
 {
@@ -1544,18 +1599,21 @@ public:	// CL exclusive functions.
 												(1 << M45A1_SH_DASH_ENTER) | (1 << M45A1_SH_DASHING) | (1 << M45A1_SH_DASH_EXIT);
 
 public:	// basic logic funcs
-	virtual bool	Deploy(void);
-	virtual void	PrimaryAttack(void);
-	virtual void	SecondaryAttack(void);
-	virtual bool	Reload(void);
-	virtual void	WeaponIdle(void)		{ return DefaultIdle(M45A1_DASHING); }
-	virtual bool	HolsterStart(void)		{ return DefaultHolster(M45A1_HOLSTER, M45A1_HOLSTER_TIME); }
-	virtual	void	DashStart(void)			{ return DefaultDashStart(M45A1_DASH_ENTER, M45A1_DASH_ENTER_TIME); }
-	virtual void	DashEnd(void)			{ return DefaultDashEnd(M45A1_DASH_ENTER, M45A1_DASH_ENTER_TIME, M45A1_DASH_EXIT, M45A1_DASH_EXIT_TIME); }
+	virtual bool	Deploy			(void);
+	virtual void	PrimaryAttack	(void)	{ return M45A1Fire(GetSpread()); }
+	virtual void	SecondaryAttack	(void);
+	virtual bool	Reload			(void);
+	virtual void	WeaponIdle		(void)	{ return DefaultIdle(M45A1_DASHING); }
+	virtual bool	HolsterStart	(void)	{ return DefaultHolster(M45A1_HOLSTER, M45A1_HOLSTER_TIME); }
+	virtual	void	DashStart		(void)	{ return DefaultDashStart(M45A1_DASH_ENTER, M45A1_DASH_ENTER_TIME); }
+	virtual void	DashEnd			(void)	{ return DefaultDashEnd(M45A1_DASH_ENTER, M45A1_DASH_ENTER_TIME, M45A1_DASH_EXIT, M45A1_DASH_EXIT_TIME); }
 
 public:	// util funcs
-	virtual	float	GetMaxSpeed(void)		{ return M45A1_MAX_SPEED; }
-	virtual void	ResetModel(void);	// declare by marco.
+	virtual	float	GetMaxSpeed		(void)	{ return M45A1_MAX_SPEED; }
+	virtual void	ResetModel		(void);	// declare by marco.
+	virtual bool	SetLeftHand		(bool bAppear)	{ return DefaultSetLHand(bAppear, M45A1_LHAND_UP, M45A1_LHAND_UP_TIME, M45A1_LHAND_DOWN, M45A1_LHAND_DOWN_TIME); }
+	virtual void	PlayBlockAnim	(void)	{ return DefaultBlock(M45A1_BLOCK_UP, M45A1_BLOCK_UP_TIME, M45A1_BLOCK_DOWN, M45A1_BLOCK_DOWN_TIME); }
+	virtual float	GetSpread		(void)	{ return DefaultSpread(M45A1_SPREAD_BASELINE * (1.0f - m_flAccuracy), 0.25f, 0.75f, 2.0f, 5.0f); }
 
 public:	// new functions
 	void M45A1Fire(float flSpread, float flCycleTime = M45A1_FIRE_INTERVAL);
@@ -1577,10 +1635,15 @@ constexpr float FIVESEVEN_HOLSTER_TIME		= 0.7F;
 constexpr float FIVESEVEN_CHECKMAG_TIME		= 2.033F;
 constexpr float FIVESEVEN_DASH_ENTER_TIME	= 0.8F;
 constexpr float FIVESEVEN_DASH_EXIT_TIME	= 0.37F;
+constexpr float	FIVESEVEN_BLOCK_UP_TIME		= 0.4666f;
+constexpr float	FIVESEVEN_BLOCK_DOWN_TIME	= 0.4666f;
+constexpr float	FIVESEVEN_LHAND_UP_TIME		= 0.2666f;
+constexpr float	FIVESEVEN_LHAND_DOWN_TIME	= 0.2666f;
 constexpr float FIVESEVEN_FIRE_INTERVAL		= 0.132f;
 constexpr float	FIVESEVEN_EFFECTIVE_RANGE	= 4096.0f;
 constexpr int	FIVESEVEN_PENETRATION		= 1;
 constexpr int	FIVESEVEN_GUN_VOLUME		= NORMAL_GUN_VOLUME;
+constexpr float FIVESEVEN_SPREAD_BASELINE	= 0.04f;
 
 enum fiveseven_e
 {
@@ -1636,7 +1699,7 @@ public:	// CL exclusive functions.
 
 public:	// basic logic funcs
 	virtual bool	Deploy			(void);
-	virtual void	PrimaryAttack	(void);
+	virtual void	PrimaryAttack	(void) { return FiveSevenFire(GetSpread()); }
 	virtual void	SecondaryAttack	(void);
 	virtual bool	Reload			(void);
 	virtual void	WeaponIdle		(void) { return DefaultIdle(FIVESEVEN_DASHING); }
@@ -1647,6 +1710,9 @@ public:	// basic logic funcs
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void) { return FIVESEVEN_MAX_SPEED; }
 	virtual void	ResetModel		(void);	// declare by marco.
+	virtual bool	SetLeftHand		(bool bAppear)	{ return DefaultSetLHand(bAppear, FIVESEVEN_LHAND_UP, FIVESEVEN_LHAND_UP_TIME, FIVESEVEN_LHAND_DOWN, FIVESEVEN_LHAND_DOWN_TIME); }
+	virtual void	PlayBlockAnim	(void)	{ return DefaultBlock(FIVESEVEN_BLOCK_UP, FIVESEVEN_BLOCK_UP_TIME, FIVESEVEN_BLOCK_DOWN, FIVESEVEN_BLOCK_DOWN_TIME); }
+	virtual float	GetSpread		(void)	{ return DefaultSpread(FIVESEVEN_SPREAD_BASELINE * (1.0f - m_flAccuracy), 0.25f, 0.75f, 2.0f, 5.0f); }
 
 public:	// new functions
 	void FiveSevenFire(float flSpread, float flCycleTime = FIVESEVEN_FIRE_INTERVAL);
@@ -1663,6 +1729,7 @@ constexpr float UMP45_RELOAD_TIME		= 3.2f;
 constexpr float UMP45_RPM				= 600.0f;
 constexpr float	UMP45_EFFECTIVE_RANGE	= 8192.0f;
 constexpr int	UMP45_PENETRATION		= 1;
+constexpr float UMP45_SPREAD_BASELINE	= 0.015f;
 
 enum ump45_e
 {
@@ -1687,7 +1754,7 @@ public:	// SV exclusive functions.
 
 public:	// basic logic funcs
 	virtual bool	Deploy			(void);
-	virtual void	PrimaryAttack	(void);
+	virtual void	PrimaryAttack	(void) { return UMP45Fire(GetSpread()); }
 	virtual void	SecondaryAttack	(void);
 	virtual	bool	Reload			(void);
 	virtual void	WeaponIdle		(void);
@@ -1695,6 +1762,7 @@ public:	// basic logic funcs
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void) { return UMP45_MAX_SPEED; }
 	virtual void	ResetModel		(void);
+	virtual float	GetSpread		(void) { return DefaultSpread(UMP45_SPREAD_BASELINE * m_flAccuracy, 0.25f, 0.75f, 1.0f, 5.0f); }	// no additional spread on running.
 
 public:	// new functions
 	void UMP45Fire(float flSpread, float flCycleTime = 60.0f / UMP45_RPM);

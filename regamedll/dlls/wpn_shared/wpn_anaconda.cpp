@@ -55,26 +55,6 @@ bool CAnaconda::Deploy()
 	return false;
 }
 
-void CAnaconda::PrimaryAttack()
-{
-	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
-	{
-		AnacondaFire(1.5f * (1.0f - m_flAccuracy));
-	}
-	else if (m_pPlayer->pev->velocity.Length2D() > 0)
-	{
-		AnacondaFire(0.255f * (1.0f - m_flAccuracy));
-	}
-	else if (m_pPlayer->pev->flags & FL_DUCKING)
-	{
-		AnacondaFire(0.075f * (1.0f - m_flAccuracy));
-	}
-	else
-	{
-		AnacondaFire(0.15 * (1.0f - m_flAccuracy));
-	}
-}
-
 void CAnaconda::SecondaryAttack()
 {
 	m_bInZoom = !m_bInZoom;

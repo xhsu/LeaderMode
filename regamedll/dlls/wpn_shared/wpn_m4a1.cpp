@@ -123,26 +123,6 @@ void CM4A1::SecondaryAttack()
 	}
 }
 
-void CM4A1::PrimaryAttack()
-{
-	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
-	{
-		M4A1Fire(0.035f + (0.4f * m_flAccuracy));
-	}
-	else if (m_pPlayer->pev->velocity.Length2D() > 140)
-	{
-		M4A1Fire(0.035f + (0.07f * m_flAccuracy));
-	}
-	else if (m_bInZoom)	// decrease spread while scoping.
-	{
-		M4A1Fire(0.01f * m_flAccuracy);
-	}
-	else
-	{
-		M4A1Fire(0.02f * m_flAccuracy);
-	}
-}
-
 void CM4A1::M4A1Fire(float flSpread, float flCycleTime)
 {
 	m_iShotsFired++;

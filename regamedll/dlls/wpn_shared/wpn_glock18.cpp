@@ -70,32 +70,9 @@ void CG18C::SecondaryAttack()
 #endif
 }
 
-void CG18C::PrimaryAttack()
-{
-	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
-	{
-		GLOCK18Fire(1.0f * (1.0f - m_flAccuracy));
-	}
-	else if (m_pPlayer->pev->velocity.Length2D() > 0)
-	{
-		GLOCK18Fire(0.165f * (1.0f - m_flAccuracy));
-	}
-	else if (m_pPlayer->pev->flags & FL_DUCKING)
-	{
-		GLOCK18Fire(0.075f * (1.0f - m_flAccuracy));
-	}
-	else
-	{
-		GLOCK18Fire(0.1f * (1.0f - m_flAccuracy));
-	}
-}
-
 void CG18C::GLOCK18Fire(float flSpread, float flCycleTime)
 {
 	// LUNA: G18C is allowed to fire in FULL AUTO.
-
-	if (m_bInZoom)
-		flSpread *= 0.5f;
 
 	if (m_flLastFire)
 	{

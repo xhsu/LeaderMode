@@ -228,22 +228,7 @@ void CXM8::PrimaryAttack()
 	if (m_iVariation == Role_Sharpshooter)
 		flInterval = 0.2f;
 
-	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
-	{
-		XM8Fire(0.035f + (0.4f * m_flAccuracy), flInterval);
-	}
-	else if (m_pPlayer->pev->velocity.Length2D() > 140)
-	{
-		XM8Fire(0.035f + (0.07f * m_flAccuracy), flInterval);
-	}
-	else if (m_bInZoom)	// decrease spread while scoping.
-	{
-		XM8Fire(0.01f * m_flAccuracy, flInterval);
-	}
-	else
-	{
-		XM8Fire(0.02f * m_flAccuracy, flInterval);
-	}
+	XM8Fire(GetSpread(), flInterval);
 }
 
 void CXM8::XM8Fire(float flSpread, float flCycleTime)
