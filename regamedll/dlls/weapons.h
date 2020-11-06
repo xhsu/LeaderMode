@@ -290,6 +290,7 @@ constexpr float USP_RELOAD_TIME		= 1.87f;
 constexpr float USP_FIRE_INTERVAL	= 0.15f;
 constexpr float	USP_EFFECTIVE_RANGE = 4096.0f;
 constexpr int	USP_PENETRATION		= 1;	// 1 means it can't penetrate anything.
+constexpr float	USP_SPREAD_BASELINE	= 0.1f;
 
 enum usp_e
 {
@@ -315,7 +316,7 @@ public:	// SV exclusive functions.
 
 public:	// basic logic funcs
 	virtual bool	Deploy			(void);
-	virtual void	PrimaryAttack	(void);
+	virtual void	PrimaryAttack	(void) { return USPFire(GetSpread()); }
 	virtual void	SecondaryAttack	(void);
 	virtual	bool	Reload			(void);
 	virtual void	WeaponIdle		(void);
@@ -323,6 +324,7 @@ public:	// basic logic funcs
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void) { return USP_MAX_SPEED; }
 	virtual void	ResetModel		(void);
+	virtual float	GetSpread		(void) { return DefaultSpread(USP_SPREAD_BASELINE * (1.0f - m_flAccuracy), 0.25f, 0.75f, 2.0f, 5.0f); }
 
 public:	// new functions
 	void USPFire(float flSpread, float flCycleTime = USP_FIRE_INTERVAL);

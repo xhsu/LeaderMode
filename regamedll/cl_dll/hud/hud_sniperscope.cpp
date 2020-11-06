@@ -9,6 +9,8 @@ Modern Warfare Dev Team
 
 #include "precompiled.h"
 
+static wrect_t nullrc = { 0, 0, 0, 0 };
+
 int CHudSniperScope::Init(void)
 {
 	Reset();
@@ -20,12 +22,42 @@ int CHudSniperScope::Init(void)
 
 int CHudSniperScope::VidInit(void)
 {
+	Q_memset(&m_rghScopes, NULL, sizeof(m_rghScopes));
+	Q_memset(&m_rgrcScopes, NULL, sizeof(m_rgrcScopes));
+
 	m_iScopes[0] = LoadDDS("texture/Scope/Def_Scope_1440_1080.dds");
 	m_iScopes[1] = LoadDDS("texture/Scope/Def_Scope_1620_1080.dds");
 	m_iScopes[2] = LoadDDS("texture/Scope/Def_Scope_1728_1080.dds");
 	m_iScopes[3] = LoadDDS("texture/Scope/Def_Scope_1920_1080.dds");
 
 	m_iUsingScope = m_iScopes[FindBestRatio()];
+
+	// get the sniper rifles scopes
+	int i = 0;
+	auto pList = gEngfuncs.pfnSPR_GetList("sprites/scopes.txt", &i);
+
+	if (pList)
+	{
+		char sz[128];
+		client_sprite_t* p = nullptr;
+
+		for (int j = 0; j < LAST_WEAPON; j++)
+		{
+			if (!g_rgWpnInfo[j].m_pszInternalName || g_rgWpnInfo[j].m_pszInternalName[0] == '\0')
+				continue;
+
+			p = gHUD::GetSpriteFromList(pList, g_rgWpnInfo[j].m_pszInternalName, 640, i);
+
+			if (p)
+			{
+				Q_snprintf(sz, charsmax(sz), "sprites/%s.spr", p->szSprite);
+				m_rghScopes[j] = gEngfuncs.pfnSPR_Load(sz);
+				m_rgrcScopes[j] = p->rc;
+			}
+			else
+				m_rghScopes[j] = NULL;
+		}
+	}
 
 	return TRUE;
 }
@@ -79,16 +111,25 @@ int CHudSniperScope::Draw(float flTime)
 		glEnable(GL_TEXTURE_2D);
 	}
 
-	if (gHUD::m_iFOV > 40)
-		return FALSE;
+	if (gHUD::m_iFOV <= 40)
+	{
+		gEngfuncs.pTriAPI->RenderMode(kRenderTransColor);
+		gEngfuncs.pTriAPI->Brightness(1.0);
+		gEngfuncs.pTriAPI->Color4ub(0, 0, 0, 255);
+		gEngfuncs.pTriAPI->CullFace(TRI_NONE);
 
-	gEngfuncs.pTriAPI->RenderMode(kRenderTransColor);
-	gEngfuncs.pTriAPI->Brightness(1.0);
-	gEngfuncs.pTriAPI->Color4ub(0, 0, 0, 255);
-	gEngfuncs.pTriAPI->CullFace(TRI_NONE);
+		glBindTexture(GL_TEXTURE_2D, m_iUsingScope);
+		DrawUtils::Draw2DQuad(0, 0, ScreenWidth, ScreenHeight);
+	}
 
-	glBindTexture(GL_TEXTURE_2D, m_iUsingScope);
-	DrawUtils::Draw2DQuad(0, 0, ScreenWidth, ScreenHeight);
+	if (g_pCurWeapon && m_rghScopes[g_pCurWeapon->m_iId] && gHUD::m_iFOV <= 40)	// have a customised scope? draw it.
+	{
+		gEngfuncs.pfnSetCrosshair(m_rghScopes[g_pCurWeapon->m_iId], m_rgrcScopes[g_pCurWeapon->m_iId], 255, 255, 255);
+	}
+	else
+	{
+		gEngfuncs.pfnSetCrosshair(0, nullrc, 0, 0, 0);
+	}
 
 	return TRUE;
 }

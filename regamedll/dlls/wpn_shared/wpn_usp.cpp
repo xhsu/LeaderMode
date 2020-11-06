@@ -73,26 +73,6 @@ void CUSP::SecondaryAttack()
 #endif
 }
 
-void CUSP::PrimaryAttack()
-{
-	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
-	{
-		USPFire(1.2f * (1.0f - m_flAccuracy));
-	}
-	else if (m_pPlayer->pev->velocity.Length2D() > 0)
-	{
-		USPFire(0.225f * (1.0f - m_flAccuracy));
-	}
-	else if (m_pPlayer->pev->flags & FL_DUCKING)
-	{
-		USPFire(0.08f * (1.0f - m_flAccuracy));
-	}
-	else
-	{
-		USPFire(0.1f * (1.0f - m_flAccuracy));
-	}
-}
-
 void CUSP::USPFire(float flSpread, float flCycleTime)
 {
 	if (++m_iShotsFired > 1)

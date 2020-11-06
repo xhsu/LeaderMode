@@ -38,6 +38,8 @@ public:
 	void SetFadeFromBlack(float flRate, float flStayTime = 0.1f);
 
 private:
+	hSprite	m_rghScopes[LAST_WEAPON];
+	wrect_t	m_rgrcScopes[LAST_WEAPON];
 	GLuint m_iUsingScope;
 	GLuint m_iScopes[4];
 	Phase m_iPhase;

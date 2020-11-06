@@ -834,7 +834,8 @@ void CHudSpectator::SetModes(int iNewMainMode, int iNewInsetMode)
 		{
 			if (gEngfuncs.pfnGetCvarFloat("cl_observercrosshair") != 0.0)
 			{
-				gEngfuncs.pfnSetCrosshair(gHUD::m_Crosshair.m_hObserverCrosshair, gHUD::m_Crosshair.m_rcObserverCrosshair, 255, 255, 255);
+				// UNDONE, get this thing back.
+				//gEngfuncs.pfnSetCrosshair(gHUD::m_Crosshair.m_hObserverCrosshair, gHUD::m_Crosshair.m_rcObserverCrosshair, 255, 255, 255);
 			}
 			else
 			{

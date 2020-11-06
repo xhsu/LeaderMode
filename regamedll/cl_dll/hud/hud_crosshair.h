@@ -20,41 +20,13 @@ extern float g_flSpread;
 class CHudCrosshair : public CBaseHudElement
 {
 public:
-	hSprite m_hObserverCrosshair;
-	wrect_t m_rcObserverCrosshair;
-	hSprite	m_rghScopes[LAST_WEAPON];
-	wrect_t	m_rgrcScopes[LAST_WEAPON];
-	int m_iCurrentCrosshair;
-	bool m_bAdditive;
-	int m_iCrosshairScaleBase;
-	char m_szLastCrosshairColor[32];
-	float m_flLastCalcTime;
-	int m_iAlpha;
-	int m_R;
-	int m_G;
-	int m_B;
-	int m_cvarR;
-	int m_cvarG;
-	int m_cvarB;
-	int m_bObserverCrosshair;
-	int m_iAmmoLastCheck;
-	float m_flCrosshairDistance;
+	float m_flCrosshairDistance		{ 0.1f };
+	float m_flCurChDistance			{ 0.1f };
+	float m_flCrosshairBarLength	{ 15.0f };
+	double m_flAlphaMul				{ 1.0 };
 
 public:
 	virtual int Init(void);
-	virtual int VidInit(void);
 	virtual int Draw(float flTime);
 	virtual void Reset(void);
-
-	void CalculateCrosshairColor(void);
-	void CalculateCrosshairDrawMode(void);
-	void CalculateCrosshairSize(void);
-	int DrawCrosshair(float flTime, WeaponIdType weaponid);
-	int DrawCrosshairEx(float flTime, WeaponIdType weaponid, int iBarSize, float flCrosshairDistance, bool bAdditive, int r, int g, int b, int a);
-	void Adjust_Crosshair(void);
-
-	void MsgFunc_Crosshair(bool bDrawn);
-	void MsgFunc_HideWeapon(int& bits);
 };
-
-int GetWeaponAccuracyFlags(WeaponIdType iId);

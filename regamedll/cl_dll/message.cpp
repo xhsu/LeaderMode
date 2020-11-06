@@ -384,7 +384,7 @@ MSG_FUNC(HideWeapon)
 
 	int bitsWhat = READ_BYTE();
 
-	gHUD::m_Crosshair.MsgFunc_HideWeapon(bitsWhat);
+	gHUD::m_bitsHideHUDDisplay = bitsWhat;
 	return TRUE;
 }
 
@@ -590,7 +590,6 @@ MSG_FUNC(Crosshair)
 
 	BOOL FDrawn = READ_BYTE();
 
-	gHUD::m_Crosshair.MsgFunc_Crosshair(FDrawn);
 	return TRUE;
 }
 

@@ -236,7 +236,6 @@ void gHUD::Init(void)
 	gEngfuncs.pfnAddCommand("slot10", CommandFunc_Slot10);
 	gEngfuncs.pfnAddCommand("invnext", CommandFunc_NextWeapon);
 	gEngfuncs.pfnAddCommand("invprev", CommandFunc_PrevWeapon);
-	gEngfuncs.pfnAddCommand("adjust_crosshair", CommandFunc_Adjust_Crosshair);
 	gEngfuncs.pfnAddCommand("lastinv", CommandFunc_SelectLastItem);
 	gEngfuncs.pfnAddCommand("eqpnext", CommandFunc_NextEquipment);
 	gEngfuncs.pfnAddCommand("eqpprev", CommandFunc_PrevEquipment);
@@ -962,12 +961,6 @@ void CommandFunc_PrevWeapon(void)
 	}
 
 	gEngfuncs.pfnPlaySoundByName(WEAPONLIST_EMPTY_SFX, VOL_NORM);
-}
-
-void CommandFunc_Adjust_Crosshair(void)
-{
-	// forward this call, since most of this command is reagarding changing the variables in m_Ammo.
-	gHUD::m_Crosshair.Adjust_Crosshair();
 }
 
 void CommandFunc_SelectLastItem(void)	// an equivlent function of void CBasePlayer::SelectLastItem() on SV.
