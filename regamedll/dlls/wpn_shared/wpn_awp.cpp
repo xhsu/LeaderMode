@@ -111,8 +111,6 @@ int CAWP::CalcBodyParam(void)
 
 void CAWP::Think(void)
 {
-	CBaseWeapon::Think();
-
 	if (m_flTimeChamberCleared != 0 && m_flTimeChamberCleared <= gpGlobals->time)
 	{
 		// you must playing designated anim to cancel this flag. also, you cannot in-scope.
@@ -125,8 +123,14 @@ void CAWP::Think(void)
 		{
 			// sorry, you're doing something else to trick the system.
 			m_flTimeChamberCleared = gpGlobals->time + 9999.0f;
+
+			// also, block the shell vfx.
+			m_pPlayer->m_flEjectBrass = 0;
 		}
 	}
+
+	// make it post.
+	CBaseWeapon::Think();
 }
 
 void CAWP::PrimaryAttack()
