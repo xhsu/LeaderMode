@@ -27,7 +27,7 @@ void CUMP45::Precache()
 
 bool CUMP45::Deploy()
 {
-	m_flAccuracy = 0.0f;
+	m_flAccuracy = 0.4f;
 
 	return DefaultDeploy(UMP45_VIEW_MODEL, UMP45_WORLD_MODEL, UMP45_DRAW, "carbine");
 }
@@ -70,15 +70,20 @@ void CUMP45::SecondaryAttack(void)
 #endif
 }
 
+float CUMP45::GetSpread(void)
+{
+	m_flAccuracy = ((m_iShotsFired * m_iShotsFired) / 210) + 0.4f;
+
+	if (m_flAccuracy > 1.0f)
+		m_flAccuracy = 1.0f;
+
+	return DefaultSpread(UMP45_SPREAD_BASELINE * m_flAccuracy, 0.1f, 0.75f, 1.0f, 5.0f);	// no additional penalty on dashing.
+}
+
 void CUMP45::UMP45Fire(float flSpread, float flCycleTime)
 {
 	m_iShotsFired++;
 	m_bDelayRecovery = true;
-
-	m_flAccuracy = ((m_iShotsFired * m_iShotsFired) / 210) + 0.5f;
-
-	if (m_flAccuracy > 1.0f)
-		m_flAccuracy = 1.0f;
 
 	if (m_iClip <= 0)
 	{
@@ -163,7 +168,7 @@ bool CUMP45::Reload()
 {
 	if (DefaultReload(m_pItemInfo->m_iMaxClip, UMP45_RELOAD, UMP45_RELOAD_TIME))
 	{
-		m_flAccuracy = 0.0f;
+		m_flAccuracy = 0.4f;
 		return true;
 	}
 

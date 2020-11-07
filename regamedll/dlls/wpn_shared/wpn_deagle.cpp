@@ -128,13 +128,8 @@ bool CDEagle::Deploy()
 		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DEAGLE_DRAW_FIRST_TIME : DEAGLE_DRAW_TIME);
 }
 
-void CDEagle::DEagleFire(float flSpread, float flCycleTime)
+float CDEagle::GetSpread(void)
 {
-	if (++m_iShotsFired > 1)
-	{
-		return;
-	}
-
 	if (m_flLastFire != 0.0)
 	{
 		m_flAccuracy -= (0.4f - (gpGlobals->time - m_flLastFire)) * 0.35f;
@@ -147,6 +142,16 @@ void CDEagle::DEagleFire(float flSpread, float flCycleTime)
 		{
 			m_flAccuracy = 0.55f;
 		}
+	}
+
+	return DefaultSpread(DEAGLE_SPREAD_BASELINE * (1.0f - m_flAccuracy), 0.1f, 0.75f, 2.0f, 5.0f);
+}
+
+void CDEagle::DEagleFire(float flSpread, float flCycleTime)
+{
+	if (++m_iShotsFired > 1)
+	{
+		return;
 	}
 
 	m_flLastFire = gpGlobals->time;

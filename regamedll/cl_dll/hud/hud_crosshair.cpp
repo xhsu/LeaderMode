@@ -9,7 +9,6 @@ Modern Warfare Dev Team
 
 #include "precompiled.h"
 
-int g_iShotsFired = 0;
 float g_flSpread = 0;
 static wrect_t nullrc = { 0, 0, 0, 0 };
 
@@ -48,7 +47,7 @@ int CHudCrosshair::Draw(float flTime)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	// black part.
+	// black part. (Background)
 	glColor4f(0, 0, 0, 0.5 * m_flAlphaMul);
 	DrawUtils::Draw2DQuad(
 		float(ScreenWidth) / 2.0f - 3,
@@ -74,7 +73,7 @@ int CHudCrosshair::Draw(float flTime)
 		float(ScreenWidth) / 2.0f + m_flCurChDistance / 2.0f + m_flCrosshairBarLength + 2,
 		float(ScreenHeight) / 2.0f + 3);
 
-	// white part.
+	// white part. (Front)
 	glColor4f(1, 1, 1, 1 * m_flAlphaMul);
 	DrawUtils::Draw2DQuad(
 		float(ScreenWidth) / 2.0f - 1.0f,

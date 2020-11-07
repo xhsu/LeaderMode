@@ -164,13 +164,8 @@ void CFN57::SecondaryAttack()
 	}
 }
 
-void CFN57::FiveSevenFire(float flSpread, float flCycleTime)
+float CFN57::GetSpread(void)
 {
-	if (++m_iShotsFired > 1)
-	{
-		return;
-	}
-
 	if (m_flLastFire != 0.0f)
 	{
 		m_flAccuracy -= (0.275f - (gpGlobals->time - m_flLastFire)) * 0.25f;
@@ -183,6 +178,16 @@ void CFN57::FiveSevenFire(float flSpread, float flCycleTime)
 		{
 			m_flAccuracy = 0.725f;
 		}
+	}
+
+	return DefaultSpread(FIVESEVEN_SPREAD_BASELINE * (1.0f - m_flAccuracy), 0.1f, 0.75f, 2.0f, 5.0f);
+}
+
+void CFN57::FiveSevenFire(float flSpread, float flCycleTime)
+{
+	if (++m_iShotsFired > 1)
+	{
+		return;
 	}
 
 	m_flLastFire = gpGlobals->time;

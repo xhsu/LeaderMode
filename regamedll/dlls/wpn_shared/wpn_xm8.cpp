@@ -167,7 +167,7 @@ void CXM8::Think(void)
 
 bool CXM8::Deploy()
 {
-	m_flAccuracy = 0.2f;
+	m_flAccuracy = 0.25f;
 	m_iShotsFired = 0;
 
 	return DefaultDeploy(XM8_VIEW_MODEL, XM8_WORLD_MODEL, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? XM8_DRAW_FIRST : XM8_DRAW, "carbine", (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? XM8_DRAW_FIRST_TIME : XM8_DRAW_TIME);
@@ -231,6 +231,16 @@ void CXM8::PrimaryAttack()
 	XM8Fire(GetSpread(), flInterval);
 }
 
+float CXM8::GetSpread(void)
+{
+	m_flAccuracy = (float(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 215.0f) + 0.25f;
+
+	if (m_flAccuracy > 1.0f)
+		m_flAccuracy = 1.0f;
+
+	return DefaultSpread(XM8_SPREAD_BASELINE * m_flAccuracy, 0.1f, 0.75f, 2.0f, 5.0f);
+}
+
 void CXM8::XM8Fire(float flSpread, float flCycleTime)
 {
 	m_iShotsFired++;
@@ -241,11 +251,6 @@ void CXM8::XM8Fire(float flSpread, float flCycleTime)
 	{
 		return;
 	}
-
-	m_flAccuracy = (float(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 215.0f) + 0.3f;
-
-	if (m_flAccuracy > 1.0f)
-		m_flAccuracy = 1.0f;
 
 	if (m_iClip <= 0)
 	{
@@ -344,7 +349,7 @@ bool CXM8::Reload()
 		m_iClip ? XM8_RELOAD_TIME : XM8_RELOAD_EMPTY_TIME,
 		m_iClip ? 0.7f : 0.7f))
 	{
-		m_flAccuracy = 0.2f;
+		m_flAccuracy = 0.25f;
 		return true;
 	}
 

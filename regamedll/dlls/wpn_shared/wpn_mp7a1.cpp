@@ -27,7 +27,7 @@ void CMP7A1::Precache()
 
 bool CMP7A1::Deploy()
 {
-	m_flAccuracy = 0.2f;
+	m_flAccuracy = 0.3f;
 	m_iShotsFired = 0;
 
 	return DefaultDeploy(MP7A1_VIEW_MODEL, MP7A1_WORLD_MODEL, MP7A1_DRAW, "onehanded");
@@ -71,15 +71,20 @@ void CMP7A1::SecondaryAttack(void)
 #endif
 }
 
+float CMP7A1::GetSpread(void)
+{
+	m_flAccuracy = (float(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 200.0f) + 0.3f;
+
+	if (m_flAccuracy > 1.4f)
+		m_flAccuracy = 1.4f;
+
+	return DefaultSpread(MP7A1_SPREAD_BASELINE * m_flAccuracy, 0.1f, 0.75f, 1.0f, 5.0f);	// no additional spread penalty on walking.
+}
+
 void CMP7A1::MP7A1Fire(float flSpread, float flCycleTime)
 {
 	m_iShotsFired++;
 	m_bDelayRecovery = true;
-
-	m_flAccuracy = (float(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 200.0f) + 0.55f;
-
-	if (m_flAccuracy > 1.4f)
-		m_flAccuracy = 1.4f;
 
 	if (m_iClip <= 0)
 	{
@@ -164,7 +169,7 @@ bool CMP7A1::Reload()
 {
 	if (DefaultReload(m_pItemInfo->m_iMaxClip, MP7A1_RELOAD, MP7A1_RELOAD_TIME))
 	{
-		m_flAccuracy = 0.2f;
+		m_flAccuracy = 0.3f;
 		return true;
 	}
 

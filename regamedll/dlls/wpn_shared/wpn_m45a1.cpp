@@ -149,13 +149,8 @@ void CM45A1::SecondaryAttack()
 	}
 }
 
-void CM45A1::M45A1Fire(float flSpread, float flCycleTime)
+float CM45A1::GetSpread(void)
 {
-	if (++m_iShotsFired > 1)
-	{
-		return;
-	}
-
 	if (m_flLastFire)
 	{
 		m_flAccuracy -= (0.325f - (gpGlobals->time - m_flLastFire)) * 0.275f;
@@ -168,6 +163,16 @@ void CM45A1::M45A1Fire(float flSpread, float flCycleTime)
 		{
 			m_flAccuracy = 0.55f;
 		}
+	}
+
+	return DefaultSpread(M45A1_SPREAD_BASELINE * (1.0f - m_flAccuracy), 0.1f, 0.75f, 2.0f, 5.0f);
+}
+
+void CM45A1::M45A1Fire(float flSpread, float flCycleTime)
+{
+	if (++m_iShotsFired > 1)
+	{
+		return;
 	}
 
 	m_flLastFire = gpGlobals->time;

@@ -27,7 +27,7 @@ void CAK47::Precache()
 
 bool CAK47::Deploy()
 {
-	m_flAccuracy = 0.2f;
+	m_flAccuracy = 0.3f;
 	m_iShotsFired = 0;
 
 	return DefaultDeploy(AK47_VIEW_MODEL, AK47_WORLD_MODEL, AK47_DRAW, "ak47");
@@ -70,15 +70,20 @@ void CAK47::SecondaryAttack()
 #endif
 }
 
+float CAK47::GetSpread(void)
+{
+	m_flAccuracy = (float(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 200.0f) + 0.3f;
+
+	if (m_flAccuracy > 1.25f)
+		m_flAccuracy = 1.25f;
+
+	return DefaultSpread(AK47_SPREAD_BASELINE * m_flAccuracy, 0.1f, 0.75f, 2.0f, 5.0f);
+}
+
 void CAK47::AK47Fire(float flSpread, float flCycleTime)
 {
 	m_iShotsFired++;
 	m_bDelayRecovery = true;
-
-	m_flAccuracy = (float(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 200.0f) + 0.35f;
-
-	if (m_flAccuracy > 1.25f)
-		m_flAccuracy = 1.25f;
 
 	if (m_iClip <= 0)
 	{
@@ -163,7 +168,7 @@ bool CAK47::Reload()
 {
 	if (DefaultReload(m_pItemInfo->m_iMaxClip, AK47_RELOAD, AK47_RELOAD_TIME))
 	{
-		m_flAccuracy = 0.2f;
+		m_flAccuracy = 0.3f;
 		return true;
 	}
 

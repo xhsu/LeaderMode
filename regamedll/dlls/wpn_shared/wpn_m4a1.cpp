@@ -101,7 +101,7 @@ void CM4A1::Think(void)
 
 bool CM4A1::Deploy()
 {
-	m_flAccuracy = 0.2f;
+	m_flAccuracy = 0.25f;
 	m_iShotsFired = 0;
 
 	return DefaultDeploy(M4A1_VIEW_MODEL, M4A1_WORLD_MODEL, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? M4A1_DRAW_FIRST : M4A1_DRAW, "rifle", (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? M4A1_DRAW_FIRST_TIME : M4A1_DRAW_TIME);
@@ -123,15 +123,20 @@ void CM4A1::SecondaryAttack()
 	}
 }
 
+float CM4A1::GetSpread(void)
+{
+	m_flAccuracy = (float(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 220.0f) + 0.25f;
+
+	if (m_flAccuracy > 1.0f)
+		m_flAccuracy = 1.0f;
+
+	return DefaultSpread(M4A1_SPREAD_BASELINE * m_flAccuracy, 0.1f, 0.75f, 2.0f, 5.0f);
+}
+
 void CM4A1::M4A1Fire(float flSpread, float flCycleTime)
 {
 	m_iShotsFired++;
 	m_bDelayRecovery = true;
-
-	m_flAccuracy = (float(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 220.0f) + 0.3f;
-
-	if (m_flAccuracy > 1.0f)
-		m_flAccuracy = 1.0f;
 
 	if (m_iClip <= 0)
 	{
@@ -217,7 +222,7 @@ bool CM4A1::Reload()
 		m_iClip ? M4A1_RELOAD_TIME : M4A1_RELOAD_EMPTY_TIME,
 		m_iClip ? 0.7f : 0.6f))
 	{
-		m_flAccuracy = 0.2f;
+		m_flAccuracy = 0.25f;
 		return true;
 	}
 

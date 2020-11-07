@@ -101,7 +101,7 @@ void CSCARH::Think(void)
 
 bool CSCARH::Deploy()
 {
-	m_flAccuracy = 0.2f;
+	m_flAccuracy = 0.25f;
 	m_iShotsFired = 0;
 	return DefaultDeploy(SCARH_VIEW_MODEL, SCARH_WORLD_MODEL, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? SCARH_DRAW_FIRST : SCARH_DEPLOY, "mp5", (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? SCARH_DRAW_FIRST_TIME : SCARH_DEPLOY_TIME);
 }
@@ -122,15 +122,20 @@ void CSCARH::SecondaryAttack()
 	}
 }
 
+float CSCARH::GetSpread(void)
+{
+	m_flAccuracy = (float(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 220.0f) + 0.25f;
+
+	if (m_flAccuracy > 1.0f)
+		m_flAccuracy = 1.0f;
+
+	return DefaultSpread(SCARH_SPREAD_BASELINE * m_flAccuracy, 0.1f, 0.75f, 2.0f, 5.0f);
+}
+
 void CSCARH::SCARHFire(float flSpread, float flCycleTime)
 {
 	m_iShotsFired++;
 	m_bDelayRecovery = true;
-
-	m_flAccuracy = (float(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 220.0f) + 0.3f;
-
-	if (m_flAccuracy > 1.0f)
-		m_flAccuracy = 1.0f;
 
 	if (m_iClip <= 0)
 	{
@@ -221,7 +226,7 @@ bool CSCARH::Reload()
 		m_iClip ? SCARH_RELOAD_TIME : SCARH_RELOAD_EMPTY_TIME,
 		m_iClip ? 0.69f : 0.54f))
 	{
-		m_flAccuracy = 0.2f;
+		m_flAccuracy = 0.25f;
 		return true;
 	}
 

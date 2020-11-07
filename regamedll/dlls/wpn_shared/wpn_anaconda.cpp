@@ -93,16 +93,8 @@ void CAnaconda::SecondaryAttack()
 #endif
 }
 
-void CAnaconda::AnacondaFire(float flSpread, float flCycleTime)
+float CAnaconda::GetSpread(void)
 {
-	if (++m_iShotsFired > 1)
-	{
-		return;
-	}
-
-	if (m_bInZoom)	// decrease spread while scoping.
-		flSpread *= 0.5f;
-
 	if (m_flLastFire != 0.0f)
 	{
 		m_flAccuracy -= (0.325f - (gpGlobals->time - m_flLastFire)) * 0.3f;
@@ -115,6 +107,16 @@ void CAnaconda::AnacondaFire(float flSpread, float flCycleTime)
 		{
 			m_flAccuracy = 0.6f;
 		}
+	}
+
+	return DefaultSpread(ANACONDA_SPREAD_BASELINE * (1.0f - m_flAccuracy), 0.1f, 0.75f, 2.0f, 5.0f);
+}
+
+void CAnaconda::AnacondaFire(float flSpread, float flCycleTime)
+{
+	if (++m_iShotsFired > 1)
+	{
+		return;
 	}
 
 	m_flLastFire = gpGlobals->time;

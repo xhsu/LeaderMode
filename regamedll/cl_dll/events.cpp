@@ -1016,7 +1016,6 @@ DECLARE_EVENT(FireAK47)
 
 	if (EV_IsLocal(idx))
 	{
-		g_iShotsFired++;
 		EV_MuzzleFlash();
 
 		if (g_pCurWeapon)
@@ -1066,7 +1065,6 @@ DECLARE_EVENT(FireXM8)
 
 	if (EV_IsLocal(idx))
 	{
-		g_iShotsFired++;
 		EV_MuzzleFlash();
 
 		int iAnim = XM8_FIRE;
@@ -1127,7 +1125,6 @@ DECLARE_EVENT(FireAWP)
 
 	if (EV_IsLocal(idx))
 	{
-		g_iShotsFired++;
 		EV_MuzzleFlash();
 
 		if (g_pCurWeapon)
@@ -1171,7 +1168,6 @@ DECLARE_EVENT(FireDEagle)
 
 	if (EV_IsLocal(idx))
 	{
-		g_iShotsFired++;
 		EV_MuzzleFlash();
 
 		if (g_pCurWeapon)
@@ -1225,7 +1221,6 @@ DECLARE_EVENT(FireM45A1)
 
 	if (EV_IsLocal(idx))
 	{
-		g_iShotsFired++;
 		EV_MuzzleFlash();
 
 		if (g_pCurWeapon)
@@ -1302,7 +1297,6 @@ DECLARE_EVENT(Fire57)
 
 	if (EV_IsLocal(idx))
 	{
-		g_iShotsFired++;
 		EV_MuzzleFlash();
 
 		if (g_pCurWeapon)
@@ -1382,7 +1376,6 @@ DECLARE_EVENT(FireSVD)
 
 	if (EV_IsLocal(idx))
 	{
-		g_iShotsFired++;
 		EV_MuzzleFlash();
 
 		if (g_pCurWeapon)
@@ -1441,7 +1434,6 @@ DECLARE_EVENT(Fireglock18)
 
 	if (EV_IsLocal(idx))
 	{
-		g_iShotsFired++;
 		EV_MuzzleFlash();
 
 		int seq = GLOCK18_SHOOT;
@@ -1505,7 +1497,6 @@ DECLARE_EVENT(FireMK46)
 
 	if (EV_IsLocal(idx))
 	{
-		g_iShotsFired++;
 		EV_MuzzleFlash();
 
 		int seq = MK46_SHOOT_UNSCOPE;
@@ -1563,7 +1554,6 @@ DECLARE_EVENT(FireKSG12)
 
 	if (EV_IsLocal(idx))
 	{
-		g_iShotsFired++;
 		EV_MuzzleFlash();
 
 		// shoot anim.
@@ -1601,7 +1591,6 @@ DECLARE_EVENT(FireM4A1)
 
 	if (EV_IsLocal(idx))
 	{
-		g_iShotsFired++;
 		EV_MuzzleFlash();
 
 		if (g_pCurWeapon)
@@ -1666,7 +1655,6 @@ DECLARE_EVENT(FireAnaconda)
 
 	if (EV_IsLocal(idx))
 	{
-		g_iShotsFired++;
 		EV_MuzzleFlash();
 
 		if (empty)
@@ -1722,7 +1710,6 @@ DECLARE_EVENT(FireSCARH)
 
 	if (EV_IsLocal(idx))
 	{
-		g_iShotsFired++;
 		EV_MuzzleFlash();
 
 		int seq = SCARH_SHOOT_LAST;
@@ -1778,7 +1765,6 @@ DECLARE_EVENT(FireMP7A1)
 
 	if (EV_IsLocal(idx))
 	{
-		g_iShotsFired++;
 		EV_MuzzleFlash();
 
 		if (g_pCurWeapon)
@@ -1829,7 +1815,6 @@ DECLARE_EVENT(FireUMP45)
 
 	if (EV_IsLocal(idx))
 	{
-		g_iShotsFired++;
 		EV_MuzzleFlash();
 
 		if (g_pCurWeapon)
@@ -1883,8 +1868,6 @@ DECLARE_EVENT(FireUSP)
 
 	if (EV_IsLocal(idx))
 	{
-		++g_iShotsFired;
-
 		int seq;
 		EV_MuzzleFlash();
 		if (!empty)
@@ -1980,8 +1963,6 @@ DECLARE_EVENT(FireM1014)
 	Vector ShellVelocity, ShellOrigin;
 	if (EV_IsLocal(idx))
 	{
-		g_iShotsFired++;
-
 		if (lefthand == 0)
 			EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 22.0, -9.0, -11.0);
 		else

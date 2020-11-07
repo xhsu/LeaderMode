@@ -1243,7 +1243,7 @@ Vector2D CBaseEntity::FireBullets3(const Vector& vecOrigin, const Vector& vecDir
 
 			flAccumulatedDamageModifier *= flDamageModifier;	// post-multiply.
 
-			SERVER_PRINT(SharedVarArgs("[%s] Original Damage: %d; Distance: %f; AccumulatedModifier: %.2f; Result: %d\n", STRING(tr.pHit->v.classname), iDamage, flTotalDistance, flAccumulatedDamageModifier, iCurrentDamage));
+			//SERVER_PRINT(SharedVarArgs("[%s] Original Damage: %d; Distance: %f; AccumulatedModifier: %.2f; Result: %d\n", STRING(tr.pHit->v.classname), iDamage, flTotalDistance, flAccumulatedDamageModifier, iCurrentDamage));
 		}
 		else
 			iPenetration = 0;

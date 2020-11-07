@@ -27,7 +27,8 @@ void CG18C::Precache()
 
 bool CG18C::Deploy()
 {
-	m_flAccuracy = 0.9f;
+	m_flAccuracy = 0.4f;
+	m_iShotsFired = 0;
 
 	return DefaultDeploy(G18C_VIEW_MODEL, G18C_WORLD_MODEL, GLOCK18_DRAW, "onehanded", GLOCK18_DEPLOY_TIME);
 }
@@ -70,26 +71,23 @@ void CG18C::SecondaryAttack()
 #endif
 }
 
+float CG18C::GetSpread(void)
+{
+	m_flAccuracy = (float(m_iShotsFired * m_iShotsFired) / 220.1f) + 0.4f;
+
+	if (m_flAccuracy > 0.75f)
+		m_flAccuracy = 0.75f;
+
+	// use math model of full-auto smg.
+	return DefaultSpread(GLOCK18_SPREAD_BASELINE * m_flAccuracy, 0.1f, 0.75f, 1.0f, 5.0f);
+}
+
 void CG18C::GLOCK18Fire(float flSpread, float flCycleTime)
 {
 	// LUNA: G18C is allowed to fire in FULL AUTO.
 
-	if (m_flLastFire)
-	{
-		// Mark the time of this shot and determine the accuracy modifier based on the last shot fired...
-		m_flAccuracy -= (0.325f - (gpGlobals->time - m_flLastFire)) * 0.275f;
-
-		if (m_flAccuracy > 0.9f)
-		{
-			m_flAccuracy = 0.9f;
-		}
-		else if (m_flAccuracy < 0.6f)
-		{
-			m_flAccuracy = 0.6f;
-		}
-	}
-
-	m_flLastFire = gpGlobals->time;
+	m_iShotsFired++;
+	m_bDelayRecovery = true;
 
 	if (m_iClip <= 0)
 	{
@@ -182,7 +180,8 @@ bool CG18C::Reload()
 {
 	if (DefaultReload(m_pItemInfo->m_iMaxClip, GLOCK18_RELOAD, GLOCK18_RELOAD_TIME))
 	{
-		m_flAccuracy = 0.9f;
+		m_iShotsFired = 0;
+		m_flAccuracy = 0.4f;
 		return true;
 	}
 
