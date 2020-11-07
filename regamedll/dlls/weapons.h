@@ -1719,7 +1719,7 @@ public:	// new functions
 };
 
 #define UMP45_VIEW_MODEL	"models/weapons/v_ump45.mdl"
-#define UMP45_WORLD_MODEL	"models/w_ump45.mdl"	// FIXME
+#define UMP45_WORLD_MODEL	"models/weapons/w_ump45.mdl"	
 #define UMP45_FIRE_SFX		"weapons/ump45/ump45_fire.wav"
 
 constexpr float UMP45_MAX_SPEED			= 250.0f;
