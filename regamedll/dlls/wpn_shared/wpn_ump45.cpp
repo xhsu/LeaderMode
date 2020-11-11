@@ -23,51 +23,106 @@ void CUMP45::Precache()
 	m_usEvent = PRECACHE_EVENT(1, "events/ump45.sc");
 }
 
+#else
+
+static constexpr int BULLETS = 8;
+static constexpr int SIGHT = 10;
+static constexpr int LASER = 11;
+static constexpr int MUZZLE = 12;
+static constexpr int SELECTOR = 13;
+
+static constexpr int SILENCER = 1;
+static constexpr int HOLOGRAPHIC = 1;
+
+int CUMP45::CalcBodyParam(void)
+{
+	static BodyEnumInfo_t info[] =
+	{
+		{ 0, 1 },	// right hand	= 0;
+		{ 0, 2 },	// left hand	= 1;
+		{ 0, 1 },	// right sleeve	= 2;
+		{ 0, 2 },	// left sleeve	= 3;
+
+		{ 0, 1 },	// weapon		= 4;
+		{ 0, 1 },
+		{ 0, 1 },
+		{ 0, 1 },
+
+		{ 0, 11 },	// bullets		= 8;
+
+		{ 0, 1 },
+
+		{ 0, 2 },	// sight		= 10;
+		{ 0, 2 },	// laser		= 11;
+		{ 0, 2 },	// muzzle		= 12;
+		{ 0, 2 },	// selector		= 13;
+	};
+
+	switch (m_iVariation)
+	{
+	case Role_SWAT:
+	case Role_Medic:
+	case Role_MadScientist:
+		// holographic
+		info[SIGHT].body = HOLOGRAPHIC;
+		info[MUZZLE].body = FALSE;
+		info[LASER].body = FALSE;
+		break;
+
+	case Role_Sharpshooter:
+		// holography, laser
+		info[SIGHT].body = HOLOGRAPHIC;
+		info[MUZZLE].body = FALSE;
+		info[LASER].body = TRUE;
+		break;
+
+	case Role_Assassin:
+		// holography, silencer
+		info[SIGHT].body = HOLOGRAPHIC;
+		info[MUZZLE].body = SILENCER;
+		info[LASER].body = FALSE;
+		break;
+
+	default:
+		info[SIGHT].body = FALSE;
+		info[MUZZLE].body = FALSE;
+		info[LASER].body = FALSE;
+		break;
+	}
+
+	// as the magazine is getting lesser, this number is getting bigger. (later sub-model)
+	info[BULLETS].body = Q_clamp(10 - m_iClip, 0, 10);
+
+	return CalcBody(info, _countof(info));	// elements count of the info[].
+}
+
 #endif
 
 bool CUMP45::Deploy()
 {
 	m_flAccuracy = 0.4f;
 
-	return DefaultDeploy(UMP45_VIEW_MODEL, UMP45_WORLD_MODEL, UMP45_DRAW, "carbine");
+	return DefaultDeploy(UMP45_VIEW_MODEL, UMP45_WORLD_MODEL, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? UMP45_DRAW_FIRST : UMP45_DRAW, "m249", (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? UMP45_DRAW_FIRST_TIME : UMP45_DRAW_TIME);
 }
 
 void CUMP45::SecondaryAttack(void)
 {
-	m_bInZoom = !m_bInZoom;
-	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.3f;
+	switch (m_iVariation)
+	{
+	case Role_SWAT:
+	case Role_Medic:
+	case Role_MadScientist:
+	case Role_Sharpshooter:
+	case Role_Assassin:
+		// holography
+		DefaultSteelSight(Vector(-2.575f, 0, 0.015f), 80);
+		break;
 
-#ifdef CLIENT_DLL
-	// due to some logic problem, we actually cannot use m_bInZoom here.
-	// it would be override.
-
-	if (!g_vecGunOfsGoal.LengthSquared())
-	{
-		g_vecGunOfsGoal = Vector(-13.7f, -10, 3.5f);
-		gHUD::m_iFOV = 85;	// allow clients to predict the zoom.
+	default:
+		// steel sight
+		DefaultSteelSight(Vector(-2.57f, 0, 0.69f), 85);
+		break;
 	}
-	else
-	{
-		g_vecGunOfsGoal = g_vecZero;
-		gHUD::m_iFOV = 90;
-	}
-
-	// this model needs faster.
-	g_flGunOfsMovingSpeed = 10.0f;
-#else
-	// just zoom a liiiiittle bit.
-	// this doesn't suffer from the same bug where the gunofs does, since the FOV was actually sent from SV.
-	if (m_bInZoom)
-	{
-		m_pPlayer->pev->fov = 85;
-		EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, "weapons/steelsight_in.wav", 0.75f, ATTN_STATIC);
-	}
-	else
-	{
-		m_pPlayer->pev->fov = 90;
-		EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, "weapons/steelsight_out.wav", 0.75f, ATTN_STATIC);
-	}
-#endif
 }
 
 float CUMP45::GetSpread(void)
@@ -112,9 +167,9 @@ void CUMP45::UMP45Fire(float flSpread, float flCycleTime)
 	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, UMP45_EFFECTIVE_RANGE, UMP45_PENETRATION, m_iPrimaryAmmoType, UMP45_DAMAGE, UMP45_RANGE_MODIFER, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
-	SendWeaponAnim(UTIL_SharedRandomLong(m_pPlayer->random_seed, UMP45_SHOOT1, UMP45_SHOOT3));
+	SendWeaponAnim(m_bInZoom ? UMP45_SHOOT_AIM : UMP45_SHOOT);
 	PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL, m_pPlayer->edict(), m_usEvent, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y,
-		int(m_pPlayer->pev->punchangle.x * 100), int(m_pPlayer->pev->punchangle.y * 100), FALSE, FALSE);
+		int(m_pPlayer->pev->punchangle.x * 100), int(m_pPlayer->pev->punchangle.y * 100), m_bInZoom, m_iVariation == Role_Assassin);
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 	{
@@ -125,8 +180,8 @@ void CUMP45::UMP45Fire(float flSpread, float flCycleTime)
 	Q_memset(&args, NULL, sizeof(args));
 
 	args.angles = m_pPlayer->pev->v_angle;
-	args.bparam1 = false;	// unused
-	args.bparam2 = false;	// unused
+	args.bparam1 = m_bInZoom;
+	args.bparam2 = m_iVariation == Role_Assassin;
 	args.ducking = gEngfuncs.pEventAPI->EV_LocalPlayerDucking();
 	args.entindex = gEngfuncs.GetLocalPlayer()->index;
 	args.flags = FEV_NOTHOST | FEV_RELIABLE | FEV_CLIENT | FEV_GLOBAL;
@@ -140,7 +195,7 @@ void CUMP45::UMP45Fire(float flSpread, float flCycleTime)
 	EV_FireUMP45(&args);
 #endif
 
-	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
+	m_pPlayer->m_iWeaponVolume = UMP45_GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = DIM_GUN_FLASH;
 
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
@@ -166,19 +221,26 @@ void CUMP45::UMP45Fire(float flSpread, float flCycleTime)
 
 bool CUMP45::Reload()
 {
-	if (DefaultReload(m_pItemInfo->m_iMaxClip, UMP45_RELOAD, UMP45_RELOAD_TIME))
+	if (DefaultReload(m_pItemInfo->m_iMaxClip,
+		m_iClip ? UMP45_RELOAD : UMP45_RELOAD_EMPTY,
+		m_iClip ? UMP45_RELOAD_TIME : UMP45_RELOAD_EMPTY_TIME,
+		m_iClip ? 0.7667f : 0.4667f))
 	{
 		m_flAccuracy = 0.4f;
 		return true;
 	}
 
-	return false;
-}
+	// KF2 ???
+	if (m_pPlayer->pev->weaponanim != UMP45_CHECKMAG)
+	{
+		if (m_bInZoom)
+			SecondaryAttack();
 
-void CUMP45::WeaponIdle()
-{
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
-	SendWeaponAnim(UMP45_IDLE1);
+		SendWeaponAnim(UMP45_CHECKMAG);
+		m_flTimeWeaponIdle = UMP45_CHECKMAG_TIME;
+	}
+
+	return false;
 }
 
 DECLARE_STANDARD_RESET_MODEL_FUNC(UMP45)

@@ -356,7 +356,7 @@ bool CXM8::Reload()
 	// KF2 ???
 	if (m_pPlayer->pev->weaponanim != XM8_CHECK_MAGAZINE)
 	{
-		if (m_bInReload)
+		if (m_bInZoom)
 			SecondaryAttack();
 
 		SendWeaponAnim(XM8_CHECK_MAGAZINE);

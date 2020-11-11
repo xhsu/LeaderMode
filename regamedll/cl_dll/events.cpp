@@ -1818,7 +1818,7 @@ DECLARE_EVENT(FireUMP45)
 		EV_MuzzleFlash();
 
 		if (g_pCurWeapon)
-			g_pCurWeapon->SendWeaponAnim(UTIL_SharedRandomLong(gPseudoPlayer.random_seed, UMP45_SHOOT1, UMP45_SHOOT3));
+			g_pCurWeapon->SendWeaponAnim(args->bparam1 ? UMP45_SHOOT_AIM : UMP45_SHOOT);
 
 		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 3, 0.25, 10, 10, 10, EV_PISTOL_SMOKE, velocity, false, 35);
 	}
@@ -1839,10 +1839,14 @@ DECLARE_EVENT(FireUMP45)
 
 	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iPShell, TE_BOUNCE_SHELL, idx, 13);
 
-	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, UMP45_FIRE_SFX, 1.0, 0.64, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
-
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
+
+	// original API: vol = 1.0, attn = 0.64, pitch = 94~110
+	EV_PlayGunFire(idx,
+		args->bparam2 ? UMP45_FIRE_SIL_SFX : UMP45_FIRE_SFX,
+		args->bparam2 ? QUIET_GUN_VOLUME : UMP45_GUN_VOLUME,
+		vecSrc + forward * 10.0f, RANDOM_LONG(87, 105));
 
 	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, UMP45_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_UMP45].m_iAmmoType, UMP45_PENETRATION);
 }

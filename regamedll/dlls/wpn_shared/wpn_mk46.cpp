@@ -113,7 +113,7 @@ int CMK46::CalcBodyParam(void)
 		break;
 	}
 
-	// as the magazine is getting lesser, this number is getting bigger. (later model)
+	// as the magazine is getting lesser, this number is getting bigger. (later sub-model)
 	info[BULLETS].body = Q_clamp(16 - m_iClip, 0, 15);
 
 	// in EMPTY reload, after we remove the empty mag, the new mag should be full of bullets.
@@ -294,7 +294,7 @@ bool CMK46::Reload()
 	// KF2 ???
 	if (m_pPlayer->pev->weaponanim != MK46_INSPECTION)
 	{
-		if (m_bInReload)
+		if (m_bInZoom)
 			SecondaryAttack();
 
 		SendWeaponAnim(MK46_INSPECTION);

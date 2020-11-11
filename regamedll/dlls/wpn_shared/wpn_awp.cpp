@@ -278,7 +278,7 @@ bool CAWP::Reload()
 	// KF2 ???
 	if (m_pPlayer->pev->weaponanim != AWP_CHECK_MAGAZINE)
 	{
-		if (m_bInReload)
+		if (m_pPlayer->pev->fov < DEFAULT_FOV)
 			SecondaryAttack();
 
 		SendWeaponAnim(AWP_CHECK_MAGAZINE);

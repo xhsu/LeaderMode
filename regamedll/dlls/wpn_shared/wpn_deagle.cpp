@@ -236,7 +236,7 @@ bool CDEagle::Reload()
 	// KF2 ???
 	if (m_pPlayer->pev->weaponanim != DEAGLE_CHECK_MAGAZINE)
 	{
-		if (m_bInReload)
+		if (m_bInZoom)
 			SecondaryAttack();
 
 		SendWeaponAnim(DEAGLE_CHECK_MAGAZINE);

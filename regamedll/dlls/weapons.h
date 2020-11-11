@@ -1721,24 +1721,49 @@ public:	// new functions
 #define UMP45_VIEW_MODEL	"models/weapons/v_ump45.mdl"
 #define UMP45_WORLD_MODEL	"models/weapons/w_ump45.mdl"	
 #define UMP45_FIRE_SFX		"weapons/ump45/ump45_fire.wav"
+#define UMP45_FIRE_SIL_SFX	"weapons/ump45/ump45_fire.wav"	// FIXME
 
 constexpr float UMP45_MAX_SPEED			= 250.0f;
 constexpr float UMP45_DAMAGE			= 32;
 constexpr float UMP45_RANGE_MODIFER		= 1.149658245;	// 80% damage @800 inches.
-constexpr float UMP45_RELOAD_TIME		= 3.2f;
+constexpr float UMP45_RELOAD_TIME		= 2.8667F;
+constexpr float UMP45_RELOAD_EMPTY_TIME	= 3.0667F;
+constexpr float UMP45_DRAW_TIME			= 0.6333F;
+constexpr float UMP45_DRAW_FIRST_TIME	= 1.2F;
+constexpr float UMP45_HOLSTER_TIME		= 0.6333F;
+constexpr float UMP45_CHECKMAG_TIME		= 3.6F;
+constexpr float UMP45_BLOCK_UP_TIME		= 0.3667F;
+constexpr float UMP45_BLOCK_DOWN_TIME	= 0.3667F;
+constexpr float UMP45_LHAND_DOWN_TIME	= 0.7F;
+constexpr float UMP45_LHAND_UP_TIME		= 0.7F;
+constexpr float UMP45_DASH_ENTER_TIME	= 0.3667F;
+constexpr float UMP45_DASH_EXIT_TIME	= 0.3667F;
 constexpr float UMP45_RPM				= 600.0f;
 constexpr float	UMP45_EFFECTIVE_RANGE	= 8192.0f;
 constexpr int	UMP45_PENETRATION		= 1;
 constexpr float UMP45_SPREAD_BASELINE	= 0.15f;
+constexpr int	UMP45_GUN_VOLUME		= NORMAL_GUN_VOLUME;
 
 enum ump45_e
 {
 	UMP45_IDLE1,
+	UMP45_SHOOT,
+	UMP45_SHOOT_AIM,
 	UMP45_RELOAD,
+	UMP45_RELOAD_EMPTY,
 	UMP45_DRAW,
-	UMP45_SHOOT1,
-	UMP45_SHOOT2,
-	UMP45_SHOOT3,
+	UMP45_DRAW_FIRST,
+	UMP45_HOLSTER,
+	UMP45_CHECKMAG,
+	UMP45_TO_SEMI,
+	UMP45_TO_AUTO,
+	UMP45_BLOCK_UP,
+	UMP45_BLOCK_DOWN,
+	UMP45_LHAND_DOWN,
+	UMP45_LHAND_UP,
+	UMP45_DASH_ENTER,
+	UMP45_DASHING,
+	UMP45_DASH_EXIT
 };
 
 class CUMP45 : public CBaseWeapon
@@ -1750,18 +1775,27 @@ public:	// SV exclusive variables.
 
 public:	// SV exclusive functions.
 	virtual void	Precache		(void);
+#else
+public:	// CL exclusive functions.
+	virtual	bool	UsingInvertedVMDL(void) { return false; }	// Model designed by InnocentBlue is not inverted.
+	virtual int		CalcBodyParam	(void);
 #endif
 
 public:	// basic logic funcs
 	virtual bool	Deploy			(void);
-	virtual void	PrimaryAttack	(void) { return UMP45Fire(GetSpread()); }
+	virtual void	PrimaryAttack	(void)	{ return UMP45Fire(GetSpread()); }
 	virtual void	SecondaryAttack	(void);
 	virtual	bool	Reload			(void);
-	virtual void	WeaponIdle		(void);
+	virtual void	WeaponIdle		(void)	{ return DefaultIdle(UMP45_DASHING); }
+	virtual bool	HolsterStart	(void)	{ return DefaultHolster(UMP45_HOLSTER, UMP45_HOLSTER_TIME); }
+	virtual	void	DashStart		(void)	{ return DefaultDashStart(UMP45_DASH_ENTER, UMP45_DASH_ENTER_TIME); }
+	virtual void	DashEnd			(void)	{ return DefaultDashEnd(UMP45_DASH_ENTER, UMP45_DASH_ENTER_TIME, UMP45_DASH_EXIT, UMP45_DASH_EXIT_TIME); }
 
 public:	// util funcs
-	virtual	float	GetMaxSpeed		(void) { return UMP45_MAX_SPEED; }
+	virtual	float	GetMaxSpeed		(void)	{ return UMP45_MAX_SPEED; }
 	virtual void	ResetModel		(void);
+	virtual bool	SetLeftHand		(bool bAppear)	{ return DefaultSetLHand(bAppear, UMP45_LHAND_UP, UMP45_LHAND_UP_TIME, UMP45_LHAND_DOWN, UMP45_LHAND_DOWN_TIME); }
+	virtual void	PlayBlockAnim	(void)	{ return DefaultBlock(UMP45_BLOCK_UP, UMP45_BLOCK_UP_TIME, UMP45_BLOCK_DOWN, UMP45_BLOCK_DOWN_TIME); }
 	virtual float	GetSpread		(void);
 
 public:	// new functions

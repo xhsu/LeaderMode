@@ -229,7 +229,7 @@ bool CM4A1::Reload()
 	// KF2 ???
 	if (m_pPlayer->pev->weaponanim != M4A1_CHECK_MAGAZINE)
 	{
-		if (m_bInReload)
+		if (m_bInZoom)
 			SecondaryAttack();
 
 		SendWeaponAnim(M4A1_CHECK_MAGAZINE);

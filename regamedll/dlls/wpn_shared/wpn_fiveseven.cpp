@@ -286,7 +286,7 @@ bool CFN57::Reload()
 	// KF2 ???
 	if (m_pPlayer->pev->weaponanim != FIVESEVEN_CHECK_MAGAZINE)
 	{
-		if (m_bInReload)
+		if (m_bInZoom)
 			SecondaryAttack();
 
 		SendWeaponAnim(FIVESEVEN_CHECK_MAGAZINE);
