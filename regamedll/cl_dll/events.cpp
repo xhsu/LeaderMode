@@ -2028,13 +2028,24 @@ DECLARE_EVENT(CreateExplo)
 	}
 }
 
-DECLARE_EVENT(CreateSmoke)
+DECLARE_EVENT(CreateSmoke)	// smokeRadius = 115.0f. From bot_manager.cpp
 {
 	TEMPENTITY* pTemp;
 
 	if (!args->bparam2) // first explosion
 	{
 		const model_t* pGasModel = gEngfuncs.GetSpritePointer(gEngfuncs.pfnSPR_Load("sprites/gas_puff_01.spr"));
+
+		// regional fog VFX.
+		RegionalFog RFog;
+		RFog.m_Color = Vector(75, 75, 75);
+		RFog.m_flDecayMultiplier = 1;	// start from 1.0f
+		RFog.m_flDensity = 0.0015f;
+		RFog.m_flRadius = 230;
+		RFog.m_flTimeRemoval = g_flClientTime + 30;
+		RFog.m_flTimeStartDecay = g_flClientTime + 15;
+		RFog.m_vecOrigin = args->origin;
+		g_lstRegionalFog.push_back(RFog);
 
 		for (int i = 0; i < 20; i++)	// SMOKE_CLOUDS == 20
 		{

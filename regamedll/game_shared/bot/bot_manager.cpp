@@ -86,7 +86,7 @@ const char *GameEventName[NUM_GAME_EVENTS + 1] =
 // STL uses exceptions, but we are not compiling with them - ignore warning
 #pragma warning(disable : 4530)
 
-const float smokeRadius = 115.0f;		// for smoke grenades
+constexpr float smokeRadius = 115.0f;		// for smoke grenades
 
 // Convert name to GameEventType
 // TODO: Find more appropriate place for this function

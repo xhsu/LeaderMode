@@ -958,17 +958,53 @@ MSG_FUNC(Brass)
 
 MSG_FUNC(Fog)
 {
+	g_FogParameters.density = 0;
+	g_FogParameters.affectsSkyBox = false;
+	g_FogParameters.color = g_vecZero;
+
 	BEGIN_READ(pbuf, iSize);
 
-	color24 color;
-	color.r = READ_BYTE();
-	color.g = READ_BYTE();
-	color.b = READ_BYTE();
+	g_FogParameters.color.r = READ_BYTE();
+	g_FogParameters.color.g = READ_BYTE();
+	g_FogParameters.color.b = READ_BYTE();
 
-	int a = READ_BYTE();
-	int b = READ_BYTE();
-	int c = READ_BYTE();
-	int d = READ_BYTE();
+	int a, b, c, d;
+	a = READ_BYTE();
+	b = READ_BYTE();
+	c = READ_BYTE();
+	d = READ_BYTE();
+
+	union
+	{
+		unsigned char a, b, c, d;
+		float v;
+	}
+	dat;
+
+	dat.a = a;
+	dat.b = b;
+	dat.c = c;
+	dat.d = d;
+
+	g_FogParameters.density = dat.v;
+
+	if (iSize > 7 || !READ_OK())
+		g_FogParameters.affectsSkyBox = READ_BYTE();
+
+	if (cl_fog_skybox)
+		gEngfuncs.Cvar_SetValue(cl_fog_skybox->name, g_FogParameters.affectsSkyBox);
+
+	if (cl_fog_density)
+		gEngfuncs.Cvar_SetValue(cl_fog_density->name, g_FogParameters.density);
+
+	if (cl_fog_r)
+		gEngfuncs.Cvar_SetValue(cl_fog_r->name, g_FogParameters.color[0]);
+
+	if (cl_fog_g)
+		gEngfuncs.Cvar_SetValue(cl_fog_g->name, g_FogParameters.color[1]);
+
+	if (cl_fog_b)
+		gEngfuncs.Cvar_SetValue(cl_fog_b->name, g_FogParameters.color[2]);
 
 	return TRUE;
 }

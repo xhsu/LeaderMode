@@ -77,6 +77,7 @@ void CL_DLLEXPORT HUD_Frame(double flDeltaTime)
 	g_flClientTime += flDeltaTime;
 
 	Sound_Think(flDeltaTime);
+	RegionalFogThink();
 }
 
 BOOL CL_DLLEXPORT HUD_GetHullBounds(int hullnumber, float* mins, float* maxs)

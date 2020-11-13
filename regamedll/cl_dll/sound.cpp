@@ -30,19 +30,19 @@ static std::unordered_map<std::string, FMOD::Sound*> g_mapSoundPrecache;
 
 namespace gFMODChannelManager
 {
-	struct
+	struct channel_info_s
 	{
 		FMOD::Channel* m_pChannel;
 		double m_flNextAvailable;
-
-	} m_Channels[FMOD_MAX_CHANNEL_GOLDSRC];
+	};
+	std::array<channel_info_s, FMOD_MAX_CHANNEL_GOLDSRC> m_Channels;
 
 	FMOD::Channel** Allocate(float flCooldown = 3.5f)
 	{
-		short iMin = 0;
+		size_t iMin = 0;
 		double flMinTime = 99999999.0;
 
-		for (short i = 0; i < FMOD_MAX_CHANNEL_GOLDSRC; i++)
+		for (size_t i = 0; i < FMOD_MAX_CHANNEL_GOLDSRC; i++)
 		{
 			if (m_Channels[i].m_flNextAvailable < g_flClientTime)
 			{
@@ -67,6 +67,52 @@ namespace gFMODChannelManager
 		// just occuiped a furthest unused channel.
 		m_Channels[iMin].m_flNextAvailable = g_flClientTime + flCooldown;
 		return &m_Channels[iMin].m_pChannel;
+	}
+
+	FMOD::Channel** PermanentAllocate(size_t* piIndex)
+	{
+		size_t iMin = 0, i = 0;
+		double flMinTime = 99999999.0;
+
+		for (i = 0; i < FMOD_MAX_CHANNEL_GOLDSRC; i++)
+		{
+			if (m_Channels[i].m_flNextAvailable < g_flClientTime)
+			{
+				iMin = i;
+				break;
+			}
+
+			// record the time on the way.
+			if (m_Channels[i].m_flNextAvailable < flMinTime)
+			{
+				iMin = i;
+				flMinTime = m_Channels[i].m_flNextAvailable;
+			}
+
+			if (m_Channels[i].m_flNextAvailable > g_flClientTime)
+				continue;
+
+			m_Channels[i].m_flNextAvailable = g_flClientTime + 99999.0;
+
+			if (piIndex)
+				*piIndex = i;
+
+			return &m_Channels[i].m_pChannel;
+		}
+
+		// just occuiped a furthest unused channel.
+		m_Channels[iMin].m_flNextAvailable = g_flClientTime + 99999.0;
+
+		if (piIndex)
+			*piIndex = iMin;
+
+		return &m_Channels[iMin].m_pChannel;
+	}
+
+	void Free(size_t index)
+	{
+		m_Channels[index].m_flNextAvailable = g_flClientTime;
+		m_Channels[index].m_pChannel->stop();
 	}
 }
 

@@ -11,12 +11,27 @@ Modern Warfare Dev Team
 
 struct FogParameters
 {
-	float color[3];
+	Vector color;
 	float density;
 	bool affectsSkyBox;
 };
 
 extern FogParameters g_FogParameters;
+
+struct RegionalFog
+{
+	Vector m_vecOrigin;
+	Vector m_Color;
+	float m_flRadius;
+	float m_flDensity;
+	double m_flTimeRemoval;
+	double m_flTimeStartDecay;
+	float m_flDecayMultiplier;
+};
+
+extern std::list<RegionalFog> g_lstRegionalFog;
+
+void RegionalFogThink(void);	// update regional fog, e.g. removal.
 
 namespace DrawUtils
 {

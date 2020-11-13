@@ -10,40 +10,65 @@ Modern Warfare Dev Team
 #include "precompiled.h"
 
 FogParameters g_FogParameters;
+std::list<RegionalFog> g_lstRegionalFog;
+
+void RegionalFogThink(void)
+{
+	auto iter = g_lstRegionalFog.begin();
+	while (iter != g_lstRegionalFog.end())
+	{
+		if (iter->m_flTimeRemoval < g_flClientTime)
+		{
+			iter = g_lstRegionalFog.erase(iter);
+		}
+		else
+		{
+			// decay
+			if (iter->m_flTimeStartDecay < g_flClientTime)
+			{
+				iter->m_flDecayMultiplier = Q_abs(iter->m_flTimeRemoval - g_flClientTime) / Q_abs(iter->m_flTimeRemoval - iter->m_flTimeStartDecay);
+			}
+
+			// move on
+			iter++;
+		}
+	}
+}
 
 void RenderFog(void)
 {
-	FogParameters fog;
-	int bOn;
+	float flDensity = g_FogParameters.density;
+	auto pPlayer = gEngfuncs.GetLocalPlayer();
+	float flDistance = 0, flFraction = 0;
+	Vector rgbColor = g_FogParameters.color;
+	short iColorCount = g_FogParameters.density > 0 ? 1 : 0;	// if this map has no fog at first, don't event start counting from 1.
 
-	fog.color[0] = g_FogParameters.color[0];
-	fog.color[1] = g_FogParameters.color[1];
-	fog.color[2] = g_FogParameters.color[2];
-	fog.density = g_FogParameters.density;
-	fog.affectsSkyBox = g_FogParameters.affectsSkyBox;
+	for (const auto& elem : g_lstRegionalFog)
+	{
+		flDistance = (pPlayer->origin - elem.m_vecOrigin).Length();
+		if (flDistance > elem.m_flRadius)
+			continue;
 
-	if (cl_fog_skybox)
-		fog.affectsSkyBox = cl_fog_skybox->value;
+		flFraction = Q_clamp(1.0f - flDistance / elem.m_flRadius, 0.0f, 1.0f);
 
-	if (cl_fog_density)
-		fog.density = cl_fog_density->value;
+		// accumulate the fog density.
+		flDensity += flFraction * elem.m_flDensity * elem.m_flDecayMultiplier;
 
-	if (cl_fog_r)
-		fog.color[0] = cl_fog_r->value;
+		// "accumulate the color.
+		rgbColor += elem.m_Color;
+		iColorCount++;
+	}
 
-	if (cl_fog_g)
-		fog.color[1] = cl_fog_g->value;
+	// prevents divide by 0.
+	if (iColorCount <= 0)
+		iColorCount = 1;
 
-	if (cl_fog_b)
-		fog.color[2] = cl_fog_b->value;
+	// take the average of the color sum.
+	rgbColor /= float(iColorCount);
 
-	if (g_iWaterLevel <= 1)
-		bOn = fog.density > 0.0;
-	else
-		bOn = false;
-
-	gEngfuncs.pTriAPI->FogParams(fog.density, fog.affectsSkyBox);
-	gEngfuncs.pTriAPI->Fog(fog.color, 100, 2000, bOn);
+	// render.
+	gEngfuncs.pTriAPI->FogParams(flDensity, true);
+	gEngfuncs.pTriAPI->Fog(rgbColor, 100, 2000, flDensity > 0);
 }
 
 void HUD_DrawNormalTriangles2(void)
