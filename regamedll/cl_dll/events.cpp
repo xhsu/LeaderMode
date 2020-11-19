@@ -1991,6 +1991,17 @@ DECLARE_EVENT(FireM1014)
 
 DECLARE_EVENT(CreateExplo)
 {
+	// regional fog VFX.
+	RegionalFog RFog;
+	RFog.m_Color = Vector(75, 75, 75);
+	RFog.m_flDecayMultiplier = 1;	// start from 1.0f
+	RFog.m_flDensity = 0.001f;
+	RFog.m_flRadius = 230;
+	RFog.m_flTimeRemoval = g_flClientTime + 5;	// keep the time of removal sync with the sprite death.
+	RFog.m_flTimeStartDecay = g_flClientTime;
+	RFog.m_vecOrigin = args->origin;
+	g_lstRegionalFog.push_back(RFog);
+
 	// goal: some somke around the explosion centre...
 
 	const model_t* pGasModel = gEngfuncs.GetSpritePointer(gEngfuncs.pfnSPR_Load("sprites/gas_puff_01.spr"));
@@ -2038,9 +2049,9 @@ DECLARE_EVENT(CreateSmoke)	// smokeRadius = 115.0f. From bot_manager.cpp
 
 		// regional fog VFX.
 		RegionalFog RFog;
-		RFog.m_Color = Vector(75, 75, 75);
+		RFog.m_Color = Vector(175, 175, 175);
 		RFog.m_flDecayMultiplier = 1;	// start from 1.0f
-		RFog.m_flDensity = 0.0015f;
+		RFog.m_flDensity = 0.001f;
 		RFog.m_flRadius = 230;
 		RFog.m_flTimeRemoval = g_flClientTime + 30;
 		RFog.m_flTimeStartDecay = g_flClientTime + 15;
