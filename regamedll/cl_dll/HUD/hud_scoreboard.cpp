@@ -200,7 +200,7 @@ int CHudScoreboard::Draw(float flTime)
 		// 1. Classes
 		// since we are no longer showing HP, use a bit its spaces.
 		x2 = x + m_flChunkOffset * 1.5f;
-		if (g_PlayerExtraInfo[i].m_iTeam == g_iTeamNumber || g_iTeamNumber == TEAM_SPECTATOR)
+		if (g_PlayerExtraInfo[i].m_iTeam == g_iTeam || g_iTeam == TEAM_SPECTATOR)
 		{
 			gFontFuncs.DrawSetTextPos(x2, y);
 			gFontFuncs.DrawPrintText(m_rgpwcRoleNames[g_PlayerExtraInfo[i].m_iRoleType]);
@@ -209,7 +209,7 @@ int CHudScoreboard::Draw(float flTime)
 		// 2. HP
 		// (placeholder)
 		x2 += m_flChunkOffset * 0.5f;
-		/*if (g_PlayerExtraInfo[i].m_iTeam == g_iTeamNumber || g_iTeamNumber == TEAM_SPECTATOR)
+		/*if (g_PlayerExtraInfo[i].m_iTeam == g_iTeam || g_iTeam == TEAM_SPECTATOR)
 		{
 			_snwprintf(wszText, wcharsmax(wszText), L"%d", g_PlayerExtraInfo[i].m_iHealth);
 			gFontFuncs.DrawSetTextPos(x2, y);
@@ -218,7 +218,7 @@ int CHudScoreboard::Draw(float flTime)
 
 		// 3. Money
 		x2 += m_flChunkOffset;
-		if (g_PlayerExtraInfo[i].m_iTeam == g_iTeamNumber || g_iTeamNumber == TEAM_SPECTATOR)
+		if (g_PlayerExtraInfo[i].m_iTeam == g_iTeam || g_iTeam == TEAM_SPECTATOR)
 		{
 			_snwprintf(wszText, wcharsmax(wszText), L"%d", g_PlayerExtraInfo[i].m_iAccount);
 			gFontFuncs.DrawSetTextPos(x2, y);
@@ -308,7 +308,7 @@ int CHudScoreboard::Draw(float flTime)
 		// 1. Classes
 		// since we are no longer showing HP, use a bit its spaces.
 		x2 = x + m_flChunkOffset * 1.5f;
-		if (g_PlayerExtraInfo[i].m_iTeam == g_iTeamNumber || g_iTeamNumber == TEAM_SPECTATOR)
+		if (g_PlayerExtraInfo[i].m_iTeam == g_iTeam || g_iTeam == TEAM_SPECTATOR)
 		{
 			gFontFuncs.DrawSetTextPos(x2, y);
 			gFontFuncs.DrawPrintText(m_rgpwcRoleNames[g_PlayerExtraInfo[i].m_iRoleType]);
@@ -317,7 +317,7 @@ int CHudScoreboard::Draw(float flTime)
 		// 2. HP
 		// (placeholder)
 		x2 += m_flChunkOffset * 0.5f;
-		/*if (g_PlayerExtraInfo[i].m_iTeam == g_iTeamNumber || g_iTeamNumber == TEAM_SPECTATOR)
+		/*if (g_PlayerExtraInfo[i].m_iTeam == g_iTeam || g_iTeam == TEAM_SPECTATOR)
 		{
 			_snwprintf(wszText, wcharsmax(wszText), L"%d", g_PlayerExtraInfo[i].m_iHealth);
 			gFontFuncs.DrawSetTextPos(x2, y);
@@ -326,7 +326,7 @@ int CHudScoreboard::Draw(float flTime)
 
 		// 3. Money
 		x2 += m_flChunkOffset;
-		if (g_PlayerExtraInfo[i].m_iTeam == g_iTeamNumber || g_iTeamNumber == TEAM_SPECTATOR)
+		if (g_PlayerExtraInfo[i].m_iTeam == g_iTeam || g_iTeam == TEAM_SPECTATOR)
 		{
 			_snwprintf(wszText, wcharsmax(wszText), L"%d", g_PlayerExtraInfo[i].m_iAccount);
 			gFontFuncs.DrawSetTextPos(x2, y);

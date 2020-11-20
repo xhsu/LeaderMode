@@ -91,7 +91,7 @@ void CHudSpectator::CheckSettings(void)
 		}
 	}
 
-	if (((g_iTeamNumber == TEAM_TERRORIST) || (g_iTeamNumber == TEAM_CT)) && (g_iUser1 == OBS_IN_EYE))
+	if (((g_iTeam == TEAM_TERRORIST) || (g_iTeam == TEAM_CT)) && (g_iUser1 == OBS_IN_EYE))
 	{
 		if (m_pip->value != INSET_OFF)
 		{
@@ -1078,7 +1078,7 @@ bool CHudSpectator::DirectorMessage(int iSize, void* pbuf)
 	case DRC_CMD_START:
 	{
 		g_iPlayerClass = 0;
-		g_iTeamNumber = 0;
+		g_iTeam = 0;
 
 		MsgFunc_InitHUD(NULL, 0, NULL);
 		MsgFunc_ResetHUD(NULL, 0, NULL);

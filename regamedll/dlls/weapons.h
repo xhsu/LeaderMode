@@ -197,7 +197,14 @@ public:
 		float	m_flFrame;
 #endif
 	}
-	m_Stack;
+	m_Stack
+	{ 0, 0.0f, 0.0f, 0,
+		0.0f, 0.0f, 0.0f
+#ifndef CLIENT_DLL
+	};
+#else
+		, 0.0f, 0.0f, 0.0f };
+#endif
 
 #ifndef CLIENT_DLL
 public:	// SV exclusive variables.

@@ -274,7 +274,7 @@ MSG_FUNC(TeamInfo)
 	g_PlayerExtraInfo[iPlayerId].m_iTeam = iTeam;
 
 	if (iPlayerId == gHUD::m_iPlayerNum)
-		g_iTeamNumber = iTeam;
+		g_iTeam = iTeam;
 
 	return TRUE;
 }
@@ -888,7 +888,7 @@ MSG_FUNC(Location)
 
 	int iPlayerId = READ_BYTE();
 	
-	Q_strlcpy(g_PlayerExtraInfo[iPlayerId].location, READ_STRING());
+	Q_strlcpy(g_PlayerExtraInfo[iPlayerId].m_szLocationText, READ_STRING());
 
 	return TRUE;
 }

@@ -206,7 +206,7 @@ namespace gViewModelHandsTexture
 		{
 			if (!Q_strcmp(pTexture->name, "v_hands.bmp"))
 			{
-				pTexture->index = ((g_iTeamNumber == TEAM_CT) ? m_iCTHandTexture : m_iTRHandTexture);
+				pTexture->index = ((g_iTeam == TEAM_CT) ? m_iCTHandTexture : m_iTRHandTexture);
 				break;
 			}
 
@@ -230,7 +230,7 @@ namespace gViewModelHandsTexture
 		{
 			if (!Q_strcmp(pTexture->name, "v_hands.bmp"))
 			{
-				pTexture->index = ((g_iTeamNumber == TEAM_CT) ? m_iCTHandTexture : m_iTRHandTexture);
+				pTexture->index = ((g_iTeam == TEAM_CT) ? m_iCTHandTexture : m_iTRHandTexture);
 				break;
 			}
 

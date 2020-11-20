@@ -45,12 +45,13 @@ public:
 	inline void DrawRadarDot(const Vector& vec, int iBaseDotSize, int flags, const PackedColorVec& colour) { DrawRadarDot(vec.x, vec.y, vec.z, iBaseDotSize, flags, colour.r, colour.g, colour.b, colour.a); }
 
 public:
-	bool m_bTrackArray[MAX_POINTS + 1];
-	int m_iPlayerLastPointedAt;
+	std::array<bool, MAX_POINTS + 1> m_bTrackArray;
+	unsigned int m_iPlayerLastPointedAt;
 	bool m_bDrawRadar;
 	int m_HUD_radar;
 	int m_HUD_radaropaque;
 	std::array<radar_point_s, MAX_POINTS> m_rgCustomPoints;
+	std::array<GLuint, ROLE_COUNT> m_rgiRadarIcons;
 
 private:
 	wrect_t* m_hrad;

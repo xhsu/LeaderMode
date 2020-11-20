@@ -126,11 +126,15 @@ public:
 	{
 		free(ptr);
 	}
-	CBaseHudElement() {}
+	CBaseHudElement() noexcept {}
+	CBaseHudElement(const CBaseHudElement& s) = default;
+	CBaseHudElement(CBaseHudElement&& s) = default;
+	CBaseHudElement& operator=(const CBaseHudElement& s) = default;
+	CBaseHudElement& operator=(CBaseHudElement&& s) = default;
 	virtual ~CBaseHudElement() {}
 
 public:
-	int	  m_bitsFlags; // active, moving,
+	int	  m_bitsFlags{ 0 };// active, moving,
 
 public:
 	virtual int Init(void) { return 0; }

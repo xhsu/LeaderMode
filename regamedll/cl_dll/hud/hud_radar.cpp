@@ -14,7 +14,7 @@ void TrackPlayer(void)
 
 void ClearPlayers(void)
 {
-	Q_memset(gHUD::m_Radar.m_bTrackArray, 0, sizeof(gHUD::m_Radar.m_bTrackArray));
+	gHUD::m_Radar.m_bTrackArray.fill(false);
 }
 
 void DrawRadar(void)
@@ -34,10 +34,24 @@ int CHudRadar::Init(void)
 	gEngfuncs.pfnAddCommand("drawradar", ::DrawRadar);
 	gEngfuncs.pfnAddCommand("hideradar", HideRadar);
 
-	Q_memset(m_bTrackArray, 0, sizeof(m_bTrackArray));
+	m_bTrackArray.fill(false);
 
 	m_iPlayerLastPointedAt = 0;
 	m_bDrawRadar = true;
+
+	// CT
+	m_rgiRadarIcons[Role_Breacher]		= LoadDDS("texture/HUD/ClassesIcon/CT/Breacher_Radar.dds");
+	m_rgiRadarIcons[Role_Commander]		= LoadDDS("texture/HUD/ClassesIcon/CT/Commander_Radar.dds");
+	m_rgiRadarIcons[Role_Medic]			= LoadDDS("texture/HUD/ClassesIcon/CT/Medic_Radar.dds");
+	m_rgiRadarIcons[Role_Sharpshooter]	= LoadDDS("texture/HUD/ClassesIcon/CT/Sharpshooter_Radar.dds");
+	m_rgiRadarIcons[Role_SWAT]			= LoadDDS("texture/HUD/ClassesIcon/CT/SWAT_Radar.dds");
+
+	// T
+	m_rgiRadarIcons[Role_Arsonist]		= LoadDDS("texture/HUD/ClassesIcon/T/Arsonist_Radar.dds");
+	m_rgiRadarIcons[Role_Assassin]		= LoadDDS("texture/HUD/ClassesIcon/T/Assassin_Radar.dds");
+	m_rgiRadarIcons[Role_Godfather]		= LoadDDS("texture/HUD/ClassesIcon/T/Godfather_Radar.dds");
+	m_rgiRadarIcons[Role_LeadEnforcer]	= LoadDDS("texture/HUD/ClassesIcon/T/LeadEnforcer_Radar.dds");
+	m_rgiRadarIcons[Role_MadScientist]	= LoadDDS("texture/HUD/ClassesIcon/T/MadScientist_Radar.dds");
 
 	gHUD::AddHudElem(this);
 	return 1;
@@ -179,7 +193,7 @@ void CHudRadar::DrawRadar(float flTime)
 		if (!g_PlayerInfoList[i].name || !g_PlayerInfoList[i].name[0])
 			continue;
 
-		if (gHUD::m_iPlayerNum == i || g_PlayerExtraInfo[i].m_iTeam != g_iTeamNumber || g_PlayerExtraInfo[i].m_bIsDead)
+		if (gHUD::m_iPlayerNum == i || g_PlayerExtraInfo[i].m_iTeam != g_iTeam || g_PlayerExtraInfo[i].m_bIsDead)
 			continue;
 
 		if (g_PlayerExtraInfo[i].m_iHealth <= 0)	// no dead guy allowed.
@@ -191,7 +205,7 @@ void CHudRadar::DrawRadar(float flTime)
 		if (vecTranslated.x < 0 || vecTranslated.x > iRadarRadius || vecTranslated.y < 0 || vecTranslated.y > iRadarRadius)
 			continue;
 
-		if ((g_PlayerExtraInfo[i].m_bIsGodfather && (g_iTeamNumber == TEAM_TERRORIST || g_iTeamNumber == TEAM_UNASSIGNED)) || (g_PlayerExtraInfo[i].m_bIsCommander && (g_iTeamNumber == TEAM_CT || g_iTeamNumber == TEAM_UNASSIGNED)))
+		if ((g_PlayerExtraInfo[i].m_bIsGodfather && (g_iTeam == TEAM_TERRORIST || g_iTeam == TEAM_UNASSIGNED)) || (g_PlayerExtraInfo[i].m_bIsCommander && (g_iTeam == TEAM_CT || g_iTeam == TEAM_UNASSIGNED)))
 		{
 			r = 250;
 			g = 0;
@@ -199,7 +213,7 @@ void CHudRadar::DrawRadar(float flTime)
 		}
 		else
 		{
-			if (m_bTrackArray[i] == true)
+			if (m_bTrackArray[i])
 			{
 				iBaseDotSize *= 2;
 				r = 185;
@@ -214,7 +228,24 @@ void CHudRadar::DrawRadar(float flTime)
 			}
 		}
 
-		DrawRadarDot(vecTranslated, iBaseDotSize, RADAR_DOT_NORMAL, r, g, b, 235);
+		// the noobie and illegit players have no icon.
+		if (g_PlayerExtraInfo[i].m_iRoleType > Role_UNASSIGNED && g_PlayerExtraInfo[i].m_iRoleType < ROLE_COUNT)
+		{
+			// class icon
+			gEngfuncs.pTriAPI->RenderMode(kRenderTransColor);
+			gEngfuncs.pTriAPI->Brightness(1.0);
+
+			// in order to make transparent fx on dds texture...
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glColor4f(VEC_YELLOWISH.r, VEC_YELLOWISH.g, VEC_YELLOWISH.b, 235.0 / 255.0);
+
+			gEngfuncs.pTriAPI->CullFace(TRI_NONE);
+
+			glBindTexture(GL_TEXTURE_2D, m_rgiRadarIcons[g_PlayerExtraInfo[i].m_iRoleType]);
+			DrawUtils::Draw2DQuad(vecTranslated.x - 2, vecTranslated.y - 2, vecTranslated.x + 2, vecTranslated.y + 2);
+		}
+		else
+			DrawRadarDot(vecTranslated, iBaseDotSize, RADAR_DOT_NORMAL, r, g, b, 235);
 
 		if (g_PlayerExtraInfo[i].m_flTimeNextRadarFlash != -1.0 && flTime > g_PlayerExtraInfo[i].m_flTimeNextRadarFlash && g_PlayerExtraInfo[i].m_iRadarFlashRemains > 0)
 		{
@@ -269,15 +300,15 @@ void CHudRadar::DrawPlayerLocation(void)
 	int string_width, string_height;
 	int x, y;
 
-	if (g_PlayerExtraInfo[gHUD::m_iPlayerNum].location[0] != '#')
+	if (g_PlayerExtraInfo[gHUD::m_iPlayerNum].m_szLocationText[0] != '#')
 	{
 		static wchar_t locBuffer[512];
-		VGUI_LOCALISE->ConvertANSIToUnicode(g_PlayerExtraInfo[gHUD::m_iPlayerNum].location, locBuffer, sizeof(locBuffer));
+		VGUI_LOCALISE->ConvertANSIToUnicode(g_PlayerExtraInfo[gHUD::m_iPlayerNum].m_szLocationText, locBuffer, sizeof(locBuffer));
 		locString = locBuffer;
 	}
 	else
 	{
-		locString = VGUI_LOCALISE->Find(g_PlayerExtraInfo[gHUD::m_iPlayerNum].location);
+		locString = VGUI_LOCALISE->Find(g_PlayerExtraInfo[gHUD::m_iPlayerNum].m_szLocationText);
 	}
 
 	if (!locString)

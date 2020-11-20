@@ -581,7 +581,7 @@ void CBaseWeapon::PostFrame()
 		// stick into enemy's face?
 		int iEntIndex = PM_GetPhysEntInfo(tr.ent);	// the TR result does not directly implies ENTINDEX() in edict or cl_entity. it needs a conversion.
 		if (iEntIndex < gEngfuncs.GetMaxClients() && iEntIndex > 0)
-			if (g_PlayerExtraInfo[iEntIndex].m_iTeam != g_iTeamNumber)
+			if (g_PlayerExtraInfo[iEntIndex].m_iTeam != g_iTeam)
 				tr.fraction = 1.0f;	// "nothing happens here, let's shoot!"
 
 		// the BLOCKED condition is a player attribute.

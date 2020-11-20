@@ -26,7 +26,7 @@ struct extra_player_info_t
 	int			m_iAccount;
 
 	float	m_flTimeNextRadarFlash;
-	bool	m_bRadarFlashing;
+	bool	m_bRadarFlashing;	// this flashing is the big yellowish block when the corresponding player is talking.
 	float	m_iRadarFlashRemains;
 	bool	m_bBeingTracking;	// assassin's skill & commander's skill.
 
@@ -34,7 +34,7 @@ struct extra_player_info_t
 	bool	m_bIsGodfather;
 	bool	m_bIsCommander;
 	
-	char location[32];
+	char	m_szLocationText[32];
 };
 
 extern int iOnTrain[MAX_PLAYERS];
@@ -43,7 +43,7 @@ extern int iOnTrain[MAX_PLAYERS];
 extern int g_iUser1;
 extern int g_iUser2;
 extern int g_iUser3;
-extern int g_iTeamNumber;
+extern int g_iTeam;
 extern int g_iPlayerClass;
 extern int g_iPlayerFlags;
 extern Vector g_vPlayerVelocity;

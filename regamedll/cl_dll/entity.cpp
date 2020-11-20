@@ -24,7 +24,7 @@ int iOnTrain[MAX_PLAYERS];
 int g_iUser1;
 int g_iUser2;
 int g_iUser3;
-int g_iTeamNumber;
+int g_iTeam;
 int g_iPlayerClass;
 int g_iPlayerFlags;
 Vector g_vPlayerVelocity;
@@ -158,7 +158,7 @@ void HUD_ProcessPlayerState2(entity_state_s* pDestination, const entity_state_s*
 	cl_entity_t* pPlayer = gEngfuncs.GetLocalPlayer();	// Get the local player's index
 	if (pDestination->number == pPlayer->index)
 	{
-		g_iTeamNumber = g_PlayerExtraInfo[pDestination->number].m_iTeam;
+		g_iTeam = g_PlayerExtraInfo[pDestination->number].m_iTeam;
 
 		pDestination->iuser1 = g_iUser1 = pSource->iuser1;
 		pDestination->iuser2 = g_iUser2 = pSource->iuser2;
