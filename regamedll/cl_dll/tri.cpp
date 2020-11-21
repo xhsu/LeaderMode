@@ -189,6 +189,10 @@ static float factors[4];
 
 void DrawUtils::Draw2DQuadProgressBar(float x, float y, float flInnerWidth, float flInnerHeight, float flThickness, float flPercent)
 {
+	// let the x and y become the coord of inner quad.
+	x -= flThickness;
+	y -= flThickness;
+
 	flPercent = Q_clamp(flPercent, 0.0f, 1.0f);
 
 	if (flPercent >= 0.75f)

@@ -18,6 +18,10 @@ Created Date: 07 Mar 2020
 #define VEC_CYANISH			Vector(0.2f, 0.8f, 1.0f)
 #define RGB_SPRINGGREENISH	0x0066FF99
 #define VEC_SPRINGGREENISH	Vector(0.4f, 1.0f, 0.6f)
+#define RGB_CT_COLOUR		0x00ADC9EB
+#define VEC_CT_COLOUR		Vector(173.0 / 255.0, 201.0 / 255.0, 235.0 / 255.0)
+#define RGB_T_COLOUR		0x00D85150
+#define VEC_T_COLOUR		Vector(216.0 / 255.0, 81.0 / 255.0, 80.0 / 255.0)
 
 #define DHN_DRAWZERO	BIT(0)
 #define DHN_2DIGITS		BIT(1)

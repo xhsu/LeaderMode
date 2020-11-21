@@ -149,43 +149,39 @@ void CHudRadar::DrawRadarDot(int x, int y, float z_diff, int iBaseDotSize, int f
 	}
 }
 
+static constexpr float	RADAR_BORDER = 12;
+static constexpr float	RADAR_HUD_SIZE = 192;
+static constexpr float	RADAR_RANGE = 2048;
+static constexpr int	RADAR_ICON_SIZE = 16;
+static const Vector GODFATHER_COLOR_DIFF = VEC_SPRINGGREENISH - VEC_T_COLOUR;
+static const Vector COMMANDER_COLOR_DIFF = VEC_SPRINGGREENISH - VEC_CT_COLOUR;
+
 void CHudRadar::DrawRadar(float flTime)
 {
-	// UNDONE
-	/*if (gConfigs.bEnableClientUI && cl_newradar->value)
-		return;*/
-
-	float fRange;
-	int iRadarRadius;
-	int iBaseDotSize;
-	int r, g, b;
+	int iBaseDotSize = 2;
+	Vector color;
 	Vector vecTranslated;
-
-	if (ScreenWidth >= 640)
-	{
-		fRange = 2048;
-		iRadarRadius = 128;
-		iBaseDotSize = 2;
-	}
-	else
-	{
-		fRange = 1024;
-		iRadarRadius = 64;
-		iBaseDotSize = 1;
-	}
-
-	if (g_PlayerExtraInfo[gHUD::m_iPlayerNum].m_bIsDead)
-		return;
 
 	if (cl_radartype && cl_radartype->value != 0)
 	{
-		gEngfuncs.pfnSPR_Set(m_hRadaropaque, 200, 200, 200);
-		gEngfuncs.pfnSPR_DrawHoles(0, 0, 0, m_hradopaque);
+		//gEngfuncs.pfnSPR_Set(m_hRadaropaque, 200, 200, 200);
+		//gEngfuncs.pfnSPR_DrawHoles(0, 0, 0, m_hradopaque);
+		gEngfuncs.pTriAPI->SpriteTexture(gEngfuncs.GetSpritePointer(m_hRadaropaque), 0);
 	}
 	else
 	{
-		gEngfuncs.pfnSPR_Set(m_hRadar, 25, 75, 25);
-		gEngfuncs.pfnSPR_DrawAdditive(0, 0, 0, m_hrad);
+		glDisable(GL_TEXTURE_2D);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		glColor4f(1, 1, 1, 0.5);
+		DrawUtils::Draw2DQuad(RADAR_BORDER, RADAR_BORDER, RADAR_BORDER + RADAR_HUD_SIZE, RADAR_BORDER + RADAR_HUD_SIZE);
+
+		glColor4f(1, 1, 1, 1);
+		DrawUtils::Draw2DQuadProgressBar(RADAR_BORDER, RADAR_BORDER, RADAR_HUD_SIZE, RADAR_HUD_SIZE, 2, 1);
+
+		glDisable(GL_BLEND);
+		glEnable(GL_TEXTURE_2D);
 	}
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
@@ -200,52 +196,91 @@ void CHudRadar::DrawRadar(float flTime)
 			continue;
 
 		// translate the location we received to radar coord.
-		vecTranslated = Translate(g_PlayerExtraInfo[i].m_vecOrigin, fRange, iRadarRadius);
+		vecTranslated = Translate(g_PlayerExtraInfo[i].m_vecOrigin, RADAR_RANGE, RADAR_HUD_SIZE);
 
-		if (vecTranslated.x < 0 || vecTranslated.x > iRadarRadius || vecTranslated.y < 0 || vecTranslated.y > iRadarRadius)
-			continue;
+		// this is because we don't want the icon clipping through radar border.
+		if (vecTranslated.x < RADAR_ICON_SIZE / 2 || vecTranslated.x > RADAR_HUD_SIZE - RADAR_ICON_SIZE / 2 ||
+			vecTranslated.y < RADAR_ICON_SIZE / 2 || vecTranslated.y > RADAR_HUD_SIZE - RADAR_ICON_SIZE / 2)
+		{
+			// makes sure that they stay on the radar border..
+			vecTranslated.x = Q_clamp(vecTranslated.x, float(RADAR_ICON_SIZE / 2), float(RADAR_HUD_SIZE - RADAR_ICON_SIZE / 2));
+			vecTranslated.y = Q_clamp(vecTranslated.y, float(RADAR_ICON_SIZE / 2), float(RADAR_HUD_SIZE - RADAR_ICON_SIZE / 2));
+		}
+
+		// offset it with the radar location.
+		vecTranslated.x += RADAR_BORDER;
+		vecTranslated.y += RADAR_BORDER;
 
 		if ((g_PlayerExtraInfo[i].m_bIsGodfather && (g_iTeam == TEAM_TERRORIST || g_iTeam == TEAM_UNASSIGNED)) || (g_PlayerExtraInfo[i].m_bIsCommander && (g_iTeam == TEAM_CT || g_iTeam == TEAM_UNASSIGNED)))
 		{
-			r = 250;
-			g = 0;
-			b = 0;
+			color.r = 250;
+			color.g = 0;
+			color.b = 0;
 		}
 		else
 		{
 			if (m_bTrackArray[i])
 			{
 				iBaseDotSize *= 2;
-				r = 185;
-				g = 20;
-				b = 20;
+				color.r = 185;
+				color.g = 20;
+				color.b = 20;
 			}
 			else
 			{
-				r = 150;
-				g = 75;
-				b = 250;
+				color.r = 150;
+				color.g = 75;
+				color.b = 250;
 			}
 		}
 
 		// the noobie and illegit players have no icon.
 		if (g_PlayerExtraInfo[i].m_iRoleType > Role_UNASSIGNED && g_PlayerExtraInfo[i].m_iRoleType < ROLE_COUNT)
 		{
-			// class icon
 			gEngfuncs.pTriAPI->RenderMode(kRenderTransColor);
 			gEngfuncs.pTriAPI->Brightness(1.0);
 
 			// in order to make transparent fx on dds texture...
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			glColor4f(VEC_YELLOWISH.r, VEC_YELLOWISH.g, VEC_YELLOWISH.b, 235.0 / 255.0);
+
+			switch (g_PlayerExtraInfo[i].m_iRoleType)
+			{
+			case Role_Arsonist:
+			case Role_Assassin:
+			case Role_LeadEnforcer:
+			case Role_MadScientist:
+				glColor4f(VEC_T_COLOUR.r, VEC_T_COLOUR.g, VEC_T_COLOUR.b, 1);
+				break;
+
+			case Role_Breacher:
+			case Role_Medic:
+			case Role_Sharpshooter:
+			case Role_SWAT:
+				glColor4f(VEC_CT_COLOUR.r, VEC_CT_COLOUR.g, VEC_CT_COLOUR.b, 1);
+				break;
+
+			case Role_Commander:
+				color = VEC_CT_COLOUR + ((Q_sin(gHUD::m_flTime * 2.0f) + 1.0f) / 2.0f) * COMMANDER_COLOR_DIFF;
+				glColor4f(color.r, color.g, color.b, 1);
+				break;
+
+			case Role_Godfather:
+				color = VEC_T_COLOUR + ((Q_sin(gHUD::m_flTime * 2.0f) + 1.0f) / 2.0f) * GODFATHER_COLOR_DIFF;
+				glColor4f(color.r, color.g, color.b, 1);
+				break;
+
+			default:
+				glColor4f(VEC_YELLOWISH.r, VEC_YELLOWISH.g, VEC_YELLOWISH.b, 1);
+				break;
+			}
 
 			gEngfuncs.pTriAPI->CullFace(TRI_NONE);
 
 			glBindTexture(GL_TEXTURE_2D, m_rgiRadarIcons[g_PlayerExtraInfo[i].m_iRoleType]);
-			DrawUtils::Draw2DQuad(vecTranslated.x - 2, vecTranslated.y - 2, vecTranslated.x + 2, vecTranslated.y + 2);
+			DrawUtils::Draw2DQuad(vecTranslated.x - RADAR_ICON_SIZE / 2, vecTranslated.y - RADAR_ICON_SIZE / 2, vecTranslated.x + RADAR_ICON_SIZE / 2, vecTranslated.y + RADAR_ICON_SIZE / 2);
 		}
 		else
-			DrawRadarDot(vecTranslated, iBaseDotSize, RADAR_DOT_NORMAL, r, g, b, 235);
+			DrawRadarDot(vecTranslated, iBaseDotSize, RADAR_DOT_NORMAL, color.r, color.g, color.b, 235);
 
 		if (g_PlayerExtraInfo[i].m_flTimeNextRadarFlash != -1.0 && flTime > g_PlayerExtraInfo[i].m_flTimeNextRadarFlash && g_PlayerExtraInfo[i].m_iRadarFlashRemains > 0)
 		{
@@ -256,11 +291,11 @@ void CHudRadar::DrawRadar(float flTime)
 
 		if (g_PlayerExtraInfo[i].m_bRadarFlashing && g_PlayerExtraInfo[i].m_iRadarFlashRemains > 0)
 		{
-			r = 230;
-			g = 110;
-			b = 25;
+			color.r = 230;
+			color.g = 110;
+			color.b = 25;
 
-			DrawRadarDot(vecTranslated.x, vecTranslated.y, vecTranslated.z, iBaseDotSize, RADAR_DOT_BOMBCARRIER, r, g, b, 245);
+			DrawRadarDot(vecTranslated.x, vecTranslated.y, vecTranslated.z, iBaseDotSize, RADAR_DOT_BOMBCARRIER, color.r, color.g, color.b, 245);
 		}
 	}
 
@@ -284,7 +319,7 @@ void CHudRadar::DrawRadar(float flTime)
 
 		if (m_rgCustomPoints[i].m_bPhase)
 		{
-			Vector vec = Translate(m_rgCustomPoints[i].m_vecCoord, fRange, iRadarRadius);
+			Vector vec = Translate(m_rgCustomPoints[i].m_vecCoord, RADAR_RANGE, RADAR_HUD_SIZE);
 			DrawRadarDot(vec, iBaseDotSize * m_rgCustomPoints[i].m_iDotSize, m_rgCustomPoints[i].m_bitsFlags, m_rgCustomPoints[i].m_color);
 		}
 	}
@@ -332,19 +367,7 @@ void CHudRadar::DrawPlayerLocation(void)
 		gHUD::m_VGUI2Print.DrawVGUI2String(locString, x, y, g_LocationColor[0], g_LocationColor[1], g_LocationColor[2]);
 }
 
-int CHudRadar::GetRadarSize(void)
-{
-	// UNDONE
-	/*if (cl_newradar->value && gConfigs.bEnableClientUI)
-		return cl_newradar_size->value * ScreenWidth;*/
-
-	if (ScreenWidth >= 640)
-		return 128;
-	else
-		return 64;
-}
-
-Vector CHudRadar::Translate(const Vector& vecOrigin, float flRange, float flRadarRadius)
+Vector CHudRadar::Translate(const Vector& vecOrigin, float flScanRange, float flRadarHudRadius)
 {
 	float x_diff, y_diff, z_diff;
 	float flOffset;
@@ -376,20 +399,21 @@ Vector CHudRadar::Translate(const Vector& vecOrigin, float flRange, float flRada
 	xnew_diff = x_diff * Q_cos(flOffset) - y_diff * Q_sin(flOffset);
 	ynew_diff = x_diff * Q_sin(flOffset) + y_diff * Q_cos(flOffset);
 
-	if ((-1.0f * y_diff) > flRange)
+	if ((-1.0f * y_diff) > flScanRange)
 	{
-		flScale = (-1.0f * y_diff) / flRange;
+		flScale = (-1.0f * y_diff) / flScanRange;
 
 		xnew_diff /= flScale;
 		ynew_diff /= flScale;
 	}
 
-	xnew_diff /= 32;
-	ynew_diff /= 32;
+	// mapping out the point in real scale into radar size scale.
+	xnew_diff /= flScanRange / flRadarHudRadius;
+	ynew_diff /= flScanRange / flRadarHudRadius;
 
 	Vector vecResult;
-	vecResult.x = (flRadarRadius / 2) + (int)xnew_diff;
-	vecResult.y = (flRadarRadius / 2) + (int)ynew_diff;
+	vecResult.x = (flRadarHudRadius / 2) + round(xnew_diff);
+	vecResult.y = (flRadarHudRadius / 2) + round(ynew_diff);
 	vecResult.z = z_diff;
 
 	return vecResult;

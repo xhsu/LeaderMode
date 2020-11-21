@@ -1420,7 +1420,7 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	HUD_InitClientWeapons();
 
 	// Get current clock
-	gpGlobals->time = time;
+	gpGlobals->time = float(time);
 
 	// Fill in data based on selected weapon
 	if (from->client.m_iId > WEAPON_NONE && from->client.m_iId < LAST_WEAPON)
@@ -1505,7 +1505,7 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	gPseudoPlayer.pev->waterlevel = from->client.waterlevel;
 	gPseudoPlayer.pev->maxspeed = STATE->client.maxspeed; //!!! Taking "to"
 	gPseudoPlayer.pev->punchangle = STATE->client.punchangle; //!!! Taking "to"
-	gPseudoPlayer.pev->fov = from->client.fov;
+	gPseudoPlayer.pev->fov = gHUD::m_iFOV;	// 11072020 LUNA: from->client.fov is broken, keeping give me 0.
 	gPseudoPlayer.pev->weaponanim = from->client.weaponanim;
 	gPseudoPlayer.pev->viewmodel = from->client.viewmodel;
 	gPseudoPlayer.m_flNextAttack = from->client.m_flNextAttack;
@@ -1624,6 +1624,21 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 			continue;
 		}
 
+		// Decrement weapon counters, server does this at same time ( during post think, after doing everything else )
+		// LUNA: is this gpGlobals->framerate ???
+		pCurrent->m_flNextPrimaryAttack -= cmd->msec / 1000.0f;
+		pCurrent->m_flNextSecondaryAttack -= cmd->msec / 1000.0f;
+		pCurrent->m_flTimeWeaponIdle -= cmd->msec / 1000.0f;
+
+		if (pCurrent->m_flNextPrimaryAttack < -1.0)
+			pCurrent->m_flNextPrimaryAttack = -1.0;
+
+		if (pCurrent->m_flNextSecondaryAttack < -0.001)
+			pCurrent->m_flNextSecondaryAttack = -0.001;
+
+		if (pCurrent->m_flTimeWeaponIdle < -0.001)
+			pCurrent->m_flTimeWeaponIdle = -0.001;
+
 		pto->m_iClip = pCurrent->m_iClip;
 
 		pto->m_flNextPrimaryAttack = pCurrent->m_flNextPrimaryAttack;
@@ -1639,51 +1654,6 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		pto->m_iWeaponState = pCurrent->m_bitsFlags;
 		pto->m_fInZoom = pCurrent->m_iShotsFired;
 		pto->m_fAimedDamage = pCurrent->m_flLastFire;
-
-		// Decrement weapon counters, server does this at same time ( during post think, after doing everything else )
-		// LUNA: is this gpGlobals->framerate ???
-		pto->m_flNextReload -= cmd->msec / 1000.0f;
-		pto->m_fNextAimBonus -= cmd->msec / 1000.0f;
-		pto->m_flNextPrimaryAttack -= cmd->msec / 1000.0f;
-		pto->m_flNextSecondaryAttack -= cmd->msec / 1000.0f;
-		pto->m_flTimeWeaponIdle -= cmd->msec / 1000.0f;
-
-		if (pto->m_flPumpTime != -9999.0f)
-		{
-			pto->m_flPumpTime -= cmd->msec / 1000.0f;
-			if (pto->m_flPumpTime < -1.0f)
-				pto->m_flPumpTime = 1.0f;
-		}
-
-		if (pto->m_fNextAimBonus < -1.0)
-		{
-			pto->m_fNextAimBonus = -1.0;
-		}
-
-		if (pto->m_flNextPrimaryAttack < -1.0)
-		{
-			pto->m_flNextPrimaryAttack = -1.0;
-		}
-
-		if (pto->m_flNextSecondaryAttack < -0.001)
-		{
-			pto->m_flNextSecondaryAttack = -0.001;
-		}
-
-		if (pto->m_flTimeWeaponIdle < -0.001)
-		{
-			pto->m_flTimeWeaponIdle = -0.001;
-		}
-
-		if (pto->m_flNextReload < -0.001)
-		{
-			pto->m_flNextReload = -0.001;
-		}
-
-		/*if ( pto->fuser1 < -0.001 )
-		{
-			pto->fuser1 = -0.001;
-		}*/
 	}
 
 #ifdef CHECKING_NEXT_PRIM_ATTACK_SYNC

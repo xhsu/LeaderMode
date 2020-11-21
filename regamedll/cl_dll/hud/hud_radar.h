@@ -37,8 +37,7 @@ public:
 	void DrawRadarDot(int x, int y, float z_diff, int iBaseDotSize, int flags, int r, int g, int b, int a);
 	void DrawRadar(float flTime);
 	void DrawPlayerLocation(void);
-	int GetRadarSize(void);
-	Vector Translate(const Vector& vecOrigin, float flRange, float flRadarRadius);	// translate a point onto radar map. the returning z coord is actually z_diff rather than normal meaning.
+	Vector Translate(const Vector& vecOrigin, float flScanRange, float flRadarHudRadius);	// translate a point onto radar map. the returning z coord is actually z_diff rather than normal meaning.
 
 public:
 	inline void DrawRadarDot(const Vector& vec, int iBaseDotSize, int flags, int r, int g, int b, int a) { DrawRadarDot(vec.x, vec.y, vec.z, iBaseDotSize, flags, r, g, b, a); }

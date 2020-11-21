@@ -52,27 +52,6 @@
 												}
 #endif
 
-#define DECLARE_STANDARD_LHAND_FUNC(x)			bool C##x::SetLeftHand(bool bAppear)	\
-												{	\
-													if (bAppear && m_bitsFlags & WPNSTATE_NO_LHAND)	\
-													{	\
-														SendWeaponAnim(x##_LHAND_UP);	\
-														m_pPlayer->m_flNextAttack = x##_LHAND_UP_TIME;	\
-														m_flTimeWeaponIdle = x##_LHAND_UP_TIME;	\
-														m_bitsFlags &= ~WPNSTATE_NO_LHAND;	\
-														return true;	\
-													}	\
-													else if (!(m_bitsFlags & WPNSTATE_NO_LHAND))	\
-													{	\
-														SendWeaponAnim(x##_LHAND_DOWN);	\
-														m_pPlayer->m_flNextAttack = x##_LHAND_DOWN_TIME;	\
-														m_flTimeWeaponIdle = x##_LHAND_DOWN_TIME;	\
-														m_bitsFlags |= WPNSTATE_NO_LHAND;	\
-														return true;	\
-													}	\
-													return false;	\
-												}
-
 class CBaseEntity;
 class CBasePlayer;
 class CWeaponBox;
@@ -823,7 +802,7 @@ constexpr float SVD_RELOAD_TIME		= 3.2f;
 constexpr float SVD_FIRE_INTERVAL	= 0.25f;
 constexpr int	SVD_PENETRATION		= 3;
 constexpr float	SVD_EFFECTIVE_RANGE	= 8192.0f;
-constexpr float	SVD_SPREAD_BASELINE = 0.025f;
+constexpr float	SVD_SPREAD_BASELINE = 0.0251f;
 
 enum svd_e
 {

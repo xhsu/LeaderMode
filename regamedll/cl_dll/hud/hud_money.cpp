@@ -52,6 +52,9 @@ int CHudAccountBalance::Draw(float flTime)
 	if ((gHUD::m_bitsHideHUDDisplay & HIDEHUD_MONEY) || g_iUser1)
 		return 1;
 
+	if (gHUD::m_bPlayerDead)
+		return 1;
+
 	if (m_bStartFade && m_flAlpha > 0)
 	{
 		m_flAlpha -= gHUD::m_flTimeDelta * 100;
@@ -62,7 +65,7 @@ int CHudAccountBalance::Draw(float flTime)
 	wchar_t wszText[64];
 	int iWidth, iHeight;
 	int x = 10;
-	int y = gHUD::m_Radar.GetRadarSize() + 10;
+	int y = 192 + 10;	// FIXME
 
 	int r, g, b;
 	int r1, g1, b1;
