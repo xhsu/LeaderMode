@@ -60,18 +60,18 @@ int CHudMessage::Draw(float fTime)
 		{
 			brightness = FadeBlend(m_pGameTitle->fadein, m_pGameTitle->fadeout, m_pGameTitle->holdtime, localTime);
 
-			int halfWidth = gHUD::GetSpriteRect(m_HUD_title_half).right - gHUD::GetSpriteRect(m_HUD_title_half).left;
-			int fullWidth = halfWidth + gHUD::GetSpriteRect(m_HUD_title_life).right - gHUD::GetSpriteRect(m_HUD_title_life).left;
-			int fullHeight = gHUD::GetSpriteRect(m_HUD_title_half).bottom - gHUD::GetSpriteRect(m_HUD_title_half).top;
+			int halfWidth = gHUD::GetSpriteRect(m_HUD_title_half)->right - gHUD::GetSpriteRect(m_HUD_title_half)->left;
+			int fullWidth = halfWidth + gHUD::GetSpriteRect(m_HUD_title_life)->right - gHUD::GetSpriteRect(m_HUD_title_life)->left;
+			int fullHeight = gHUD::GetSpriteRect(m_HUD_title_half)->bottom - gHUD::GetSpriteRect(m_HUD_title_half)->top;
 
 			int x = XPosition(m_pGameTitle->x, fullWidth, fullWidth);
 			int y = YPosition(m_pGameTitle->y, fullHeight);
 
 			gEngfuncs.pfnSPR_Set(gHUD::GetSprite(m_HUD_title_half), brightness * m_pGameTitle->r1, brightness * m_pGameTitle->g1, brightness * m_pGameTitle->b1);
-			gEngfuncs.pfnSPR_DrawAdditive(0, x, y, &gHUD::GetSpriteRect(m_HUD_title_half));
+			gEngfuncs.pfnSPR_DrawAdditive(0, x, y, gHUD::GetSpriteRect(m_HUD_title_half));
 
 			gEngfuncs.pfnSPR_Set(gHUD::GetSprite(m_HUD_title_life), brightness * m_pGameTitle->r1, brightness * m_pGameTitle->g1, brightness * m_pGameTitle->b1);
-			gEngfuncs.pfnSPR_DrawAdditive(0, x + halfWidth, y, &gHUD::GetSpriteRect(m_HUD_title_life));
+			gEngfuncs.pfnSPR_DrawAdditive(0, x + halfWidth, y, gHUD::GetSpriteRect(m_HUD_title_life));
 
 			drawn = 1;
 		}

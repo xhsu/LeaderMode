@@ -18,7 +18,7 @@ int CHudStatusIcons::VidInit(void)
 {
 	int HUD_cross = gHUD::GetSpriteIndex("cross");
 
-	m_iCrossWidth = gHUD::GetSpriteRect(HUD_cross).right - gHUD::GetSpriteRect(HUD_cross).left;
+	m_iCrossWidth = gHUD::GetSpriteRect(HUD_cross)->right - gHUD::GetSpriteRect(HUD_cross)->left;
 	return 1;
 }
 
@@ -108,7 +108,7 @@ void CHudStatusIcons::EnableIcon(char* pszIconName, unsigned char red, unsigned 
 
 	int spr_index = gHUD::GetSpriteIndex(pszIconName);
 	m_IconList[i].spr = gHUD::GetSprite(spr_index);
-	m_IconList[i].rc = gHUD::GetSpriteRect(spr_index);
+	m_IconList[i].rc = *gHUD::GetSpriteRect(spr_index);
 	m_IconList[i].r = red;
 	m_IconList[i].g = green;
 	m_IconList[i].b = blue;

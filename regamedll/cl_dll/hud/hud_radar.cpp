@@ -53,6 +53,9 @@ int CHudRadar::Init(void)
 	m_rgiRadarIcons[Role_LeadEnforcer]	= LoadDDS("texture/HUD/ClassesIcon/T/LeadEnforcer_Radar.dds");
 	m_rgiRadarIcons[Role_MadScientist]	= LoadDDS("texture/HUD/ClassesIcon/T/MadScientist_Radar.dds");
 
+	// common
+	m_iIdArrow = LoadDDS("texture/HUD/Radar/Arrow.dds");
+
 	gHUD::AddHudElem(this);
 	return 1;
 }
@@ -64,18 +67,8 @@ int CHudRadar::VidInit(void)
 	m_HUD_radar = gHUD::GetSpriteIndex("radar");
 	m_HUD_radaropaque = gHUD::GetSpriteIndex("radaropaque");
 
-	m_hrad = &gHUD::GetSpriteRect(m_HUD_radar);
-	m_hradopaque = &gHUD::GetSpriteRect(m_HUD_radaropaque);
-
-	m_hrad->left = 0;
-	m_hrad->top = 0;
-	m_hrad->right = 128;
-	m_hrad->bottom = 128;
-
-	m_hradopaque->left = 0;
-	m_hradopaque->top = 0;
-	m_hradopaque->right = 128;
-	m_hradopaque->bottom = 128;
+	m_hrad = gHUD::GetSpriteRect(m_HUD_radar);
+	m_hradopaque = gHUD::GetSpriteRect(m_HUD_radaropaque);
 
 	m_hRadar = gHUD::GetSprite(m_HUD_radar);
 	m_hRadaropaque = gHUD::GetSprite(m_HUD_radaropaque);
@@ -162,27 +155,19 @@ void CHudRadar::DrawRadar(float flTime)
 	Vector color;
 	Vector vecTranslated;
 
-	if (cl_radartype && cl_radartype->value != 0)
-	{
-		//gEngfuncs.pfnSPR_Set(m_hRadaropaque, 200, 200, 200);
-		//gEngfuncs.pfnSPR_DrawHoles(0, 0, 0, m_hradopaque);
-		gEngfuncs.pTriAPI->SpriteTexture(gEngfuncs.GetSpritePointer(m_hRadaropaque), 0);
-	}
-	else
-	{
-		glDisable(GL_TEXTURE_2D);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	// draw base board.
+	glDisable(GL_TEXTURE_2D);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		glColor4f(1, 1, 1, 0.5);
-		DrawUtils::Draw2DQuad(RADAR_BORDER, RADAR_BORDER, RADAR_BORDER + RADAR_HUD_SIZE, RADAR_BORDER + RADAR_HUD_SIZE);
+	glColor4f(1, 1, 1, 0.5);
+	DrawUtils::Draw2DQuad(RADAR_BORDER, RADAR_BORDER, RADAR_BORDER + RADAR_HUD_SIZE, RADAR_BORDER + RADAR_HUD_SIZE);
 
-		glColor4f(1, 1, 1, 1);
-		DrawUtils::Draw2DQuadProgressBar(RADAR_BORDER, RADAR_BORDER, RADAR_HUD_SIZE, RADAR_HUD_SIZE, 2, 1);
+	glColor4f(1, 1, 1, 1);
+	DrawUtils::Draw2DQuadProgressBar(RADAR_BORDER, RADAR_BORDER, RADAR_HUD_SIZE, RADAR_HUD_SIZE, 2, 1);
 
-		glDisable(GL_BLEND);
-		glEnable(GL_TEXTURE_2D);
-	}
+	glDisable(GL_BLEND);
+	glEnable(GL_TEXTURE_2D);
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -278,6 +263,13 @@ void CHudRadar::DrawRadar(float flTime)
 
 			glBindTexture(GL_TEXTURE_2D, m_rgiRadarIcons[g_PlayerExtraInfo[i].m_iRoleType]);
 			DrawUtils::Draw2DQuad(vecTranslated.x - RADAR_ICON_SIZE / 2, vecTranslated.y - RADAR_ICON_SIZE / 2, vecTranslated.x + RADAR_ICON_SIZE / 2, vecTranslated.y + RADAR_ICON_SIZE / 2);
+
+			/*if (vecTranslated.z != 0)
+			{
+				//glBlendFunc(GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR);
+				glBindTexture(GL_TEXTURE_2D, m_iIdArrow);
+				DrawUtils::Draw2DQuad(vecTranslated.x + RADAR_ICON_SIZE, vecTranslated.y, vecTranslated.x + RADAR_ICON_SIZE * 2, vecTranslated.y + RADAR_ICON_SIZE);
+			}*/
 		}
 		else
 			DrawRadarDot(vecTranslated, iBaseDotSize, RADAR_DOT_NORMAL, color.r, color.g, color.b, 235);

@@ -27,7 +27,7 @@ int CHudBattery::VidInit(void)
 	m_HUD_suithelmet_empty = gHUD::GetSpriteIndex("suithelmet_empty");
 	m_HUD_suithelmet_full = gHUD::GetSpriteIndex("suithelmet_full");
 
-	m_iHeight = gHUD::GetSpriteRect(m_HUD_suit_full).bottom - gHUD::GetSpriteRect(m_HUD_suit_empty).top;
+	m_iHeight = gHUD::GetSpriteRect(m_HUD_suit_full)->bottom - gHUD::GetSpriteRect(m_HUD_suit_empty)->top;
 	m_fFade = 0;
 	return 1;
 }
@@ -52,8 +52,8 @@ int CHudBattery::Draw(float flTime)
 
 	hSprite hSpriteEmpty = gHUD::GetSprite(spriteEmpty);
 	hSprite hSpriteFull = gHUD::GetSprite(spriteFull);
-	wrect_t* prcEmpty = &gHUD::GetSpriteRect(spriteEmpty);
-	wrect_t* prcFull = &gHUD::GetSpriteRect(spriteFull);
+	const wrect_t* prcEmpty = gHUD::GetSpriteRect(spriteEmpty);
+	const wrect_t* prcFull = gHUD::GetSpriteRect(spriteFull);
 
 	int r, g, b, x, y, a;
 	wrect_t rc = *prcFull;

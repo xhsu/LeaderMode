@@ -86,7 +86,7 @@ int CHudAmmo::Draw(float flTime)
 		}
 
 		int iFlags = DHN_DRAWZERO;
-		int AmmoWidth = gHUD::GetSpriteRect(gHUD::m_HUD_number_0).right - gHUD::GetSpriteRect(gHUD::m_HUD_number_0).left;
+		int AmmoWidth = gHUD::GetSpriteRect(gHUD::m_HUD_number_0)->right - gHUD::GetSpriteRect(gHUD::m_HUD_number_0)->left;
 
 		a = Q_max(MIN_ALPHA, int(m_flAlpha));
 

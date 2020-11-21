@@ -48,11 +48,11 @@ int CHudHealth::VidInit(void)
 	m_HUD_dmg_bio = gHUD::GetSpriteIndex("dmg_bio") + 1;
 	m_HUD_cross = gHUD::GetSpriteIndex("cross");
 
-	giDmgHeight = gHUD::GetSpriteRect(m_HUD_dmg_bio).right - gHUD::GetSpriteRect(m_HUD_dmg_bio).left;
-	giDmgWidth = gHUD::GetSpriteRect(m_HUD_dmg_bio).bottom - gHUD::GetSpriteRect(m_HUD_dmg_bio).top;
+	giDmgHeight = gHUD::GetSpriteRect(m_HUD_dmg_bio)->right - gHUD::GetSpriteRect(m_HUD_dmg_bio)->left;
+	giDmgWidth = gHUD::GetSpriteRect(m_HUD_dmg_bio)->bottom - gHUD::GetSpriteRect(m_HUD_dmg_bio)->top;
 
-	giDmgHeight = gHUD::GetSpriteRect(m_HUD_dmg_bio).right - gHUD::GetSpriteRect(m_HUD_dmg_bio).left;
-	giDmgWidth = gHUD::GetSpriteRect(m_HUD_dmg_bio).bottom - gHUD::GetSpriteRect(m_HUD_dmg_bio).top;
+	giDmgHeight = gHUD::GetSpriteRect(m_HUD_dmg_bio)->right - gHUD::GetSpriteRect(m_HUD_dmg_bio)->left;
+	giDmgWidth = gHUD::GetSpriteRect(m_HUD_dmg_bio)->bottom - gHUD::GetSpriteRect(m_HUD_dmg_bio)->top;
 
 	m_hBloodScreen = LoadDDS("texture/Screen/BloodScreen.dds");
 
@@ -105,10 +105,10 @@ int CHudHealth::Draw(float flTime)
 	DrawUtils::Draw2DQuad(0, 0, ScreenWidth, ScreenHeight);
 
 	// red cross.
-	HealthWidth = gHUD::GetSpriteRect(gHUD::m_HUD_number_0).right - gHUD::GetSpriteRect(gHUD::m_HUD_number_0).left;
-	int CrossWidth = gHUD::GetSpriteRect(m_HUD_cross).right - gHUD::GetSpriteRect(m_HUD_cross).left;
+	HealthWidth = gHUD::GetSpriteRect(gHUD::m_HUD_number_0)->right - gHUD::GetSpriteRect(gHUD::m_HUD_number_0)->left;
+	int CrossWidth = gHUD::GetSpriteRect(m_HUD_cross)->right - gHUD::GetSpriteRect(m_HUD_cross)->left;
 
-	y = ScreenHeight - HEALTH_BASIC_OFS - (gHUD::GetSpriteRect(m_HUD_cross).bottom - gHUD::GetSpriteRect(m_HUD_cross).top);
+	y = ScreenHeight - HEALTH_BASIC_OFS - (gHUD::GetSpriteRect(m_HUD_cross)->bottom - gHUD::GetSpriteRect(m_HUD_cross)->top);
 	x = HEALTH_BASIC_OFS;
 
 	// shaking VFX.
@@ -126,13 +126,13 @@ int CHudHealth::Draw(float flTime)
 	int r1 = r, g1 = g, b1 = b;
 	ScaleColors(r1, g1, b1, a);
 	gEngfuncs.pfnSPR_Set(gHUD::GetSprite(m_HUD_cross), r1, g1, b1);
-	gEngfuncs.pfnSPR_DrawAdditive(0, x, y, &gHUD::GetSpriteRect(m_HUD_cross));
+	gEngfuncs.pfnSPR_DrawAdditive(0, x, y, gHUD::GetSpriteRect(m_HUD_cross));
 
 	// export Y for other HUDs
 	m_flLastDrawingY = y;
 
 	x += CrossWidth + HEALTH_ICON_BAR_INTERSPACE;
-	y += (gHUD::GetSpriteRect(m_HUD_cross).bottom - gHUD::GetSpriteRect(m_HUD_cross).top - HEALTH_BAR_WIDTH) / 2;
+	y += (gHUD::GetSpriteRect(m_HUD_cross)->bottom - gHUD::GetSpriteRect(m_HUD_cross)->top - HEALTH_BAR_WIDTH) / 2;
 
 	// health bar.
 	float flFullLength = HEALTH_BAR_LENGTH;
@@ -318,7 +318,7 @@ int CHudHealth::DrawDamage(float flTime)
 		{
 			pdmg = &m_dmg[i];
 			gEngfuncs.pfnSPR_Set(gHUD::GetSprite(m_HUD_dmg_bio + i), r, g, b);
-			gEngfuncs.pfnSPR_DrawAdditive(0, pdmg->x, pdmg->y, &gHUD::GetSpriteRect(m_HUD_dmg_bio + i));
+			gEngfuncs.pfnSPR_DrawAdditive(0, pdmg->x, pdmg->y, gHUD::GetSpriteRect(m_HUD_dmg_bio + i));
 		}
 	}
 

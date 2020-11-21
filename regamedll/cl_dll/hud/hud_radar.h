@@ -46,15 +46,16 @@ public:
 public:
 	std::array<bool, MAX_POINTS + 1> m_bTrackArray;
 	unsigned int m_iPlayerLastPointedAt;
-	bool m_bDrawRadar;
+	bool m_bDrawRadar{ true };
 	int m_HUD_radar;
 	int m_HUD_radaropaque;
 	std::array<radar_point_s, MAX_POINTS> m_rgCustomPoints;
 	std::array<GLuint, ROLE_COUNT> m_rgiRadarIcons;
+	GLuint m_iIdArrow{ 0U };
 
 private:
-	wrect_t* m_hrad;
-	wrect_t* m_hradopaque;
+	const wrect_t* m_hrad;
+	const wrect_t* m_hradopaque;
 	hSprite m_hRadar;
 	hSprite m_hRadaropaque;
 };

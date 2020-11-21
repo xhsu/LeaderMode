@@ -87,7 +87,7 @@ void CHudScenarioStatus::MsgFunc_Scenario(int iSize, void* pbuf)
 	sprIndex = gHUD::GetSpriteIndex(spriteName);
 
 	m_hSprite = gHUD::GetSprite(sprIndex);
-	m_rect = gHUD::GetSpriteRect(sprIndex);
+	m_rect = *gHUD::GetSpriteRect(sprIndex);
 
 	alpha = READ_BYTE();
 

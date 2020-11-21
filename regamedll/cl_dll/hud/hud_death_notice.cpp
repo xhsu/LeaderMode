@@ -29,7 +29,7 @@ int CHudDeathNotice::VidInit(void)
 {
 	m_HUD_d_skull = gHUD::GetSpriteIndex("d_skull");
 	m_headSprite = gHUD::GetSpriteIndex("d_headshot");
-	m_headWidth = gHUD::GetSpriteRect(m_headSprite).right - gHUD::GetSpriteRect(m_headSprite).left;
+	m_headWidth = gHUD::GetSpriteRect(m_headSprite)->right - gHUD::GetSpriteRect(m_headSprite)->left;
 
 	return 1;
 }
@@ -62,14 +62,14 @@ int CHudDeathNotice::Draw(float flTime)
 			x -= DEATHNOTICE_INTERSPACE;
 
 			gEngfuncs.pfnSPR_Set(gHUD::GetSprite(m_headSprite), 255, 255, 255);
-			gEngfuncs.pfnSPR_DrawAdditive(0, x, y, &gHUD::GetSpriteRect(m_headSprite));
+			gEngfuncs.pfnSPR_DrawAdditive(0, x, y, gHUD::GetSpriteRect(m_headSprite));
 		}
 
 		// weapon
-		x -= (item.m_pWeaponSpriteInfo.right - item.m_pWeaponSpriteInfo.left);
+		x -= (item.m_rcWeaponSpriteInfo.right - item.m_rcWeaponSpriteInfo.left);
 		x -= DEATHNOTICE_INTERSPACE;
 		gEngfuncs.pfnSPR_Set(item.m_hWeaponSprite, 255, 255, 255);	// weapon
-		gEngfuncs.pfnSPR_DrawAdditive(0, x, y, &item.m_pWeaponSpriteInfo);
+		gEngfuncs.pfnSPR_DrawAdditive(0, x, y, &item.m_rcWeaponSpriteInfo);
 
 		// killer
 		if (!item.m_bGhostKill)
@@ -83,7 +83,7 @@ int CHudDeathNotice::Draw(float flTime)
 		}
 
 		// move Y coord after each draw.
-		y += (item.m_pWeaponSpriteInfo.bottom - item.m_pWeaponSpriteInfo.top) + DEATHNOTICE_INTERSPACE;
+		y += (item.m_rcWeaponSpriteInfo.bottom - item.m_rcWeaponSpriteInfo.top) + DEATHNOTICE_INTERSPACE;
 	}
 
 	return TRUE;
@@ -138,7 +138,7 @@ void CHudDeathNotice::MsgFunc_DeathMsg(int iKillerIndex, int iVictimIndex, bool 
 	if (iIndex == -1)	// no found
 		iIndex = m_HUD_d_skull;
 
-	item.m_pWeaponSpriteInfo = gHUD::GetSpriteRect(iIndex);
+	item.m_rcWeaponSpriteInfo = *gHUD::GetSpriteRect(iIndex);
 	item.m_hWeaponSprite = gHUD::GetSprite(iIndex);
 
 	// remove time.

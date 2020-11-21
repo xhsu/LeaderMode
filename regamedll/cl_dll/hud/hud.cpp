@@ -564,7 +564,7 @@ int gHUD::DrawHudStringReverse(int xpos, int ypos, int iMinX, const char* szStri
 
 int gHUD::DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int b)
 {
-	int iWidth = GetSpriteRect(m_HUD_number_0).right - GetSpriteRect(m_HUD_number_0).left;
+	int iWidth = GetSpriteRect(m_HUD_number_0)->right - GetSpriteRect(m_HUD_number_0)->left;
 	int k;
 
 	if (iNumber > 0)
@@ -573,13 +573,13 @@ int gHUD::DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int
 		{
 			k = iNumber / 10000;
 			gEngfuncs.pfnSPR_Set(GetSprite(m_HUD_number_0 + k), r, g, b);
-			gEngfuncs.pfnSPR_DrawAdditive(0, x, y, &GetSpriteRect(m_HUD_number_0 + k));
+			gEngfuncs.pfnSPR_DrawAdditive(0, x, y, GetSpriteRect(m_HUD_number_0 + k));
 			x += iWidth;
 		}
 		else if (iFlags & (DHN_5DIGITS))
 		{
 			if (iFlags & DHN_FILLZERO)
-				gEngfuncs.pfnSPR_DrawAdditive(0, x, y, &GetSpriteRect(m_HUD_number_0));
+				gEngfuncs.pfnSPR_DrawAdditive(0, x, y, GetSpriteRect(m_HUD_number_0));
 
 			x += iWidth;
 		}
@@ -588,13 +588,13 @@ int gHUD::DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int
 		{
 			k = (iNumber % 10000) / 1000;
 			gEngfuncs.pfnSPR_Set(GetSprite(m_HUD_number_0 + k), r, g, b);
-			gEngfuncs.pfnSPR_DrawAdditive(0, x, y, &GetSpriteRect(m_HUD_number_0 + k));
+			gEngfuncs.pfnSPR_DrawAdditive(0, x, y, GetSpriteRect(m_HUD_number_0 + k));
 			x += iWidth;
 		}
 		else if (iFlags & (DHN_5DIGITS | DHN_4DIGITS))
 		{
 			if (iFlags & DHN_FILLZERO)
-				gEngfuncs.pfnSPR_DrawAdditive(0, x, y, &GetSpriteRect(m_HUD_number_0));
+				gEngfuncs.pfnSPR_DrawAdditive(0, x, y, GetSpriteRect(m_HUD_number_0));
 
 			x += iWidth;
 		}
@@ -603,13 +603,13 @@ int gHUD::DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int
 		{
 			k = (iNumber % 1000) / 100;
 			gEngfuncs.pfnSPR_Set(GetSprite(m_HUD_number_0 + k), r, g, b);
-			gEngfuncs.pfnSPR_DrawAdditive(0, x, y, &GetSpriteRect(m_HUD_number_0 + k));
+			gEngfuncs.pfnSPR_DrawAdditive(0, x, y, GetSpriteRect(m_HUD_number_0 + k));
 			x += iWidth;
 		}
 		else if (iFlags & (DHN_5DIGITS | DHN_4DIGITS | DHN_3DIGITS))
 		{
 			if (iFlags & DHN_FILLZERO)
-				gEngfuncs.pfnSPR_DrawAdditive(0, x, y, &GetSpriteRect(m_HUD_number_0));
+				gEngfuncs.pfnSPR_DrawAdditive(0, x, y, GetSpriteRect(m_HUD_number_0));
 
 			x += iWidth;
 		}
@@ -618,20 +618,20 @@ int gHUD::DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int
 		{
 			k = (iNumber % 100) / 10;
 			gEngfuncs.pfnSPR_Set(GetSprite(m_HUD_number_0 + k), r, g, b);
-			gEngfuncs.pfnSPR_DrawAdditive(0, x, y, &GetSpriteRect(m_HUD_number_0 + k));
+			gEngfuncs.pfnSPR_DrawAdditive(0, x, y, GetSpriteRect(m_HUD_number_0 + k));
 			x += iWidth;
 		}
 		else if (iFlags & (DHN_5DIGITS | DHN_4DIGITS | DHN_3DIGITS | DHN_2DIGITS))
 		{
 			if (iFlags & DHN_FILLZERO)
-				gEngfuncs.pfnSPR_DrawAdditive(0, x, y, &GetSpriteRect(m_HUD_number_0));
+				gEngfuncs.pfnSPR_DrawAdditive(0, x, y, GetSpriteRect(m_HUD_number_0));
 
 			x += iWidth;
 		}
 
 		k = iNumber % 10;
 		gEngfuncs.pfnSPR_Set(GetSprite(m_HUD_number_0 + k), r, g, b);
-		gEngfuncs.pfnSPR_DrawAdditive(0, x, y, &GetSpriteRect(m_HUD_number_0 + k));
+		gEngfuncs.pfnSPR_DrawAdditive(0, x, y, GetSpriteRect(m_HUD_number_0 + k));
 		x += iWidth;
 	}
 	else if (iFlags & DHN_DRAWZERO)
@@ -641,7 +641,7 @@ int gHUD::DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int
 		if (iFlags & (DHN_5DIGITS))
 		{
 			if (iFlags & DHN_FILLZERO)
-				gEngfuncs.pfnSPR_DrawAdditive(0, x, y, &GetSpriteRect(m_HUD_number_0));
+				gEngfuncs.pfnSPR_DrawAdditive(0, x, y, GetSpriteRect(m_HUD_number_0));
 
 			x += iWidth;
 		}
@@ -649,7 +649,7 @@ int gHUD::DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int
 		if (iFlags & (DHN_5DIGITS | DHN_4DIGITS))
 		{
 			if (iFlags & DHN_FILLZERO)
-				gEngfuncs.pfnSPR_DrawAdditive(0, x, y, &GetSpriteRect(m_HUD_number_0));
+				gEngfuncs.pfnSPR_DrawAdditive(0, x, y, GetSpriteRect(m_HUD_number_0));
 
 			x += iWidth;
 		}
@@ -657,7 +657,7 @@ int gHUD::DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int
 		if (iFlags & (DHN_5DIGITS | DHN_4DIGITS | DHN_3DIGITS))
 		{
 			if (iFlags & DHN_FILLZERO)
-				gEngfuncs.pfnSPR_DrawAdditive(0, x, y, &GetSpriteRect(m_HUD_number_0));
+				gEngfuncs.pfnSPR_DrawAdditive(0, x, y, GetSpriteRect(m_HUD_number_0));
 
 			x += iWidth;
 		}
@@ -665,12 +665,12 @@ int gHUD::DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int
 		if (iFlags & (DHN_5DIGITS | DHN_4DIGITS | DHN_3DIGITS | DHN_2DIGITS))
 		{
 			if (iFlags & DHN_FILLZERO)
-				gEngfuncs.pfnSPR_DrawAdditive(0, x, y, &GetSpriteRect(m_HUD_number_0));
+				gEngfuncs.pfnSPR_DrawAdditive(0, x, y, GetSpriteRect(m_HUD_number_0));
 
 			x += iWidth;
 		}
 
-		gEngfuncs.pfnSPR_DrawAdditive(0, x, y, &GetSpriteRect(m_HUD_number_0));
+		gEngfuncs.pfnSPR_DrawAdditive(0, x, y, GetSpriteRect(m_HUD_number_0));
 		x += iWidth;
 	}
 
@@ -681,7 +681,7 @@ int gHUD::DrawHudNumber(int x, int y, int iNumber, int r, int g, int b)
 {
 	static char szBuffer[16];
 	const char* pszPosint;
-	int iWidth = GetSpriteRect(m_HUD_number_0).right - GetSpriteRect(m_HUD_number_0).left;
+	int iWidth = GetSpriteRect(m_HUD_number_0)->right - GetSpriteRect(m_HUD_number_0)->left;
 	int k;
 
 	Q_snprintf(szBuffer, sizeof(szBuffer) - 1, "%5i", iNumber);
@@ -697,7 +697,7 @@ int gHUD::DrawHudNumber(int x, int y, int iNumber, int r, int g, int b)
 		if (k >= 0 && k <= 9)
 		{
 			gEngfuncs.pfnSPR_Set(GetSprite(m_HUD_number_0 + k), r, g, b);
-			gEngfuncs.pfnSPR_DrawAdditive(0, x, y, &GetSpriteRect(m_HUD_number_0 + k));
+			gEngfuncs.pfnSPR_DrawAdditive(0, x, y, GetSpriteRect(m_HUD_number_0 + k));
 		}
 
 		x += iWidth;
@@ -773,9 +773,9 @@ hSprite gHUD::GetSprite(int index)
 	return (index < 0) ? 0 : m_rghSprites[index];
 }
 
-wrect_t gHUD::GetSpriteRect(int index)
+const wrect_t* gHUD::GetSpriteRect(int index)
 {
-	return m_rgrcRects[index];
+	return &m_rgrcRects[index];
 }
 
 client_sprite_t* gHUD::GetSpriteFromList(client_sprite_t* pList, const char* psz, int iRes, int iCount)

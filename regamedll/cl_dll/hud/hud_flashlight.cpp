@@ -27,9 +27,9 @@ int CHudFlashlight::VidInit(void)
 	m_hSprite1 = gHUD::GetSprite(HUD_flash_empty);
 	m_hSprite2 = gHUD::GetSprite(HUD_flash_full);
 	m_hBeam = gHUD::GetSprite(HUD_flash_beam);
-	m_prc1 = gHUD::GetSpriteRect(HUD_flash_empty);
-	m_prc2 = gHUD::GetSpriteRect(HUD_flash_full);
-	m_prcBeam = gHUD::GetSpriteRect(HUD_flash_beam);
+	m_prc1 = *gHUD::GetSpriteRect(HUD_flash_empty);
+	m_prc2 = *gHUD::GetSpriteRect(HUD_flash_full);
+	m_prcBeam = *gHUD::GetSpriteRect(HUD_flash_beam);
 	m_iWidth = m_prc2.right - m_prc2.left;
 
 	return 1;

@@ -13,7 +13,7 @@ struct DeathNoticeItem
 	bool	m_bHeadshot;
 	bool	m_bGhostKill;
 	hSprite	m_hWeaponSprite;
-	wrect_t m_pWeaponSpriteInfo;
+	wrect_t m_rcWeaponSpriteInfo;
 	float	m_flTimeToRemove;
 	float*	m_rgflVictimColour;
 	float*	m_rgflKillerColour;

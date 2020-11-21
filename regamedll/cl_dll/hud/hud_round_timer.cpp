@@ -127,9 +127,9 @@ int CHudRoundTimer::Draw(float flTime)
 	int x, y, w, yc2;
 
 	if (ScreenWidth < 640)
-		w = ScreenWidth - (5 * (gHUD::GetSpriteRect(gHUD::m_HUD_number_0).right - gHUD::GetSpriteRect(gHUD::m_HUD_number_0).left));
+		w = ScreenWidth - (5 * (gHUD::GetSpriteRect(gHUD::m_HUD_number_0)->right - gHUD::GetSpriteRect(gHUD::m_HUD_number_0)->left));
 	else
-		w = ScreenWidth - (4 * (gHUD::GetSpriteRect(gHUD::m_HUD_number_0).right - gHUD::GetSpriteRect(gHUD::m_HUD_number_0).left));
+		w = ScreenWidth - (4 * (gHUD::GetSpriteRect(gHUD::m_HUD_number_0)->right - gHUD::GetSpriteRect(gHUD::m_HUD_number_0)->left));
 
 	x = w / 2;
 
@@ -141,7 +141,7 @@ int CHudRoundTimer::Draw(float flTime)
 	if (ScreenWidth >= 400)
 	{
 		gEngfuncs.pfnSPR_Set(gHUD::GetSprite(m_HUD_stopwatch), r, g, b);
-		gEngfuncs.pfnSPR_DrawAdditive(0, gHUD::GetSpriteRect(m_HUD_stopwatch).left + x - gHUD::GetSpriteRect(m_HUD_stopwatch).right, y, &gHUD::GetSpriteRect(m_HUD_stopwatch));
+		gEngfuncs.pfnSPR_DrawAdditive(0, gHUD::GetSpriteRect(m_HUD_stopwatch)->left + x - gHUD::GetSpriteRect(m_HUD_stopwatch)->right, y, gHUD::GetSpriteRect(m_HUD_stopwatch));
 	}
 
 	yc2 = y - (gHUD::m_iFontEngineHeight - gHUD::m_iFontHeight) / 2 - 1;
@@ -150,9 +150,9 @@ int CHudRoundTimer::Draw(float flTime)
 	if (m_HUD_colon != -1)
 	{
 		gEngfuncs.pfnSPR_Set(gHUD::GetSprite(m_HUD_colon), r, g, b);
-		gEngfuncs.pfnSPR_DrawAdditive(0, x, y, &gHUD::GetSpriteRect(m_HUD_colon));
+		gEngfuncs.pfnSPR_DrawAdditive(0, x, y, gHUD::GetSpriteRect(m_HUD_colon));
 
-		x += gHUD::GetSpriteRect(m_HUD_colon).right - gHUD::GetSpriteRect(m_HUD_colon).left;
+		x += gHUD::GetSpriteRect(m_HUD_colon)->right - gHUD::GetSpriteRect(m_HUD_colon)->left;
 	}
 	else
 	{
@@ -161,7 +161,7 @@ int CHudRoundTimer::Draw(float flTime)
 
 	x = gHUD::DrawHudNumber(x, y, DHN_2DIGITS | DHN_DRAWZERO | DHN_FILLZERO, timer_s, r, g, b);
 
-	m_closestRight = float(x) + float(gHUD::GetSpriteRect(gHUD::m_HUD_number_0).right - gHUD::GetSpriteRect(gHUD::m_HUD_number_0).left) * 1.5f;
+	m_closestRight = float(x) + float(gHUD::GetSpriteRect(gHUD::m_HUD_number_0)->right - gHUD::GetSpriteRect(gHUD::m_HUD_number_0)->left) * 1.5f;
 	return 1;
 }
 
