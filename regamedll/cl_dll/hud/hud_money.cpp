@@ -65,7 +65,7 @@ int CHudAccountBalance::Draw(float flTime)
 	wchar_t wszText[64];
 	int iWidth, iHeight;
 	int x = 10;
-	int y = 192 + 10;	// FIXME
+	int y = 240 + 10;	// FIXME
 
 	int r, g, b;
 	int r1, g1, b1;

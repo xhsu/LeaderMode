@@ -343,6 +343,24 @@ public:
 	inline void SetStayLength(float flLength = 0) { m_flStayLength = flLength; }
 };
 
+namespace OverviewMgr
+{
+	// variables
+	extern float m_flZoom;
+	extern Vector2D m_vecOrigin;
+	extern bool m_bRotated;
+	extern GLuint m_iIdTexture;
+	extern int m_iHeight;
+	extern int m_iWidth;
+	extern Matrix3x3 m_mxTransform;
+
+	// event calls.
+	void OnHUDReset(void);
+
+	// functions
+	bool LoadOverviewInfo(const char* pszFilePath);
+};
+
 extern CScreenFade gScreenFadeMgr;
 
 extern hud_player_info_t g_PlayerInfoList[MAX_PLAYERS + 1];

@@ -1275,7 +1275,7 @@ DECLARE_EVENT(FireM45A1)
 		args->bparam1 = g_iRoleType == Role_Assassin;	// needs convertion for local EV.
 
 	// original goldsrc api: VOL = 1.0, ATTN = 0.6
-	EV_PlayGunFire(idx, M45A1_FIRE_SFX, args->bparam1 ? QUIET_GUN_VOLUME : M45A1_GUN_VOLUME, vecSrc + forward * 10.0f);
+	EV_PlayGunFire(idx, args->bparam1 ? M45A1_FIRE_SFX_SIL : M45A1_FIRE_SFX, args->bparam1 ? QUIET_GUN_VOLUME : M45A1_GUN_VOLUME, vecSrc + forward * 10.0f);
 
 	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, M45A1_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_DEAGLE].m_iAmmoType, M45A1_PENETRATION);
 }

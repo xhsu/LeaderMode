@@ -119,6 +119,22 @@ void AngleQuaternion(float* angles, vec4_t quaternion)
 	quaternion[3] = cr * cp * cy + sr * sp * sy;
 }
 
+void BuildMatrix2x2ByIJ(const vec_t* i_hat, const vec_t* j_hat, vec_t(*output)[2])
+{
+	output[0][0] = i_hat[0];
+	output[0][1] = j_hat[0];
+	output[1][0] = i_hat[1];
+	output[1][1] = j_hat[1];
+}
+
+void Matrix2x2Composition(const vec_t** left, const vec_t** right, vec_t(*output)[2])
+{
+	output[0][0] = left[0][0] * right[0][0] + left[0][1] * right[1][0];
+	output[0][1] = left[0][0] * right[0][1] + left[0][1] * right[1][1];
+	output[1][0] = left[1][0] * right[0][0] + left[1][1] * right[1][0];
+	output[1][1] = left[1][0] * right[0][1] + left[1][1] * right[1][1];
+}
+
 void UTIL_StringToVector(float* pVector, const char* pString)
 {
 	char* pstr, * pfront, tempString[128];

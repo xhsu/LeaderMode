@@ -54,6 +54,10 @@ void VectorTransform(const float* in1, float in2[3][4], float* out);
 void QuaternionSlerp(vec4_t p, vec4_t q, float t, vec4_t qt);
 void AngleQuaternion(float* angles, vec4_t quaternion);
 
+// 2x2 matrics and Vector2D
+void BuildMatrix2x2ByIJ(const vec_t* i_hat, const vec_t* j_hat, vec_t(*output)[2]);
+void Matrix2x2Composition(const vec_t **left, const vec_t **right, vec_t(*output)[2]);
+
 inline void UnpackRGB(int& r, int& g, int& b, unsigned long ulRGB)
 {
 	r = (ulRGB & 0xFF0000) >> 16;

@@ -117,6 +117,7 @@ public:
 			y > -tolerance && y < tolerance);
 	}
 
+	// anti-clockwise.
 	Vector2D Rotate(float angle) const
 	{
 		float a, c, s;
@@ -127,6 +128,20 @@ public:
 
 		return Vector2D(c * x - s * y,
 						s * x + c * y
+		);
+	}
+
+	Vector2D Transform(const vec_t** matrix) const
+	{
+		/*
+		| a  b | | x |   | ax + by |
+		|      | |   | = |         |
+		| c  d | | y |   | cx + dy |
+		*/
+
+		return Vector2D(
+			matrix[0][0] * x + matrix[0][1] * y,
+			matrix[1][0] * x + matrix[1][1] * y
 		);
 	}
 
@@ -142,6 +157,294 @@ inline real_t DotProduct(const Vector2D &a, const Vector2D &b)
 inline Vector2D operator*(float fl, const Vector2D &v)
 {
 	return v * fl;
+}
+
+inline float operator^(const Vector2D& a, const Vector2D& b)
+{
+	float length_ab = a.Length() * b.Length();
+
+	if (length_ab == 0.0)
+		return 0.0;
+
+	return (double)(Q_acos(DotProduct(a, b) / length_ab) * (180.0 / M_PI));
+}
+
+// 2x2 Matrix
+class Matrix2x2
+{
+public:
+	// Construction/destruction
+	constexpr Matrix2x2() : a(1), b(0), c(0), d(1) {}
+	constexpr Matrix2x2(float A, float B, float C, float D) : a(A), b(B), c(C), d(D) {}
+	constexpr Matrix2x2(const Vector2D& i_hat, const Vector2D& j_hat) : a(i_hat.x), b(j_hat.x), c(i_hat.y), d(j_hat.y) {}
+	Matrix2x2(const Matrix2x2& m) { *(int*)&a = *(int*)&m.a; *(int*)&b = *(int*)&m.b; *(int*)&c = *(int*)&m.c; *(int*)&d = *(int*)&m.d;}
+	Matrix2x2(const float rgfl[4]) { *(int*)&a = *(int*)&rgfl[0]; *(int*)&b = *(int*)&rgfl[1]; *(int*)&c = *(int*)&rgfl[2]; *(int*)&d = *(int*)&rgfl[3];}
+	Matrix2x2(const float rgfl[2][2]) { *(int*)&a = *(int*)&rgfl[0][0]; *(int*)&b = *(int*)&rgfl[0][1]; *(int*)&c = *(int*)&rgfl[1][0]; *(int*)&d = *(int*)&rgfl[1][1]; }
+	Matrix2x2(float flAngle)	// by a anti-clockwise rotation.
+	{
+		auto rad = (flAngle * M_PI / 180.0);
+		auto sine = Q_sin(rad);
+		auto cosine = Q_cos(rad);
+
+		a = cosine;	b = -sine;
+		c = sine;	d = cosine;
+	}
+
+	// Operators
+	decltype(auto) operator-()			const { return Matrix2x2(d, -b, -c, a); }	// Inverse matrix
+	bool operator==(const Matrix2x2& m) const { return a == m.a && b == m.b && c == m.c && d == m.d; }
+	bool operator!=(const Matrix2x2& m) const { return !(*this == m); }
+
+	decltype(auto) operator+(const Matrix2x2& m) const { return Matrix2x2(a + m.a, b + m.b, c + m.c, d + m.d); }
+	decltype(auto) operator-(const Matrix2x2& m) const { return Matrix2x2(a - m.a, b - m.b, c - m.c, d - m.d); }
+	decltype(auto) operator*(const Matrix2x2& m) const { return Matrix2x2(a * m.a + b * m.c, a * m.b + b * m.d, c * m.a + d * m.c, c * m.b + d * m.d); }
+
+	decltype(auto) operator+=(const Matrix2x2& m) { return (*this = *this + m); }
+	decltype(auto) operator-=(const Matrix2x2& m) { return (*this = *this - m); }
+	decltype(auto) operator*=(const Matrix2x2& m) { return (*this = *this * m); }
+
+	decltype(auto) operator=(std::nullptr_t) { return Matrix2x2(0, 0, 0, 0); }
+	decltype(auto) operator*(float fl) const { return Matrix2x2(a * fl, b * fl, c * fl, d * fl); }
+	decltype(auto) operator/(float fl) const { return Matrix2x2(a / fl, b / fl, c / fl, d / fl); }
+
+	decltype(auto) operator*=(float fl) { return (*this = *this * fl); }
+	decltype(auto) operator/=(float fl) { return (*this = *this / fl); }
+
+	operator float* () { return &a; }
+	operator const float* () const { return &a; }
+
+	// Methods
+	void Clear() { a = 0; b = 0; c = 0; d = 0; }
+	static decltype(auto) Identity()	{ return Matrix2x2(1, 0, 0, 1); }
+	static decltype(auto) Zero()		{ return Matrix2x2(0, 0, 0, 0); }
+
+	// Members
+	vec_t a, b, c, d;
+};
+
+inline Matrix2x2 operator*(float fl, const Matrix2x2& m)
+{
+	return m * fl;
+}
+
+inline Vector2D operator*(const Matrix2x2& m, const Vector2D& v)
+{
+	/*
+	| a  b | | x |   | ax + by |
+	|      | |   | = |         |
+	| c  d | | y |   | cx + dy |
+	*/
+
+	return Vector2D(
+		m.a * v.x + m.b * v.y,
+		m.c * v.x + m.d * v.y
+	);
+}
+
+// 3x3 Matrix
+class Matrix3x3
+{
+public:
+	// Construction/destruction
+	constexpr Matrix3x3() noexcept {}
+	constexpr Matrix3x3(const Matrix3x3& s) = default;
+	constexpr Matrix3x3(Matrix3x3&& s) = default;
+	Matrix3x3& operator=(const Matrix3x3& s) = default;
+	Matrix3x3& operator=(Matrix3x3&& s) = default;
+	~Matrix3x3() {}
+
+	Matrix3x3(const float rgfl[3][3]) { memcpy(&dat, &rgfl, sizeof(dat)); }
+	Matrix3x3(float a, float b, float c, float d, float e, float f, float g, float h, float i)
+	{
+		dat[0][0] = a; dat[0][1] = b; dat[0][2] = c;
+		dat[1][0] = d; dat[1][1] = e; dat[1][2] = f;
+		dat[2][0] = g; dat[2][1] = h; dat[2][2] = i;
+	}
+
+	// Static Methods
+	static decltype(auto) Identity()
+	{
+		return Matrix3x3(
+			1, 0, 0,
+			0, 1, 0,
+			0, 0, 1
+		);
+	}
+
+	static decltype(auto) Zero()
+	{
+		return Matrix3x3(
+			0, 0, 0,
+			0, 0, 0,
+			0, 0, 0
+		);
+	}
+
+	static decltype(auto) Rotation2D(float flAngle)
+	{
+		auto rad = (flAngle * M_PI / 180.0);
+		auto sine = Q_sin(rad);
+		auto cosine = Q_cos(rad);
+
+		Matrix3x3 m;
+		m.dat[0][0] = cosine;	m.dat[0][1] = -sine;	m.dat[0][2] = 0;
+		m.dat[1][0] = sine;		m.dat[1][1] = cosine;	m.dat[1][2] = 0;
+		m.dat[2][0] = 0;		m.dat[2][1] = 0;		m.dat[2][2] = 1;
+
+		return m;
+	}
+
+	static decltype(auto) Translation2D(const Vector2D& v)
+	{
+		Matrix3x3 m = Matrix3x3::Identity();
+
+		m.dat[0][2] = v.x;
+		m.dat[1][2] = v.y;
+
+		return m;
+	}
+
+	// Operators
+	decltype(auto) operator-()			const	// Inverse matrix
+	{
+		vec_t invdet = 1.0f / Det();
+
+		Matrix3x3 mxInv;
+		mxInv.dat[0][0] = (dat[1][1] * dat[2][2] - dat[2][1] * dat[1][2]) * invdet;
+		mxInv.dat[0][1] = (dat[0][2] * dat[2][1] - dat[0][1] * dat[2][2]) * invdet;
+		mxInv.dat[0][2] = (dat[0][1] * dat[1][2] - dat[0][2] * dat[1][1]) * invdet;
+		mxInv.dat[1][0] = (dat[1][2] * dat[2][0] - dat[1][0] * dat[2][2]) * invdet;
+		mxInv.dat[1][1] = (dat[0][0] * dat[2][2] - dat[0][2] * dat[2][0]) * invdet;
+		mxInv.dat[1][2] = (dat[1][0] * dat[0][2] - dat[0][0] * dat[1][2]) * invdet;
+		mxInv.dat[2][0] = (dat[1][0] * dat[2][1] - dat[2][0] * dat[1][1]) * invdet;
+		mxInv.dat[2][1] = (dat[2][0] * dat[0][1] - dat[0][0] * dat[2][1]) * invdet;
+		mxInv.dat[2][2] = (dat[0][0] * dat[1][1] - dat[1][0] * dat[0][1]) * invdet;
+
+		return mxInv;
+	}
+
+	bool operator==(const Matrix3x3& m) const { return !memcmp(&dat, &m.dat, sizeof(dat)); }
+	bool operator!=(const Matrix3x3& m) const { return !(*this == m); }
+
+	decltype(auto) operator+(const Matrix3x3& m) const
+	{
+		Matrix3x3 mx;
+
+		for (size_t i = 0; i < 3; i++)
+		{
+			mx.dat[i][0] = dat[i][0] + m.dat[i][0];
+			mx.dat[i][1] = dat[i][1] + m.dat[i][1];
+			mx.dat[i][2] = dat[i][2] + m.dat[i][2];
+		}
+
+		return mx;
+	}
+
+	decltype(auto) operator-(const Matrix3x3& m) const
+	{
+		Matrix3x3 mx;
+
+		for (size_t i = 0; i < 3; i++)
+		{
+			mx.dat[i][0] = dat[i][0] - m.dat[i][0];
+			mx.dat[i][1] = dat[i][1] - m.dat[i][1];
+			mx.dat[i][2] = dat[i][2] - m.dat[i][2];
+		}
+
+		return mx;
+	}
+
+	decltype(auto) operator*(const Matrix3x3& m) const
+	{
+		Matrix3x3 mx;
+
+		mx.dat[0][0] = dat[0][0] * m.dat[0][0] + dat[0][1] * m.dat[1][0] + dat[0][2] * m.dat[2][0];
+		mx.dat[0][1] = dat[0][0] * m.dat[0][1] + dat[0][1] * m.dat[1][1] + dat[0][2] * m.dat[2][1];
+		mx.dat[0][2] = dat[0][0] * m.dat[0][2] + dat[0][1] * m.dat[1][2] + dat[0][2] * m.dat[2][2];
+		mx.dat[1][0] = dat[1][0] * m.dat[0][0] + dat[1][1] * m.dat[1][0] + dat[1][2] * m.dat[2][0];
+		mx.dat[1][1] = dat[1][0] * m.dat[0][1] + dat[1][1] * m.dat[1][1] + dat[1][2] * m.dat[2][1];
+		mx.dat[1][2] = dat[1][0] * m.dat[0][2] + dat[1][1] * m.dat[1][2] + dat[1][2] * m.dat[2][2];
+		mx.dat[2][0] = dat[2][0] * m.dat[0][0] + dat[2][1] * m.dat[1][0] + dat[2][2] * m.dat[2][0];
+		mx.dat[2][1] = dat[2][0] * m.dat[0][1] + dat[2][1] * m.dat[1][1] + dat[2][2] * m.dat[2][1];
+		mx.dat[2][2] = dat[2][0] * m.dat[0][2] + dat[2][1] * m.dat[1][2] + dat[2][2] * m.dat[2][2];
+
+		return mx;
+	}
+
+	decltype(auto) operator+=(const Matrix3x3& m) { return (*this = *this + m); }
+	decltype(auto) operator-=(const Matrix3x3& m) { return (*this = *this - m); }
+	decltype(auto) operator*=(const Matrix3x3& m) { return (*this = *this * m); }
+
+	decltype(auto) operator=(std::nullptr_t) { return Zero(); }
+	decltype(auto) operator*(float fl) const
+	{
+		Matrix3x3 mx;
+
+		for (size_t i = 0; i < 3; i++)
+		{
+			mx.dat[i][0] = dat[i][0] * fl;
+			mx.dat[i][1] = dat[i][1] * fl;
+			mx.dat[i][2] = dat[i][2] * fl;
+		}
+
+		return mx;
+	}
+	decltype(auto) operator/(float fl) const
+	{
+		Matrix3x3 mx;
+
+		for (size_t i = 0; i < 3; i++)
+		{
+			mx.dat[i][0] = dat[i][0] / fl;
+			mx.dat[i][1] = dat[i][1] / fl;
+			mx.dat[i][2] = dat[i][2] / fl;
+		}
+
+		return mx;
+	}
+
+	decltype(auto) operator*=(float fl) { return (*this = *this * fl); }
+	decltype(auto) operator/=(float fl) { return (*this = *this / fl); }
+
+	operator float* () { return &dat[0][0]; }
+	operator const float* () const { return &dat[0][0]; }
+
+	// Methods
+	vec_t Det(void) const
+	{
+		return	dat[0][0] * (dat[1][1] * dat[2][2] - dat[2][1] * dat[1][2]) -
+				dat[0][1] * (dat[1][0] * dat[2][2] - dat[1][2] * dat[2][0]) +
+				dat[0][2] * (dat[1][0] * dat[2][1] - dat[1][1] * dat[2][0]);
+	}
+
+	// Members
+	vec_t dat[3][3]
+	{
+		{1, 0, 0},
+		{0, 1, 0},
+		{0, 0, 1}
+	};
+};
+
+inline Matrix3x3 operator*(float fl, const Matrix3x3& m)
+{
+	return m * fl;
+}
+
+inline Vector2D operator*(const Matrix3x3& m, const Vector2D& v)
+{
+	/*
+	| a  b  u | | x |   | ax + by + u |
+	| c  d  v | | y | = | cx + dy + v |
+	| 0  0  1 | | 1 |   |      1      |
+
+	For the practice sake, we just ignore the additional [1] from the last row.
+	*/
+
+	return Vector2D(
+		m.dat[0][0] * v.x + m.dat[0][1] * v.y + m.dat[0][2],
+		m.dat[1][0] * v.x + m.dat[1][1] * v.y + m.dat[1][2]
+	);
 }
 
 // 3D Vector
@@ -439,16 +742,6 @@ inline float operator^(const Vector& a, const Vector& b)
 		return 0.0;
 
 	return (double)(Q_acos(DotProduct(a, b) / length_ab) * (180.0 / M_PI));
-}
-
-inline float operator^(const Vector2D& a, const Vector2D& b)
-{
-	float length_ab = a.Length() * b.Length();
-
-	if (length_ab == 0.0)
-		return 0.0;
-
-	return (double)(Q_acos(DotProduct2D(a, b) / length_ab) * (180.0 / M_PI));
 }
 
 template<

@@ -37,10 +37,17 @@ namespace DrawUtils
 {
 	void Draw2DQuad(float x1, float y1, float x2, float y2);
 	void Draw2DQuadNoTex(float x1, float y1, float x2, float y2);
+	void Draw2DQuadCustomTex(float x1, float y1, float x2, float y2, float u1, float v1, float u2, float v2);
+	void Draw2DQuadCustomTex(float x1, float y1, float x2, float y2, const Vector2D* vecs);
 	void Draw2DLinearProgressBar(float x, float y, float flWidth, float flFullLength, float flPercent);
 	void Draw2DHollowQuad(float x, float y, float flWidth, float flHeight);
 	void Draw2DQuadProgressBar(float x, float y, float flInnerWidth, float flInnerHeight, float flThickness, float flPercent);
 	void Draw2DQuadProgressBar2(float x, float y, float flTotalWidth, float flTotalHeight, float flThickness, float flPercent);
+
+	inline void Draw2DQuad(const Vector2D& lefttop, const Vector2D& rightbottom) { Draw2DQuad(lefttop.x, lefttop.y, rightbottom.x, rightbottom.y); }
+	inline void Draw2DQuadNoTex(const Vector2D& lefttop, const Vector2D& rightbottom) { Draw2DQuadNoTex(lefttop.x, lefttop.y, rightbottom.x, rightbottom.y); }
+	inline void Draw2DQuadCustomTex(const Vector2D& lefttop, const Vector2D& rightbottom, const Vector2D& texLT, const Vector2D& texRB) { Draw2DQuadCustomTex(lefttop.x, lefttop.y, rightbottom.x, rightbottom.y, texLT.x, texLT.y, texRB.x, texRB.y); }
+	inline void Draw2DQuadCustomTex(const Vector2D& lefttop, const Vector2D& rightbottom, const Vector2D* vecs) { Draw2DQuadCustomTex(lefttop.x, lefttop.y, rightbottom.x, rightbottom.y, vecs); }
 }
 
 // export funcs

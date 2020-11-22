@@ -551,7 +551,7 @@ void CHudSpectator::LoadMapSprites()
 		m_MapSprite = gEngfuncs.LoadMapSprite(m_OverviewData.layersImages[0]);
 	}
 	else
-		m_MapSprite = NULL; // the standard "unknown map" sprite will be used instead
+		m_MapSprite = nullptr; // the standard "unknown map" sprite will be used instead
 }
 
 bool CHudSpectator::ParseOverviewFile()
@@ -561,7 +561,7 @@ bool CHudSpectator::ParseOverviewFile()
 	char token[1024] = { 0 };
 	float height;
 
-	char* pfile = NULL;
+	char* pfile = nullptr;
 
 	Q_memset(&m_OverviewData, 0, sizeof(m_OverviewData));
 

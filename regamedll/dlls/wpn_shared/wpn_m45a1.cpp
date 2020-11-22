@@ -268,7 +268,15 @@ bool CM45A1::Reload()
 		return true;
 	}
 
-	// TODO: add a magcheck anim.
+	// KF2 ???
+	if (m_pPlayer->pev->weaponanim != M45A1_CHECK_MAGAZINE)
+	{
+		if (m_bInZoom)
+			SecondaryAttack();
+
+		SendWeaponAnim(M45A1_CHECK_MAGAZINE);
+		m_flTimeWeaponIdle = M45A1_CHECK_MAGAZINE_TIME;
+	}
 
 	return false;
 }

@@ -136,6 +136,10 @@ GLuint gl_load_dds(GLvoid* pBuffer, int* iWidth, int* iHeight)
 	glGenTextures(1, &iTextureID);
 	glBindTexture(GL_TEXTURE_2D, iTextureID);
 
+	// LUNA: prevent coord > 1.
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
 	switch (compressFormat)
 	{
 	case D3DFMT_DXT1:
@@ -171,6 +175,11 @@ GLuint LoadDDS(const char* szFile, int* iWidth, int* iHeight)
 	FileHandle_t fp;
 	int		size;
 	void*	data;
+
+	if (iWidth)
+		*iWidth = 0;
+	if (iHeight)
+		*iHeight = 0;
 
 	//fp = fopen(szFile, "rb");
 	fp = FILE_SYSTEM->Open(szFile, "rb");

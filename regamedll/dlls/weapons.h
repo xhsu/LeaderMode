@@ -1506,7 +1506,8 @@ public:	// util funcs
 
 #define M45A1_VIEW_MODEL	"models/weapons/v_m45a1.mdl"
 #define M45A1_WORLD_MODEL	"models/w_elite.mdl"	// FIXME, BUGBUG
-#define M45A1_FIRE_SFX		"weapons/M45A1/M45_Shoot.wav"
+#define M45A1_FIRE_SFX		"weapons/m45a1/m45a1_fire.wav"
+#define M45A1_FIRE_SFX_SIL	"weapons/m45a1/m45a1_fire_sil.wav"
 
 constexpr float M45A1_MAX_SPEED				= 250.0f;
 constexpr float M45A1_RELOAD_EMPYT_TIME		= 2.6f;
@@ -1524,6 +1525,7 @@ constexpr float M45A1_SH_RELOAD_EMPTY_TIME	= 2.833F;
 constexpr float M45A1_SH_RELOAD_TIME		= 2.1667F;
 constexpr float M45A1_SH_DASH_ENTER_TIME	= 0.33333F;
 constexpr float M45A1_SH_DASH_EXIT_TIME		= 0.65F;
+constexpr float M45A1_CHECK_MAGAZINE_TIME	= 2.06667F;
 constexpr float M45A1_DAMAGE				= 36.0f;
 constexpr float M45A1_RANGE_MODIFER			= 1.131980371;	// 80% damage @900 inches.
 constexpr float M45A1_FIRE_INTERVAL			= 0.2f;
@@ -1557,7 +1559,8 @@ enum m45a1_e
 	M45A1_SH_RELOAD,
 	M45A1_SH_DASH_ENTER,
 	M45A1_SH_DASHING,
-	M45A1_SH_DASH_EXIT
+	M45A1_SH_DASH_EXIT,
+	M45A1_CHECK_MAGAZINE
 };
 
 class CM45A1 : public CBaseWeapon
@@ -1578,7 +1581,7 @@ public:	// CL exclusive functions.
 	static constexpr int BITS_SLIDE_STOP_ANIM = (1 << M45A1_IDLE) |
 												(1 << M45A1_DRAW) |
 												(1 << M45A1_HOLSTER) |
-												/*(1 << M45A1_CHECK_MAGAZINE) |*/	// FIXME, TODO
+												(1 << M45A1_CHECK_MAGAZINE) |
 												(1 << M45A1_LHAND_DOWN) | (1 << M45A1_LHAND_UP) |
 												(1 << M45A1_BLOCK_DOWN) | (1 << M45A1_BLOCK_UP) |
 												(1 << M45A1_DASH_ENTER) | (1 << M45A1_DASHING) | (1 << M45A1_DASH_EXIT) |

@@ -144,4 +144,6 @@ private:
 	int m_lastSecondaryObject;
 	int m_lastAutoDirector;
 	cameraWayPoint_t m_CamPath[MAX_CAM_WAYPOINTS];
+
+	friend class CHudRadar;
 };

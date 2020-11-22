@@ -134,6 +134,10 @@ MSG_FUNC(ResetHUD)
 {
 	// this msg have no arguments.
 
+	// reset the overview first.
+	OverviewMgr::OnHUDReset();
+
+	// then goes the regular elements.
 	for (auto pHudElem : gHUD::m_lstHudElements)
 	{
 		pHudElem->Reset();

@@ -27,6 +27,93 @@ void HideRadar(void)
 	gHUD::m_Radar.m_bDrawRadar = false;
 }
 
+bool LoadOverviewInfo(const char* fileName, overview_t* data)
+{
+	char* buffer = (char*)gEngfuncs.COM_LoadFile((char*)fileName, 5, nullptr);
+	if (!buffer) {
+		return false;
+	}
+	char* parsePos = buffer;
+	char token[128];
+	bool parseSuccess = false;
+	while (true) {
+		parsePos = gEngfuncs.COM_ParseFile(parsePos, token);
+		if (!parsePos) {
+			break;
+		}
+		if (!Q_stricmp(token, "global")) {
+			parsePos = gEngfuncs.COM_ParseFile(parsePos, token);
+			if (!parsePos) {
+				goto error;
+			}
+			if (Q_stricmp(token, "{")) {
+				goto error;
+			}
+			while (true) {
+				parsePos = gEngfuncs.COM_ParseFile(parsePos, token);
+				if (!parsePos) {
+					goto error;
+				}
+				if (!Q_stricmp(token, "zoom")) {
+					parsePos = gEngfuncs.COM_ParseFile(parsePos, token);
+					data->zoom = atof(token);
+				}
+				else if (!Q_stricmp(token, "origin")) {
+					parsePos = gEngfuncs.COM_ParseFile(parsePos, token);
+					data->originX = atof(token);
+					parsePos = gEngfuncs.COM_ParseFile(parsePos, token);
+					data->originY = atof(token);
+					parsePos = gEngfuncs.COM_ParseFile(parsePos, token);
+				}
+				else if (!Q_stricmp(token, "rotated")) {
+					parsePos = gEngfuncs.COM_ParseFile(parsePos, token);
+					data->rotated = atoi(token) != 0;
+				}
+				else if (!Q_stricmp(token, "}")) {
+					break;
+				}
+				else {
+					goto error;
+				}
+			}
+		}
+		else if (!Q_stricmp(token, "layer")) {
+			parsePos = gEngfuncs.COM_ParseFile(parsePos, token);
+			if (!parsePos) {
+				goto error;
+			}
+			if (strcmp(token, "{")) {
+				goto error;
+			}
+			while (true) {
+				parsePos = gEngfuncs.COM_ParseFile(parsePos, token);
+				if (!Q_stricmp(token, "image")) {
+					parsePos = gEngfuncs.COM_ParseFile(parsePos, token);
+					data->textureId = LoadDDS(token);
+				}
+				else if (!Q_stricmp(token, "height")) {
+					parsePos = gEngfuncs.COM_ParseFile(parsePos, token);
+				}
+				else if (!Q_stricmp(token, "}")) {
+					break;
+				}
+				else {
+					goto error;
+				}
+			}
+		}
+		else {
+			goto error;
+		}
+	}
+	parseSuccess = true;
+error:
+	if (buffer) {
+		gEngfuncs.COM_FreeFile(buffer);
+	}
+	return parseSuccess;
+}
+
 int CHudRadar::Init(void)
 {
 	gEngfuncs.pfnAddCommand("trackplayer", TrackPlayer);
@@ -72,7 +159,32 @@ int CHudRadar::VidInit(void)
 
 	m_hRadar = gHUD::GetSprite(m_HUD_radar);
 	m_hRadaropaque = gHUD::GetSprite(m_HUD_radaropaque);
+
 	return 1;
+}
+
+void CHudRadar::Reset(void)
+{
+	// map
+	char szPath[128], szMap[64];
+	Q_strcpy(szMap, gEngfuncs.pfnGetLevelName() + 5U);
+	szMap[Q_strlen(szMap) - 4U] = 0;
+
+	Q_sprintf(szPath, "overviews/%s.dds", szMap);
+	//m_pMapSprite = gEngfuncs.LoadMapSprite(szPath);
+	m_Overview.m_iId = LoadDDS(szPath, &m_Overview.m_iWidth, &m_Overview.m_iHeight);
+
+	Q_sprintf(szPath, "overviews/%s.txt", szMap);
+	LoadOverviewInfo(szPath, &m_OVData);
+
+	if (m_Overview.m_iId)
+	{
+		m_Overview.m_vecScale.x = 8192.0f / m_OVData.zoom;
+		m_Overview.m_vecScale.y = 8192.0f / m_OVData.zoom / float(4.0 / 3.0);
+
+		m_Overview.m_vecScale.x /= float(m_Overview.m_iWidth);
+		m_Overview.m_vecScale.y /= float(m_Overview.m_iHeight);
+	}
 }
 
 int CHudRadar::Draw(float flTime)
@@ -143,19 +255,23 @@ void CHudRadar::DrawRadarDot(int x, int y, float z_diff, int iBaseDotSize, int f
 }
 
 static constexpr float	RADAR_BORDER = 12;
-static constexpr float	RADAR_HUD_SIZE = 192;
+static constexpr float	RADAR_HUD_SIZE = 240;
 static constexpr float	RADAR_RANGE = 2048;
 static constexpr int	RADAR_ICON_SIZE = 16;
 static const Vector GODFATHER_COLOR_DIFF = VEC_SPRINGGREENISH - VEC_T_COLOUR;
 static const Vector COMMANDER_COLOR_DIFF = VEC_SPRINGGREENISH - VEC_CT_COLOUR;
+
+// view.cpp
+extern Vector v_angles;
 
 void CHudRadar::DrawRadar(float flTime)
 {
 	int iBaseDotSize = 2;
 	Vector color;
 	Vector vecTranslated;
+	bool bClampped = false;
 
-	// draw base board.
+	// draw white board.
 	glDisable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -168,6 +284,54 @@ void CHudRadar::DrawRadar(float flTime)
 
 	glDisable(GL_BLEND);
 	glEnable(GL_TEXTURE_2D);
+
+	if (m_Overview.m_iId)
+	{
+		gEngfuncs.pTriAPI->RenderMode(kRenderTransColor);
+		gEngfuncs.pTriAPI->Brightness(1.0);
+
+		// in order to make transparent fx on dds texture...
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glColor4f(1, 1, 1, 1);
+
+		gEngfuncs.pTriAPI->CullFace(TRI_NONE);
+		
+		glBindTexture(GL_TEXTURE_2D, m_Overview.m_iId);
+
+		// Build two points: left-top and right-bottom
+		Vector2D vecLT = OverviewMgr::m_mxTransform * Vector2D(gHUD::m_vecOrigin.x - RADAR_RANGE / 2.0f, gHUD::m_vecOrigin.y - RADAR_RANGE / 2.0f);
+		Vector2D vecRB = OverviewMgr::m_mxTransform * Vector2D(gHUD::m_vecOrigin.x + RADAR_RANGE / 2.0f, gHUD::m_vecOrigin.y + RADAR_RANGE / 2.0f);
+
+		// and myself.
+		Vector2D vecMe = OverviewMgr::m_mxTransform * Vector2D(gHUD::m_vecOrigin.x, gHUD::m_vecOrigin.y);
+
+		// Build an dynamic matrix. Map the origin onto radar map.
+		Matrix3x3 mxRadarTransform = Matrix3x3::Identity();
+
+		// Step 4: Scale it with the entire texture GL coord, i.e., 0~1
+		mxRadarTransform *= Matrix3x3(
+			1.0f / float(OverviewMgr::m_iWidth),	0.0f,									0.0f,
+			0.0f,									1.0f / float(OverviewMgr::m_iHeight),	0.0f,
+			0.0f,									0.0f,									1.0f
+		);
+
+		// Step 3: Add the centre point back.
+		mxRadarTransform *= Matrix3x3::Translation2D(vecMe);
+
+		// Step 2: Rotate it according to our viewing yaw.
+		mxRadarTransform *= Matrix3x3::Rotation2D(180.0f - v_angles.yaw);
+
+		// Step 1: Subtract it with our own origin, make us right on centre.
+		mxRadarTransform *= Matrix3x3::Translation2D(-vecMe);
+
+		Vector2D vecs[4];
+		vecs[0] = mxRadarTransform * vecLT;
+		vecs[1] = mxRadarTransform * Vector2D(vecRB.x, vecLT.y);
+		vecs[2] = mxRadarTransform * vecRB;
+		vecs[3] = mxRadarTransform * Vector2D(vecLT.x, vecRB.y);
+
+		DrawUtils::Draw2DQuadCustomTex(Vector2D(RADAR_BORDER, RADAR_BORDER), Vector2D(RADAR_BORDER + RADAR_HUD_SIZE, RADAR_BORDER + RADAR_HUD_SIZE), vecs);
+	}
 
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -190,7 +354,11 @@ void CHudRadar::DrawRadar(float flTime)
 			// makes sure that they stay on the radar border..
 			vecTranslated.x = Q_clamp(vecTranslated.x, float(RADAR_ICON_SIZE / 2), float(RADAR_HUD_SIZE - RADAR_ICON_SIZE / 2));
 			vecTranslated.y = Q_clamp(vecTranslated.y, float(RADAR_ICON_SIZE / 2), float(RADAR_HUD_SIZE - RADAR_ICON_SIZE / 2));
+
+			bClampped = true;
 		}
+		else
+			bClampped = false;
 
 		// offset it with the radar location.
 		vecTranslated.x += RADAR_BORDER;
@@ -234,42 +402,70 @@ void CHudRadar::DrawRadar(float flTime)
 			case Role_Assassin:
 			case Role_LeadEnforcer:
 			case Role_MadScientist:
-				glColor4f(VEC_T_COLOUR.r, VEC_T_COLOUR.g, VEC_T_COLOUR.b, 1);
+				color = VEC_T_COLOUR;
 				break;
 
 			case Role_Breacher:
 			case Role_Medic:
 			case Role_Sharpshooter:
 			case Role_SWAT:
-				glColor4f(VEC_CT_COLOUR.r, VEC_CT_COLOUR.g, VEC_CT_COLOUR.b, 1);
+				color = VEC_CT_COLOUR;
 				break;
 
 			case Role_Commander:
 				color = VEC_CT_COLOUR + ((Q_sin(gHUD::m_flTime * 2.0f) + 1.0f) / 2.0f) * COMMANDER_COLOR_DIFF;
-				glColor4f(color.r, color.g, color.b, 1);
 				break;
 
 			case Role_Godfather:
 				color = VEC_T_COLOUR + ((Q_sin(gHUD::m_flTime * 2.0f) + 1.0f) / 2.0f) * GODFATHER_COLOR_DIFF;
-				glColor4f(color.r, color.g, color.b, 1);
 				break;
 
 			default:
-				glColor4f(VEC_YELLOWISH.r, VEC_YELLOWISH.g, VEC_YELLOWISH.b, 1);
+				color = VEC_YELLOWISH;
 				break;
 			}
+
+			// to distinguish, the clampped icons will dim out a little bit.
+			glColor4f(color.r, color.g, color.b, bClampped ? 0.5 : 1.0);
 
 			gEngfuncs.pTriAPI->CullFace(TRI_NONE);
 
 			glBindTexture(GL_TEXTURE_2D, m_rgiRadarIcons[g_PlayerExtraInfo[i].m_iRoleType]);
 			DrawUtils::Draw2DQuad(vecTranslated.x - RADAR_ICON_SIZE / 2, vecTranslated.y - RADAR_ICON_SIZE / 2, vecTranslated.x + RADAR_ICON_SIZE / 2, vecTranslated.y + RADAR_ICON_SIZE / 2);
 
-			/*if (vecTranslated.z != 0)
+			if (Q_abs(vecTranslated.z) > 128)
 			{
-				//glBlendFunc(GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR);
-				glBindTexture(GL_TEXTURE_2D, m_iIdArrow);
-				DrawUtils::Draw2DQuad(vecTranslated.x + RADAR_ICON_SIZE, vecTranslated.y, vecTranslated.x + RADAR_ICON_SIZE * 2, vecTranslated.y + RADAR_ICON_SIZE);
-			}*/
+				glDisable(GL_TEXTURE_2D);
+				glEnable(GL_BLEND);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+				// take the same color for the above/below sign.
+				glColor4f(color.r, color.g, color.b, bClampped ? 0.5 : 1.0);
+
+				Vector2D vecPeak, vecLeftBottom, vecRightBottom;
+
+				if (vecTranslated.z < 0)
+				{
+					vecPeak = Vector2D(vecTranslated.x + RADAR_ICON_SIZE * 0.75, vecTranslated.y + RADAR_ICON_SIZE / 2);
+					vecLeftBottom = Vector2D(vecTranslated.x + RADAR_ICON_SIZE * 0.5, vecTranslated.y);
+					vecRightBottom = Vector2D(vecTranslated.x + RADAR_ICON_SIZE, vecTranslated.y);
+				}
+				else
+				{
+					vecPeak = Vector2D(vecTranslated.x + RADAR_ICON_SIZE * 0.75f, vecTranslated.y - RADAR_ICON_SIZE / 2);
+					vecLeftBottom = Vector2D(vecTranslated.x + RADAR_ICON_SIZE * 0.5, vecTranslated.y);
+					vecRightBottom = Vector2D(vecTranslated.x + RADAR_ICON_SIZE, vecTranslated.y);
+				}
+
+				glBegin(GL_POLYGON);
+				glVertex2f(vecPeak.x, vecPeak.y);
+				glVertex2f(vecLeftBottom.x, vecLeftBottom.y);
+				glVertex2f(vecRightBottom.x, vecRightBottom.y);
+				glEnd();
+
+				glDisable(GL_BLEND);
+				glEnable(GL_TEXTURE_2D);
+			}
 		}
 		else
 			DrawRadarDot(vecTranslated, iBaseDotSize, RADAR_DOT_NORMAL, color.r, color.g, color.b, 235);
@@ -403,10 +599,41 @@ Vector CHudRadar::Translate(const Vector& vecOrigin, float flScanRange, float fl
 	xnew_diff /= flScanRange / flRadarHudRadius;
 	ynew_diff /= flScanRange / flRadarHudRadius;
 
-	Vector vecResult;
-	vecResult.x = (flRadarHudRadius / 2) + round(xnew_diff);
-	vecResult.y = (flRadarHudRadius / 2) + round(ynew_diff);
-	vecResult.z = z_diff;
+	return Vector(	(flRadarHudRadius / 2) + round(xnew_diff),
+					(flRadarHudRadius / 2) + round(ynew_diff),
+					z_diff);
+}
+
+Vector2D CHudRadar::Translate(const Vector& vecOrigin)
+{
+	Vector2D vecResult;
+
+	if (m_OVData.rotated)
+	{
+		vecResult.x = ((vecOrigin.x - m_OVData.originX) / m_Overview.m_vecScale.x) + float(m_Overview.m_iWidth) / 2.0f;
+		vecResult.y = -((vecOrigin.y - m_OVData.originY) / m_Overview.m_vecScale.y) + float(m_Overview.m_iHeight) / 2.0f;
+	}
+	else
+	{
+		vecResult.x = -((vecOrigin.y - m_OVData.originY) / m_Overview.m_vecScale.y) + float(m_Overview.m_iWidth) / 2.0f;
+		vecResult.y = -((vecOrigin.x - m_OVData.originX) / m_Overview.m_vecScale.x) + float(m_Overview.m_iHeight) / 2.0f;
+	}
 
 	return vecResult;
+}
+
+void CHudRadar::Translate(Vector2D& vecOrigin)
+{
+	Vector2D vecCopy = vecOrigin;
+
+	if (m_OVData.rotated)
+	{
+		vecOrigin.x = ((vecCopy.x - m_OVData.originX) / m_Overview.m_vecScale.x) + float(m_Overview.m_iWidth) / 2.0f;
+		vecOrigin.y = -((vecCopy.y - m_OVData.originY) / m_Overview.m_vecScale.y) + float(m_Overview.m_iHeight) / 2.0f;
+	}
+	else
+	{
+		vecOrigin.x = -((vecCopy.y - m_OVData.originY) / m_Overview.m_vecScale.y) + float(m_Overview.m_iWidth) / 2.0f;
+		vecOrigin.y = -((vecCopy.x - m_OVData.originX) / m_Overview.m_vecScale.x) + float(m_Overview.m_iHeight) / 2.0f;
+	}
 }

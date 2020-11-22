@@ -152,6 +152,44 @@ void DrawUtils::Draw2DQuadNoTex(float x1, float y1, float x2, float y2)
 	glEnd();
 }
 
+void DrawUtils::Draw2DQuadCustomTex(float x1, float y1, float x2, float y2, float u1, float v1, float u2, float v2)
+{
+	gEngfuncs.pTriAPI->Begin(TRI_QUADS);
+
+	gEngfuncs.pTriAPI->TexCoord2f(u1, v1);
+	gEngfuncs.pTriAPI->Vertex3f(x1, y1, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f(u1, v2);
+	gEngfuncs.pTriAPI->Vertex3f(x1, y2, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f(u2, v2);
+	gEngfuncs.pTriAPI->Vertex3f(x2, y2, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f(u2, v1);
+	gEngfuncs.pTriAPI->Vertex3f(x2, y1, 0);
+
+	gEngfuncs.pTriAPI->End();
+}
+
+void DrawUtils::Draw2DQuadCustomTex(float x1, float y1, float x2, float y2, const Vector2D* vecs)
+{
+	gEngfuncs.pTriAPI->Begin(TRI_QUADS);
+
+	gEngfuncs.pTriAPI->TexCoord2f(vecs[0].x, vecs[0].y);
+	gEngfuncs.pTriAPI->Vertex3f(x1, y1, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f(vecs[1].x, vecs[1].y);
+	gEngfuncs.pTriAPI->Vertex3f(x2, y1, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f(vecs[2].x, vecs[2].y);
+	gEngfuncs.pTriAPI->Vertex3f(x2, y2, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f(vecs[3].x, vecs[3].y);
+	gEngfuncs.pTriAPI->Vertex3f(x1, y2, 0);
+
+	gEngfuncs.pTriAPI->End();
+}
+
 void DrawUtils::Draw2DLinearProgressBar(float x, float y, float flWidth, float flFullLength, float flPercent)
 {
 	// the border of bar.

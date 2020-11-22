@@ -1166,3 +1166,180 @@ void CScreenFade::Think(void)
 		// then ... it's simply done.. nothing to do else.
 	}
 }
+
+namespace OverviewMgr
+{
+	// variables declaration.
+	float m_flZoom = 0;
+	Vector2D m_vecOrigin = Vector2D();
+	bool m_bRotated = false;
+	GLuint m_iIdTexture = 0U;
+	int m_iHeight = 0;
+	int m_iWidth = 0;
+	Matrix3x3 m_mxTransform = Matrix3x3::Identity();
+};
+
+void OverviewMgr::OnHUDReset(void)
+{
+	m_flZoom = 0;
+	m_vecOrigin = Vector2D();
+	m_bRotated = false;
+	m_iIdTexture = 0U;
+	m_iHeight = 0;
+	m_iWidth = 0;
+	m_mxTransform = Matrix3x3::Identity();
+
+	char szPath[128], szMap[64];
+
+	// remove "maps/" words.
+	Q_strcpy(szMap, gEngfuncs.pfnGetLevelName() + 5U);
+
+	// truncate ".bmp" words.
+	szMap[Q_strlen(szMap) - 4U] = 0;
+
+	// and we can have the txt file read.
+	Q_sprintf(szPath, "overviews/%s.txt", szMap);
+
+	if (!LoadOverviewInfo(szPath))
+		return;
+
+	// Build the constant Transfrom matrix.
+	// The maxtrics composition is interpreted right from the left.
+	// Therefore, when we building these matrics, we have to do it from the last step to the first step.
+
+	// Step 3: Translate it with the sprite origin, make its value from [0~width] or [0~height] respectively.
+	m_mxTransform *= Matrix3x3::Translation2D(Vector2D(OverviewMgr::m_iWidth, OverviewMgr::m_iHeight) / 2.0f);
+
+	// Step 2: Linear transform it, map it on the sprite.
+	// Reference: https://www.cnblogs.com/crsky/p/9441540.html
+	m_mxTransform *= Matrix3x3(
+		1.0f / (8192.0f / m_flZoom / float(m_iWidth)),	0,																	0,
+		0,												1.0f / (8192.0f / m_flZoom / float(4.0 / 3.0) / float(m_iHeight)),	0,
+		0,												0,																	1
+	);
+
+	if (m_bRotated)
+		m_mxTransform *= Matrix3x3(
+			-1,	0,	0,
+			0,	1,	0,
+			0,	0,	1
+		);
+	else
+		m_mxTransform *= Matrix3x3(
+			0,	-1,	0,
+			-1,	0,	0,
+			0,	0,	1
+		);
+
+	// Step 1: Translate the origin, match it with the map sprite origin.
+	m_mxTransform *= Matrix3x3::Translation2D(-m_vecOrigin);
+}
+
+bool OverviewMgr::LoadOverviewInfo(const char* pszFilePath)
+{
+	// API problem. Have to enforce the conversion.
+	char* pszBuffer = (char*)gEngfuncs.COM_LoadFile((char*)pszFilePath, 5, nullptr);
+
+	if (!pszBuffer)
+		return false;
+
+	char* pszParsePos = pszBuffer;
+	char szToken[128];
+	bool bSuccessful = false;
+
+	while (true)
+	{
+		pszParsePos = gEngfuncs.COM_ParseFile(pszParsePos, szToken);
+
+		if (!pszParsePos)
+			break;
+
+		// block1: "GLOBAL"
+		if (!Q_stricmp(szToken, "global"))
+		{
+			pszParsePos = gEngfuncs.COM_ParseFile(pszParsePos, szToken);
+
+			if (!pszParsePos)
+				goto error;
+
+			// the first line followed have to be "{"
+			if (Q_stricmp(szToken, "{"))
+				goto error;
+
+			while (true)
+			{
+				pszParsePos = gEngfuncs.COM_ParseFile(pszParsePos, szToken);
+				if (!pszParsePos)
+					goto error;
+
+				if (!Q_stricmp(szToken, "zoom"))
+				{
+					pszParsePos = gEngfuncs.COM_ParseFile(pszParsePos, szToken);
+					m_flZoom = Q_atof(szToken);
+				}
+				else if (!Q_stricmp(szToken, "origin"))
+				{
+					pszParsePos = gEngfuncs.COM_ParseFile(pszParsePos, szToken);
+					m_vecOrigin.x = Q_atof(szToken);
+					pszParsePos = gEngfuncs.COM_ParseFile(pszParsePos, szToken);
+					m_vecOrigin.y = Q_atof(szToken);
+
+					// we don't need a Z coord, but we have to process it either way.
+					pszParsePos = gEngfuncs.COM_ParseFile(pszParsePos, szToken);
+				}
+				else if (!Q_stricmp(szToken, "rotated"))
+				{
+					pszParsePos = gEngfuncs.COM_ParseFile(pszParsePos, szToken);
+					m_bRotated = !!Q_atoi(szToken);
+				}
+				else if (!Q_stricmp(szToken, "}"))
+					break;
+
+				// there can't be anything else!
+				else
+					goto error;
+			}
+		}
+		else if (!Q_stricmp(szToken, "layer"))
+		{
+			pszParsePos = gEngfuncs.COM_ParseFile(pszParsePos, szToken);
+
+			if (!pszParsePos)
+				goto error;
+
+			if (Q_stricmp(szToken, "{"))
+				goto error;
+
+			while (true)
+			{
+				pszParsePos = gEngfuncs.COM_ParseFile(pszParsePos, szToken);
+
+				if (!Q_stricmp(szToken, "image"))
+				{
+					pszParsePos = gEngfuncs.COM_ParseFile(pszParsePos, szToken);
+					szToken[Q_strlen(szToken) - 4U] = 0;
+					Q_strcat(szToken, ".dds");
+					m_iIdTexture = LoadDDS(szToken, &m_iWidth, &m_iHeight);
+				}
+				else if (!Q_stricmp(szToken, "height"))
+					pszParsePos = gEngfuncs.COM_ParseFile(pszParsePos, szToken);	// useless, but we have to do it.
+
+				else if (!Q_stricmp(szToken, "}"))
+					break;
+				else
+					goto error;
+			}
+		}
+		else
+			goto error;
+	}
+
+	// if "goto error" happenned, it will bypass this line.
+	bSuccessful = true;
+
+error:
+	if (pszBuffer)
+		gEngfuncs.COM_FreeFile(pszBuffer);
+
+	return bSuccessful;
+}
