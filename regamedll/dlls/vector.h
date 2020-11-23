@@ -191,7 +191,7 @@ public:
 	}
 
 	// Operators
-	decltype(auto) operator-()			const { return Matrix2x2(d, -b, -c, a); }	// Inverse matrix
+	decltype(auto) operator~()			const { return Matrix2x2(d, -b, -c, a); }	// Inverse matrix
 	bool operator==(const Matrix2x2& m) const { return a == m.a && b == m.b && c == m.c && d == m.d; }
 	bool operator!=(const Matrix2x2& m) const { return !(*this == m); }
 
@@ -286,26 +286,60 @@ public:
 		auto sine = Q_sin(rad);
 		auto cosine = Q_cos(rad);
 
-		Matrix3x3 m;
-		m.dat[0][0] = cosine;	m.dat[0][1] = -sine;	m.dat[0][2] = 0;
-		m.dat[1][0] = sine;		m.dat[1][1] = cosine;	m.dat[1][2] = 0;
-		m.dat[2][0] = 0;		m.dat[2][1] = 0;		m.dat[2][2] = 1;
-
-		return m;
+		return Matrix3x3(
+			cosine,	-sine,	0,
+			sine,	cosine,	0,
+			0,		0,		1
+		);
 	}
 
 	static decltype(auto) Translation2D(const Vector2D& v)
 	{
-		Matrix3x3 m = Matrix3x3::Identity();
+		return Matrix3x3(
+			1, 0, v.x,
+			0, 1, v.y,
+			0, 0, 1
+		);
+	}
 
-		m.dat[0][2] = v.x;
-		m.dat[1][2] = v.y;
+	static decltype(auto) Stretch2D(float x, float y)
+	{
+		return Matrix3x3(
+			x, 0, 0,
+			0, y, 0,
+			0, 0, 1
+		);
+	}
 
-		return m;
+	static decltype(auto) Stretch2D(float k)
+	{
+		return Matrix3x3(
+			k, 0, 0,
+			0, k, 0,
+			0, 0, 1
+		);
+	}
+
+	static decltype(auto) Squeeze2D(float x, float y)
+	{
+		return Matrix3x3(
+			1.0f / x,	0,			0,
+			0,			1.0f / y,	0,
+			0,			0,			1
+		);
+	}
+
+	static decltype(auto) Squeeze2D(float k)
+	{
+		return Matrix3x3(
+			1.0f / k,	0,			0,
+			0,			1.0f / k,	0,
+			0,			0,			1
+		);
 	}
 
 	// Operators
-	decltype(auto) operator-()			const	// Inverse matrix
+	decltype(auto) operator~()			const	// Inverse matrix
 	{
 		vec_t invdet = 1.0f / Det();
 
@@ -454,9 +488,10 @@ class Vector
 public:
 	// Construction/destruction
 	constexpr Vector() : x(0), y(0), z(0) {}
-	constexpr Vector(float X, float Y, float Z) : x(X), y(Y), z(Z) {}
+	constexpr Vector(vec_t X, vec_t Y, vec_t Z) : x(X), y(Y), z(Z) {}
+	constexpr Vector(const Vector2D& v2d, vec_t Z) : x(v2d.x), y(v2d.y), z(Z) {}
 	Vector(const Vector &v) { *(int *)&x = *(int *)&v.x; *(int *)&y = *(int *)&v.y; *(int *)&z = *(int *)&v.z; }
-	Vector(const float rgfl[3]) { *(int *)&x = *(int *)&rgfl[0]; *(int *)&y = *(int *)&rgfl[1]; *(int *)&z = *(int *)&rgfl[2]; }
+	Vector(const vec_t rgfl[3]) { *(int *)&x = *(int *)&rgfl[0]; *(int *)&y = *(int *)&rgfl[1]; *(int *)&z = *(int *)&rgfl[2]; }
 
 	// Operators
 	decltype(auto) operator-()       const { return Vector(-x, -y, -z); }

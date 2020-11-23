@@ -27,93 +27,6 @@ void HideRadar(void)
 	gHUD::m_Radar.m_bDrawRadar = false;
 }
 
-bool LoadOverviewInfo(const char* fileName, overview_t* data)
-{
-	char* buffer = (char*)gEngfuncs.COM_LoadFile((char*)fileName, 5, nullptr);
-	if (!buffer) {
-		return false;
-	}
-	char* parsePos = buffer;
-	char token[128];
-	bool parseSuccess = false;
-	while (true) {
-		parsePos = gEngfuncs.COM_ParseFile(parsePos, token);
-		if (!parsePos) {
-			break;
-		}
-		if (!Q_stricmp(token, "global")) {
-			parsePos = gEngfuncs.COM_ParseFile(parsePos, token);
-			if (!parsePos) {
-				goto error;
-			}
-			if (Q_stricmp(token, "{")) {
-				goto error;
-			}
-			while (true) {
-				parsePos = gEngfuncs.COM_ParseFile(parsePos, token);
-				if (!parsePos) {
-					goto error;
-				}
-				if (!Q_stricmp(token, "zoom")) {
-					parsePos = gEngfuncs.COM_ParseFile(parsePos, token);
-					data->zoom = atof(token);
-				}
-				else if (!Q_stricmp(token, "origin")) {
-					parsePos = gEngfuncs.COM_ParseFile(parsePos, token);
-					data->originX = atof(token);
-					parsePos = gEngfuncs.COM_ParseFile(parsePos, token);
-					data->originY = atof(token);
-					parsePos = gEngfuncs.COM_ParseFile(parsePos, token);
-				}
-				else if (!Q_stricmp(token, "rotated")) {
-					parsePos = gEngfuncs.COM_ParseFile(parsePos, token);
-					data->rotated = atoi(token) != 0;
-				}
-				else if (!Q_stricmp(token, "}")) {
-					break;
-				}
-				else {
-					goto error;
-				}
-			}
-		}
-		else if (!Q_stricmp(token, "layer")) {
-			parsePos = gEngfuncs.COM_ParseFile(parsePos, token);
-			if (!parsePos) {
-				goto error;
-			}
-			if (strcmp(token, "{")) {
-				goto error;
-			}
-			while (true) {
-				parsePos = gEngfuncs.COM_ParseFile(parsePos, token);
-				if (!Q_stricmp(token, "image")) {
-					parsePos = gEngfuncs.COM_ParseFile(parsePos, token);
-					data->textureId = LoadDDS(token);
-				}
-				else if (!Q_stricmp(token, "height")) {
-					parsePos = gEngfuncs.COM_ParseFile(parsePos, token);
-				}
-				else if (!Q_stricmp(token, "}")) {
-					break;
-				}
-				else {
-					goto error;
-				}
-			}
-		}
-		else {
-			goto error;
-		}
-	}
-	parseSuccess = true;
-error:
-	if (buffer) {
-		gEngfuncs.COM_FreeFile(buffer);
-	}
-	return parseSuccess;
-}
-
 int CHudRadar::Init(void)
 {
 	gEngfuncs.pfnAddCommand("trackplayer", TrackPlayer);
@@ -151,40 +64,7 @@ int CHudRadar::VidInit(void)
 {
 	m_bitsFlags |= HUD_ACTIVE;
 
-	m_HUD_radar = gHUD::GetSpriteIndex("radar");
-	m_HUD_radaropaque = gHUD::GetSpriteIndex("radaropaque");
-
-	m_hrad = gHUD::GetSpriteRect(m_HUD_radar);
-	m_hradopaque = gHUD::GetSpriteRect(m_HUD_radaropaque);
-
-	m_hRadar = gHUD::GetSprite(m_HUD_radar);
-	m_hRadaropaque = gHUD::GetSprite(m_HUD_radaropaque);
-
 	return 1;
-}
-
-void CHudRadar::Reset(void)
-{
-	// map
-	char szPath[128], szMap[64];
-	Q_strcpy(szMap, gEngfuncs.pfnGetLevelName() + 5U);
-	szMap[Q_strlen(szMap) - 4U] = 0;
-
-	Q_sprintf(szPath, "overviews/%s.dds", szMap);
-	//m_pMapSprite = gEngfuncs.LoadMapSprite(szPath);
-	m_Overview.m_iId = LoadDDS(szPath, &m_Overview.m_iWidth, &m_Overview.m_iHeight);
-
-	Q_sprintf(szPath, "overviews/%s.txt", szMap);
-	LoadOverviewInfo(szPath, &m_OVData);
-
-	if (m_Overview.m_iId)
-	{
-		m_Overview.m_vecScale.x = 8192.0f / m_OVData.zoom;
-		m_Overview.m_vecScale.y = 8192.0f / m_OVData.zoom / float(4.0 / 3.0);
-
-		m_Overview.m_vecScale.x /= float(m_Overview.m_iWidth);
-		m_Overview.m_vecScale.y /= float(m_Overview.m_iHeight);
-	}
 }
 
 int CHudRadar::Draw(float flTime)
@@ -262,7 +142,7 @@ static const Vector GODFATHER_COLOR_DIFF = VEC_SPRINGGREENISH - VEC_T_COLOUR;
 static const Vector COMMANDER_COLOR_DIFF = VEC_SPRINGGREENISH - VEC_CT_COLOUR;
 
 // view.cpp
-extern Vector v_angles;
+extern Vector v_angles, v_origin;
 
 void CHudRadar::DrawRadar(float flTime)
 {
@@ -285,7 +165,7 @@ void CHudRadar::DrawRadar(float flTime)
 	glDisable(GL_BLEND);
 	glEnable(GL_TEXTURE_2D);
 
-	if (m_Overview.m_iId)
+	if (OverviewMgr::m_iIdTexture)
 	{
 		gEngfuncs.pTriAPI->RenderMode(kRenderTransColor);
 		gEngfuncs.pTriAPI->Brightness(1.0);
@@ -296,7 +176,7 @@ void CHudRadar::DrawRadar(float flTime)
 
 		gEngfuncs.pTriAPI->CullFace(TRI_NONE);
 		
-		glBindTexture(GL_TEXTURE_2D, m_Overview.m_iId);
+		glBindTexture(GL_TEXTURE_2D, OverviewMgr::m_iIdTexture);
 
 		// Build two points: left-top and right-bottom
 		Vector2D vecLT = OverviewMgr::m_mxTransform * Vector2D(gHUD::m_vecOrigin.x - RADAR_RANGE / 2.0f, gHUD::m_vecOrigin.y - RADAR_RANGE / 2.0f);
@@ -309,11 +189,7 @@ void CHudRadar::DrawRadar(float flTime)
 		Matrix3x3 mxRadarTransform = Matrix3x3::Identity();
 
 		// Step 4: Scale it with the entire texture GL coord, i.e., 0~1
-		mxRadarTransform *= Matrix3x3(
-			1.0f / float(OverviewMgr::m_iWidth),	0.0f,									0.0f,
-			0.0f,									1.0f / float(OverviewMgr::m_iHeight),	0.0f,
-			0.0f,									0.0f,									1.0f
-		);
+		mxRadarTransform *= Matrix3x3::Squeeze2D(OverviewMgr::m_iWidth, OverviewMgr::m_iHeight);
 
 		// Step 3: Add the centre point back.
 		mxRadarTransform *= Matrix3x3::Translation2D(vecMe);
@@ -333,6 +209,8 @@ void CHudRadar::DrawRadar(float flTime)
 		DrawUtils::Draw2DQuadCustomTex(Vector2D(RADAR_BORDER, RADAR_BORDER), Vector2D(RADAR_BORDER + RADAR_HUD_SIZE, RADAR_BORDER + RADAR_HUD_SIZE), vecs);
 	}
 
+	Matrix3x3 mxRadarTransform = Matrix3x3::Stretch2D(RADAR_HUD_SIZE / RADAR_RANGE) * Matrix3x3::Rotation2D(180.0f - v_angles.yaw) * Matrix3x3::Translation2D(-Vector2D(v_origin.x, v_origin.y));
+
 	for (int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if (!g_PlayerInfoList[i].name || !g_PlayerInfoList[i].name[0])
@@ -345,7 +223,8 @@ void CHudRadar::DrawRadar(float flTime)
 			continue;
 
 		// translate the location we received to radar coord.
-		vecTranslated = Translate(g_PlayerExtraInfo[i].m_vecOrigin, RADAR_RANGE, RADAR_HUD_SIZE);
+		//vecTranslated = Translate(g_PlayerExtraInfo[i].m_vecOrigin, RADAR_RANGE, RADAR_HUD_SIZE);
+		vecTranslated = Vector(mxRadarTransform * gEngfuncs.GetEntityByIndex(i)->curstate.origin.Make2D(), gEngfuncs.GetEntityByIndex(i)->curstate.origin.z - gHUD::m_vecOrigin.z);
 
 		// this is because we don't want the icon clipping through radar border.
 		if (vecTranslated.x < RADAR_ICON_SIZE / 2 || vecTranslated.x > RADAR_HUD_SIZE - RADAR_ICON_SIZE / 2 ||
@@ -602,38 +481,4 @@ Vector CHudRadar::Translate(const Vector& vecOrigin, float flScanRange, float fl
 	return Vector(	(flRadarHudRadius / 2) + round(xnew_diff),
 					(flRadarHudRadius / 2) + round(ynew_diff),
 					z_diff);
-}
-
-Vector2D CHudRadar::Translate(const Vector& vecOrigin)
-{
-	Vector2D vecResult;
-
-	if (m_OVData.rotated)
-	{
-		vecResult.x = ((vecOrigin.x - m_OVData.originX) / m_Overview.m_vecScale.x) + float(m_Overview.m_iWidth) / 2.0f;
-		vecResult.y = -((vecOrigin.y - m_OVData.originY) / m_Overview.m_vecScale.y) + float(m_Overview.m_iHeight) / 2.0f;
-	}
-	else
-	{
-		vecResult.x = -((vecOrigin.y - m_OVData.originY) / m_Overview.m_vecScale.y) + float(m_Overview.m_iWidth) / 2.0f;
-		vecResult.y = -((vecOrigin.x - m_OVData.originX) / m_Overview.m_vecScale.x) + float(m_Overview.m_iHeight) / 2.0f;
-	}
-
-	return vecResult;
-}
-
-void CHudRadar::Translate(Vector2D& vecOrigin)
-{
-	Vector2D vecCopy = vecOrigin;
-
-	if (m_OVData.rotated)
-	{
-		vecOrigin.x = ((vecCopy.x - m_OVData.originX) / m_Overview.m_vecScale.x) + float(m_Overview.m_iWidth) / 2.0f;
-		vecOrigin.y = -((vecCopy.y - m_OVData.originY) / m_Overview.m_vecScale.y) + float(m_Overview.m_iHeight) / 2.0f;
-	}
-	else
-	{
-		vecOrigin.x = -((vecCopy.y - m_OVData.originY) / m_Overview.m_vecScale.y) + float(m_Overview.m_iWidth) / 2.0f;
-		vecOrigin.y = -((vecCopy.x - m_OVData.originX) / m_Overview.m_vecScale.x) + float(m_Overview.m_iHeight) / 2.0f;
-	}
 }

@@ -1210,12 +1210,11 @@ void OverviewMgr::OnHUDReset(void)
 	// Step 3: Translate it with the sprite origin, make its value from [0~width] or [0~height] respectively.
 	m_mxTransform *= Matrix3x3::Translation2D(Vector2D(OverviewMgr::m_iWidth, OverviewMgr::m_iHeight) / 2.0f);
 
-	// Step 2: Linear transform it, map it on the sprite.
+	// Step 2: Linear stretch it, map it on the sprite.
 	// Reference: https://www.cnblogs.com/crsky/p/9441540.html
-	m_mxTransform *= Matrix3x3(
-		1.0f / (8192.0f / m_flZoom / float(m_iWidth)),	0,																	0,
-		0,												1.0f / (8192.0f / m_flZoom / float(4.0 / 3.0) / float(m_iHeight)),	0,
-		0,												0,																	1
+	m_mxTransform *= Matrix3x3::Squeeze2D(
+		8192.0f / m_flZoom / float(m_iWidth),
+		8192.0f / m_flZoom / float(4.0 / 3.0) / float(m_iHeight)
 	);
 
 	if (m_bRotated)
