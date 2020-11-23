@@ -6,36 +6,8 @@ Created Date: Mar 11 2020
 
 #include "precompiled.h"
 
-void TrackPlayer(void)
-{
-	if (gHUD::m_Radar.m_iPlayerLastPointedAt <= MAX_CLIENTS)
-		gHUD::m_Radar.m_bTrackArray[gHUD::m_Radar.m_iPlayerLastPointedAt] = true;
-}
-
-void ClearPlayers(void)
-{
-	gHUD::m_Radar.m_bTrackArray.fill(false);
-}
-
-void DrawRadar(void)
-{
-	gHUD::m_Radar.m_bDrawRadar = true;
-}
-
-void HideRadar(void)
-{
-	gHUD::m_Radar.m_bDrawRadar = false;
-}
-
 int CHudRadar::Init(void)
 {
-	gEngfuncs.pfnAddCommand("trackplayer", TrackPlayer);
-	gEngfuncs.pfnAddCommand("clearplayers", ClearPlayers);
-	gEngfuncs.pfnAddCommand("drawradar", ::DrawRadar);
-	gEngfuncs.pfnAddCommand("hideradar", HideRadar);
-
-	m_bTrackArray.fill(false);
-
 	m_iPlayerLastPointedAt = 0;
 	m_bDrawRadar = true;
 
@@ -138,8 +110,6 @@ static constexpr float	RADAR_BORDER = 12;
 static constexpr float	RADAR_HUD_SIZE = 240;
 static constexpr float	RADAR_RANGE = 2048;
 static constexpr int	RADAR_ICON_SIZE = 16;
-static const Vector GODFATHER_COLOR_DIFF = VEC_SPRINGGREENISH - VEC_T_COLOUR;
-static const Vector COMMANDER_COLOR_DIFF = VEC_SPRINGGREENISH - VEC_CT_COLOUR;
 
 // view.cpp
 extern Vector v_angles, v_origin;
@@ -148,7 +118,8 @@ void CHudRadar::DrawRadar(float flTime)
 {
 	int iBaseDotSize = 2;
 	Vector color;
-	Vector vecTranslated;
+	Vector2D vecTranslated;
+	float flZDiff = 0;
 	bool bClampped = false;
 
 	// draw white board.
@@ -156,7 +127,7 @@ void CHudRadar::DrawRadar(float flTime)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glColor4f(1, 1, 1, 0.5);
+	glColor4f(0, 0, 0, 0.5);
 	DrawUtils::Draw2DQuad(RADAR_BORDER, RADAR_BORDER, RADAR_BORDER + RADAR_HUD_SIZE, RADAR_BORDER + RADAR_HUD_SIZE);
 
 	glColor4f(1, 1, 1, 1);
@@ -165,6 +136,7 @@ void CHudRadar::DrawRadar(float flTime)
 	glDisable(GL_BLEND);
 	glEnable(GL_TEXTURE_2D);
 
+	// Got a minimap? Draw it first!
 	if (OverviewMgr::m_iIdTexture)
 	{
 		gEngfuncs.pTriAPI->RenderMode(kRenderTransColor);
@@ -186,32 +158,72 @@ void CHudRadar::DrawRadar(float flTime)
 		Vector2D vecMe = OverviewMgr::m_mxTransform * Vector2D(gHUD::m_vecOrigin.x, gHUD::m_vecOrigin.y);
 
 		// Build an dynamic matrix. Map the origin onto radar map.
-		Matrix3x3 mxRadarTransform = Matrix3x3::Identity();
+		Matrix3x3 mxMiniMapTransform =
 
-		// Step 4: Scale it with the entire texture GL coord, i.e., 0~1
-		mxRadarTransform *= Matrix3x3::Squeeze2D(OverviewMgr::m_iWidth, OverviewMgr::m_iHeight);
+			// Step 4: Scale it with the entire texture GL coord, i.e., 0~1
+			Matrix3x3::Squeeze2D(OverviewMgr::m_iWidth, OverviewMgr::m_iHeight) *
 
-		// Step 3: Add the centre point back.
-		mxRadarTransform *= Matrix3x3::Translation2D(vecMe);
+			// Step 3: Add the centre point back.
+			Matrix3x3::Translation2D(vecMe) *
 
-		// Step 2: Rotate it according to our viewing yaw.
-		mxRadarTransform *= Matrix3x3::Rotation2D(180.0f - v_angles.yaw);
+			// Step 2: Rotate it according to our viewing yaw.
+			Matrix3x3::Rotation2D(180.0f - v_angles.yaw) *
 
-		// Step 1: Subtract it with our own origin, make us right on centre.
-		mxRadarTransform *= Matrix3x3::Translation2D(-vecMe);
+			// Step 1: Subtract it with our own origin, make us right on centre.
+			Matrix3x3::Translation2D(-vecMe);
 
 		Vector2D vecs[4];
-		vecs[0] = mxRadarTransform * vecLT;
-		vecs[1] = mxRadarTransform * Vector2D(vecRB.x, vecLT.y);
-		vecs[2] = mxRadarTransform * vecRB;
-		vecs[3] = mxRadarTransform * Vector2D(vecLT.x, vecRB.y);
+		vecs[0] = mxMiniMapTransform * vecLT;
+		vecs[1] = mxMiniMapTransform * Vector2D(vecRB.x, vecLT.y);
+		vecs[2] = mxMiniMapTransform * vecRB;
+		vecs[3] = mxMiniMapTransform * Vector2D(vecLT.x, vecRB.y);
 
 		DrawUtils::Draw2DQuadCustomTex(Vector2D(RADAR_BORDER, RADAR_BORDER), Vector2D(RADAR_BORDER + RADAR_HUD_SIZE, RADAR_BORDER + RADAR_HUD_SIZE), vecs);
 	}
 
-	Matrix3x3 mxRadarTransform = Matrix3x3::Stretch2D(RADAR_HUD_SIZE / RADAR_RANGE) * Matrix3x3::Rotation2D(180.0f - v_angles.yaw) * Matrix3x3::Translation2D(-Vector2D(v_origin.x, v_origin.y));
+	// Draw ourself.
+	vecTranslated = Vector2D(RADAR_BORDER + RADAR_HUD_SIZE / 2, RADAR_BORDER + RADAR_HUD_SIZE / 2);	// I must be the centre of this radar map. Otherwise it will be meaningless.
+	color = GetColor(gEngfuncs.GetLocalPlayer()->index);
 
-	for (int i = 0; i < MAX_CLIENTS; i++)
+	if (g_iRoleType > Role_UNASSIGNED && g_iRoleType < ROLE_COUNT)
+	{
+		gEngfuncs.pTriAPI->RenderMode(kRenderTransColor);
+		gEngfuncs.pTriAPI->Brightness(1.0);
+
+		// in order to make transparent fx on dds texture...
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		gEngfuncs.pTriAPI->CullFace(TRI_NONE);
+
+		glColor4f(color.r, color.g, color.b, 1);
+		glBindTexture(GL_TEXTURE_2D, m_rgiRadarIcons[g_iRoleType]);
+		DrawUtils::Draw2DQuad(vecTranslated.x - RADAR_ICON_SIZE / 2, vecTranslated.y - RADAR_ICON_SIZE / 2, vecTranslated.x + RADAR_ICON_SIZE / 2, vecTranslated.y + RADAR_ICON_SIZE / 2);
+	}
+	else
+	{
+		color *= 255.0f;	// due to gEngfuncs.pfnFillRGBA() do not accept 0~1 as its color parameters.
+		DrawRadarDot(vecTranslated, 0, iBaseDotSize, RADAR_DOT_NORMAL, color.r, color.g, color.b, 235);
+	}
+
+	// Build a matrix which transform a world point onto our mini-map.
+	m_mxRadarTransform =
+
+		// Step 5: Offset it to avoid negative value. After the first 4 steps, the center of the coordinate system is (0, 0), the left-top corner of the screen. We have to make it centered with the radar's center.
+		Matrix3x3::Translation2D(Vector2D(RADAR_HUD_SIZE / 2, RADAR_HUD_SIZE / 2)) *
+
+		// Step 4: Reverse our Y coord, since the 2D coord system on our monitor is +X for RIGHT, +Y for DOWNWARD.
+		Matrix3x3::Stretch2D(1, -1) *
+
+		// Step 3: Squeeze the coord to fit our radar and map range.
+		Matrix3x3::Stretch2D(RADAR_HUD_SIZE / RADAR_RANGE) *
+
+		// Step 2: Rotate the point according to our yaw.
+		Matrix3x3::Rotation2D(90.0f - v_angles.yaw) *
+
+		// Step 1: Make ourself the centre of coord system.
+		Matrix3x3::Translation2D(-v_origin.Make2D());
+
+	for (size_t i = 0; i < MAX_CLIENTS; i++)
 	{
 		if (!g_PlayerInfoList[i].name || !g_PlayerInfoList[i].name[0])
 			continue;
@@ -223,8 +235,8 @@ void CHudRadar::DrawRadar(float flTime)
 			continue;
 
 		// translate the location we received to radar coord.
-		//vecTranslated = Translate(g_PlayerExtraInfo[i].m_vecOrigin, RADAR_RANGE, RADAR_HUD_SIZE);
-		vecTranslated = Vector(mxRadarTransform * gEngfuncs.GetEntityByIndex(i)->curstate.origin.Make2D(), gEngfuncs.GetEntityByIndex(i)->curstate.origin.z - gHUD::m_vecOrigin.z);
+		vecTranslated = m_mxRadarTransform * gEngfuncs.GetEntityByIndex(i)->origin.Make2D();
+		flZDiff = gEngfuncs.GetEntityByIndex(i)->origin.z - gHUD::m_vecOrigin.z;
 
 		// this is because we don't want the icon clipping through radar border.
 		if (vecTranslated.x < RADAR_ICON_SIZE / 2 || vecTranslated.x > RADAR_HUD_SIZE - RADAR_ICON_SIZE / 2 ||
@@ -243,28 +255,8 @@ void CHudRadar::DrawRadar(float flTime)
 		vecTranslated.x += RADAR_BORDER;
 		vecTranslated.y += RADAR_BORDER;
 
-		if ((g_PlayerExtraInfo[i].m_bIsGodfather && (g_iTeam == TEAM_TERRORIST || g_iTeam == TEAM_UNASSIGNED)) || (g_PlayerExtraInfo[i].m_bIsCommander && (g_iTeam == TEAM_CT || g_iTeam == TEAM_UNASSIGNED)))
-		{
-			color.r = 250;
-			color.g = 0;
-			color.b = 0;
-		}
-		else
-		{
-			if (m_bTrackArray[i])
-			{
-				iBaseDotSize *= 2;
-				color.r = 185;
-				color.g = 20;
-				color.b = 20;
-			}
-			else
-			{
-				color.r = 150;
-				color.g = 75;
-				color.b = 250;
-			}
-		}
+		// determind color.
+		color = GetColor(i);
 
 		// the noobie and illegit players have no icon.
 		if (g_PlayerExtraInfo[i].m_iRoleType > Role_UNASSIGNED && g_PlayerExtraInfo[i].m_iRoleType < ROLE_COUNT)
@@ -275,35 +267,6 @@ void CHudRadar::DrawRadar(float flTime)
 			// in order to make transparent fx on dds texture...
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-			switch (g_PlayerExtraInfo[i].m_iRoleType)
-			{
-			case Role_Arsonist:
-			case Role_Assassin:
-			case Role_LeadEnforcer:
-			case Role_MadScientist:
-				color = VEC_T_COLOUR;
-				break;
-
-			case Role_Breacher:
-			case Role_Medic:
-			case Role_Sharpshooter:
-			case Role_SWAT:
-				color = VEC_CT_COLOUR;
-				break;
-
-			case Role_Commander:
-				color = VEC_CT_COLOUR + ((Q_sin(gHUD::m_flTime * 2.0f) + 1.0f) / 2.0f) * COMMANDER_COLOR_DIFF;
-				break;
-
-			case Role_Godfather:
-				color = VEC_T_COLOUR + ((Q_sin(gHUD::m_flTime * 2.0f) + 1.0f) / 2.0f) * GODFATHER_COLOR_DIFF;
-				break;
-
-			default:
-				color = VEC_YELLOWISH;
-				break;
-			}
-
 			// to distinguish, the clampped icons will dim out a little bit.
 			glColor4f(color.r, color.g, color.b, bClampped ? 0.5 : 1.0);
 
@@ -312,7 +275,7 @@ void CHudRadar::DrawRadar(float flTime)
 			glBindTexture(GL_TEXTURE_2D, m_rgiRadarIcons[g_PlayerExtraInfo[i].m_iRoleType]);
 			DrawUtils::Draw2DQuad(vecTranslated.x - RADAR_ICON_SIZE / 2, vecTranslated.y - RADAR_ICON_SIZE / 2, vecTranslated.x + RADAR_ICON_SIZE / 2, vecTranslated.y + RADAR_ICON_SIZE / 2);
 
-			if (Q_abs(vecTranslated.z) > 128)
+			if (Q_abs(flZDiff) > 128)
 			{
 				glDisable(GL_TEXTURE_2D);
 				glEnable(GL_BLEND);
@@ -323,7 +286,7 @@ void CHudRadar::DrawRadar(float flTime)
 
 				Vector2D vecPeak, vecLeftBottom, vecRightBottom;
 
-				if (vecTranslated.z < 0)
+				if (flZDiff < 0)
 				{
 					vecPeak = Vector2D(vecTranslated.x + RADAR_ICON_SIZE * 0.75, vecTranslated.y + RADAR_ICON_SIZE / 2);
 					vecLeftBottom = Vector2D(vecTranslated.x + RADAR_ICON_SIZE * 0.5, vecTranslated.y);
@@ -347,7 +310,10 @@ void CHudRadar::DrawRadar(float flTime)
 			}
 		}
 		else
-			DrawRadarDot(vecTranslated, iBaseDotSize, RADAR_DOT_NORMAL, color.r, color.g, color.b, 235);
+		{
+			color *= 255.0f;	// due to gEngfuncs.pfnFillRGBA() do not accept 0~1 as its color parameters.
+			DrawRadarDot(vecTranslated, flZDiff, iBaseDotSize, RADAR_DOT_NORMAL, color.r, color.g, color.b, 235);
+		}
 
 		if (g_PlayerExtraInfo[i].m_flTimeNextRadarFlash != -1.0 && flTime > g_PlayerExtraInfo[i].m_flTimeNextRadarFlash && g_PlayerExtraInfo[i].m_iRadarFlashRemains > 0)
 		{
@@ -362,7 +328,7 @@ void CHudRadar::DrawRadar(float flTime)
 			color.g = 110;
 			color.b = 25;
 
-			DrawRadarDot(vecTranslated.x, vecTranslated.y, vecTranslated.z, iBaseDotSize, RADAR_DOT_BOMBCARRIER, color.r, color.g, color.b, 245);
+			DrawRadarDot(vecTranslated, flZDiff, iBaseDotSize, RADAR_DOT_BOMBCARRIER, color.r, color.g, color.b, 245);
 		}
 	}
 
@@ -386,8 +352,9 @@ void CHudRadar::DrawRadar(float flTime)
 
 		if (m_rgCustomPoints[i].m_bPhase)
 		{
-			Vector vec = Translate(m_rgCustomPoints[i].m_vecCoord, RADAR_RANGE, RADAR_HUD_SIZE);
-			DrawRadarDot(vec, iBaseDotSize * m_rgCustomPoints[i].m_iDotSize, m_rgCustomPoints[i].m_bitsFlags, m_rgCustomPoints[i].m_color);
+			vecTranslated = m_mxRadarTransform * m_rgCustomPoints[i].m_vecCoord.Make2D();
+			flZDiff = m_rgCustomPoints[i].m_vecCoord.z - gHUD::m_vecOrigin.z;
+			DrawRadarDot(vecTranslated, flZDiff, iBaseDotSize * m_rgCustomPoints[i].m_iDotSize, m_rgCustomPoints[i].m_bitsFlags, m_rgCustomPoints[i].m_color);
 		}
 	}
 
@@ -427,58 +394,47 @@ void CHudRadar::DrawPlayerLocation(void)
 
 	gHUD::m_VGUI2Print.GetStringSize(locString, &string_width, &string_height);
 
-	x = max(0, center_x - (string_width / 2));
+	x = Q_max(0, center_x - (string_width / 2));
 	y = center_y + (string_height / 2);
 
 	if (wcslen(locString) > 0)
 		gHUD::m_VGUI2Print.DrawVGUI2String(locString, x, y, g_LocationColor[0], g_LocationColor[1], g_LocationColor[2]);
 }
 
-Vector CHudRadar::Translate(const Vector& vecOrigin, float flScanRange, float flRadarHudRadius)
+static const Vector GODFATHER_COLOR_DIFF = VEC_SPRINGGREENISH - VEC_T_COLOUR;
+static const Vector COMMANDER_COLOR_DIFF = VEC_SPRINGGREENISH - VEC_CT_COLOUR;
+
+Vector CHudRadar::GetColor(size_t iPlayerIndex)
 {
-	float x_diff, y_diff, z_diff;
-	float flOffset;
-	float xnew_diff, ynew_diff;
-	float flScale;
-
-	x_diff = vecOrigin.x - gHUD::m_vecOrigin.x;
-	y_diff = vecOrigin.y - gHUD::m_vecOrigin.y;
-	z_diff = vecOrigin.z - gHUD::m_vecOrigin.z;
-
-	flOffset = Q_atan(y_diff / x_diff);
-	flOffset *= 180.0f;
-	flOffset /= M_PI;
-
-	if ((x_diff < 0) && (y_diff >= 0))
-		flOffset = 180.0f + flOffset;
-	else if ((x_diff < 0) && (y_diff < 0))
-		flOffset = 180.0f + flOffset;
-	else if ((x_diff >= 0) && (y_diff < 0))
-		flOffset = 360.0f + flOffset;
-
-	y_diff = -1.0f * Q_sqrt((x_diff * x_diff) + (y_diff * y_diff));
-	x_diff = 0;
-
-	flOffset = gHUD::m_vecAngles.yaw - flOffset;
-	flOffset *= M_PI;
-	flOffset /= 180.0f;
-
-	xnew_diff = x_diff * Q_cos(flOffset) - y_diff * Q_sin(flOffset);
-	ynew_diff = x_diff * Q_sin(flOffset) + y_diff * Q_cos(flOffset);
-
-	if ((-1.0f * y_diff) > flScanRange)
+	switch (g_PlayerExtraInfo[iPlayerIndex].m_iRoleType)
 	{
-		flScale = (-1.0f * y_diff) / flScanRange;
+	case Role_Arsonist:
+	case Role_Assassin:
+	case Role_LeadEnforcer:
+	case Role_MadScientist:
+	case Role_Breacher:
+	case Role_Medic:
+	case Role_Sharpshooter:
+	case Role_SWAT:
+		switch (g_PlayerExtraInfo[iPlayerIndex].m_iTeam)
+		{
+		case TEAM_CT:
+			return VEC_CT_COLOUR;
 
-		xnew_diff /= flScale;
-		ynew_diff /= flScale;
+		case TEAM_TERRORIST:
+			return VEC_T_COLOUR;
+
+		default:
+			return VEC_YELLOWISH;
+		}
+
+	case Role_Commander:
+		return VEC_CT_COLOUR + ((Q_sin(gHUD::m_flTime * 2.0f) + 1.0f) / 2.0f) * COMMANDER_COLOR_DIFF;
+
+	case Role_Godfather:
+		return VEC_T_COLOUR + ((Q_sin(gHUD::m_flTime * 2.0f) + 1.0f) / 2.0f) * GODFATHER_COLOR_DIFF;
+
+	default:
+		return VEC_YELLOWISH;
 	}
-
-	// mapping out the point in real scale into radar size scale.
-	xnew_diff /= flScanRange / flRadarHudRadius;
-	ynew_diff /= flScanRange / flRadarHudRadius;
-
-	return Vector(	(flRadarHudRadius / 2) + round(xnew_diff),
-					(flRadarHudRadius / 2) + round(ynew_diff),
-					z_diff);
 }
