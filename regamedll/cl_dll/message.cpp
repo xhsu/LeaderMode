@@ -1,4 +1,4 @@
-/*
+ï»¿/*
 
 Created Date: 08 Mar 2020
 
@@ -1281,7 +1281,7 @@ MSG_FUNC(Manpower)
 		gHUD::m_scenarioStatus.m_rgwcsManpowerTexts[iTeam].clear();
 	else
 	{
-		gHUD::m_scenarioStatus.m_rgwcsManpowerTexts[iTeam] = L"[•••" + UTIL_ArabicToRoman(iManpower - 10U) + L"]";
+		gHUD::m_scenarioStatus.m_rgwcsManpowerTexts[iTeam] = L"[â€¢â€¢â€¢" + UTIL_ArabicToRoman(iManpower - 10U) + L"]";
 	}
 
 	return TRUE;
