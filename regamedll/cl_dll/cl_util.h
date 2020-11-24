@@ -85,3 +85,4 @@ float* GetClientColor(int clientIndex);
 hSprite LoadSprite(const char* pszName);
 bool CalcScreen(Vector& in, Vector2D& out);	// a.k.a. WorldToScreen
 void UTIL_TraceLine(Vector& vecSrc, Vector& vecEnd, int traceFlags, int ignore_pe, struct pmtrace_s* ptr, int index, int hull = 2);
+std::wstring UTIL_ArabicToRoman(unsigned value);

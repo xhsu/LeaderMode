@@ -111,7 +111,6 @@ cvar_t showtriggers          = { "showtriggers", "0", 0, 0.0f, nullptr }; // deb
                                                                           // TODO: Maybe it's better to register in the engine?
 cvar_t roundover                    = { "mp_roundover", "0", FCVAR_SERVER, 0.0f, nullptr };
 cvar_t show_radioicon               = { "mp_show_radioicon", "1", 0, 1.0f, nullptr };
-cvar_t show_scenarioicon            = { "mp_show_scenarioicon", "0", FCVAR_SERVER, 0.0f, nullptr };
 cvar_t old_bomb_defused_sound       = { "mp_old_bomb_defused_sound", "1", 0, 1.0f, nullptr };
 cvar_t item_staytime                = { "mp_item_staytime", "300", FCVAR_SERVER, 300.0f, nullptr };
 cvar_t legacy_bombtarget_touch      = { "mp_legacy_bombtarget_touch", "1", 0, 1.0f, nullptr };
@@ -255,11 +254,6 @@ void EXT_FUNC GameDLLInit()
 	CVAR_REGISTER(&showtriggers);
 	CVAR_REGISTER(&roundover);
 	CVAR_REGISTER(&show_radioicon);
-
-	if (!AreRunningCZero())
-	{
-		CVAR_REGISTER(&show_scenarioicon);
-	}
 
 	CVAR_REGISTER(&old_bomb_defused_sound);
 	CVAR_REGISTER(&item_staytime);

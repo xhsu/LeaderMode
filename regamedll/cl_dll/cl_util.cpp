@@ -366,3 +366,38 @@ void UTIL_TraceLine(Vector& vecSrc, Vector& vecEnd, int traceFlags, int ignore_p
 	// Restore state info
 	gEngfuncs.pEventAPI->EV_PopPMStates();
 }
+
+struct romandata_t { unsigned int value; wchar_t const* numeral; };
+constexpr romandata_t romandata[] =
+{
+	{1000,	L"M"},
+	{900,	L"CM"},
+	{500,	L"D"},
+	{400,	L"CD"},
+	{100,	L"C"},
+	{ 90,	L"XC"},
+	{ 50,	L"L"},
+	{ 40,	L"XL"},
+	{ 10,	L"X"},
+	{ 9,	L"IX"},
+	{ 5,	L"V"},
+	{ 4,	L"IV"},
+	{ 1,	L"I"},
+	{ 0,	nullptr} // end marker
+};
+
+std::wstring UTIL_ArabicToRoman(unsigned value)
+{
+	std::wstring result;
+
+	for (const romandata_t* current = romandata; current->value > 0; ++current)
+	{
+		while (value >= current->value)
+		{
+			result += current->numeral;
+			value -= current->value;
+		}
+	}
+
+	return result;
+}

@@ -476,9 +476,13 @@ MSG_FUNC(SendAudio)
 		gEngfuncs.pfnPlaySoundByNameAtPitch(code, 1.0, pitch);
 	}
 
+	// flash radar icon.
 	g_PlayerExtraInfo[client].m_iRadarFlashRemains = 22;
 	g_PlayerExtraInfo[client].m_flTimeNextRadarFlash = gHUD::m_flTime;
 	g_PlayerExtraInfo[client].m_bRadarFlashing = true;
+
+	// speaker icon next to player name.
+	gHUD::m_scenarioStatus.m_rgflTimeSpeakerIconHide[client] = g_flClientTime + 3.5;
 
 	return TRUE;
 }
@@ -826,13 +830,6 @@ MSG_FUNC(TaskTime)
 	int iRemainingTime = READ_SHORT();
 	BOOL FShouldCountDown = READ_BYTE();
 	int iFadeOutDelay = READ_BYTE();
-
-	return TRUE;
-}
-
-MSG_FUNC(Scenario)
-{
-	gHUD::m_scenarioStatus.MsgFunc_Scenario(iSize, pbuf);
 
 	return TRUE;
 }
@@ -1273,14 +1270,34 @@ MSG_FUNC(Manpower)
 {
 	BEGIN_READ(pbuf, iSize);
 
-	int iTeam = READ_BYTE();
-	int iManpower = READ_BYTE();
+	unsigned iTeam = (unsigned)READ_BYTE();
+	unsigned iManpower = (unsigned)READ_BYTE();
 
+	// update value
 	g_rgiManpower[iTeam] = iManpower;
+
+	// update text
+	if (iManpower <= 10)
+		gHUD::m_scenarioStatus.m_rgwcsManpowerTexts[iTeam].clear();
+	else
+	{
+		gHUD::m_scenarioStatus.m_rgwcsManpowerTexts[iTeam] = L"[•••" + UTIL_ArabicToRoman(iManpower - 10U) + L"]";
+	}
 
 	return TRUE;
 }
 
+MSG_FUNC(Scheme)
+{
+	BEGIN_READ(pbuf, iSize);
+
+	unsigned iTeam = (unsigned)READ_BYTE();
+	TacticalSchemes iScheme = (TacticalSchemes)READ_BYTE();
+
+	g_rgiTeamSchemes[iTeam] = iScheme;
+
+	return TRUE;
+}
 
 // player.cpp
 MSG_FUNC(Logo)
@@ -1377,7 +1394,6 @@ void Msg_Init(void)
 	HOOK_USER_MSG(CZCareerHUD);
 	HOOK_USER_MSG(ShadowIdx);
 	HOOK_USER_MSG(TaskTime);
-	HOOK_USER_MSG(Scenario);
 	HOOK_USER_MSG(BotVoice);
 	HOOK_USER_MSG(BuyClose);
 	HOOK_USER_MSG(SpecHealth2);
@@ -1401,6 +1417,7 @@ void Msg_Init(void)
 	HOOK_USER_MSG(SecVMDL);
 	HOOK_USER_MSG(Equipment);
 	HOOK_USER_MSG(Manpower);
+	HOOK_USER_MSG(Scheme);
 
 	// player.cpp
 	HOOK_USER_MSG(Logo);

@@ -1056,6 +1056,12 @@ void EXT_FUNC CHalfLifeMultiplay::RestartRound()
 		// Reset team scores
 		UpdateTeamScores();
 
+		// Reset manpower and schemes.
+		m_rgiManpowers.fill(0);
+		m_rgbMenpowerBroadcast.fill(false);
+		m_rgTeamTacticalScheme.fill(Scheme_UNASSIGNED);
+		m_flNextTSBallotBoxesOpen = gpGlobals->time + ballot_boxes_opening_interval.value;
+
 		// Reset the player stats
 		for (int i = 1; i <= gpGlobals->maxClients; i++)
 		{
@@ -1213,8 +1219,8 @@ void EXT_FUNC CHalfLifeMultiplay::RestartRound()
 	}
 
 	// re-calculate menpower.
-	m_rgiManpowers[CT] = m_rgiManpowers[TERRORIST] = menpower_per_player.value * (m_iNumCT + m_iNumTerrorist) / 2.0f;
-	m_rgbMenpowerBroadcast[CT] = m_rgbMenpowerBroadcast[TERRORIST] = false;
+	m_rgiManpowers.fill(round(menpower_per_player.value * float(m_iNumCT + m_iNumTerrorist) / 2.0f));
+	m_rgbMenpowerBroadcast.fill(false);
 
 	for (int iTeam = TERRORIST; iTeam <= CT; iTeam++)	// Doctrine_MassAssault on new round.
 		if (m_rgTeamTacticalScheme[iTeam] == Doctrine_MassAssault)
@@ -1553,6 +1559,12 @@ void CHalfLifeMultiplay::Think()
 					m_rgiManpowers[iTeam] *= 2;
 				else if (rgSave[iTeam] == Doctrine_MassAssault)	// switching to others
 					m_rgiManpowers[iTeam] /= 2;
+
+				// inform client that team scheme has changed.
+				MESSAGE_BEGIN(MSG_ALL, gmsgScheme);
+				WRITE_BYTE(iTeam);
+				WRITE_BYTE(m_rgTeamTacticalScheme[iTeam]);
+				MESSAGE_END();
 			}
 		}
 	}

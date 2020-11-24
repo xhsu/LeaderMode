@@ -1040,20 +1040,4 @@ CGrenade* CGrenade::C4(CBasePlayer* pPlayer)
 	return pGrenade;
 }
 
-void AnnounceFlashInterval(float interval, float offset)
-{
-	if (!AreRunningCZero() && !show_scenarioicon.value)
-	{
-		return;
-	}
-
-	MESSAGE_BEGIN(MSG_ALL, gmsgScenarioIcon);
-		WRITE_BYTE(1);
-		WRITE_STRING("bombticking");
-		WRITE_BYTE(255);
-		WRITE_SHORT(int(interval));	// interval
-		WRITE_SHORT(int(offset));
-	MESSAGE_END();
-}
-
 IMPLEMENT_SAVERESTORE(CGrenade, CBaseMonster)

@@ -124,10 +124,10 @@ void CHudRadar::DrawRadar(float flTime)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glColor4f(0, 0, 0, 0.5);
-	DrawUtils::Draw2DQuad(RADAR_BORDER, RADAR_BORDER, RADAR_BORDER + RADAR_HUD_SIZE, RADAR_BORDER + RADAR_HUD_SIZE);
+	DrawUtils::Draw2DQuad(BORDER_GAP, BORDER_GAP, BORDER_GAP + HUD_SIZE, BORDER_GAP + HUD_SIZE);
 
 	glColor4f(1, 1, 1, 1);
-	DrawUtils::Draw2DQuadProgressBar(RADAR_BORDER, RADAR_BORDER, RADAR_HUD_SIZE, RADAR_HUD_SIZE, 2, 1);
+	DrawUtils::Draw2DQuadProgressBar(BORDER_GAP, BORDER_GAP, HUD_SIZE, HUD_SIZE, 2, 1);
 
 	glDisable(GL_BLEND);
 	glEnable(GL_TEXTURE_2D);
@@ -147,8 +147,8 @@ void CHudRadar::DrawRadar(float flTime)
 		glBindTexture(GL_TEXTURE_2D, OverviewMgr::m_iIdTexture);
 
 		// Build two points: left-top and right-bottom
-		Vector2D vecLT = OverviewMgr::m_mxTransform * Vector2D(gHUD::m_vecOrigin.x - RADAR_RANGE / 2.0f, gHUD::m_vecOrigin.y - RADAR_RANGE / 2.0f);
-		Vector2D vecRB = OverviewMgr::m_mxTransform * Vector2D(gHUD::m_vecOrigin.x + RADAR_RANGE / 2.0f, gHUD::m_vecOrigin.y + RADAR_RANGE / 2.0f);
+		Vector2D vecLT = OverviewMgr::m_mxTransform * Vector2D(gHUD::m_vecOrigin.x - DIAMETER / 2.0f, gHUD::m_vecOrigin.y - DIAMETER / 2.0f);
+		Vector2D vecRB = OverviewMgr::m_mxTransform * Vector2D(gHUD::m_vecOrigin.x + DIAMETER / 2.0f, gHUD::m_vecOrigin.y + DIAMETER / 2.0f);
 
 		// and myself.
 		Vector2D vecMe = OverviewMgr::m_mxTransform * Vector2D(gHUD::m_vecOrigin.x, gHUD::m_vecOrigin.y);
@@ -174,11 +174,11 @@ void CHudRadar::DrawRadar(float flTime)
 		vecs[2] = mxMiniMapTransform * vecRB;
 		vecs[3] = mxMiniMapTransform * Vector2D(vecLT.x, vecRB.y);
 
-		DrawUtils::Draw2DQuadCustomTex(Vector2D(RADAR_BORDER, RADAR_BORDER), Vector2D(RADAR_BORDER + RADAR_HUD_SIZE, RADAR_BORDER + RADAR_HUD_SIZE), vecs);
+		DrawUtils::Draw2DQuadCustomTex(Vector2D(BORDER_GAP, BORDER_GAP), Vector2D(BORDER_GAP + HUD_SIZE, BORDER_GAP + HUD_SIZE), vecs);
 	}
 
 	// Draw ourself.
-	vecTranslated = Vector2D(RADAR_BORDER + RADAR_HUD_SIZE / 2, RADAR_BORDER + RADAR_HUD_SIZE / 2);	// I must be the centre of this radar map. Otherwise it will be meaningless.
+	vecTranslated = Vector2D(BORDER_GAP + HUD_SIZE / 2, BORDER_GAP + HUD_SIZE / 2);	// I must be the centre of this radar map. Otherwise it will be meaningless.
 	color = gHUD::GetColor(gHUD::m_iPlayerNum);
 
 	if (g_iRoleType > Role_UNASSIGNED && g_iRoleType < ROLE_COUNT)
@@ -193,7 +193,7 @@ void CHudRadar::DrawRadar(float flTime)
 
 		glColor4f(color.r, color.g, color.b, 1);
 		glBindTexture(GL_TEXTURE_2D, m_rgiRadarIcons[g_iRoleType]);
-		DrawUtils::Draw2DQuad(vecTranslated.x - RADAR_ICON_SIZE / 2, vecTranslated.y - RADAR_ICON_SIZE / 2, vecTranslated.x + RADAR_ICON_SIZE / 2, vecTranslated.y + RADAR_ICON_SIZE / 2);
+		DrawUtils::Draw2DQuad(vecTranslated.x - ICON_SIZE / 2, vecTranslated.y - ICON_SIZE / 2, vecTranslated.x + ICON_SIZE / 2, vecTranslated.y + ICON_SIZE / 2);
 	}
 	else
 	{
@@ -205,13 +205,13 @@ void CHudRadar::DrawRadar(float flTime)
 	m_mxRadarTransform =
 
 		// Step 5: Offset it to avoid negative value. After the first 4 steps, the center of the coordinate system is (0, 0), the left-top corner of the screen. We have to make it centered with the radar's center.
-		Matrix3x3::Translation2D(Vector2D(RADAR_HUD_SIZE / 2, RADAR_HUD_SIZE / 2)) *
+		Matrix3x3::Translation2D(Vector2D(HUD_SIZE / 2, HUD_SIZE / 2)) *
 
 		// Step 4: Reverse our Y coord, since the 2D coord system on our monitor is +X for RIGHT, +Y for DOWNWARD.
 		Matrix3x3::Stretch2D(1, -1) *
 
 		// Step 3: Squeeze the coord to fit our radar and map range.
-		Matrix3x3::Stretch2D(RADAR_HUD_SIZE / RADAR_RANGE) *
+		Matrix3x3::Stretch2D(HUD_SIZE / DIAMETER) *
 
 		// Step 2: Rotate the point according to our yaw.
 		Matrix3x3::Rotation2D(90.0f - v_angles.yaw) *
@@ -235,12 +235,12 @@ void CHudRadar::DrawRadar(float flTime)
 		flZDiff = gEngfuncs.GetEntityByIndex(i)->origin.z - gHUD::m_vecOrigin.z;
 
 		// this is because we don't want the icon clipping through radar border.
-		if (vecTranslated.x < RADAR_ICON_SIZE / 2 || vecTranslated.x > RADAR_HUD_SIZE - RADAR_ICON_SIZE / 2 ||
-			vecTranslated.y < RADAR_ICON_SIZE / 2 || vecTranslated.y > RADAR_HUD_SIZE - RADAR_ICON_SIZE / 2)
+		if (vecTranslated.x < ICON_SIZE / 2 || vecTranslated.x > HUD_SIZE - ICON_SIZE / 2 ||
+			vecTranslated.y < ICON_SIZE / 2 || vecTranslated.y > HUD_SIZE - ICON_SIZE / 2)
 		{
 			// makes sure that they stay on the radar border..
-			vecTranslated.x = Q_clamp(vecTranslated.x, float(RADAR_ICON_SIZE / 2), float(RADAR_HUD_SIZE - RADAR_ICON_SIZE / 2));
-			vecTranslated.y = Q_clamp(vecTranslated.y, float(RADAR_ICON_SIZE / 2), float(RADAR_HUD_SIZE - RADAR_ICON_SIZE / 2));
+			vecTranslated.x = Q_clamp(vecTranslated.x, float(ICON_SIZE / 2), float(HUD_SIZE - ICON_SIZE / 2));
+			vecTranslated.y = Q_clamp(vecTranslated.y, float(ICON_SIZE / 2), float(HUD_SIZE - ICON_SIZE / 2));
 
 			bClampped = true;
 		}
@@ -248,11 +248,11 @@ void CHudRadar::DrawRadar(float flTime)
 			bClampped = false;
 
 		// offset it with the radar location.
-		vecTranslated.x += RADAR_BORDER;
-		vecTranslated.y += RADAR_BORDER;
+		vecTranslated.x += BORDER_GAP;
+		vecTranslated.y += BORDER_GAP;
 
 		// determind color.
-		color = GetColor(i);
+		color = gHUD::GetColor(i);
 
 		// the noobie and illegit players have no icon.
 		if (g_PlayerExtraInfo[i].m_iRoleType > Role_UNASSIGNED && g_PlayerExtraInfo[i].m_iRoleType < ROLE_COUNT)
@@ -269,7 +269,7 @@ void CHudRadar::DrawRadar(float flTime)
 			gEngfuncs.pTriAPI->CullFace(TRI_NONE);
 
 			glBindTexture(GL_TEXTURE_2D, m_rgiRadarIcons[g_PlayerExtraInfo[i].m_iRoleType]);
-			DrawUtils::Draw2DQuad(vecTranslated.x - RADAR_ICON_SIZE / 2, vecTranslated.y - RADAR_ICON_SIZE / 2, vecTranslated.x + RADAR_ICON_SIZE / 2, vecTranslated.y + RADAR_ICON_SIZE / 2);
+			DrawUtils::Draw2DQuad(vecTranslated.x - ICON_SIZE / 2, vecTranslated.y - ICON_SIZE / 2, vecTranslated.x + ICON_SIZE / 2, vecTranslated.y + ICON_SIZE / 2);
 
 			if (Q_abs(flZDiff) > 128)
 			{
@@ -284,15 +284,15 @@ void CHudRadar::DrawRadar(float flTime)
 
 				if (flZDiff < 0)
 				{
-					vecPeak = Vector2D(vecTranslated.x + RADAR_ICON_SIZE * 0.75, vecTranslated.y + RADAR_ICON_SIZE / 2);
-					vecLeftBottom = Vector2D(vecTranslated.x + RADAR_ICON_SIZE * 0.5, vecTranslated.y);
-					vecRightBottom = Vector2D(vecTranslated.x + RADAR_ICON_SIZE, vecTranslated.y);
+					vecPeak = Vector2D(vecTranslated.x + ICON_SIZE * 0.75, vecTranslated.y + ICON_SIZE / 2);
+					vecLeftBottom = Vector2D(vecTranslated.x + ICON_SIZE * 0.5, vecTranslated.y);
+					vecRightBottom = Vector2D(vecTranslated.x + ICON_SIZE, vecTranslated.y);
 				}
 				else
 				{
-					vecPeak = Vector2D(vecTranslated.x + RADAR_ICON_SIZE * 0.75f, vecTranslated.y - RADAR_ICON_SIZE / 2);
-					vecLeftBottom = Vector2D(vecTranslated.x + RADAR_ICON_SIZE * 0.5, vecTranslated.y);
-					vecRightBottom = Vector2D(vecTranslated.x + RADAR_ICON_SIZE, vecTranslated.y);
+					vecPeak = Vector2D(vecTranslated.x + ICON_SIZE * 0.75f, vecTranslated.y - ICON_SIZE / 2);
+					vecLeftBottom = Vector2D(vecTranslated.x + ICON_SIZE * 0.5, vecTranslated.y);
+					vecRightBottom = Vector2D(vecTranslated.x + ICON_SIZE, vecTranslated.y);
 				}
 
 				glBegin(GL_POLYGON);

@@ -65,7 +65,7 @@ int CHudAccountBalance::Draw(float flTime)
 	wchar_t wszText[64];
 	int iWidth, iHeight;
 	int x = 10;
-	int y = CHudRadar::RADAR_HUD_SIZE + CHudRadar::RADAR_BORDER + 10;
+	int y = CHudRadar::HUD_SIZE + CHudRadar::BORDER_GAP + 10;
 
 	int r, g, b;
 	int r1, g1, b1;

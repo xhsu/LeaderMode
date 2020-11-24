@@ -146,7 +146,6 @@ extern cvar_t round_restart_delay;
 extern cvar_t showtriggers;
 extern cvar_t roundover;
 extern cvar_t show_radioicon;
-extern cvar_t show_scenarioicon;
 extern cvar_t item_staytime;
 extern cvar_t respawn_immunitytime;
 extern cvar_t respawn_immunity_effects;

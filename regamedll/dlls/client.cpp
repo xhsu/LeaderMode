@@ -63,7 +63,6 @@ int gmsgHLTV = 0;
 int gmsgSpecHealth = 0;
 int gmsgForceCam = 0;
 int gmsgReceiveW = 0;
-int gmsgScenarioIcon = 0;
 int gmsgBotVoice = 0;
 int gmsgBuyClose = 0;
 int gmsgItemStatus = 0;
@@ -86,6 +85,7 @@ int gmsgSound = 0;
 int gmsgSecVMDL = 0;
 int gmsgEquipment = 0;
 int gmsgManpower = 0;
+int gmsgScheme = 0;
 
 bool g_bClientPrintEnable = true;
 
@@ -208,7 +208,6 @@ void LinkUserMessages()
 	gmsgCZCareerHUD   = REG_USER_MSG("CZCareerHUD", -1);
 	gmsgShadowIdx     = REG_USER_MSG("ShadowIdx", 4);
 	gmsgTaskTime      = REG_USER_MSG("TaskTime", 4);
-	gmsgScenarioIcon  = REG_USER_MSG("Scenario", -1);
 	gmsgBotVoice      = REG_USER_MSG("BotVoice", 2);
 	gmsgBuyClose      = REG_USER_MSG("BuyClose", 0);
 	gmsgSpecHealth2   = REG_USER_MSG("SpecHealth2", 2);
@@ -232,6 +231,7 @@ void LinkUserMessages()
 	gmsgSecVMDL		  = REG_USER_MSG("SecVMDL", -1);
 	gmsgEquipment	  = REG_USER_MSG("Equipment", 2);
 	gmsgManpower	  = REG_USER_MSG("Manpower", 2);
+	gmsgScheme		  = REG_USER_MSG("Scheme", 2);
 }
 
 void WriteSigonMessages()

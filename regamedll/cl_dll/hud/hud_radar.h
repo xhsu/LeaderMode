@@ -31,10 +31,10 @@ struct radar_point_s
 class CHudRadar : public CBaseHudElement
 {
 public:
-	static constexpr float	RADAR_BORDER	= 12;
-	static constexpr float	RADAR_HUD_SIZE	= 240;
-	static constexpr float	RADAR_RANGE		= 2048;
-	static constexpr int	RADAR_ICON_SIZE	= 16;
+	static constexpr float	BORDER_GAP	= 12;
+	static constexpr float	HUD_SIZE	= 240;
+	static constexpr float	DIAMETER	= 2048;
+	static constexpr int	ICON_SIZE	= 16;
 
 public:
 	int Init(void);
