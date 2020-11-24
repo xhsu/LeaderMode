@@ -1,6 +1,7 @@
 /*
 
 Created Date: Mar 11 2020
+Reincarnation Date: Nov 21 2020
 
 */
 
@@ -30,6 +31,12 @@ struct radar_point_s
 class CHudRadar : public CBaseHudElement
 {
 public:
+	static constexpr float	RADAR_BORDER	= 12;
+	static constexpr float	RADAR_HUD_SIZE	= 240;
+	static constexpr float	RADAR_RANGE		= 2048;
+	static constexpr int	RADAR_ICON_SIZE	= 16;
+
+public:
 	int Init(void);
 	int VidInit(void);
 	int Draw(float fTime);
@@ -37,7 +44,6 @@ public:
 	void DrawRadarDot(int x, int y, float z_diff, int iBaseDotSize, int flags, int r, int g, int b, int a);
 	void DrawRadar(float flTime);
 	void DrawPlayerLocation(void);
-	Vector GetColor(size_t iPlayerIndex);
 
 public:
 	inline void DrawRadarDot(const Vector2D& vec, float z_diff, int iBaseDotSize, int flags, int r, int g, int b, int a) { DrawRadarDot(vec.x, vec.y, z_diff, iBaseDotSize, flags, r, g, b, a); }

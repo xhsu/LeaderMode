@@ -1213,12 +1213,12 @@ void EXT_FUNC CHalfLifeMultiplay::RestartRound()
 	}
 
 	// re-calculate menpower.
-	m_rgiMenpowers[CT] = m_rgiMenpowers[TERRORIST] = menpower_per_player.value * (m_iNumCT + m_iNumTerrorist) / 2.0f;
+	m_rgiManpowers[CT] = m_rgiManpowers[TERRORIST] = menpower_per_player.value * (m_iNumCT + m_iNumTerrorist) / 2.0f;
 	m_rgbMenpowerBroadcast[CT] = m_rgbMenpowerBroadcast[TERRORIST] = false;
 
 	for (int iTeam = TERRORIST; iTeam <= CT; iTeam++)	// Doctrine_MassAssault on new round.
 		if (m_rgTeamTacticalScheme[iTeam] == Doctrine_MassAssault)
-			m_rgiMenpowers[iTeam] *= 2;
+			m_rgiManpowers[iTeam] *= 2;
 
 	if (TheBots)
 	{
@@ -1504,6 +1504,20 @@ void CHalfLifeMultiplay::Think()
 	CheckMenpower(CT);
 	CheckMenpower(TERRORIST);
 
+	// sync manpower data with clients.
+	for (size_t i = 0; i < 4; i++)
+	{
+		if (m_rgiManpowers[i] != m_rgiClientKnownManpower[i])
+		{
+			MESSAGE_BEGIN(MSG_ALL, gmsgManpower);
+			WRITE_BYTE(i);
+			WRITE_BYTE(m_rgiManpowers[i]);
+			MESSAGE_END();
+
+			m_rgiClientKnownManpower[i] = m_rgiManpowers[i];
+		}
+	}
+
 	// team tactical scheme think
 	if (m_flNextTSBallotBoxesOpen <= gpGlobals->time)
 	{
@@ -1536,9 +1550,9 @@ void CHalfLifeMultiplay::Think()
 				}
 
 				if (m_rgTeamTacticalScheme[iTeam] == Doctrine_MassAssault)	// switching to Doctrine_MassAssault
-					m_rgiMenpowers[iTeam] *= 2;
+					m_rgiManpowers[iTeam] *= 2;
 				else if (rgSave[iTeam] == Doctrine_MassAssault)	// switching to others
-					m_rgiMenpowers[iTeam] /= 2;
+					m_rgiManpowers[iTeam] /= 2;
 			}
 		}
 	}
@@ -2687,7 +2701,7 @@ BOOL EXT_FUNC CHalfLifeMultiplay::FPlayerCanRespawn(CBasePlayer *pPlayer)
 	}
 
 	// They cannot respawn without menpower consume, unless it's Freezing phase.
-	if (m_rgiMenpowers[pPlayer->m_iTeam] <= 0)
+	if (m_rgiManpowers[pPlayer->m_iTeam] <= 0)
 	{
 		return FALSE;
 	}
@@ -4107,7 +4121,7 @@ CBasePlayer* CHalfLifeMultiplay::RandomNonroleCharacter(TeamName iTeam)
 
 void CHalfLifeMultiplay::CheckMenpower(TeamName iTeam)
 {
-	if (m_rgiMenpowers[iTeam] <= 0 && !m_rgbMenpowerBroadcast[iTeam])	// broadcast it if we didn't
+	if (m_rgiManpowers[iTeam] <= 0 && !m_rgbMenpowerBroadcast[iTeam])	// broadcast it if we didn't
 	{
 		UTIL_HudMessageAll(m_TextParam_Notification, "The menpower of %s is depleted!", iTeam == CT ? "CT" : "TERRORIST");
 		UTIL_PlayEarSound(nullptr, SFX_MENPOWER_DEPLETED);

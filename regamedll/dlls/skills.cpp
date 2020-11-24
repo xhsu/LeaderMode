@@ -2092,7 +2092,7 @@ bool CSkillRadarScan2::Execute()
 		UTIL_PlayEarSound(pTeammate, RADAR_BEEP_SFX);
 
 		if (m_pTracing == THE_COMMANDER)
-			UTIL_PrintChatColor(nullptr, REDCHAT, "/yAccorading to the intel, they are executing %s with %d menpower remaining.", g_rgszTacticalSchemeNames[CSGameRules()->m_rgTeamTacticalScheme[3 - m_pPlayer->m_iTeam]], CSGameRules()->m_rgiMenpowers[3 - m_pPlayer->m_iTeam]);
+			UTIL_PrintChatColor(nullptr, REDCHAT, "/yAccorading to the intel, they are executing %s with %d menpower remaining.", g_rgszTacticalSchemeNames[CSGameRules()->m_rgTeamTacticalScheme[3 - m_pPlayer->m_iTeam]], CSGameRules()->m_rgiManpowers[3 - m_pPlayer->m_iTeam]);
 	}
 
 	UTIL_PrintChatColor(nullptr, REDCHAT, "/yThe /t%s %s/y makes his intel public, which reveal the /gapproximate position/y of the /t%s %s/y!", g_rgszRoleNames[m_pPlayer->m_iRoleType], STRING(m_pPlayer->pev->netname), g_rgszRoleNames[m_pTracing->m_iRoleType], STRING(m_pTracing->pev->netname));

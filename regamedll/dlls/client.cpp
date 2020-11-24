@@ -85,6 +85,7 @@ int gmsgSkillTimer = 0;
 int gmsgSound = 0;
 int gmsgSecVMDL = 0;
 int gmsgEquipment = 0;
+int gmsgManpower = 0;
 
 bool g_bClientPrintEnable = true;
 
@@ -230,6 +231,7 @@ void LinkUserMessages()
 	gmsgSound		  = REG_USER_MSG("Sound", -1);
 	gmsgSecVMDL		  = REG_USER_MSG("SecVMDL", -1);
 	gmsgEquipment	  = REG_USER_MSG("Equipment", 2);
+	gmsgManpower	  = REG_USER_MSG("Manpower", 2);
 }
 
 void WriteSigonMessages()
@@ -2997,6 +2999,7 @@ void EXT_FUNC StartFrame()
 	if (g_pGameRules)
 	{
 		g_pGameRules->Think();
+
 		if (g_pGameRules->IsGameOver())
 			return;
 	}

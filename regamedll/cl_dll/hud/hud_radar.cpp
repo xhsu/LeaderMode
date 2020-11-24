@@ -1,6 +1,7 @@
 /*
 
 Created Date: Mar 11 2020
+Reincarnation Date: Nov 21 2020
 
 */
 
@@ -106,11 +107,6 @@ void CHudRadar::DrawRadarDot(int x, int y, float z_diff, int iBaseDotSize, int f
 	}
 }
 
-static constexpr float	RADAR_BORDER = 12;
-static constexpr float	RADAR_HUD_SIZE = 240;
-static constexpr float	RADAR_RANGE = 2048;
-static constexpr int	RADAR_ICON_SIZE = 16;
-
 // view.cpp
 extern Vector v_angles, v_origin;
 
@@ -183,7 +179,7 @@ void CHudRadar::DrawRadar(float flTime)
 
 	// Draw ourself.
 	vecTranslated = Vector2D(RADAR_BORDER + RADAR_HUD_SIZE / 2, RADAR_BORDER + RADAR_HUD_SIZE / 2);	// I must be the centre of this radar map. Otherwise it will be meaningless.
-	color = GetColor(gEngfuncs.GetLocalPlayer()->index);
+	color = gHUD::GetColor(gHUD::m_iPlayerNum);
 
 	if (g_iRoleType > Role_UNASSIGNED && g_iRoleType < ROLE_COUNT)
 	{
@@ -399,42 +395,4 @@ void CHudRadar::DrawPlayerLocation(void)
 
 	if (wcslen(locString) > 0)
 		gHUD::m_VGUI2Print.DrawVGUI2String(locString, x, y, g_LocationColor[0], g_LocationColor[1], g_LocationColor[2]);
-}
-
-static const Vector GODFATHER_COLOR_DIFF = VEC_SPRINGGREENISH - VEC_T_COLOUR;
-static const Vector COMMANDER_COLOR_DIFF = VEC_SPRINGGREENISH - VEC_CT_COLOUR;
-
-Vector CHudRadar::GetColor(size_t iPlayerIndex)
-{
-	switch (g_PlayerExtraInfo[iPlayerIndex].m_iRoleType)
-	{
-	case Role_Arsonist:
-	case Role_Assassin:
-	case Role_LeadEnforcer:
-	case Role_MadScientist:
-	case Role_Breacher:
-	case Role_Medic:
-	case Role_Sharpshooter:
-	case Role_SWAT:
-		switch (g_PlayerExtraInfo[iPlayerIndex].m_iTeam)
-		{
-		case TEAM_CT:
-			return VEC_CT_COLOUR;
-
-		case TEAM_TERRORIST:
-			return VEC_T_COLOUR;
-
-		default:
-			return VEC_YELLOWISH;
-		}
-
-	case Role_Commander:
-		return VEC_CT_COLOUR + ((Q_sin(gHUD::m_flTime * 2.0f) + 1.0f) / 2.0f) * COMMANDER_COLOR_DIFF;
-
-	case Role_Godfather:
-		return VEC_T_COLOUR + ((Q_sin(gHUD::m_flTime * 2.0f) + 1.0f) / 2.0f) * GODFATHER_COLOR_DIFF;
-
-	default:
-		return VEC_YELLOWISH;
-	}
 }

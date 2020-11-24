@@ -1,14 +1,22 @@
 /*
 
 Created Date: Mar 12 2020
+Reincarnation Date: Nov 24 2020
 
 */
 
 #include "precompiled.h"
 
+std::array<int, 4U> g_rgiManpower = { 0, 0, 0, 0 };
+
 int CHudScenarioStatus::Init(void)
 {
-	m_bitsFlags = 0;
+	m_bitsFlags = HUD_ACTIVE;
+
+	int iHeight = 0, iWidth = 0;
+
+	m_iIdSpeaker = LoadDDS("texture/HUD/Items/Speaker.dds");
+	m_iIdManpower = LoadDDS("texture/HUD/Items/Manpower.dds", &iWidth, &iHeight); m_flManpowerTextureRatio = float(iWidth) / float(iHeight);
 
 	gHUD::AddHudElem(this);
 	return 1;
@@ -16,17 +24,11 @@ int CHudScenarioStatus::Init(void)
 
 int CHudScenarioStatus::VidInit(void)
 {
-	m_alpha = 100;
-	m_hSprite = NULL;
-
 	return 1;
 }
 
 void CHudScenarioStatus::Reset(void)
 {
-	m_bitsFlags &= ~HUD_ACTIVE;
-	m_hSprite = NULL;
-	m_nextFlash = 0;
 }
 
 int CHudScenarioStatus::Draw(float fTime)
@@ -37,30 +39,91 @@ int CHudScenarioStatus::Draw(float fTime)
 	if (gEngfuncs.IsSpectateOnly())
 		return 1;
 
-	if (!m_hSprite)
-		return 1;
+	// Start from right next to radar.
+	int x = CHudRadar::RADAR_BORDER * 2 + CHudRadar::RADAR_HUD_SIZE;
+	int y = CHudRadar::RADAR_BORDER;
 
-	if (m_bitsFlags & HUD_ACTIVE)
+	//
+	Vector color = gHUD::GetColor(gHUD::m_iPlayerNum);
+
+	const wchar_t* pwcsName = nullptr;
+	int iTall = 0, iWidth = 0;
+
+	for (size_t i = 0; i < MAX_CLIENTS; i++)
 	{
-		int r, g, b;
-		UnpackRGB(r, g, b, RGB_YELLOWISH);
+		if (!g_PlayerInfoList[i].name || !g_PlayerInfoList[i].name[0])
+			continue;
 
-		int x = gHUD::m_roundTimer.m_closestRight;
-		int y = ScreenHeight + (3 * gHUD::m_iFontHeight) / -2 - (m_rect.bottom - m_rect.top - gHUD::m_iFontHeight) / 2;
+		if (g_PlayerExtraInfo[i].m_iTeam != g_iTeam)
+			continue;
 
-		ScaleColors(r, g, b, m_alpha);
+		x = CHudRadar::RADAR_BORDER * 2 + CHudRadar::RADAR_HUD_SIZE;	// Reset X pos on each loop.
 
-		if (m_alpha > 100)
-			m_alpha *= 0.9;
+		pwcsName = UTF8ToUnicode(g_PlayerInfoList[i].name);
+		gFontFuncs.GetTextSize(gHUD::m_Scoreboard.m_hPlayerNameFont, pwcsName, &iWidth, &iTall);
 
-		gEngfuncs.pfnSPR_Set(m_hSprite, r, g, b);
-		gEngfuncs.pfnSPR_DrawAdditive(0, x, y, &m_rect);
+		// Draw class icon.
+		gEngfuncs.pTriAPI->RenderMode(kRenderTransColor);
+		gEngfuncs.pTriAPI->Brightness(1.0);
+
+		// in order to make transparent fx on dds texture...
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		gEngfuncs.pTriAPI->CullFace(TRI_NONE);
+
+		glColor4f(color.r, color.g, color.b, 1);
+		glBindTexture(GL_TEXTURE_2D, gHUD::m_Radar.m_rgiRadarIcons[g_PlayerExtraInfo[i].m_iRoleType]);
+		DrawUtils::Draw2DQuad(x, y, x + iTall, y + iTall);	// yeah, it's a square.
+
+		x += iTall;	// move to the right side of that icon.
+
+		// Draw the name text follow.
+		gFontFuncs.DrawSetTextFont(gHUD::m_Scoreboard.m_hPlayerNameFont);
+		gFontFuncs.DrawSetTextPos(x, y);
+		gFontFuncs.DrawSetTextColor(235, 235, 235, 255);	// have to keep the text white.
+		gFontFuncs.DrawPrintText(pwcsName);
+
+		x += iWidth;	// move to the right side of that text.
+
+		if (m_flTimeSpeakerIconHide < g_flClientTime)
+		{
+			gEngfuncs.pTriAPI->RenderMode(kRenderTransColor);
+			gEngfuncs.pTriAPI->Brightness(1.0);
+
+			// in order to make transparent fx on dds texture...
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+			gEngfuncs.pTriAPI->CullFace(TRI_NONE);
+
+			glColor4f(1, 1, 1, 1);
+			glBindTexture(GL_TEXTURE_2D, m_iIdSpeaker);
+			DrawUtils::Draw2DQuad(x, y, x + iTall, y + iTall);	// yeah, it's a square.
+		}
+
+		y += iTall;	// To the next row.
 	}
 
-	if (m_flashInterval && fTime >= m_nextFlash)
+	x = CHudRadar::RADAR_BORDER * 2 + CHudRadar::RADAR_HUD_SIZE;	// Reset X pos on manpower indicator.
+
+	gEngfuncs.pTriAPI->RenderMode(kRenderTransColor);
+	gEngfuncs.pTriAPI->Brightness(1.0);
+
+	// in order to make transparent fx on dds texture...
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	gEngfuncs.pTriAPI->CullFace(TRI_NONE);
+
+	glColor4f(1, 1, 1, 1);
+	glBindTexture(GL_TEXTURE_2D, m_iIdSpeaker);
+
+	iTall = 32;
+	iWidth = round(m_flManpowerTextureRatio * float(iTall));
+
+	for (int i = 0; i < g_rgiManpower[g_iTeam]; i++)
 	{
-		m_nextFlash = m_flashInterval + fTime;
-		m_alpha = m_flashAlpha;
+		DrawUtils::Draw2DQuad(x, y, x + iWidth, y + iTall);
+
+		x += iWidth + 2;	// right shift.
 	}
 
 	return 1;

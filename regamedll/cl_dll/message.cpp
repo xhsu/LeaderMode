@@ -50,7 +50,7 @@ MSG_FUNC(Health)
 
 	g_PlayerExtraInfo[iClient].m_iHealth = iHealth;
 
-	if (iClient == gEngfuncs.GetLocalPlayer()->index)
+	if (iClient == gHUD::m_iPlayerNum)
 		gHUD::m_Health.MsgFunc_Health(iHealth);
 
 	return TRUE;
@@ -478,7 +478,7 @@ MSG_FUNC(SendAudio)
 
 	g_PlayerExtraInfo[client].m_iRadarFlashRemains = 22;
 	g_PlayerExtraInfo[client].m_flTimeNextRadarFlash = gHUD::m_flTime;
-	g_PlayerExtraInfo[client].m_bRadarFlashing = 1;
+	g_PlayerExtraInfo[client].m_bRadarFlashing = true;
 
 	return TRUE;
 }
@@ -503,7 +503,7 @@ MSG_FUNC(Money)
 	g_PlayerExtraInfo[iPlayerId].m_iAccount = iAccount;
 
 	// if it is the local player, call the HUD func.
-	if (iPlayerId == gEngfuncs.GetLocalPlayer()->index)
+	if (iPlayerId == gHUD::m_iPlayerNum)
 		gHUD::m_accountBalance.MsgFunc_Money(iAccount);
 
 	return TRUE;
@@ -1269,6 +1269,18 @@ MSG_FUNC(Equipment)
 	return TRUE;
 }
 
+MSG_FUNC(Manpower)
+{
+	BEGIN_READ(pbuf, iSize);
+
+	int iTeam = READ_BYTE();
+	int iManpower = READ_BYTE();
+
+	g_rgiManpower[iTeam] = iManpower;
+
+	return TRUE;
+}
+
 
 // player.cpp
 MSG_FUNC(Logo)
@@ -1388,6 +1400,7 @@ void Msg_Init(void)
 	HOOK_USER_MSG(Sound);
 	HOOK_USER_MSG(SecVMDL);
 	HOOK_USER_MSG(Equipment);
+	HOOK_USER_MSG(Manpower);
 
 	// player.cpp
 	HOOK_USER_MSG(Logo);

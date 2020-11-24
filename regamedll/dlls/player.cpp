@@ -7608,10 +7608,10 @@ void CBasePlayer::PlayerRespawnThink()
 		pev->button = 0;
 		pev->nextthink = -1;
 		
-		CSGameRules()->m_rgiMenpowers[m_iTeam]--;
+		CSGameRules()->m_rgiManpowers[m_iTeam]--;
 
 		if (m_iRoleType == Role_LeadEnforcer)	// berserker has a doubled consumption.
-			CSGameRules()->m_rgiMenpowers[m_iTeam]--;
+			CSGameRules()->m_rgiManpowers[m_iTeam]--;
 	}
 }
 
@@ -7983,8 +7983,8 @@ void CBasePlayer::UpdateHudText()
 	// Part IV: menpower information.
 	if (pLeader && !pLeader->IsAlive())
 		Q_strlcpy(szBuffer, "Replenishment Discontinued|");
-	else if (CSGameRules()->m_rgiMenpowers[m_iTeam] > 0)
-		Q_snprintf(szBuffer, sizeof(szBuffer) - 1, "Menpower: %d|", CSGameRules()->m_rgiMenpowers[m_iTeam]);
+	else if (CSGameRules()->m_rgiManpowers[m_iTeam] > 0)
+		Q_snprintf(szBuffer, sizeof(szBuffer) - 1, "Menpower: %d|", CSGameRules()->m_rgiManpowers[m_iTeam]);
 	else
 		Q_strlcpy(szBuffer, "Menpower Depleted|");
 

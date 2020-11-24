@@ -455,7 +455,8 @@ public:
 	EntityHandle<CBasePlayer> m_rgpCharacters[ROLE_COUNT];
 	hudtextparms_t m_TextParam_Notification;
 	hudtextparms_t m_TextParam_Hud;
-	int m_rgiMenpowers[4];
+	int m_rgiManpowers[4];
+	int m_rgiClientKnownManpower[4];
 	bool m_rgbMenpowerBroadcast[4];
 	TacticalSchemes m_rgTeamTacticalScheme[4];
 	float m_flNextTSBallotBoxesOpen;

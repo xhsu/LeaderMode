@@ -270,7 +270,6 @@ public:
 			0, 0, 1
 		);
 	}
-
 	static decltype(auto) Zero()
 	{
 		return Matrix3x3(
@@ -279,7 +278,6 @@ public:
 			0, 0, 0
 		);
 	}
-
 	static decltype(auto) Rotation2D(float flAngle)
 	{
 		auto rad = (flAngle * M_PI / 180.0);
@@ -292,7 +290,6 @@ public:
 			0,		0,		1
 		);
 	}
-
 	static decltype(auto) Translation2D(const Vector2D& v)
 	{
 		return Matrix3x3(
@@ -301,7 +298,6 @@ public:
 			0, 0, 1
 		);
 	}
-
 	static decltype(auto) Stretch2D(float x, float y)
 	{
 		return Matrix3x3(
@@ -310,7 +306,6 @@ public:
 			0, 0, 1
 		);
 	}
-
 	static decltype(auto) Stretch2D(float k)
 	{
 		return Matrix3x3(
@@ -319,7 +314,6 @@ public:
 			0, 0, 1
 		);
 	}
-
 	static decltype(auto) Squeeze2D(float x, float y)
 	{
 		return Matrix3x3(
@@ -328,7 +322,6 @@ public:
 			0,			0,			1
 		);
 	}
-
 	static decltype(auto) Squeeze2D(float k)
 	{
 		return Matrix3x3(
@@ -356,7 +349,6 @@ public:
 
 		return mxInv;
 	}
-
 	bool operator==(const Matrix3x3& m) const { return !memcmp(&dat, &m.dat, sizeof(dat)); }
 	bool operator!=(const Matrix3x3& m) const { return !(*this == m); }
 
@@ -373,7 +365,6 @@ public:
 
 		return mx;
 	}
-
 	decltype(auto) operator-(const Matrix3x3& m) const
 	{
 		Matrix3x3 mx;
@@ -387,7 +378,6 @@ public:
 
 		return mx;
 	}
-
 	decltype(auto) operator*(const Matrix3x3& m) const
 	{
 		Matrix3x3 mx;

@@ -264,3 +264,4 @@ extern int gmsgSkillTimer;
 extern int gmsgSound;
 extern int gmsgSecVMDL;
 extern int gmsgEquipment;
+extern int gmsgManpower;
