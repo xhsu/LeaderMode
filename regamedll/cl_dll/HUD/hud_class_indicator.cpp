@@ -55,6 +55,9 @@ int CHudClassIndicator::Init(void)
 	m_bitsFlags = HUD_ACTIVE;
 	m_fFade = 0;
 
+	m_hClassFont = gFontFuncs.CreateFont();
+	gFontFuncs.AddGlyphSetToFont(m_hClassFont, "Trajan Pro", 24, FW_BOLD, 1, 0, FONTFLAG_ANTIALIAS | FONTFLAG_OUTLINE, 0x0, 0xFFFF);
+
 	gHUD::AddHudElem(this);
 	return TRUE;
 }
@@ -84,11 +87,13 @@ int CHudClassIndicator::VidInit(void)
 
 BOOL CHudClassIndicator::Draw(float flTime)
 {
+	DrawClassName(flTime);	// At the left bottom conor.
+
 	// careful for the array bound!
 	if (g_iRoleType < Role_UNASSIGNED || g_iRoleType >= ROLE_COUNT)
 		return FALSE;
 
-	int a = 255;
+	m_iAlpha = 255;
 	if (m_fFade)
 	{
 		if (m_fFade > FADE_TIME)
@@ -98,15 +103,15 @@ BOOL CHudClassIndicator::Draw(float flTime)
 
 		if (m_fFade <= 0)
 		{
-			a = 100;
+			m_iAlpha = 100;
 			m_fFade = 0;
 		}
 
-		a = MIN_ALPHA + (m_fFade / FADE_TIME) * 128;
+		m_iAlpha = MIN_ALPHA + (m_fFade / FADE_TIME) * 128;
 
 	}
 	else
-		a = MIN_ALPHA;
+		m_iAlpha = MIN_ALPHA;
 
 	// class icon
 	gEngfuncs.pTriAPI->RenderMode(kRenderTransColor);
@@ -114,7 +119,7 @@ BOOL CHudClassIndicator::Draw(float flTime)
 
 	// in order to make transparent fx on dds texture...
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glColor4f(VEC_YELLOWISH.r, VEC_YELLOWISH.g, VEC_YELLOWISH.b, a / 255.0);
+	glColor4f(VEC_YELLOWISH.r, VEC_YELLOWISH.g, VEC_YELLOWISH.b, m_iAlpha / 255.0);
 
 	gEngfuncs.pTriAPI->CullFace(TRI_NONE);
 
@@ -185,4 +190,38 @@ void CHudClassIndicator::SetSkillTimer(float flTotalTime, MODE iMode, float flCu
 	m_flTotalTime = flTotalTime;
 	m_iMode = iMode;
 	m_flCurrentTime = flCurrentTime;
+}
+
+void CHudClassIndicator::DrawClassName(float flTime)
+{
+	int x = 0, y = gHUD::m_Battery.m_flLastDrawingY - 9;
+	int x2 = 24, y2 = y - 12;
+
+	glDisable(GL_TEXTURE_2D);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glColor4f(VEC_YELLOWISH.r, VEC_YELLOWISH.g, VEC_YELLOWISH.b, 1.0);
+
+	glBegin(GL_QUADS);
+	glVertex2f(x, y);
+	glVertex2f(x2, y2);
+	glVertex2f(x2, y2 + 2);
+	glVertex2f(x, y + 2);
+	glEnd();
+
+	glBegin(GL_QUADS);
+	glVertex2f(x2, y2);
+	glVertex2f(x2 + 12, y2);
+	glVertex2f(x2 + 12, y2 + 2);
+	glVertex2f(x2, y2 + 2);
+	glEnd();
+
+	glDisable(GL_BLEND);
+	glEnable(GL_TEXTURE_2D);
+
+	gFontFuncs.DrawSetTextFont(m_hClassFont);
+	gFontFuncs.DrawSetTextPos(x2 + 12, y2 - 8);
+	gFontFuncs.DrawSetTextColor(235, 235, 235, 255);	// have to keep the text white.
+	gFontFuncs.DrawPrintText(g_rgwcsRoleNames[g_iRoleType].c_str());
 }

@@ -12,6 +12,7 @@ public:
 	int Init(void);
 	int VidInit(void);
 	int Draw(float flTime);
+	void Reset(void);
 	void InitHUDData(void);
 
 	void MsgFunc_Battery(int& iNewArmourValue);
@@ -27,4 +28,5 @@ public:
 	float m_fFade;
 	int m_iArmorType;
 	int m_iHeight;		// width of the battery innards
+	float m_flLastDrawingY;	// for other HUD elements.
 };

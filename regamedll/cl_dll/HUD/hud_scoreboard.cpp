@@ -23,29 +23,11 @@ const char* CHudScoreboard::m_rgszScoreboardElemKeyName[8] =
 	"#Cstrike_TitlesTXT_LATENCY"
 };
 
-const char* CHudScoreboard::m_rgszRoleNamesKey[ROLE_COUNT] =
-{
-	"#LeaderMod_Role_UNASSIGNED",
-
-	"#LeaderMod_Role_Commander",
-	"#LeaderMod_Role_SWAT",
-	"#LeaderMod_Role_Breacher",
-	"#LeaderMod_Role_Sharpshooter",
-	"#LeaderMod_Role_Medic",
-
-	"#LeaderMod_Role_Godfather",
-	"#LeaderMod_Role_LeadEnforcer",
-	"#LeaderMod_Role_MadScientist",
-	"#LeaderMod_Role_Assassin",
-	"#LeaderMod_Role_Arsonist",
-};
-
 const wchar_t* CHudScoreboard::m_pwszTeamName[4] = { nullptr, nullptr, nullptr, nullptr };
 const wchar_t* CHudScoreboard::m_pwszPlayerCalled = nullptr;
 const wchar_t* CHudScoreboard::m_pwszDeathCalled = nullptr;
 const wchar_t* CHudScoreboard::m_rgpwcScoreboardElementName[8] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 const wchar_t* CHudScoreboard::m_pwcTeamWinsText = nullptr;
-const wchar_t* CHudScoreboard::m_rgpwcRoleNames[ROLE_COUNT] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 
 int CHudScoreboard::Init(void)
 {
@@ -89,14 +71,6 @@ int CHudScoreboard::VidInit(void)
 
 		if (!m_rgpwcScoreboardElementName[i])
 			m_rgpwcScoreboardElementName[i] = L"TEXT NO FOUND!";
-	}
-
-	for (int i = 0; i < ROLE_COUNT; i++)
-	{
-		m_rgpwcRoleNames[i] = VGUI_LOCALISE->Find(m_rgszRoleNamesKey[i]);
-
-		if (!m_rgpwcRoleNames[i])
-			m_rgpwcRoleNames[i] = L"TEXT NO FOUND!";
 	}
 
 	// font.
@@ -203,7 +177,7 @@ int CHudScoreboard::Draw(float flTime)
 		if (g_PlayerExtraInfo[i].m_iTeam == g_iTeam || g_iTeam == TEAM_SPECTATOR)
 		{
 			gFontFuncs.DrawSetTextPos(x2, y);
-			gFontFuncs.DrawPrintText(m_rgpwcRoleNames[g_PlayerExtraInfo[i].m_iRoleType]);
+			gFontFuncs.DrawPrintText(g_rgwcsRoleNames[g_PlayerExtraInfo[i].m_iRoleType].c_str());
 		}
 
 		// 2. HP
@@ -311,7 +285,7 @@ int CHudScoreboard::Draw(float flTime)
 		if (g_PlayerExtraInfo[i].m_iTeam == g_iTeam || g_iTeam == TEAM_SPECTATOR)
 		{
 			gFontFuncs.DrawSetTextPos(x2, y);
-			gFontFuncs.DrawPrintText(m_rgpwcRoleNames[g_PlayerExtraInfo[i].m_iRoleType]);
+			gFontFuncs.DrawPrintText(g_rgwcsRoleNames[g_PlayerExtraInfo[i].m_iRoleType].c_str());
 		}
 
 		// 2. HP

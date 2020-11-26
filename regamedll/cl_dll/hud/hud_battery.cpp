@@ -94,6 +94,9 @@ int CHudBattery::Draw(float flTime)
 	gEngfuncs.pfnSPR_Set(hSpriteEmpty, r, g, b);
 	gEngfuncs.pfnSPR_DrawAdditive(0, x, y, prcEmpty);
 
+	// Lock the Y here, since this is the highest point of this HUD.
+	m_flLastDrawingY = y;
+
 	if (rc.bottom > rc.top)
 	{
 		gEngfuncs.pfnSPR_Set(hSpriteFull, r, g, b);
@@ -126,11 +129,16 @@ int CHudBattery::Draw(float flTime)
 	return 1;
 }
 
-void CHudBattery::InitHUDData(void)
+void CHudBattery::Reset(void)
 {
 	m_flArmour = 0;
 	m_flDrawingArmour = 0;
 	m_iArmorType = 0;
+}
+
+void CHudBattery::InitHUDData(void)
+{
+	Reset();
 }
 
 void CHudBattery::MsgFunc_Battery(int& iNewArmourValue)

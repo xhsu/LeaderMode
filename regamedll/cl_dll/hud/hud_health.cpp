@@ -191,8 +191,16 @@ void CHudHealth::Reset(void)
 	m_fAttackFront = m_fAttackRear = m_fAttackRight = m_fAttackLeft = 0;
 	m_bitsDamage = 0;
 
-	m_iHealth = 0;
-	m_flDrawingHealth = 0;
+	if (g_iRoleType == Role_Commander || g_iRoleType == Role_Godfather)
+	{
+		m_iHealth = 1000;
+		m_flDrawingHealth = 1000;
+	}
+	else
+	{
+		m_iHealth = 100;
+		m_flDrawingHealth = 100;
+	}
 
 	for (int i = 0; i < NUM_DMG_TYPES; i++)
 		m_dmg[i].fExpire = 0;

@@ -78,7 +78,6 @@ public:
 
 	// Localise keys
 	static const char* m_rgszScoreboardElemKeyName[8];
-	static const char* m_rgszRoleNamesKey[ROLE_COUNT];
 
 	// Localise texts
 	static const wchar_t* m_pwszTeamName[4];
@@ -86,7 +85,6 @@ public:
 	static const wchar_t* m_pwszDeathCalled;
 	static const wchar_t* m_rgpwcScoreboardElementName[8];
 	static const wchar_t* m_pwcTeamWinsText;
-	static const wchar_t* m_rgpwcRoleNames[ROLE_COUNT];
 
 public:
 	CBasePanel		m_Baseboard;

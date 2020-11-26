@@ -381,7 +381,7 @@ int CHudSayText::GetTextPrintY(void)
 	}
 	else
 	{*/
-		iRetVal = (ScreenHeight - gHUD::m_iFontHeight * 2.75) - (line_height * MAX_LINES) - (line_height * 0.5);
+		iRetVal = (gHUD::m_Battery.m_flLastDrawingY - 32 - 18) - (line_height * MAX_LINES) - (line_height * 0.5);
 	//}
 
 	return iRetVal;

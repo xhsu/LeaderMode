@@ -20,6 +20,8 @@ enum TacticalSchemes
 
 extern std::array<unsigned, 4U> g_rgiManpower;
 extern std::array<TacticalSchemes, SCHEMES_COUNT> g_rgiTeamSchemes;
+extern std::array<std::wstring, ROLE_COUNT> g_rgwcsRoleNames;
+extern std::array<std::wstring, SCHEMES_COUNT> g_rgwcsSchemeNames;
 
 class CHudScenarioStatus : public CBaseHudElement
 {
@@ -46,4 +48,5 @@ public:
 	float m_flManpowerTextureRatio{ 1.0f };
 	std::array<std::wstring, 4U> m_rgwcsManpowerTexts;
 	std::array<GLuint, SCHEMES_COUNT> m_rgiIdSchemeTexture{ 0U, 0U, 0U, 0U, 0U };
+	int m_hNameFont{ 0 };
 };

@@ -26,11 +26,14 @@ public:
 public:
 	void	LightUp(void);
 	void	SetSkillTimer(float flTotalTime, MODE iMode, float flCurrentTime);
+	void	DrawClassName(float flTime);
 
 public:
-	GLuint m_iClassesIcon[ROLE_COUNT];
+	std::array<GLuint, ROLE_COUNT> m_iClassesIcon;
 	float m_fFade;
 	float m_flTotalTime;
 	MODE m_iMode;
 	float m_flCurrentTime;
+	int m_iAlpha{ 255 };
+	int m_hClassFont{ 0 };
 };
