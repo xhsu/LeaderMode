@@ -40,23 +40,25 @@ public:
 	void MsgFunc_SetSlot(WeaponIdType iId, int iSlot);
 
 public:
-	hSprite m_rghWeaponSprite[LAST_WEAPON];
-	wrect_t	m_rgrcWeaponSprite[LAST_WEAPON];
-	hSprite m_rghHighlightedWeaponSprite[LAST_WEAPON];
-	wrect_t	m_rgrcHighlightedWeaponSprite[LAST_WEAPON];
+	std::array<hSprite, LAST_WEAPON> m_rghWeaponSprite;
+	std::array<wrect_t, LAST_WEAPON> m_rgrcWeaponSprite;
+	std::array<hSprite, LAST_WEAPON> m_rghHighlightedWeaponSprite;
+	std::array<wrect_t, LAST_WEAPON> m_rgrcHighlightedWeaponSprite;
 
-	WeaponIdType m_rgiWeapons[MAX_ITEM_TYPES];
-	Vector2D m_rgvecCurCoord[MAX_ITEM_TYPES];
-	Vector2D m_rgvecDestCoord[MAX_ITEM_TYPES];
-	hSprite* m_rgphList[MAX_ITEM_TYPES];
-	wrect_t* m_rgprcList[MAX_ITEM_TYPES];
+	std::array<WeaponIdType, MAX_ITEM_TYPES> m_rgiWeapons;
+	std::array<Vector2D, MAX_ITEM_TYPES> m_rgvecCurCoord;
+	std::array<Vector2D, MAX_ITEM_TYPES> m_rgvecDestCoord;
+	std::array<hSprite*, MAX_ITEM_TYPES> m_rgphList;
+	std::array<wrect_t*, MAX_ITEM_TYPES> m_rgprcList;
 
 	float m_flAlpha;
 	Phase m_iPhase;
 	WeaponIdType m_iLastWpnId;
+	float m_flLastY{ 0.0f };	// for other UI elements.
+	float m_flWidestCard{ 0.0f };	// for other UI elements.
 
 	int m_hClipFont;
 	int m_hAmmoFont;
-	float m_rgflFontAlpha[MAX_ITEM_TYPES];
-	Vector2D m_rgvecFontCoord[MAX_ITEM_TYPES];	// UNDONE
+	std::array<float, MAX_ITEM_TYPES> m_rgflFontAlpha;
+	std::array<Vector2D, MAX_ITEM_TYPES> m_rgvecFontCoord;	// UNDONE
 };

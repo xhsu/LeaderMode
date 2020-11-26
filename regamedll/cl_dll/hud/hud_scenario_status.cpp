@@ -162,7 +162,7 @@ int CHudScenarioStatus::Draw(float fTime)
 	iWidth = round(m_flManpowerTextureRatio * float(iTall));
 
 	// no more than 10 manpower icon. use text and numbers for the rests.
-	for (int i = 0; i < Q_min(g_rgiManpower[g_iTeam], 10U); i++)
+	for (size_t i = 0; i < Q_min(g_rgiManpower[g_iTeam], 10U); i++)
 	{
 		glColor4f(1, 1, 1, MANPOWER_ALPHAS[i]);
 		DrawUtils::Draw2DQuad(x, y, x + iWidth, y + iTall);

@@ -183,10 +183,21 @@ int CHudWeaponList::Draw(float flTime)
 	wchar_t wszText[16];
 	float flCardHeight, flCurHeight;
 	CBaseWeapon* pWeapon;
-	for (int i = 0; i < MAX_ITEM_TYPES; i++)
+	m_flLastY = ScreenHeight;
+	m_flWidestCard = 0;
+
+	for (size_t i = 0; i < MAX_ITEM_TYPES; i++)
 	{
 		if (!m_rgphList[i] || !*m_rgphList[i] || !m_rgprcList[i])
 			continue;
+
+		// find the highest (smallest) one.
+		if (m_rgvecDestCoord[i].y < m_flLastY)
+			m_flLastY = m_rgvecDestCoord[i].y;
+
+		// find the widest card.
+		if ((m_rgprcList[i]->right - m_rgprcList[i]->left) > m_flWidestCard)
+			m_flWidestCard = m_rgprcList[i]->right - m_rgprcList[i]->left;
 
 		pWeapon = g_rgpClientWeapons[m_rgiWeapons[i]];
 

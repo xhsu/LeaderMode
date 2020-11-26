@@ -842,14 +842,40 @@ Vector gHUD::GetColor(size_t iPlayerIndex)
 		}
 
 	case Role_Commander:
-		return VEC_CT_COLOUR + ((Q_sin(gHUD::m_flTime * 2.0f) + 1.0f) / 2.0f) * COMMANDER_COLOR_DIFF;
+		return VEC_CT_COLOUR + GetOscillation() * COMMANDER_COLOR_DIFF;
 
 	case Role_Godfather:
-		return VEC_T_COLOUR + ((Q_sin(gHUD::m_flTime * 2.0f) + 1.0f) / 2.0f) * GODFATHER_COLOR_DIFF;
+		return VEC_T_COLOUR + GetOscillation() * GODFATHER_COLOR_DIFF;
 
 	default:
 		return VEC_YELLOWISH;
 	}
+}
+
+bool gHUD::GetSprite(const char* szSpriteName, hSprite* phSPR, const wrect_t** pprcSPR)
+{
+	auto index = GetSpriteIndex(szSpriteName);
+
+	if (!index)
+		return false;
+
+	if (phSPR)
+		*phSPR = GetSprite(index);
+
+	if (pprcSPR)
+		*pprcSPR = GetSpriteRect(index);
+
+	return true;
+}
+
+float gHUD::GetOscillation(void)
+{
+	return (Q_sin(gHUD::m_flTime * 2.0f) + 1.0f) / 2.0f;
+}
+
+float gHUD::GetOscillationUnfreezable(void)
+{
+	return (Q_sin(gHUD::m_flUCDTime * 2.0f) + 1.0f) / 2.0f;
 }
 
 void gHUD::SlotInput(int iSlot)

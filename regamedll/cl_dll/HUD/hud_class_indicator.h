@@ -13,6 +13,9 @@ class CHudClassIndicator : public CBaseHudElement
 {
 public:
 	typedef enum { DECREASE = -1, FREEZED = 0, INCREASE = 1} MODE;
+
+	static constexpr int INDICATOR_SIZE = 128;
+
 public:
 	static	SkillIndex	GetPrimarySkill(void);
 

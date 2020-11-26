@@ -223,6 +223,9 @@ namespace gHUD
 	client_sprite_t* GetSpriteFromList(client_sprite_t* pList, const char* psz, int iRes, int iCount);	// get a specific SPR from a list. i.e., a TXT file list.
 	void GetSprite(client_sprite_t* pSprite, hSprite& hSPR, wrect_t& rcSPR);
 	Vector GetColor(size_t iPlayerIndex);
+	bool GetSprite(const char* szSpriteName, hSprite* phSPR, const wrect_t** pprcSPR);
+	float GetOscillation(void);
+	float GetOscillationUnfreezable(void);
 
 	// HUD bridges
 	void SlotInput(int iSlot);

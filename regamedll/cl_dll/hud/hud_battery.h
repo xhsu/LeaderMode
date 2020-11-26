@@ -21,8 +21,10 @@ public:
 	float GetMaxArmour(void);
 
 public:
-	int m_HUD_suit_empty, m_HUD_suit_full;
-	int m_HUD_suithelmet_empty, m_HUD_suithelmet_full;
+	hSprite m_hSuitEmpty, m_hSuitHelmetEmpty;
+	const wrect_t* m_prcSuitEmpty, *m_prcSuitHelmetEmpty;
+	hSprite m_hSuitFull, m_hSuitHelmetFull;
+	const wrect_t* m_prcSuitFull, *m_prcSuitHelmetFull;
 	float m_flArmour;
 	float m_flDrawingArmour;
 	float m_fFade;

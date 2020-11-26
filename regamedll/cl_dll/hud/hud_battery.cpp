@@ -21,13 +21,12 @@ int CHudBattery::Init(void)
 
 int CHudBattery::VidInit(void)
 {
-	m_HUD_suit_empty = gHUD::GetSpriteIndex("suit_empty");
-	m_HUD_suit_full = gHUD::GetSpriteIndex("suit_full");
+	gHUD::GetSprite("suit_empty", &m_hSuitEmpty, &m_prcSuitEmpty);
+	gHUD::GetSprite("suit_full", &m_hSuitFull, &m_prcSuitFull);
+	gHUD::GetSprite("suithelmet_empty", &m_hSuitHelmetEmpty, &m_prcSuitHelmetEmpty);
+	gHUD::GetSprite("suithelmet_full", &m_hSuitHelmetFull, &m_prcSuitHelmetFull);
 
-	m_HUD_suithelmet_empty = gHUD::GetSpriteIndex("suithelmet_empty");
-	m_HUD_suithelmet_full = gHUD::GetSpriteIndex("suithelmet_full");
-
-	m_iHeight = gHUD::GetSpriteRect(m_HUD_suit_full)->bottom - gHUD::GetSpriteRect(m_HUD_suit_empty)->top;
+	m_iHeight = m_prcSuitFull->bottom - m_prcSuitFull->top;
 	m_fFade = 0;
 	return 1;
 }
@@ -37,23 +36,18 @@ int CHudBattery::Draw(float flTime)
 	if ((gHUD::m_bitsHideHUDDisplay & HIDEHUD_HEALTH) || g_iUser1)
 		return 1;
 
-	int spriteEmpty, spriteFull;
+	auto hSpriteEmpty = m_hSuitEmpty;
+	auto hSpriteFull = m_hSuitFull;
+	auto prcEmpty = m_prcSuitEmpty;
+	auto prcFull = m_prcSuitFull;
 
 	if (m_iArmorType >= 1)
 	{
-		spriteEmpty = m_HUD_suithelmet_empty;
-		spriteFull = m_HUD_suithelmet_full;
+		hSpriteEmpty = m_hSuitHelmetEmpty;
+		hSpriteFull = m_hSuitHelmetFull;
+		prcEmpty = m_prcSuitHelmetEmpty;
+		prcFull = m_prcSuitHelmetFull;
 	}
-	else
-	{
-		spriteEmpty = m_HUD_suit_empty;
-		spriteFull = m_HUD_suit_full;
-	}
-
-	hSprite hSpriteEmpty = gHUD::GetSprite(spriteEmpty);
-	hSprite hSpriteFull = gHUD::GetSprite(spriteFull);
-	const wrect_t* prcEmpty = gHUD::GetSpriteRect(spriteEmpty);
-	const wrect_t* prcFull = gHUD::GetSpriteRect(spriteFull);
 
 	int r, g, b, x, y, a;
 	wrect_t rc = *prcFull;
