@@ -36,8 +36,8 @@ int CHudStatusIcons::Draw(float flTime)
 	if (gEngfuncs.IsSpectateOnly())
 		return 1;
 
-	int x = m_iCrossWidth / 2;
-	int y = ScreenHeight / 2;
+	int x = ScreenWidth - m_iCrossWidth / 2 * 3;
+	int y = gHUD::m_accountBalance.m_flLastY;
 
 	if (flTime > m_tmNextFlash)
 	{
@@ -49,6 +49,7 @@ int CHudStatusIcons::Draw(float flTime)
 	{
 		if (m_IconList[i].spr)
 		{
+			// LUNA: shift upward in LeaderMod
 			y += (m_IconList[i].rc.top - m_IconList[i].rc.bottom) - 5;
 
 			if (!m_bFlashOn && m_IconList[i].bFlash)

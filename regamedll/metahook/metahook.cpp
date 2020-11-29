@@ -45,6 +45,9 @@ void IPlugins::LoadClient(cl_exportfuncs_t* pExportFunc)
 	// in client.dll, this function should be called in gExportfuncs.Initialize().
 	Dxt_Initialization();
 
+	// Search engine function for client.dll
+	SearchEngineFunctions();
+
 	// client.dll initialize.
 	Q_memcpy(&gExportfuncs, pExportFunc, sizeof(gExportfuncs));
 }

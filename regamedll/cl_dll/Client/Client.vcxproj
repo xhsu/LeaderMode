@@ -71,7 +71,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>E:\SteamLibrary\steamapps\common\Half-Life\leadermode\cl_dlls\</OutDir>
+    <OutDir>C:\Program Files (x86)\Steam\steamapps\common\Half-Life\leadermode\cl_dlls\</OutDir>
     <TargetName>client</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -79,7 +79,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>E:\SteamLibrary\steamapps\common\Half-Life\leadermode\cl_dlls\</OutDir>
+    <OutDir>C:\Program Files (x86)\Steam\steamapps\common\Half-Life\leadermode\cl_dlls\</OutDir>
     <TargetName>client</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -295,6 +295,8 @@
     <ClInclude Include="..\..\dlls\weapontype.h" />
     <ClInclude Include="..\..\game_shared\shared_string.h" />
     <ClInclude Include="..\..\game_shared\shared_util.h" />
+    <ClInclude Include="..\..\metahook\client.h" />
+    <ClInclude Include="..\..\metahook\engine.h" />
     <ClInclude Include="..\..\pm_shared\pm_debug.h" />
     <ClInclude Include="..\..\pm_shared\pm_defs.h" />
     <ClInclude Include="..\..\pm_shared\pm_info.h" />

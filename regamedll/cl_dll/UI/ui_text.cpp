@@ -20,10 +20,10 @@ bool CBaseText::Draw(float flTime)
 	float x = GetX();
 	float y = GetY();
 
-	gFontFuncs.DrawSetTextFont(m_hFont);
-	gFontFuncs.DrawSetTextPos(x, y);
-	gFontFuncs.DrawSetTextColor(m_ubColour.r, m_ubColour.g, m_ubColour.b, m_ubColour.a);
-	gFontFuncs.DrawPrintText(m_wszWords);
+	gFontFuncs::DrawSetTextFont(m_hFont);
+	gFontFuncs::DrawSetTextPos(x, y);
+	gFontFuncs::DrawSetTextColor(m_ubColour.r, m_ubColour.g, m_ubColour.b, m_ubColour.a);
+	gFontFuncs::DrawPrintText(m_wszWords);
 
 	if (!m_lstChildren.empty())
 	{
@@ -68,7 +68,7 @@ void CBaseText::SetLocalise(const char* key)
 int CBaseText::CreateFont(const char* windowsFontName, int tall, int weight, int blur, int scanlines, int flags)
 {
 	m_iFontSize = tall;
-	m_hFont = gFontFuncs.CreateFont();
-	gFontFuncs.AddGlyphSetToFont(m_hFont, windowsFontName, tall, weight, blur, scanlines, flags, 0x0, 0xFFFF);
+	m_hFont = gFontFuncs::CreateFont();
+	gFontFuncs::AddGlyphSetToFont(m_hFont, windowsFontName, tall, weight, blur, scanlines, flags, 0x0, 0xFFFF);
 	return m_hFont;
 }

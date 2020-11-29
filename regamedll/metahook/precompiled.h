@@ -34,6 +34,12 @@ Modern Warfare Dev Team
 // for studiohdr_t and STUDIO_NF_FULLBRIGHT
 #include "../engine/studio.h"
 
+// general engine hooks and function prototype definitions
+#include "engine.h"
+
+// client extended funcs
+#include "client.h"
+
 // specific functions
 #include "larger_textures.h"
 #include "fullbright_textures.h"

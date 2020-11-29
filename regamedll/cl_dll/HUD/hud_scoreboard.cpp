@@ -74,8 +74,8 @@ int CHudScoreboard::VidInit(void)
 	}
 
 	// font.
-	m_hPlayerNameFont = gFontFuncs.CreateFont();
-	gFontFuncs.AddGlyphSetToFont(m_hPlayerNameFont, "Trajan Pro", 18, FW_MEDIUM, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0xFFFF);
+	m_hPlayerNameFont = gFontFuncs::CreateFont();
+	gFontFuncs::AddGlyphSetToFont(m_hPlayerNameFont, "Trajan Pro", 18, FW_MEDIUM, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0xFFFF);
 
 	// base board: translucent black
 	m_Baseboard.m_bitsFlags |= HUD_ACTIVE;
@@ -124,19 +124,19 @@ int CHudScoreboard::Draw(float flTime)
 	_snwprintf(wszText, wcharsmax(wszText), L"%s (%d %s) %s: %d", m_pwszTeamName[TEAM_CT], iPlayerCounts, m_pwszPlayerCalled, m_pwcTeamWinsText, g_rgiTeamScore[TEAM_CT]);
 
 	// CTs
-	gFontFuncs.DrawSetTextFont(m_hPlayerNameFont);
-	gFontFuncs.DrawSetTextPos(x, y);
-	gFontFuncs.DrawSetTextColor(173, 201, 235, 255);	// colour of CT.
-	gFontFuncs.DrawPrintText(wszText);
+	gFontFuncs::DrawSetTextFont(m_hPlayerNameFont);
+	gFontFuncs::DrawSetTextPos(x, y);
+	gFontFuncs::DrawSetTextColor(RGB_CT_COLOUR, 255);	// colour of CT.
+	gFontFuncs::DrawPrintText(wszText);
 
 	float x2 = x + m_flChunkOffset * 2; // starts from column #3, "MONEY".
 	for (int i = 3; i < 8; i++)
 	{
 		x2 += m_flChunkOffset;
-		gFontFuncs.DrawSetTextFont(m_hPlayerNameFont);
-		gFontFuncs.DrawSetTextPos(x2, y);
-		gFontFuncs.DrawSetTextColor(173, 201, 235, 255);	// colour of CT.
-		gFontFuncs.DrawPrintText(m_rgpwcScoreboardElementName[i]);
+		gFontFuncs::DrawSetTextFont(m_hPlayerNameFont);
+		gFontFuncs::DrawSetTextPos(x2, y);
+		gFontFuncs::DrawSetTextColor(RGB_CT_COLOUR, 255);	// colour of CT.
+		gFontFuncs::DrawPrintText(m_rgpwcScoreboardElementName[i]);
 	}
 
 	glDisable(GL_TEXTURE_2D);
@@ -144,7 +144,7 @@ int CHudScoreboard::Draw(float flTime)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glColor4f(173 / 255.0, 201 / 255.0, 235 / 255.0, 1);
 
-	gFontFuncs.GetTextSize(m_hPlayerNameFont, wszText, &iTextWidth, &iTextHeight);
+	gFontFuncs::GetTextSize(m_hPlayerNameFont, wszText, &iTextWidth, &iTextHeight);
 	DrawUtils::Draw2DQuadNoTex(m_Baseboard.GetX(), y + iTextHeight + 2, m_Baseboard.GetX() + m_Baseboard.m_flWidth, y + iTextHeight + 4);
 
 	glDisable(GL_BLEND);
@@ -158,7 +158,7 @@ int CHudScoreboard::Draw(float flTime)
 		if (g_PlayerExtraInfo[i].m_iTeam != TEAM_CT)
 			continue;
 
-		gFontFuncs.GetTextSize(m_hPlayerNameFont, wszText, &iTextWidth, &iTextHeight);
+		gFontFuncs::GetTextSize(m_hPlayerNameFont, wszText, &iTextWidth, &iTextHeight);
 		y += iTextHeight + 4;
 
 		wcsncpy_s(wszText, UTF8ToUnicode(g_PlayerInfoList[i].name), MAX_PLAYER_NAME_LENGTH);
@@ -166,18 +166,18 @@ int CHudScoreboard::Draw(float flTime)
 		if (g_PlayerExtraInfo[i].m_bIsDead)
 			_snwprintf(wszText, wcharsmax(wszText), L"%s (%s)", UTF8ToUnicode(g_PlayerInfoList[i].name), m_pwszDeathCalled);
 
-		gFontFuncs.DrawSetTextFont(m_hPlayerNameFont);
-		gFontFuncs.DrawSetTextPos(x, y);
-		gFontFuncs.DrawSetTextColor(173, 201, 235, 255);	// colour of CT.
-		gFontFuncs.DrawPrintText(wszText);
+		gFontFuncs::DrawSetTextFont(m_hPlayerNameFont);
+		gFontFuncs::DrawSetTextPos(x, y);
+		gFontFuncs::DrawSetTextColor(RGB_CT_COLOUR, 255);	// colour of CT.
+		gFontFuncs::DrawPrintText(wszText);
 
 		// 1. Classes
 		// since we are no longer showing HP, use a bit its spaces.
 		x2 = x + m_flChunkOffset * 1.5f;
 		if (g_PlayerExtraInfo[i].m_iTeam == g_iTeam || g_iTeam == TEAM_SPECTATOR)
 		{
-			gFontFuncs.DrawSetTextPos(x2, y);
-			gFontFuncs.DrawPrintText(g_rgwcsRoleNames[g_PlayerExtraInfo[i].m_iRoleType].c_str());
+			gFontFuncs::DrawSetTextPos(x2, y);
+			gFontFuncs::DrawPrintText(g_rgwcsRoleNames[g_PlayerExtraInfo[i].m_iRoleType].c_str());
 		}
 
 		// 2. HP
@@ -186,8 +186,8 @@ int CHudScoreboard::Draw(float flTime)
 		/*if (g_PlayerExtraInfo[i].m_iTeam == g_iTeam || g_iTeam == TEAM_SPECTATOR)
 		{
 			_snwprintf(wszText, wcharsmax(wszText), L"%d", g_PlayerExtraInfo[i].m_iHealth);
-			gFontFuncs.DrawSetTextPos(x2, y);
-			gFontFuncs.DrawPrintText(wszText);
+			gFontFuncs::DrawSetTextPos(x2, y);
+			gFontFuncs::DrawPrintText(wszText);
 		}*/
 
 		// 3. Money
@@ -195,27 +195,27 @@ int CHudScoreboard::Draw(float flTime)
 		if (g_PlayerExtraInfo[i].m_iTeam == g_iTeam || g_iTeam == TEAM_SPECTATOR)
 		{
 			_snwprintf(wszText, wcharsmax(wszText), L"%d", g_PlayerExtraInfo[i].m_iAccount);
-			gFontFuncs.DrawSetTextPos(x2, y);
-			gFontFuncs.DrawPrintText(wszText);
+			gFontFuncs::DrawSetTextPos(x2, y);
+			gFontFuncs::DrawPrintText(wszText);
 		}
 
 		// 4. Kill
 		x2 += m_flChunkOffset;
 		_snwprintf(wszText, wcharsmax(wszText), L"%d", g_PlayerExtraInfo[i].m_iKills);
-		gFontFuncs.DrawSetTextPos(x2, y);
-		gFontFuncs.DrawPrintText(wszText);
+		gFontFuncs::DrawSetTextPos(x2, y);
+		gFontFuncs::DrawPrintText(wszText);
 
 		// 5. Deaths
 		x2 += m_flChunkOffset;
 		_snwprintf(wszText, wcharsmax(wszText), L"%d", g_PlayerExtraInfo[i].m_iDeaths);
-		gFontFuncs.DrawSetTextPos(x2, y);
-		gFontFuncs.DrawPrintText(wszText);
+		gFontFuncs::DrawSetTextPos(x2, y);
+		gFontFuncs::DrawPrintText(wszText);
 
 		// 6. KDA
 		x2 += m_flChunkOffset;
 		_snwprintf(wszText, wcharsmax(wszText), L"%.2f", float(g_PlayerExtraInfo[i].m_iKills) / float(Q_max(short(1), g_PlayerExtraInfo[i].m_iDeaths)));
-		gFontFuncs.DrawSetTextPos(x2, y);
-		gFontFuncs.DrawPrintText(wszText);
+		gFontFuncs::DrawSetTextPos(x2, y);
+		gFontFuncs::DrawPrintText(wszText);
 
 		// 7. PING
 		x2 += m_flChunkOffset;
@@ -224,8 +224,8 @@ int CHudScoreboard::Draw(float flTime)
 		else
 			wcsncpy_s(wszText, L"Local", 6);
 
-		gFontFuncs.DrawSetTextPos(x2, y);
-		gFontFuncs.DrawPrintText(wszText);
+		gFontFuncs::DrawSetTextPos(x2, y);
+		gFontFuncs::DrawPrintText(wszText);
 	}
 
 	// TERs
@@ -233,18 +233,18 @@ int CHudScoreboard::Draw(float flTime)
 	iPlayerCounts = GetTeamCounts(TEAM_TERRORIST);
 	_snwprintf(wszText, wcharsmax(wszText), L"%s (%d %s) %s: %d", m_pwszTeamName[TEAM_TERRORIST], iPlayerCounts, m_pwszPlayerCalled, m_pwcTeamWinsText, g_rgiTeamScore[TEAM_TERRORIST]);
 
-	gFontFuncs.DrawSetTextFont(m_hPlayerNameFont);
-	gFontFuncs.DrawSetTextPos(x, y);
-	gFontFuncs.DrawSetTextColor(216, 81, 80, 255);	// colour of T.
-	gFontFuncs.DrawPrintText(wszText);
+	gFontFuncs::DrawSetTextFont(m_hPlayerNameFont);
+	gFontFuncs::DrawSetTextPos(x, y);
+	gFontFuncs::DrawSetTextColor(RGB_T_COLOUR, 255);	// colour of T.
+	gFontFuncs::DrawPrintText(wszText);
 
 	x2 = x + m_flChunkOffset * 2; // starts from column #3, "MONEY".
 	for (int i = 3; i < 8; i++)
 	{
 		x2 += m_flChunkOffset;
-		gFontFuncs.DrawSetTextFont(m_hPlayerNameFont);
-		gFontFuncs.DrawSetTextPos(x2, y);
-		gFontFuncs.DrawPrintText(m_rgpwcScoreboardElementName[i]);
+		gFontFuncs::DrawSetTextFont(m_hPlayerNameFont);
+		gFontFuncs::DrawSetTextPos(x2, y);
+		gFontFuncs::DrawPrintText(m_rgpwcScoreboardElementName[i]);
 	}
 
 	glDisable(GL_TEXTURE_2D);
@@ -252,7 +252,7 @@ int CHudScoreboard::Draw(float flTime)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glColor4f(216 / 255.0, 81 / 255.0, 80 / 255.0, 1);
 
-	gFontFuncs.GetTextSize(m_hPlayerNameFont, wszText, &iTextWidth, &iTextHeight);
+	gFontFuncs::GetTextSize(m_hPlayerNameFont, wszText, &iTextWidth, &iTextHeight);
 	DrawUtils::Draw2DQuadNoTex(m_Baseboard.GetX(), y + iTextHeight + 2, m_Baseboard.GetX() + m_Baseboard.m_flWidth, y + iTextHeight + 4);
 
 	glDisable(GL_BLEND);
@@ -266,7 +266,7 @@ int CHudScoreboard::Draw(float flTime)
 		if (g_PlayerExtraInfo[i].m_iTeam != TEAM_TERRORIST)
 			continue;
 
-		gFontFuncs.GetTextSize(m_hPlayerNameFont, wszText, &iTextWidth, &iTextHeight);
+		gFontFuncs::GetTextSize(m_hPlayerNameFont, wszText, &iTextWidth, &iTextHeight);
 		y += iTextHeight + 4;
 
 		wcsncpy_s(wszText, UTF8ToUnicode(g_PlayerInfoList[i].name), MAX_PLAYER_NAME_LENGTH);
@@ -274,18 +274,18 @@ int CHudScoreboard::Draw(float flTime)
 		if (g_PlayerExtraInfo[i].m_bIsDead)
 			_snwprintf(wszText, wcharsmax(wszText), L"%s (%s)", UTF8ToUnicode(g_PlayerInfoList[i].name), m_pwszDeathCalled);
 
-		gFontFuncs.DrawSetTextFont(m_hPlayerNameFont);
-		gFontFuncs.DrawSetTextPos(x, y);
-		gFontFuncs.DrawSetTextColor(216, 81, 80, 255);	// colour of T.
-		gFontFuncs.DrawPrintText(wszText);
+		gFontFuncs::DrawSetTextFont(m_hPlayerNameFont);
+		gFontFuncs::DrawSetTextPos(x, y);
+		gFontFuncs::DrawSetTextColor(RGB_T_COLOUR, 255);	// colour of T.
+		gFontFuncs::DrawPrintText(wszText);
 
 		// 1. Classes
 		// since we are no longer showing HP, use a bit its spaces.
 		x2 = x + m_flChunkOffset * 1.5f;
 		if (g_PlayerExtraInfo[i].m_iTeam == g_iTeam || g_iTeam == TEAM_SPECTATOR)
 		{
-			gFontFuncs.DrawSetTextPos(x2, y);
-			gFontFuncs.DrawPrintText(g_rgwcsRoleNames[g_PlayerExtraInfo[i].m_iRoleType].c_str());
+			gFontFuncs::DrawSetTextPos(x2, y);
+			gFontFuncs::DrawPrintText(g_rgwcsRoleNames[g_PlayerExtraInfo[i].m_iRoleType].c_str());
 		}
 
 		// 2. HP
@@ -294,8 +294,8 @@ int CHudScoreboard::Draw(float flTime)
 		/*if (g_PlayerExtraInfo[i].m_iTeam == g_iTeam || g_iTeam == TEAM_SPECTATOR)
 		{
 			_snwprintf(wszText, wcharsmax(wszText), L"%d", g_PlayerExtraInfo[i].m_iHealth);
-			gFontFuncs.DrawSetTextPos(x2, y);
-			gFontFuncs.DrawPrintText(wszText);
+			gFontFuncs::DrawSetTextPos(x2, y);
+			gFontFuncs::DrawPrintText(wszText);
 		}*/
 
 		// 3. Money
@@ -303,27 +303,27 @@ int CHudScoreboard::Draw(float flTime)
 		if (g_PlayerExtraInfo[i].m_iTeam == g_iTeam || g_iTeam == TEAM_SPECTATOR)
 		{
 			_snwprintf(wszText, wcharsmax(wszText), L"%d", g_PlayerExtraInfo[i].m_iAccount);
-			gFontFuncs.DrawSetTextPos(x2, y);
-			gFontFuncs.DrawPrintText(wszText);
+			gFontFuncs::DrawSetTextPos(x2, y);
+			gFontFuncs::DrawPrintText(wszText);
 		}
 
 		// 4. Kill
 		x2 += m_flChunkOffset;
 		_snwprintf(wszText, wcharsmax(wszText), L"%d", g_PlayerExtraInfo[i].m_iKills);
-		gFontFuncs.DrawSetTextPos(x2, y);
-		gFontFuncs.DrawPrintText(wszText);
+		gFontFuncs::DrawSetTextPos(x2, y);
+		gFontFuncs::DrawPrintText(wszText);
 
 		// 5. Deaths
 		x2 += m_flChunkOffset;
 		_snwprintf(wszText, wcharsmax(wszText), L"%d", g_PlayerExtraInfo[i].m_iDeaths);
-		gFontFuncs.DrawSetTextPos(x2, y);
-		gFontFuncs.DrawPrintText(wszText);
+		gFontFuncs::DrawSetTextPos(x2, y);
+		gFontFuncs::DrawPrintText(wszText);
 
 		// 6. KDA
 		x2 += m_flChunkOffset;
 		_snwprintf(wszText, wcharsmax(wszText), L"%.2f", float(g_PlayerExtraInfo[i].m_iKills) / float(Q_max(short(1), g_PlayerExtraInfo[i].m_iDeaths)));
-		gFontFuncs.DrawSetTextPos(x2, y);
-		gFontFuncs.DrawPrintText(wszText);
+		gFontFuncs::DrawSetTextPos(x2, y);
+		gFontFuncs::DrawPrintText(wszText);
 
 		// 7. PING
 		x2 += m_flChunkOffset;
@@ -332,17 +332,17 @@ int CHudScoreboard::Draw(float flTime)
 		else
 			wcsncpy_s(wszText, L"Local", 6);
 
-		gFontFuncs.DrawSetTextPos(x2, y);
-		gFontFuncs.DrawPrintText(wszText);
+		gFontFuncs::DrawSetTextPos(x2, y);
+		gFontFuncs::DrawPrintText(wszText);
 	}
 
 	// Observers
 	y += iTextHeight * 2;
 
-	gFontFuncs.DrawSetTextFont(m_hPlayerNameFont);
-	gFontFuncs.DrawSetTextPos(x, y);
-	gFontFuncs.DrawSetTextColor(255, 255, 255, 255);
-	gFontFuncs.DrawPrintText(m_pwszTeamName[TEAM_SPECTATOR]);
+	gFontFuncs::DrawSetTextFont(m_hPlayerNameFont);
+	gFontFuncs::DrawSetTextPos(x, y);
+	gFontFuncs::DrawSetTextColor(255, 255, 255, 255);
+	gFontFuncs::DrawPrintText(m_pwszTeamName[TEAM_SPECTATOR]);
 
 	for (int i = 1; i <= MAX_PLAYERS; i++)
 	{
@@ -352,15 +352,15 @@ int CHudScoreboard::Draw(float flTime)
 		if (g_PlayerExtraInfo[i].m_iTeam == TEAM_CT || g_PlayerExtraInfo[i].m_iTeam == TEAM_TERRORIST)
 			continue;	// all the rest is called observers.
 
-		gFontFuncs.GetTextSize(m_hPlayerNameFont, wszText, &iTextWidth, &iTextHeight);
+		gFontFuncs::GetTextSize(m_hPlayerNameFont, wszText, &iTextWidth, &iTextHeight);
 		y += iTextHeight + 2;
 
 		wcsncpy_s(wszText, UTF8ToUnicode(g_PlayerInfoList[i].name), MAX_PLAYER_NAME_LENGTH);
 
-		gFontFuncs.DrawSetTextFont(m_hPlayerNameFont);
-		gFontFuncs.DrawSetTextPos(x, y);
-		gFontFuncs.DrawSetTextColor(255, 255, 255, 255);
-		gFontFuncs.DrawPrintText(wszText);
+		gFontFuncs::DrawSetTextFont(m_hPlayerNameFont);
+		gFontFuncs::DrawSetTextPos(x, y);
+		gFontFuncs::DrawSetTextColor(255, 255, 255, 255);
+		gFontFuncs::DrawPrintText(wszText);
 	}
 
 	return 1;

@@ -14,8 +14,7 @@ Modern Warfare Dev Team
 
 #include "precompiled.h"
 
-int (*g_pfnGL_LoadTexture)(char* identifier, int textureType, int width, int height, BYTE* data, int mipmap, int iType, BYTE* pPal) = NULL;
-qboolean (*g_pfnLoadTGA)(char* szFilename, unsigned char* buffer, int bufferSize, int* width, int* height) = NULL;
+int (*g_pfnGL_LoadTexture)(char* identifier, int textureType, int width, int height, BYTE* data, int mipmap, int iType, BYTE* pPal) = nullptr;
 
 
 int GL_LoadTexture(char* identifier, int textureType, int width, int height, BYTE* data, int mipmap, int iType, BYTE* pPal)
@@ -87,8 +86,4 @@ void LargerTexture_InstallHook(void)
 	{
 		g_pMetaHookAPI->InlineHook(g_pfnGL_LoadTexture, GL_LoadTexture, (void*&)g_pfnGL_LoadTexture);
 	}
-
-	g_pfnLoadTGA = (qboolean (*)(char*, unsigned char*, int, int*, int*))g_pMetaHookAPI->SearchPattern((void*)g_dwEngineBase, g_dwEngineSize, LOAD_TGA_SIG, sizeof(LOAD_TGA_SIG) - 1);
-	if (!g_pfnLoadTGA)
-		g_pfnLoadTGA = (qboolean (*)(char*, unsigned char*, int, int*, int*))g_pMetaHookAPI->SearchPattern((void*)g_dwEngineBase, g_dwEngineSize, LOAD_TGA_SIG_NEW, sizeof(LOAD_TGA_SIG_NEW) - 1);
 }

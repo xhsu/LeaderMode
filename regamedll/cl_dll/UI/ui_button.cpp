@@ -121,7 +121,7 @@ void CBaseTextButton::SetSize(float flWidth, float flHeight)
 	m_Background.m_flHeight = m_flHeight = flHeight;
 
 	int iTextWidth = 0, iTextHeight = 0;
-	gFontFuncs.GetTextSize(m_Text.m_hFont, m_Text.m_wszWords, &iTextWidth, &iTextHeight);
+	gFontFuncs::GetTextSize(m_Text.m_hFont, m_Text.m_wszWords, &iTextWidth, &iTextHeight);
 
 	// re-center the text.
 	m_Text.m_vecCoord.x = (m_flWidth - float(iTextWidth)) / 2.0f;
@@ -152,7 +152,7 @@ void CBaseTextButton2::SetSize(float flWidth, float flHeight)
 	m_flHeight = flHeight;
 
 	int iTextWidth = 0, iTextHeight = 0;
-	gFontFuncs.GetTextSize(m_Text.m_hFont, m_Text.m_wszWords, &iTextWidth, &iTextHeight);
+	gFontFuncs::GetTextSize(m_Text.m_hFont, m_Text.m_wszWords, &iTextWidth, &iTextHeight);
 
 	// re-center the text.
 	m_Text.m_vecCoord.x = (m_flWidth - float(iTextWidth)) / 2.0f;

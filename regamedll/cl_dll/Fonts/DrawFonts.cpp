@@ -3,33 +3,6 @@
 
 #pragma comment(lib, "opengl32.lib")
 
-void F_Init(void);
-void F_Shutdown(void);
-void F_DrawSetTextFont(int font);
-void F_DrawSetTextColor(int r, int g, int b, int a);
-void F_DrawSetTextPos(int x, int y);
-void F_DrawGetTextPos(int *x, int *y);
-void F_DrawSetText3DPos(Vector vecSrc);
-void F_DrawGetText3DPos(Vector *vecSrc);
-void F_DrawSetText3DDir(Vector vecForward, Vector vecRight, Vector vecUp);
-void F_DrawSetText3DHeight(float flHeight);
-void F_DrawPrintText(const wchar_t *text);
-void F_DrawPrint3DText(const wchar_t *text);
-void F_DrawPrint3DTextVertical(const wchar_t *text);
-void F_DrawOutlineText(const wchar_t *text);
-void F_DrawUnicodeChar(wchar_t wch);
-void F_Draw3DUnicodeChar(wchar_t wch);
-void F_Draw3DUnicodeCharVertical(wchar_t wch);
-int F_CreateFont(void);
-bool F_AddGlyphSetToFont(int font, const char *windowsFontName, int tall, int weight, int blur, int scanlines, int flags, int lowRange, int highRange);
-bool F_AddCustomFontFile(const char *fontFileName);
-int F_GetFontTall(int font);
-void F_GetCharABCwide(int font, int ch, int *a, int *b, int *c);
-int F_GetCharacterWidth(int font, int ch);
-void F_GetTextSize(int font, const wchar_t *text, int *wide, int *tall);
-int F_GetFontAscent(int font, wchar_t wch);
-int F_GetFontFlags(int font);
-
 static int s_Font;
 static int s_Color[4];
 static int s_Pos[2];
@@ -37,22 +10,22 @@ static Vector s_vec3DPos;
 static Vector s_vec3DDir[3];
 static float s_flRatio;
 
-void F_Init(void)
+void gFontFuncs::Init(void)
 {
 	s_Font = 0;
 }
 
-void F_Shutdown(void)
+void gFontFuncs::Shutdown(void)
 {
 	return FontManager().ClearAllFonts();
 }
 
-void F_DrawSetTextFont(int font)
+void gFontFuncs::DrawSetTextFont(int font)
 {
 	s_Font = font;
 }
 
-void F_DrawSetTextColor(int r, int g, int b, int a)
+void gFontFuncs::DrawSetTextColor(int r, int g, int b, int a)
 {
 	s_Color[0] = r;
 	s_Color[1] = g;
@@ -60,113 +33,129 @@ void F_DrawSetTextColor(int r, int g, int b, int a)
 	s_Color[3] = a;
 }
 
-void F_DrawSetTextPos(int x, int y)
+void gFontFuncs::DrawSetTextColor(const Vector& color, float a)
+{
+	s_Color[0] = round(color.r * 255.0f);
+	s_Color[1] = round(color.g * 255.0f);
+	s_Color[2] = round(color.b * 255.0f);
+	s_Color[3] = round(a * 255.0f);
+}
+
+void gFontFuncs::DrawSetTextColor(unsigned long ulRGB, int a)
+{
+	s_Color[0] = (ulRGB & 0xFF0000) >> 16;
+	s_Color[1] = (ulRGB & 0xFF00) >> 8;
+	s_Color[2] = ulRGB & 0xFF;
+	s_Color[3] = a;
+}
+
+void gFontFuncs::DrawSetTextPos(int x, int y)
 {
 	s_Pos[0] = x;
 	s_Pos[1] = y;
 }
 
-void F_DrawSetText3DPos(Vector vecSrc)
+void gFontFuncs::DrawSetText3DPos(Vector vecSrc)
 {
 	s_vec3DPos = vecSrc;
 }
 
-void F_DrawGetText3DPos(Vector *vecSrc)
+void gFontFuncs::DrawGetText3DPos(Vector *vecSrc)
 {
 	*vecSrc = s_vec3DPos;
 }
 
-void F_DrawSetText3DDir(Vector vecForward, Vector vecRight, Vector vecUp)
+void gFontFuncs::DrawSetText3DDir(Vector vecForward, Vector vecRight, Vector vecUp)
 {
 	s_vec3DDir[0] = vecForward;
 	s_vec3DDir[1] = vecRight;
 	s_vec3DDir[2] = vecUp;
 }
 
-void F_DrawSetText3DHeight(float flHeight)
+void gFontFuncs::DrawSetText3DHeight(float flHeight)
 {
 	if (flHeight <= 0.0f)
 		s_flRatio = 1.0f;
 	else
-		s_flRatio = flHeight / (float)F_GetFontTall(s_Font);
+		s_flRatio = flHeight / (float)gFontFuncs::GetFontTall(s_Font);
 }
 
-void F_DrawGetTextPos(int *x, int *y)
+void gFontFuncs::DrawGetTextPos(int *x, int *y)
 {
 	*x = s_Pos[0];
 	*y = s_Pos[1];
 }
 
-void F_DrawPrintText(const wchar_t *text)
+void gFontFuncs::DrawPrintText(const wchar_t *text)
 {
 	int x, y;
-	F_DrawGetTextPos(&x, &y);
+	gFontFuncs::DrawGetTextPos(&x, &y);
 
-	int fontTall = F_GetFontTall(s_Font);
+	int fontTall = gFontFuncs::GetFontTall(s_Font);
 
 	for (size_t i = 0; i < wcslen(text); ++i)
 	{
 		if (text[i] == '\n')
 		{
 			y = y + fontTall;
-			F_DrawSetTextPos(x, y);
+			gFontFuncs::DrawSetTextPos(x, y);
 			continue;
 		}
 
 		if (text[i] == '\t')
 			continue;
 
-		F_DrawUnicodeChar(text[i]);
+		gFontFuncs::DrawUnicodeChar(text[i]);
 	}
 }
 
-void F_DrawPrint3DText(const wchar_t *text)
+void gFontFuncs::DrawPrint3DText(const wchar_t *text)
 {
 	Vector vecSrc;
-	F_DrawGetText3DPos(&vecSrc);
+	gFontFuncs::DrawGetText3DPos(&vecSrc);
 
-	float fontTall = (float)F_GetFontTall(s_Font);
+	float fontTall = (float)gFontFuncs::GetFontTall(s_Font);
 
 	for (size_t i = 0; i < wcslen(text); ++i)
 	{
 		if (text[i] == '\n')
 		{
 			vecSrc -= s_vec3DDir[2] * fontTall;
-			F_DrawSetText3DPos(vecSrc);
+			gFontFuncs::DrawSetText3DPos(vecSrc);
 			continue;
 		}
 
 		if (text[i] == '\t')
 			continue;
 
-		F_Draw3DUnicodeChar(text[i]);
+		gFontFuncs::Draw3DUnicodeChar(text[i]);
 	}
 }
 
-void F_DrawPrint3DTextVertical(const wchar_t *text)
+void gFontFuncs::DrawPrint3DTextVertical(const wchar_t *text)
 {
 	Vector vecSrc;
-	F_DrawGetText3DPos(&vecSrc);
+	gFontFuncs::DrawGetText3DPos(&vecSrc);
 
-	float fontTall = (float)F_GetFontTall(s_Font);
+	float fontTall = (float)gFontFuncs::GetFontTall(s_Font);
 
 	for (size_t i = 0; i < wcslen(text); ++i)
 	{
 		if (text[i] == '\n')
 		{
 			vecSrc -= s_vec3DDir[1] * fontTall;
-			F_DrawSetText3DPos(vecSrc);
+			gFontFuncs::DrawSetText3DPos(vecSrc);
 			continue;
 		}
 
 		if (text[i] == '\t')
 			continue;
 
-		F_Draw3DUnicodeCharVertical(text[i]);
+		gFontFuncs::Draw3DUnicodeCharVertical(text[i]);
 	}
 }
 
-void F_DrawOutlineText(const wchar_t *text)
+void gFontFuncs::DrawOutlineText(const wchar_t *text)
 {
 	static int pos[2], color[4];
 
@@ -175,31 +164,31 @@ void F_DrawOutlineText(const wchar_t *text)
 	memcpy(color, s_Color, sizeof(s_Color));
 
 	// draw outline color
-	F_DrawSetTextColor(0, 0, 0, color[3]);
+	gFontFuncs::DrawSetTextColor(0, 0, 0, color[3]);
 
 	// left
-	F_DrawSetTextPos(pos[0] - 1, pos[1]);
-	F_DrawPrintText(text);
+	gFontFuncs::DrawSetTextPos(pos[0] - 1, pos[1]);
+	gFontFuncs::DrawPrintText(text);
 
 	// right
-	F_DrawSetTextPos(pos[0] + 1, pos[1]);
-	F_DrawPrintText(text);
+	gFontFuncs::DrawSetTextPos(pos[0] + 1, pos[1]);
+	gFontFuncs::DrawPrintText(text);
 
 	// top
-	F_DrawSetTextPos(pos[0], pos[1] - 1);
-	F_DrawPrintText(text);
+	gFontFuncs::DrawSetTextPos(pos[0], pos[1] - 1);
+	gFontFuncs::DrawPrintText(text);
 
 	// bottom
-	F_DrawSetTextPos(pos[0], pos[1] + 1);
-	F_DrawPrintText(text);
+	gFontFuncs::DrawSetTextPos(pos[0], pos[1] + 1);
+	gFontFuncs::DrawPrintText(text);
 	
 	// draw text
-	F_DrawSetTextColor(color[0], color[1], color[2], color[3]);
-	F_DrawSetTextPos(pos[0], pos[1]);
-	F_DrawPrintText(text);
+	gFontFuncs::DrawSetTextColor(color[0], color[1], color[2], color[3]);
+	gFontFuncs::DrawSetTextPos(pos[0], pos[1]);
+	gFontFuncs::DrawPrintText(text);
 }
 
-void F_DrawUnicodeChar(wchar_t wch)
+void gFontFuncs::DrawUnicodeChar(wchar_t wch)
 {
 	if (!s_Font)
 		return;
@@ -209,12 +198,12 @@ void F_DrawUnicodeChar(wchar_t wch)
 	y = s_Pos[1];
 
 	int a, b, c;
-	F_GetCharABCwide(s_Font, wch, &a, &b, &c);
+	gFontFuncs::GetCharABCwide(s_Font, wch, &a, &b, &c);
 
 	int rgbaWide, rgbaTall;
 
 	rgbaWide = b;
-	rgbaTall = F_GetFontTall(s_Font);
+	rgbaTall = gFontFuncs::GetFontTall(s_Font);
 
 	x  = x + a;
 
@@ -249,7 +238,7 @@ void F_DrawUnicodeChar(wchar_t wch)
 	s_Pos[1] = y;
 }
 
-void F_Draw3DUnicodeChar(wchar_t wch)
+void gFontFuncs::Draw3DUnicodeChar(wchar_t wch)
 {
 	if (!s_Font)
 		return;
@@ -257,12 +246,12 @@ void F_Draw3DUnicodeChar(wchar_t wch)
 	Vector vecSrc = s_vec3DPos;
 
 	int a, b, c;
-	F_GetCharABCwide(s_Font, wch, &a, &b, &c);
+	gFontFuncs::GetCharABCwide(s_Font, wch, &a, &b, &c);
 
 	int rgbaWide, rgbaTall;
 
 	rgbaWide = b;
-	rgbaTall = F_GetFontTall(s_Font);
+	rgbaTall = gFontFuncs::GetFontTall(s_Font);
 
 	// don't know why, but this line is useless in 3D drawing
 	//vecSrc += s_vec3DDir[1] * (float)a;
@@ -300,7 +289,7 @@ void F_Draw3DUnicodeChar(wchar_t wch)
 	s_vec3DPos += float(b + c) * s_flRatio * s_vec3DDir[1];
 }
 
-void F_Draw3DUnicodeCharVertical(wchar_t wch)
+void gFontFuncs::Draw3DUnicodeCharVertical(wchar_t wch)
 {
 	if (!s_Font)
 		return;
@@ -308,12 +297,12 @@ void F_Draw3DUnicodeCharVertical(wchar_t wch)
 	Vector vecSrc = s_vec3DPos;
 
 	int a, b, c;
-	F_GetCharABCwide(s_Font, wch, &a, &b, &c);
+	gFontFuncs::GetCharABCwide(s_Font, wch, &a, &b, &c);
 
 	int rgbaWide, rgbaTall;
 
 	rgbaWide = b;
-	rgbaTall = F_GetFontTall(s_Font);
+	rgbaTall = gFontFuncs::GetFontTall(s_Font);
 
 	// don't know why, but this line is useless in 3D drawing
 	//vecSrc += s_vec3DDir[1] * (float)a;
@@ -351,78 +340,47 @@ void F_Draw3DUnicodeCharVertical(wchar_t wch)
 	s_vec3DPos -= float(b + c) * s_flRatio * s_vec3DDir[2];
 }
 
-int F_CreateFont(void)
+int gFontFuncs::CreateFont(void)
 {
 	return FontManager().CreateFont();
 }
 
-bool F_AddGlyphSetToFont(int font, const char *windowsFontName, int tall, int weight, int blur, int scanlines, int flags, int lowRange, int highRange)
+bool gFontFuncs::AddGlyphSetToFont(int font, const char *windowsFontName, int tall, int weight, int blur, int scanlines, int flags, int lowRange, int highRange)
 {
 	return FontManager().AddGlyphSetToFont(font, windowsFontName, tall, weight, blur, scanlines, flags, lowRange, highRange);
 }
 
-bool F_AddCustomFontFile(const char *fontFileName)
+bool gFontFuncs::AddCustomFontFile(const char *fontFileName)
 {
 	return AddFontResourceExA(fontFileName, FR_PRIVATE, 0) != 0;
 }
 
-int F_GetFontTall(int font)
+int gFontFuncs::GetFontTall(int font)
 {
 	return FontManager().GetFontTall(font);
 }
 
-void F_GetCharABCwide(int font, int ch, int *a, int *b, int *c)
+void gFontFuncs::GetCharABCwide(int font, int ch, int *a, int *b, int *c)
 {
 	return FontManager().GetCharABCwide(font, ch, *a, *b, *c);
 }
 
-int F_GetCharacterWidth(int font, int ch)
+int gFontFuncs::GetCharacterWidth(int font, int ch)
 {
 	return FontManager().GetCharacterWidth(font, ch);
 }
 
-void F_GetTextSize(int font, const wchar_t *text, int *wide, int *tall)
+void gFontFuncs::GetTextSize(int font, const wchar_t *text, int *wide, int *tall)
 {
 	return FontManager().GetTextSize(font, text, *wide, *tall);
 }
 
-int F_GetFontAscent(int font, wchar_t wch)
+int gFontFuncs::GetFontAscent(int font, wchar_t wch)
 {
 	return FontManager().GetFontAscent(font, wch);
 }
 
-int F_GetFontFlags(int font)
+int gFontFuncs::GetFontFlags(int font)
 {
 	return FontManager().GetFontFlags(font);
 }
-
-fonts_api_t gFontFuncs = 
-{
-	F_Init,
-	F_Shutdown,
-	F_DrawSetTextFont,
-	F_DrawSetTextColor,
-	F_DrawSetTextPos,
-	F_DrawGetTextPos,
-	F_DrawPrintText,
-	F_DrawOutlineText,
-	F_DrawUnicodeChar,
-	F_CreateFont,
-	F_AddGlyphSetToFont,
-	F_AddCustomFontFile,
-	F_GetFontTall,
-	F_GetCharABCwide,
-	F_GetCharacterWidth,
-	F_GetTextSize,
-	F_GetFontAscent,
-	F_GetFontFlags,
-
-	F_DrawSetText3DPos,
-	F_DrawGetText3DPos,
-	F_DrawSetText3DDir,
-	F_DrawSetText3DHeight,
-	F_DrawPrint3DText,
-	F_DrawPrint3DTextVertical,
-	F_Draw3DUnicodeChar,
-	F_Draw3DUnicodeCharVertical
-};

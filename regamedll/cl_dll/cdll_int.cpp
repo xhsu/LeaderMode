@@ -7,6 +7,7 @@ Created Date: 05 Mar 2020
 #include "precompiled.h"
 
 cl_enginefunc_t gEngfuncs;
+cl_extendedfunc_t gExtFuncs;
 
 void CL_DLLEXPORT CAM_Think(void)
 {
@@ -179,7 +180,7 @@ void CL_DLLEXPORT HUD_Reset(void)
 void CL_DLLEXPORT HUD_Shutdown(void)
 {
 	gHUD::Shutdown();
-	gFontFuncs.Shutdown();
+	gFontFuncs::Shutdown();
 	Sound_Exit();
 }
 
@@ -213,7 +214,7 @@ BOOL CL_DLLEXPORT HUD_VidInit(void)
 	g_pViewEnt = gEngfuncs.GetViewModel();
 
 	gHUD::VidInit();
-	gFontFuncs.Init();
+	gFontFuncs::Init();
 	gViewModelHandsTexture::Initiation();
 	return TRUE;
 }
@@ -249,8 +250,6 @@ void CL_DLLEXPORT IN_MouseEvent(int mstate)
 
 BOOL CL_DLLEXPORT Initialize_(cl_enginefunc_t* pEnginefuncs, int iVersion)	// LUNA: this has to be renamed because so many other functions are using the same name.
 {
-	gEngfuncs = *pEnginefuncs;
-
 	if (iVersion != CLDLL_INTERFACE_VERSION)
 		return FALSE;
 
@@ -262,6 +261,33 @@ BOOL CL_DLLEXPORT Initialize_(cl_enginefunc_t* pEnginefuncs, int iVersion)	// LU
 
 	// LUNA: UNDONE, crsky told me to do it later.
 	//CL_LoadParticleMan();
+
+	// Load metahook extended functions.
+	HMODULE hMetahookDLL = LoadLibrary("lm_metahook_module.dll");
+	if (!hMetahookDLL)
+	{
+		MessageBox(nullptr, "Metahook module no found!", nullptr, MB_OK | MB_ICONERROR);
+		exit(0);
+		return FALSE;
+	}
+
+	FUNC_GetExtFuncs pfn = (FUNC_GetExtFuncs)GetProcAddress(hMetahookDLL, "CL_GetExtendedFuncs");
+
+	if (pfn)
+		pfn(&gExtFuncs);
+	else
+	{
+		MessageBox(nullptr, "Function \"CL_GetExtendedFuncs\" no found!", nullptr, MB_OK | MB_ICONERROR);
+		exit(0);
+		return FALSE;
+	}
+
+	if (gExtFuncs.version != CLIENT_EXTENDED_FUNCS_API_VERSION)
+	{
+		MessageBox(nullptr, "Version mismatch between client and metahook module!", nullptr, MB_OK | MB_ICONERROR);
+		exit(0);
+		return FALSE;
+	}
 
 	// get tracker interface, if any
 	return TRUE;

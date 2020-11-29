@@ -54,8 +54,6 @@ public:
 	float m_flAlpha;
 	Phase m_iPhase;
 	WeaponIdType m_iLastWpnId;
-	float m_flLastY{ 0.0f };	// for other UI elements.
-	float m_flWidestCard{ 0.0f };	// for other UI elements.
 
 	int m_hClipFont;
 	int m_hAmmoFont;

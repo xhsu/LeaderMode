@@ -55,8 +55,8 @@ int CHudClassIndicator::Init(void)
 	m_bitsFlags = HUD_ACTIVE;
 	m_fFade = 0;
 
-	m_hClassFont = gFontFuncs.CreateFont();
-	gFontFuncs.AddGlyphSetToFont(m_hClassFont, "Trajan Pro", 24, FW_BOLD, 1, 0, FONTFLAG_ANTIALIAS | FONTFLAG_OUTLINE, 0x0, 0xFFFF);
+	m_hClassFont = gFontFuncs::CreateFont();
+	gFontFuncs::AddGlyphSetToFont(m_hClassFont, "Trajan Pro", FONT_TALL, FW_BOLD, 1, 0, FONTFLAG_ANTIALIAS | FONTFLAG_OUTLINE, 0x0, 0xFFFF);
 
 	gHUD::AddHudElem(this);
 	return TRUE;
@@ -85,9 +85,11 @@ int CHudClassIndicator::VidInit(void)
 	return TRUE;
 }
 
+static char szKeyText[64];
+
 BOOL CHudClassIndicator::Draw(float flTime)
 {
-	DrawClassName(flTime);	// At the left bottom conor.
+	DrawLeftPortion(flTime);	// At the left bottom conor.
 
 	// careful for the array bound!
 	if (g_iRoleType < Role_UNASSIGNED || g_iRoleType >= ROLE_COUNT)
@@ -113,82 +115,7 @@ BOOL CHudClassIndicator::Draw(float flTime)
 	else
 		m_iAlpha = MIN_ALPHA;
 
-	float x = ScreenWidth - INDICATOR_SIZE;
-	float y = gHUD::m_WeaponList.m_flLastY - INDICATOR_SIZE - 12;
-	const wchar_t* pwcsKeybind = L"[Caps Lock]";	// UNDONE
-
-	// Class icon
-	gEngfuncs.pTriAPI->RenderMode(kRenderTransColor);
-	gEngfuncs.pTriAPI->Brightness(1.0);
-
-	// in order to make transparent fx on dds texture...
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glColor4f(VEC_YELLOWISH.r, VEC_YELLOWISH.g, VEC_YELLOWISH.b, m_iAlpha / 255.0);
-
-	gEngfuncs.pTriAPI->CullFace(TRI_NONE);
-
-	glBindTexture(GL_TEXTURE_2D, m_iClassesIcon[g_iRoleType]);
-	DrawUtils::Draw2DQuad(x, y, x + INDICATOR_SIZE, y + INDICATOR_SIZE);
-
-	// if you don't have a avaliable skill, i.e. a Role_UNASSIGNED, the progress bar is unnecessary.
-	if (GetPrimarySkill() == SkillIndex_ERROR)
-		return TRUE;
-
-	// Progression bar.
-	glDisable(GL_TEXTURE_2D);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	// a shinny colour make the player notice.
-	Vector vecColour = VEC_YELLOWISH;
-	if (m_flCurrentTime >= m_flTotalTime)
-		vecColour = VEC_YELLOWISH + (VEC_SPRINGGREENISH - VEC_YELLOWISH) * gHUD::GetOscillation();	// make this sine wave bouncing between 0 to 1.
-
-	glColor4f(vecColour.r, vecColour.g, vecColour.b, 1.0);
-
-	DrawUtils::Draw2DQuadProgressBar2(x, y, INDICATOR_SIZE, INDICATOR_SIZE, 3, m_flCurrentTime / m_flTotalTime);
-
-	// HUD art border.
-	y += INDICATOR_SIZE * 0.75f;
-
-	int iTall = 0, iWidth = 0;
-	gFontFuncs.GetTextSize(m_hClassFont, pwcsKeybind, &iWidth, &iTall);
-
-	glColor4f(VEC_YELLOWISH.r, VEC_YELLOWISH.g, VEC_YELLOWISH.b, m_iAlpha / 255.0);
-
-	glEnable(GL_POLYGON_SMOOTH);
-	glHint(GL_POLYGON_SMOOTH_HINT, GL_DONT_CARE);
-	glBegin(GL_POLYGON);
-	glVertex2f(x, y - 1);
-	glVertex2f(x, y + 1);
-	glVertex2f(x - 40, y + 32 - 1);
-	glVertex2f(x - 40, y + 32 + 1);
-	glEnd();
-	glDisable(GL_POLYGON_SMOOTH);
-
-	DrawUtils::Draw2DQuad(
-		x - 40, y + 32 - 1,
-		x - 40 - iWidth, y + 32 + 1
-	);
-
-	glDisable(GL_BLEND);
-	glEnable(GL_TEXTURE_2D);
-
-	// Keybind text
-	x = x - 40 - iWidth;
-	y = y + 32 - iTall;
-
-	vecColour = Vector(1, 1, 1);
-	if (m_flCurrentTime >= m_flTotalTime)	// cooldown is over.
-		vecColour = Vector(1, 1, 1) + (VEC_SPRINGGREENISH - Vector(1, 1, 1)) * gHUD::GetOscillation();
-
-	// amplify this to 0~255 scale.
-	vecColour *= 255.0f;
-
-	gFontFuncs.DrawSetTextFont(m_hClassFont);
-	gFontFuncs.DrawSetTextPos(x, y);
-	gFontFuncs.DrawSetTextColor(vecColour.r, vecColour.g, vecColour.b, m_flCurrentTime >= m_flTotalTime ? 255 : m_iAlpha);	// only high-bright if not in the cooldown.
-	gFontFuncs.DrawPrintText(pwcsKeybind);
+	DrawRightPortion(flTime);
 
 	return TRUE;
 }
@@ -234,10 +161,10 @@ void CHudClassIndicator::SetSkillTimer(float flTotalTime, MODE iMode, float flCu
 	m_flCurrentTime = flCurrentTime;
 }
 
-void CHudClassIndicator::DrawClassName(float flTime)
+void CHudClassIndicator::DrawLeftPortion(float flTime)
 {
 	int iTall = 0, iWidth = 0;
-	gFontFuncs.GetTextSize(m_hClassFont, g_rgwcsRoleNames[g_iRoleType].c_str(), &iWidth, &iTall);
+	gFontFuncs::GetTextSize(m_hClassFont, g_rgwcsRoleNames[g_iRoleType].c_str(), &iWidth, &iTall);
 
 	int x = 0, y = gHUD::m_Battery.m_flLastDrawingY - iTall / 2;
 	int x2 = HEALTH_BASIC_OFS - 2, y2 = y - HEALTH_BASIC_OFS;
@@ -268,8 +195,91 @@ void CHudClassIndicator::DrawClassName(float flTime)
 	glDisable(GL_BLEND);
 	glEnable(GL_TEXTURE_2D);
 
-	gFontFuncs.DrawSetTextFont(m_hClassFont);
-	gFontFuncs.DrawSetTextPos(x2 + 2, y2 - iTall / 2);
-	gFontFuncs.DrawSetTextColor(235, 235, 235, m_iAlpha);	// have to keep the text white.
-	gFontFuncs.DrawPrintText(g_rgwcsRoleNames[g_iRoleType].c_str());
+	gFontFuncs::DrawSetTextFont(m_hClassFont);
+	gFontFuncs::DrawSetTextPos(x2 + 2, y2 - iTall / 2);
+	gFontFuncs::DrawSetTextColor(235, 235, 235, m_iAlpha);	// have to keep the text white.
+	gFontFuncs::DrawPrintText(g_rgwcsRoleNames[g_iRoleType].c_str());
+}
+
+void CHudClassIndicator::DrawRightPortion(float flTime)
+{
+	float x = ScreenWidth - INDICATOR_SIZE;
+	float y = gHUD::m_WeaponList.m_flLastY - INDICATOR_SIZE - FONT_TALL / 2;
+
+	// get & show the keyname.
+	Q_snprintf(szKeyText, _countof(szKeyText) - 1U, "[%s]", gExtFuncs.pfnKey_NameForBinding("executeskill"));
+	const wchar_t* pwcsKeybind = ANSIToUnicode(szKeyText);
+
+	// 1. Class icon
+	gEngfuncs.pTriAPI->RenderMode(kRenderTransColor);
+	gEngfuncs.pTriAPI->Brightness(1.0);
+
+	// in order to make transparent fx on dds texture...
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glColor4f(VEC_YELLOWISH.r, VEC_YELLOWISH.g, VEC_YELLOWISH.b, m_iAlpha / 255.0);
+
+	gEngfuncs.pTriAPI->CullFace(TRI_NONE);
+
+	glBindTexture(GL_TEXTURE_2D, m_iClassesIcon[g_iRoleType]);
+	DrawUtils::Draw2DQuad(x, y, x + INDICATOR_SIZE, y + INDICATOR_SIZE);
+
+	// for CHudMoney. It's already the highest point.
+	m_flLastY = y;
+
+	// if you don't have a avaliable skill, i.e. a Role_UNASSIGNED, the progress bar is unnecessary.
+	if (GetPrimarySkill() == SkillIndex_ERROR)
+		return;
+
+	// 2. Progression bar.
+	glDisable(GL_TEXTURE_2D);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	// a shinny colour make the player notice.
+	Vector vecColour = VEC_YELLOWISH;
+	if (m_flCurrentTime >= m_flTotalTime)
+		vecColour = VEC_YELLOWISH + (VEC_SPRINGGREENISH - VEC_YELLOWISH) * gHUD::GetOscillation();	// make this sine wave bouncing between 0 to 1.
+
+	glColor4f(vecColour.r, vecColour.g, vecColour.b, 1.0);
+
+	DrawUtils::Draw2DQuadProgressBar2(x, y, INDICATOR_SIZE, INDICATOR_SIZE, 3, m_flCurrentTime / m_flTotalTime);
+
+	// 3. HUD art border.
+	y += INDICATOR_SIZE * 0.75f;
+
+	int iTall = 0, iWidth = 0;
+	gFontFuncs::GetTextSize(m_hClassFont, pwcsKeybind, &iWidth, &iTall);
+
+	glColor4f(VEC_YELLOWISH.r, VEC_YELLOWISH.g, VEC_YELLOWISH.b, m_iAlpha / 255.0);
+
+	glEnable(GL_POLYGON_SMOOTH);
+	glHint(GL_POLYGON_SMOOTH_HINT, GL_DONT_CARE);
+	glBegin(GL_POLYGON);
+	glVertex2f(x, y - 1);
+	glVertex2f(x, y + 1);
+	glVertex2f(x - 40, y + 32 - 1);
+	glVertex2f(x - 40, y + 32 + 1);
+	glEnd();
+	glDisable(GL_POLYGON_SMOOTH);
+
+	DrawUtils::Draw2DQuad(
+		x - 40, y + 32 - 1,
+		x - 40 - iWidth, y + 32 + 1
+	);
+
+	glDisable(GL_BLEND);
+	glEnable(GL_TEXTURE_2D);
+
+	// 4. Keybind text
+	x = x - 40 - iWidth;
+	y = y + 32 - iTall - 1;
+
+	vecColour = Vector(1, 1, 1);
+	if (m_flCurrentTime >= m_flTotalTime)	// cooldown is over.
+		vecColour += (VEC_SPRINGGREENISH - Vector(1, 1, 1)) * gHUD::GetOscillation();
+
+	gFontFuncs::DrawSetTextFont(m_hClassFont);
+	gFontFuncs::DrawSetTextPos(x, y);
+	gFontFuncs::DrawSetTextColor(vecColour, m_flCurrentTime >= m_flTotalTime ? 1.0f : (float(m_iAlpha) / 255));	// only high-bright if not in the cooldown.
+	gFontFuncs::DrawPrintText(pwcsKeybind);
 }

@@ -30,8 +30,10 @@ public:
 	static constexpr int GAP_PLAYERNAME_ICON = 4;
 	static constexpr int GAP_ROWS = 2;
 	static constexpr int GAP_MANPOWER_INTERICON = 2;
+	static constexpr int GAP_SCHEMEICON_TEXT = 4;
 
 	static constexpr int MANPOWER_ICON_SIZE = 32;
+	static constexpr int SCHEME_ICON_SIZE = 60;
 
 	static constexpr std::array<double, 10U> MANPOWER_ALPHAS = {1, 1, 1, 1, 1, 0.84, 0.68, 0.52, 0.36, 0.2};
 

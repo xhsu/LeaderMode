@@ -20,10 +20,10 @@ int CHudAccountBalance::VidInit(void)
 	m_HUD_minus = gHUD::GetSpriteIndex("minus");
 	m_HUD_plus = gHUD::GetSpriteIndex("plus");
 
-	m_hNumberFont = gFontFuncs.CreateFont();
-	gFontFuncs.AddGlyphSetToFont(m_hNumberFont, "Scriptina", 48, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS|FONTFLAG_ADDITIVE, 0x0, 0xFFFF);
-	m_hSignFont = gFontFuncs.CreateFont();
-	gFontFuncs.AddGlyphSetToFont(m_hSignFont, "Scriptina", 72, FW_BOLD, 1, 0, FONTFLAG_ANTIALIAS | FONTFLAG_ADDITIVE, 0x0, 0xFFFF);
+	m_hNumberFont = gFontFuncs::CreateFont();
+	gFontFuncs::AddGlyphSetToFont(m_hNumberFont, "Scriptina", 48, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS|FONTFLAG_ADDITIVE, 0x0, 0xFFFF);
+	m_hSignFont = gFontFuncs::CreateFont();
+	gFontFuncs::AddGlyphSetToFont(m_hSignFont, "Scriptina", 72, FW_BOLD, 1, 0, FONTFLAG_ANTIALIAS | FONTFLAG_ADDITIVE, 0x0, 0xFFFF);
 
 	int r, g, b;
 	int r1, g1, b1;
@@ -64,11 +64,7 @@ int CHudAccountBalance::Draw(float flTime)
 	// get a posision below radar.
 	wchar_t wszText[64];
 	int iWidth, iHeight;
-	int x = 10;
-	int y = CHudRadar::HUD_SIZE + CHudRadar::BORDER_GAP + 10;
-
 	int r, g, b;
-	int r1, g1, b1;
 
 	if (m_flBlinkTime > gEngfuncs.GetClientTime())
 	{
@@ -85,20 +81,25 @@ int CHudAccountBalance::Draw(float flTime)
 	}
 
 	_snwprintf(wszText, wcharsmax(wszText), L"$ %d", m_iAccount);
-	gFontFuncs.GetTextSize(m_hSignFont, wszText, &iWidth, &iHeight);
+	gFontFuncs::GetTextSize(m_hSignFont, wszText, &iWidth, &iHeight);
 
-	gFontFuncs.DrawSetTextFont(m_hSignFont);
-	gFontFuncs.DrawSetTextPos(x, y);
-	gFontFuncs.DrawSetTextColor(r, g, b, 255);
-	gFontFuncs.DrawPrintText(wszText);
+	int x = ScreenWidth - iWidth - 10;
+	int y = gHUD::m_ClassIndicator.m_flLastY - iHeight - 10;
 
-	y += iHeight;
+	gFontFuncs::DrawSetTextFont(m_hSignFont);
+	gFontFuncs::DrawSetTextPos(x, y);
+	gFontFuncs::DrawSetTextColor(r, g, b, 255);
+	gFontFuncs::DrawPrintText(wszText);
+
+	// for CHudStatusIcons. Here is the highest point of Y.
+	m_flLastY = y;
+
+	y += 32;	// wierd font. you just can't use(or trust) the font tall.
 	_snwprintf(wszText, wcharsmax(wszText), m_bDeltaPositiveSign ? L"+%d" : L"-%d", Q_abs(m_iAccountDelta));
-	UnpackRGB(r1, g1, b1, m_bDeltaPositiveSign ? RGB_GREENISH : RGB_REDISH);
-	gFontFuncs.DrawSetTextFont(m_hNumberFont);
-	gFontFuncs.DrawSetTextPos(x, y);
-	gFontFuncs.DrawSetTextColor(r1, g1, b1, m_flAlpha);
-	gFontFuncs.DrawPrintText(wszText);
+	gFontFuncs::DrawSetTextFont(m_hNumberFont);
+	gFontFuncs::DrawSetTextPos(x, y);
+	gFontFuncs::DrawSetTextColor(m_bDeltaPositiveSign ? RGB_GREENISH : RGB_REDISH, m_flAlpha);
+	gFontFuncs::DrawPrintText(wszText);
 
 	return 1;
 }
@@ -106,17 +107,16 @@ int CHudAccountBalance::Draw(float flTime)
 void CHudAccountBalance::Think(void)
 {
 	int iLastDelta = m_iAccountDelta;
+	int iThisFrameDecrement = round(float(m_iAccountDelta) * gHUD::m_flUCDTimeDelta);
 
 	if (m_iAccountDelta > 0)
-	{
-		m_iAccountDelta--;
-		m_iAccount++;
-	}
+		iThisFrameDecrement = Q_max(1, iThisFrameDecrement);
 	else if (m_iAccountDelta < 0)
-	{
-		m_iAccountDelta++;
-		m_iAccount--;
-	}
+		iThisFrameDecrement = Q_min(iThisFrameDecrement, -1);
+
+	// sign doesn't matter here.
+	m_iAccountDelta -= iThisFrameDecrement;
+	m_iAccount += iThisFrameDecrement;
 
 	// do nothing when m_iAccountDelta == 0
 

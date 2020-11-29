@@ -15,6 +15,7 @@ public:
 	typedef enum { DECREASE = -1, FREEZED = 0, INCREASE = 1} MODE;
 
 	static constexpr int INDICATOR_SIZE = 128;
+	static constexpr int FONT_TALL = 24;
 
 public:
 	static	SkillIndex	GetPrimarySkill(void);
@@ -29,7 +30,8 @@ public:
 public:
 	void	LightUp(void);
 	void	SetSkillTimer(float flTotalTime, MODE iMode, float flCurrentTime);
-	void	DrawClassName(float flTime);
+	void	DrawLeftPortion(float flTime);
+	void	DrawRightPortion(float flTime);
 
 public:
 	std::array<GLuint, ROLE_COUNT> m_iClassesIcon;

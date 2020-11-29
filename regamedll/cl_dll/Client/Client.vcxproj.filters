@@ -34,6 +34,9 @@
     <Filter Include="cl_dll\UI">
       <UniqueIdentifier>{73f28086-aa1c-4105-b2fd-271daebe87ff}</UniqueIdentifier>
     </Filter>
+    <Filter Include="metahook">
+      <UniqueIdentifier>{52e595bc-41a3-4927-bff8-6b3cb1d1f064}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\cdll_int.cpp">
@@ -508,6 +511,12 @@
     </ClInclude>
     <ClInclude Include="..\..\game_shared\shared_string.h">
       <Filter>game_shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\metahook\client.h">
+      <Filter>metahook</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\metahook\engine.h">
+      <Filter>metahook</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

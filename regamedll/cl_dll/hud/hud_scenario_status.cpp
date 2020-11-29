@@ -21,6 +21,7 @@ int CHudScenarioStatus::Init(void)
 	m_iIdSpeaker = LoadDDS("texture/HUD/Items/Speaker.dds");
 	m_iIdManpower = LoadDDS("texture/HUD/Items/Manpower.dds", &iWidth, &iHeight); m_flManpowerTextureRatio = float(iWidth) / float(iHeight);
 
+	m_rgiIdSchemeTexture[Scheme_UNASSIGNED]				= LoadDDS("texture/HUD/ClassesIcon/Doraemon.dds");	// FIXME
 	m_rgiIdSchemeTexture[Doctrine_GrandBattleplan]		= LoadDDS("texture/HUD/Schemes/Doctrine_GrandBattleplan.dds");
 	m_rgiIdSchemeTexture[Doctrine_MassAssault]			= LoadDDS("texture/HUD/Schemes/Doctrine_MassAssault.dds");
 	m_rgiIdSchemeTexture[Doctrine_MobileWarfare]		= LoadDDS("texture/HUD/Schemes/Doctrine_MobileWarfare.dds");
@@ -46,8 +47,8 @@ int CHudScenarioStatus::Init(void)
 	g_rgwcsRoleNames[Role_Assassin]		= VGUI_LOCALISE->Find("#LeaderMod_Role_Assassin");
 	g_rgwcsRoleNames[Role_Arsonist]		= VGUI_LOCALISE->Find("#LeaderMod_Role_Arsonist");
 
-	m_hNameFont = gFontFuncs.CreateFont();
-	gFontFuncs.AddGlyphSetToFont(m_hNameFont, "Trajan Pro", 20, FW_BOLD, 1, 0, FONTFLAG_ANTIALIAS | FONTFLAG_OUTLINE, 0x0, 0xFFFF);
+	m_hNameFont = gFontFuncs::CreateFont();
+	gFontFuncs::AddGlyphSetToFont(m_hNameFont, "Trajan Pro", 20, FW_BOLD, 1, 0, FONTFLAG_ANTIALIAS | FONTFLAG_OUTLINE, 0x0, 0xFFFF);
 
 	gHUD::AddHudElem(this);
 	return 1;
@@ -64,6 +65,9 @@ void CHudScenarioStatus::Reset(void)
 	g_rgiManpower.fill(0);
 	g_rgiTeamSchemes.fill(Scheme_UNASSIGNED);
 }
+
+static std::wstring wcsKeyName;
+static const Vector VEC_WHITE_RED_DIFF = VEC_REDISH - Vector(1, 1, 1);
 
 int CHudScenarioStatus::Draw(float fTime)
 {
@@ -98,7 +102,7 @@ int CHudScenarioStatus::Draw(float fTime)
 		x = CHudRadar::BORDER_GAP * 2 + CHudRadar::HUD_SIZE;	// Reset X pos on each loop.
 
 		pwcsName = UTF8ToUnicode(g_PlayerInfoList[i].name);
-		gFontFuncs.GetTextSize(gHUD::m_Scoreboard.m_hPlayerNameFont, pwcsName, &iWidth, &iTall);
+		gFontFuncs::GetTextSize(gHUD::m_Scoreboard.m_hPlayerNameFont, pwcsName, &iWidth, &iTall);
 
 		// Draw class icon.
 		gEngfuncs.pTriAPI->RenderMode(kRenderTransColor);
@@ -118,10 +122,10 @@ int CHudScenarioStatus::Draw(float fTime)
 		x += iTall + GAP_PLAYERNAME_ICON;	// move to the right side of that icon.
 
 		// Draw the name text follow.
-		gFontFuncs.DrawSetTextFont(m_hNameFont);
-		gFontFuncs.DrawSetTextPos(x, y);
-		gFontFuncs.DrawSetTextColor(235, 235, 235, 255);	// have to keep the text white.
-		gFontFuncs.DrawPrintText(pwcsName);
+		gFontFuncs::DrawSetTextFont(m_hNameFont);
+		gFontFuncs::DrawSetTextPos(x, y);
+		gFontFuncs::DrawSetTextColor(235, 235, 235, 255);	// have to keep the text white.
+		gFontFuncs::DrawPrintText(pwcsName);
 
 		x += iWidth + GAP_PLAYERNAME_ICON;	// move to the right side of that text.
 
@@ -172,8 +176,8 @@ int CHudScenarioStatus::Draw(float fTime)
 
 	if (g_rgiManpower[g_iTeam] > 10)
 	{
-		gFontFuncs.DrawSetTextPos(x, y);
-		gFontFuncs.DrawPrintText(m_rgwcsManpowerTexts[g_iTeam].c_str());
+		gFontFuncs::DrawSetTextPos(x, y);
+		gFontFuncs::DrawPrintText(m_rgwcsManpowerTexts[g_iTeam].c_str());
 	}
 
 	// Scheme Indicator
@@ -182,13 +186,31 @@ int CHudScenarioStatus::Draw(float fTime)
 	x = CHudRadar::BORDER_GAP;
 	y = CHudRadar::BORDER_GAP + CHudRadar::HUD_SIZE + 10;
 
-	// only show this indicator when it is not disputing.
-	if (g_rgiTeamSchemes[g_iTeam] != Scheme_UNASSIGNED)
+	// red-white flashing if its contesting.
+	if (g_rgiTeamSchemes[g_iTeam] == Scheme_UNASSIGNED)
+	{
+		auto vecColor = Vector(1, 1, 1) + VEC_WHITE_RED_DIFF * gHUD::GetOscillation();
+		glColor4f(vecColor.r, vecColor.g, vecColor.b, 1);
+		gFontFuncs::DrawSetTextColor(vecColor, 1);
+	}
+	else
 	{
 		glColor4f(1, 1, 1, 1);
-		glBindTexture(GL_TEXTURE_2D, m_rgiIdSchemeTexture[g_rgiTeamSchemes[g_iTeam]]);
-		DrawUtils::Draw2DQuad(x, y, x + 60, y + 60);
 	}
 
+	glBindTexture(GL_TEXTURE_2D, m_rgiIdSchemeTexture[g_rgiTeamSchemes[g_iTeam]]);
+	DrawUtils::Draw2DQuad(x, y, x + SCHEME_ICON_SIZE, y + SCHEME_ICON_SIZE);
+
+	// text of scheme name
+	gFontFuncs::DrawSetTextFont(gHUD::m_ClassIndicator.m_hClassFont);
+	gFontFuncs::DrawSetTextPos(x + SCHEME_ICON_SIZE + GAP_SCHEMEICON_TEXT, y);
+	gFontFuncs::DrawPrintText(g_rgwcsSchemeNames[g_rgiTeamSchemes[g_iTeam]].c_str());
+
+	wcsKeyName = L"[" + std::wstring(ANSIToUnicode(gExtFuncs.pfnKey_NameForBinding("votescheme"))) + L"]";
+	gFontFuncs::DrawSetTextPos(x + SCHEME_ICON_SIZE + GAP_SCHEMEICON_TEXT, y + SCHEME_ICON_SIZE - CHudClassIndicator::FONT_TALL);
+	gFontFuncs::DrawPrintText(wcsKeyName.c_str());
+
+	// for CHudMoney, the below element.
+	m_flLastY = y + SCHEME_ICON_SIZE;
 	return 1;
 }

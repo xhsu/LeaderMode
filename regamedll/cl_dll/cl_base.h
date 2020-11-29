@@ -118,6 +118,10 @@ Created Date: 05 Mar 2020
 #include <gl/GL.h>
 #include <gl/GLU.h>
 
+// functions loaded(or extended) from metahook module.
+#include "../metahook/engine.h"
+#include "../metahook/client.h"
+
 // custom header starts from here.
 #include "cdll_int.h"
 #include "entity.h"

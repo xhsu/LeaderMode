@@ -138,7 +138,9 @@ public:
 	virtual ~CBaseHudElement() {}
 
 public:
-	int	  m_bitsFlags{ 0 };// active, moving,
+	int	m_bitsFlags{ 0 };// active, moving,
+	float m_flLastX{ 0.0f };	// last drawn position
+	float m_flLastY{ 0.0f };	// last drawn position
 
 public:
 	virtual int Init(void) { return 0; }

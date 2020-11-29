@@ -71,7 +71,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>E:\SteamLibrary\steamapps\common\Half-Life\leadermode\metahook\plugins\</OutDir>
+    <OutDir>C:\Program Files (x86)\Steam\steamapps\common\Half-Life\leadermode\metahook\plugins\</OutDir>
     <TargetName>lm_metahook_module</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -79,7 +79,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>E:\SteamLibrary\steamapps\common\Half-Life\leadermode\metahook\plugins\</OutDir>
+    <OutDir>C:\Program Files (x86)\Steam\steamapps\common\Half-Life\leadermode\metahook\plugins\</OutDir>
     <TargetName>lm_metahook_module</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -101,6 +101,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>export.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -135,6 +136,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>export.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -156,6 +158,8 @@
   <ItemGroup>
     <ClCompile Include="..\..\cl_dll\Graph\dxt.cpp" />
     <ClCompile Include="..\..\common\interface.cpp" />
+    <ClCompile Include="..\client.cpp" />
+    <ClCompile Include="..\engine.cpp" />
     <ClCompile Include="..\fullbright_textures.cpp" />
     <ClCompile Include="..\larger_textures.cpp" />
     <ClCompile Include="..\metahook.cpp" />
@@ -168,6 +172,8 @@
     <ClInclude Include="..\..\cl_dll\Graph\dxt.h" />
     <ClInclude Include="..\..\common\interface.h" />
     <ClInclude Include="..\cdll_export.h" />
+    <ClInclude Include="..\client.h" />
+    <ClInclude Include="..\engine.h" />
     <ClInclude Include="..\fullbright_textures.h" />
     <ClInclude Include="..\larger_textures.h" />
     <ClInclude Include="..\metahook.h" />

@@ -1058,6 +1058,7 @@ void EXT_FUNC CHalfLifeMultiplay::RestartRound()
 
 		// Reset manpower and schemes.
 		m_rgiManpowers.fill(0);
+		m_rgiClientKnownManpower.fill(0);
 		m_rgbMenpowerBroadcast.fill(false);
 		m_rgTeamTacticalScheme.fill(Scheme_UNASSIGNED);
 		m_flNextTSBallotBoxesOpen = gpGlobals->time + ballot_boxes_opening_interval.value;

@@ -344,10 +344,10 @@ void gHUD::VidInit(void)
 	m_iFontEngineHeight = VGUI_SURFACE->GetFontTall(font);
 
 	// custom font function set.
-	m_hCambriaFont = gFontFuncs.CreateFont();
-	gFontFuncs.AddGlyphSetToFont(m_hCambriaFont, "Cambria", 24, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0xFFFF);
-	m_hTrajanProFont = gFontFuncs.CreateFont();
-	gFontFuncs.AddGlyphSetToFont(m_hTrajanProFont, "Trajan Pro", 24, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0xFFFF);
+	m_hCambriaFont = gFontFuncs::CreateFont();
+	gFontFuncs::AddGlyphSetToFont(m_hCambriaFont, "Cambria", 24, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0xFFFF);
+	m_hTrajanProFont = gFontFuncs::CreateFont();
+	gFontFuncs::AddGlyphSetToFont(m_hTrajanProFont, "Trajan Pro", 24, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0xFFFF);
 
 	// UNDONE
 	//if (gConfigs.bEnableClientUI)
