@@ -40,38 +40,15 @@ int CHudScoreboard::Init(void)
 int CHudScoreboard::VidInit(void)
 {
 	// get team name from localise.
-	m_pwszTeamName[TEAM_CT] = VGUI_LOCALISE->Find("#Cstrike_ScoreBoard_CT");
-	m_pwszTeamName[TEAM_TERRORIST] = VGUI_LOCALISE->Find("#Cstrike_ScoreBoard_Ter");
-	m_pwszTeamName[TEAM_SPECTATOR] = VGUI_LOCALISE->Find("#Cstrike_TitlesTXT_Spectators");
-	m_pwszPlayerCalled = VGUI_LOCALISE->Find("#Cstrike_TitlesTXT_Player_plural");
-	m_pwszDeathCalled = VGUI_LOCALISE->Find("#LeaderMod_SBE_KIA");
-	m_pwcTeamWinsText = VGUI_LOCALISE->Find("#Cstrike_TitlesTXT_WINS");
-
-	if (!m_pwszTeamName[TEAM_CT])
-		m_pwszTeamName[TEAM_CT] = L"#Cstrike_ScoreBoard_CT";
-
-	if (!m_pwszTeamName[TEAM_TERRORIST])
-		m_pwszTeamName[TEAM_TERRORIST] = L"#Cstrike_ScoreBoard_Ter";
-
-	if (!m_pwszTeamName[TEAM_SPECTATOR])
-		m_pwszTeamName[TEAM_SPECTATOR] = L"#Cstrike_TitlesTXT_Spectators";
-
-	if (!m_pwszPlayerCalled)
-		m_pwszPlayerCalled = L"#Cstrike_TitlesTXT_Player_plural";
-
-	if (!m_pwszDeathCalled)
-		m_pwszDeathCalled = L"#LeaderMod_SBE_KIA";
-
-	if (!m_pwcTeamWinsText)
-		m_pwcTeamWinsText = L"#Cstrike_TitlesTXT_WINS";
+	m_pwszTeamName[TEAM_CT] = UTIL_GetLocalisation("#Cstrike_ScoreBoard_CT");
+	m_pwszTeamName[TEAM_TERRORIST] = UTIL_GetLocalisation("#Cstrike_ScoreBoard_Ter");
+	m_pwszTeamName[TEAM_SPECTATOR] = UTIL_GetLocalisation("#Cstrike_TitlesTXT_Spectators");
+	m_pwszPlayerCalled = UTIL_GetLocalisation("#Cstrike_TitlesTXT_Player_plural");
+	m_pwszDeathCalled = UTIL_GetLocalisation("#LeaderMod_SBE_KIA");
+	m_pwcTeamWinsText = UTIL_GetLocalisation("#Cstrike_TitlesTXT_WINS");
 
 	for (int i = 0; i < 8; i++)
-	{
-		m_rgpwcScoreboardElementName[i] = VGUI_LOCALISE->Find(m_rgszScoreboardElemKeyName[i]);
-
-		if (!m_rgpwcScoreboardElementName[i])
-			m_rgpwcScoreboardElementName[i] = L"TEXT NO FOUND!";
-	}
+		m_rgpwcScoreboardElementName[i] = UTIL_GetLocalisation(m_rgszScoreboardElemKeyName[i]);
 
 	// font.
 	m_hPlayerNameFont = gFontFuncs::CreateFont();

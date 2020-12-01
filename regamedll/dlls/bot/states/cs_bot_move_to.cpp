@@ -80,11 +80,12 @@ void MoveToState::OnUpdate(CCSBot *me)
 	me->UpdateLookAround();
 
 	// Scenario logic
-	switch (TheCSBots()->GetScenario())
+	// UNDONE
+	/*switch (TheCSBots()->GetScenario())
 	{
 	default:
 		break;
-	}
+	}*/
 
 	if (me->UpdatePathMovement() != CCSBot::PROGRESSING)
 	{

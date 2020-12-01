@@ -1562,11 +1562,12 @@ void BotChatterInterface::ReportingIn()
 	SayWhere(say, place);
 
 	// what are we doing
-	switch (m_me->GetTask())
+	// UNDONE
+	/*switch (m_me->GetTask())
 	{
 	default:
 		break;
-	}
+	}*/
 
 	// what do we see
 	if (m_me->IsAttacking())

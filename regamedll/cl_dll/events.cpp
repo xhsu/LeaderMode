@@ -684,22 +684,24 @@ void EV_HLDM_DecalGunshot(pmtrace_t* pTrace, int iBulletType, float scale, int r
 		{
 			int iStreakCount = gEngfuncs.pfnRandomLong(15, 30);
 
-			switch (iBulletType)
+			/*switch (iBulletType)
 			{
 			default:
 				iColorIndex = 30;
 				break;
-			}
+			}*/
+			iColorIndex = 30;
 
 			gEngfuncs.pEfxAPI->R_StreakSplash(pTrace->endpos, gEngfuncs.pfnRandomFloat(4.0, 10.0) * pTrace->plane.normal, iColorIndex, iStreakCount, gEngfuncs.pfnRandomFloat(4.0, 10.0) * pTrace->plane.normal[2], -75, 75);
 		}
 
-		switch (iBulletType)
+		/*switch (iBulletType)
 		{
 		default:
 			decalname = EV_HLDM_DamageDecal(pe);
 			break;
-		}
+		}*/
+		decalname = EV_HLDM_DamageDecal(pe);
 
 		EV_HLDM_GunshotDecalTrace(pTrace, decalname, cTextureType);
 		EV_HLDM_CreateSmoke(pTrace->endpos + pTrace->plane.normal * 5.0, pTrace->plane.normal, 25, scale, r, g, b, EV_WALL_PUFF, NULL, true, 35);

@@ -298,6 +298,34 @@ int CHudSayText::Draw(float flTime)
 	int r, g, b;
 	float fR, fG, fB;
 
+
+	int x = ScreenWidth / 2 - 100;
+	y = ScreenHeight / 2;
+	int line_width = 0;
+	for (auto& line : m_lstContents)
+	{
+		for (auto& segment : line.m_lstLineData)
+		{
+			x = gHUD::m_VGUI2Print.DrawVGUI2String(segment.m_wcsText.c_str(), x, y, segment.m_vecColor.r, segment.m_vecColor.g, segment.m_vecColor.b);
+			gHUD::m_VGUI2Print.GetStringSize(segment.m_wcsText.c_str(), &line_width, &line_height);
+		}
+
+		x = ScreenWidth / 2 - 100;
+		y += line_height;
+	}
+
+	auto iterator = m_lstContents.cbegin();
+	while (iterator != m_lstContents.cend())
+	{
+		if (iterator->m_flTimeCreated < gHUD::m_flUCDTime - 5.0f)
+		{
+			m_lstContents.erase(iterator++);
+		}
+		else
+		{
+			++iterator;
+		}
+	}
 	// UNDONE
 	/*if (gConfigs.bEnableClientUI)
 	{
@@ -310,44 +338,47 @@ int CHudSayText::Draw(float flTime)
 			return 1;
 	}*/
 
-	if (!m_HUD_saytext->value)
-		return 1;
+	//if (!m_HUD_saytext->value)
+	//	return 1;
 
-	flScrollTime = Q_min(flScrollTime, flTime + m_HUD_saytext_time->value);
-	flScrollTime = Q_min(flScrollTime, flTime + m_HUD_saytext_time->value);
+	//flScrollTime = Q_min(flScrollTime, flTime + m_HUD_saytext_time->value);
+	//flScrollTime = Q_min(flScrollTime, flTime + m_HUD_saytext_time->value);
 
-	if (flScrollTime <= flTime)
-	{
-		if (g_sayTextLine[0].m_line[0])
-		{
-			flScrollTime = flTime + m_HUD_saytext_time->value;
-			ScrollTextUp();
-		}
-		else
-		{
-			m_bitsFlags &= ~HUD_ACTIVE;
-		}
-	}
+	//if (flScrollTime <= flTime)
+	//{
+	//	if (g_sayTextLine[0].m_line[0])
+	//	{
+	//		flScrollTime = flTime + m_HUD_saytext_time->value;
+	//		ScrollTextUp();
+	//	}
+	//	else
+	//	{
+	//		m_bitsFlags &= ~HUD_ACTIVE;
+	//	}
+	//}
 
-	gEngfuncs.pfnDrawConsoleString(10, y, "");
+	//gEngfuncs.pfnDrawConsoleString(10, y, "");
 
-	colour = gEngfuncs.pfnGetCvarString("con_color");
-	sscanf(colour, "%i %i %i", &r, &g, &b);
+	//colour = gEngfuncs.pfnGetCvarString("con_color");
+	//sscanf(colour, "%i %i %i", &r, &g, &b);
 
-	fR = r / 255.0;
-	fG = g / 255.0;
-	fB = b / 255.0;
+	//fR = r / 255.0;
+	//fG = g / 255.0;
+	//fB = b / 255.0;
 
-	for (int i = 0; i < MAX_LINES; i++)
-	{
-		if (g_sayTextLine[i].m_line[0])
-			g_sayTextLine[i].Draw(10, y, fR, fG, fB);
+	//for (int i = 0; i < MAX_LINES; i++)
+	//{
+	//	if (g_sayTextLine[i].m_line[0])
+	//		g_sayTextLine[i].Draw(10, y, fR, fG, fB);
 
-		y += line_height;
-	}
+	//	y += line_height;
+	//}
 
 	return 1;
 }
+
+#define SAYTEXT_COLOR_KEY				L"$["
+#define SAYTEXT_CONFIG_TERMINATE_KEY	L"]"
 
 void CHudSayText::MsgFunc_SayText(int iSize, void* pbuf)
 {
@@ -358,16 +389,76 @@ void CHudSayText::MsgFunc_SayText(int iSize, void* pbuf)
 	char formatStr[256];
 	Q_strlcpy(formatStr, READ_STRING());
 
-	char sstr1[256], sstr2[256], sstr3[256], sstr4[256];
+	char sstr1[256] = "", sstr2[256] = "", sstr3[256] = "", sstr4[256] = "";
 	Q_strlcpy(sstr1, READ_STRING());
 	Q_strlcpy(sstr2, READ_STRING());
 	Q_strlcpy(sstr3, READ_STRING());
 	Q_strlcpy(sstr4, READ_STRING());
 
+	// if this one is empty, it usually means refer to player name.
 	if (!sstr1[0] && client_index > 0)
 		Q_strlcpy(sstr1, g_PlayerInfoList[client_index].name);
 
-	SayTextPrint(formatStr, iSize - 1, client_index, sstr1, sstr2, sstr3, sstr4);
+	//SayTextPrint(formatStr, iSize - 1, client_index, sstr1, sstr2, sstr3, sstr4);
+
+	// if this is an localisable text, it will be localised, otherwise it will still be convered to an Unicode text.
+	const wchar_t* pwcsText = UTIL_GetLocalisation(formatStr);
+	const wchar_t* pwcsArg1 = UTIL_GetLocalisation(sstr1);
+	const wchar_t* pwcsArg2 = UTIL_GetLocalisation(sstr2);
+	const wchar_t* pwcsArg3 = UTIL_GetLocalisation(sstr3);
+	const wchar_t* pwcsArg4 = UTIL_GetLocalisation(sstr4);
+
+	static wchar_t wcsFinalDraft[1024] = L"";
+	const wchar_t* pwcsTest = wcsstr(pwcsText, L"%s");
+	if (pwcsTest && pwcsTest[2] > '0' && pwcsTest[2] < '9')	// two letters afterward. Is it the form of "Blablabla %s1, bla %s2 bla"?
+	{
+		// use VGUI API here.
+		VGUI_LOCALISE->ConstructString(wcsFinalDraft, sizeof(wcsFinalDraft), (wchar_t*)pwcsText, 4, pwcsArg1, pwcsArg2, pwcsArg3, pwcsArg4);
+	}
+	else
+	{
+		_snwprintf(wcsFinalDraft, wcharsmax(wcsFinalDraft), pwcsText, pwcsArg1, pwcsArg2, pwcsArg3, pwcsArg4);
+	}
+
+	linedata_t lstLineData;
+	std::wstring wcs = wcsFinalDraft;
+	size_t iPosition = 0U, iLastPosition = 0U, iColorTextStarts = 0U, iColorTextEnds = 0U;
+	Vector vecColor = VEC_YELLOWISH;
+
+	while ((iPosition = wcs.find(SAYTEXT_COLOR_KEY, iLastPosition)) != std::wstring::npos)
+	{
+		// prevent empty first string.
+		if (iPosition != iLastPosition)
+		{
+			// the second parameter is length, not the second position.
+			lstLineData.emplace_back(
+				vecColor,
+				wcs.substr(iLastPosition, iPosition - iLastPosition)
+			);
+		}
+
+		// I don't know why, but we have to keep this at post position. concluded by experiments.
+		// _countof(CONST_SZ) - 1U is used for these situation: text position. (remove the additional '\0' at the end.)
+		iColorTextStarts = iPosition + _countof(SAYTEXT_COLOR_KEY) - 1U;
+		iColorTextEnds = wcs.find(SAYTEXT_CONFIG_TERMINATE_KEY, iPosition);
+		GetColorFromText(client_index, wcs.substr(iColorTextStarts, iColorTextEnds - iColorTextStarts), vecColor);
+
+		// ignore "]" symble as well.
+		iLastPosition = wcs.find(SAYTEXT_CONFIG_TERMINATE_KEY, iPosition) + _countof(SAYTEXT_CONFIG_TERMINATE_KEY) - 1U;
+		gEngfuncs.Con_Printf("%d\n", _countof(SAYTEXT_CONFIG_TERMINATE_KEY));
+	}
+
+	// for the last segment.
+	// its color already been read above in the very last while loop.
+	lstLineData.emplace_back(
+		vecColor,
+		wcs.substr(iLastPosition)
+	);
+
+	// add this line into the larger list.
+	m_lstContents.push_back(lstLineData);
+
+	m_bitsFlags |= HUD_ACTIVE;
 }
 
 int CHudSayText::GetTextPrintY(void)
@@ -670,4 +761,37 @@ void CHudSayText::EnsureTextFitsInOneLineAndWrapIfHaveTo(int line)
 			}
 		}
 	}
+}
+
+void CHudSayText::GetColorFromText(int client_index, const std::wstring& wcsColorText, Vector& vecColor)
+{
+	if (UTIL_CaseInsensitiveCompare(wcsColorText, std::wstring(L"Yellowish")))
+		vecColor = VEC_YELLOWISH;
+	else if (UTIL_CaseInsensitiveCompare(wcsColorText, std::wstring(L"Redish")))
+		vecColor = VEC_REDISH;
+	else if (UTIL_CaseInsensitiveCompare(wcsColorText, std::wstring(L"Greenish")))
+		vecColor = VEC_GREENISH;
+	else if (UTIL_CaseInsensitiveCompare(wcsColorText, std::wstring(L"Cyan")))
+		vecColor = VEC_CYANISH;
+	else if (UTIL_CaseInsensitiveCompare(wcsColorText, std::wstring(L"Springgreen")))
+		vecColor = VEC_SPRINGGREENISH;
+	else if (UTIL_CaseInsensitiveCompare(wcsColorText, std::wstring(L"Team")))
+	{
+		switch (g_PlayerExtraInfo[client_index].m_iTeam)
+		{
+		case TEAM_CT:
+			vecColor = VEC_CT_COLOUR;
+			break;
+
+		case TEAM_TERRORIST:
+			vecColor = VEC_T_COLOUR;
+			break;
+
+		default:
+			vecColor = VEC_SILVERISH;
+			break;
+		}
+	}
+	else
+		vecColor = VEC_SILVERISH;
 }

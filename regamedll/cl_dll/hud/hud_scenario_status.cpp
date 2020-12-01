@@ -27,25 +27,25 @@ int CHudScenarioStatus::Init(void)
 	m_rgiIdSchemeTexture[Doctrine_MobileWarfare]		= LoadDDS("texture/HUD/Schemes/Doctrine_MobileWarfare.dds");
 	m_rgiIdSchemeTexture[Doctrine_SuperiorFirepower]	= LoadDDS("texture/HUD/Schemes/Doctrine_SuperiorFirepower.dds");
 
-	g_rgwcsSchemeNames[Scheme_UNASSIGNED]			= VGUI_LOCALISE->Find("#LeaderMod_Scheme_UNASSIGNED");
-	g_rgwcsSchemeNames[Doctrine_GrandBattleplan]	= VGUI_LOCALISE->Find("#LeaderMod_Doctrine_GrandBattleplan");
-	g_rgwcsSchemeNames[Doctrine_MassAssault]		= VGUI_LOCALISE->Find("#LeaderMod_Doctrine_MassAssault");
-	g_rgwcsSchemeNames[Doctrine_MobileWarfare]		= VGUI_LOCALISE->Find("#LeaderMod_Doctrine_MobileWarfare");
-	g_rgwcsSchemeNames[Doctrine_SuperiorFirepower]	= VGUI_LOCALISE->Find("#LeaderMod_Doctrine_SuperiorFirepower");
+	g_rgwcsSchemeNames[Scheme_UNASSIGNED]			= UTIL_GetLocalisation("#LeaderMod_Scheme_UNASSIGNED");
+	g_rgwcsSchemeNames[Doctrine_GrandBattleplan]	= UTIL_GetLocalisation("#LeaderMod_Doctrine_GrandBattleplan");
+	g_rgwcsSchemeNames[Doctrine_MassAssault]		= UTIL_GetLocalisation("#LeaderMod_Doctrine_MassAssault");
+	g_rgwcsSchemeNames[Doctrine_MobileWarfare]		= UTIL_GetLocalisation("#LeaderMod_Doctrine_MobileWarfare");
+	g_rgwcsSchemeNames[Doctrine_SuperiorFirepower]	= UTIL_GetLocalisation("#LeaderMod_Doctrine_SuperiorFirepower");
 
-	g_rgwcsRoleNames[Role_UNASSIGNED]	= VGUI_LOCALISE->Find("#LeaderMod_Role_UNASSIGNED");
+	g_rgwcsRoleNames[Role_UNASSIGNED]	= UTIL_GetLocalisation("#LeaderMod_Role_UNASSIGNED");
 
-	g_rgwcsRoleNames[Role_Commander]	= VGUI_LOCALISE->Find("#LeaderMod_Role_Commander");
-	g_rgwcsRoleNames[Role_SWAT]			= VGUI_LOCALISE->Find("#LeaderMod_Role_SWAT");
-	g_rgwcsRoleNames[Role_Breacher]		= VGUI_LOCALISE->Find("#LeaderMod_Role_Breacher");
-	g_rgwcsRoleNames[Role_Sharpshooter]	= VGUI_LOCALISE->Find("#LeaderMod_Role_Sharpshooter");
-	g_rgwcsRoleNames[Role_Medic]		= VGUI_LOCALISE->Find("#LeaderMod_Role_Medic");
+	g_rgwcsRoleNames[Role_Commander]	= UTIL_GetLocalisation("#LeaderMod_Role_Commander");
+	g_rgwcsRoleNames[Role_SWAT]			= UTIL_GetLocalisation("#LeaderMod_Role_SWAT");
+	g_rgwcsRoleNames[Role_Breacher]		= UTIL_GetLocalisation("#LeaderMod_Role_Breacher");
+	g_rgwcsRoleNames[Role_Sharpshooter]	= UTIL_GetLocalisation("#LeaderMod_Role_Sharpshooter");
+	g_rgwcsRoleNames[Role_Medic]		= UTIL_GetLocalisation("#LeaderMod_Role_Medic");
 
-	g_rgwcsRoleNames[Role_Godfather]	= VGUI_LOCALISE->Find("#LeaderMod_Role_Godfather");
-	g_rgwcsRoleNames[Role_LeadEnforcer]	= VGUI_LOCALISE->Find("#LeaderMod_Role_LeadEnforcer");
-	g_rgwcsRoleNames[Role_MadScientist]	= VGUI_LOCALISE->Find("#LeaderMod_Role_MadScientist");
-	g_rgwcsRoleNames[Role_Assassin]		= VGUI_LOCALISE->Find("#LeaderMod_Role_Assassin");
-	g_rgwcsRoleNames[Role_Arsonist]		= VGUI_LOCALISE->Find("#LeaderMod_Role_Arsonist");
+	g_rgwcsRoleNames[Role_Godfather]	= UTIL_GetLocalisation("#LeaderMod_Role_Godfather");
+	g_rgwcsRoleNames[Role_LeadEnforcer]	= UTIL_GetLocalisation("#LeaderMod_Role_LeadEnforcer");
+	g_rgwcsRoleNames[Role_MadScientist]	= UTIL_GetLocalisation("#LeaderMod_Role_MadScientist");
+	g_rgwcsRoleNames[Role_Assassin]		= UTIL_GetLocalisation("#LeaderMod_Role_Assassin");
+	g_rgwcsRoleNames[Role_Arsonist]		= UTIL_GetLocalisation("#LeaderMod_Role_Arsonist");
 
 	m_hNameFont = gFontFuncs::CreateFont();
 	gFontFuncs::AddGlyphSetToFont(m_hNameFont, "Trajan Pro", 20, FW_BOLD, 1, 0, FONTFLAG_ANTIALIAS | FONTFLAG_OUTLINE, 0x0, 0xFFFF);

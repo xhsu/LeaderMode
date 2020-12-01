@@ -360,7 +360,7 @@ void CHudRadar::DrawRadar(float flTime)
 
 void CHudRadar::DrawPlayerLocation(void)
 {
-	wchar_t* locString;
+	const wchar_t* locString;
 	int center_x, center_y;
 	int string_width, string_height;
 	int x, y;
@@ -373,7 +373,7 @@ void CHudRadar::DrawPlayerLocation(void)
 	}
 	else
 	{
-		locString = VGUI_LOCALISE->Find(g_PlayerExtraInfo[gHUD::m_iPlayerNum].m_szLocationText);
+		locString = UTIL_GetLocalisation(g_PlayerExtraInfo[gHUD::m_iPlayerNum].m_szLocationText);
 	}
 
 	if (!locString)

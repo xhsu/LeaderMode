@@ -86,4 +86,10 @@ hSprite LoadSprite(const char* pszName);
 bool CalcScreen(Vector& in, Vector2D& out);	// a.k.a. WorldToScreen
 void UTIL_TraceLine(Vector& vecSrc, Vector& vecEnd, int traceFlags, int ignore_pe, struct pmtrace_s* ptr, int index, int hull = 2);
 std::wstring UTIL_ArabicToRoman(unsigned value);
-const wchar_t* UTIL_GetLocalisation(const char* szToken);
+const wchar_t* UTIL_GetLocalisation(const char* szToken);	// safe version of ILocalize::Find().
+void UTIL_ReplaceAll(std::string& str, const std::string& from, const std::string& to);
+void UTIL_ReplaceAll(std::wstring& str, const std::wstring& from, const std::wstring& to);
+//inline bool caseInsCharCompare(char a, char b) { return(toupper(a) == toupper(b)); }
+inline bool caseInsCharCompare(wchar_t a, wchar_t b) { return(towupper(a) == towupper(b)); }
+//template<typename stringTy> inline bool caseInsCharCompare(stringTy a, stringTy b) { return(std::toupper(a) == std::toupper(b)); }
+template<typename stringTy> inline bool UTIL_CaseInsensitiveCompare(const stringTy& s1, const stringTy& s2) { return ((s1.size() == s2.size()) && std::equal(s1.cbegin(), s1.cend(), s2.cbegin(), caseInsCharCompare)); }

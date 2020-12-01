@@ -583,11 +583,12 @@ void CCSBot::Update()
 	UpdatePeripheralVision();
 
 	// Scenario interrupts
-	switch (TheCSBots()->GetScenario())
+	// UNDONE
+	/*switch (TheCSBots()->GetScenario())
 	{
 	default:
 		break;
-	}
+	}*/
 
 	// Follow nearby humans if our co-op is high and we have nothing else to do
 	// If we were just following someone, don't auto-follow again for a short while to
