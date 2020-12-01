@@ -559,7 +559,7 @@ void CHudSayText::SayTextPrint(const char* pszBuf, int iBufSize, int clientIndex
 
 	if (useStdPrintf)
 	{
-		_snwprintf(finalBuffer, sizeof(finalBuffer), msg, w[0], w[1], w[2], w[3]);
+		_snwprintf(finalBuffer, wcharsmax(finalBuffer), msg, w[0], w[1], w[2], w[3]);
 	}
 	else
 	{

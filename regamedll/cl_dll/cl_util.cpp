@@ -401,3 +401,26 @@ std::wstring UTIL_ArabicToRoman(unsigned value)
 
 	return result;
 }
+
+static std::unordered_map<std::string, std::wstring> s_mapTexts;
+
+const wchar_t* UTIL_GetLocalisation(const char* szToken)
+{
+	if (!szToken)
+		return L"NULL POINTER";
+
+	const wchar_t* pwcs = VGUI_LOCALISE->Find(szToken);
+
+	if (pwcs)
+		return pwcs;
+
+	auto iterator = s_mapTexts.find(szToken);
+
+	if (iterator == s_mapTexts.end())
+	{
+		s_mapTexts[szToken] = ANSIToUnicode(szToken);
+		return s_mapTexts[szToken].c_str();
+	}
+	else
+		return iterator->second.c_str();
+}

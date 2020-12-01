@@ -225,7 +225,7 @@ int CHudWeaponList::Draw(float flTime)
 			gEngfuncs.pfnFillRGBA(vecAmmoBarCoord.x, vecAmmoBarCoord.y, AMMOBAR_WIDTH, flCurHeight, r, g, b, 255);
 
 			// ammo text.
-			_snwprintf(wszText, sizeof(wszText), L"%d", gPseudoPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType]);
+			_snwprintf(wszText, wcharsmax(wszText), L"%d", gPseudoPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType]);
 			gFontFuncs::GetTextSize(pWeapon->m_pItemInfo->m_iMaxClip == WEAPON_NOCLIP ? m_hClipFont : m_hAmmoFont, wszText, &iTextWidth, &iTextHeight);
 			vecAmmoTextCoord = m_rgvecCurCoord[i] + Vector2D(-AMMOBAR_WIDTH - iTextWidth - WEAPONLIST_GAP, (flCardHeight - iTextHeight) / 2);
 
@@ -237,7 +237,7 @@ int CHudWeaponList::Draw(float flTime)
 			// clip text
 			if (pWeapon->m_pItemInfo->m_iMaxClip != WEAPON_NOCLIP)	// we must have a clip to do so.
 			{
-				_snwprintf(wszText, sizeof(wszText), L"%d", pWeapon->m_iClip);
+				_snwprintf(wszText, wcharsmax(wszText), L"%d", pWeapon->m_iClip);
 				gFontFuncs::GetTextSize(m_hClipFont, wszText, &iTextWidth, &iTextHeight);
 
 				// don't reset the coord, we need to recalculate based on it!
