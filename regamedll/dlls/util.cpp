@@ -693,35 +693,27 @@ void UTIL_PrintConsole(edict_t *pEdict, const char *fmt, ...)
 	ClientPrint(pEntity->pev, HUD_PRINTCONSOLE, string);
 }
 
-void UTIL_SayText(edict_t *pEdict, const char *fmt, ...)
+void UTIL_SayText(CBasePlayer* pPlayer, const char* szFormatKey, const char* szArg1, const char* szArg2, const char* szArg3, const char* szArg4)
 {
-	CBaseEntity *pEntity = GET_PRIVATE<CBaseEntity>(pEdict);
-	if (!pEntity || !pEntity->IsNetClient())
-		return;
-
-	static char string[1024];
-
-	va_list ap;
-	va_start(ap, fmt);
-	Q_vsnprintf(string, sizeof(string), fmt, ap);
-	va_end(ap);
-
-	if (Q_strlen(string) < sizeof(string) - 2)
-		Q_strcat(string, "\n");
-	else
-		string[Q_strlen(string) - 1] = '\n';
-
-	MESSAGE_BEGIN(MSG_ONE, gmsgSayText, nullptr, pEntity->edict());
-		WRITE_BYTE(pEntity->entindex());
-		WRITE_STRING(string);
+	MESSAGE_BEGIN(MSG_ONE_UNRELIABLE, gmsgSayText, nullptr, pPlayer->edict());
+	WRITE_BYTE(pPlayer->entindex());
+	WRITE_STRING(szFormatKey);
+	WRITE_STRING(szArg1);
+	WRITE_STRING(szArg2);
+	WRITE_STRING(szArg3);
+	WRITE_STRING(szArg4);
 	MESSAGE_END();
 }
 
-void UTIL_SayTextAll(const char *pText, CBaseEntity *pEntity)
+void UTIL_SayTextAll(CBasePlayer* pEventPlayer, const char* szFormatKey, const char* szArg1, const char* szArg2, const char* szArg3, const char* szArg4)
 {
-	MESSAGE_BEGIN(MSG_ALL, gmsgSayText);
-		WRITE_BYTE(pEntity->entindex());
-		WRITE_STRING(pText);
+	MESSAGE_BEGIN(MSG_BROADCAST, gmsgSayText);
+	WRITE_BYTE(pEventPlayer->entindex());
+	WRITE_STRING(szFormatKey);
+	WRITE_STRING(szArg1);
+	WRITE_STRING(szArg2);
+	WRITE_STRING(szArg3);
+	WRITE_STRING(szArg4);
 	MESSAGE_END();
 }
 
@@ -1761,66 +1753,6 @@ void replace_all(std::string& str, const std::string& from, const std::string& t
 	{
 		str.replace(start_pos, from.length(), to);
 		start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
-	}
-}
-
-const char* g_rgszTeamName[] = { "UNASSIGNED", "TERRORIST", "CT", "SPECTATOR" };
-
-void UTIL_PrintChatColor(CBasePlayer* player, ChatColor color, const char* szMessage, ...)
-{
-	if (player && player->IsBot())
-		return;
-
-	va_list argptr;
-	static char szStr[192];
-
-	va_start(argptr, szMessage);
-	vsprintf_s(szStr, szMessage, argptr);
-	va_end(argptr);
-
-	std::string message = std::string(szStr);
-	replace_all(message, "/y", "\1");
-	replace_all(message, "/t", "\3");
-	replace_all(message, "/g", "\4");
-
-	bool bAll = (player != nullptr);
-
-	if (player == nullptr)
-	{
-		for (int i = 1; i <= gpGlobals->maxClients; i++)
-		{
-			CBasePlayer *toolman = UTIL_PlayerByIndex(i);
-
-			if (toolman && toolman->IsPlayer())
-			{
-				player = toolman;
-				break;
-			}
-		}
-	}
-
-	if (!player)	// it's dangerous to proceed.
-		return;
-
-	if (REDCHAT <= color && color <= GREYCHAT)
-	{
-		MESSAGE_BEGIN(bAll ? MSG_ALL : MSG_ONE, gmsgTeamInfo, g_vecZero, bAll ? nullptr : player->edict());
-		WRITE_BYTE(player->entindex());
-		WRITE_BYTE(color);
-		MESSAGE_END();
-	}
-
-	MESSAGE_BEGIN(bAll ? MSG_ALL : MSG_ONE, gmsgSayText, g_vecZero, bAll ? nullptr : player->edict());
-	WRITE_BYTE(player->entindex());
-	WRITE_STRING(message.c_str());
-	MESSAGE_END();
-
-	if (REDCHAT <= color && color <= GREYCHAT)
-	{
-		MESSAGE_BEGIN(bAll ? MSG_ALL : MSG_ONE, gmsgTeamInfo, g_vecZero, bAll ? nullptr : player->edict());
-		WRITE_BYTE(player->entindex());
-		WRITE_BYTE(player->m_iTeam);
-		MESSAGE_END();
 	}
 }
 

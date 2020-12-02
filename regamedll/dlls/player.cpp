@@ -4067,9 +4067,6 @@ void EXT_FUNC CBasePlayer::PostThink()
 	// NOTE: this is useless for CS 1.6 - s1lent
 	UpdatePlayerSound();
 
-	// HUD update for those living.
-	UpdateHudText();
-
 	// no Overhealing think for the dead, of course.
 	gOverHealingMgr::Think(this);
 
@@ -4116,13 +4113,6 @@ pt_end:
 	{
 		if (m_rgpSkills[i])
 			m_rgpSkills[i]->Think();
-	}
-
-	// update hud text after death. observer function, for instance.
-	if (Q_strcmp(m_szHudText, m_szClientHudText))
-	{
-		UTIL_HudMessage(this, CSGameRules()->m_TextParam_Hud, m_szHudText);
-		Q_strlcpy(m_szClientHudText, m_szHudText);
 	}
 }
 
@@ -7275,7 +7265,7 @@ void CBasePlayer::ParseRebuy()
 {
 	if (m_lstRebuy.empty())
 	{
-		UTIL_PrintChatColor(this, GREYCHAT, "/tYou have to save a rebuy list first!");
+		UTIL_SayText(this, "#LeaderMod_SetRebuyFirst");
 		return;
 	}
 
@@ -7296,16 +7286,16 @@ void CBasePlayer::SaveRebuy()
 	}
 
 	char szText[192];
-	Q_snprintf(szText, sizeof(szText) - 1, "/tRebuy items set: ");
+	Q_snprintf(szText, sizeof(szText) - 1, "$[Cyan]Rebuy items set: ");
 
-	for (auto iId : m_lstRebuy)
+	for (auto& iId : m_lstRebuy)
 	{
-		Q_strlcat(szText, "/y[/g");
+		Q_strlcat(szText, "$[Yellowish][$[Springgreen]");
 		Q_strlcat(szText, g_rgWpnInfo[iId].m_pszExternalName);
-		Q_strlcat(szText, "/y]/t ");
+		Q_strlcat(szText, "$[Yellowish]]$[Cyan] ");
 	}
 
-	UTIL_PrintChatColor(this, BLUECHAT, szText);
+	UTIL_SayText(this, szText);
 }
 
 bool CBasePlayer::IsObservingPlayer(CBasePlayer *pPlayer)
@@ -7920,81 +7910,6 @@ void CBasePlayer::AssignRole(RoleTypes iNewRole)
 	m_iClientBattery = -1;
 }
 
-void CBasePlayer::UpdateHudText()
-{
-	// TODO: observer mode.
-
-	static char szBuffer[512];
-
-	if (!IsAlive() || IsDormant() || m_iJoiningState != JOINED)
-	{
-		Q_strlcpy(m_szHudText, " ");
-		return;
-	}
-
-	// Part I: personal role information.
-	Q_snprintf(m_szHudText, sizeof(m_szHudText) - 1, "Role: %s\n", g_rgszRoleNames[m_iRoleType]);
-
-	// Part II: skills information.
-	for (int i = SkillType_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
-	{
-		if (m_rgpSkills[i])
-		{
-			Q_memset(szBuffer, NULL, sizeof(szBuffer));	// reset buffer before each use.
-
-			if (m_rgpSkills[i]->GetHudPercentage() >= 1.0f)
-				Q_strlcpy(szBuffer, m_rgpSkills[i]->GetName());
-			else
-			{
-				int iLinesCount = m_rgpSkills[i]->GetHudPercentage() * 30.0f;
-				int iDotsCount = 30 - iLinesCount;
-
-				for (int j = 0; i < iLinesCount; i++)
-					Q_strlcat(szBuffer, "/");
-
-				for (int j = 0; i < iDotsCount; i++)
-					Q_strlcat(szBuffer, "-");
-			}
-
-			Q_strlcat(szBuffer, "\n");
-			Q_strlcat(m_szHudText, szBuffer);
-		}
-	}
-
-	// Part III: leader information.
-	CBasePlayer* pLeader = THE_COMMANDER;
-	RoleTypes iLeaderRole = Role_Commander;
-
-	if (m_iTeam == TERRORIST)
-	{
-		pLeader = THE_GODFATHER;
-		iLeaderRole = Role_Godfather;
-	}
-
-	if (!pLeader)
-		Q_snprintf(szBuffer, sizeof(szBuffer) - 1, "%s: Unrevealed|", g_rgszRoleNames[iLeaderRole]);
-	else if (!pLeader->IsAlive())
-		Q_snprintf(szBuffer, sizeof(szBuffer) - 1, "%s: K.I.A.|", g_rgszRoleNames[iLeaderRole]);
-	else
-		Q_snprintf(szBuffer, sizeof(szBuffer) - 1, "%s: %s|", g_rgszRoleNames[iLeaderRole], STRING(pLeader->pev->netname));
-
-	Q_strlcat(m_szHudText, szBuffer);
-
-	// Part IV: menpower information.
-	if (pLeader && !pLeader->IsAlive())
-		Q_strlcpy(szBuffer, "Replenishment Discontinued|");
-	else if (CSGameRules()->m_rgiManpowers[m_iTeam] > 0)
-		Q_snprintf(szBuffer, sizeof(szBuffer) - 1, "Menpower: %d|", CSGameRules()->m_rgiManpowers[m_iTeam]);
-	else
-		Q_strlcpy(szBuffer, "Menpower Depleted|");
-
-	Q_strlcat(m_szHudText, szBuffer);
-
-	// Part V: tactical scheme information.
-	Q_snprintf(szBuffer, sizeof(szBuffer) - 1, "Tactical Scheme: %s", g_rgszTacticalSchemeNames[CSGameRules()->m_rgTeamTacticalScheme[m_iTeam]]);
-	Q_strlcat(m_szHudText, szBuffer);
-}
-
 void CBasePlayer::CheckItemAccessibility()
 {
 	for (auto pWeapon : CBaseWeapon::m_lstWeapons)
@@ -8008,7 +7923,7 @@ void CBasePlayer::CheckItemAccessibility()
 		if (g_rgRoleWeaponsAccessibility[m_iRoleType][pWeapon->m_iId] == WPN_F)
 		{
 			AddAccount(GetWeaponInfo(pWeapon->m_iId)->m_iCost / 2, RT_SOLD_ITEM);
-			UTIL_PrintChatColor(this, REDCHAT, "/gRefunding/y improper item /t%s/y for /g%d$/y.", pWeapon->m_pItemInfo->m_pszExternalName, GetWeaponInfo(pWeapon->m_iId)->m_iCost / 2);
+			UTIL_SayText(this, "#LeaderMod_RefundWpn", pWeapon->m_pItemInfo->m_pszExternalName, std::to_string(GetWeaponInfo(pWeapon->m_iId)->m_iCost / 2).c_str());
 			UTIL_PlayEarSound(this, SFX_REFUND_GUNS);
 
 			pWeapon->Kill();	// RemovePlayerItem() is included!

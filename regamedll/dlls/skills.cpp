@@ -72,6 +72,18 @@ float CBaseSkill::GetCountingTime() const
 	return GetDuration();	// ready to use.
 }
 
+void CBaseSkill::TerminatePeers() const
+{
+	for (auto pPeer : m_pPlayer->m_rgpSkills)
+	{
+		// skip myself.
+		if (pPeer == this)
+			continue;
+
+		pPeer->Terminate();
+	}
+}
+
 //
 // Role_Commander: Battlefield Analysis
 //
@@ -87,13 +99,13 @@ bool CSkillRadarScan::Execute()
 
 	if (m_bUsingSkill)
 	{
-		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently activated!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillActivated", GetName());
 		return false;
 	}
 
 	if (!m_bAllowSkill)
 	{
-		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently cooling down!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillCooling", GetName());
 		return false;
 	}
 
@@ -121,7 +133,7 @@ bool CSkillRadarScan::Execute()
 	// nobody to trace.
 	if (!m_pTracing)
 	{
-		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/tWe have no one to trace currently!");
+		UTIL_SayText(m_pPlayer, "#LeaderMod_Radar_NoOneToTrack");
 		return false;
 	}
 
@@ -146,7 +158,7 @@ bool CSkillRadarScan::Execute()
 		UTIL_PlayEarSound(pTeammate, ACTIVATION_SFX);
 	}
 
-	UTIL_PrintChatColor(nullptr, REDCHAT, "/gthe /y%s %s/g starts an UAV scanning, the location of /t%s %s/g is exposed!", g_rgszRoleNames[m_pPlayer->m_iRoleType], STRING(m_pPlayer->pev->netname), g_rgszRoleNames[m_pTracing->m_iRoleType], STRING(m_pTracing->pev->netname));
+	UTIL_SayTextAll(m_pPlayer, "#LeaderMod_Commander_Sk_Hint", g_rgszRoleNames[m_pPlayer->m_iRoleType], STRING(m_pPlayer->pev->netname), g_rgszRoleNames[m_pTracing->m_iRoleType], STRING(m_pTracing->pev->netname));
 
 	m_bUsingSkill = true;
 	m_bAllowSkill = false;
@@ -175,7 +187,7 @@ void CSkillRadarScan::Think()
 			UTIL_PlayEarSound(pTeammate, CLOSURE_SFX);
 		}
 
-		UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is over!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillEnd", GetName());
 
 		m_bUsingSkill = false;
 		m_flTimeCooldownOver = gpGlobals->time + GetCooldown();
@@ -209,7 +221,7 @@ void CSkillRadarScan::Think()
 						continue;
 
 					UTIL_PlayEarSound(pTeammate, RADAR_TARGET_DEAD_SFX);
-					UTIL_PrintChatColor(pTeammate, REDCHAT, "/gThe target /t%s %s/g traced by /y%s %s/g was eliminated!", g_rgszRoleNames[m_pTracing->m_iRoleType], STRING(m_pTracing->pev->netname), g_rgszRoleNames[m_pPlayer->m_iRoleType], STRING(m_pPlayer->pev->netname));
+					UTIL_SayText(pTeammate, "#LeaderMod_Commander_Sk_Hunt", g_rgszRoleNames[m_pTracing->m_iRoleType], STRING(m_pTracing->pev->netname), g_rgszRoleNames[m_pPlayer->m_iRoleType], STRING(m_pPlayer->pev->netname));
 				}
 			}
 
@@ -246,7 +258,7 @@ void CSkillRadarScan::Think()
 	{
 		m_bAllowSkill = true;
 
-		UTIL_PrintChatColor(m_pPlayer, GREENCHAT, "/g%s is ready again!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillReady", GetName());
 		UTIL_PlayEarSound(m_pPlayer, COOLDOWN_COMPLETE_SFX);
 	}
 }
@@ -267,10 +279,13 @@ bool CSkillRadarScan::Terminate()
 		UTIL_PlayEarSound(pTeammate, CLOSURE_SFX);
 	}
 
-	UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is terminated in advanced!", GetName());
+	UTIL_SayText(m_pPlayer, "#LeaderMod_SkillTerminate", GetName());
 
 	m_bUsingSkill = false;
 	m_flTimeCooldownOver = gpGlobals->time + GetCooldown() * Q_clamp((gpGlobals->time - m_flTimeLastUsed) / GetDuration(), 0.0f, 1.0f);	// return the unused time.
+
+	// This is the masterskill. Therefore, terminate all other skills as well.
+	TerminatePeers();
 
 	return true;
 }
@@ -288,18 +303,19 @@ bool CSkillFireRate::Execute()
 
 	if (m_bUsingSkill)
 	{
-		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently activated!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillActivated", GetName());
 		return false;
 	}
 
 	if (!m_bAllowSkill)
 	{
-		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently cooling down!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillCooling", GetName());
 		return false;
 	}
 
+	// the junior partner of a skill has no independent SFX.
 	//UTIL_PlayEarSound(m_pPlayer, ACTIVATION_SFX);
-	UTIL_PrintChatColor(m_pPlayer, BLUECHAT, "/g%s/y is active now. Your /tweapon fire interval/y is /thalved/y.", GetName());
+	UTIL_SayText(m_pPlayer, "#LeaderMod_FireRate_Desc", GetName());
 
 	m_bUsingSkill = true;
 	m_bAllowSkill = false;
@@ -314,7 +330,7 @@ void CSkillFireRate::Think()
 	if (m_bUsingSkill && m_flTimeLastUsed + GetDuration() < gpGlobals->time)
 	{
 		//UTIL_PlayEarSound(m_pPlayer, CLOSURE_SFX);
-		UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is over!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillEnd", GetName());
 
 		m_bUsingSkill = false;
 		m_flTimeCooldownOver = gpGlobals->time + GetCooldown();
@@ -328,15 +344,15 @@ void CSkillFireRate::Think()
 	{
 		m_bAllowSkill = true;
 
-		UTIL_PrintChatColor(m_pPlayer, GREENCHAT, "/g%s is ready again!", GetName());
-		UTIL_PlayEarSound(m_pPlayer, COOLDOWN_COMPLETE_SFX);
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillReady", GetName());
+		//UTIL_PlayEarSound(m_pPlayer, COOLDOWN_COMPLETE_SFX);
 	}
 }
 
 bool CSkillFireRate::Terminate()
 {
 	//UTIL_PlayEarSound(m_pPlayer, CLOSURE_SFX);
-	UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is terminated in advanced!", GetName());
+	UTIL_SayText(m_pPlayer, "#LeaderMod_SkillTerminate", GetName());
 
 	m_bUsingSkill = false;
 	m_flTimeCooldownOver = gpGlobals->time + GetCooldown() * Q_clamp((gpGlobals->time - m_flTimeLastUsed) / GetDuration(), 0.0f, 1.0f);	// return the unused time.
@@ -359,13 +375,13 @@ bool CSkillReduceDamage::Execute()
 
 	if (m_bUsingSkill)
 	{
-		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently activated!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillActivated", GetName());
 		return false;
 	}
 
 	if (!m_bAllowSkill)
 	{
-		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently cooling down!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillCooling", GetName());
 		return false;
 	}
 
@@ -373,7 +389,7 @@ bool CSkillReduceDamage::Execute()
 		return false;
 
 	//UTIL_PlayEarSound(m_pPlayer, ACTIVATION_SFX);
-	UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/g%s/y is active now. /tDamage/y dealt to you is /ghalved/y.", GetName());
+	UTIL_SayText(m_pPlayer, "#LeaderMod_ReduceDmg_Desc", GetName());
 
 	m_bUsingSkill = true;
 	m_bAllowSkill = false;
@@ -388,7 +404,7 @@ void CSkillReduceDamage::Think()
 	if (m_bUsingSkill && m_flTimeLastUsed + GetDuration() < gpGlobals->time)
 	{
 		//UTIL_PlayEarSound(m_pPlayer, CLOSURE_SFX);
-		UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is over!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillEnd", GetName());
 
 		m_bUsingSkill = false;
 		m_flTimeCooldownOver = gpGlobals->time + GetCooldown();
@@ -402,8 +418,8 @@ void CSkillReduceDamage::Think()
 	{
 		m_bAllowSkill = true;
 
-		UTIL_PrintChatColor(m_pPlayer, GREENCHAT, "/g%s is ready again!", GetName());
-		UTIL_PlayEarSound(m_pPlayer, COOLDOWN_COMPLETE_SFX);
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillReady", GetName());
+		//UTIL_PlayEarSound(m_pPlayer, COOLDOWN_COMPLETE_SFX);
 	}
 }
 
@@ -413,7 +429,7 @@ bool CSkillReduceDamage::Terminate()
 		return false;
 
 	//UTIL_PlayEarSound(m_pPlayer, CLOSURE_SFX);
-	UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is terminated in advanced!", GetName());
+	UTIL_SayText(m_pPlayer, "#LeaderMod_SkillTerminate", GetName());
 
 	m_bUsingSkill = false;
 	m_flTimeCooldownOver = gpGlobals->time + GetCooldown() * Q_clamp((gpGlobals->time - m_flTimeLastUsed) / GetDuration(), 0.0f, 1.0f);	// return the unused time.
@@ -456,13 +472,13 @@ bool CSkillBulletproof::Execute()
 
 	if (m_bUsingSkill)
 	{
-		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently activated!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillActivated", GetName());
 		return false;
 	}
 
 	if (!m_bAllowSkill)
 	{
-		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently cooling down!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillCooling", GetName());
 		return false;
 	}
 
@@ -529,7 +545,7 @@ void CSkillBulletproof::Think()
 	if (m_bUsingSkill && m_flTimeLastUsed + GetDuration() < gpGlobals->time)
 	{
 		UTIL_PlayEarSound(m_pPlayer, CLOSURE_SFX);
-		UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is over!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillEnd", GetName());
 
 		m_bUsingSkill = false;
 		m_flTimeCooldownOver = gpGlobals->time + GetCooldown();
@@ -550,7 +566,7 @@ void CSkillBulletproof::Think()
 	{
 		m_bAllowSkill = true;
 
-		UTIL_PrintChatColor(m_pPlayer, GREENCHAT, "/g%s is ready again!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillReady", GetName());
 		UTIL_PlayEarSound(m_pPlayer, COOLDOWN_COMPLETE_SFX);
 	}
 }
@@ -558,11 +574,14 @@ void CSkillBulletproof::Think()
 bool CSkillBulletproof::Terminate()
 {
 	UTIL_PlayEarSound(m_pPlayer, CLOSURE_SFX);
-	UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is terminated in advanced!", GetName());
+	UTIL_SayText(m_pPlayer, "#LeaderMod_SkillTerminate", GetName());
 	UTIL_ScreenFade(m_pPlayer, Vector(179, 217, 255), 0.5f, 0.1f, 40, FFADE_IN);
 
 	m_bUsingSkill = false;
 	m_flTimeCooldownOver = gpGlobals->time + GetCooldown() * Q_clamp((gpGlobals->time - m_flTimeLastUsed) / GetDuration(), 0.0f, 1.0f);	// return the unused time.
+
+	// This is the masterskill. Therefore, terminate all other skills as well.
+	TerminatePeers();
 
 	return true;
 }
@@ -695,18 +714,18 @@ bool CSkillExplosiveBullets::Execute()
 
 	if (m_bUsingSkill)
 	{
-		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently activated!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillActivated", GetName());
 		return false;
 	}
 
 	if (!m_bAllowSkill)
 	{
-		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently cooling down!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillCooling", GetName());
 		return false;
 	}
 
 	//UTIL_PlayEarSound(m_pPlayer, ACTIVATION_SFX);
-	UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/g%s/y is active now. All of your weapons would fire /texplosive bullets/y now.", GetName());
+	UTIL_SayText(m_pPlayer, "#LeaderMod_ExploBullets_Desc", GetName());
 
 	m_bUsingSkill = true;
 	m_bAllowSkill = false;
@@ -721,7 +740,7 @@ void CSkillExplosiveBullets::Think()
 	if (m_bUsingSkill && m_flTimeLastUsed + GetDuration() < gpGlobals->time)
 	{
 		//UTIL_PlayEarSound(m_pPlayer, CLOSURE_SFX);
-		UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is over!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillEnd", GetName());
 
 		m_bUsingSkill = false;
 		m_flTimeCooldownOver = gpGlobals->time + GetCooldown();
@@ -735,15 +754,15 @@ void CSkillExplosiveBullets::Think()
 	{
 		m_bAllowSkill = true;
 
-		UTIL_PrintChatColor(m_pPlayer, GREENCHAT, "/g%s is ready again!", GetName());
-		UTIL_PlayEarSound(m_pPlayer, COOLDOWN_COMPLETE_SFX);
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillReady", GetName());
+		//UTIL_PlayEarSound(m_pPlayer, COOLDOWN_COMPLETE_SFX);
 	}
 }
 
 bool CSkillExplosiveBullets::Terminate()
 {
 	//UTIL_PlayEarSound(m_pPlayer, CLOSURE_SFX);
-	UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is terminated in advanced!", GetName());
+	UTIL_SayText(m_pPlayer, "#LeaderMod_SkillTerminate", GetName());
 
 	m_bUsingSkill = false;
 	m_flTimeCooldownOver = gpGlobals->time + GetCooldown() * Q_clamp((gpGlobals->time - m_flTimeLastUsed) / GetDuration(), 0.0f, 1.0f);	// return the unused time.
@@ -919,13 +938,13 @@ bool CSkillInfiniteGrenade::Execute()
 
 	if (m_bUsingSkill)
 	{
-		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently activated!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillActivated", GetName());
 		return false;
 	}
 
 	if (!m_bAllowSkill)
 	{
-		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently cooling down!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillCooling", GetName());
 		return false;
 	}
 
@@ -962,7 +981,7 @@ void CSkillInfiniteGrenade::Think()
 	if (m_bUsingSkill && m_flTimeLastUsed + GetDuration() < gpGlobals->time)
 	{
 		UTIL_PlayEarSound(m_pPlayer, CLOSURE_SFX);
-		UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is over!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillEnd", GetName());
 
 		m_bUsingSkill = false;
 		m_flTimeCooldownOver = gpGlobals->time + GetCooldown();
@@ -976,7 +995,7 @@ void CSkillInfiniteGrenade::Think()
 	{
 		m_bAllowSkill = true;
 
-		UTIL_PrintChatColor(m_pPlayer, GREENCHAT, "/g%s is ready again!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillReady", GetName());
 		UTIL_PlayEarSound(m_pPlayer, COOLDOWN_COMPLETE_SFX);
 	}
 }
@@ -984,10 +1003,13 @@ void CSkillInfiniteGrenade::Think()
 bool CSkillInfiniteGrenade::Terminate()
 {
 	UTIL_PlayEarSound(m_pPlayer, CLOSURE_SFX);
-	UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is terminated in advanced!", GetName());
+	UTIL_SayText(m_pPlayer, "#LeaderMod_SkillTerminate", GetName());
 
 	m_bUsingSkill = false;
 	m_flTimeCooldownOver = gpGlobals->time + GetCooldown() * Q_clamp((gpGlobals->time - m_flTimeLastUsed) / GetDuration(), 0.0f, 1.0f);	// return the unused time.
+
+	// This is the masterskill. Therefore, terminate all other skills as well.
+	TerminatePeers();
 
 	return true;
 }
@@ -1017,13 +1039,13 @@ bool CSkillEnfoceHeadshot::Execute()
 
 	if (m_bUsingSkill)
 	{
-		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently activated!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillActivated", GetName());
 		return false;
 	}
 
 	if (!m_bAllowSkill)
 	{
-		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently cooling down!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillCooling", GetName());
 		return false;
 	}
 
@@ -1042,7 +1064,7 @@ void CSkillEnfoceHeadshot::Think()
 	if (m_bUsingSkill && m_flTimeLastUsed + GetDuration() < gpGlobals->time)
 	{
 		UTIL_PlayEarSound(m_pPlayer, CLOSURE_SFX);
-		UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is over!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillEnd", GetName());
 
 		m_bUsingSkill = false;
 		m_flTimeCooldownOver = gpGlobals->time + GetCooldown();
@@ -1056,18 +1078,21 @@ void CSkillEnfoceHeadshot::Think()
 	{
 		m_bAllowSkill = true;
 
-		UTIL_PrintChatColor(m_pPlayer, GREENCHAT, "/g%s is ready again!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillReady", GetName());
 		UTIL_PlayEarSound(m_pPlayer, COOLDOWN_COMPLETE_SFX);
 	}
 }
 
 bool CSkillEnfoceHeadshot::Terminate()
 {
-	//UTIL_PlayEarSound(m_pPlayer, CLOSURE_SFX);
-	UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is terminated in advanced!", GetName());
+	UTIL_PlayEarSound(m_pPlayer, CLOSURE_SFX);
+	UTIL_SayText(m_pPlayer, "#LeaderMod_SkillTerminate", GetName());
 
 	m_bUsingSkill = false;
 	m_flTimeCooldownOver = gpGlobals->time + GetCooldown() * Q_clamp((gpGlobals->time - m_flTimeLastUsed) / GetDuration(), 0.0f, 1.0f);	// return the unused time.
+
+	// This is the masterskill. Therefore, terminate all other skills as well.
+	TerminatePeers();
 
 	return true;
 }
@@ -1111,17 +1136,17 @@ bool CSkillHighlightSight::Execute()
 
 	if (m_bUsingSkill)
 	{
-		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently activated!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillActivated", GetName());
 		return false;
 	}
 
 	if (!m_bAllowSkill)
 	{
-		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently cooling down!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillCooling", GetName());
 		return false;
 	}
 
-	UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/g%s/y is active now. All your /tenemies /y would be /ghighlight/y in your sight.", GetName());
+	UTIL_SayText(m_pPlayer, "#LeaderMod_EnemyHighlight_Desc", GetName());
 
 	m_bUsingSkill = true;
 	m_bAllowSkill = false;
@@ -1136,7 +1161,7 @@ void CSkillHighlightSight::Think()
 	if (m_bUsingSkill && m_flTimeLastUsed + GetDuration() < gpGlobals->time)
 	{
 		//UTIL_PlayEarSound(m_pPlayer, CLOSURE_SFX);
-		UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is over!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillEnd", GetName());
 
 		m_bUsingSkill = false;
 		m_flTimeCooldownOver = gpGlobals->time + GetCooldown();
@@ -1150,15 +1175,15 @@ void CSkillHighlightSight::Think()
 	{
 		m_bAllowSkill = true;
 
-		UTIL_PrintChatColor(m_pPlayer, GREENCHAT, "/g%s is ready again!", GetName());
-		UTIL_PlayEarSound(m_pPlayer, COOLDOWN_COMPLETE_SFX);
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillReady", GetName());
+		//UTIL_PlayEarSound(m_pPlayer, COOLDOWN_COMPLETE_SFX);
 	}
 }
 
 bool CSkillHighlightSight::Terminate()
 {
 	//UTIL_PlayEarSound(m_pPlayer, CLOSURE_SFX);
-	UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is terminated in advanced!", GetName());
+	UTIL_SayText(m_pPlayer, "#LeaderMod_SkillTerminate", GetName());
 
 	m_bUsingSkill = false;
 	m_flTimeCooldownOver = gpGlobals->time + GetCooldown() * Q_clamp((gpGlobals->time - m_flTimeLastUsed) / GetDuration(), 0.0f, 1.0f);	// return the unused time.
@@ -1206,19 +1231,19 @@ bool CSkillHealingShot::Execute()
 
 	if (m_bUsingSkill)
 	{
-		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently activated!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillActivated", GetName());
 		return false;
 	}
 
 	if (!m_bAllowSkill)
 	{
-		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently cooling down!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillCooling", GetName());
 		return false;
 	}
 
 	//UTIL_PlayEarSound(m_pPlayer, ACTIVATION_SFX);
 	UTIL_ScreenFade(m_pPlayer, HEALING_COLOR, 0.2f, 0.2f, 60, FFADE_IN);
-	UTIL_PrintChatColor(m_pPlayer, BLUECHAT, "/g%s/y is active now. All your weapons are loaded with /thealing dart/y.", GetName());
+	UTIL_SayText(m_pPlayer, "#LeaderMod_HealingShot_Desc", GetName());
 
 	m_bUsingSkill = true;
 	m_bAllowSkill = false;
@@ -1233,7 +1258,7 @@ void CSkillHealingShot::Think()
 	if (m_bUsingSkill && m_flTimeLastUsed + GetDuration() < gpGlobals->time)
 	{
 		//UTIL_PlayEarSound(m_pPlayer, CLOSURE_SFX);
-		UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is over!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillEnd", GetName());
 
 		m_bUsingSkill = false;
 		m_flTimeCooldownOver = gpGlobals->time + GetCooldown();
@@ -1247,7 +1272,7 @@ void CSkillHealingShot::Think()
 	{
 		m_bAllowSkill = true;
 
-		UTIL_PrintChatColor(m_pPlayer, GREENCHAT, "/g%s is ready again!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillReady", GetName());
 		UTIL_PlayEarSound(m_pPlayer, COOLDOWN_COMPLETE_SFX);
 	}
 }
@@ -1255,10 +1280,13 @@ void CSkillHealingShot::Think()
 bool CSkillHealingShot::Terminate()
 {
 	//UTIL_PlayEarSound(m_pPlayer, CLOSURE_SFX);
-	UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is terminated in advanced!", GetName());
+	UTIL_SayText(m_pPlayer, "#LeaderMod_SkillTerminate", GetName());
 
 	m_bUsingSkill = false;
 	m_flTimeCooldownOver = gpGlobals->time + GetCooldown() * Q_clamp((gpGlobals->time - m_flTimeLastUsed) / GetDuration(), 0.0f, 1.0f);	// return the unused time.
+
+	// This is the masterskill. Therefore, terminate all other skills as well.
+	TerminatePeers();
 
 	return true;
 }
@@ -1320,13 +1348,13 @@ bool CSkillGavelkind::Execute()
 
 	if (m_bUsingSkill)
 	{
-		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently activated!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillActivated", GetName());
 		return false;
 	}
 
 	if (!m_bAllowSkill)
 	{
-		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently cooling down!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillCooling", GetName());
 		return false;
 	}
 
@@ -1418,7 +1446,7 @@ void CSkillGavelkind::Think()
 		m_lstGodchildren.clear();
 
 		UTIL_PlayEarSound(m_pPlayer, CLOSURE_SFX);
-		UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is over!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillEnd", GetName());
 
 		// as for the godfather... he would get all his health back.
 		m_pPlayer->pev->health += m_flSavedDeltaHP;
@@ -1436,7 +1464,7 @@ void CSkillGavelkind::Think()
 	{
 		m_bAllowSkill = true;
 
-		UTIL_PrintChatColor(m_pPlayer, GREENCHAT, "/g%s is ready again!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillReady", GetName());
 		UTIL_PlayEarSound(m_pPlayer, COOLDOWN_COMPLETE_SFX);
 	}
 
@@ -1477,7 +1505,7 @@ bool CSkillGavelkind::Terminate()	// the terminate machism is different in this 
 {
 	if (!m_lstGodchildren.empty())
 	{
-		for (auto Godchild : m_lstGodchildren)
+		for (auto& Godchild : m_lstGodchildren)
 		{
 			if (!Godchild.m_pGodchild.IsValid() || !Godchild.m_pGodchild->IsAlive())
 				continue;
@@ -1485,12 +1513,15 @@ bool CSkillGavelkind::Terminate()	// the terminate machism is different in this 
 			Godchild.m_pGodchild->pev->max_health = Godchild.m_pGodchild->pev->health;	// increase HP limit to the current value.
 
 			UTIL_PlayEarSound(m_pPlayer, PASSIVE_SFX);
-			UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/yThough /t%s %s/y was killed, but a part of him is /gnow a part of you/y.", g_rgszRoleNames[m_pPlayer->m_iRoleType], STRING(m_pPlayer->pev->netname));
+			UTIL_SayText(m_pPlayer, "#LeaderMod_Godfather_Sk_Killed", g_rgszRoleNames[m_pPlayer->m_iRoleType], STRING(m_pPlayer->pev->netname));
 		}
 	}
 
 	m_bUsingSkill = false;
 	m_flTimeCooldownOver = gpGlobals->time + GetCooldown() * Q_clamp((gpGlobals->time - m_flTimeLastUsed) / GetDuration(), 0.0f, 1.0f);	// return the unused time.
+
+	// This is the masterskill. Therefore, terminate all other skills as well.
+	TerminatePeers();
 
 	return true;
 }
@@ -1525,19 +1556,19 @@ bool CSkillResistDeath::Execute()
 
 	if (m_bUsingSkill)
 	{
-		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently activated!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillActivated", GetName());
 		return false;
 	}
 
 	if (!m_bAllowSkill)
 	{
-		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently cooling down!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillCooling", GetName());
 		return false;
 	}
 
 	if (m_pPlayer->m_flOHNextThink > 0.0f && m_pPlayer->pev->health > 2.0f)	// never allow Swan Song while being OH.
 	{
-		UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/yYou can't perform /t%s/y while you're /goverhealed/y!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SwanSong_Reject_OH", GetName());
 		return false;
 	}
 
@@ -1562,7 +1593,7 @@ void CSkillResistDeath::Think()
 	if (m_bUsingSkill && m_flTimeLastUsed + GetDuration() < gpGlobals->time)
 	{
 		//UTIL_PlayEarSound(m_pPlayer, CLOSURE_SFX);
-		UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is over!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillEnd", GetName());
 
 		m_bUsingSkill = false;
 		m_flTimeCooldownOver = gpGlobals->time + GetCooldown();
@@ -1586,7 +1617,7 @@ void CSkillResistDeath::Think()
 	{
 		m_bAllowSkill = true;
 
-		UTIL_PrintChatColor(m_pPlayer, GREENCHAT, "/g%s is ready again!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillReady", GetName());
 		UTIL_PlayEarSound(m_pPlayer, COOLDOWN_COMPLETE_SFX);
 	}
 }
@@ -1598,11 +1629,14 @@ bool CSkillResistDeath::Terminate()
 
 	STOP_SOUND(m_pPlayer->edict(), CHAN_VOICE, ACTIVATION_SFX);
 	UTIL_ScreenFade(m_pPlayer, Vector(255, 10, 10), 0.5f, 0.1f, 60, FFADE_IN);
-	UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is terminated in advanced!", GetName());
+	UTIL_SayText(m_pPlayer, "#LeaderMod_SkillTerminate", GetName());
 
 	m_bUsingSkill = false;
 	m_flTimeCooldownOver = gpGlobals->time + GetCooldown() * Q_clamp((gpGlobals->time - m_flTimeLastUsed) / GetDuration(), 0.0f, 1.0f);	// return the unused time.
 	m_pPlayer->ResetMaxSpeed();
+
+	// This is the masterskill. Therefore, terminate all other skills as well.
+	TerminatePeers();
 
 	return true;
 }
@@ -1664,16 +1698,17 @@ bool CSkillTaserGun::Execute()
 
 	if (m_bUsingSkill)
 	{
-		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently activated!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillActivated", GetName());
 		return false;
 	}
 
 	if (!m_bAllowSkill)
 	{
-		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently cooling down!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillCooling", GetName());
 		return false;
 	}
 
+	UTIL_SayText(m_pPlayer, "#LeaderMod_TaserGun_Desc", GetName());
 	UTIL_PlayEarSound(m_pPlayer, ACTIVATION_SFX);
 	EMIT_SOUND(m_pPlayer->edict(), CHAN_STATIC, STATIC_ELEC_SFX, 0.65f, ATTN_NORM);
 
@@ -1690,7 +1725,7 @@ void CSkillTaserGun::Think()
 	if (m_bUsingSkill && m_flTimeLastUsed + GetDuration() < gpGlobals->time)
 	{
 		STOP_SOUND(m_pPlayer->edict(), CHAN_STATIC, STATIC_ELEC_SFX);
-		UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is over!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillEnd", GetName());
 
 		m_bUsingSkill = false;
 		m_flTimeCooldownOver = gpGlobals->time + GetCooldown();
@@ -1704,7 +1739,7 @@ void CSkillTaserGun::Think()
 	{
 		m_bAllowSkill = true;
 
-		UTIL_PrintChatColor(m_pPlayer, GREENCHAT, "/g%s is ready again!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillReady", GetName());
 		UTIL_PlayEarSound(m_pPlayer, COOLDOWN_COMPLETE_SFX);
 	}
 }
@@ -1713,10 +1748,13 @@ bool CSkillTaserGun::Terminate()
 {
 	CLIENT_COMMAND(m_pPlayer->edict(), "stopsound\n");
 	STOP_SOUND(m_pPlayer->edict(), CHAN_STATIC, STATIC_ELEC_SFX);
-	UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is terminated in advanced!", GetName());
+	UTIL_SayText(m_pPlayer, "#LeaderMod_SkillTerminate", GetName());
 
 	m_bUsingSkill = false;
 	m_flTimeCooldownOver = gpGlobals->time + GetCooldown() * Q_clamp((gpGlobals->time - m_flTimeLastUsed) / GetDuration(), 0.0f, 1.0f);	// return the unused time.
+
+	// This is the masterskill. Therefore, terminate all other skills as well.
+	TerminatePeers();
 
 	return true;
 }
@@ -1833,13 +1871,13 @@ bool CSkillInvisible::Execute()
 
 	if (m_bUsingSkill)
 	{
-		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently activated!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillActivated", GetName());
 		return false;
 	}
 
 	if (!m_bAllowSkill)
 	{
-		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently cooling down!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillCooling", GetName());
 		return false;
 	}
 
@@ -1865,7 +1903,7 @@ void CSkillInvisible::Think()
 	// A. it's time up!
 	if (m_bUsingSkill && m_flTimeLastUsed + GetDuration() < gpGlobals->time)
 	{
-		UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is over!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillEnd", GetName());
 
 		m_bUsingSkill = false;
 		m_flTimeCooldownOver = gpGlobals->time + GetCooldown();
@@ -1890,7 +1928,7 @@ void CSkillInvisible::Think()
 	{
 		m_bAllowSkill = true;
 
-		UTIL_PrintChatColor(m_pPlayer, GREENCHAT, "/g%s is ready again!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillReady", GetName());
 		UTIL_PlayEarSound(m_pPlayer, COOLDOWN_COMPLETE_SFX);
 	}
 }
@@ -1899,7 +1937,7 @@ bool CSkillInvisible::Terminate()
 {
 	CLIENT_COMMAND(m_pPlayer->edict(), "stopsound\n");
 	UTIL_ScreenFade(m_pPlayer, SCREEN_COLOUR, 0.3f, 0.1f, 60, FFADE_IN);
-	UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is terminated in advanced!", GetName());
+	UTIL_SayText(m_pPlayer, "#LeaderMod_SkillTerminate", GetName());
 
 	m_bUsingSkill = false;
 	m_flTimeCooldownOver = gpGlobals->time + GetCooldown() * Q_clamp((gpGlobals->time - m_flTimeLastUsed) / GetDuration(), 0.0f, 1.0f);	// return the unused time.
@@ -1911,6 +1949,9 @@ bool CSkillInvisible::Terminate()
 	m_pPlayer->m_pActiveItem->Deploy();
 	m_pPlayer->m_iHideHUD &= ~HIDEHUD;
 
+	// This is the masterskill. Therefore, terminate all other skills as well.
+	TerminatePeers();
+
 	return true;
 }
 
@@ -1921,8 +1962,8 @@ void CSkillInvisible::Discharge(CBasePlayer* pCause)
 	UTIL_PlayEarSound(pCause, DISCOVERED_SFX);
 	UTIL_PlayEarSound(m_pPlayer, DISCOVERED_SFX);
 	UTIL_ScreenFade(m_pPlayer, SCREEN_COLOUR, 0.3f, 0.1f, 60, FFADE_IN);
-	UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/tYou are discovered!", GetName());
-	UTIL_PrintChatColor(pCause, REDCHAT, "/tYou just discovered %s, the %s!", STRING(m_pPlayer->pev->netname), g_rgszRoleNames[m_pPlayer->m_iRoleType]);
+	UTIL_SayText(m_pPlayer, "#LeaderMod_Hitman_Sk_Discovered");
+	UTIL_SayText(pCause, "#LeaderMod_Hitman_Sk_Discovering", STRING(m_pPlayer->pev->netname), g_rgszRoleNames[m_pPlayer->m_iRoleType]);
 
 	m_bUsingSkill = false;
 	m_flTimeCooldownOver = gpGlobals->time + GetCooldown();	// unhonored discovered. no CD return.
@@ -1933,6 +1974,9 @@ void CSkillInvisible::Discharge(CBasePlayer* pCause)
 
 	m_pPlayer->m_pActiveItem->Deploy();
 	m_pPlayer->m_iHideHUD &= ~HIDEHUD;
+
+	// This is the masterskill. Therefore, terminate all other skills as well.
+	TerminatePeers();
 }
 
 void CSkillInvisible::OnPlayerDamagedPre(entvars_t* pevInflictor, entvars_t* pevAttacker, float& flDamage, int& bitsDamageTypes)
@@ -2031,13 +2075,13 @@ bool CSkillRadarScan2::Execute()
 
 	if (m_bUsingSkill)
 	{
-		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently activated!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillActivated", GetName());
 		return false;
 	}
 
 	if (!m_bAllowSkill)
 	{
-		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently cooling down!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillCooling", GetName());
 		return false;
 	}
 
@@ -2065,7 +2109,7 @@ bool CSkillRadarScan2::Execute()
 	// nobody to trace.
 	if (!m_pTracing)
 	{
-		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/tWe have no one to trace currently!");
+		UTIL_SayText(m_pPlayer, "#LeaderMod_Radar_NoOneToTrack");
 		return false;
 	}
 
@@ -2092,10 +2136,12 @@ bool CSkillRadarScan2::Execute()
 		UTIL_PlayEarSound(pTeammate, RADAR_BEEP_SFX);
 
 		if (m_pTracing == THE_COMMANDER)
-			UTIL_PrintChatColor(nullptr, REDCHAT, "/yAccorading to the intel, they are executing %s with %d menpower remaining.", g_rgszTacticalSchemeNames[CSGameRules()->m_rgTeamTacticalScheme[3 - m_pPlayer->m_iTeam]], CSGameRules()->m_rgiManpowers[3 - m_pPlayer->m_iTeam]);
+			UTIL_SayText(pTeammate, "#LeaderMod_Hitman_Sk_Intel",
+				g_rgszTacticalSchemeNames[CSGameRules()->m_rgTeamTacticalScheme[3 - m_pPlayer->m_iTeam]],	// parameter 1: their scheme.
+				std::to_string(CSGameRules()->m_rgiManpowers[3 - m_pPlayer->m_iTeam]).c_str());	// parameter 2: their menpower.
 	}
 
-	UTIL_PrintChatColor(nullptr, REDCHAT, "/yThe /t%s %s/y makes his intel public, which reveal the /gapproximate position/y of the /t%s %s/y!", g_rgszRoleNames[m_pPlayer->m_iRoleType], STRING(m_pPlayer->pev->netname), g_rgszRoleNames[m_pTracing->m_iRoleType], STRING(m_pTracing->pev->netname));
+	UTIL_SayTextAll(m_pPlayer, "#LeaderMod_Hitman_Sk_Intel_All", g_rgszRoleNames[m_pPlayer->m_iRoleType], STRING(m_pPlayer->pev->netname), g_rgszRoleNames[m_pTracing->m_iRoleType], STRING(m_pTracing->pev->netname));
 
 	m_bUsingSkill = true;
 	m_bAllowSkill = false;
@@ -2125,7 +2171,7 @@ void CSkillRadarScan2::Think()
 			MESSAGE_END();
 		}
 
-		UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is over!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillEnd", GetName());
 
 		m_bUsingSkill = false;
 		m_flTimeCooldownOver = gpGlobals->time + GetCooldown();
@@ -2159,7 +2205,7 @@ void CSkillRadarScan2::Think()
 						continue;
 
 					UTIL_PlayEarSound(pTeammate, RADAR_TARGET_DEAD_SFX);
-					UTIL_PrintChatColor(pTeammate, REDCHAT, "/gThe target /t%s %s/g traced by /y%s %s/g was eliminated!", g_rgszRoleNames[m_pTracing->m_iRoleType], STRING(m_pTracing->pev->netname), g_rgszRoleNames[m_pPlayer->m_iRoleType], STRING(m_pPlayer->pev->netname));
+					UTIL_SayText(pTeammate, "#LeaderMod_Hitman_Sk_Hunt", g_rgszRoleNames[m_pTracing->m_iRoleType], STRING(m_pTracing->pev->netname), g_rgszRoleNames[m_pPlayer->m_iRoleType], STRING(m_pPlayer->pev->netname));
 				}
 			}
 
@@ -2222,8 +2268,8 @@ void CSkillRadarScan2::Think()
 	{
 		m_bAllowSkill = true;
 
-		UTIL_PrintChatColor(m_pPlayer, GREENCHAT, "/g%s is ready again!", GetName());
-		UTIL_PlayEarSound(m_pPlayer, COOLDOWN_COMPLETE_SFX);
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillReady", GetName());
+		//UTIL_PlayEarSound(m_pPlayer, COOLDOWN_COMPLETE_SFX);
 	}
 }
 
@@ -2244,7 +2290,7 @@ bool CSkillRadarScan2::Terminate()
 		MESSAGE_END();
 	}
 
-	UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is terminated in advanced!", GetName());
+	UTIL_SayText(m_pPlayer, "#LeaderMod_SkillTerminate", GetName());
 
 	m_bUsingSkill = false;
 	m_flTimeCooldownOver = gpGlobals->time + GetCooldown() * Q_clamp((gpGlobals->time - m_flTimeLastUsed) / GetDuration(), 0.0f, 1.0f);	// return the unused time.
@@ -2270,18 +2316,18 @@ bool CSkillIncendiaryAmmo::Execute()
 
 	if (m_bUsingSkill)
 	{
-		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently activated!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillActivated", GetName());
 		return false;
 	}
 
 	if (!m_bAllowSkill)
 	{
-		UTIL_PrintChatColor(m_pPlayer, GREYCHAT, "/t%s is currently cooling down!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillCooling", GetName());
 		return false;
 	}
 
 	EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, ACTIVATION_SFX, VOL_NORM, ATTN_NORM);
-	UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/gAll /yof your weapons are loaded with /tincendiary ammo/y now.");
+	UTIL_SayText(m_pPlayer, "#LeaderMod_IncendiaryAmmo_Desc");
 
 	m_bUsingSkill = true;
 	m_bAllowSkill = false;
@@ -2296,7 +2342,7 @@ void CSkillIncendiaryAmmo::Think()
 	if (m_bUsingSkill && m_flTimeLastUsed + GetDuration() < gpGlobals->time)
 	{
 		UTIL_PlayEarSound(m_pPlayer, CLOSURE_SFX);
-		UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is over!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillEnd", GetName());
 
 		m_bUsingSkill = false;
 		m_flTimeCooldownOver = gpGlobals->time + GetCooldown();
@@ -2310,7 +2356,7 @@ void CSkillIncendiaryAmmo::Think()
 	{
 		m_bAllowSkill = true;
 
-		UTIL_PrintChatColor(m_pPlayer, GREENCHAT, "/g%s is ready again!", GetName());
+		UTIL_SayText(m_pPlayer, "#LeaderMod_SkillReady", GetName());
 		UTIL_PlayEarSound(m_pPlayer, COOLDOWN_COMPLETE_SFX);
 	}
 }
@@ -2318,10 +2364,13 @@ void CSkillIncendiaryAmmo::Think()
 bool CSkillIncendiaryAmmo::Terminate()
 {
 	UTIL_PlayEarSound(m_pPlayer, CLOSURE_SFX);
-	UTIL_PrintChatColor(m_pPlayer, REDCHAT, "/t%s is terminated in advanced!", GetName());
+	UTIL_SayText(m_pPlayer, "#LeaderMod_SkillTerminate", GetName());
 
 	m_bUsingSkill = false;
 	m_flTimeCooldownOver = gpGlobals->time + GetCooldown() * Q_clamp((gpGlobals->time - m_flTimeLastUsed) / GetDuration(), 0.0f, 1.0f);	// return the unused time.
+
+	// This is the masterskill. Therefore, terminate all other skills as well.
+	TerminatePeers();
 
 	return true;
 }

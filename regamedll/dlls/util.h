@@ -189,15 +189,6 @@ inline void STOP_SOUND_MSG(edict_t *entity, int msg_type, int channel, const cha
 	BUILD_SOUND_MSG(entity, channel, sample, 0, 0, SND_STOP, PITCH_NORM, msg_type, SVC_NOP, g_vecZero, player);
 }
 
-enum ChatColor
-{
-	REDCHAT = 1,
-	BLUECHAT,
-	GREYCHAT,
-	NORMALCHAT,
-	GREENCHAT,
-};
-
 class CBaseEntity;
 class CBasePlayer;
 class CBaseWeapon;	// LUNA: this is NOT a derived class of CBaseEntity anymore!
@@ -237,8 +228,8 @@ void ClientPrint(entvars_t *client, int msg_dest, const char *msg_name, const ch
 void UTIL_Log(const char *fmt, ...);
 void UTIL_ServerPrint(const char *fmt, ...);
 void UTIL_PrintConsole(edict_t *pEdict, const char *fmt, ...);
-void UTIL_SayText(CBaseEntity *pEntity, const char *fmt, ...);
-void UTIL_SayTextAll(const char *pText, CBaseEntity *pEntity);
+void UTIL_SayText(CBasePlayer* pPlayer, const char* szFormatKey, const char* szArg1 = "", const char* szArg2 = "", const char* szArg3 = "", const char* szArg4 = "");
+void UTIL_SayTextAll(CBasePlayer* pEventPlayer, const char* szFormatKey, const char* szArg1 = "", const char* szArg2 = "", const char* szArg3 = "", const char* szArg4 = "");
 char *UTIL_dtos1(int d);
 char *UTIL_dtos2(int d);
 char *UTIL_dtos3(int d);
@@ -302,7 +293,6 @@ bool UTIL_IsSpawnPointOccupied(CBaseEntity *pSpot);
 void MAKE_STRING_CLASS(const char *str, entvars_t *pev);
 void NORETURN Sys_Error(const char *error, ...);
 void replace_all(std::string& str, const std::string& from, const std::string& to);
-void UTIL_PrintChatColor(CBasePlayer* player, ChatColor color, const char* szMessage, ...);
 void UTIL_PlayEarSound(CBasePlayer* player, const char* sfx);
 bool UTIL_CheckPassibility(const Vector& vecPoint);	// return true is accessable
 void UTIL_BeamEntPoint(int id, Vector point, int SpriteId, int StartFrame, int FrameRate, int life, int width, int noise, int red, int green, int bule, int brightness, int ScrollSpeed);

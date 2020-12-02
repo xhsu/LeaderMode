@@ -57,6 +57,15 @@ void CHudSayText::Think(void)
 	{
 		if (iterator->m_flTimeCreated < gHUD::m_flUCDTime - m_pCVar_saytext_time->value)
 		{
+			// save a cache in console.
+			std::wstring wcs = L"";
+			for (auto& elem : iterator->m_lstLineData)
+				wcs += elem.m_wcsText;
+
+			// make a new line, you know the console.
+			wcs += L"\n";
+			gEngfuncs.pfnConsolePrint(UnicodeToUTF8(wcs.c_str()));
+
 			m_lstContents.erase(iterator++);
 		}
 		else
@@ -76,6 +85,7 @@ int CHudSayText::GetTextPrintY(void)
 
 void CHudSayText::GetColorFromText(int client_index, const std::wstring& wcsColorText, Vector& vecColor)
 {
+	// Specific color.
 	if (UTIL_CaseInsensitiveCompare(wcsColorText, std::wstring(L"Yellowish")))
 		vecColor = VEC_YELLOWISH;
 	else if (UTIL_CaseInsensitiveCompare(wcsColorText, std::wstring(L"Redish")))
@@ -86,6 +96,12 @@ void CHudSayText::GetColorFromText(int client_index, const std::wstring& wcsColo
 		vecColor = VEC_CYANISH;
 	else if (UTIL_CaseInsensitiveCompare(wcsColorText, std::wstring(L"Springgreen")))
 		vecColor = VEC_SPRINGGREENISH;
+	else if (UTIL_CaseInsensitiveCompare(wcsColorText, std::wstring(L"Orange")))
+		vecColor = VEC_ORANGE;
+	else if (UTIL_CaseInsensitiveCompare(wcsColorText, std::wstring(L"Violet")))
+		vecColor = VEC_VIOLET;
+
+	// Team color
 	else if (UTIL_CaseInsensitiveCompare(wcsColorText, std::wstring(L"Team")))
 	{
 		switch (g_PlayerExtraInfo[client_index].m_iTeam)
@@ -111,8 +127,10 @@ void CHudSayText::GetColorFromText(int client_index, const std::wstring& wcsColo
 		vecColor = VEC_T_COLOUR;
 	else if (UTIL_CaseInsensitiveCompare(wcsColorText, std::wstring(L"Spec")))
 		vecColor = VEC_SILVERISH;
+
+	// default color: yellow.
 	else
-		vecColor = VEC_SILVERISH;
+		vecColor = VEC_YELLOWISH;
 }
 
 void CHudSayText::AddToSayText(int iClientIndex, const char* formatStr, const char* sstr1, const char* sstr2, const char* sstr3, const char* sstr4)

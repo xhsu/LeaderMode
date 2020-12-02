@@ -171,9 +171,8 @@ enum TacticalSchemes
 	SCHEMES_COUNT
 };
 
-extern const char* g_rgszTacticalSchemeNames[SCHEMES_COUNT];
-extern const char* g_rgszTacticalSchemeDesc[SCHEMES_COUNT];
-extern const ChatColor g_rgiTacticalSchemeDescColor[SCHEMES_COUNT];
+extern std::array<const char*, SCHEMES_COUNT> g_rgszTacticalSchemeNames;
+extern std::array<const char*, SCHEMES_COUNT> g_rgszTacticalSchemeDesc;
 
 class CItem;
 

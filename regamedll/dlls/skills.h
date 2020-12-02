@@ -91,6 +91,9 @@ public:	// skill action
 	virtual bool  IsCoolingDown() const { return (!m_bUsingSkill && !m_bAllowSkill); }
 	virtual bool  IsReady()	const { return (!m_bUsingSkill && m_bAllowSkill); }
 
+	// utils
+	virtual void TerminatePeers() const;
+
 	// passive skill: weapons
 	virtual float WeaponFireIntervalModifier(CBaseWeapon* pWeapon) { return 1.0f; }
 	virtual void OnGrenadeThrew(EquipmentIdType iId, CGrenade* pGrenade) { }
@@ -196,9 +199,6 @@ public:
 class CSkillArmorRegen : public CBaseSkill
 {
 public:
-	CSkillArmorRegen() { m_bShouldSelfArmourRegenPlaySFX = true; }
-
-public:
 	static const float GIFT_RADIUS;
 	static const float GIFT_INTERVAL;
 	static const float GIFT_AMOUNT;
@@ -211,7 +211,7 @@ public:
 public:
 	float m_flNextArmourOffer;
 	float m_flNextSelfArmourRegen;
-	bool m_bShouldSelfArmourRegenPlaySFX;
+	bool m_bShouldSelfArmourRegenPlaySFX{ true };
 
 public:
 	void Think();

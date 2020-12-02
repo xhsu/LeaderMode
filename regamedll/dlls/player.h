@@ -514,7 +514,6 @@ public:
 
 	// new functions from leader mod.
 	void AssignRole(RoleTypes iNewRole);	// this function is only for skill installation.
-	void UpdateHudText();
 	void CheckItemAccessibility();
 	CBaseSkill* GetPrimarySkill();
 	bool IsUsingPrimarySkill();
@@ -719,8 +718,6 @@ public:
 	float m_flSpawnProtectionEndTime;
 	RoleTypes m_iRoleType;
 	std::array<CBaseSkill*, SKILLTYPE_COUNT> m_rgpSkills;
-	char m_szHudText[512];
-	char m_szClientHudText[512];
 	std::list<WeaponIdType> m_lstRebuy;
 	TacticalSchemes m_iVotedTS;
 	float m_flTSThink;

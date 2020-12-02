@@ -24,6 +24,10 @@ Created Date: 07 Mar 2020
 #define VEC_T_COLOUR		Vector(216.0 / 255.0, 81.0 / 255.0, 80.0 / 255.0)
 #define RGB_SILVERISH		0x00C0C0C0
 #define VEC_SILVERISH		Vector(0.75, 0.75, 0.75)
+#define RGB_VIOLET			0x00BF00FF
+#define VEC_VIOLET			Vector(0.75, 0.0f, 1.0f)
+#define RGB_ORANGE			0x00FF8000
+#define VEC_ORANGE			Vector(1.0f, 0.5f, 0.0f)
 
 #define DHN_DRAWZERO	BIT(0)
 #define DHN_2DIGITS		BIT(1)

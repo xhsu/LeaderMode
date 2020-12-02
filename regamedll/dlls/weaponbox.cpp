@@ -219,7 +219,7 @@ void CWeaponBox::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE use
 		if (pWeapon && !pWeapon->IsDead())
 		{
 			pPlayer->AddAccount(pWeapon->m_pItemInfo->m_iCost / 2, RT_SOLD_ITEM);
-			UTIL_PrintChatColor(pPlayer, BLUECHAT, "/gSeizing weapon /t%s/g have you rewarded with /t%d/g$", WeaponIDToAlias(pWeapon->m_iId), pWeapon->m_pItemInfo->m_iCost / 2);
+			UTIL_SayText(pPlayer, "#LeaderMod_Commander_Sk_SeizeWpn", WeaponIDToAlias(pWeapon->m_iId), std::to_string(pWeapon->m_pItemInfo->m_iCost / 2).c_str());
 			EMIT_SOUND(pPlayer->edict(), CHAN_ITEM, SFX_REFUND_GUNS, VOL_NORM, ATTN_NORM);
 
 			pWeapon->Kill();

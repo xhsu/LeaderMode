@@ -14,25 +14,23 @@ RewardAccount CHalfLifeMultiplay::m_rgRewardAccountRules_default[] = {
 	REWARD_KILLED_LEADER,					// RR_KILLED_ENEMY_LEADER,
 };
 
-const char* g_rgszTacticalSchemeNames[SCHEMES_COUNT] =
+std::array<const char*, SCHEMES_COUNT> g_rgszTacticalSchemeNames =
 {
-	"Disputing",
-	"Superior Firepower Doctrine",
-	"Mass Assault Doctrine",
-	"Grand Battleplan Doctrine",
-	"Mobile Warfare Doctrine",
+	"#LeaderMod_Scheme_UNASSIGNED",
+	"#LeaderMod_Doctrine_GrandBattleplan",
+	"#LeaderMod_Doctrine_MassAssault",
+	"#LeaderMod_Doctrine_MobileWarfare",
+	"#LeaderMod_Doctrine_SuperiorFirepower",
 };
 
-const char* g_rgszTacticalSchemeDesc[SCHEMES_COUNT] =
+std::array<const char*, SCHEMES_COUNT> g_rgszTacticalSchemeDesc =
 {
-	"/yIf most of you are /gUNDETERMINED/y, or you are having a /tdisputation/y: Your team /twon't receive/y any buff.",
-	"/gSuperior Firepower Doctrine/y: Refill /g4%%%%/y of your /tmaximum/y clip /teach second/y.",
-	"/gMass Assault Doctrine/y: /gMinimize /tredeployment interval/y of your squad along with /gdoubled/y menpower.",
-	"/gGrand Battleplan Doctrine/y: Slowly /grefill accounts/y of all your squad members. In addition, you will receive /trudimentary equipments/y after each redeployment.",
-	"/gMobile Warfare Doctrine/y: /gRedeployment loci/y are relocated near the /tSquad Leader/y. In addition, you are allowed to purchase gears /geverywhere/y.",
+	"#LeaderMod_Scheme_UNASSIGNED_Intro",
+	"#LeaderMod_Doctrine_GrandBattleplan_Intro",
+	"#LeaderMod_Doctrine_MassAssault_Intro",
+	"#LeaderMod_Doctrine_MobileWarfare_Intro",
+	"#LeaderMod_Doctrine_SuperiorFirepower_Intro",
 };
-
-const ChatColor g_rgiTacticalSchemeDescColor[SCHEMES_COUNT] = { GREYCHAT, REDCHAT, BLUECHAT, BLUECHAT, GREYCHAT };
 
 bool IsBotSpeaking()
 {
@@ -2804,7 +2802,7 @@ void EXT_FUNC CHalfLifeMultiplay::PlayerKilled(CBasePlayer *pVictim, entvars_t *
 	{
 		// send the message to everyone.
 		UTIL_HudMessageAll(m_TextParam_Notification, "the %s is killed!", g_rgszRoleNames[pVictim->m_iRoleType]);
-		UTIL_PrintChatColor(nullptr, pVictim->m_iTeam == CT ? BLUECHAT : REDCHAT, "/tthe %s is killed!", g_rgszRoleNames[pVictim->m_iRoleType]);
+		UTIL_SayTextAll(pVictim, "#LeaderMod_LeaderKilled", "", g_rgszRoleNames[pVictim->m_iRoleType]);
 
 		// SFX
 		CBasePlayer* pPlayer = nullptr;
@@ -3076,7 +3074,7 @@ bool CHalfLifeMultiplay::CanHavePlayerItem(CBasePlayer* pPlayer, WeaponIdType iI
 		if (g_bClientPrintEnable && bPrintHint)
 		{
 			ClientPrint(pPlayer->pev, HUD_PRINTCENTER, "#Cannot_Buy_This");
-			UTIL_PrintChatColor(pPlayer, REDCHAT, "/yYou are unqualified to use /t%s/y since you are /g%s/y.", g_rgWpnInfo[iId].m_pszExternalName, g_rgszRoleNames[pPlayer->m_iRoleType]);
+			UTIL_SayText(pPlayer, "#LeaderMod_CannotBuyThis", g_rgWpnInfo[iId].m_pszExternalName, g_rgszRoleNames[pPlayer->m_iRoleType]);
 		}
 
 		return false;
@@ -3175,7 +3173,7 @@ bool CHalfLifeMultiplay::CanHaveEquipment(CBasePlayer* pPlayer, EquipmentIdType 
 		if (g_bClientPrintEnable)
 		{
 			ClientPrint(pPlayer->pev, HUD_PRINTCENTER, "#Cannot_Buy_This");
-			UTIL_PrintChatColor(pPlayer, REDCHAT, "/yYou are unqualified to have /t%s/y since you are /g%s/y.", g_rgEquipmentInfo[iId].m_pszExternalName, g_rgszRoleNames[pPlayer->m_iRoleType]);
+			UTIL_SayText(pPlayer, "#LeaderMod_CannotBuyThis", g_rgEquipmentInfo[iId].m_pszExternalName, g_rgszRoleNames[pPlayer->m_iRoleType]);
 		}
 
 		return false;

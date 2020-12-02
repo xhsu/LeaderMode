@@ -411,7 +411,7 @@ void OpenMenu_DeclareRole(CBasePlayer* pPlayer)
 {
 	if (pPlayer->m_iTeam != CT && pPlayer->m_iTeam != TERRORIST)
 	{
-		UTIL_PrintChatColor(pPlayer, GREYCHAT, "/tYou can't declare your role because you are not in the game.");
+		UTIL_SayText(pPlayer, "#LeaderMod_IlligalDecalre");
 		return;
 	}
 
@@ -507,7 +507,7 @@ bool MenuHandler_DeclareRole(CBasePlayer* pPlayer, int iSlot)
 
 	if (iRole != Role_UNASSIGNED && CSGameRules()->HasRoleOccupied(iRole, pPlayer->m_iTeam))	// you can always decide to be a noobie.
 	{
-		UTIL_PrintChatColor(pPlayer, GREYCHAT, "/tRole /g%s/t had been choosen by others.", g_rgszRoleNames[iRole]);
+		UTIL_SayText(pPlayer, "#LeaderMod_RoleOccupied", g_rgszRoleNames[iRole], STRING(CSGameRules()->m_rgpCharacters[iRole]->pev->netname));
 		return false;
 	}
 
@@ -522,7 +522,7 @@ bool MenuHandler_DeclareRole(CBasePlayer* pPlayer, int iSlot)
 	else
 	{
 		pPlayer->AssignRole(iRole);
-		UTIL_PrintChatColor(pPlayer, pPlayer->m_iTeam == CT ? BLUECHAT : REDCHAT, "/gYou are now the /t%s/g!", g_rgszRoleNames[iRole]);
+		UTIL_SayText(pPlayer, "#LeaderMod_Got_a_Role", g_rgszRoleNames[iRole]);
 	}
 	
 	return true;
@@ -565,7 +565,7 @@ bool MenuHandler_VoteTacticalSchemes(CBasePlayer* pPlayer, int iSlot)
 	TacticalSchemes iScheme = (TacticalSchemes)(iSlot - 1);
 
 	pPlayer->m_iVotedTS = iScheme;
-	UTIL_PrintChatColor(pPlayer, g_rgiTacticalSchemeDescColor[iScheme], g_rgszTacticalSchemeDesc[iScheme]);
+	UTIL_SayText(pPlayer, g_rgszTacticalSchemeDesc[iScheme]);
 
 	return false;	// player may needs to read the desc.
 }

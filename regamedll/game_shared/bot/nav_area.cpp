@@ -3829,7 +3829,7 @@ void EditNavAreas(NavEditCmdType cmd)
 				}
 
 				Q_snprintf(buffer, sizeof(buffer), "Area #%d %s %s\n", area->GetID(), locName, attrib);
-				UTIL_SayTextAll(buffer, pLocalPlayer);
+				UTIL_SayTextAll(pLocalPlayer, buffer);
 
 				// do "place painting"
 				if (isPlacePainting)
@@ -4012,7 +4012,7 @@ void EditNavAreas(NavEditCmdType cmd)
 
 							char buffer[190];
 							Q_snprintf(buffer, sizeof(buffer), "Marked Area is connected to %d other Areas\n", connected);
-							UTIL_SayTextAll(buffer, pLocalPlayer);
+							UTIL_SayTextAll(pLocalPlayer, buffer);
 						}
 						break;
 					case EDIT_MARK_UNNAMED:
@@ -4059,7 +4059,7 @@ void EditNavAreas(NavEditCmdType cmd)
 
 								char buffer[190];
 								Q_snprintf(buffer, sizeof(buffer), "Marked Area is connected to %d other Areas - there are %d total unnamed areas\n", connected, totalUnnamedAreas);
-								UTIL_SayTextAll(buffer, pLocalPlayer);
+								UTIL_SayTextAll(pLocalPlayer, buffer);
 							}
 						}
 						break;
