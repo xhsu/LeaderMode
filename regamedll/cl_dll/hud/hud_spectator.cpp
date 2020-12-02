@@ -79,9 +79,9 @@ void CHudSpectator::CheckSettings(void)
 	if (gHUD::m_bIntermission)
 		m_pip->value = INSET_OFF;
 
-	if (m_chatEnabled != (gHUD::m_SayText.m_HUD_saytext->value != 0))
+	if (m_chatEnabled != (gHUD::m_SayText.m_pCVar_saytext->value != 0))
 	{
-		m_chatEnabled = (gHUD::m_SayText.m_HUD_saytext->value != 0);
+		m_chatEnabled = (gHUD::m_SayText.m_pCVar_saytext->value != 0);
 
 		if (gEngfuncs.IsSpectateOnly())
 		{
@@ -1468,7 +1468,7 @@ int CHudSpectator::Init(void)
 	m_zoomDelta = 0.0f;
 	m_moveDelta = 0.0f;
 	m_FOV = 90.0f;
-	m_chatEnabled = (gHUD::m_SayText.m_HUD_saytext->value != 0);
+	m_chatEnabled = (gHUD::m_SayText.m_pCVar_saytext->value != 0);
 	iJumpSpectator = 0;
 	m_lastAutoDirector = -1.0f;
 

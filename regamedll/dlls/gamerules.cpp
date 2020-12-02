@@ -1993,25 +1993,37 @@ void CHalfLifeMultiplay::AssignCommander(CBasePlayer *pPlayer)
 
 	for (int i = 1; i <= gpGlobals->maxClients; i++)
 	{
-		pPlayer = UTIL_PlayerByIndex(i);
+		auto pClient = UTIL_PlayerByIndex(i);
 
-		if (!pPlayer || !pPlayer->IsAlive() || pPlayer->IsBot())
+		if (!pClient || !pClient->IsAlive() || pClient->IsBot())
 			continue;
 
-		switch (pPlayer->m_iTeam)
+		MESSAGE_BEGIN(MSG_ONE_UNRELIABLE, gmsgSayText, nullptr, pClient->edict());
+		WRITE_BYTE(pPlayer->entindex());
+
+		// format.
+		switch (pClient->m_iTeam)
 		{
 		case CT:
-			UTIL_PrintChatColor(pPlayer, BLUECHAT, "/t%s/y is your /t%s/y in this operation./g PROTECT HIM!", STRING(THE_COMMANDER->pev->netname), g_rgszRoleNames[Role_Commander]);
+			WRITE_STRING("#LeaderMod_CT_ProtectCommander");
 			break;
 
 		case TERRORIST:
-			UTIL_PrintChatColor(pPlayer, REDCHAT, "/y%s/t is the /y%s/t, the head of CTs. To stop this assault, kill him ASAP.", STRING(THE_COMMANDER->pev->netname), g_rgszRoleNames[Role_Commander]);
+			WRITE_STRING("#LeaderMod_T_KillCommander");
 			break;
 
 		default:
-			UTIL_PrintChatColor(pPlayer, BLUECHAT, "/t%s/y is the /t%s/y of this round.", STRING(THE_COMMANDER->pev->netname), g_rgszRoleNames[Role_Commander]);
+			WRITE_STRING("#LeaderMod_Spec_Commander");
 			break;
 		}
+
+		WRITE_STRING("");	// empty string for auto-name-filling.
+		WRITE_STRING("#LeaderMod_Role_Commander");
+
+		if (pClient->m_iTeam == TERRORIST)	// additional argument for TERRORIST text.
+			WRITE_STRING("#Cstrike_ScoreBoard_CT");
+
+		MESSAGE_END();
 	}
 }
 
@@ -2066,25 +2078,37 @@ void CHalfLifeMultiplay::AssignGodfather(CBasePlayer* pPlayer)
 
 	for (int i = 1; i <= gpGlobals->maxClients; i++)
 	{
-		pPlayer = UTIL_PlayerByIndex(i);
+		auto pClient = UTIL_PlayerByIndex(i);
 
-		if (!pPlayer || !pPlayer->IsAlive() || pPlayer->IsBot())
+		if (!pClient || !pClient->IsAlive() || pClient->IsBot())
 			continue;
 
-		switch (pPlayer->m_iTeam)
+		MESSAGE_BEGIN(MSG_ONE_UNRELIABLE, gmsgSayText, nullptr, pClient->edict());
+		WRITE_BYTE(pPlayer->entindex());
+
+		// format.
+		switch (pClient->m_iTeam)
 		{
 		case CT:
-			UTIL_PrintChatColor(pPlayer, REDCHAT, "/t%s/y is the /t%s/y, the most valued target of this operation.", STRING(THE_GODFATHER->pev->netname), g_rgszRoleNames[Role_Godfather]);
+			WRITE_STRING("#LeaderMod_CT_HuntGodfather");
 			break;
 
 		case TERRORIST:
-			UTIL_PrintChatColor(pPlayer, GREYCHAT, "/g%s/t is your boss and /g%s/t. Make sure he survive in this assault.", STRING(THE_GODFATHER->pev->netname), g_rgszRoleNames[Role_Godfather]);
+			WRITE_STRING("#LeaderMod_T_ProtectGodfather");
 			break;
 
 		default:
-			UTIL_PrintChatColor(pPlayer, REDCHAT, "/t%s/y is the /t%s/y of this round.", STRING(THE_GODFATHER->pev->netname), g_rgszRoleNames[Role_Godfather]);
+			WRITE_STRING("#LeaderMod_Spec_Godfather");
 			break;
 		}
+
+		WRITE_STRING("");	// empty string for auto-name-filling.
+		WRITE_STRING("#LeaderMod_Role_Godfather");
+
+		if (pClient->m_iTeam == TERRORIST)	// additional argument for TERRORIST text.
+			WRITE_STRING("#Cstrike_ScoreBoard_Ter");
+
+		MESSAGE_END();
 	}
 }
 

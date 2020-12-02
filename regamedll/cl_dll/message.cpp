@@ -120,8 +120,6 @@ MSG_FUNC(HudText)
 
 MSG_FUNC(SayText)
 {
-	gHUD::m_SayText.MsgFunc_SayText(iSize, pbuf);
-
 	BEGIN_READ(pbuf, iSize);
 
 	int client_index = READ_BYTE();
@@ -136,34 +134,10 @@ MSG_FUNC(SayText)
 	Q_strlcpy(sstr4, READ_STRING());
 
 	// if this one is empty, it usually means refer to player name.
-	if (!sstr1[0] && client_index > 0)
+	if (!sstr1[0] && client_index > 0 && g_PlayerInfoList[client_index].name)
 		Q_strlcpy(sstr1, g_PlayerInfoList[client_index].name);
 
-	// if this is an localisable text, it will be localised, otherwise it will still be convered to an Unicode text.
-	const wchar_t* pwcsText = UTIL_GetLocalisation(formatStr);
-	const wchar_t* pwcsArg1 = UTIL_GetLocalisation(sstr1);
-	const wchar_t* pwcsArg2 = UTIL_GetLocalisation(sstr2);
-	const wchar_t* pwcsArg3 = UTIL_GetLocalisation(sstr3);
-	const wchar_t* pwcsArg4 = UTIL_GetLocalisation(sstr4);
-
-	wchar_t wcsFinalDraft[512] = L"";
-	const wchar_t* pwcsTest = wcsstr(pwcsText, L"%s");
-	if (pwcsTest && pwcsTest[2] > '0' && pwcsTest[2] < '9')	// two letters afterward. Is it the form of "%s1, %s2"?
-	{
-		// use VGUI API here.
-		VGUI_LOCALISE->ConstructString(wcsFinalDraft, sizeof(wcsFinalDraft), (wchar_t*)pwcsText, 4, pwcsArg1, pwcsArg2, pwcsArg3, pwcsArg4);
-	}
-	else
-	{
-		_snwprintf(wcsFinalDraft, wcharsmax(wcsFinalDraft), pwcsText, pwcsArg1, pwcsArg2, pwcsArg3, pwcsArg4);
-	}
-
-	gEngfuncs.pfnConsolePrint(UnicodeToANSI(wcsFinalDraft));
-	/*gEngfuncs.pfnConsolePrint(formatStr);
-	gEngfuncs.pfnConsolePrint(sstr1);
-	gEngfuncs.pfnConsolePrint(sstr2);
-	gEngfuncs.pfnConsolePrint(sstr3);
-	gEngfuncs.pfnConsolePrint(sstr4);*/
+	gHUD::m_SayText.AddToSayText(client_index, formatStr, sstr1, sstr2, sstr3, sstr4);
 
 	return TRUE;
 }

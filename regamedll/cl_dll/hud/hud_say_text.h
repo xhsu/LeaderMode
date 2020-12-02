@@ -1,35 +1,30 @@
 /*
 
 Created Date: Mar 11 2020
+Reincarnation Data: Dec 01 2020
 
 */
 
 #pragma once
 
-#define TEXTCOLOR_NORMAL		1
-#define TEXTCOLOR_USEOLDCOLORS	2
-#define TEXTCOLOR_PLAYERNAME	3
-#define TEXTCOLOR_LOCATION		4
 
 class CHudSayText : public CBaseHudElement
 {
 public:
 	int Init(void);
-	void InitHUDData(void);
+	void Reset(void);
 	int Draw(float flTime);
+	void Think(void);
 
 public:
-	void MsgFunc_SayText(int iSize, void* pbuf);
-
-public:
-	int GetTextPrintY(void);
-	void SayTextPrint(const char* pszBuf, int iBufSize, int clientIndex = -1, char* sstr1 = NULL, char* sstr2 = NULL, char* sstr3 = NULL, char* sstr4 = NULL);
-	void EnsureTextFitsInOneLineAndWrapIfHaveTo(int line);
+	static int GetTextPrintY(void);
 	static void GetColorFromText(int client_index, const std::wstring& wcsColorText, Vector& vecColor);
+	void AddToSayText(int iClientIndex, const char* pszText, const char* pszArg1 = "", const char* pszArg2 = "", const char* pszArg3 = "", const char* pszArg4 = "");
+	void AddToSayText(int iClientIndex, const wchar_t* pwcsText, const wchar_t* pwcsArg1 = L"", const wchar_t* pwcsArg2 = L"", const wchar_t* pwcsArg3 = L"", const wchar_t* pwcsArg4 = L"");
 
 public:
-	cvar_s* m_HUD_saytext;
-	cvar_s* m_HUD_saytext_time;
+	cvar_s* m_pCVar_saytext;
+	cvar_s* m_pCVar_saytext_time;
 
 private:
 	class CSayTextSegment

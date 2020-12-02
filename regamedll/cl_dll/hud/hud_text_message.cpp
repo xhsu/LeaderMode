@@ -200,7 +200,7 @@ void CHudTextMessage::MsgFunc_TextMsg(int iSize, void* pbuf)
 				sstr4 = szNewBuf[4];
 		}
 
-		gHUD::m_SayText.SayTextPrint(msg_text, MSG_BUF_SIZE, playerIndex, sstr1, sstr2, sstr3, sstr4);
+		gHUD::m_SayText.AddToSayText(playerIndex, msg_text, sstr1, sstr2, sstr3, sstr4);
 		break;
 	}
 
@@ -221,7 +221,7 @@ void CHudTextMessage::MsgFunc_TextMsg(int iSize, void* pbuf)
 
 	case HUD_PRINTTALK:
 	{
-		gHUD::m_SayText.SayTextPrint(msg_text, MSG_BUF_SIZE, -1, sstr1, sstr2, sstr3, sstr4);
+		gHUD::m_SayText.AddToSayText(gHUD::m_iPlayerNum, msg_text, sstr1, sstr2, sstr3, sstr4);
 		break;
 	}
 
