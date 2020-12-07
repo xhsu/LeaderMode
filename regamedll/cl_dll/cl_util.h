@@ -93,3 +93,4 @@ void UTIL_ReplaceAll(std::wstring& str, const std::wstring& from, const std::wst
 inline bool caseInsCharCompare(wchar_t a, wchar_t b) { return(towupper(a) == towupper(b)); }
 //template<typename stringTy> inline bool caseInsCharCompare(stringTy a, stringTy b) { return(std::toupper(a) == std::toupper(b)); }
 template<typename stringTy> inline bool UTIL_CaseInsensitiveCompare(const stringTy& s1, const stringTy& s2) { return ((s1.size() == s2.size()) && std::equal(s1.cbegin(), s1.cend(), s2.cbegin(), caseInsCharCompare)); }
+void Sys_Error(const char* fmt, ...);

@@ -239,7 +239,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\Graph\bmp.cpp" />
     <ClCompile Include="..\Graph\dxt.cpp" />
+    <ClCompile Include="..\Graph\tga.cpp" />
     <ClCompile Include="..\hud\hud.cpp" />
     <ClCompile Include="..\hud\hud_ammo.cpp" />
     <ClCompile Include="..\hud\hud_battery.cpp" />
@@ -316,7 +318,9 @@
     <ClInclude Include="..\Fonts\FontManager.h" />
     <ClInclude Include="..\Fonts\FontTextureCache.h" />
     <ClInclude Include="..\Fonts\Win32Font.h" />
+    <ClInclude Include="..\Graph\bmp.h" />
     <ClInclude Include="..\Graph\dxt.h" />
+    <ClInclude Include="..\Graph\tga.h" />
     <ClInclude Include="..\hud\hud.h" />
     <ClInclude Include="..\hud\hud_ammo.h" />
     <ClInclude Include="..\hud\hud_battery.h" />

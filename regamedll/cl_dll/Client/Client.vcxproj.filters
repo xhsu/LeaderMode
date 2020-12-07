@@ -294,6 +294,12 @@
     <ClCompile Include="..\..\game_shared\shared_string.cpp">
       <Filter>game_shared</Filter>
     </ClCompile>
+    <ClCompile Include="..\Graph\tga.cpp">
+      <Filter>cl_dll\Graph</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Graph\bmp.cpp">
+      <Filter>cl_dll\Graph</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\cdll_int.h">
@@ -517,6 +523,12 @@
     </ClInclude>
     <ClInclude Include="..\..\metahook\engine.h">
       <Filter>metahook</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Graph\tga.h">
+      <Filter>cl_dll\Graph</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Graph\bmp.h">
+      <Filter>cl_dll\Graph</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

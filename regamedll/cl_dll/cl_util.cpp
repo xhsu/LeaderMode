@@ -425,7 +425,6 @@ const wchar_t* UTIL_GetLocalisation(const char* szToken)
 		return iterator->second.c_str();
 }
 
-
 void UTIL_ReplaceAll(std::string& str, const std::string& from, const std::string& to)
 {
 	if (from.empty())
@@ -452,4 +451,19 @@ void UTIL_ReplaceAll(std::wstring& str, const std::wstring& from, const std::wst
 		str.replace(start_pos, from.length(), to);
 		start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
 	}
+}
+
+void Sys_Error(const char* fmt, ...)
+{
+	static char output[1024];
+	va_list ptr;
+
+	va_start(ptr, fmt);
+	vsnprintf(output, charsmax(output), fmt, ptr);
+	va_end(ptr);
+
+	HWND hwnd = GetActiveWindow();
+	MessageBox(hwnd, output, "Fatal Error", MB_OK | MB_ICONERROR | MB_TOPMOST);
+
+	_exit(-1);
 }

@@ -304,8 +304,7 @@ BOOL CL_DLLEXPORT Initialize_(cl_enginefunc_t* pEnginefuncs, int iVersion)	// LU
 	HMODULE hMetahookDLL = LoadLibrary("lm_metahook_module.dll");
 	if (!hMetahookDLL)
 	{
-		MessageBox(nullptr, "Metahook module no found!", nullptr, MB_OK | MB_ICONERROR);
-		exit(0);
+		Sys_Error("Metahook module no found!");
 		return FALSE;
 	}
 
@@ -315,15 +314,13 @@ BOOL CL_DLLEXPORT Initialize_(cl_enginefunc_t* pEnginefuncs, int iVersion)	// LU
 		pfn(&gExtFuncs);
 	else
 	{
-		MessageBox(nullptr, "Function \"CL_GetExtendedFuncs\" no found!", nullptr, MB_OK | MB_ICONERROR);
-		exit(0);
+		Sys_Error("Function \"CL_GetExtendedFuncs\" no found!");
 		return FALSE;
 	}
 
 	if (gExtFuncs.version != CLIENT_EXTENDED_FUNCS_API_VERSION)
 	{
-		MessageBox(nullptr, "Version mismatch between client and metahook module!", nullptr, MB_OK | MB_ICONERROR);
-		exit(0);
+		Sys_Error("Version mismatch between client and metahook module!\nExpect Version: %d\nReceived Version: %d", CLIENT_EXTENDED_FUNCS_API_VERSION, gExtFuncs.version);
 		return FALSE;
 	}
 

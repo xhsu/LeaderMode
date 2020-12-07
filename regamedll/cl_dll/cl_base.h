@@ -142,6 +142,8 @@ Created Date: 05 Mar 2020
 
 // graphic stuff
 #include "Graph/dxt.h"
+#include "Graph/bmp.h"
+#include "Graph/tga.h"
 
 // font stuff
 #include "Fonts/DrawFonts.h"
