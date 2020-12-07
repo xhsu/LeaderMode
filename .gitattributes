@@ -25,6 +25,7 @@ gradlew           text eol=lf
 *.cfg             text eol=crlf
 *.properties      text eol=crlf
 *.vm              text eol=crlf
+*.txt             text eol=crlf
 
 # Compiled Object files
 *.o               binary
@@ -39,6 +40,9 @@ gradlew           text eol=lf
 *.wad             binary
 *.bsp             binary
 *.rmf             binary
+*.mdl             binary
+*.wav             binary
+*.mp3             binary
 
 # Project files
 *.sln             text eol=crlf
