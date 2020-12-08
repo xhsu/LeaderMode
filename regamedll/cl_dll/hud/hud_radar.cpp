@@ -163,7 +163,7 @@ void CHudRadar::DrawRadar(float flTime)
 			Matrix3x3::Translation2D(vecMe) *
 
 			// Step 2: Rotate it according to our viewing yaw.
-			Matrix3x3::Rotation2D(180.0f - v_angles.yaw) *
+			Matrix3x3::Rotation2D(OverviewMgr::m_bRotated ? 270.0f - v_angles.yaw : 180.0f - v_angles.yaw) *
 
 			// Step 1: Subtract it with our own origin, make us right on centre.
 			Matrix3x3::Translation2D(-vecMe);
@@ -173,6 +173,26 @@ void CHudRadar::DrawRadar(float flTime)
 		vecs[1] = mxMiniMapTransform * Vector2D(vecRB.x, vecLT.y);
 		vecs[2] = mxMiniMapTransform * vecRB;
 		vecs[3] = mxMiniMapTransform * Vector2D(vecLT.x, vecRB.y);
+
+		if (OverviewMgr::m_bRotated)
+		{
+			// This is only used in de_dust_cz, for its bugged overview.
+			//std::swap(vecs[0], vecs[3]);
+			//std::swap(vecs[1], vecs[2]);
+
+			// This is the regular method.
+			// USAGI: assume the centre of overview is (0, 0).
+			// Reflected about line x = 0. (i.e., Y axis.)
+			std::swap(vecs[0], vecs[1]);
+			std::swap(vecs[2], vecs[3]);
+
+			// Inverted about (0, 0).
+			for (auto& v : vecs)
+			{
+				v.x = 1.0f - v.x;
+				v.y = 1.0f - v.y;
+			}
+		}
 
 		DrawUtils::Draw2DQuadCustomTex(Vector2D(BORDER_GAP, BORDER_GAP), Vector2D(BORDER_GAP + HUD_SIZE, BORDER_GAP + HUD_SIZE), vecs);
 	}

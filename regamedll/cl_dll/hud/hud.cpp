@@ -1284,8 +1284,8 @@ void OverviewMgr::OnHUDReset(void)
 
 	if (m_bRotated)
 		m_mxTransform *= Matrix3x3(
-			1,	0,	0,
-			0,	-1,	0,
+			-1,	0,	0,
+			0,	1,	0,
 			0,	0,	1
 		);
 	else
@@ -1384,7 +1384,17 @@ bool OverviewMgr::LoadOverviewInfo(const char* pszFilePath)
 					//szToken[Q_strlen(szToken) - 4U] = 0;
 					//Q_strcat(szToken, ".dds");
 					//m_iIdTexture = LoadDDS(szToken, &m_iWidth, &m_iHeight);
-					m_iIdTexture = LoadBMP(szToken, &m_iWidth, &m_iHeight);
+					const char* pTestLocation = &szToken[Q_strlen(szToken) - 4U];
+
+					// support only these 3 formats.
+					if (!Q_strnicmp(pTestLocation, ".bmp", 4U))
+						m_iIdTexture = LoadBMP(szToken, &m_iWidth, &m_iHeight);
+					else if (!Q_strnicmp(pTestLocation, ".dds", 4U))
+						m_iIdTexture = LoadDDS(szToken, &m_iWidth, &m_iHeight);
+					else if (!Q_strnicmp(pTestLocation, ".tga", 4U))
+						m_iIdTexture = LoadTGA(szToken, &m_iWidth, &m_iHeight);
+					else
+						goto error;
 				}
 				else if (!Q_stricmp(szToken, "height"))
 					pszParsePos = gEngfuncs.COM_ParseFile(pszParsePos, szToken);	// useless, but we have to do it.

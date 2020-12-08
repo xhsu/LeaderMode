@@ -77,6 +77,9 @@ int CHudScenarioStatus::Draw(float fTime)
 	if (gEngfuncs.IsSpectateOnly())
 		return 1;
 
+	if (gHUD::m_bPlayerDead)
+		return 1;
+
 	// Start from right next to radar.
 	int x = CHudRadar::BORDER_GAP * 2 + CHudRadar::HUD_SIZE;
 	int y = CHudRadar::BORDER_GAP;

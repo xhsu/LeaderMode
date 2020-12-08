@@ -81,7 +81,12 @@ bool LoadBMP(const char* szFilename, byte* buffer, int bufferSize, int* width, i
 				dst[0] = lpbmi->bmiColors[*src].rgbRed;
 				dst[1] = lpbmi->bmiColors[*src].rgbGreen;
 				dst[2] = lpbmi->bmiColors[*src].rgbBlue;
-				dst[3] = 255;
+
+				// LUNA: leadermode only!!!
+				if (dst[0] <= 10 && dst[2] <= 10)
+					dst[3] = 255 - lpbmi->bmiColors[*src].rgbGreen;
+				else
+					dst[3] = 255;
 			}
 		}
 

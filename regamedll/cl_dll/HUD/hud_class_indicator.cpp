@@ -89,6 +89,9 @@ static char szKeyText[64];
 
 BOOL CHudClassIndicator::Draw(float flTime)
 {
+	if (gHUD::m_bPlayerDead)
+		return TRUE;
+
 	DrawLeftPortion(flTime);	// At the left bottom conor.
 
 	// careful for the array bound!
