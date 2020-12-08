@@ -240,6 +240,7 @@ void gHUD::Init(void)
 	gEngfuncs.pfnAddCommand("eqpnext", CommandFunc_NextEquipment);
 	gEngfuncs.pfnAddCommand("eqpprev", CommandFunc_PrevEquipment);
 	gEngfuncs.pfnAddCommand("changemode", CommandFunc_AlterAct);
+	gEngfuncs.pfnAddCommand("updateoverview", &OverviewMgr::OnHUDReset);
 }
 
 void gHUD::Shutdown(void)

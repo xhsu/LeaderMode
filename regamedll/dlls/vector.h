@@ -278,6 +278,14 @@ public:
 			0, 0, 0
 		);
 	}
+	static decltype(auto) IJ(const Vector2D& i, const Vector2D& j)
+	{
+		return Matrix3x3(
+			i.x, j.x, 0,
+			i.y, j.y, 0,
+			0,   0,   1
+		);
+	}
 	static decltype(auto) Rotation2D(float flAngle)
 	{
 		auto rad = (flAngle * M_PI / 180.0);
@@ -295,6 +303,14 @@ public:
 		return Matrix3x3(
 			1, 0, v.x,
 			0, 1, v.y,
+			0, 0, 1
+		);
+	}
+	static decltype(auto) Translation2D(float x, float y)
+	{
+		return Matrix3x3(
+			1, 0, x,
+			0, 1, y,
 			0, 0, 1
 		);
 	}

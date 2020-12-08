@@ -124,42 +124,6 @@ cl_entity_t CL_DLLEXPORT* HUD_GetUserEntity(int index)
 	return HUD_GetUserEntity2(index);
 }
 
-void __test(void)
-{
-	char sz[1024];
-	Q_strlcpy(sz, gEngfuncs.Cmd_Argv(1));
-
-	std::wstring wcs = ANSIToUnicode(sz);
-
-	size_t iPosition = 0U, iLastPosition = 0U, iColorTextStarts = 0U, iColorTextEnds = 0U;
-	std::list<std::wstring> queue, colors;
-
-	while ((iPosition = wcs.find(L"$COLOR[", iLastPosition)) != std::wstring::npos)
-	{
-		iColorTextStarts = iPosition + _countof(L"$COLOR[") - 1U;
-		iColorTextEnds = wcs.find(L"]", iPosition);
-		colors.emplace_back(wcs.substr(iColorTextStarts, iColorTextEnds - iColorTextStarts));
-
-		// prevent empty first string.
-		if (iPosition != iLastPosition)
-		{
-			// the second parameter is length, not the second position.
-			queue.emplace_back(wcs.substr(iLastPosition, iPosition - iLastPosition));
-		}
-
-		// ignore "]" symble as well.
-		iLastPosition = wcs.find(L"]", iPosition) + 1U;
-	}
-
-	queue.emplace_back(wcs.substr(iLastPosition));
-
-	for (auto& elem : queue)
-	{
-		gEngfuncs.pfnConsolePrint("\n");
-		gEngfuncs.pfnConsolePrint(UnicodeToANSI(elem.c_str()));
-	}
-}
-
 void CL_DLLEXPORT HUD_Init(void)
 {
 	InitInput();
@@ -171,8 +135,6 @@ void CL_DLLEXPORT HUD_Init(void)
 	Msg_Init();
 	gHUD::Init();
 	Wpn_Init();
-
-	gEngfuncs.pfnAddCommand("wstringtest", &__test);
 }
 
 BOOL CL_DLLEXPORT HUD_Key_Event(int down, int keynum, const char* pszCurrentBinding)

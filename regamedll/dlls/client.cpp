@@ -2805,13 +2805,6 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 			{
 				CGrenade::C4_Detonate(pPlayer);
 			}
-			else if (FStrEq(pcmd, "sv_test001"))
-			{
-			MESSAGE_BEGIN(MSG_ALL, gmsgSayText);
-			WRITE_BYTE(0);
-			WRITE_STRING("#LeaderMod_Scheme_UNASSIGNED_Intro");
-			MESSAGE_END();
-			}
 			else
 			{
 				if (HandleRadioAliasCommands(pPlayer, pcmd))
