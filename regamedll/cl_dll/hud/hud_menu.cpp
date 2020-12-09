@@ -26,7 +26,7 @@ int CHudMenu::Init(void)
 
 void CHudMenu::InitHUDData(void)
 {
-	m_fMenuDisplayed = 0;
+	m_bMenuDisplayed = 0;
 	m_bitsValidSlots = 0;
 
 	Reset();
@@ -35,24 +35,22 @@ void CHudMenu::InitHUDData(void)
 void CHudMenu::Reset(void)
 {
 	g_szPrelocalisedMenuString[0] = 0;
-	m_fWaitingForMore = FALSE;
+	m_bWaitingForMore = FALSE;
 }
 
 int CHudMenu::Draw(float flTime)
 {
-	if (m_flShutoffTime > 0)
+	// hide menu if time is up.
+	if (m_flShutoffTime > 0 && m_flShutoffTime <= gHUD::m_flTime)
 	{
-		if (m_flShutoffTime <= gHUD::m_flTime)
-		{
-			m_fMenuDisplayed = 0;
-			m_bitsFlags &= ~HUD_ACTIVE;
-			return 1;
-		}
+		m_bMenuDisplayed = 0;
+		m_bitsFlags &= ~HUD_ACTIVE;
+		return 1;
 	}
 
-	// UNDONE
-	/*if (gViewPortInterface && gViewPortInterface->IsScoreBoardVisible())
-		return 1;*/
+	// hide menu when scoreboard is shown.
+	if (in_score.state & 3 || gHUD::m_bIntermission)
+		return 1;
 
 	int nlc = 0;
 
@@ -207,7 +205,7 @@ void CHudMenu::MsgFunc_ShowMenu(int iSize, void* pbuf)
 
 	if (m_bitsValidSlots)
 	{
-		if (!m_fWaitingForMore)
+		if (!m_bWaitingForMore)
 			Q_strncpy(g_szPrelocalisedMenuString, READ_STRING(), MAX_MENU_STRING);
 		else
 			Q_strncat(g_szPrelocalisedMenuString, READ_STRING(), MAX_MENU_STRING - Q_strlen(g_szPrelocalisedMenuString));
@@ -225,16 +223,16 @@ void CHudMenu::MsgFunc_ShowMenu(int iSize, void* pbuf)
 			}
 		}
 
-		m_fMenuDisplayed = 1;
+		m_bMenuDisplayed = 1;
 		m_bitsFlags |= HUD_ACTIVE;
 	}
 	else
 	{
-		m_fMenuDisplayed = 0;
+		m_bMenuDisplayed = 0;
 		m_bitsFlags &= ~HUD_ACTIVE;
 	}
 
-	m_fWaitingForMore = NeedMore;
+	m_bWaitingForMore = NeedMore;
 }
 
 bool CHudMenu::SelectMenuItem(int menu_item)
@@ -246,7 +244,7 @@ bool CHudMenu::SelectMenuItem(int menu_item)
 		Q_snprintf(szbuf, charsmax(szbuf), "menuselect %d\n", menu_item);
 		gEngfuncs.pfnClientCmd(szbuf);
 
-		m_fMenuDisplayed = 0;
+		m_bMenuDisplayed = 0;
 		m_bitsFlags &= ~HUD_ACTIVE;
 		return true;
 	}

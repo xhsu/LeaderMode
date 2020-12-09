@@ -14,22 +14,23 @@ RewardAccount CHalfLifeMultiplay::m_rgRewardAccountRules_default[] = {
 	REWARD_KILLED_LEADER,					// RR_KILLED_ENEMY_LEADER,
 };
 
+// keep the sequence of these texts aligned with enum TacticalSchemes.
 std::array<const char*, SCHEMES_COUNT> g_rgszTacticalSchemeNames =
 {
 	"#LeaderMod_Scheme_UNASSIGNED",
-	"#LeaderMod_Doctrine_GrandBattleplan",
-	"#LeaderMod_Doctrine_MassAssault",
-	"#LeaderMod_Doctrine_MobileWarfare",
 	"#LeaderMod_Doctrine_SuperiorFirepower",
+	"#LeaderMod_Doctrine_MassAssault",
+	"#LeaderMod_Doctrine_GrandBattleplan",
+	"#LeaderMod_Doctrine_MobileWarfare",
 };
 
 std::array<const char*, SCHEMES_COUNT> g_rgszTacticalSchemeDesc =
 {
 	"#LeaderMod_Scheme_UNASSIGNED_Intro",
-	"#LeaderMod_Doctrine_GrandBattleplan_Intro",
-	"#LeaderMod_Doctrine_MassAssault_Intro",
-	"#LeaderMod_Doctrine_MobileWarfare_Intro",
 	"#LeaderMod_Doctrine_SuperiorFirepower_Intro",
+	"#LeaderMod_Doctrine_MassAssault_Intro",
+	"#LeaderMod_Doctrine_GrandBattleplan_Intro",
+	"#LeaderMod_Doctrine_MobileWarfare_Intro",
 };
 
 bool IsBotSpeaking()

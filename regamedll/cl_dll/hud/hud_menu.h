@@ -23,8 +23,8 @@ public:
 	bool SelectMenuItem(int menu_item);
 
 public:
-	bool m_fMenuDisplayed;
+	bool m_bMenuDisplayed;
 	int m_bitsValidSlots;
 	float m_flShutoffTime;
-	bool m_fWaitingForMore;
+	bool m_bWaitingForMore;
 };

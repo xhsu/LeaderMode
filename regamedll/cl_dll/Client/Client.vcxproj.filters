@@ -37,6 +37,9 @@
     <Filter Include="metahook">
       <UniqueIdentifier>{52e595bc-41a3-4927-bff8-6b3cb1d1f064}</UniqueIdentifier>
     </Filter>
+    <Filter Include="public">
+      <UniqueIdentifier>{e81bbb95-a41d-41d1-ae58-1b92073918a1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\cdll_int.cpp">
@@ -157,9 +160,6 @@
       <Filter>cl_dll</Filter>
     </ClCompile>
     <ClCompile Include="..\..\common\parsemsg.cpp">
-      <Filter>common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\common\interface.cpp">
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\viewport_interface.cpp">
@@ -300,6 +300,9 @@
     <ClCompile Include="..\Graph\bmp.cpp">
       <Filter>cl_dll\Graph</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\public\interface.cpp">
+      <Filter>public</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\cdll_int.h">
@@ -434,9 +437,6 @@
     <ClInclude Include="..\..\common\parsemsg.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\common\interface.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="..\viewport_interface.h">
       <Filter>cl_dll</Filter>
     </ClInclude>
@@ -529,6 +529,9 @@
     </ClInclude>
     <ClInclude Include="..\Graph\bmp.h">
       <Filter>cl_dll\Graph</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\public\interface.h">
+      <Filter>public</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

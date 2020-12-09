@@ -185,6 +185,10 @@ int CHudScenarioStatus::Draw(float fTime)
 
 	// Scheme Indicator
 
+	// show no scheme indicator if there is a menu on screen.
+	if (gHUD::m_Menu.m_bMenuDisplayed)
+		return TRUE;
+
 	// completely move x and y to another location.
 	x = CHudRadar::BORDER_GAP;
 	y = CHudRadar::BORDER_GAP + CHudRadar::HUD_SIZE + 10;

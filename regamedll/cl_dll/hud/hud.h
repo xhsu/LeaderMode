@@ -365,6 +365,7 @@ namespace OverviewMgr
 	extern int m_iHeight;
 	extern int m_iWidth;
 	extern Matrix3x3 m_mxTransform;
+	extern model_t* m_pMapSprite;
 
 	// event calls.
 	void OnHUDReset(void);

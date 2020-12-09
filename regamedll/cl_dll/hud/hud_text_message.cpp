@@ -19,22 +19,16 @@ char* CHudTextMessage::LocaliseTextString(const char* msg, char* dst_buffer, int
 			static char word_buf[255];
 			char* wdst = word_buf, * word_start = src;
 
+			// filter spacebar, tab and stuff like that.
 			for (++src; (*src >= 'A' && *src <= 'z') || (*src >= '0' && *src <= '9'); wdst++, src++)
 				*wdst = *src;
 
 			*wdst = 0;
 
-			client_textmessage_t* clmsg = gEngfuncs.pfnTextMessageGet(word_buf);
+			// the function of returning #LOCALISE_TOKEN if no localised text found is included in UTIL_GetLocalisation().
+			const char* pLocalisedText = UnicodeToANSI(UTIL_GetLocalisation(word_buf));
 
-			if (!clmsg || !(clmsg->pMessage))
-			{
-				src = word_start;
-				*dst = *src;
-				dst++, src++;
-				continue;
-			}
-
-			for (char* wsrc = (char*)clmsg->pMessage; *wsrc != 0; wsrc++, dst++)
+			for (char* wsrc = (char*)pLocalisedText; *wsrc != 0; wsrc++, dst++)
 				*dst = *wsrc;
 
 			*dst = 0;

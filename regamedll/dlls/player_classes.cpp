@@ -9,19 +9,19 @@ Segmentation Date: Sep 20 2020
 
 const char* g_rgszRoleNames[ROLE_COUNT] =
 {
-	"Noobie",
+	"#LeaderMod_Role_UNASSIGNED",
 
-	"Commander",
-	"S.W.A.T.",
-	"Breacher",
-	"Sharpshooter",
-	"Medic",
+	"#LeaderMod_Role_Commander",
+	"#LeaderMod_Role_SWAT",
+	"#LeaderMod_Role_Breacher",
+	"#LeaderMod_Role_Sharpshooter",
+	"#LeaderMod_Role_Medic",
 
-	"Godfather",
-	"Lead Enforcer",
-	"Mad Scientist",
-	"Hitman",
-	"Arsonist"
+	"#LeaderMod_Role_Godfather",
+	"#LeaderMod_Role_LeadEnforcer",
+	"#LeaderMod_Role_MadScientist",
+	"#LeaderMod_Role_Assassin",
+	"#LeaderMod_Role_Arsonist"
 };
 
 const int g_rgRoleWeaponsAccessibility[ROLE_COUNT][LAST_WEAPON] =

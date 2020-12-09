@@ -157,7 +157,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\cl_dll\Graph\dxt.cpp" />
-    <ClCompile Include="..\..\common\interface.cpp" />
+    <ClCompile Include="..\..\public\interface.cpp" />
     <ClCompile Include="..\client.cpp" />
     <ClCompile Include="..\engine.cpp" />
     <ClCompile Include="..\fullbright_textures.cpp" />
@@ -170,7 +170,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\cl_dll\Graph\dxt.h" />
-    <ClInclude Include="..\..\common\interface.h" />
+    <ClInclude Include="..\..\public\interface.h" />
     <ClInclude Include="..\cdll_export.h" />
     <ClInclude Include="..\client.h" />
     <ClInclude Include="..\engine.h" />

@@ -415,7 +415,7 @@ void OpenMenu_DeclareRole(CBasePlayer* pPlayer)
 		return;
 	}
 
-	char szTitle[64];
+	char szTitle[128];
 	Q_sprintf(szTitle,	"\\rDeclare New Role\n"
 						"\\wYour current role: \\y%s\n\n", g_rgszRoleNames[pPlayer->m_iRoleType]);
 
@@ -432,7 +432,7 @@ void OpenMenu_DeclareRole(CBasePlayer* pPlayer)
 	g_iMenuItemCount = 1;
 
 	// Noobie is special.
-	Q_snprintf(szItem, sizeof(szItem) - 1, "\\r1. \\w%s\\d", g_rgszRoleNames[Role_UNASSIGNED]);
+	Q_snprintf(szItem, sizeof(szItem) - 1, "\\r1. \\w%s \\d", g_rgszRoleNames[Role_UNASSIGNED]);
 	Q_strlcat(szBuffer, szItem);
 
 	CBasePlayer* pOthers = nullptr;

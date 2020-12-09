@@ -91,7 +91,7 @@ Created Date: 05 Mar 2020
 #include "../game_shared/shared_string.h"
 
 // for ISurface
-#include "../common/interface.h"
+#include "../public/interface.h"
 
 // for local_state_s
 #include "../common/entity_state.h"

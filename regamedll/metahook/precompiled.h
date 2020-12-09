@@ -18,7 +18,7 @@ Modern Warfare Dev Team
 #include "../dlls/vector.h"
 
 // interface
-#include "../common/interface.h"
+#include "interface.h"
 
 // core of metahook (version 0.4)
 #include "metahook.h"

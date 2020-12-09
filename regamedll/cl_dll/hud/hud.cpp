@@ -888,7 +888,7 @@ void gHUD::SlotInput(int iSlot)
 	//if (gViewPortInterface && gViewPortInterface->SlotInput(iSlot))
 		//return;
 
-	if (m_Menu.m_fMenuDisplayed)
+	if (m_Menu.m_bMenuDisplayed)
 	{
 		m_Menu.SelectMenuItem(iSlot);	// never -1 over here.
 		return;
@@ -1242,6 +1242,7 @@ namespace OverviewMgr
 	int m_iHeight = 0;
 	int m_iWidth = 0;
 	Matrix3x3 m_mxTransform = Matrix3x3::Identity();
+	model_t* m_pMapSprite = nullptr;
 };
 
 void OverviewMgr::OnHUDReset(void)
@@ -1253,6 +1254,7 @@ void OverviewMgr::OnHUDReset(void)
 	m_iHeight = 0;
 	m_iWidth = 0;
 	m_mxTransform = Matrix3x3::Identity();
+	m_pMapSprite = nullptr;
 
 	char szPath[128], szMap[64];
 
@@ -1388,7 +1390,10 @@ bool OverviewMgr::LoadOverviewInfo(const char* pszFilePath)
 
 					// support only these 3 formats.
 					if (!Q_strnicmp(pTestLocation, ".bmp", 4U))
+					{
 						m_iIdTexture = LoadBMP(szToken, &m_iWidth, &m_iHeight);
+						m_pMapSprite = gEngfuncs.LoadMapSprite(szToken);	// exclusive to BMP formats.
+					}
 					else if (!Q_strnicmp(pTestLocation, ".dds", 4U))
 						m_iIdTexture = LoadDDS(szToken, &m_iWidth, &m_iHeight);
 					else if (!Q_strnicmp(pTestLocation, ".tga", 4U))
