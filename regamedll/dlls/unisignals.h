@@ -39,13 +39,18 @@ class CUnifiedSignals
 public:
 	CUnifiedSignals()
 	{
-		m_flSignal = 0;
-		m_flState = 0;
+		Reset();
 	}
+
 public:
 	void Update()
 	{
 		m_flState = m_flSignal;
+		m_flSignal = 0;
+	}
+	void Reset()
+	{
+		m_flState = 0;
 		m_flSignal = 0;
 	}
 	void Signal(int flags) { m_flSignal |= flags; }

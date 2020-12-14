@@ -323,7 +323,11 @@ public:
 // dummy
 enum TacticalSchemes;
 
-class CBasePlayer: public CBaseMonster {
+class CBasePlayer: public CBaseMonster
+{
+public:
+	virtual ~CBasePlayer();
+
 public:
 	virtual void Spawn();
 	virtual void Precache();

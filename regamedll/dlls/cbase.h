@@ -61,7 +61,11 @@ public:
 	{
 		free(ptr);
 	}
-	CBaseEntity() {}
+	CBaseEntity() noexcept {}
+	CBaseEntity(const CBaseEntity& s) = default;
+	CBaseEntity(CBaseEntity&& s) = default;
+	CBaseEntity& operator=(const CBaseEntity& s) = default;
+	CBaseEntity& operator=(CBaseEntity&& s) = default;
 	virtual ~CBaseEntity() {}
 
 public:

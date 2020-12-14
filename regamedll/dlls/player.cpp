@@ -82,6 +82,11 @@ entvars_t *g_pevLastInflictor;
 
 LINK_ENTITY_TO_CLASS(player, CBasePlayer)
 
+CBasePlayer::~CBasePlayer()
+{
+	m_hintMessageQueue.Reset();
+}
+
 void CBasePlayer::SendItemStatus()
 {
 	int itemStatus = 0;
@@ -5240,7 +5245,7 @@ void CBasePlayer::HandleSignals()
 	int state = m_signals.GetSignal();
 	int changed = m_signals.GetState() ^ state;
 
-	m_signals.Update();
+	m_signals.Reset();
 
 	if (changed & SIGNAL_BUY)
 	{

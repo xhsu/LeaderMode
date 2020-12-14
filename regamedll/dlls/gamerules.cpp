@@ -2237,6 +2237,9 @@ BOOL EXT_FUNC CHalfLifeMultiplay::FShouldSwitchWeapon(CBasePlayer *pPlayer, CBas
 	if (!pPlayer->m_iAutoWepSwitch)
 		return FALSE;
 
+	if (pPlayer->m_iAutoWepSwitch == 2 && (pPlayer->m_afButtonLast & (IN_ATTACK | IN_ATTACK2)))
+		return FALSE;
+
 	if (!pPlayer->m_pActiveItem->CanHolster())
 	{
 		// can't put away the active item.
@@ -2536,6 +2539,7 @@ void CHalfLifeMultiplay::ClientDisconnected(edict_t *pClient)
 					int iMode = pObserver->pev->iuser1;
 
 					pObserver->pev->iuser1 = OBS_NONE;
+					pObserver->m_flNextFollowTime = 0.0f;
 					pObserver->Observer_SetMode(iMode);
 				}
 			}
@@ -2705,9 +2709,14 @@ void EXT_FUNC CHalfLifeMultiplay::PlayerSpawn(CBasePlayer *pPlayer)
 	if (pPlayer->m_bJustConnected)
 		return;
 
+	int iAutoWepSwitch = pPlayer->m_iAutoWepSwitch;
+	pPlayer->m_iAutoWepSwitch = 1;
+
 	pPlayer->pev->weapons |= (1 << WEAPON_SUIT);
 	pPlayer->OnSpawnEquip();
 	pPlayer->SetPlayerModel();
+
+	pPlayer->m_iAutoWepSwitch = iAutoWepSwitch;
 
 	if (respawn_immunitytime.value > 0)
 		pPlayer->SetSpawnProtection(respawn_immunitytime.value);
@@ -3444,7 +3453,8 @@ int ReloadMapCycleFile(char *filename, mapcycle_t *cycle)
 			if (Q_strlen(pToken) <= 0)
 				break;
 
-			Q_strcpy(szMap, pToken);
+			Q_strncpy(szMap, pToken, sizeof(szMap) - 1);
+			szMap[sizeof(szMap) - 1] = '\0';
 
 			// Any more tokens on this line?
 			if (SharedTokenWaiting(pFileList))
