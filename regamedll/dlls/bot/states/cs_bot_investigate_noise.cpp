@@ -61,8 +61,8 @@ void InvestigateNoiseState::OnUpdate(CCSBot *me)
 	if (me->ShouldInvestigateNoise(&newNoiseDist))
 	{
 		Vector toOldNoise = m_checkNoisePosition - me->pev->origin;
-		const float muchCloserDist = 100.0f;
-		if (toOldNoise.IsLengthGreaterThan(newNoiseDist + muchCloserDist))
+		constexpr float muchCloserDist = 100.0f;
+		if (toOldNoise > (newNoiseDist + muchCloserDist))
 		{
 			// new sound is closer
 			AttendCurrentNoise(me);

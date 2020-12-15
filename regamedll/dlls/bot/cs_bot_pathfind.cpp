@@ -293,9 +293,8 @@ bool CCSBot::UpdateLadderMovement()
 	case ASCEND_LADDER:
 	case DESCEND_LADDER:
 	{
-		const float farAway = 200.0f;
-		Vector2D d = (m_pathLadder->m_top - pev->origin).Make2D();
-		if (d.IsLengthGreaterThan(farAway))
+		constexpr float farAway = 200.0f;
+		if ((m_pathLadder->m_top - pev->origin).Make2D() > farAway)
 		{
 			PrintIfWatched("Missed ladder\n");
 			Jump(MUST_JUMP);
@@ -328,8 +327,8 @@ bool CCSBot::UpdateLadderMovement()
 		}
 
 		// small radius will just slow them down a little for more accuracy in hitting their spot
-		const float walkRange = 50.0f;
-		if (d.IsLengthLessThan(walkRange))
+		constexpr float walkRange = 50.0f;
+		if (d < walkRange)
 		{
 			Walk();
 			StandUp();
@@ -386,8 +385,8 @@ bool CCSBot::UpdateLadderMovement()
 			// if approaching ladder from the side or "ahead", walk
 			if (m_pathLadder->m_topBehindArea != m_lastKnownArea)
 			{
-				const float walkRange = 150.0f;
-				if (!IsCrouching() && d.IsLengthLessThan(walkRange))
+				constexpr float walkRange = 150.0f;
+				if (!IsCrouching() && d < walkRange)
 					Walk();
 			}
 
@@ -828,8 +827,8 @@ int CCSBot::FindPathPoint(float aheadRange, Vector *point, int *prevIndex)
 
 		// if we are very close to the next point in the path, skip ahead to the next one to avoid wiggling
 		// we must do a 2D check here, in case the goal point is floating in space due to jump down, etc
-		const float closeEpsilon = 20.0f; // 10.0f
-		while ((*point - close).Make2D().IsLengthLessThan(closeEpsilon))
+		constexpr float closeEpsilon = 20.0f; // 10.0f
+		while ((*point - close).Make2D() < closeEpsilon)
 		{
 			index++;
 
@@ -851,8 +850,8 @@ int CCSBot::FindPathPoint(float aheadRange, Vector *point, int *prevIndex)
 		Vector pos = m_path[startIndex + 1].pos;
 
 		// we must do a 2D check here, in case the goal point is floating in space due to jump down, etc
-		const float closeEpsilon = 20.0f;
-		if ((pos - close).Make2D().IsLengthLessThan(closeEpsilon))
+		constexpr float closeEpsilon = 20.0f;
+		if ((pos - close).Make2D() < closeEpsilon)
 		{
 			startIndex++;
 		}
@@ -1000,18 +999,18 @@ int CCSBot::FindPathPoint(float aheadRange, Vector *point, int *prevIndex)
 	// if position found is too close to us, or behind us, force it farther down the path so we don't stop and wiggle
 	if (!isCorner)
 	{
-		const float epsilon = 50.0f;
+		constexpr float epsilon = 50.0f;
 		Vector2D toPoint;
 		toPoint.x = point->x - pev->origin.x;
 		toPoint.y = point->y - pev->origin.y;
-		if (DotProduct(toPoint, initDir.Make2D()) < 0.0f || toPoint.IsLengthLessThan(epsilon))
+		if (DotProduct(toPoint, initDir.Make2D()) < 0.0 || toPoint < epsilon)
 		{
 			int i;
 			for (i = startIndex; i < m_pathLength; i++)
 			{
 				toPoint.x = m_path[i].pos.x - pev->origin.x;
 				toPoint.y = m_path[i].pos.y - pev->origin.y;
-				if (m_path[i].ladder || (m_path[i].area->GetAttributes() & NAV_JUMP) || toPoint.IsLengthGreaterThan(epsilon))
+				if (m_path[i].ladder || (m_path[i].area->GetAttributes() & NAV_JUMP) || toPoint > epsilon)
 				{
 					*point = m_path[i].pos;
 					startIndex = i;
@@ -1134,8 +1133,8 @@ bool CCSBot::IsFriendInTheWay(const Vector *goalPos) const
 		Vector toFriend = pPlayer->pev->origin - pev->origin;
 
 		// check if friend is in our "personal space"
-		const float personalSpace = 100.0f;
-		if (toFriend.IsLengthGreaterThan(personalSpace))
+		constexpr float personalSpace = 100.0f;
+		if (toFriend > personalSpace)
 			continue;
 
 		// find distance of friend along our movement path
@@ -1153,8 +1152,8 @@ bool CCSBot::IsFriendInTheWay(const Vector *goalPos) const
 			pos = pev->origin + friendDistAlong * moveDir;
 
 		// check if friend overlaps our intended line of movement
-		const float friendRadius = 30.0f;
-		if ((pos - pPlayer->pev->origin).IsLengthLessThan(friendRadius))
+		constexpr float friendRadius = 30.0f;
+		if ((pos - pPlayer->pev->origin) < friendRadius)
 		{
 			// friend is in our personal space and overlaps our intended line of movement
 			m_isFriendInTheWay = true;
@@ -1299,22 +1298,22 @@ CCSBot::PathResult CCSBot::UpdatePathMovement(bool allowSpeedChange)
 		Vector toEnd(pev->origin.x, pev->origin.y, GetFeetZ());
 		Vector d = GetPathEndpoint() - toEnd; // can't use 2D because path end may be below us (jump down)
 
-		const float walkRange = 200.0f;
+		constexpr float walkRange = 200.0f;
 
 		// walk as we get close to the goal position to ensure we hit it
-		if (d.IsLengthLessThan(walkRange))
+		if (d < walkRange)
 		{
 			// don't walk if crouching - too slow
 			if (allowSpeedChange && !IsCrouching())
 				Walk();
 
 			// note if we are near the end of the path
-			const float nearEndRange = 50.0f;
-			if (d.IsLengthLessThan(nearEndRange))
+			constexpr float nearEndRange = 50.0f;
+			if (d < nearEndRange)
 				nearEndOfPath = true;
 
-			const float closeEpsilon = 20.0f;
-			if (d.IsLengthLessThan(closeEpsilon))
+			constexpr float closeEpsilon = 20.0f;
+			if (d < closeEpsilon)
 			{
 				// reached goal position - path complete
 				DestroyPath();
@@ -1331,7 +1330,7 @@ CCSBot::PathResult CCSBot::UpdatePathMovement(bool allowSpeedChange)
 	// To keep us moving smoothly, we will move towards
 	// a point farther ahead of us down our path.
 	int prevIndex = 0;				// closest index on path just prior to where we are now
-	const float aheadRange = 300.0f;
+	constexpr float aheadRange = 300.0f;
 	int newIndex = FindPathPoint(aheadRange, &m_goalPosition, &prevIndex);
 
 	// BOTPORT: Why is prevIndex sometimes -1?
@@ -1339,8 +1338,8 @@ CCSBot::PathResult CCSBot::UpdatePathMovement(bool allowSpeedChange)
 		prevIndex = 0;
 
 	// if goal position is near to us, we must be about to go around a corner - so look ahead!
-	const float nearCornerRange = 100.0f;
-	if (m_pathIndex < m_pathLength - 1 && (m_goalPosition - pev->origin).IsLengthLessThan(nearCornerRange))
+	constexpr float nearCornerRange = 100.0f;
+	if (m_pathIndex < m_pathLength - 1 && (m_goalPosition - pev->origin) < nearCornerRange)
 	{
 		ClearLookAt();
 		InhibitLookAround(0.5f);
@@ -1358,7 +1357,7 @@ CCSBot::PathResult CCSBot::UpdatePathMovement(bool allowSpeedChange)
 
 		// if we are approaching a crouch area, crouch
 		// if there are no crouch areas coming up, stand
-		const float crouchRange = 50.0f;
+		constexpr float crouchRange = 50.0f;
 		bool didCrouch = false;
 		for (int i = prevIndex; i < m_pathLength; i++)
 		{
@@ -1372,7 +1371,7 @@ CCSBot::PathResult CCSBot::UpdatePathMovement(bool allowSpeedChange)
 			Vector close;
 			to->GetClosestPointOnArea(&pev->origin, &close);
 
-			if ((close - pev->origin).Make2D().IsLengthGreaterThan(crouchRange))
+			if ((close - pev->origin).Make2D() > crouchRange)
 				break;
 
 			if (to->GetAttributes() & NAV_CROUCH)
@@ -1406,8 +1405,8 @@ CCSBot::PathResult CCSBot::UpdatePathMovement(bool allowSpeedChange)
 		toGoal = m_path[m_pathIndex].pos - pev->origin;
 
 		// actually aim our view farther down the path
-		const float lookAheadRange = 500.0f;
-		if (!m_path[m_pathIndex].ladder && !IsNearJump() && toGoal.Make2D().IsLengthLessThan(lookAheadRange))
+		constexpr float lookAheadRange = 500.0f;
+		if (!m_path[m_pathIndex].ladder && !IsNearJump() && toGoal.Make2D() < lookAheadRange)
 		{
 			float along = toGoal.Length2D();
 			int i;
@@ -1524,9 +1523,9 @@ CCSBot::PathResult CCSBot::UpdatePathMovement(bool allowSpeedChange)
 	bool didFall = false;
 	if (m_goalPosition.z - GetFeetZ() > JumpCrouchHeight)
 	{
-		const float closeRange = 75.0f;
+		constexpr float closeRange = 75.0f;
 		Vector2D to(pev->origin.x - m_goalPosition.x, pev->origin.y - m_goalPosition.y);
-		if (to.IsLengthLessThan(closeRange))
+		if (to < closeRange)
 		{
 			// we can't reach the goal position
 			// check if we can reach the next node, in case this was a "jump down" situation

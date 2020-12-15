@@ -912,7 +912,7 @@ inline void AddAreaToOpenList(CNavArea *area, CNavArea *parent, const Vector *st
 			// make sure this area overlaps range
 			Vector closePos;
 			area->GetClosestPointOnArea(startPos, &closePos);
-			if ((closePos - *startPos).Make2D().IsLengthLessThan(maxRange))
+			if ((closePos - *startPos).Make2D() < maxRange)
 			{
 				// compute approximate distance along path to limit travel range, too
 				float distAlong = parent->GetCostSoFar();

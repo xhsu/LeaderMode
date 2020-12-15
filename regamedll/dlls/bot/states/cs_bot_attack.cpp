@@ -70,13 +70,13 @@ void AttackState::OnEnter(CCSBot *me)
 		{
 			if (pEnemy)
 			{
-				const float crouchFarRange = 750.0f;
+				constexpr float crouchFarRange = 750.0f;
 				float crouchChance;
 
 				// more likely to crouch if using sniper rifle or if enemy is far away
 				if (me->IsUsingSniperRifle())
 					crouchChance = 50.0f;
-				else if ((me->pev->origin - pEnemy->pev->origin).IsLengthGreaterThan(crouchFarRange))
+				else if ((me->pev->origin - pEnemy->pev->origin) > crouchFarRange)
 					crouchChance = 50.0f;
 				else
 					crouchChance = 20.0f * (1.0f - me->GetProfile()->GetAggression());
@@ -235,8 +235,8 @@ void AttackState::OnUpdate(CCSBot *me)
 		bool repath = false;
 		if (me->HasPath())
 		{
-			const float repathRange = 100.0f;
-			if ((me->GetPathEndpoint() - pEnemy->pev->origin).IsLengthGreaterThan(repathRange))
+			constexpr float repathRange = 100.0f;
+			if ((me->GetPathEndpoint() - pEnemy->pev->origin) > repathRange)
 			{
 				repath = true;
 			}
@@ -302,15 +302,15 @@ void AttackState::OnUpdate(CCSBot *me)
 	{
 		// if we have a sniper rifle and our enemy is too close, switch to pistol
 		// NOTE: Must be larger than NO_ZOOM range in AdjustZoom()
-		const float sniperMinRange = 310.0f;
-		if ((pEnemy->pev->origin - me->pev->origin).IsLengthLessThan(sniperMinRange))
+		constexpr float sniperMinRange = 310.0f;
+		if ((pEnemy->pev->origin - me->pev->origin) < sniperMinRange)
 			me->EquipPistol();
 	}
 	else if (me->IsUsingShotgun())
 	{
 		// if we have a shotgun equipped and enemy is too far away, switch to pistol
-		const float shotgunMaxRange = 1000.0f;
-		if ((pEnemy->pev->origin - me->pev->origin).IsLengthGreaterThan(shotgunMaxRange))
+		constexpr float shotgunMaxRange = 1000.0f;
+		if ((pEnemy->pev->origin - me->pev->origin) > shotgunMaxRange)
 			me->EquipPistol();
 	}
 

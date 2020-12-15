@@ -33,52 +33,55 @@ class Vector2D
 {
 public:
 	// Construction/destruction
+	constexpr Vector2D(Vector2D&& s) = default;
+	Vector2D& operator=(const Vector2D& s) = default;
+	Vector2D& operator=(Vector2D&& s) = default;
 	constexpr Vector2D() : x(0), y(0) {}
 	constexpr Vector2D(float X, float Y) : x(X), y(Y) {}
 	Vector2D(const Vector2D &v) { *(int *)&x = *(int *)&v.x; *(int *)&y = *(int *)&v.y; }
 	explicit Vector2D(const float rgfl[2]) { *(int*)&x = *(int*)&rgfl[0]; *(int*)&y = *(int*)&rgfl[1]; }
 
 	// Operators
-	decltype(auto) operator-()         const { return Vector2D(-x, -y); }
-	bool operator==(const Vector2D &v) const { return x == v.x && y == v.y; }
-	bool operator!=(const Vector2D &v) const { return !(*this == v); }
+	constexpr decltype(auto) operator-()         const { return Vector2D(-x, -y); }
+	constexpr bool operator==(const Vector2D &v) const { return x == v.x && y == v.y; }
+	constexpr bool operator!=(const Vector2D &v) const { return !(*this == v); }
 
-	decltype(auto) operator+(const Vector2D &v)  const { return Vector2D(x + v.x, y + v.y); }
-	decltype(auto) operator-(const Vector2D &v)  const { return Vector2D(x - v.x, y - v.y); }
-	decltype(auto) operator*(const Vector2D &v)  const { return Vector2D(x * v.x, y * v.y); }
-	decltype(auto) operator/(const Vector2D &v)  const { return Vector2D(x / v.x, y / v.y); }
+	constexpr decltype(auto) operator+(const Vector2D &v)  const { return Vector2D(x + v.x, y + v.y); }
+	constexpr decltype(auto) operator-(const Vector2D &v)  const { return Vector2D(x - v.x, y - v.y); }
+	constexpr decltype(auto) operator*(const Vector2D &v)  const { return Vector2D(x * v.x, y * v.y); }
+	constexpr decltype(auto) operator/(const Vector2D &v)  const { return Vector2D(x / v.x, y / v.y); }
 
-	decltype(auto) operator+=(const Vector2D &v) { return (*this = *this + v); }
-	decltype(auto) operator-=(const Vector2D &v) { return (*this = *this - v); }
-	decltype(auto) operator*=(const Vector2D &v) { return (*this = *this * v); }
-	decltype(auto) operator/=(const Vector2D &v) { return (*this = *this / v); }
+	constexpr decltype(auto) operator+=(const Vector2D &v) { return (*this = *this + v); }
+	constexpr decltype(auto) operator-=(const Vector2D &v) { return (*this = *this - v); }
+	constexpr decltype(auto) operator*=(const Vector2D &v) { return (*this = *this * v); }
+	constexpr decltype(auto) operator/=(const Vector2D &v) { return (*this = *this / v); }
 
-	decltype(auto) operator+(float fl) const { return Vector2D(x + fl, y + fl); }
-	decltype(auto) operator-(float fl) const { return Vector2D(x - fl, y - fl); }
+	constexpr decltype(auto) operator+(float fl) const { return Vector2D(x + fl, y + fl); }
+	constexpr decltype(auto) operator-(float fl) const { return Vector2D(x - fl, y - fl); }
 
 	// TODO: FIX ME!!
 #ifdef PLAY_GAMEDLL
-	decltype(auto) operator*(float fl) const { return Vector2D(vec_t(x * fl), vec_t(y * fl)); }
-	decltype(auto) operator/(float fl) const { return Vector2D(vec_t(x / fl), vec_t(y / fl)); }
+	constexpr decltype(auto) operator*(float fl) const { return Vector2D(vec_t(x * fl), vec_t(y * fl)); }
+	constexpr decltype(auto) operator/(float fl) const { return Vector2D(vec_t(x / fl), vec_t(y / fl)); }
 #else
-	decltype(auto) operator*(float fl) const { return Vector2D(x * fl, y * fl); }
-	decltype(auto) operator/(float fl) const { return Vector2D(x / fl, y / fl); }
+	constexpr decltype(auto) operator*(float fl) const { return Vector2D(x * fl, y * fl); }
+	constexpr decltype(auto) operator/(float fl) const { return Vector2D(x / fl, y / fl); }
 #endif
 
-	decltype(auto) operator=(std::nullptr_t) { return Vector2D(0, 0); }
-	decltype(auto) operator+=(float fl) { return (*this = *this + fl); }
-	decltype(auto) operator-=(float fl) { return (*this = *this - fl); }
-	decltype(auto) operator*=(float fl) { return (*this = *this * fl); }
-	decltype(auto) operator/=(float fl) { return (*this = *this / fl); }
+	constexpr decltype(auto) operator=(std::nullptr_t) { return Vector2D(0, 0); }
+	constexpr decltype(auto) operator+=(float fl) { return (*this = *this + fl); }
+	constexpr decltype(auto) operator-=(float fl) { return (*this = *this - fl); }
+	constexpr decltype(auto) operator*=(float fl) { return (*this = *this * fl); }
+	constexpr decltype(auto) operator/=(float fl) { return (*this = *this / fl); }
 
 	// Methods
 	inline void Clear() { x = 0; y = 0; }
 	inline void CopyToArray(float *rgfl) const { *(int *)&rgfl[0] = *(int *)&x; *(int *)&rgfl[1] = *(int *)&y; }
 	inline real_t Length() const { return Q_sqrt(real_t(x * x + y * y)); }		// Get the vector's magnitude
-	inline float LengthSquared() const { return (x * x + y * y); }				// Get the vector's magnitude squared
+	inline constexpr real_t LengthSquared() const { return real_t(x * x + y * y); }				// Get the vector's magnitude squared
 
-	operator float*()             { return &x; } // Vectors will now automatically convert to float * when needed
-	operator const float*() const { return &x; } // Vectors will now automatically convert to float * when needed
+	constexpr operator float*()             { return &x; } // Vectors will now automatically convert to float * when needed
+	constexpr operator const float*() const { return &x; } // Vectors will now automatically convert to float * when needed
 
 	Vector2D Normalize() const
 	{
@@ -86,16 +89,21 @@ public:
 		if (!flLen)
 			return Vector2D(0, 0);
 
-		flLen = 1 / flLen;
+		flLen = 1.0 / flLen;
 
-#ifdef PLAY_GAMEDLL
 		return Vector2D(vec_t(x * flLen), vec_t(y * flLen));
-#else
-		return Vector2D(x * flLen, y * flLen);
-#endif // PLAY_GAMEDLL
 	}
-	inline bool IsLengthLessThan   (float length) const { return (LengthSquared() < length * length); }
-	inline bool IsLengthGreaterThan(float length) const { return (LengthSquared() > length * length); }
+
+	// LUNA: comparison with Vector3 was moved to the end of this file.
+	constexpr bool operator< (vec_t fl) const { return !!(LengthSquared() < real_t(fl * fl)); }
+	constexpr bool operator<= (vec_t fl) const { return !!(LengthSquared() <= real_t(fl * fl)); }
+	constexpr bool operator< (const Vector2D& v) const { return !!(LengthSquared() < v.LengthSquared()); }
+	constexpr bool operator<= (const Vector2D& v) const { return !!(LengthSquared() <= v.LengthSquared()); }
+	constexpr bool operator> (vec_t fl) const { return !!(LengthSquared() > real_t(fl * fl)); }
+	constexpr bool operator>= (vec_t fl) const { return !!(LengthSquared() >= real_t(fl * fl)); }
+	constexpr bool operator> (const Vector2D& v) const { return !!(LengthSquared() > v.LengthSquared()); }
+	constexpr bool operator>= (const Vector2D& v) const { return !!(LengthSquared() >= v.LengthSquared()); }
+
 	real_t NormalizeInPlace()
 	{
 		real_t flLen = Length();
@@ -111,7 +119,7 @@ public:
 		}
 		return flLen;
 	}
-	bool IsZero(float tolerance = 0.01f) const
+	constexpr bool IsZero(vec_t tolerance = 0.01f) const
 	{
 		return (x > -tolerance && x < tolerance &&
 			y > -tolerance && y < tolerance);
@@ -120,18 +128,16 @@ public:
 	// anti-clockwise.
 	Vector2D Rotate(float angle) const
 	{
-		float a, c, s;
-
-		a = (angle * M_PI / 180.0);
-		c = Q_cos(a);
-		s = Q_sin(a);
+		auto a = (angle * M_PI / 180.0);
+		auto c = Q_cos(a);
+		auto s = Q_sin(a);
 
 		return Vector2D(c * x - s * y,
 						s * x + c * y
 		);
 	}
 
-	Vector2D Transform(const vec_t** matrix) const
+	constexpr Vector2D Transform(const vec_t** matrix) const
 	{
 		/*
 		| a  b | | x |   | ax + by |
@@ -149,24 +155,24 @@ public:
 	vec_t x, y;
 };
 
-inline real_t DotProduct(const Vector2D &a, const Vector2D &b)
+inline constexpr real_t DotProduct(const Vector2D &a, const Vector2D &b)
 {
 	return (a.x * b.x + a.y * b.y);
 }
 
-inline Vector2D operator*(float fl, const Vector2D &v)
+inline constexpr Vector2D operator*(float fl, const Vector2D &v)
 {
 	return v * fl;
 }
 
-inline float operator^(const Vector2D& a, const Vector2D& b)
+inline real_t operator^(const Vector2D& a, const Vector2D& b)
 {
-	float length_ab = a.Length() * b.Length();
+	real_t length_ab = a.Length() * b.Length();
 
 	if (length_ab == 0.0)
 		return 0.0;
 
-	return (double)(Q_acos(DotProduct(a, b) / length_ab) * (180.0 / M_PI));
+	return (real_t)(Q_acos(DotProduct(a, b) / length_ab) * (180.0 / M_PI));
 }
 
 // 2x2 Matrix
@@ -174,6 +180,9 @@ class Matrix2x2
 {
 public:
 	// Construction/destruction
+	constexpr Matrix2x2(Matrix2x2&& s) = default;
+	Matrix2x2& operator=(const Matrix2x2& s) = default;
+	Matrix2x2& operator=(Matrix2x2&& s) = default;
 	constexpr Matrix2x2() : a(1), b(0), c(0), d(1) {}
 	constexpr Matrix2x2(float A, float B, float C, float D) : a(A), b(B), c(C), d(D) {}
 	constexpr Matrix2x2(const Vector2D& i_hat, const Vector2D& j_hat) : a(i_hat.x), b(j_hat.x), c(i_hat.y), d(j_hat.y) {}
@@ -191,43 +200,43 @@ public:
 	}
 
 	// Operators
-	decltype(auto) operator~()			const { return Matrix2x2(d, -b, -c, a); }	// Inverse matrix
-	bool operator==(const Matrix2x2& m) const { return a == m.a && b == m.b && c == m.c && d == m.d; }
-	bool operator!=(const Matrix2x2& m) const { return !(*this == m); }
+	constexpr decltype(auto) operator~()			const { return Matrix2x2(d, -b, -c, a); }	// Inverse matrix
+	constexpr bool operator==(const Matrix2x2& m)	const { return a == m.a && b == m.b && c == m.c && d == m.d; }
+	constexpr bool operator!=(const Matrix2x2& m)	const { return !(*this == m); }
 
-	decltype(auto) operator+(const Matrix2x2& m) const { return Matrix2x2(a + m.a, b + m.b, c + m.c, d + m.d); }
-	decltype(auto) operator-(const Matrix2x2& m) const { return Matrix2x2(a - m.a, b - m.b, c - m.c, d - m.d); }
-	decltype(auto) operator*(const Matrix2x2& m) const { return Matrix2x2(a * m.a + b * m.c, a * m.b + b * m.d, c * m.a + d * m.c, c * m.b + d * m.d); }
+	constexpr decltype(auto) operator+(const Matrix2x2& m) const { return Matrix2x2(a + m.a, b + m.b, c + m.c, d + m.d); }
+	constexpr decltype(auto) operator-(const Matrix2x2& m) const { return Matrix2x2(a - m.a, b - m.b, c - m.c, d - m.d); }
+	constexpr decltype(auto) operator*(const Matrix2x2& m) const { return Matrix2x2(a * m.a + b * m.c, a * m.b + b * m.d, c * m.a + d * m.c, c * m.b + d * m.d); }
 
-	decltype(auto) operator+=(const Matrix2x2& m) { return (*this = *this + m); }
-	decltype(auto) operator-=(const Matrix2x2& m) { return (*this = *this - m); }
-	decltype(auto) operator*=(const Matrix2x2& m) { return (*this = *this * m); }
+	constexpr decltype(auto) operator+=(const Matrix2x2& m) { return (*this = *this + m); }
+	constexpr decltype(auto) operator-=(const Matrix2x2& m) { return (*this = *this - m); }
+	constexpr decltype(auto) operator*=(const Matrix2x2& m) { return (*this = *this * m); }
 
-	decltype(auto) operator=(std::nullptr_t) { return Matrix2x2(0, 0, 0, 0); }
-	decltype(auto) operator*(float fl) const { return Matrix2x2(a * fl, b * fl, c * fl, d * fl); }
-	decltype(auto) operator/(float fl) const { return Matrix2x2(a / fl, b / fl, c / fl, d / fl); }
+	constexpr decltype(auto) operator=(std::nullptr_t) { return Matrix2x2(0, 0, 0, 0); }
+	constexpr decltype(auto) operator*(float fl) const { return Matrix2x2(a * fl, b * fl, c * fl, d * fl); }
+	constexpr decltype(auto) operator/(float fl) const { return Matrix2x2(a / fl, b / fl, c / fl, d / fl); }
 
-	decltype(auto) operator*=(float fl) { return (*this = *this * fl); }
-	decltype(auto) operator/=(float fl) { return (*this = *this / fl); }
+	constexpr decltype(auto) operator*=(float fl) { return (*this = *this * fl); }
+	constexpr decltype(auto) operator/=(float fl) { return (*this = *this / fl); }
 
-	operator float* () { return &a; }
-	operator const float* () const { return &a; }
+	constexpr operator float* () { return &a; }
+	constexpr operator const float* () const { return &a; }
 
 	// Methods
 	void Clear() { a = 0; b = 0; c = 0; d = 0; }
-	static decltype(auto) Identity()	{ return Matrix2x2(1, 0, 0, 1); }
-	static decltype(auto) Zero()		{ return Matrix2x2(0, 0, 0, 0); }
+	static constexpr decltype(auto) Identity()	{ return Matrix2x2(1, 0, 0, 1); }
+	static constexpr decltype(auto) Zero()		{ return Matrix2x2(0, 0, 0, 0); }
 
 	// Members
-	vec_t a, b, c, d;
+	vec_t a{ 1 }, b{ 0 }, c{ 0 }, d{ 1 };	// Started with identity matrix.
 };
 
-inline Matrix2x2 operator*(float fl, const Matrix2x2& m)
+inline constexpr Matrix2x2 operator*(float fl, const Matrix2x2& m)
 {
 	return m * fl;
 }
 
-inline Vector2D operator*(const Matrix2x2& m, const Vector2D& v)
+inline constexpr Vector2D operator*(const Matrix2x2& m, const Vector2D& v)
 {
 	/*
 	| a  b | | x |   | ax + by |
@@ -251,10 +260,10 @@ public:
 	constexpr Matrix3x3(Matrix3x3&& s) = default;
 	Matrix3x3& operator=(const Matrix3x3& s) = default;
 	Matrix3x3& operator=(Matrix3x3&& s) = default;
-	~Matrix3x3() {}
+	//~Matrix3x3() {}
 
 	Matrix3x3(const float rgfl[3][3]) { memcpy(&dat, &rgfl, sizeof(dat)); }
-	Matrix3x3(float a, float b, float c, float d, float e, float f, float g, float h, float i)
+	constexpr Matrix3x3(float a, float b, float c, float d, float e, float f, float g, float h, float i)
 	{
 		dat[0][0] = a; dat[0][1] = b; dat[0][2] = c;
 		dat[1][0] = d; dat[1][1] = e; dat[1][2] = f;
@@ -262,7 +271,7 @@ public:
 	}
 
 	// Static Methods
-	static decltype(auto) Identity()
+	static constexpr decltype(auto) Identity()
 	{
 		return Matrix3x3(
 			1, 0, 0,
@@ -270,7 +279,7 @@ public:
 			0, 0, 1
 		);
 	}
-	static decltype(auto) Zero()
+	static constexpr decltype(auto) Zero()
 	{
 		return Matrix3x3(
 			0, 0, 0,
@@ -278,7 +287,7 @@ public:
 			0, 0, 0
 		);
 	}
-	static decltype(auto) IJ(const Vector2D& i, const Vector2D& j)
+	static constexpr decltype(auto) IJ(const Vector2D& i, const Vector2D& j)
 	{
 		return Matrix3x3(
 			i.x, j.x, 0,
@@ -298,7 +307,7 @@ public:
 			0,		0,		1
 		);
 	}
-	static decltype(auto) Translation2D(const Vector2D& v)
+	static constexpr decltype(auto) Translation2D(const Vector2D& v)
 	{
 		return Matrix3x3(
 			1, 0, v.x,
@@ -306,7 +315,7 @@ public:
 			0, 0, 1
 		);
 	}
-	static decltype(auto) Translation2D(float x, float y)
+	static constexpr decltype(auto) Translation2D(float x, float y)
 	{
 		return Matrix3x3(
 			1, 0, x,
@@ -314,7 +323,7 @@ public:
 			0, 0, 1
 		);
 	}
-	static decltype(auto) Stretch2D(float x, float y)
+	static constexpr decltype(auto) Stretch2D(float x, float y)
 	{
 		return Matrix3x3(
 			x, 0, 0,
@@ -322,7 +331,7 @@ public:
 			0, 0, 1
 		);
 	}
-	static decltype(auto) Stretch2D(float k)
+	static constexpr decltype(auto) Stretch2D(float k)
 	{
 		return Matrix3x3(
 			k, 0, 0,
@@ -330,7 +339,7 @@ public:
 			0, 0, 1
 		);
 	}
-	static decltype(auto) Squeeze2D(float x, float y)
+	static constexpr decltype(auto) Squeeze2D(float x, float y)
 	{
 		return Matrix3x3(
 			1.0f / x,	0,			0,
@@ -338,7 +347,7 @@ public:
 			0,			0,			1
 		);
 	}
-	static decltype(auto) Squeeze2D(float k)
+	static constexpr decltype(auto) Squeeze2D(float k)
 	{
 		return Matrix3x3(
 			1.0f / k,	0,			0,
@@ -348,7 +357,7 @@ public:
 	}
 
 	// Operators
-	decltype(auto) operator~()			const	// Inverse matrix
+	constexpr decltype(auto) operator~() const	// Inverse matrix
 	{
 		vec_t invdet = 1.0f / Det();
 
@@ -365,10 +374,11 @@ public:
 
 		return mxInv;
 	}
+
 	bool operator==(const Matrix3x3& m) const { return !memcmp(&dat, &m.dat, sizeof(dat)); }
 	bool operator!=(const Matrix3x3& m) const { return !(*this == m); }
 
-	decltype(auto) operator+(const Matrix3x3& m) const
+	constexpr decltype(auto) operator+(const Matrix3x3& m) const
 	{
 		Matrix3x3 mx;
 
@@ -381,7 +391,7 @@ public:
 
 		return mx;
 	}
-	decltype(auto) operator-(const Matrix3x3& m) const
+	constexpr decltype(auto) operator-(const Matrix3x3& m) const
 	{
 		Matrix3x3 mx;
 
@@ -394,7 +404,7 @@ public:
 
 		return mx;
 	}
-	decltype(auto) operator*(const Matrix3x3& m) const
+	constexpr decltype(auto) operator*(const Matrix3x3& m) const
 	{
 		Matrix3x3 mx;
 
@@ -411,12 +421,12 @@ public:
 		return mx;
 	}
 
-	decltype(auto) operator+=(const Matrix3x3& m) { return (*this = *this + m); }
-	decltype(auto) operator-=(const Matrix3x3& m) { return (*this = *this - m); }
-	decltype(auto) operator*=(const Matrix3x3& m) { return (*this = *this * m); }
+	constexpr decltype(auto) operator+=(const Matrix3x3& m) { return (*this = *this + m); }
+	constexpr decltype(auto) operator-=(const Matrix3x3& m) { return (*this = *this - m); }
+	constexpr decltype(auto) operator*=(const Matrix3x3& m) { return (*this = *this * m); }
 
-	decltype(auto) operator=(std::nullptr_t) { return Zero(); }
-	decltype(auto) operator*(float fl) const
+	constexpr decltype(auto) operator=(std::nullptr_t) { return Zero(); }
+	constexpr decltype(auto) operator*(float fl) const
 	{
 		Matrix3x3 mx;
 
@@ -429,7 +439,7 @@ public:
 
 		return mx;
 	}
-	decltype(auto) operator/(float fl) const
+	constexpr decltype(auto) operator/(float fl) const
 	{
 		Matrix3x3 mx;
 
@@ -443,14 +453,14 @@ public:
 		return mx;
 	}
 
-	decltype(auto) operator*=(float fl) { return (*this = *this * fl); }
-	decltype(auto) operator/=(float fl) { return (*this = *this / fl); }
+	constexpr decltype(auto) operator*=(float fl) { return (*this = *this * fl); }
+	constexpr decltype(auto) operator/=(float fl) { return (*this = *this / fl); }
 
-	operator float* () { return &dat[0][0]; }
-	operator const float* () const { return &dat[0][0]; }
+	constexpr operator float* () { return &dat[0][0]; }
+	constexpr operator const float* () const { return &dat[0][0]; }
 
 	// Methods
-	vec_t Det(void) const
+	constexpr vec_t Det(void) const
 	{
 		return	dat[0][0] * (dat[1][1] * dat[2][2] - dat[2][1] * dat[1][2]) -
 				dat[0][1] * (dat[1][0] * dat[2][2] - dat[1][2] * dat[2][0]) +
@@ -466,12 +476,12 @@ public:
 	};
 };
 
-inline Matrix3x3 operator*(float fl, const Matrix3x3& m)
+inline constexpr Matrix3x3 operator*(float fl, const Matrix3x3& m)
 {
 	return m * fl;
 }
 
-inline Vector2D operator*(const Matrix3x3& m, const Vector2D& v)
+inline constexpr Vector2D operator*(const Matrix3x3& m, const Vector2D& v)
 {
 	/*
 	| a  b  u | | x |   | ax + by + u |
@@ -493,6 +503,9 @@ class Vector
 {
 public:
 	// Construction/destruction
+	constexpr Vector(Vector&& s) = default;
+	Vector& operator=(const Vector& s) = default;
+	Vector& operator=(Vector&& s) = default;
 	constexpr Vector() : x(0), y(0), z(0) {}
 	constexpr Vector(vec_t X, vec_t Y, vec_t Z) : x(X), y(Y), z(Z) {}
 	constexpr Vector(const Vector2D& v2d, vec_t Z) : x(v2d.x), y(v2d.y), z(Z) {}
@@ -500,37 +513,31 @@ public:
 	Vector(const vec_t rgfl[3]) { *(int *)&x = *(int *)&rgfl[0]; *(int *)&y = *(int *)&rgfl[1]; *(int *)&z = *(int *)&rgfl[2]; }
 
 	// Operators
-	decltype(auto) operator-()       const { return Vector(-x, -y, -z); }
-	bool operator==(const Vector &v) const { return x == v.x && y == v.y && z == v.z; }
-	bool operator!=(const Vector &v) const { return !(*this == v); }
+	constexpr decltype(auto) operator-()       const { return Vector(-x, -y, -z); }
+	constexpr bool operator==(const Vector &v) const { return x == v.x && y == v.y && z == v.z; }
+	constexpr bool operator!=(const Vector &v) const { return !(*this == v); }
 
-	decltype(auto) operator+(const Vector &v) const { return Vector(x + v.x, y + v.y, z + v.z); }
-	decltype(auto) operator-(const Vector &v) const { return Vector(x - v.x, y - v.y, z - v.z); }
-	decltype(auto) operator*(const Vector &v) const { return Vector(x * v.x, y * v.y, z * v.z); }
-	decltype(auto) operator/(const Vector &v) const { return Vector(x / v.x, y / v.y, z / v.z); }
+	constexpr decltype(auto) operator+(const Vector &v) const { return Vector(x + v.x, y + v.y, z + v.z); }
+	constexpr decltype(auto) operator-(const Vector &v) const { return Vector(x - v.x, y - v.y, z - v.z); }
+	constexpr decltype(auto) operator*(const Vector &v) const { return Vector(x * v.x, y * v.y, z * v.z); }
+	constexpr decltype(auto) operator/(const Vector &v) const { return Vector(x / v.x, y / v.y, z / v.z); }
 
-	decltype(auto) operator+=(const Vector &v) { return (*this = *this + v); }
-	decltype(auto) operator-=(const Vector &v) { return (*this = *this - v); }
-	decltype(auto) operator*=(const Vector &v) { return (*this = *this * v); }
-	decltype(auto) operator/=(const Vector &v) { return (*this = *this / v); }
+	constexpr decltype(auto) operator+=(const Vector &v) { return (*this = *this + v); }
+	constexpr decltype(auto) operator-=(const Vector &v) { return (*this = *this - v); }
+	constexpr decltype(auto) operator*=(const Vector &v) { return (*this = *this * v); }
+	constexpr decltype(auto) operator/=(const Vector &v) { return (*this = *this / v); }
 
-	decltype(auto) operator+(float fl) const { return Vector(x + fl, y + fl, z + fl); }
-	decltype(auto) operator-(float fl) const { return Vector(x - fl, y - fl, z - fl); }
+	constexpr decltype(auto) operator+(float fl) const { return Vector(x + fl, y + fl, z + fl); }
+	constexpr decltype(auto) operator-(float fl) const { return Vector(x - fl, y - fl, z - fl); }
 
-	// TODO: FIX ME!!
-#ifdef PLAY_GAMEDLL
-	decltype(auto) operator*(float fl) const { return Vector(vec_t(x * fl), vec_t(y * fl), vec_t(z * fl)); }
-	decltype(auto) operator/(float fl) const { return Vector(vec_t(x / fl), vec_t(y / fl), vec_t(z / fl)); }
-#else
-	decltype(auto) operator*(float fl) const { return Vector(x * fl, y * fl, z * fl); }
-	decltype(auto) operator/(float fl) const { return Vector(x / fl, y / fl, z / fl); }
-#endif
+	constexpr decltype(auto) operator*(float fl) const { return Vector(vec_t(x * fl), vec_t(y * fl), vec_t(z * fl)); }
+	constexpr decltype(auto) operator/(float fl) const { return Vector(vec_t(x / fl), vec_t(y / fl), vec_t(z / fl)); }
 
-	decltype(auto) operator=(std::nullptr_t) { return Vector(0, 0, 0); }
-	decltype(auto) operator+=(float fl) { return (*this = *this + fl); }
-	decltype(auto) operator-=(float fl) { return (*this = *this - fl); }
-	decltype(auto) operator*=(float fl) { return (*this = *this * fl); }
-	decltype(auto) operator/=(float fl) { return (*this = *this / fl); }
+	constexpr decltype(auto) operator=(std::nullptr_t) { return Vector(0, 0, 0); }
+	constexpr decltype(auto) operator+=(float fl) { return (*this = *this + fl); }
+	constexpr decltype(auto) operator-=(float fl) { return (*this = *this - fl); }
+	constexpr decltype(auto) operator*=(float fl) { return (*this = *this * fl); }
+	constexpr decltype(auto) operator/=(float fl) { return (*this = *this / fl); }
 
 	// Methods
 	void Clear()
@@ -558,47 +565,23 @@ public:
 	}
 
 	// Get the vector's magnitude squared
-	real_t LengthSquared() const { return (x * x + y * y + z * z); }
+	constexpr real_t LengthSquared() const { return real_t(x * x + y * y + z * z); }
 
-	operator float*()             { return &x; } // Vectors will now automatically convert to float * when needed
-	operator const float*() const { return &x; } // Vectors will now automatically convert to float * when needed
+	constexpr operator float*()             { return &x; } // Vectors will now automatically convert to float * when needed
+	constexpr operator const float*() const { return &x; } // Vectors will now automatically convert to float * when needed
 
-#ifndef PLAY_GAMEDLL
+	// for out precision normalize
 	Vector Normalize() const
 	{
-		float flLen = Length();
-		if (flLen == 0)
-			return Vector(0, 0, 1);
-
-		flLen = 1 / flLen;
-		return Vector(x * flLen, y * flLen, z * flLen);
-	}
-#else
-	Vector Normalize()
-	{
 		real_t flLen = Length();
-		if (flLen == 0)
+		if (flLen == 0.0)
 			return Vector(0, 0, 1);
 
-		vec_t fTemp = vec_t(1 / flLen);
-		return Vector(x * fTemp, y * fTemp, z * fTemp);
-	}
-#endif // PLAY_GAMEDLL
-	// for out precision normalize
-	Vector NormalizePrecision() const
-	{
-#ifndef PLAY_GAMEDLL
-		return Normalize();
-#else
-		real_t flLen = Length();
-		if (flLen == 0)
-			return Vector(0, 0, 1);
-
-		flLen = 1 / flLen;
+		flLen = 1.0 / flLen;
 		return Vector(vec_t(x * flLen), vec_t(y * flLen), vec_t(z * flLen));
-#endif // PLAY_GAMEDLL
 	}
-	Vector2D Make2D() const
+
+	constexpr Vector2D Make2D() const
 	{
 		Vector2D Vec2;
 		*(int *)&Vec2.x = *(int *)&x;
@@ -607,21 +590,31 @@ public:
 	}
 
 	real_t Length2D() const { return Q_sqrt(real_t(x * x + y * y)); }
+	constexpr real_t Length2DSquared() const { return real_t(x * x + y * y); }
 
-	inline bool IsLengthLessThan   (float length) const { return (LengthSquared() < length * length); }
-	inline bool IsLengthGreaterThan(float length) const { return (LengthSquared() > length * length); }
+	constexpr bool operator< (vec_t fl) const { return !!(LengthSquared() < fl * fl); }
+	constexpr bool operator<= (vec_t fl) const { return !!(LengthSquared() <= fl * fl); }
+	constexpr bool operator< (const Vector& v) const { return !!(LengthSquared() < v.LengthSquared()); }
+	constexpr bool operator<= (const Vector& v) const { return !!(LengthSquared() <= v.LengthSquared()); }
+	constexpr bool operator< (const Vector2D& v) const { return !!(Length2DSquared() < v.LengthSquared()); }
+	constexpr bool operator<= (const Vector2D& v) const { return !!(Length2DSquared() <= v.LengthSquared()); }
+	constexpr bool operator> (vec_t fl) const { return !!(LengthSquared() > fl * fl); }
+	constexpr bool operator>= (vec_t fl) const { return !!(LengthSquared() >= fl * fl); }
+	constexpr bool operator> (const Vector& v) const { return !!(LengthSquared() > v.LengthSquared()); }
+	constexpr bool operator>= (const Vector& v) const { return !!(LengthSquared() >= v.LengthSquared()); }
+	constexpr bool operator> (const Vector2D& v) const { return !!(Length2DSquared() > v.LengthSquared()); }
+	constexpr bool operator>= (const Vector2D& v) const { return !!(Length2DSquared() >= v.LengthSquared()); }
 
-#ifdef PLAY_GAMEDLL
 	template<typename T = real_t>
-	real_t NormalizeInPlace()
+	constexpr T NormalizeInPlace()
 	{
 		T flLen = Length();
 
 		if (flLen > 0)
 		{
-			x = vec_t(1 / flLen * x);
-			y = vec_t(1 / flLen * y);
-			z = vec_t(1 / flLen * z);
+			x = vec_t(1.0 / flLen * x);
+			y = vec_t(1.0 / flLen * y);
+			z = vec_t(1.0 / flLen * z);
 		}
 		else
 		{
@@ -632,26 +625,8 @@ public:
 
 		return flLen;
 	}
-#else // PLAY_GAMEDLL
-	float NormalizeInPlace()
-	{
-		float flLen = Length();
-		if (flLen > 0)
-		{
-			x /= flLen;
-			y /= flLen;
-			z /= flLen;
-		}
-		else
-		{
-			x = 0;
-			y = 0;
-			z = 1;
-		}
-		return flLen;
-	}
-#endif // PLAY_GAMEDLL
-	bool IsZero(float tolerance = 0.01f) const
+
+	constexpr bool IsZero(float tolerance = 0.01f) const
 	{
 		return (x > -tolerance && x < tolerance &&
 			y > -tolerance && y < tolerance &&
@@ -660,17 +635,17 @@ public:
 
 	Vector MakeVector() const
 	{
-		vec_t rad_pitch = (pitch * M_PI / 180.0f);
-		vec_t rad_yaw = (yaw * M_PI / 180.0f);
-		vec_t tmp = Q_cos(rad_pitch);
+		auto rad_pitch = (pitch * M_PI / 180.0f);
+		auto rad_yaw = (yaw * M_PI / 180.0f);
+		auto tmp = Q_cos(rad_pitch);
 
-		return Vector(	(-tmp * -Q_cos(rad_yaw)),	// x
-						(Q_sin(rad_yaw) * tmp),		// y
-						-Q_sin(rad_pitch)			// z
+		return Vector(	vec_t(-tmp * -Q_cos(rad_yaw)),	// x
+						vec_t(Q_sin(rad_yaw) * tmp),	// y
+						vec_t(-Q_sin(rad_pitch))		// z
 		);
 	}
 
-	Vector VectorAngles(void) const
+	constexpr Vector VectorAngles(void) const
 	{
 		Vector a;
 		a.pitch = 0;
@@ -704,11 +679,9 @@ public:
 
 	Vector RotateX(float angle) const
 	{
-		float a, c, s;
-
-		a = (angle * M_PI / 180.0);
-		c = Q_cos(a);
-		s = Q_sin(a);
+		auto a = (angle * M_PI / 180.0);
+		auto c = Q_cos(a);
+		auto s = Q_sin(a);
 
 		return Vector(	x,
 						c * y - s * z,
@@ -718,11 +691,9 @@ public:
 
 	Vector RotateY(float angle) const
 	{
-		float a, c, s;
-
-		a = (angle * M_PI / 180.0);
-		c = Q_cos(a);
-		s = Q_sin(a);
+		auto a = (angle * M_PI / 180.0);
+		auto c = Q_cos(a);
+		auto s = Q_sin(a);
 
 		return Vector(	c * x + s * z,
 						y,
@@ -732,11 +703,9 @@ public:
 
 	Vector RotateZ(float angle) const
 	{
-		float a, c, s;
-
-		a = (angle * M_PI / 180.0);
-		c = Q_cos(a);
-		s = Q_sin(a);
+		auto a = (angle * M_PI / 180.0);
+		auto c = Q_cos(a);
+		auto s = Q_sin(a);
 
 		return Vector(	c * x - s * y,
 						s * x + c * y,
@@ -750,40 +719,46 @@ public:
 	union { vec_t z; vec_t roll;	vec_t b; };
 };
 
-inline Vector operator*(float fl, const Vector &v)
+inline constexpr Vector operator*(float fl, const Vector &v)
 {
 	return v * fl;
 }
 
-inline real_t DotProduct(const Vector &a, const Vector &b)
+inline constexpr real_t DotProduct(const Vector &a, const Vector &b)
 {
 	return (a.x * b.x + a.y * b.y + a.z * b.z);
 }
 
-inline real_t DotProduct2D(const Vector& a, const Vector& b)
+inline constexpr real_t DotProduct2D(const Vector& a, const Vector& b)
 {
 	return (a.x * b.x + a.y * b.y);
 }
 
-inline real_t DotProduct2D(const Vector2D &a, const Vector2D &b)
+inline constexpr real_t DotProduct2D(const Vector2D &a, const Vector2D &b)
 {
 	return (a.x * b.x + a.y * b.y);
 }
 
-inline Vector CrossProduct(const Vector &a, const Vector &b)
+inline constexpr Vector CrossProduct(const Vector &a, const Vector &b)
 {
 	return Vector(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
 }
 
-inline float operator^(const Vector& a, const Vector& b)
+inline real_t operator^(const Vector& a, const Vector& b)
 {
-	float length_ab = a.Length() * b.Length();
+	real_t length_ab = a.Length() * b.Length();
 
 	if (length_ab == 0.0)
 		return 0.0;
 
-	return (double)(Q_acos(DotProduct(a, b) / length_ab) * (180.0 / M_PI));
+	return (real_t)(Q_acos(DotProduct(a, b) / length_ab) * (180.0 / M_PI));
 }
+
+// Vector2D and Vector comparison operation.
+inline constexpr bool operator< (const Vector2D& v2, const Vector& v3) { return !!(v2.LengthSquared() < v3.Length2DSquared()); }
+inline constexpr bool operator<= (const Vector2D& v2, const Vector& v3) { return !!(v2.LengthSquared() <= v3.Length2DSquared()); }
+inline constexpr bool operator> (const Vector2D& v2, const Vector& v3) { return !!(v2.LengthSquared() > v3.Length2DSquared()); }
+inline constexpr bool operator>= (const Vector2D& v2, const Vector& v3) { return !!(v2.LengthSquared() >= v3.Length2DSquared()); }
 
 template<
 	typename X,

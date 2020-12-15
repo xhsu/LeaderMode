@@ -305,7 +305,7 @@ bool CBotManager::IsInsideSmokeCloud(const Vector *pos)
 		{
 			const Vector *smokeOrigin = ag->GetDetonationPosition();
 
-			if ((*smokeOrigin - *pos).IsLengthLessThan(smokeRadius))
+			if ((*smokeOrigin - *pos) < smokeRadius)
 				return true;
 		}
 	}

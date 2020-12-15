@@ -40,8 +40,6 @@ void CGrenade::Explode(Vector vecSrc, Vector vecAim)
 // UNDONE: temporary scorching for PreAlpha - find a less sleazy permenant solution.
 void CGrenade::Explode(TraceResult *pTrace, int bitsDamageType)
 {
-	float flRndSound; // sound randomizer
-
 	pev->model = iStringNull; // invisible
 	pev->solid = SOLID_NOT;   // intangible
 	pev->takedamage = DAMAGE_NO;
@@ -70,13 +68,10 @@ void CGrenade::Explode(TraceResult *pTrace, int bitsDamageType)
 	else
 		UTIL_DecalTrace(pTrace, DECAL_SCORCH2);
 
-	// TODO: unused
-	flRndSound = RANDOM_FLOAT(0, 1);
-
 	switch (RANDOM_LONG(0, 1))
 	{
 	case 0: EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/flashbang-2.wav", 0.55, ATTN_NORM); break;
-	case 1: EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/flashbang-1.wav", 0.55, ATTN_NORM); break;
+	default: EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/flashbang-1.wav", 0.55, ATTN_NORM); break;
 	}
 
 	pev->effects |= EF_NODRAW;
@@ -466,11 +461,16 @@ void CGrenade::C4_Detonate()
 		pEntity->TakeDamage(pev, pPlayer->pev, flDamage, DMG_EXPLOSION);
 	}
 
+	// create a scorch in place.
+	TraceResult tr;
+	UTIL_TraceLine(pev->origin, pev->origin - m_vecAttachedSurfaceNorm * 10.0f, dont_ignore_monsters, edict(), &tr);
+	UTIL_DecalTrace(&tr, RANDOM_LONG(0, 1) ? DECAL_SCORCH1 : DECAL_SCORCH2);
+
 	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
 	WRITE_BYTE(TE_EXPLOSION);
-	WRITE_COORD(pev->origin.x + pev->v_angle.x * RANDOM_FLOAT(50, 55));	// the v_angle is norm of its attached surface.
-	WRITE_COORD(pev->origin.y + pev->v_angle.y * RANDOM_FLOAT(50, 55));
-	WRITE_COORD(pev->origin.z + pev->v_angle.z * RANDOM_FLOAT(50, 55));
+	WRITE_COORD(pev->origin.x + m_vecAttachedSurfaceNorm.x * RANDOM_FLOAT(50, 55));
+	WRITE_COORD(pev->origin.y + m_vecAttachedSurfaceNorm.y * RANDOM_FLOAT(50, 55));
+	WRITE_COORD(pev->origin.z + m_vecAttachedSurfaceNorm.z * RANDOM_FLOAT(50, 55));
 	WRITE_SHORT(g_sModelIndexFireball3);
 	WRITE_BYTE(25);
 	WRITE_BYTE(30);
@@ -479,9 +479,9 @@ void CGrenade::C4_Detonate()
 
 	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
 	WRITE_BYTE(TE_EXPLOSION);
-	WRITE_COORD(pev->origin.x + pev->v_angle.x * RANDOM_FLOAT(70, 95));	// the v_angle is norm of its attached surface.
-	WRITE_COORD(pev->origin.y + pev->v_angle.y * RANDOM_FLOAT(70, 95));
-	WRITE_COORD(pev->origin.z + pev->v_angle.z * RANDOM_FLOAT(70, 95));
+	WRITE_COORD(pev->origin.x + m_vecAttachedSurfaceNorm.x * RANDOM_FLOAT(70, 95));
+	WRITE_COORD(pev->origin.y + m_vecAttachedSurfaceNorm.y * RANDOM_FLOAT(70, 95));
+	WRITE_COORD(pev->origin.z + m_vecAttachedSurfaceNorm.z * RANDOM_FLOAT(70, 95));
 	WRITE_SHORT(g_sModelIndexFireball2);
 	WRITE_BYTE(30);
 	WRITE_BYTE(30);
@@ -935,8 +935,9 @@ void CGrenade::C4Touch(CBaseEntity* pOther)
 	VEC_TO_ANGLES(tr.vecPlaneNormal, angle);
 	pev->angles = tr.vecPlaneNormal.VectorAngles();
 	pev->sequence = 1;
-	pev->v_angle = tr.vecPlaneNormal;	// LUNA: save for C4_Detonate() later.
 	pev->movetype = MOVETYPE_NONE;
+
+	m_vecAttachedSurfaceNorm = tr.vecPlaneNormal;
 
 	EMIT_SOUND(edict(), CHAN_ITEM, C4_PLACED_SFX, 0.2f, ATTN_NORM);
 }

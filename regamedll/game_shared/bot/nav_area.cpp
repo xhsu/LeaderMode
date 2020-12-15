@@ -2541,13 +2541,13 @@ const Vector *CNavArea::GetCorner(NavCornerType corner) const
 // Returns true if an existing hiding spot is too close to given position
 bool CNavArea::IsHidingSpotCollision(const Vector *pos) const
 {
-	const float collisionRange = 30.0f;
+	constexpr float collisionRange = 30.0f;
 
 	for (HidingSpotList::const_iterator iter = m_hidingSpotList.begin(); iter != m_hidingSpotList.end(); iter++)
 	{
 		const HidingSpot *spot = (*iter);
 
-		if ((*spot->GetPosition() - *pos).IsLengthLessThan(collisionRange))
+		if ((*spot->GetPosition() - *pos) < collisionRange)
 			return true;
 	}
 
@@ -2852,8 +2852,8 @@ void CNavArea::AddSpotEncounters(const class CNavArea *from, NavDirType fromDir,
 	// create unique marker to flag used spots
 	HidingSpot::ChangeMasterMarker();
 
-	const float stepSize = 25.0f;		// 50
-	const float seeSpotRange = 2000.0f;	// 3000
+	constexpr float stepSize = 25.0f;		// 50
+	constexpr float seeSpotRange = 2000.0f;	// 3000
 	TraceResult result;
 
 	Vector eye, delta;
@@ -2893,7 +2893,7 @@ void CNavArea::AddSpotEncounters(const class CNavArea *from, NavDirType fromDir,
 			delta.z = (spotPos->z + eyeHeight) - eye.z;
 
 			// check if in range
-			if (delta.IsLengthGreaterThan(seeSpotRange))
+			if (delta > seeSpotRange)
 				continue;
 
 			// check if we have LOS
@@ -3127,7 +3127,7 @@ public:
 			// make sure hiding spot is in range
 			if (m_range > 0.0f)
 			{
-				if ((*spot->GetPosition() - *m_origin).IsLengthGreaterThan(m_range))
+				if ((*spot->GetPosition() - *m_origin) > m_range)
 					continue;
 			}
 

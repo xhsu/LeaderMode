@@ -1327,8 +1327,8 @@ inline bool CCSBot::IsAwareOfEnemyDeath() const
 
 inline bool CCSBot::IsNotMoving() const
 {
-	const float stillSpeed = 10.0f;
-	return pev->velocity.IsLengthLessThan(stillSpeed);
+	constexpr float stillSpeed = 10.0f;
+	return pev->velocity < stillSpeed;
 }
 
 inline bool CCSBot::HasAnyAmmo(CBaseWeapon *weapon) const
@@ -1359,7 +1359,7 @@ public:
 			// make sure hiding spot is in range
 			if (m_range > 0.0f)
 			{
-				if ((*spot->GetPosition() - m_me->pev->origin).IsLengthGreaterThan(m_range))
+				if ((*spot->GetPosition() - m_me->pev->origin) > m_range)
 					continue;
 			}
 

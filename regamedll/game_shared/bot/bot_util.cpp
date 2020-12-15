@@ -383,7 +383,7 @@ bool UTIL_IsVisibleToTeam(const Vector &spot, int team, float maxRange)
 		if (pPlayer->m_iTeam != team)
 			continue;
 
-		if (maxRange > 0.0f && (spot - pPlayer->Center()).IsLengthGreaterThan(maxRange))
+		if (maxRange > 0.0f && (spot - pPlayer->Center()) > maxRange)
 			continue;
 
 		TraceResult result;

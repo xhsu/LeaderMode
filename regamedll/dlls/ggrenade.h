@@ -78,7 +78,8 @@ public:
 
 	enum
 	{
-		HE = 0,
+		ERROR_GR = 0,
+		HE = 1,
 		FLASHBANG,
 		SMOKE,
 		CRYO,
@@ -87,16 +88,17 @@ public:
 		INCENDIARY,
 		RCC4,
 	}
-	m_iType;
+	m_iType{ ERROR_GR };
 
 	int m_iTeam;
 	int m_iCurWave;
 	int m_SGSmoke;
 	int m_angle;
-	unsigned short m_usEvent;
+	unsigned short m_usEvent{ 0 };
 	bool m_bLightSmoke;
 	bool m_bDetonated;
 	Vector m_vSmokeDetonate;
 	int m_iBounceCount;
 	BOOL m_fRegisteredSound;
+	Vector m_vecAttachedSurfaceNorm{ g_vecZero };
 };

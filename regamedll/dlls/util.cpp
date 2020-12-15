@@ -9,7 +9,7 @@ NOXREF void UTIL_ParametricRocket(entvars_t *pev, Vector p_vecOrigin, Vector vec
 {
 	TraceResult tr;
 	Vector vecTravel;
-	float travelTime;
+	float travelTime = 0.0f;
 
 	pev->startpos = p_vecOrigin;
 	UTIL_MakeVectors(vecAngles);
@@ -19,8 +19,6 @@ NOXREF void UTIL_ParametricRocket(entvars_t *pev, Vector p_vecOrigin, Vector vec
 	vecTravel = pev->endpos - pev->startpos;
 	if (pev->velocity.Length() > 0.0f)
 		travelTime = vecTravel.Length() / pev->velocity.Length();
-	else
-		travelTime = 0.0f;
 
 	pev->starttime = gpGlobals->time;
 	pev->impacttime = travelTime + gpGlobals->time;
@@ -376,7 +374,7 @@ void UTIL_EmitAmbientSound(edict_t *entity, const Vector &vecOrigin, const char 
 		EMIT_AMBIENT_SOUND(entity, rgfl, samp, vol, attenuation, fFlags, pitch);
 }
 
-unsigned short FixedUnsigned16(float value, float scale)
+constexpr unsigned short FixedUnsigned16(float value, float scale)
 {
 	int output = value * scale;
 	if (output < 0)
@@ -388,7 +386,7 @@ unsigned short FixedUnsigned16(float value, float scale)
 	return (unsigned short)output;
 }
 
-short FixedSigned16(float value, float scale)
+constexpr short FixedSigned16(float value, float scale)
 {
 	int output = value * scale;
 	if (output > SHRT_MAX)
@@ -874,7 +872,6 @@ float UTIL_Approach(float target, float value, float speed)
 real_t UTIL_ApproachAngle(float target, float value, float speed)
 {
 	target = UTIL_AngleMod(target);
-
 	value = UTIL_AngleMod(value);
 
 	float delta = target - value;
@@ -898,9 +895,7 @@ real_t UTIL_ApproachAngle(float target, float value, float speed)
 
 real_t UTIL_AngleDistance(float next, float cur)
 {
-	real_t delta;
-
-	delta = next - cur;
+	auto delta = next - cur;
 
 	if (delta < -180.0f)
 		delta += 360.0f;
@@ -908,7 +903,7 @@ real_t UTIL_AngleDistance(float next, float cur)
 	else if (delta > 180.0f)
 		delta -= 360.0f;
 
-	return delta;
+	return (real_t)delta;
 }
 
 float UTIL_SplineFraction(float value, float scale)

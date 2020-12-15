@@ -97,8 +97,8 @@ void CCSBot::UpdateLookAngles()
 			faceDir = OppositeDirection(faceDir);
 		}
 
-		const float lookAlongLadderRange = 100.0f;
-		const float ladderPitch = 60.0f;
+		constexpr float lookAlongLadderRange = 100.0f;
+		constexpr float ladderPitch = 60.0f;
 
 		// adjust pitch to look up/down ladder as we ascend/descend
 		switch (m_pathLadderState)
@@ -108,7 +108,7 @@ void CCSBot::UpdateLookAngles()
 			Vector to = m_goalPosition - pev->origin;
 			useYaw = idealYaw;
 
-			if (to.IsLengthLessThan(lookAlongLadderRange))
+			if (to < lookAlongLadderRange)
 				usePitch = -ladderPitch;
 			break;
 		}
@@ -117,7 +117,7 @@ void CCSBot::UpdateLookAngles()
 			Vector to = m_goalPosition - pev->origin;
 			useYaw = idealYaw;
 
-			if (to.IsLengthLessThan(lookAlongLadderRange))
+			if (to < lookAlongLadderRange)
 				usePitch = ladderPitch;
 			break;
 		}

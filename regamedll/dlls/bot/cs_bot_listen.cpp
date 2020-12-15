@@ -110,7 +110,7 @@ bool CCSBot::CanHearNearbyEnemyGunfire(float range) const
 		return false;
 
 	// check noise range
-	if (range > 0.0f && (pev->origin - m_noisePosition).IsLengthGreaterThan(range))
+	if (range > 0.0f && (pev->origin - m_noisePosition) > range)
 		return false;
 
 	// if we dont have line of sight, it's not threatening (cant get shot)
@@ -159,8 +159,8 @@ bool CCSBot::UpdateLookAtNoise()
 	float const recentThreatTime = 5.0f;
 	if (GetTimeSinceLastSawEnemy() < recentThreatTime)
 	{
-		const float closeThreatRange = 750.0f;
-		if ((pev->origin - m_lastEnemyPosition).IsLengthLessThan(closeThreatRange))
+		constexpr float closeThreatRange = 750.0f;
+		if ((pev->origin - m_lastEnemyPosition) < closeThreatRange)
 		{
 			nearbyThreat = true;
 		}

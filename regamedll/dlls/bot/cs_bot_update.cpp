@@ -125,8 +125,8 @@ void CCSBot::Upkeep()
 		if (m_lookAtSpotClearIfClose)
 		{
 			// dont look at spots just in front of our face - it causes erratic view rotation
-			const float tooCloseRange = 100.0f;
-			if ((m_lookAtSpot - pev->origin).IsLengthLessThan(tooCloseRange))
+			constexpr float tooCloseRange = 100.0f;
+			if ((m_lookAtSpot - pev->origin) < tooCloseRange)
 				m_lookAtSpotState = NOT_LOOKING_AT_SPOT;
 		}
 
@@ -297,8 +297,8 @@ void CCSBot::Update()
 	}
 
 	// update approach points
-	const float recomputeApproachPointTolerance = 50.0f;
-	if ((m_approachPointViewPosition - pev->origin).IsLengthGreaterThan(recomputeApproachPointTolerance))
+	constexpr float recomputeApproachPointTolerance = 50.0f;
+	if ((m_approachPointViewPosition - pev->origin) > recomputeApproachPointTolerance)
 	{
 		ComputeApproachPoints();
 		m_approachPointViewPosition = pev->origin;
@@ -367,8 +367,8 @@ void CCSBot::Update()
 				// attack if enemy very close
 				if (!doAttack)
 				{
-					const float selfDefenseRange = 750.0f;
-					doAttack = (pev->origin - threat->pev->origin).IsLengthLessThan(selfDefenseRange);
+					constexpr float selfDefenseRange = 750.0f;
+					doAttack = (pev->origin - threat->pev->origin) < selfDefenseRange;
 				}
 				break;
 			}
@@ -388,8 +388,8 @@ void CCSBot::Update()
 					if (IsUsingKnife() && IsHiding())
 					{
 						// if hiding with a knife, wait until threat is close
-						const float knifeAttackRange = 250.0f;
-						if ((pev->origin - threat->pev->origin).IsLengthLessThan(knifeAttackRange))
+						constexpr float knifeAttackRange = 250.0f;
+						if ((pev->origin - threat->pev->origin) < knifeAttackRange)
 						{
 							Attack(threat);
 						}
@@ -608,11 +608,11 @@ void CCSBot::Update()
 			if (pLeader && pLeader->IsAutoFollowAllowed())
 			{
 				// count how many bots are already following this player
-				const float maxFollowCount = 2;
+				constexpr float maxFollowCount = 2;
 				if (GetBotFollowCount(pLeader) < maxFollowCount)
 				{
-					const float autoFollowRange = 300.0f;
-					if ((pLeader->pev->origin - pev->origin).IsLengthLessThan(autoFollowRange))
+					constexpr float autoFollowRange = 300.0f;
+					if ((pLeader->pev->origin - pev->origin) < autoFollowRange)
 					{
 						CNavArea *leaderArea = TheNavAreaGrid.GetNavArea(&pLeader->pev->origin);
 						if (leaderArea)

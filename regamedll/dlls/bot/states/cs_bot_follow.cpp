@@ -135,8 +135,8 @@ void FollowState::OnUpdate(CCSBot *me)
 	}
 
 	// determine whether we should sneak or not
-	const float farAwayRange = 750.0f;
-	if ((m_leader->pev->origin - me->pev->origin).IsLengthGreaterThan(farAwayRange))
+	constexpr float farAwayRange = 750.0f;
+	if ((m_leader->pev->origin - me->pev->origin) > farAwayRange)
 	{
 		// far away from leader - run to catch up
 		m_isSneaking = false;
@@ -165,16 +165,16 @@ void FollowState::OnUpdate(CCSBot *me)
 	bool repath = false;
 
 	// if the leader has stopped, hide nearby
-	const float nearLeaderRange = 250.0f;
+	constexpr float nearLeaderRange = 250.0f;
 	if (!me->HasPath() && m_leaderMotionState == STOPPED && m_leaderMotionStateTime.GetElapsedTime() > m_waitTime)
 	{
 		// throttle how often this check occurs
 		m_waitTime += RANDOM_FLOAT(1.0f, 3.0f);
 
 		// the leader has stopped - if we are close to him, take up a hiding spot
-		if ((m_leader->pev->origin - me->pev->origin).IsLengthLessThan(nearLeaderRange))
+		if ((m_leader->pev->origin - me->pev->origin) < nearLeaderRange)
 		{
-			const float hideRange = 250.0f;
+			constexpr float hideRange = 250.0f;
 			if (me->TryToHide(nullptr, -1.0f, hideRange, false, USE_NEAREST))
 			{
 				me->ResetStuckMonitor();

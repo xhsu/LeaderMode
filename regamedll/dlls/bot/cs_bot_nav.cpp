@@ -55,10 +55,8 @@ void CCSBot::StuckCheck()
 	if (m_isStuck)
 	{
 		// we are stuck - see if we have moved far enough to be considered unstuck
-		Vector delta = pev->origin - m_stuckSpot;
-
-		const float unstuckRange = 75.0f;
-		if (delta.IsLengthGreaterThan(unstuckRange))
+		constexpr float unstuckRange = 75.0f;
+		if ((pev->origin - m_stuckSpot) > unstuckRange)
 		{
 			// we are no longer stuck
 			ResetStuckMonitor();

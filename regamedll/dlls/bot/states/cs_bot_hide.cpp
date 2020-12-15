@@ -85,8 +85,8 @@ void HideState::OnUpdate(CCSBot *me)
 			CBasePlayer *pLeader = me->GetFollowLeader();
 
 			// BOTPORT: Determine walk/run velocity thresholds
-			float runThreshold = 200.0f;
-			if (pLeader->pev->velocity.IsLengthGreaterThan(runThreshold))
+			constexpr float runThreshold = 200.0f;
+			if (pLeader->pev->velocity > runThreshold)
 			{
 				// leader is running, stay with him
 				me->Follow(pLeader);
@@ -94,8 +94,8 @@ void HideState::OnUpdate(CCSBot *me)
 			}
 
 			// if leader has moved, stay with him
-			const float followRange = 250.0f;
-			if ((m_leaderAnchorPos - pLeader->pev->origin).IsLengthGreaterThan(followRange))
+			constexpr float followRange = 250.0f;
+			if ((m_leaderAnchorPos - pLeader->pev->origin) > followRange)
 			{
 				me->Follow(pLeader);
 				return;
