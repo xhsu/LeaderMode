@@ -96,6 +96,13 @@ inline void MESSAGE_BEGIN(int msg_dest, int msg_type, const float *pOrigin = nul
 	(*g_engfuncs.pfnMessageBegin)(msg_dest, msg_type, pOrigin, ed);
 }
 
+inline void WRITE_VECTOR(const Vector& v)
+{
+	(*g_engfuncs.pfnWriteCoord)(v.x);
+	(*g_engfuncs.pfnWriteCoord)(v.y);
+	(*g_engfuncs.pfnWriteCoord)(v.z);
+}
+
 template <typename T = void>
 inline T *GET_PRIVATE(edict_t *pEdict)
 {

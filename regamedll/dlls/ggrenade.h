@@ -6,6 +6,9 @@ Created Date: Mar 13 2020
 
 #pragma once
 
+extern int g_iSpriteGroundexp1;
+extern int g_iSpriteZerogxplode2;
+
 // combat.cpp
 float GetAmountOfPlayerVisible(Vector vecSrc, CBaseEntity* pEntity);
 

@@ -5224,7 +5224,7 @@ void OLD_CheckBuyZone(CBasePlayer *pPlayer)
 		CBaseEntity *pSpot = nullptr;
 		while ((pSpot = UTIL_FindEntityByClassname(pSpot, pszSpawnClass)))
 		{
-			if ((pSpot->pev->origin - pPlayer->pev->origin).Length() < 200.0f)
+			if ((pSpot->pev->origin - pPlayer->pev->origin) < 200)
 			{
 				pPlayer->m_signals.Signal(SIGNAL_BUY);
 				break;
@@ -5245,7 +5245,8 @@ void CBasePlayer::HandleSignals()
 	int state = m_signals.GetSignal();
 	int changed = m_signals.GetState() ^ state;
 
-	m_signals.Reset();
+	// Push signals from this frame to stock.
+	m_signals.Update();
 
 	if (changed & SIGNAL_BUY)
 	{
@@ -5474,7 +5475,7 @@ void EXT_FUNC CBasePlayer::UpdateClientData()
 	{
 		m_fInitHUD = FALSE;
 		gInitHUD = FALSE;
-		m_signals.Update();
+		m_signals.Reset();
 
 		MESSAGE_BEGIN(MSG_ONE, gmsgResetHUD, nullptr, pev);
 		MESSAGE_END();

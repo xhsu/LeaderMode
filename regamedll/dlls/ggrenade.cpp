@@ -1,5 +1,8 @@
 #include "precompiled.h"
 
+int g_iSpriteGroundexp1 = 0;
+int g_iSpriteZerogxplode2 = 0;
+
 TYPEDESCRIPTION CGrenade::m_SaveData[] =
 {
 	DEFINE_FIELD(CGrenade, m_iType, FIELD_INTEGER),
@@ -466,27 +469,28 @@ void CGrenade::C4_Detonate()
 	UTIL_TraceLine(pev->origin, pev->origin - m_vecAttachedSurfaceNorm * 10.0f, dont_ignore_monsters, edict(), &tr);
 	UTIL_DecalTrace(&tr, RANDOM_LONG(0, 1) ? DECAL_SCORCH1 : DECAL_SCORCH2);
 
-	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
-	WRITE_BYTE(TE_EXPLOSION);
-	WRITE_COORD(pev->origin.x + m_vecAttachedSurfaceNorm.x * RANDOM_FLOAT(50, 55));
-	WRITE_COORD(pev->origin.y + m_vecAttachedSurfaceNorm.y * RANDOM_FLOAT(50, 55));
-	WRITE_COORD(pev->origin.z + m_vecAttachedSurfaceNorm.z * RANDOM_FLOAT(50, 55));
-	WRITE_SHORT(g_sModelIndexFireball3);
-	WRITE_BYTE(25);
-	WRITE_BYTE(30);
-	WRITE_BYTE(TE_EXPLFLAG_NOSOUND);
-	MESSAGE_END();
-
-	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
-	WRITE_BYTE(TE_EXPLOSION);
-	WRITE_COORD(pev->origin.x + m_vecAttachedSurfaceNorm.x * RANDOM_FLOAT(70, 95));
-	WRITE_COORD(pev->origin.y + m_vecAttachedSurfaceNorm.y * RANDOM_FLOAT(70, 95));
-	WRITE_COORD(pev->origin.z + m_vecAttachedSurfaceNorm.z * RANDOM_FLOAT(70, 95));
-	WRITE_SHORT(g_sModelIndexFireball2);
-	WRITE_BYTE(30);
-	WRITE_BYTE(30);
-	WRITE_BYTE(TE_EXPLFLAG_NONE);
-	MESSAGE_END();
+	if (m_vecAttachedSurfaceNorm.z > 0.5f)
+	{
+		MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
+		WRITE_BYTE(TE_EXPLOSION);
+		WRITE_VECTOR(pev->origin + m_vecAttachedSurfaceNorm * 128.0f);
+		WRITE_SHORT(g_iSpriteGroundexp1);
+		WRITE_BYTE(20);	// scale in 0.1s'
+		WRITE_BYTE(24);	// frame rate
+		WRITE_BYTE(TE_EXPLFLAG_NODLIGHTS);
+		MESSAGE_END();
+	}
+	else
+	{
+		MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
+		WRITE_BYTE(TE_EXPLOSION);
+		WRITE_VECTOR(pev->origin + m_vecAttachedSurfaceNorm * 64.0f);
+		WRITE_SHORT(g_iSpriteZerogxplode2);
+		WRITE_BYTE(25);
+		WRITE_BYTE(21);
+		WRITE_BYTE(TE_EXPLFLAG_NODLIGHTS);
+		MESSAGE_END();
+	}
 
 	// LUNA: Why DSHGFHDS always likes to remove entity this way?
 	pev->flags |= FL_KILLME;
@@ -706,6 +710,9 @@ void CGrenade::Precache()
 	PRECACHE_SOUND("weapons/sg_explode.wav");
 
 	PRECACHE_MODEL("sprites/VFX/fire3.spr");
+
+	g_iSpriteGroundexp1 = PRECACHE_MODEL("sprites/VFX/groundexp1.spr");
+	g_iSpriteZerogxplode2 = PRECACHE_MODEL("sprites/VFX/zerogxplode2.spr");
 }
 
 CGrenade *CGrenade::HEGrenade(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, int iTeam)

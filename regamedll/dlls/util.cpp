@@ -190,11 +190,9 @@ NOXREF int UTIL_MonstersInSphere(CBaseEntity ** pList, int listMax, const Vector
 
 CBaseEntity *UTIL_FindEntityInSphere(CBaseEntity *pStartEntity, const Vector &vecCenter, float flRadius)
 {
-	edict_t	*pentEntity;
+	edict_t	*pentEntity = nullptr;
 	if (pStartEntity)
 		pentEntity = pStartEntity->edict();
-	else
-		pentEntity = nullptr;
 
 	pentEntity = FIND_ENTITY_IN_SPHERE(pentEntity, vecCenter, flRadius);
 	if (!FNullEnt(pentEntity))
@@ -1645,8 +1643,8 @@ bool UTIL_IsSpawnPointOccupied(CBaseEntity *pSpot)
 	const int maxList = 8;
 	CBaseEntity *pList[maxList];
 
-	Vector mins(pSpot->pev->origin + VEC_SPOT_HULL_MIN - 8.0);
-	Vector maxs(pSpot->pev->origin + VEC_SPOT_HULL_MAX + 8.0);
+	Vector mins(pSpot->pev->origin + VEC_SPOT_HULL_MIN - Vector(8, 8, 8));
+	Vector maxs(pSpot->pev->origin + VEC_SPOT_HULL_MAX + Vector(8, 8, 8));
 
 	int nCount = UTIL_EntitiesInBox(pList, maxList, mins, maxs, FL_MONSTER | FL_CLIENT);
 	for (int i = 0; i < nCount; i++)

@@ -418,13 +418,7 @@ BOOL CBaseMonster::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, f
 
 		if (pInflictor)
 		{
-#ifndef PLAY_GAMEDLL
-			vecDir = (pInflictor->Center() - Vector(0, 0, 10) - Center()).Normalize();
-#else
-			// TODO: fix test demo
-			vecDir = NormalizeSubtract<real_t, float, real_t, real_t>(Center(), pInflictor->Center() - Vector(0, 0, 10));
-#endif
-			vecDir = g_vecAttackDir = vecDir.Normalize();
+			vecDir = g_vecAttackDir = (pInflictor->Center() - Vector(0, 0, 10) - Center()).Normalize();
 		}
 	}
 

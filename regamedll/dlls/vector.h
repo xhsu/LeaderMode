@@ -56,29 +56,25 @@ public:
 	constexpr decltype(auto) operator*=(const Vector2D &v) { return (*this = *this * v); }
 	constexpr decltype(auto) operator/=(const Vector2D &v) { return (*this = *this / v); }
 
-	constexpr decltype(auto) operator+(float fl) const { return Vector2D(x + fl, y + fl); }
-	constexpr decltype(auto) operator-(float fl) const { return Vector2D(x - fl, y - fl); }
-
-	// TODO: FIX ME!!
-#ifdef PLAY_GAMEDLL
 	constexpr decltype(auto) operator*(float fl) const { return Vector2D(vec_t(x * fl), vec_t(y * fl)); }
 	constexpr decltype(auto) operator/(float fl) const { return Vector2D(vec_t(x / fl), vec_t(y / fl)); }
-#else
-	constexpr decltype(auto) operator*(float fl) const { return Vector2D(x * fl, y * fl); }
-	constexpr decltype(auto) operator/(float fl) const { return Vector2D(x / fl, y / fl); }
-#endif
 
 	constexpr decltype(auto) operator=(std::nullptr_t) { return Vector2D(0, 0); }
-	constexpr decltype(auto) operator+=(float fl) { return (*this = *this + fl); }
-	constexpr decltype(auto) operator-=(float fl) { return (*this = *this - fl); }
 	constexpr decltype(auto) operator*=(float fl) { return (*this = *this * fl); }
 	constexpr decltype(auto) operator/=(float fl) { return (*this = *this / fl); }
+
+	// Static methods
+	static constexpr decltype(auto) Zero() { return Vector2D(0, 0); }
+	static constexpr decltype(auto) I() { return Vector2D(1, 0); }
+	static constexpr decltype(auto) J() { return Vector2D(0, 1); }
 
 	// Methods
 	inline void Clear() { x = 0; y = 0; }
 	inline void CopyToArray(float *rgfl) const { *(int *)&rgfl[0] = *(int *)&x; *(int *)&rgfl[1] = *(int *)&y; }
-	inline real_t Length() const { return Q_sqrt(real_t(x * x + y * y)); }		// Get the vector's magnitude
-	inline constexpr real_t LengthSquared() const { return real_t(x * x + y * y); }				// Get the vector's magnitude squared
+	real_t Length() const { return Q_sqrt(X() * X() + Y() * Y()); }	// Get the vector's magnitude
+	constexpr real_t LengthSquared() const { return (X() * X() + Y() * Y()); }	// Get the vector's magnitude squared
+	inline constexpr real_t X() const { return static_cast<real_t>(x); }
+	inline constexpr real_t Y() const { return static_cast<real_t>(y); }
 
 	constexpr operator float*()             { return &x; } // Vectors will now automatically convert to float * when needed
 	constexpr operator const float*() const { return &x; } // Vectors will now automatically convert to float * when needed
@@ -95,28 +91,30 @@ public:
 	}
 
 	// LUNA: comparison with Vector3 was moved to the end of this file.
-	constexpr bool operator< (vec_t fl) const { return !!(LengthSquared() < real_t(fl * fl)); }
-	constexpr bool operator<= (vec_t fl) const { return !!(LengthSquared() <= real_t(fl * fl)); }
+	constexpr bool operator< (real_t fl) const { return !!(LengthSquared() < (fl * fl)); }
+	constexpr bool operator<= (real_t fl) const { return !!(LengthSquared() <= (fl * fl)); }
 	constexpr bool operator< (const Vector2D& v) const { return !!(LengthSquared() < v.LengthSquared()); }
 	constexpr bool operator<= (const Vector2D& v) const { return !!(LengthSquared() <= v.LengthSquared()); }
-	constexpr bool operator> (vec_t fl) const { return !!(LengthSquared() > real_t(fl * fl)); }
-	constexpr bool operator>= (vec_t fl) const { return !!(LengthSquared() >= real_t(fl * fl)); }
+	constexpr bool operator> (real_t fl) const { return !!(LengthSquared() > (fl * fl)); }
+	constexpr bool operator>= (real_t fl) const { return !!(LengthSquared() >= (fl * fl)); }
 	constexpr bool operator> (const Vector2D& v) const { return !!(LengthSquared() > v.LengthSquared()); }
 	constexpr bool operator>= (const Vector2D& v) const { return !!(LengthSquared() >= v.LengthSquared()); }
 
 	real_t NormalizeInPlace()
 	{
 		real_t flLen = Length();
+
 		if (flLen > 0.0)
 		{
-			x = vec_t(1 / flLen * x);
-			y = vec_t(1 / flLen * y);
+			x = vec_t(1.0 / flLen * x);
+			y = vec_t(1.0 / flLen * y);
 		}
 		else
 		{
 			x = 1.0;
 			y = 0.0;
 		}
+
 		return flLen;
 	}
 	constexpr bool IsZero(vec_t tolerance = 0.01f) const
@@ -137,27 +135,13 @@ public:
 		);
 	}
 
-	constexpr Vector2D Transform(const vec_t** matrix) const
-	{
-		/*
-		| a  b | | x |   | ax + by |
-		|      | |   | = |         |
-		| c  d | | y |   | cx + dy |
-		*/
-
-		return Vector2D(
-			matrix[0][0] * x + matrix[0][1] * y,
-			matrix[1][0] * x + matrix[1][1] * y
-		);
-	}
-
 	// Members
 	vec_t x, y;
 };
 
 inline constexpr real_t DotProduct(const Vector2D &a, const Vector2D &b)
 {
-	return (a.x * b.x + a.y * b.y);
+	return (a.X() * b.X() + a.Y() * b.Y());
 }
 
 inline constexpr Vector2D operator*(float fl, const Vector2D &v)
@@ -527,19 +511,24 @@ public:
 	constexpr decltype(auto) operator*=(const Vector &v) { return (*this = *this * v); }
 	constexpr decltype(auto) operator/=(const Vector &v) { return (*this = *this / v); }
 
-	constexpr decltype(auto) operator+(float fl) const { return Vector(x + fl, y + fl, z + fl); }
-	constexpr decltype(auto) operator-(float fl) const { return Vector(x - fl, y - fl, z - fl); }
-
 	constexpr decltype(auto) operator*(float fl) const { return Vector(vec_t(x * fl), vec_t(y * fl), vec_t(z * fl)); }
 	constexpr decltype(auto) operator/(float fl) const { return Vector(vec_t(x / fl), vec_t(y / fl), vec_t(z / fl)); }
 
 	constexpr decltype(auto) operator=(std::nullptr_t) { return Vector(0, 0, 0); }
-	constexpr decltype(auto) operator+=(float fl) { return (*this = *this + fl); }
-	constexpr decltype(auto) operator-=(float fl) { return (*this = *this - fl); }
 	constexpr decltype(auto) operator*=(float fl) { return (*this = *this * fl); }
 	constexpr decltype(auto) operator/=(float fl) { return (*this = *this / fl); }
 
+	// Static methods
+	static constexpr decltype(auto) Zero() { return Vector(0, 0, 0); }
+	static constexpr decltype(auto) I() { return Vector(1, 0, 0); }
+	static constexpr decltype(auto) J() { return Vector(0, 1, 0); }
+	static constexpr decltype(auto) K() { return Vector(0, 0, 1); }
+
 	// Methods
+	inline constexpr real_t X() const { return static_cast<real_t>(x); }
+	inline constexpr real_t Y() const { return static_cast<real_t>(y); }
+	inline constexpr real_t Z() const { return static_cast<real_t>(z); }
+
 	void Clear()
 	{
 		x = 0;
@@ -554,18 +543,10 @@ public:
 		*(int *)&rgfl[2] = *(int *)&z;
 	}
 
-	// Get the vector's magnitude
-	real_t Length() const
-	{
-		real_t x1 = real_t(x);
-		real_t y1 = real_t(y);
-		real_t z1 = real_t(z);
-
-		return Q_sqrt(x1 * x1 + y1 * y1 + z1 * z1);
-	}
-
-	// Get the vector's magnitude squared
-	constexpr real_t LengthSquared() const { return real_t(x * x + y * y + z * z); }
+	real_t Length() const { return Q_sqrt(X() * X() + Y() * Y() + Z() * Z()); }	// Get the vector's magnitude
+	constexpr real_t LengthSquared() const { return (X() * X() + Y() * Y() + Z() * Z()); }	// Get the vector's magnitude squared
+	real_t Length2D() const { return Q_sqrt(X() * X() + Y() * Y()); }	// Get the vector's magnitude, but only consider its X and Y component
+	constexpr real_t Length2DSquared() const { return (X() * X() + Y() * Y()); }
 
 	constexpr operator float*()             { return &x; } // Vectors will now automatically convert to float * when needed
 	constexpr operator const float*() const { return &x; } // Vectors will now automatically convert to float * when needed
@@ -589,17 +570,14 @@ public:
 		return Vec2;
 	}
 
-	real_t Length2D() const { return Q_sqrt(real_t(x * x + y * y)); }
-	constexpr real_t Length2DSquared() const { return real_t(x * x + y * y); }
-
-	constexpr bool operator< (vec_t fl) const { return !!(LengthSquared() < fl * fl); }
-	constexpr bool operator<= (vec_t fl) const { return !!(LengthSquared() <= fl * fl); }
+	constexpr bool operator< (real_t fl) const { return !!(LengthSquared() < fl * fl); }
+	constexpr bool operator<= (real_t fl) const { return !!(LengthSquared() <= fl * fl); }
 	constexpr bool operator< (const Vector& v) const { return !!(LengthSquared() < v.LengthSquared()); }
 	constexpr bool operator<= (const Vector& v) const { return !!(LengthSquared() <= v.LengthSquared()); }
 	constexpr bool operator< (const Vector2D& v) const { return !!(Length2DSquared() < v.LengthSquared()); }
 	constexpr bool operator<= (const Vector2D& v) const { return !!(Length2DSquared() <= v.LengthSquared()); }
-	constexpr bool operator> (vec_t fl) const { return !!(LengthSquared() > fl * fl); }
-	constexpr bool operator>= (vec_t fl) const { return !!(LengthSquared() >= fl * fl); }
+	constexpr bool operator> (real_t fl) const { return !!(LengthSquared() > fl * fl); }
+	constexpr bool operator>= (real_t fl) const { return !!(LengthSquared() >= fl * fl); }
 	constexpr bool operator> (const Vector& v) const { return !!(LengthSquared() > v.LengthSquared()); }
 	constexpr bool operator>= (const Vector& v) const { return !!(LengthSquared() >= v.LengthSquared()); }
 	constexpr bool operator> (const Vector2D& v) const { return !!(Length2DSquared() > v.LengthSquared()); }
@@ -662,14 +640,14 @@ public:
 		}
 		else
 		{
-			a.yaw = (Q_atan2(-y, x) * 180.0f / M_PI);
+			a.yaw = vec_t(Q_atan2(-y, x) * 180.0 / M_PI);
 			if (a.yaw < 0)
 				a.yaw += 360;
 
 			a.yaw = 360.0f - a.yaw;	// LUNA: why???
 
 			auto tmp = Q_sqrt(x * x + y * y);
-			a.pitch = (Q_atan2(z, tmp) * 180.0f / M_PI);
+			a.pitch = vec_t(Q_atan2(z, tmp) * 180.0 / M_PI);
 			if (a.pitch < 0)
 				a.pitch += 360;
 		}
@@ -726,22 +704,26 @@ inline constexpr Vector operator*(float fl, const Vector &v)
 
 inline constexpr real_t DotProduct(const Vector &a, const Vector &b)
 {
-	return (a.x * b.x + a.y * b.y + a.z * b.z);
+	return (a.X() * b.X() + a.Y() * b.Y() + a.Z() * b.Z());
 }
 
 inline constexpr real_t DotProduct2D(const Vector& a, const Vector& b)
 {
-	return (a.x * b.x + a.y * b.y);
+	return (a.X() * b.X() + a.Y() * b.Y());
 }
 
 inline constexpr real_t DotProduct2D(const Vector2D &a, const Vector2D &b)
 {
-	return (a.x * b.x + a.y * b.y);
+	return (a.X() * b.X() + a.Y() * b.Y());
 }
 
 inline constexpr Vector CrossProduct(const Vector &a, const Vector &b)
 {
-	return Vector(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
+	return Vector(
+		a.Y() * b.Z() - a.Z() * b.Y(),
+		a.Z() * b.X() - a.X() * b.Z(),
+		a.X() * b.Y() - a.Y() * b.X()
+	);
 }
 
 inline real_t operator^(const Vector& a, const Vector& b)
@@ -755,108 +737,8 @@ inline real_t operator^(const Vector& a, const Vector& b)
 }
 
 // Vector2D and Vector comparison operation.
+// LUNA: doing this is because that we have to declare this type of operation after the Vector3 is fully defined.
 inline constexpr bool operator< (const Vector2D& v2, const Vector& v3) { return !!(v2.LengthSquared() < v3.Length2DSquared()); }
 inline constexpr bool operator<= (const Vector2D& v2, const Vector& v3) { return !!(v2.LengthSquared() <= v3.Length2DSquared()); }
 inline constexpr bool operator> (const Vector2D& v2, const Vector& v3) { return !!(v2.LengthSquared() > v3.Length2DSquared()); }
 inline constexpr bool operator>= (const Vector2D& v2, const Vector& v3) { return !!(v2.LengthSquared() >= v3.Length2DSquared()); }
-
-template<
-	typename X,
-	typename Y,
-	typename Z,
-	typename LenType
->
-inline LenType LengthSubtract(Vector vecStart, Vector vecDest)
-{
-	X floatX = (vecDest.x - vecStart.x);
-	Y floatY = (vecDest.y - vecStart.y);
-	Z floatZ = (vecDest.z - vecStart.z);
-
-	return Q_sqrt(real_t(floatX * floatX + floatY * floatY + floatZ * floatZ));
-}
-
-template<
-	typename X,
-	typename Y,
-	typename Z,
-	typename LenType
->
-inline Vector NormalizeSubtract(Vector vecStart, Vector vecDest)
-{
-	Vector dir;
-
-#ifdef PLAY_GAMEDLL
-
-	X floatX = (vecDest.x - vecStart.x);
-	Y floatY = (vecDest.y - vecStart.y);
-	Z floatZ = (vecDest.z - vecStart.z);
-
-	LenType flLen = Q_sqrt(real_t(floatX * floatX + floatY * floatY + floatZ * floatZ));
-
-	if (flLen == 0.0)
-	{
-		dir = Vector(0, 0, 1);
-	}
-	else
-	{
-		flLen = 1.0 / flLen;
-
-		dir.x = vec_t(floatX * flLen);
-		dir.y = vec_t(floatY * flLen);
-		dir.z = vec_t(floatZ * flLen);
-	}
-#else
-	dir = (vecDest - vecStart).Normalize();
-#endif // PLAY_GAMEDLL
-
-	return dir;
-}
-
-#ifdef PLAY_GAMEDLL
-template<typename X, typename Y, typename LenType>
-inline Vector NormalizeMulScalar(Vector2D vec, float scalar)
-{
-	LenType flLen;
-	X floatX;
-	Y floatY;
-
-	flLen = (LenType)vec.Length();
-
-	if (flLen <= 0.0)
-	{
-		floatX = 1;
-		floatY = 0;
-	}
-	else
-	{
-		flLen = 1 / flLen;
-
-		floatX = vec.x * flLen;
-		floatY = vec.y * flLen;
-	}
-
-	return Vector(vec_t(floatX * scalar), vec_t(floatY * scalar), 0);
-}
-template<typename X, typename Y, typename LenType, typename LenCast>
-inline Vector NormalizeMulScalar(Vector vec, float scalar)
-{
-	LenType flLen;
-	X floatX = vec.x;
-	Y floatY = vec.y;
-
-	flLen = (LenType)vec.Length();
-
-	if (flLen <= 0.0)
-	{
-		floatX = 1;
-		floatY = 0;
-	}
-	else
-	{
-		floatX = floatX * LenCast(1 / flLen);
-		floatY = floatY * LenCast(1 / flLen);
-	}
-
-	return Vector(vec_t(floatX * scalar), vec_t(floatY * scalar), 0);
-}
-#endif // PLAY_GAMEDLL
