@@ -280,6 +280,9 @@ void HUD_StudioEvent2(const mstudioevent_s* pEvent, const cl_entity_s* pEntity)
 	}
 }
 
+double g_flEntUpdateAbsoluteTime = 0.0;
+double g_flEntUpdateFrameTime = 0.0;
+
 /*
 =================
 CL_UpdateTEnts
@@ -296,10 +299,13 @@ void HUD_TempEntUpdate2 (
 	int		(*Callback_AddVisibleEntity)(cl_entity_t* pEntity),
 	void	(*Callback_TempEntPlaySound)(TEMPENTITY* pTemp, float damp))
 {
-	static int gTempEntFrame = 0;
+	static int	gTempEntFrame = 0;
 	int			i;
 	TEMPENTITY* pTemp, * pnext, * pprev;
 	float		gravity, gravitySlow, life, fastFreq;
+
+	g_flEntUpdateAbsoluteTime = flClientTime;
+	g_flEntUpdateFrameTime = flFrameTime;
 
 	// Nothing to simulate
 	if (!*ppTempEntActive)

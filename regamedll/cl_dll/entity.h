@@ -55,6 +55,9 @@ extern RoleTypes g_iRoleType;
 
 extern extra_player_info_t	g_PlayerExtraInfo[MAX_PLAYERS]; // additional player info sent directly to the client.dll
 
+extern double g_flEntUpdateAbsoluteTime;
+extern double g_flEntUpdateFrameTime;
+
 int HUD_AddEntity2(int iType, cl_entity_s* pEntity, const char* szModelName);
 void HUD_TxferLocalOverrides2(entity_state_s* pState, const clientdata_s* pClient);
 void HUD_ProcessPlayerState2(entity_state_s* pDestination, const entity_state_s* pSource);

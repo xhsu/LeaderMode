@@ -66,10 +66,7 @@ void CGrenade::Explode(TraceResult *pTrace, int bitsDamageType)
 
 	RadiusFlash(pev->origin, pev, pevOwner, 4, CLASS_NONE, bitsDamageType);
 
-	if (RANDOM_FLOAT(0, 1) < 0.5f)
-		UTIL_DecalTrace(pTrace, DECAL_SCORCH1);
-	else
-		UTIL_DecalTrace(pTrace, DECAL_SCORCH2);
+	UTIL_DecalTrace(pTrace, RANDOM_LONG(0, 1) ? DECAL_SCORCH1 : DECAL_SCORCH2);
 
 	switch (RANDOM_LONG(0, 1))
 	{
@@ -150,16 +147,14 @@ void CGrenade::Explode3(TraceResult *pTrace, int bitsDamageType)
 	pev->owner = nullptr;
 	RadiusDamage(pev, pevOwner, pev->dmg, CLASS_NONE, bitsDamageType);
 
-	if (RANDOM_FLOAT(0, 1) < 0.5f)
-		UTIL_DecalTrace(pTrace, DECAL_SCORCH1);
-	else
-		UTIL_DecalTrace(pTrace, DECAL_SCORCH2);
+	UTIL_DecalTrace(pTrace, RANDOM_LONG(0, 1) ? DECAL_SCORCH1 : DECAL_SCORCH2);
 
 	switch (RANDOM_LONG(0, 2))
 	{
 	case 0: EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/debris1.wav", 0.55, ATTN_NORM); break;
 	case 1: EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/debris2.wav", 0.55, ATTN_NORM); break;
 	case 2: EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/debris3.wav", 0.55, ATTN_NORM); break;
+	default: break;
 	}
 
 	pev->effects |= EF_NODRAW;
@@ -289,7 +284,6 @@ void CGrenade::Smoke()
 void CGrenade::SG_Smoke()
 {
 	int iMaxSmokePuffs = 100;
-	float flSmokeInterval;
 
 	if (UTIL_PointContents(pev->origin) == CONTENTS_WATER)
 	{
@@ -298,18 +292,16 @@ void CGrenade::SG_Smoke()
 	else
 	{
 		Vector origin, angle;
-		real_t x_old, y_old, R_angle;
-
 		UTIL_MakeVectors(pev->angles);
 
 		origin = gpGlobals->v_forward * RANDOM_FLOAT(3, 8);
 
-		flSmokeInterval = RANDOM_FLOAT(1.5f, 3.5f) * iMaxSmokePuffs;
+		auto flSmokeInterval = RANDOM_FLOAT(1.5f, 3.5f) * iMaxSmokePuffs;
 
-		R_angle = m_angle / (180.00433335 / M_PI);
+		auto R_angle = m_angle / (180.00433335 / M_PI);
 
-		x_old = Q_cos(real_t(R_angle));
-		y_old = Q_sin(real_t(R_angle));
+		auto x_old = Q_cos(real_t(R_angle));
+		auto y_old = Q_sin(real_t(R_angle));
 
 		angle.x = origin.x * x_old - origin.y * y_old;
 		angle.y = origin.x * y_old + origin.y * x_old;
@@ -464,33 +456,11 @@ void CGrenade::C4_Detonate()
 		pEntity->TakeDamage(pev, pPlayer->pev, flDamage, DMG_EXPLOSION);
 	}
 
-	// create a scorch in place.
-	TraceResult tr;
-	UTIL_TraceLine(pev->origin, pev->origin - m_vecAttachedSurfaceNorm * 10.0f, dont_ignore_monsters, edict(), &tr);
-	UTIL_DecalTrace(&tr, RANDOM_LONG(0, 1) ? DECAL_SCORCH1 : DECAL_SCORCH2);
+	// LUNA: EFX(s) moved to client.
+	PLAYBACK_EVENT_FULL(FEV_GLOBAL | FEV_RELIABLE, nullptr, m_usEvent, 0, pev->origin, m_vecAttachedSurfaceNorm, 0.0f, 0.0f, 0, 0, false, false);
 
-	if (m_vecAttachedSurfaceNorm.z > 0.5f)
-	{
-		MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
-		WRITE_BYTE(TE_EXPLOSION);
-		WRITE_VECTOR(pev->origin + m_vecAttachedSurfaceNorm * 128.0f);
-		WRITE_SHORT(g_iSpriteGroundexp1);
-		WRITE_BYTE(20);	// scale in 0.1s'
-		WRITE_BYTE(24);	// frame rate
-		WRITE_BYTE(TE_EXPLFLAG_NODLIGHTS);
-		MESSAGE_END();
-	}
-	else
-	{
-		MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
-		WRITE_BYTE(TE_EXPLOSION);
-		WRITE_VECTOR(pev->origin + m_vecAttachedSurfaceNorm * 64.0f);
-		WRITE_SHORT(g_iSpriteZerogxplode2);
-		WRITE_BYTE(25);
-		WRITE_BYTE(21);
-		WRITE_BYTE(TE_EXPLFLAG_NODLIGHTS);
-		MESSAGE_END();
-	}
+	// But only this stays.
+	UTIL_ScreenShake(pev->origin, 10, 10, 1.5, C4_EXPLO_RADIUS);
 
 	// LUNA: Why DSHGFHDS always likes to remove entity this way?
 	pev->flags |= FL_KILLME;
@@ -609,6 +579,7 @@ void CGrenade::BounceSound()
 	case 0:	EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/grenade_hit1.wav", 0.25, ATTN_NORM); break;
 	case 1:	EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/grenade_hit2.wav", 0.25, ATTN_NORM); break;
 	case 2:	EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/grenade_hit3.wav", 0.25, ATTN_NORM); break;
+	default: break;
 	}
 }
 
@@ -698,7 +669,7 @@ void CGrenade::Precache()
 	m_rgusEvents[EQP_INCENDIARY_GR] = PRECACHE_EVENT(1, "events/Molotov.sc");
 	m_rgusEvents[EQP_HEALING_GR] = PRECACHE_EVENT(1, "events/createsmoke.sc");	// UNDONE
 	m_rgusEvents[EQP_GAS_GR] = PRECACHE_EVENT(1, "events/createsmoke.sc");	// UNDONE
-	m_rgusEvents[EQP_C4] = PRECACHE_EVENT(1, "events/createexplo.sc");	// UNDONE
+	m_rgusEvents[EQP_C4] = PRECACHE_EVENT(1, "events/C4Explo.sc");
 
 	PRECACHE_SOUND("weapons/hegrenade-1.wav");
 	PRECACHE_SOUND("weapons/hegrenade-2.wav");

@@ -985,15 +985,7 @@ void EV_HLDM_FireBullets(int idx, Vector& forward, Vector& right, Vector& up, in
 
 void EV_PlayGunFire(int idx, const char* sample, float flMaxDistance, const Vector& src, int iPitch)
 {
-	// to avoid the weird first personal gun fire effect, we have to determind whether we should use 3D sound.
-	/*if (EV_IsLocal(idx))
-	{
-		PlaySound(sample, iPitch);
-	}
-	else
-	{*/
-		Play3DSound(sample, 1.0f, flMaxDistance, src, iPitch);
-	//}
+	Play3DSound(sample, 1.0f, flMaxDistance, src, iPitch);
 }
 
 inline void EV_PlayGunFire(int idx, const char* sample, float flMaxDistance, const Vector& src)
@@ -2006,7 +1998,7 @@ DECLARE_EVENT(CreateExplo)
 
 	// goal: some somke around the explosion centre...
 
-	const model_t* pGasModel = gEngfuncs.GetSpritePointer(gEngfuncs.pfnSPR_Load("sprites/gas_puff_01.spr"));
+	static auto pGasModel = gEngfuncs.GetSpritePointer(gEngfuncs.pfnSPR_Load("sprites/gas_puff_01.spr"));
 
 	for (int i = 0; i < 5; i++)
 	{
@@ -2289,6 +2281,119 @@ DECLARE_EVENT(Vehicle)
 
 }
 
+DECLARE_EVENT(C4Explo)
+{
+	constexpr float C4_EXPLO_RADIUS = 300.0f;	// CGrenade::C4_EXPLO_RADIUS
+
+	static auto SCORCH1 = gEngfuncs.pEfxAPI->Draw_DecalIndexFromName("{scorch1");
+	static auto SCORCH2 = gEngfuncs.pEfxAPI->Draw_DecalIndexFromName("{scorch2");
+	static auto groundexp1 = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/VFX/groundexp1.spr");
+	static auto zerogxplode2 = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/VFX/zerogxplode2.spr");
+	static auto pGasModel = gEngfuncs.GetSpritePointer(gEngfuncs.pfnSPR_Load("sprites/gas_puff_01.spr"));
+
+	Vector& vecSurfaceNormal = args->angles;
+	Vector& vecBlastOrigin = args->origin;
+	Vector vecEnd = vecBlastOrigin - vecSurfaceNormal * 10.0f;
+
+	// Decal.
+	pmtrace_t tr;
+	UTIL_TraceLine(vecBlastOrigin, vecEnd, PM_STUDIO_IGNORE, -1, &tr, 0);
+	auto pe = gEngfuncs.pEventAPI->EV_GetPhysent(tr.ent);
+
+	// Only decal brush models such as the world etc.
+	if (pe && (pe->solid == SOLID_BSP || pe->movetype == MOVETYPE_PUSHSTEP))
+	{
+		if (CVAR_GET_FLOAT("r_decals"))
+		{
+			gEngfuncs.pEfxAPI->R_DecalShoot(
+				gEngfuncs.pEfxAPI->Draw_DecalIndex(RANDOM_LONG(0, 1) ? SCORCH1 : SCORCH2),
+				gEngfuncs.pEventAPI->EV_IndexFromTrace(&tr), 0, tr.endpos, 0);
+		}
+	}
+
+	// Sprite visual FX.
+	if (vecSurfaceNormal.z > 0.5f)
+	{
+		gEngfuncs.pEfxAPI->R_Explosion(
+			vecBlastOrigin + vecSurfaceNormal * 128.0f,
+			groundexp1,
+			2,	// scale
+			24,	// frame rate
+			TE_EXPLFLAG_NODLIGHTS
+		);
+	}
+	else
+	{
+		gEngfuncs.pEfxAPI->R_Explosion(
+			vecBlastOrigin + vecSurfaceNormal * 64.0f,
+			zerogxplode2,
+			4.6875,	// scale
+			21,	// frame rate
+			TE_EXPLFLAG_NODLIGHTS
+		);
+	}
+
+	// Custom light.
+	dlight_t* pLight = gEngfuncs.pEfxAPI->CL_AllocDlight(0);
+	if (pLight)
+	{
+		pLight->color.r = 250;
+		pLight->color.g = 0;
+		pLight->color.b = 0;
+		pLight->dark = false;
+		pLight->decay = 100;
+		pLight->die = gEngfuncs.GetClientTime() + 0.25f;
+		pLight->key = 0;	// LUNA: usage unknow.
+		pLight->minlight = 0;
+		pLight->origin = vecBlastOrigin + vecSurfaceNormal * 48;
+		pLight->radius = C4_EXPLO_RADIUS;
+	}
+
+	// Smoke moving around.
+	for (int i = 0; i < 25; i++)
+	{
+		// randomize smoke cloud position
+		Vector org = vecBlastOrigin + vecSurfaceNormal * (C4_EXPLO_RADIUS / 2.0f);
+		org.x += RANDOM_FLOAT(-C4_EXPLO_RADIUS / 2.0f, C4_EXPLO_RADIUS / 2.0f);
+		org.y += RANDOM_FLOAT(-C4_EXPLO_RADIUS / 2.0f, C4_EXPLO_RADIUS / 2.0f);
+		org.z += RANDOM_FLOAT(-C4_EXPLO_RADIUS / 2.0f, C4_EXPLO_RADIUS / 2.0f);
+
+		TEMPENTITY* pTemp = gEngfuncs.pEfxAPI->CL_TempEntAlloc(org, (model_s*)pGasModel);
+		if (pTemp)
+		{
+			// don't die when animation is ended
+			pTemp->flags |= (FTENT_SPRANIMATELOOP | FTENT_COLLIDEWORLD | FTENT_CLIENTCUSTOM);
+			pTemp->die = gEngfuncs.GetClientTime() + 10.0f;
+			pTemp->callback = EV_Smoke_FadeOut;
+			pTemp->entity.curstate.fuser3 = gEngfuncs.GetClientTime() - 5.0f; // start fading instantly
+			pTemp->entity.curstate.fuser4 = gEngfuncs.GetClientTime(); // entity creation time
+
+			pTemp->entity.curstate.rendermode = kRenderTransAlpha;	// MoE and most clients are wrong, we should use kRenderTransAlpha here...
+			pTemp->entity.curstate.renderamt = 200;
+			pTemp->entity.curstate.rendercolor.r = RANDOM_LONG(95, 110);
+			pTemp->entity.curstate.rendercolor.g = RANDOM_LONG(95, 110);
+			pTemp->entity.curstate.rendercolor.b = RANDOM_LONG(95, 110);
+			pTemp->entity.curstate.scale = 5.0f;
+
+			// make it move slowly
+			pTemp->entity.baseline.origin.x = RANDOM_LONG(-5, 5);
+			pTemp->entity.baseline.origin.y = RANDOM_LONG(-5, 5);
+			pTemp->entity.baseline.renderamt = 18;
+		}
+	}
+
+	// Regional fog.
+	RegionalFog RFog;
+	RFog.m_Color = Vector(100, 100, 100);
+	RFog.m_flDecayMultiplier = 1;	// start from 1.0f
+	RFog.m_flDensity = 0.001f;
+	RFog.m_flRadius = C4_EXPLO_RADIUS;
+	RFog.m_flTimeRemoval = g_flClientTime + 10;	// keep the time of removal sync with the sprite death.
+	RFog.m_flTimeStartDecay = g_flClientTime;
+	RFog.m_vecOrigin = vecBlastOrigin;
+	g_lstRegionalFog.push_back(RFog);
+}
+
 void Events_Init(void)
 {
 	HOOK_EVENT(ak47, FireAK47);
@@ -2318,6 +2423,7 @@ void Events_Init(void)
 	HOOK_EVENT(Molotov, MolotovExplo);
 	HOOK_EVENT(decal_reset, DecalReset);
 	HOOK_EVENT(vehicle, Vehicle);
+	HOOK_EVENT(C4Explo, C4Explo);
 
 	cl_gunbubbles = gEngfuncs.pfnRegisterVariable("cl_gunbubbles", "2", FCVAR_ARCHIVE);
 	cl_tracereffect = gEngfuncs.pfnRegisterVariable("cl_tracereffect", "1", FCVAR_ARCHIVE);

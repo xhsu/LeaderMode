@@ -574,14 +574,10 @@ public:
 	constexpr bool operator<= (real_t fl) const { return !!(LengthSquared() <= fl * fl); }
 	constexpr bool operator< (const Vector& v) const { return !!(LengthSquared() < v.LengthSquared()); }
 	constexpr bool operator<= (const Vector& v) const { return !!(LengthSquared() <= v.LengthSquared()); }
-	constexpr bool operator< (const Vector2D& v) const { return !!(Length2DSquared() < v.LengthSquared()); }
-	constexpr bool operator<= (const Vector2D& v) const { return !!(Length2DSquared() <= v.LengthSquared()); }
 	constexpr bool operator> (real_t fl) const { return !!(LengthSquared() > fl * fl); }
 	constexpr bool operator>= (real_t fl) const { return !!(LengthSquared() >= fl * fl); }
 	constexpr bool operator> (const Vector& v) const { return !!(LengthSquared() > v.LengthSquared()); }
 	constexpr bool operator>= (const Vector& v) const { return !!(LengthSquared() >= v.LengthSquared()); }
-	constexpr bool operator> (const Vector2D& v) const { return !!(Length2DSquared() > v.LengthSquared()); }
-	constexpr bool operator>= (const Vector2D& v) const { return !!(Length2DSquared() >= v.LengthSquared()); }
 
 	template<typename T = real_t>
 	constexpr T NormalizeInPlace()
@@ -735,10 +731,3 @@ inline real_t operator^(const Vector& a, const Vector& b)
 
 	return (real_t)(Q_acos(DotProduct(a, b) / length_ab) * (180.0 / M_PI));
 }
-
-// Vector2D and Vector comparison operation.
-// LUNA: doing this is because that we have to declare this type of operation after the Vector3 is fully defined.
-inline constexpr bool operator< (const Vector2D& v2, const Vector& v3) { return !!(v2.LengthSquared() < v3.Length2DSquared()); }
-inline constexpr bool operator<= (const Vector2D& v2, const Vector& v3) { return !!(v2.LengthSquared() <= v3.Length2DSquared()); }
-inline constexpr bool operator> (const Vector2D& v2, const Vector& v3) { return !!(v2.LengthSquared() > v3.Length2DSquared()); }
-inline constexpr bool operator>= (const Vector2D& v2, const Vector& v3) { return !!(v2.LengthSquared() >= v3.Length2DSquared()); }
