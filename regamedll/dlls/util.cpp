@@ -398,14 +398,13 @@ constexpr short FixedSigned16(float value, float scale)
 
 void UTIL_ScreenShake(const Vector &center, float amplitude, float frequency, float duration, float radius)
 {
-	int i;
-	float localAmplitude;
+	float localAmplitude = 0;
 	ScreenShake shake;
 
 	shake.duration = FixedUnsigned16(duration, (1<<12));
 	shake.frequency = FixedUnsigned16(frequency, (1<<8));
 
-	for (i = 1; i <= gpGlobals->maxClients; i++)
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
 	{
 		CBaseEntity *pPlayer = UTIL_PlayerByIndex(i);
 		if (!pPlayer || !(pPlayer->pev->flags & FL_ONGROUND))
@@ -414,11 +413,10 @@ void UTIL_ScreenShake(const Vector &center, float amplitude, float frequency, fl
 		localAmplitude = 0;
 		if (radius > 0)
 		{
-			Vector delta = center - pPlayer->pev->origin;
-			float distance = delta.Length();
+			if ((center - pPlayer->pev->origin) < radius)
+				localAmplitude = amplitude * (1.0 - (center - pPlayer->pev->origin).Length() / radius);	// linear decay.
 
-			if (distance < radius)
-				localAmplitude = amplitude;
+			// LUNA: however, in real life, the mechainal wave is decay in damping model over distance.
 		}
 		else
 			localAmplitude = amplitude;

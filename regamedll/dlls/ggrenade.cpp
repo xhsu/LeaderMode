@@ -460,7 +460,7 @@ void CGrenade::C4_Detonate()
 	PLAYBACK_EVENT_FULL(FEV_GLOBAL | FEV_RELIABLE, nullptr, m_usEvent, 0, pev->origin, m_vecAttachedSurfaceNorm, 0.0f, 0.0f, 0, 0, false, false);
 
 	// But only this stays.
-	UTIL_ScreenShake(pev->origin, 10, 10, 1.5, C4_EXPLO_RADIUS);
+	UTIL_ScreenShake(pev->origin, 10, 10, 1.5, C4_EXPLO_RADIUS * 2);
 
 	// LUNA: Why DSHGFHDS always likes to remove entity this way?
 	pev->flags |= FL_KILLME;
