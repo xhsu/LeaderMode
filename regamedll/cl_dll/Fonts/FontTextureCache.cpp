@@ -98,12 +98,13 @@ bool CFontTextureCache::GetTextureForChar(int font, int type, wchar_t wch, int *
 		return false;
 
 	int nByteCount = s_pFontPageSize[FONT_PAGE_SIZE_COUNT - 1] * s_pFontPageSize[FONT_PAGE_SIZE_COUNT - 1] * 4;
-	unsigned char* rgba = (unsigned char*)_alloca(nByteCount);
+	unsigned char* rgba = (unsigned char*)_malloca(nByteCount);
 	memset(rgba, 0, nByteCount);
 	winFont->GetCharRGBA(wch, 0, 0, fontWide, fontTall, rgba);
 
 	glBindTexture(GL_TEXTURE_2D, m_PageList[page].textureID[typePage]);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, drawX, drawY, fontWide, fontTall, GL_RGBA, GL_UNSIGNED_BYTE, rgba);
+	_freea(rgba);
 
 	cacheitem.page = page;
 
@@ -173,9 +174,12 @@ bool CFontTextureCache::AllocatePageForChar(int charWide, int charTall, int &pag
 
 		nNextX = charWide;
 
-		unsigned char rgba[256 * 256 * 4];
-		memset(rgba, 0, sizeof(rgba));
+		//unsigned char rgba[256 * 256 * 4];
+		constexpr size_t RGBA_SIZE = 256U * 256U * 4U;
+		unsigned char* rgba = (unsigned char*)malloc(RGBA_SIZE);
+		memset(rgba, 0, RGBA_SIZE);
 		int typePageNonAdditive = (int)(FONT_DRAW_NONADDITIVE) - 1;
+
 		glBindTexture(GL_TEXTURE_2D, newPage.textureID[typePageNonAdditive]);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, newPage.wide, newPage.tall, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgba);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -183,6 +187,8 @@ bool CFontTextureCache::AllocatePageForChar(int charWide, int charTall, int &pag
 
 		// place newPage into vector.
 		m_PageList.emplace_back(newPage);
+
+		free(rgba);
 	}
 
 	drawX = m_PageList[pageIndex].nextX;

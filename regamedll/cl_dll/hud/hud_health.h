@@ -57,11 +57,11 @@ public:
 	float GetMaxHealth(void);
 
 public:
-	int m_iHealth;
-	float m_flDrawingHealth;
-	int m_HUD_dmg_bio;
-	int m_HUD_cross;
-	float m_fFade;
+	int m_iHealth{ 100 };
+	float m_flDrawingHealth{ 100 };
+	int m_HUD_dmg_bio{ 0 };
+	int m_HUD_cross{ 0 };
+	float m_fFade{ 0.0f };
 	float m_fAttackFront, m_fAttackRear, m_fAttackLeft, m_fAttackRight;
 	float m_flLastDrawingY;
 

@@ -43,7 +43,7 @@ int CHudDeathNotice::Draw(float flTime)
 	if (!(gHUD::m_bitsHideHUDDisplay & HIDEHUD_FLASHLIGHT))
 		y += (gHUD::m_Flash.m_prc1.bottom - gHUD::m_Flash.m_prc1.top);
 
-	for (auto item : m_lstQueue)
+	for (auto& item : m_lstQueue)
 	{
 		// calculate starting point.
 		x = ScreenWidth - DEATHNOTICE_X_BASE_OFS;

@@ -21,11 +21,11 @@ public:
 	void Reset(void);
 
 public:
-	client_sprite_t* m_pTxtList;	// original data. for others to inquiry.
-	int m_iTxtListCount;
-	hSprite m_rghAmmoSprite[AMMO_MAXTYPE];
-	wrect_t	m_rgrcAmmoSprite[AMMO_MAXTYPE];
-	float m_flAlpha;
-	int m_iLastDrawnClip;
-	int m_iLastDrawnBpAmmo;
+	client_sprite_t* m_pTxtList{ nullptr };	// original data. for others to inquiry.
+	int m_iTxtListCount{ 0 };
+	std::array<hSprite, AMMO_MAXTYPE> m_rghAmmoSprite;
+	std::array<wrect_t, AMMO_MAXTYPE> m_rgrcAmmoSprite;
+	float m_flAlpha{ 0 };
+	int m_iLastDrawnClip{ 0 };
+	int m_iLastDrawnBpAmmo{ 0 };
 };

@@ -6,7 +6,7 @@ Created Date: Mar 11 2020
 
 #include "precompiled.h"
 
-
+constexpr wrect_t NULL_WRECT = { 0, 0, 0, 0 };
 
 int CHudAmmo::Init(void)
 {
@@ -14,8 +14,8 @@ int CHudAmmo::Init(void)
 
 	Reset();
 
-	Q_memset(&m_rghAmmoSprite, NULL, sizeof(m_rghAmmoSprite));
-	Q_memset(&m_rgrcAmmoSprite, NULL, sizeof(m_rgrcAmmoSprite));
+	m_rghAmmoSprite.fill(0);
+	m_rgrcAmmoSprite.fill(NULL_WRECT);
 
 	m_bitsFlags &= ~HUD_ACTIVE;	// LUNA: this is now abolished.
 	return 1;

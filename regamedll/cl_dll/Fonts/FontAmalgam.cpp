@@ -5,6 +5,7 @@ CFontAmalgam::CFontAmalgam()
 	m_Fonts.resize(4);
 	m_iMaxHeight = 0;
 	m_iMaxWidth = 0;
+	memset(m_szName, NULL, sizeof(m_szName));
 }
 
 CFontAmalgam::~CFontAmalgam()
