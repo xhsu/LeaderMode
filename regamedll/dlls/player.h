@@ -645,14 +645,14 @@ public:
 	int m_idrowndmg;
 	int m_idrownrestored;
 	int m_bitsHUDDamage;
-	BOOL m_fInitHUD;
-	BOOL m_fGameHUDInitialized;
+	bool m_fInitHUD;
+	bool m_fGameHUDInitialized;
 	int m_iTrain;
 	bool m_bClientWeaponUpToDate;
 	EHANDLE m_pTank;
 	float m_fDeadTime;
-	BOOL m_fNoPlayerSound;
-	BOOL m_fLongJump;
+	bool m_fNoPlayerSound;
+	bool m_fLongJump;
 	int m_iUpdateTime;
 	int m_iClientHealth;
 	int m_iClientBattery;
@@ -823,7 +823,7 @@ extern entvars_t *g_pevLastInflictor;
 extern CBaseEntity *g_pLastSpawn;
 extern CBaseEntity *g_pLastCTSpawn;
 extern CBaseEntity *g_pLastTerroristSpawn;
-extern BOOL gInitHUD;
+extern bool gInitHUD;
 extern cvar_t *sv_aim;
 
 void OLD_CheckBuyZone(CBasePlayer *pPlayer);

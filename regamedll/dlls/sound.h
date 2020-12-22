@@ -126,8 +126,8 @@ public:
 
 	float m_flAttenuation;	// Attenuation value
 	dynpitchvol_t m_dpv;
-	BOOL m_fActive;			// Only TRUE when the entity is playing a looping sound
-	BOOL m_fLooping;		// TRUE when the sound played will loop
+	bool m_fActive;			// Only TRUE when the entity is playing a looping sound
+	bool m_fLooping;		// TRUE when the sound played will loop
 };
 
 class CEnvSound: public CPointEntity

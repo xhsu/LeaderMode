@@ -134,7 +134,7 @@ public:
 	entvars_t *m_pevFirstTarget;
 	entvars_t *m_pevCurrentTarget;
 	int m_sounds;
-	BOOL m_activated;
+	bool m_activated;
 };
 
 // This class defines the volume of space that the player must stand in to control the train
@@ -242,5 +242,5 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 
 private:
-	BOOL m_on;
+	bool m_on;
 };

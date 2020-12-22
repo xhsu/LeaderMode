@@ -599,7 +599,7 @@ void EXT_FUNC ClientPutInServer(edict_t *pEntity)
 	CheckStartMoney();
 	pPlayer->AddAccount(startmoney.value, RT_PLAYER_JOIN);
 
-	pPlayer->m_fGameHUDInitialized = FALSE;
+	pPlayer->m_fGameHUDInitialized = false;
 	pPlayer->m_flDisplayHistory &= ~DHF_ROUND_STARTED;
 	pPlayer->pev->flags |= FL_SPECTATOR;
 	pPlayer->pev->solid = SOLID_NOT;

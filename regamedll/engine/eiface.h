@@ -393,7 +393,7 @@ typedef enum _fieldtypes
 	FIELD_POINTER,			// Arbitrary data pointer... to be removed, use an array of FIELD_CHARACTER
 	FIELD_INTEGER,			// Any integer or enum
 	FIELD_FUNCTION,			// A class function pointer (Think, Use, etc)
-	FIELD_BOOLEAN,			// boolean, implemented as an int, I may use this as a hint for compression
+	FIELD_BOOLEAN,			// boolean, implemented as an int, I may use this as a hint for compression. LUNA: rewrite its function. it can only be use on bool type.
 	FIELD_SHORT,			// 2 byte integer
 	FIELD_CHARACTER,		// a byte
 	FIELD_TIME,				// a floating point time (these are fixed up automatically too!)

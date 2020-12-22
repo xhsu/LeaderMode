@@ -28,7 +28,7 @@
 
 #include "precompiled.h"
 
-BOOL gInitHUD = TRUE;
+bool gInitHUD = true;
 
 TYPEDESCRIPTION CBasePlayer::m_playerSaveData[] =
 {
@@ -4485,7 +4485,6 @@ void EXT_FUNC CBasePlayer::Spawn()
 	m_bClientWeaponUpToDate = FALSE;
 	m_pClientActiveItem = nullptr;
 	m_iClientBattery = -1;
-	m_fInitHUD = TRUE;
 
 	m_iClientHideHUD = -1;
 
@@ -4628,7 +4627,7 @@ void EXT_FUNC CBasePlayer::Precache()
 	m_iUpdateTime = 5;
 
 	if (gInitHUD)
-		m_fInitHUD = TRUE;
+		m_fInitHUD = true;
 }
 
 int CBasePlayer::Save(CSave &save)
@@ -4979,8 +4978,8 @@ void CBasePlayer::ForceClientDllUpdate()
 	m_iClientHealth = -1;
 	m_iClientBattery = -1;
 
-	m_bClientWeaponUpToDate = FALSE;		// Force weapon send
-	m_fInitHUD = TRUE;		// Force HUD gmsgResetHUD message
+	m_bClientWeaponUpToDate = true;		// Force weapon send
+	m_fInitHUD = true;		// Force HUD gmsgResetHUD message
 	m_iTrain |= TRAIN_NEW;	// Force new train message.
 
 	// Now force all the necessary messages to be sent.
@@ -5473,8 +5472,8 @@ void EXT_FUNC CBasePlayer::UpdateClientData()
 {
 	if (m_fInitHUD)
 	{
-		m_fInitHUD = FALSE;
-		gInitHUD = FALSE;
+		m_fInitHUD = false;
+		gInitHUD = false;
 		m_signals.Reset();
 
 		MESSAGE_BEGIN(MSG_ONE, gmsgResetHUD, nullptr, pev);
@@ -5515,7 +5514,7 @@ void EXT_FUNC CBasePlayer::UpdateClientData()
 			}
 
 			g_pGameRules->InitHUD(this);
-			m_fGameHUDInitialized = TRUE;
+			m_fGameHUDInitialized = true;
 
 			if (g_pGameRules->IsMultiplayer())
 			{

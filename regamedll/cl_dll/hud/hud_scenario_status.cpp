@@ -67,7 +67,7 @@ void CHudScenarioStatus::Reset(void)
 }
 
 static std::wstring wcsKeyName;
-static const Vector VEC_WHITE_RED_DIFF = VEC_REDISH - Vector(1, 1, 1);
+static constexpr Vector VEC_WHITE_RED_DIFF = VEC_REDISH - Vector(1, 1, 1);
 
 int CHudScenarioStatus::Draw(float fTime)
 {

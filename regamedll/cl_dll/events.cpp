@@ -2285,17 +2285,17 @@ DECLARE_EVENT(C4Explo)
 {
 	constexpr float C4_EXPLO_RADIUS = 300.0f;	// CGrenade::C4_EXPLO_RADIUS
 
-	static auto SCORCH1 = gEngfuncs.pEfxAPI->Draw_DecalIndexFromName("{scorch1");
-	static auto SCORCH2 = gEngfuncs.pEfxAPI->Draw_DecalIndexFromName("{scorch2");
-	static auto groundexp1 = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/VFX/groundexp1.spr");
-	static auto zerogxplode2 = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/VFX/zerogxplode2.spr");
-	static auto pGasModel = gEngfuncs.GetSpritePointer(gEngfuncs.pfnSPR_Load("sprites/gas_puff_01.spr"));
+	static const auto SCORCH1 = gEngfuncs.pEfxAPI->Draw_DecalIndexFromName("{scorch1");
+	static const auto SCORCH2 = gEngfuncs.pEfxAPI->Draw_DecalIndexFromName("{scorch2");
+	static const auto groundexp1 = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/VFX/groundexp1.spr");
+	static const auto zerogxplode2 = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/VFX/zerogxplode2.spr");
+	static const auto pGasModel = gEngfuncs.GetSpritePointer(gEngfuncs.pfnSPR_Load("sprites/gas_puff_01.spr"));
 
 	Vector& vecSurfaceNormal = args->angles;
 	Vector& vecBlastOrigin = args->origin;
 	Vector vecEnd = vecBlastOrigin - vecSurfaceNormal * 10.0f;
 
-	// Decal.
+#pragma region Decal
 	pmtrace_t tr;
 	UTIL_TraceLine(vecBlastOrigin, vecEnd, PM_STUDIO_IGNORE, -1, &tr, 0);
 	auto pe = gEngfuncs.pEventAPI->EV_GetPhysent(tr.ent);
@@ -2310,8 +2310,9 @@ DECLARE_EVENT(C4Explo)
 				gEngfuncs.pEventAPI->EV_IndexFromTrace(&tr), 0, tr.endpos, 0);
 		}
 	}
+#pragma endregion
 
-	// Sprite visual FX.
+#pragma region Sprite visual FX.
 	if (vecSurfaceNormal.z > 0.5f)
 	{
 		gEngfuncs.pEfxAPI->R_Explosion(
@@ -2332,8 +2333,9 @@ DECLARE_EVENT(C4Explo)
 			TE_EXPLFLAG_NODLIGHTS
 		);
 	}
+#pragma endregion
 
-	// Custom light.
+#pragma region Custom light.
 	dlight_t* pLight = gEngfuncs.pEfxAPI->CL_AllocDlight(0);
 	if (pLight)
 	{
@@ -2348,8 +2350,9 @@ DECLARE_EVENT(C4Explo)
 		pLight->origin = vecBlastOrigin + vecSurfaceNormal * 48;
 		pLight->radius = C4_EXPLO_RADIUS;
 	}
+#pragma endregion
 
-	// Smoke moving around.
+#pragma region Smoke moving around.
 	for (int i = 0; i < 25; i++)
 	{
 		// randomize smoke cloud position
@@ -2381,8 +2384,9 @@ DECLARE_EVENT(C4Explo)
 			pTemp->entity.baseline.renderamt = 18;
 		}
 	}
+#pragma endregion
 
-	// Regional fog.
+#pragma region Regional fog.
 	RegionalFog RFog;
 	RFog.m_Color = Vector(100, 100, 100);
 	RFog.m_flDecayMultiplier = 1;	// start from 1.0f
@@ -2392,6 +2396,7 @@ DECLARE_EVENT(C4Explo)
 	RFog.m_flTimeStartDecay = g_flClientTime;
 	RFog.m_vecOrigin = vecBlastOrigin;
 	g_lstRegionalFog.push_back(RFog);
+#pragma endregion
 }
 
 void Events_Init(void)

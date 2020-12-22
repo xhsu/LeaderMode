@@ -520,13 +520,13 @@ int CSave::WriteFields(const char *pname, void *pBaseData, TYPEDESCRIPTION *pFie
 		case FIELD_VECTOR:
 			WriteVector(pTest->fieldName, (float *)pOutputData, pTest->fieldSize);
 			break;
-		case FIELD_BOOLEAN:
 		case FIELD_INTEGER:
 			WriteInt(pTest->fieldName, (int *)pOutputData, pTest->fieldSize);
 			break;
 		case FIELD_SHORT:
 			WriteData(pTest->fieldName, 2 * pTest->fieldSize, ((char *)pOutputData));
 			break;
+		case FIELD_BOOLEAN:
 		case FIELD_CHARACTER:
 			WriteData(pTest->fieldName, pTest->fieldSize, ((char *)pOutputData));
 			break;
@@ -734,6 +734,8 @@ int CRestore::ReadField(void *pBaseData, TYPEDESCRIPTION *pFields, int fieldCoun
 						break;
 					}
 					case FIELD_BOOLEAN:
+						*((bool*)pOutputData) = !!(*(char*)pInputData);
+						break;
 					case FIELD_INTEGER:
 						*((int *)pOutputData) = *(int *)pInputData;
 						break;
@@ -1103,5 +1105,5 @@ void EXT_FUNC ResetGlobalState()
 	gGlobalState.ClearStates();
 
 	// Init the HUD on a new game / load game
-	gInitHUD = TRUE;
+	gInitHUD = true;
 }
