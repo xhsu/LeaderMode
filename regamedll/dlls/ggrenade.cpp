@@ -583,6 +583,34 @@ void CGrenade::BounceSound()
 	}
 }
 
+void CGrenade::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
+{
+	// theoretically, pActivator and pCaller are the same.
+	if (FNullEnt(pActivator) || FNullEnt(pCaller) || !pActivator->IsPlayer() || !pCaller->IsPlayer())
+		return;
+
+	CBasePlayer* pPlayer = CBasePlayer::Instance(pActivator->pev);
+	if (pPlayer->edict() != pev->owner)	// its owner may do it.
+		return;
+
+	if (m_bC4BeingPickingUp || pev->flags & FL_KILLME)
+		return;
+
+	CBaseWeapon* pWeapon = pPlayer->m_pActiveItem;
+	if (pWeapon && pWeapon->m_bitsFlags & WPNSTATE_BUSY)	// if we are going to player the LHAND pickup anim, the current weapon must remain idled.
+		return;
+
+	m_bC4BeingPickingUp = true;	// mark for delete. (?)
+
+	pWeapon->SetLeftHand(false);
+	pWeapon->m_bitsFlags |= WPNSTATE_AUTO_LAND_UP;
+	UTIL_SetSecondaryVMDL(pPlayer, SSZ_C4_VMDL, C4_PICKUP, false);	// this is an enforced sending.
+
+	// prepare to remove this entity.
+	pev->nextthink = gpGlobals->time + C4_TIME_PICKUP_HAPPEN;
+	SetThink(&CGrenade::C4PickUpThink);
+}
+
 void CGrenade::TumbleThink()
 {
 	if (!IsInWorld())
@@ -929,6 +957,19 @@ void CGrenade::IncendiaryThink()
 	}
 
 	pev->nextthink = gpGlobals->time + 0.1f;
+}
+
+void CGrenade::C4PickUpThink()
+{
+	if (!m_bC4BeingPickingUp)
+		return;
+
+	pev->flags |= FL_KILLME;	// remove entity on next frame.
+
+	CBasePlayer* pPlayer = CBasePlayer::Instance(pev->owner);
+	(*pPlayer->GetGrenadeInventoryPointer(EQP_C4))++;
+
+	SetThink(&CBaseEntity::SUB_DoNothing);
 }
 
 CGrenade* CGrenade::HealingGrenade(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity)

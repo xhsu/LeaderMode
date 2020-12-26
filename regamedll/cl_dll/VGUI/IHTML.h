@@ -5,10 +5,10 @@
 #pragma once
 #endif
 
-#include <vgui/VGUI.h>
-#include <vgui/MouseCode.h>
-#include <vgui/KeyCode.h>
-#include <vgui/IImage.h>
+#include "VGUI.h"
+#include "MouseCode.h"
+#include "KeyCode.h"
+#include "IImage.h"
 
 namespace vgui
 {

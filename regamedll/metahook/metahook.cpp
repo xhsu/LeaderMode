@@ -50,6 +50,9 @@ void IPlugins::LoadClient(cl_exportfuncs_t* pExportFunc)
 
 	// client.dll initialize.
 	Q_memcpy(&gExportfuncs, pExportFunc, sizeof(gExportfuncs));
+
+	// Hooks
+	pExportFunc->Initialize = &Initialize;
 }
 
 void IPlugins::ExitGame(int iResult)

@@ -114,7 +114,8 @@ GLuint LoadBMP(const char* szPath, int* piWidth, int* piHeight)
 
 	if (LoadBMP(szPath, buffer, sizeof(buffer), piWidth, piHeight))
 	{
-		glGenTextures(1, &iTextureID);
+		//glGenTextures(1, &iTextureID);
+		iTextureID = (GLuint)VGUI_SURFACE->CreateNewTextureID();
 		glBindTexture(GL_TEXTURE_2D, iTextureID);
 
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, *piWidth, *piHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);

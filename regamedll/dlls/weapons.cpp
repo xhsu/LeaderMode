@@ -492,6 +492,9 @@ void CBaseWeapon::PostFrame()
 				m_bitsFlags |= WPNSTATE_QT_EXIT;
 				m_pPlayer->m_flNextAttack = C4_TIME_THROW - C4_TIME_THROW_SPAWN;
 
+				if (*m_pPlayer->GetGrenadeInventoryPointer(EQP_C4))
+					(*m_pPlayer->GetGrenadeInventoryPointer(EQP_C4))--;
+
 				return;
 			}
 
@@ -575,6 +578,15 @@ void CBaseWeapon::PostFrame()
 		}
 
 		return;
+	}
+
+	if (m_bitsFlags & (WPNSTATE_NO_LHAND | WPNSTATE_AUTO_LAND_UP) && m_pPlayer->m_flNextAttack <= 0.0f)
+	{
+		UTIL_HideSecondaryVMDL(m_pPlayer);
+		SetLeftHand(true);	// make LHAND back up.
+
+		m_bitsFlags &= ~WPNSTATE_AUTO_LAND_UP;
+		return;	// skip this frame.
 	}
 
 	// Return zoom level back to previous zoom level before we fired a shot.

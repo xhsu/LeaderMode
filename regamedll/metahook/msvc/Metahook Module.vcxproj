@@ -160,6 +160,7 @@
     <ClCompile Include="..\..\public\interface.cpp" />
     <ClCompile Include="..\client.cpp" />
     <ClCompile Include="..\engine.cpp" />
+    <ClCompile Include="..\exportfuncs.cpp" />
     <ClCompile Include="..\fullbright_textures.cpp" />
     <ClCompile Include="..\larger_textures.cpp" />
     <ClCompile Include="..\metahook.cpp" />
@@ -174,6 +175,7 @@
     <ClInclude Include="..\cdll_export.h" />
     <ClInclude Include="..\client.h" />
     <ClInclude Include="..\engine.h" />
+    <ClInclude Include="..\exportfuncs.h" />
     <ClInclude Include="..\fullbright_textures.h" />
     <ClInclude Include="..\larger_textures.h" />
     <ClInclude Include="..\metahook.h" />

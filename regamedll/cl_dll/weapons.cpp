@@ -521,6 +521,15 @@ void CBaseWeapon::PostFrame()
 		return;
 	}
 
+	if (m_bitsFlags & (WPNSTATE_NO_LHAND | WPNSTATE_AUTO_LAND_UP) && m_pPlayer->m_flNextAttack <= 0.0f)
+	{
+		gSecViewModelMgr.m_bVisible = false;
+		SetLeftHand(true);	// make LHAND back up.
+
+		m_bitsFlags &= ~WPNSTATE_AUTO_LAND_UP;
+		return;	// skip this frame.
+	}
+
 	// Return zoom level back to previous zoom level before we fired a shot.
 	// It could also be used in entering a scope with a delay.
 	if (m_flNextPrimaryAttack <= UTIL_WeaponTimeBase())

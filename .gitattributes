@@ -25,7 +25,6 @@ gradlew           text eol=lf
 *.cfg             text eol=crlf
 *.properties      text eol=crlf
 *.vm              text eol=crlf
-*.txt             text eol=crlf
 
 # Compiled Object files
 *.o               binary

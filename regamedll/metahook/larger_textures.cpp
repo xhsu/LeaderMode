@@ -62,8 +62,8 @@ int GL_LoadTexture(char* identifier, int textureType, int width, int height, BYT
 			buffer[(i * 3) + 2] = pPal[(data[i] * 3) + 2];
 		}
 
-		GLuint id = 0;	// used to create by g_pSurface->CreateNewTextureID();
-		glGenTextures(1, &id);
+		GLuint id = (GLuint)VGUI_SURFACE->CreateNewTextureID();
+		//glGenTextures(1, &id);
 
 		glBindTexture(GL_TEXTURE_2D, id);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, buffer);

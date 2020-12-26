@@ -467,3 +467,8 @@ void Sys_Error(const char* fmt, ...)
 
 	_exit(-1);
 }
+
+GLuint UTIL_VguiSurfaceNewTextureId(void)
+{
+	return (GLuint)VGUI_SURFACE->CreateNewTextureID();
+}

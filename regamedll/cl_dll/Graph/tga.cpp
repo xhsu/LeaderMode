@@ -268,7 +268,8 @@ GLuint LoadTGA(const char* szPath, int* piWidth, int* piHeight)
 
 	if (LoadTGA(szPath, buffer, sizeof(buffer), &fmt, piWidth, piHeight))
 	{
-		glGenTextures(1, &iTextureID);
+		//glGenTextures(1, &iTextureID);
+		iTextureID = (GLuint)VGUI_SURFACE->CreateNewTextureID();
 		glBindTexture(GL_TEXTURE_2D, iTextureID);
 
 		glTexImage2D(GL_TEXTURE_2D, 0, fmt, *piWidth, *piHeight, 0, fmt, GL_UNSIGNED_BYTE, buffer);

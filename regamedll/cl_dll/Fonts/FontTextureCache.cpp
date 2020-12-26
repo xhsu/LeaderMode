@@ -131,6 +131,8 @@ int CFontTextureCache::ComputePageType(int charTall) const
 	return -1;
 }
 
+GLuint UTIL_VguiSurfaceNewTextureId(void);
+
 bool CFontTextureCache::AllocatePageForChar(int charWide, int charTall, int &pageIndex, int &drawX, int &drawY, int &twide, int &ttall)
 {
 	int nPageType = ComputePageType(charTall);
@@ -162,8 +164,8 @@ bool CFontTextureCache::AllocatePageForChar(int charWide, int charTall, int &pag
 
 		for (int i = 0; i < FONT_DRAW_TYPE_COUNT; ++i)
 		{
-			//newPage.textureID[i] = g_pSurface->CreateNewTextureID();
-			glGenTextures(1, &newPage.textureID[i]);
+			newPage.textureID[i] = UTIL_VguiSurfaceNewTextureId();
+			//glGenTextures(1, &newPage.textureID[i]);
 		}
 
 		newPage.fontHeight = s_pFontPageSize[nPageType];

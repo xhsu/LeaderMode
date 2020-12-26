@@ -5,8 +5,8 @@
 #pragma once
 #endif
 
-#include <vgui/VGUI.h>
-#include <vgui/IHTML.h>
+#include "VGUI.h"
+#include "IHTML.h"
 
 #ifdef CreateFont
 #undef CreateFont

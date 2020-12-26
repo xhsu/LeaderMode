@@ -28,10 +28,11 @@ public:
 	virtual void Precache();
 	virtual int Save(CSave& save);
 	virtual int Restore(CRestore& restore);
-	virtual int ObjectCaps() { return 0; }
+	virtual int ObjectCaps() { return FCAP_ACROSS_TRANSITION | FCAP_IMPULSE_USE; }
 	virtual void Killed(entvars_t* pevAttacker, int iGib);
 	virtual int BloodColor() { return DONT_BLEED; }
 	virtual void BounceSound();
+	virtual void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType = USE_OFF, float value = 0.0f);	// this is not the original diarm C4.
 
 public:
 	static CGrenade* Flashbang(entvars_t* pevOwner, Vector vecStart, Vector vecVelocity);
@@ -66,6 +67,7 @@ public:
 	void EXPORT TumbleThink();
 	void EXPORT SG_TumbleThink();
 	void EXPORT IncendiaryThink();
+	void EXPORT C4PickUpThink();
 
 	void EXPORT BounceTouch(CBaseEntity* pOther);
 	void EXPORT SlideTouch(CBaseEntity* pOther);
@@ -104,4 +106,5 @@ public:
 	int m_iBounceCount;
 	BOOL m_fRegisteredSound;
 	Vector m_vecAttachedSurfaceNorm{ g_vecZero };
+	bool m_bC4BeingPickingUp{ false };
 };

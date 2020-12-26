@@ -131,9 +131,8 @@ GLuint gl_load_dds(GLvoid* pBuffer, int* iWidth, int* iHeight)
 
 	data = (GLvoid*)(header + 1);    // header data skipped
 
-	//int iTextureID = VGUI_SURFACE->CreateNewTextureID();
-	GLuint iTextureID;
-	glGenTextures(1, &iTextureID);
+	GLuint iTextureID = (GLuint)VGUI_SURFACE->CreateNewTextureID();
+	//glGenTextures(1, &iTextureID);
 	glBindTexture(GL_TEXTURE_2D, iTextureID);
 
 	// LUNA: prevent coord > 1.

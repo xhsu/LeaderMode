@@ -40,6 +40,9 @@
     <ClCompile Include="..\..\public\interface.cpp">
       <Filter>public</Filter>
     </ClCompile>
+    <ClCompile Include="..\exportfuncs.cpp">
+      <Filter>metahook</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\precompiled.h">
@@ -68,6 +71,9 @@
     </ClInclude>
     <ClInclude Include="..\..\public\interface.h">
       <Filter>public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\exportfuncs.h">
+      <Filter>metahook</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

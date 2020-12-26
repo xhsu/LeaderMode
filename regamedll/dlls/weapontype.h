@@ -120,16 +120,17 @@ enum WeaponState
 	WPNSTATE_HOLSTERING			= BIT(8),	// disable all other behaviours?
 	WPNSTATE_DASHING			= BIT(9),	// get a speed boost?
 	WPNSTATE_NO_LHAND			= BIT(10),	// left hand is currently doing something...
+	WPNSTATE_AUTO_LAND_UP		= BIT(11),	// left hand will automaticlly backup when the m_flNextAttack is up.
 
 	// Weapon-specific flags.
-	WPNSTATE_XM8_CHANGING		= BIT(11),
+	WPNSTATE_XM8_CHANGING		= BIT(12),
 
 	// Sets
 	WPNSTATE_SPECIAL_STATE		= WPNSTATE_XM8_CHANGING,
-	WPNSTATE_BUSY				= WPNSTATE_MELEE | WPNSTATE_QUICK_THROWING | WPNSTATE_HOLSTERING | WPNSTATE_DASHING | WPNSTATE_SPECIAL_STATE,	// unable to do other 'busy' things.
+	WPNSTATE_BUSY				= WPNSTATE_MELEE | WPNSTATE_QUICK_THROWING | WPNSTATE_HOLSTERING | WPNSTATE_DASHING | WPNSTATE_SPECIAL_STATE | WPNSTATE_NO_LHAND,	// unable to do other 'busy' things.
 
 	// Disused
-	WPNSTATE_SHIELD_DRAWN		= BIT(31)	// disused.
+	WPNSTATE_SHIELD_DRAWN		= BIT(31)	// disused, but reserved.
 };
 
 enum WeaponClassWeight
