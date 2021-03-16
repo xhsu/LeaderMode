@@ -255,9 +255,9 @@ namespace gHUD
 	extern int m_iSpriteCount;
 	extern int m_iSpriteCountAllRes;
 	extern int m_iRes;
-	extern hSprite* m_rghSprites;
-	extern wrect_t* m_rgrcRects;
-	extern char* m_rgszSpriteNames;
+	extern std::vector<hSprite> m_rghSprites;
+	extern std::vector<wrect_t> m_rgrcRects;
+	extern std::vector<std::string> m_rgszSpriteNames;
 	extern char m_szGameMode[32];
 	extern int m_HUD_number_0;
 	extern int m_iFontHeight;

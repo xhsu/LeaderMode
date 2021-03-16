@@ -56,7 +56,8 @@ int CHudClassIndicator::Init(void)
 	m_fFade = 0;
 
 	m_hClassFont = gFontFuncs::CreateFont();
-	gFontFuncs::AddGlyphSetToFont(m_hClassFont, "Trajan Pro", FONT_TALL, FW_BOLD, 1, 0, FONTFLAG_ANTIALIAS | FONTFLAG_OUTLINE, 0x0, 0xFFFF);
+	gFontFuncs::AddGlyphSetToFont(m_hClassFont, "Trajan Pro", FONT_TALL, FW_BOLD, 1, 0, FONTFLAG_ANTIALIAS | FONTFLAG_OUTLINE, 0x0, 0x2E7F);
+	gFontFuncs::AddGlyphSetToFont(m_hClassFont, "I.MingCP", FONT_TALL, FW_BOLD, 1, 0, FONTFLAG_ANTIALIAS | FONTFLAG_OUTLINE, 0x2E80, 0xFFFF);
 
 	gHUD::AddHudElem(this);
 	return TRUE;

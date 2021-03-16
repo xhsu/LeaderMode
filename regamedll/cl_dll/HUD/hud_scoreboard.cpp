@@ -52,7 +52,8 @@ int CHudScoreboard::VidInit(void)
 
 	// font.
 	m_hPlayerNameFont = gFontFuncs::CreateFont();
-	gFontFuncs::AddGlyphSetToFont(m_hPlayerNameFont, "Trajan Pro", 18, FW_MEDIUM, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0xFFFF);
+	gFontFuncs::AddGlyphSetToFont(m_hPlayerNameFont, "Trajan Pro", 18, FW_MEDIUM, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0x2E7F);
+	gFontFuncs::AddGlyphSetToFont(m_hPlayerNameFont, "I.MingCP", 18, FW_MEDIUM, 1, 0, FONTFLAG_ANTIALIAS, 0x2E80, 0xFFFF);
 
 	// base board: translucent black
 	m_Baseboard.m_bitsFlags |= HUD_ACTIVE;

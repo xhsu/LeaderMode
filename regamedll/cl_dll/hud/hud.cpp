@@ -347,11 +347,11 @@ void gHUD::VidInit(void)
 
 	// custom font function set.
 	m_hCambriaFont = gFontFuncs::CreateFont();
-	gFontFuncs::AddGlyphSetToFont(m_hCambriaFont, "Cambria", 24, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0xFFFF);
-	gFontFuncs::AddGlyphSetToFont(m_hCambriaFont, "TW-Kai", 24, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0xFFFF);
+	gFontFuncs::AddGlyphSetToFont(m_hCambriaFont, "Cambria", 24, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0x2E7F);
+	gFontFuncs::AddGlyphSetToFont(m_hCambriaFont, "TW-Kai", 24, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x2E80, 0xFFFF);
 	m_hTrajanProFont = gFontFuncs::CreateFont();
-	gFontFuncs::AddGlyphSetToFont(m_hTrajanProFont, "Trajan Pro", 24, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0xFFFF);
-	gFontFuncs::AddGlyphSetToFont(m_hTrajanProFont, "I.MingCP", 24, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0xFFFF);
+	gFontFuncs::AddGlyphSetToFont(m_hTrajanProFont, "Trajan Pro", 24, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0x2E7F);
+	gFontFuncs::AddGlyphSetToFont(m_hTrajanProFont, "I.MingCP", 24, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x2E80, 0xFFFF);
 
 	// UNDONE
 	//if (gConfigs.bEnableClientUI)
