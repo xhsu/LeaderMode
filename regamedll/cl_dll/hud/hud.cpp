@@ -63,9 +63,9 @@ namespace gHUD
 	int m_iSpriteCount = 0;
 	int m_iSpriteCountAllRes = 0;
 	int m_iRes = 640;
-	hSprite* m_rghSprites = nullptr;
-	wrect_t* m_rgrcRects = nullptr;
-	char* m_rgszSpriteNames = nullptr;
+	std::vector<hSprite> m_rghSprites;
+	std::vector<wrect_t> m_rgrcRects;
+	std::vector<std::string> m_rgszSpriteNames;
 	char m_szGameMode[32] = "\0";
 	int m_HUD_number_0 = 0;
 	int m_iFontHeight = 0;
@@ -284,9 +284,9 @@ void gHUD::VidInit(void)
 				p++;
 			}
 
-			m_rghSprites = new hSprite[m_iSpriteCount];
-			m_rgrcRects = new wrect_t[m_iSpriteCount];
-			m_rgszSpriteNames = new char[m_iSpriteCount * MAX_SPRITE_NAME_LENGTH];
+			m_rghSprites.resize(m_iSpriteCount);
+			m_rgrcRects.resize(m_iSpriteCount);
+			m_rgszSpriteNames.resize(m_iSpriteCount);
 			p = m_pSpriteList;
 
 			int index = 0;
@@ -299,7 +299,8 @@ void gHUD::VidInit(void)
 					Q_snprintf(sz, sizeof(sz) - 1, "sprites/%s.spr", p->szSprite);
 					m_rghSprites[index] = gEngfuncs.pfnSPR_Load(sz);
 					m_rgrcRects[index] = p->rc;
-					Q_strncpy(&m_rgszSpriteNames[index * MAX_SPRITE_NAME_LENGTH], p->szName, MAX_SPRITE_NAME_LENGTH);
+					m_rgszSpriteNames[index] = p->szName;
+
 					index++;
 				}
 
@@ -347,8 +348,10 @@ void gHUD::VidInit(void)
 	// custom font function set.
 	m_hCambriaFont = gFontFuncs::CreateFont();
 	gFontFuncs::AddGlyphSetToFont(m_hCambriaFont, "Cambria", 24, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0xFFFF);
+	gFontFuncs::AddGlyphSetToFont(m_hCambriaFont, "TW-Kai", 24, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0xFFFF);
 	m_hTrajanProFont = gFontFuncs::CreateFont();
 	gFontFuncs::AddGlyphSetToFont(m_hTrajanProFont, "Trajan Pro", 24, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0xFFFF);
+	gFontFuncs::AddGlyphSetToFont(m_hTrajanProFont, "I.MingCP", 24, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0xFFFF);
 
 	// UNDONE
 	//if (gConfigs.bEnableClientUI)
@@ -537,7 +540,7 @@ int gHUD::GetSpriteIndex(const char* SpriteName)
 {
 	for (int i = 0; i < m_iSpriteCount; i++)
 	{
-		if (Q_strncmp(SpriteName, m_rgszSpriteNames + (i * MAX_SPRITE_NAME_LENGTH), MAX_SPRITE_NAME_LENGTH) == 0)
+		if (Q_strncmp(SpriteName, m_rgszSpriteNames[i].c_str(), MAX_SPRITE_NAME_LENGTH) == 0)
 			return i;
 	}
 

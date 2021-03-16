@@ -6,6 +6,8 @@ Created Date: 05 Mar 2020
 
 #pragma once
 
+#include <string>
+
 #define charsmax(x)		(sizeof(x) - 1)
 #define wcharsmax(x)	(sizeof(x) / sizeof(wchar_t) - 1)
 
@@ -94,3 +96,16 @@ inline bool caseInsCharCompare(wchar_t a, wchar_t b) { return(towupper(a) == tow
 //template<typename stringTy> inline bool caseInsCharCompare(stringTy a, stringTy b) { return(std::toupper(a) == std::toupper(b)); }
 template<typename stringTy> inline bool UTIL_CaseInsensitiveCompare(const stringTy& s1, const stringTy& s2) { return ((s1.size() == s2.size()) && std::equal(s1.cbegin(), s1.cend(), s2.cbegin(), caseInsCharCompare)); }
 void Sys_Error(const char* fmt, ...);
+
+template<typename ... Args>
+std::string string_format(const std::string& format, Args ... args)
+{
+	auto size = snprintf(nullptr, 0, format.c_str(), args ...) + 1; // Extra space for '\0'
+
+	if (size <= 0)
+		throw std::runtime_error("Error during formatting.");
+
+	std::unique_ptr<char[]> buf(new char[size]);
+	snprintf(buf.get(), size, format.c_str(), args ...);
+	return std::string(buf.get(), buf.get() + size - 1); // We don't want the '\0' inside
+}
