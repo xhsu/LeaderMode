@@ -26,7 +26,7 @@ char* CHudTextMessage::LocaliseTextString(const char* msg, char* dst_buffer, int
 			*wdst = 0;
 
 			// the function of returning #LOCALISE_TOKEN if no localised text found is included in UTIL_GetLocalisation().
-			const char* pLocalisedText = UnicodeToANSI(UTIL_GetLocalisation(word_buf));
+			const char* pLocalisedText = UnicodeToUTF8(UTIL_GetLocalisation(word_buf));
 
 			for (char* wsrc = (char*)pLocalisedText; *wsrc != 0; wsrc++, dst++)
 				*dst = *wsrc;
