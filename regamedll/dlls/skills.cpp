@@ -77,7 +77,7 @@ void CBaseSkill::TerminatePeers() const
 	for (auto pPeer : m_pPlayer->m_rgpSkills)
 	{
 		// skip myself.
-		if (pPeer == this)
+		if (pPeer == this || pPeer == nullptr)
 			continue;
 
 		pPeer->Terminate();
