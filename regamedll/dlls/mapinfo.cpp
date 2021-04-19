@@ -2,7 +2,7 @@
 
 CMapInfo *g_pMapInfo = nullptr;
 
-void CMapInfo::OnCreate()
+CMapInfo::CMapInfo()
 {
 	m_iBuyingStatus = BUYING_EVERYONE;
 
@@ -17,7 +17,7 @@ void CMapInfo::OnCreate()
 	}
 }
 
-void CMapInfo::OnDestroy()
+CMapInfo::~CMapInfo()
 {
 	g_pMapInfo = nullptr;
 }

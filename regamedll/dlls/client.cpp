@@ -3026,7 +3026,7 @@ void EXT_FUNC StartFrame()
 
 void EndFrame()
 {
-	CTriggerSetOriginManager::getInstance()->Update();
+	TriggerSetOriginManager::Update();
 }
 
 void ClientPrecache()

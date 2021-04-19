@@ -31,10 +31,12 @@
 class CMapInfo: public CPointEntity
 {
 public:
-	virtual void Spawn();
-	virtual void OnCreate();
-	virtual void OnDestroy();
-	virtual void KeyValue(KeyValueData *pkvd);
+	CMapInfo();
+	virtual ~CMapInfo() final;
+
+public:
+	virtual void Spawn() final;
+	virtual void KeyValue(KeyValueData *pkvd) final;
 
 	void CheckMapInfo();
 

@@ -331,49 +331,54 @@ void CTriggerSetOrigin::UpdateKnownEntities()
 	}
 }
 
-void CTriggerSetOrigin::OnCreate()
+CTriggerSetOrigin::CTriggerSetOrigin()
 {
 	m_bUpdateEntities = false;
 	m_bSetupEntities = false;
 
-	CTriggerSetOriginManager::getInstance()->Add(this);
+	TriggerSetOriginManager::Add(this);
 }
 
-void CTriggerSetOrigin::OnDestroy()
+CTriggerSetOrigin::~CTriggerSetOrigin()
 {
-	CTriggerSetOriginManager::getInstance()->Remove(this);
+	TriggerSetOriginManager::Remove(this);
 }
 
-void CTriggerSetOriginManager::Add(CTriggerSetOrigin *pInstance)
+namespace TriggerSetOriginManager
 {
-	if (!pInstance)
-		return;
+	CUtlVector<EntityHandle<CTriggerSetOrigin>> m_Entities;
 
-	m_Entities.AddToTail(pInstance);
-}
-
-void CTriggerSetOriginManager::Remove(CTriggerSetOrigin *pInstance)
-{
-	if (!pInstance)
-		return;
-
-	m_Entities.FindAndRemove(pInstance);
-}
-
-void CTriggerSetOriginManager::Update()
-{
-	for (int i = 0; i < m_Entities.Count(); i++)
+	void Add(CTriggerSetOrigin* pInstance)
 	{
-		if (!m_Entities[i].IsValid())
-		{
-			m_Entities.Remove(i);
+		if (!pInstance)
+			return;
 
-			// Move iterator to back, because Remove method makes shift elements
-			i--;
-			continue;
-		}
-
-		// Update trigger
-		m_Entities[i]->UpdateTick();
+		m_Entities.AddToTail(pInstance);
 	}
-}
+
+	void Remove(CTriggerSetOrigin* pInstance)
+	{
+		if (!pInstance)
+			return;
+
+		m_Entities.FindAndRemove(pInstance);
+	}
+
+	void Update()
+	{
+		for (int i = 0; i < m_Entities.Count(); i++)
+		{
+			if (!m_Entities[i].IsValid())
+			{
+				m_Entities.Remove(i);
+
+				// Move iterator to back, because Remove method makes shift elements
+				i--;
+				continue;
+			}
+
+			// Update trigger
+			m_Entities[i]->UpdateTick();
+		}
+	}
+};

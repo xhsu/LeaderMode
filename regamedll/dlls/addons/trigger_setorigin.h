@@ -40,19 +40,20 @@
                                           // You would leave this off if you needed to move the entity to an initial position before having it follow another entity.
                                           // (If this isn't set, trigger_setorigin will move the entity to it's copypointer's origin before doing the offset difference calculation)
 
-const int MAX_SETORIGIN_ENTITIES = 64;
+constexpr int MAX_SETORIGIN_ENTITIES = 64;
 
-class CTriggerSetOrigin: public CBaseDelay {
+class CTriggerSetOrigin: public CBaseDelay
+{
+public:
+	CTriggerSetOrigin();
+	virtual ~CTriggerSetOrigin() final;
+
 public:
 	void KeyValue(KeyValueData *pkvd);
 	int ObjectCaps() { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
 
-	void OnCreate();
-	void OnDestroy();
-
-protected:
-	friend class CTriggerSetOriginManager;
+	// LUNA: Fuck the protected.
 	void UpdateTick();
 	void SetupEntities();
 	void UpdateKnownEntities();
@@ -78,21 +79,9 @@ private:
 	bool m_bSetupEntities;
 };
 
-class CTriggerSetOriginManager
+namespace TriggerSetOriginManager
 {
-public:
-	CTriggerSetOriginManager() {}
-
-	void Add(CTriggerSetOrigin *pInstance);
-	void Remove(CTriggerSetOrigin *pInstance);
+	void Add(CTriggerSetOrigin* pInstance);
+	void Remove(CTriggerSetOrigin* pInstance);
 	void Update();
-
-	static CTriggerSetOriginManager *getInstance()
-	{
-		static CTriggerSetOriginManager *pInstance = new CTriggerSetOriginManager;
-		return pInstance;
-	}
-
-private:
-	CUtlVector<EntityHandle<CTriggerSetOrigin>> m_Entities;
 };
