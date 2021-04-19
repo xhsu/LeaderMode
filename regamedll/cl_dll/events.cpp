@@ -384,18 +384,13 @@ char* EV_HLDM_DamageDecal(physent_t* pe)
 
 void EV_HLDM_GunshotDecalTrace(pmtrace_t* pTrace, char* decalName, char chTextureType)
 {
-	int iRand;
-	physent_t* pe;
-
 	gEngfuncs.pEfxAPI->R_BulletImpactParticles(pTrace->endpos);
 
-
-	iRand = RANDOM_LONG(0, 0x7FFF);
-	if (iRand < (0x7fff / 2))// not every bullet makes a sound.
+	if (RANDOM_LONG(0, 1))	// not every bullet makes a sound.
 	{
 		if (chTextureType == CHAR_TEX_VENT || chTextureType == CHAR_TEX_METAL)
 		{
-			switch (iRand % 2)
+			switch (RANDOM_LONG(0, 1))
 			{
 			case 0: gEngfuncs.pEventAPI->EV_PlaySound(-1, pTrace->endpos, 0, "weapons/ric_metal-1.wav", 1.0f, ATTN_NORM, 0, PITCH_NORM); break;
 			case 1: gEngfuncs.pEventAPI->EV_PlaySound(-1, pTrace->endpos, 0, "weapons/ric_metal-2.wav", 1.0f, ATTN_NORM, 0, PITCH_NORM); break;
@@ -403,7 +398,7 @@ void EV_HLDM_GunshotDecalTrace(pmtrace_t* pTrace, char* decalName, char chTextur
 		}
 		else
 		{
-			switch (iRand % 7)
+			switch (RANDOM_LONG(0, 6))
 			{
 			case 0:	gEngfuncs.pEventAPI->EV_PlaySound(-1, pTrace->endpos, 0, "weapons/ric1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
 			case 1:	gEngfuncs.pEventAPI->EV_PlaySound(-1, pTrace->endpos, 0, "weapons/ric2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM); break;
@@ -417,7 +412,7 @@ void EV_HLDM_GunshotDecalTrace(pmtrace_t* pTrace, char* decalName, char chTextur
 
 	}
 
-	pe = gEngfuncs.pEventAPI->EV_GetPhysent(pTrace->ent);
+	physent_t* pe = gEngfuncs.pEventAPI->EV_GetPhysent(pTrace->ent);
 
 	// Only decal brush models such as the world etc.
 	if (decalName && decalName[0] && pe && (pe->solid == SOLID_BSP || pe->movetype == MOVETYPE_PUSHSTEP))
@@ -983,14 +978,19 @@ void EV_HLDM_FireBullets(int idx, Vector& forward, Vector& right, Vector& up, in
 	return EV_HLDM_FireBullets(idx, forward, right, up, cShots, vecSrc, vecDirShooting, vecSpread, flDistance, iBulletType, 0, 0, iPenetration, 0, false, 0.0f, shared_rand);
 }
 
-void EV_PlayGunFire(int idx, const char* sample, float flMaxDistance, const Vector& src, int iPitch)
+void EV_PlayGunFire(const Vector& src, const char* sample, float attn, float vol, int iPitch)
 {
-	Play3DSound(sample, 1.0f, flMaxDistance, src, iPitch);
+	Play3DSound(sample, 0.0f, AttenuationToRadius(attn), src, vol, iPitch);
 }
 
-inline void EV_PlayGunFire(int idx, const char* sample, float flMaxDistance, const Vector& src)
+void EV_PlayGunFire2(const Vector& src, const char* sample, float rad, float vol, int iPitch)
 {
-	return EV_PlayGunFire(idx, sample, flMaxDistance, src, RANDOM_LONG(94, 110));
+	Play3DSound(sample, 0.0f, rad, src, vol, iPitch);
+}
+
+void EV_PlayGunFire2(const Vector& src, const char* sample, float rad, float vol = 1.0f)
+{
+	Play3DSound(sample, 0.0f, rad, src, vol, RANDOM_LONG(94, 110));
 }
 
 DECLARE_EVENT(FireAK47)
@@ -1099,7 +1099,7 @@ DECLARE_EVENT(FireXM8)
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
 	// original goldsrc api: VOL = 1.0, ATTN = 0.48
-	EV_PlayGunFire(idx, XM8_FIRE_SFX, XM8_GUN_VOLUME, vecSrc + forward * 10.0f);
+	EV_PlayGunFire2(vecSrc + forward * 10.0f, XM8_FIRE_SFX, XM8_GUN_VOLUME);
 
 	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, XM8_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_XM8].m_iAmmoType, XM8_PENETRATION);
 }
@@ -1139,7 +1139,7 @@ DECLARE_EVENT(FireAWP)
 
 	// in awp, bparam2 is SILENCER.
 	// original goldsrc api: VOL = 1.0, ATTN = 0.28
-	EV_PlayGunFire(idx, AWP_FIRE_SFX, args->bparam2 ? NORMAL_GUN_VOLUME : AWP_GUN_VOLUME, vecSrc + forward * 10.0f);
+	EV_PlayGunFire2(vecSrc + forward * 10.0f, AWP_FIRE_SFX, args->bparam2 ? NORMAL_GUN_VOLUME : AWP_GUN_VOLUME);
 
 	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, AWP_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_AWP].m_iAmmoType, AWP_PENETRATION);
 }
@@ -1193,7 +1193,7 @@ DECLARE_EVENT(FireDEagle)
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
 	// original goldsrc api: VOL = 1.0, ATTN = 0.6
-	EV_PlayGunFire(idx, DEagle_FIRE_SFX, DEAGLE_GUN_VOLUME, vecSrc + forward * 10.0f);
+	EV_PlayGunFire2(vecSrc + forward * 10.0f, DEagle_FIRE_SFX, DEAGLE_GUN_VOLUME);
 
 	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, DEAGLE_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_DEAGLE].m_iAmmoType, DEAGLE_PENETRATION);
 }
@@ -1269,7 +1269,7 @@ DECLARE_EVENT(FireM45A1)
 		args->bparam1 = g_iRoleType == Role_Assassin;	// needs convertion for local EV.
 
 	// original goldsrc api: VOL = 1.0, ATTN = 0.6
-	EV_PlayGunFire(idx, args->bparam1 ? M45A1_FIRE_SFX_SIL : M45A1_FIRE_SFX, args->bparam1 ? QUIET_GUN_VOLUME : M45A1_GUN_VOLUME, vecSrc + forward * 10.0f);
+	EV_PlayGunFire2(vecSrc + forward * 10.0f, args->bparam1 ? M45A1_FIRE_SFX_SIL : M45A1_FIRE_SFX, args->bparam1 ? QUIET_GUN_VOLUME : M45A1_GUN_VOLUME);
 
 	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, M45A1_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_DEAGLE].m_iAmmoType, M45A1_PENETRATION);
 }
@@ -1345,10 +1345,9 @@ DECLARE_EVENT(Fire57)
 		args->bparam1 = g_iRoleType == Role_Assassin;
 
 	// original goldsrc api: VOL = 1.0, ATTN = 0.8
-	EV_PlayGunFire(idx,
+	EV_PlayGunFire2(vecSrc + forward * 10.0f,
 		args->bparam1 ? FN57_FIRE_SIL_SFX : FN57_FIRE_SFX,
-		args->bparam1 ? QUIET_GUN_VOLUME : FIVESEVEN_GUN_VOLUME,
-		vecSrc + forward * 10.0f);
+		args->bparam1 ? QUIET_GUN_VOLUME : FIVESEVEN_GUN_VOLUME);
 
 	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, FIVESEVEN_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_FIVESEVEN].m_iAmmoType, FIVESEVEN_PENETRATION);
 }
@@ -1524,7 +1523,7 @@ DECLARE_EVENT(FireMK46)
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
 	// original goldsrc api: VOL = 1.0, ATTN = 0.52
-	EV_PlayGunFire(idx, MK46_FIRE_SFX, MK46_GUN_VOLUME, vecSrc + forward * 10.0f);
+	EV_PlayGunFire2(vecSrc + forward * 10.0f, MK46_FIRE_SFX, MK46_GUN_VOLUME);
 
 	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, MK46_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_MK46].m_iAmmoType, MK46_PENETRATION);
 }
@@ -1613,7 +1612,7 @@ DECLARE_EVENT(FireM4A1)
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
 	// original goldsrc api: VOL = 1.0, ATTN = 0.52
-	EV_PlayGunFire(idx, M4A1_FIRE_SFX, M4A1_GUN_VOLUME, vecSrc + forward * 10.0f);
+	EV_PlayGunFire2(vecSrc + forward * 10.0f, M4A1_FIRE_SFX, M4A1_GUN_VOLUME);
 
 	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, M4A1_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_M4A1].m_iAmmoType, M4A1_PENETRATION);
 }
@@ -1739,7 +1738,7 @@ DECLARE_EVENT(FireSCARH)
 	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, SCARH_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_SCARH].m_iAmmoType, SCARH_PENETRATION);
 
 	// original goldsrc api: VOL = 1.0, ATTN = 0.4
-	EV_PlayGunFire(idx, SCARH_FIRE_SFX, SCARH_GUN_VOLUME, vecSrc + forward * 10.0f);
+	EV_PlayGunFire2(vecSrc + forward * 10.0f, SCARH_FIRE_SFX, SCARH_GUN_VOLUME);
 }
 
 DECLARE_EVENT(FireMP7A1)
@@ -1837,10 +1836,10 @@ DECLARE_EVENT(FireUMP45)
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
 	// original API: vol = 1.0, attn = 0.64, pitch = 94~110
-	EV_PlayGunFire(idx,
+	EV_PlayGunFire(vecSrc + forward * 10.0f,
 		args->bparam2 ? UMP45_FIRE_SIL_SFX : UMP45_FIRE_SFX,
 		args->bparam2 ? QUIET_GUN_VOLUME : UMP45_GUN_VOLUME,
-		vecSrc + forward * 10.0f, RANDOM_LONG(87, 105));
+		1.0f, RANDOM_LONG(87, 105));
 
 	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, UMP45_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_UMP45].m_iAmmoType, UMP45_PENETRATION);
 }
@@ -1903,7 +1902,7 @@ DECLARE_EVENT(FireUSP)
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
 	// original API: vol = 1.0, attn = 0.8, pitch = 87~105
-	EV_PlayGunFire(idx, USP_FIRE_SFX, QUIET_GUN_VOLUME, vecSrc + forward * 10.0f, RANDOM_LONG(87, 105));
+	EV_PlayGunFire(vecSrc + forward * 10.0f, USP_FIRE_SFX, QUIET_GUN_VOLUME, 1.0, RANDOM_LONG(87, 105));
 
 	EV_HLDM_FireBullets(idx,
 		forward, right, up,
@@ -1980,7 +1979,7 @@ DECLARE_EVENT(FireM1014)
 	EV_HLDM_FireBullets(idx, forward, right, up, M1014_PROJECTILE_COUNT, vecSrc, forward, M1014_CONE_VECTOR, M1014_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_M1014].m_iAmmoType, 1, shared_rand);
 
 	// original goldsrc api: VOL = 1.0, ATTN = 0.52
-	EV_PlayGunFire(idx, M1014_FIRE_SFX, M1014_GUN_VOLUME, vecSrc + forward * 10.0f);
+	EV_PlayGunFire2(vecSrc + forward * 10.0f, M1014_FIRE_SFX, M1014_GUN_VOLUME);
 }
 
 DECLARE_EVENT(CreateExplo)

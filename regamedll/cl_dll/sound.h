@@ -18,5 +18,10 @@ void Sound_Init();
 void Sound_Think(double flDeltaTime);
 void Sound_Exit();
 
-void PlaySound(const char* szSound, int iPitch = 100);
-void Play3DSound(const char* szSound, float flMinDist, float flMaxDist, const Vector& vecOrigin, int iPitch = 100);
+inline float AttenuationToRadius(float flAttenuation)
+{
+	return (972.85404f / fmax(0.001f, flAttenuation));	// This result came from a math model computation.
+}
+
+void PlaySound(const char* szSound, float flVolume = 1.0f, int iPitch = 100);
+void Play3DSound(const char* szSound, float flMinDist, float flMaxDist, const Vector& vecOrigin, float flVolume, int iPitch = 100);

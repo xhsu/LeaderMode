@@ -1220,7 +1220,7 @@ MSG_FUNC(Sound)
 	}
 	else
 	{
-		PlaySound(szSample, iPitch);
+		PlaySound(szSample, 1.0f, iPitch);
 	}
 
 	return TRUE;

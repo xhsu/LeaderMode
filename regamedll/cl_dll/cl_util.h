@@ -6,10 +6,8 @@ Created Date: 05 Mar 2020
 
 #pragma once
 
-#include <string>
-
-#define charsmax(x)		(sizeof(x) - 1)
-#define wcharsmax(x)	(sizeof(x) / sizeof(wchar_t) - 1)
+#define charsmax(x)		(_countof(x) - 1U)
+#define wcharsmax(x)	(_countof(x) - 1U)
 
 // some constants from MP
 #define TEAM_UNASSIGNED	0
@@ -108,4 +106,16 @@ std::string string_format(const std::string& format, Args ... args)
 	std::unique_ptr<char[]> buf(new char[size]);
 	snprintf(buf.get(), size, format.c_str(), args ...);
 	return std::string(buf.get(), buf.get() + size - 1); // We don't want the '\0' inside
+}
+
+template<typename Iter>
+Iter select_randomly(Iter start, Iter end)
+{
+	static std::random_device rd;
+	static std::mt19937 gen(rd());
+
+	std::uniform_int_distribution<> dis(0, std::distance(start, end) - 1);
+	std::advance(start, dis(gen));
+
+	return start;
 }

@@ -16,6 +16,9 @@ Created Date: 05 Mar 2020
 #include <list>
 #include <vector>
 #include <array>
+#include <string>
+#include <random>
+#include <iterator>
 
 // const, OH, why you are const!
 #include "../common/const.h"

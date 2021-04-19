@@ -37,7 +37,7 @@ namespace gFMODChannelManager
 	};
 	std::array<channel_info_s, FMOD_MAX_CHANNEL_GOLDSRC> m_Channels;
 
-	FMOD::Channel** Allocate(float flCooldown = 3.5f)
+	FMOD::Channel** Allocate(float flCooldown)
 	{
 		size_t iMin = 0;
 		double flMinTime = 99999999.0;
@@ -50,18 +50,12 @@ namespace gFMODChannelManager
 				break;
 			}
 
-			// record the time on the way.
+			// record the time by the way.
 			if (m_Channels[i].m_flNextAvailable < flMinTime)
 			{
 				iMin = i;
 				flMinTime = m_Channels[i].m_flNextAvailable;
 			}
-
-			if (m_Channels[i].m_flNextAvailable > g_flClientTime)
-				continue;
-
-			m_Channels[i].m_flNextAvailable = g_flClientTime + flCooldown;	// since only gun fire SFX supported by FMOD... it quite enough.
-			return &m_Channels[i].m_pChannel;
 		}
 
 		// just occuiped a furthest unused channel.
@@ -82,26 +76,16 @@ namespace gFMODChannelManager
 				break;
 			}
 
-			// record the time on the way.
+			// record the time by the way.
 			if (m_Channels[i].m_flNextAvailable < flMinTime)
 			{
 				iMin = i;
 				flMinTime = m_Channels[i].m_flNextAvailable;
 			}
-
-			if (m_Channels[i].m_flNextAvailable > g_flClientTime)
-				continue;
-
-			m_Channels[i].m_flNextAvailable = g_flClientTime + 99999.0;
-
-			if (piIndex)
-				*piIndex = i;
-
-			return &m_Channels[i].m_pChannel;
 		}
 
 		// just occuiped a furthest unused channel.
-		m_Channels[iMin].m_flNextAvailable = g_flClientTime + 99999.0;
+		m_Channels[iMin].m_flNextAvailable = g_flClientTime + 31622400.0;
 
 		if (piIndex)
 			*piIndex = iMin;
@@ -127,20 +111,35 @@ inline FMOD_VECTOR VecConverts(const Vector& v, bool bScale = false)
 	return FMOD_VECTOR({ v.x, v.z, v.y });
 }
 
+#ifdef _DEBUG
 void Test_FMOD(void)
 {
-	auto strKey = gEngfuncs.pfnGetGameDirectory() + std::string("/sound/") + std::string("weapons/SCARH/mk17_shoot-s.wav");
-
-	if (g_mapSoundPrecache.find(strKey) == g_mapSoundPrecache.end())
-	{
-		// precache no found, let's do it.
-		gFModSystem->createSound(strKey.c_str(), (FMOD_LOOP_NORMAL | FMOD_3D | FMOD_3D_WORLDRELATIVE | FMOD_3D_LINEARROLLOFF), 0, &g_mapSoundPrecache[strKey]);
-	}
+	PlaySound("weapons/SCARH/mk17_shoot-s.wav");
 }
+
+void CountChannels(void)
+{
+	int iResult = 0;
+
+	for (auto& info : gFMODChannelManager::m_Channels)
+	{
+		if (info.m_flNextAvailable < g_flClientTime)
+		{
+			iResult++;
+		}
+	}
+
+	std::string text = "Avaliable channels: " + std::to_string(iResult) + "\n";
+	gEngfuncs.pfnConsolePrint(text.c_str());
+}
+#endif
 
 void Sound_Init()
 {
+#ifdef _DEBUG
 	gEngfuncs.pfnAddCommand("testfmod", &Test_FMOD);
+	gEngfuncs.pfnAddCommand("countchannels", &CountChannels);
+#endif
 
 	/*
 		Create a System object and initialize.
@@ -155,38 +154,61 @@ void Sound_Init()
 	gFModSystem->set3DSettings(1.0, SND_DISTANCEFACTOR, 1.0f);
 }
 
-void PlaySound(const char* szSound, int iPitch)
+FMOD::Sound* PrecacheSound(std::string szSample, FMOD_MODE iMode)
 {
-	auto strKey = gEngfuncs.pfnGetGameDirectory() + std::string("/sound/") + std::string(szSound);
+	static char szFullPath[256];
 
-	if (g_mapSoundPrecache.find(strKey) == g_mapSoundPrecache.end())
+	// Add the "sound/" at the start.
+	if (strncmp(szSample.c_str(), "sound/", 6U))
+	{
+		std::string szLocalPath = "sound/" + szSample;
+		FILE_SYSTEM->GetLocalPath(szLocalPath.c_str(), szFullPath, charsmax(szFullPath));
+	}
+	else
+		FILE_SYSTEM->GetLocalPath(szSample.c_str(), szFullPath, charsmax(szFullPath));
+
+	if (g_mapSoundPrecache.find(szFullPath) == g_mapSoundPrecache.end())
 	{
 		// precache no found, let's do it.
-		gFModSystem->createSound(strKey.c_str(), FMOD_2D | FMOD_LOOP_OFF, 0, &g_mapSoundPrecache[strKey]);
+		gFModSystem->createSound(szFullPath, iMode, 0, &g_mapSoundPrecache[szFullPath]);
+	}
+	else
+	{
+		// Switch to current mode. This is because that it could be played under a different mode.
+		g_mapSoundPrecache[szFullPath]->setMode(iMode);
 	}
 
-	gFModSystem->playSound(g_mapSoundPrecache[strKey], nullptr, false, &g_phLocal2DChannel);
-	g_phLocal2DChannel->setPitch(float(iPitch) / 100.0f);
+	return g_mapSoundPrecache[szFullPath];
 }
 
-void Play3DSound(const char* szSound, float flMinDist, float flMaxDist, const Vector& vecOrigin, int iPitch)
+void PlaySound(const char* szSound, float flVolume, int iPitch)
 {
-	auto strKey = gEngfuncs.pfnGetGameDirectory() + std::string("/sound/") + std::string(szSound);
 	FMOD_TIMEUNIT iLength = 3500;
-	FMOD_VECTOR	pos = VecConverts(vecOrigin, true);
-
-	if (g_mapSoundPrecache.find(strKey) == g_mapSoundPrecache.end())
-	{
-		// precache no found, let's do it.
-		gFModSystem->createSound(strKey.c_str(), FMOD_DEFAULT_IN_GOLDSRC, 0, &g_mapSoundPrecache[strKey]);
-	}
-
-	g_mapSoundPrecache[strKey]->set3DMinMaxDistance(flMinDist / SND_DISTANCEFACTOR, flMaxDist / SND_DISTANCEFACTOR);
-	g_mapSoundPrecache[strKey]->getLength(&iLength, FMOD_TIMEUNIT_MS);
+	auto pSound = PrecacheSound(szSound, FMOD_2D | FMOD_LOOP_OFF);
+	pSound->getLength(&iLength, FMOD_TIMEUNIT_MS);
 
 	auto ppChannel = gFMODChannelManager::Allocate(float(iLength) / 1000.0f);
-	gFModSystem->playSound(g_mapSoundPrecache[strKey], nullptr, true, ppChannel);
+	gFModSystem->playSound(pSound, nullptr, false, ppChannel);
+	(*ppChannel)->setVolume(flVolume);
+	(*ppChannel)->setVolumeRamp(false);
+	(*ppChannel)->setPitch(float(iPitch) / 100.0f);
+	(*ppChannel)->setPaused(false);
+}
+
+void Play3DSound(const char* szSound, float flMinDist, float flMaxDist, const Vector& vecOrigin, float flVolume, int iPitch)
+{
+	FMOD_TIMEUNIT iLength = 3500;
+	FMOD_VECTOR	pos = VecConverts(vecOrigin, true);
+	auto pSound = PrecacheSound(szSound, FMOD_DEFAULT_IN_GOLDSRC);
+
+	pSound->set3DMinMaxDistance(flMinDist / SND_DISTANCEFACTOR, flMaxDist / SND_DISTANCEFACTOR);
+	pSound->getLength(&iLength, FMOD_TIMEUNIT_MS);
+
+	auto ppChannel = gFMODChannelManager::Allocate(float(iLength) / 1000.0f);
+	gFModSystem->playSound(pSound, nullptr, true, ppChannel);	// Have to activate the channel first. Otherwise it will be a nullptr.
 	(*ppChannel)->set3DAttributes(&pos, &g_fmodvecZero);
+	(*ppChannel)->setVolume(flVolume);
+	(*ppChannel)->setVolumeRamp(false);
 	(*ppChannel)->setPitch(float(iPitch) / 100.0f);	// original formula for most CS weapons: 94 + gEngfuncs.pfnRandomLong(0, 0xf)
 	(*ppChannel)->setPaused(false);
 }
@@ -210,7 +232,7 @@ void Sound_Think(double flDeltaTime)
 void Sound_Exit()
 {
 	// only sound precache needs to release. channels don't.
-	for (auto elem : g_mapSoundPrecache)
+	for (auto& elem : g_mapSoundPrecache)
 	{
 		elem.second->release();
 	}
