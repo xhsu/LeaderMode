@@ -320,3 +320,31 @@ void CL_DLLEXPORT V_CalcRefdef(ref_params_s* pparams)
 	// copy the result and save them for our own use.
 	Q_memcpy(&g_pparams, pparams, sizeof(ref_params_s));
 }
+
+//
+// From here are the extended functions called from metahook module.
+//
+
+bool MH_LoadClient(unsigned short iVersion, const cl_extendedfunc_t* pfn)
+{
+	if (iVersion != CLIENT_EXTENDED_FUNCS_API_VERSION)
+	{
+		Sys_Error("Version mismatch between client and metahook module!\nExpect version: %d\nReceived version: %d", CLIENT_EXTENDED_FUNCS_API_VERSION, iVersion);
+		return false;
+	}
+
+	if (pfn)
+		Q_memcpy(&gExtFuncs, pfn, sizeof(gExtFuncs));
+	else
+	{
+		Sys_Error("Null function table \"cl_extendedfunc_t\" sent!");
+		return false;
+	}
+
+	return true;
+}
+
+void S_StartSound(int iEntity, int iChannel, sfx_t* pSFXin, Vector& vecOrigin, float flVolume, float flAttenuation, int bitsFlags, int iPitch)
+{
+
+}

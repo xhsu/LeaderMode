@@ -99,6 +99,9 @@ Created Date: 05 Mar 2020
 // for local_state_s
 #include "../common/entity_state.h"
 
+// For engine sound structs
+#include "../engine/sfx.h"
+
 // sync the weapon data between cl and sv.
 #include "../dlls/ammo.h"
 #include "../dlls/weapontype.h"

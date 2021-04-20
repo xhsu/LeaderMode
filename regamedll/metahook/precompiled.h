@@ -38,6 +38,9 @@ Modern Warfare Dev Team
 // for studiohdr_t and STUDIO_NF_FULLBRIGHT
 #include "../engine/studio.h"
 
+// For engine sound structs
+#include "../engine/sfx.h"
+
 // general engine hooks and function prototype definitions
 #include "engine.h"
 

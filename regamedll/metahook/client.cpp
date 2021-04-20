@@ -37,6 +37,11 @@ bool CL_GetExtendedFuncs(cl_extendedfunc_t* pStructReturned)
 
 		g_pfnLoadTGA,
 		&Safe_Key_NameForBinding,
+		nullptr,
+		nullptr,
+		nullptr,
+		nullptr,
+		nullptr,
 	};
 
 	return true;

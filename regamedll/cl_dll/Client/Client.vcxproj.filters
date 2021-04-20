@@ -40,6 +40,9 @@
     <Filter Include="public">
       <UniqueIdentifier>{e81bbb95-a41d-41d1-ae58-1b92073918a1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="engine">
+      <UniqueIdentifier>{0d255911-e99c-44e4-8e0e-26bda0537596}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\cdll_int.cpp">
@@ -535,6 +538,9 @@
     </ClInclude>
     <ClInclude Include="..\..\public\interface.h">
       <Filter>public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\engine\sfx.h">
+      <Filter>engine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

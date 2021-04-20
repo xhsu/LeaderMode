@@ -9,7 +9,7 @@ Modern Warfare Dev Team
 
 #pragma once
 
-#define CLIENT_EXTENDED_FUNCS_API_VERSION	1
+#define CLIENT_EXTENDED_FUNCS_API_VERSION	2
 
 typedef struct
 {
@@ -17,6 +17,11 @@ typedef struct
 
 	ENGFUNC_LoadTGA pfnLoadTGA;
 	ENGFUNC_Key_NameForBinding pfnKey_NameForBinding;
+	ENGFUNC_S_LoadSound pfnS_LoadSound;
+	ENGFUNC_S_StartSound pfnS_StartStaticSound;
+	ENGFUNC_S_StartSound pfnS_StartDynamicSound;
+	ENGFUNC_S_StopAllSounds pfnS_StopAllSounds;
+	ENGFUNC_Cache_Check pfnCache_Check;
 }
 cl_extendedfunc_t;
 

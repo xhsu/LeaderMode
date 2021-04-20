@@ -15,6 +15,11 @@ Modern Warfare Dev Team
 
 typedef qboolean	(*ENGFUNC_LoadTGA)				(const char* szFilename, unsigned char* buffer, int bufferSize, int* width, int* height);
 typedef const char*	(*ENGFUNC_Key_NameForBinding)	(const char* pszCommand);
+typedef void		(*ENGFUNC_S_StartSound)(int entnum, int entchannel, sfx_t* sfxin, Vector& origin, float fvol, float attenuation, int flags, int pitch);
+typedef void*		(*ENGFUNC_Cache_Check)(cache_user_t* c);
+typedef sfxcache_t*	(*ENGFUNC_S_LoadSound)(sfx_t* s, /*channel_t* */void* ch);	// Due to we cannot handle channel_t*
+typedef void		(*ENGFUNC_S_StopAllSounds)(bool STFU);	// @param: clear the sound buffer instantly?
+
 
 // don't input these if this is loaded by client.dll.
 // engine funcs got by searching its signiture.

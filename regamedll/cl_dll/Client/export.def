@@ -43,3 +43,6 @@ EXPORTS
 	Initialize=Initialize_			@41
 	KB_Find							@42
 	V_CalcRefdef					@43
+
+	MH_LoadClient					@44
+	S_StartSound					@45
