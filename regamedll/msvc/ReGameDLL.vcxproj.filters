@@ -133,7 +133,7 @@
     <ClCompile Include="..\dlls\wpn_shared\wpn_scout.cpp">
       <Filter>dlls\wpn_shared</Filter>
     </ClCompile>
-    <ClCompile Include="..\dlls\wpn_shared\wpn_sg550.cpp">
+    <ClCompile Include="..\dlls\wpn_shared\wpn_psg1.cpp">
       <Filter>dlls\wpn_shared</Filter>
     </ClCompile>
     <ClCompile Include="..\dlls\wpn_shared\wpn_ump45.cpp">

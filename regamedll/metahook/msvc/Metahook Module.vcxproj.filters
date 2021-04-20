@@ -14,6 +14,9 @@
     <Filter Include="public">
       <UniqueIdentifier>{ee2e81a2-66d2-47e0-8436-baf0798745f3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="metahook\msvc">
+      <UniqueIdentifier>{652fc0dd-4d0b-41cd-ad97-2fd6218bc9ea}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\precompiled.cpp">
@@ -75,5 +78,10 @@
     <ClInclude Include="..\exportfuncs.h">
       <Filter>metahook</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="export.def">
+      <Filter>metahook\msvc</Filter>
+    </None>
   </ItemGroup>
 </Project>

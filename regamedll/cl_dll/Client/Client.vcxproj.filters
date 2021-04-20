@@ -303,6 +303,9 @@
     <ClCompile Include="..\..\public\interface.cpp">
       <Filter>public</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\dlls\wpn_shared\wpn_psg1.cpp">
+      <Filter>dlls\wpn_shared</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\cdll_int.h">

@@ -181,6 +181,9 @@
     <ClInclude Include="..\metahook.h" />
     <ClInclude Include="..\precompiled.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="export.def" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

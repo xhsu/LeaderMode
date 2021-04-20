@@ -1791,23 +1791,83 @@ public:	// new functions
 	void UMP45Fire(float flSpread, float flCycleTime = 60.0f / UMP45_RPM);
 };
 
-#define M14EBR_VIEW_MODEL	"models/weapons/v_m14ebr.mdl"
-#define M14EBR_WORLD_MODEL	"models/weapons/w_m14ebr.mdl"
-#define M14EBR_FIRE_SFX		"weapons/m14ebr/m14ebr_fire.wav"
+#define PSG1_VIEW_MODEL		"models/weapons/v_psg1.mdl"
+#define PSG1_WORLD_MODEL	"models/weapons/w_awp.mdl"	// UNDONE
+#define PSG1_FIRE_SFX		"weapons/m14ebr/m14ebr_fire.wav"	// UNDONE
 
-const float SG550_MAX_SPEED      = 210.0f;
-const float SG550_MAX_SPEED_ZOOM = 150.0f;
-const float SG550_DAMAGE         = 90;
-const float SG550_RANGE_MODIFER  = 0.98f;	// 85% damage @2400 inches.
-const float SG550_RELOAD_TIME    = 3.35f;
-
-enum sg550_e
+class CPSG1 : public CBaseWeapon
 {
-	SG550_IDLE,
-	SG550_SHOOT,
-	SG550_SHOOT2,
-	SG550_RELOAD,
-	SG550_DRAW,
+public:	// Constants / Database
+	static constexpr int IDLE = 0;
+	static constexpr int SHOOT = 1;
+	static constexpr int RELOAD = 2;
+	static constexpr int RELOAD_EMPTY = 3;
+	static constexpr int DRAW = 4;
+	static constexpr int DRAW_FIRST = 5;
+	static constexpr int CHECK_MAGAZINE = 6;
+	static constexpr int BLOCK_UP = 7;
+	static constexpr int BLOCK_DOWN = 8;
+	static constexpr int DASH_ENTER = 9;
+	static constexpr int DASHING = 10;
+	static constexpr int DASH_EXIT = 11;
+	static constexpr int LHAND_DOWN = 12;
+	static constexpr int LHAND_UP = 13;
+
+	static constexpr float	MAX_SPEED = 210.0f;
+	static constexpr float	MAX_SPEED_ZOOM = 150.0f;
+	static constexpr float	DAMAGE = 90.0f;
+	static constexpr float	RANGE_MODIFER = 1.03443782f;	// 85% damage @2400 inches.
+	static constexpr float	FIRE_INTERVAL = 0.125f;
+	static constexpr float	FIRE_ANIMTIME = 0.4333f;
+	static constexpr float	RELOAD_TIME = 3.0667F;
+	static constexpr float	RELOAD_EMPTY_TIME = 3.8667F;
+	static constexpr float	DEPLOY_TIME = 0.833F;
+	static constexpr float	DRAW_FIRST_TIME = 2.033F;
+	static constexpr float	HOLSTER_TIME = 0.7333F;	// UNDONE
+	static constexpr float	CHECK_MAGAZINE_TIME = 3.0667F;
+	static constexpr float	BLOCK_UP_TIME = 0.3667F;
+	static constexpr float	BLOCK_DOWN_TIME = 0.3667F;
+	static constexpr float	LHAND_UP_TIME = 0.4333F;
+	static constexpr float	LHAND_DOWN_TIME = 0.4333F;
+	static constexpr float	DASH_ENTER_TIME = 0.3667F;
+	static constexpr float	DASH_EXIT_TIME = 0.3667F;
+	static constexpr int	PENETRATION = 2;
+	static constexpr float	EFFECTIVE_RANGE = 8192.0f;
+	static constexpr int	GUN_VOLUME = BIG_EXPLOSION_VOLUME;
+	static constexpr float	SPREAD_BASELINE = 0.0025f;
+
+#ifndef CLIENT_DLL
+public:	// SV exclusive variables.
+	static unsigned short m_usEvent;
+	static int m_iShell;
+
+public:	// SV exclusive functions.
+	virtual void	Precache(void) final;
+#else
+public:	// CL exclusive functions.
+	virtual	bool	UsingInvertedVMDL(void) final { return false; }	// Model designed by InnocentBlue is not inverted.
+	virtual int		CalcBodyParam(void) final;
+#endif
+
+public:	// basic logic funcs
+	virtual bool	Deploy			(void) final;
+	virtual void	PrimaryAttack	(void) final { return PSG1Fire(GetSpread()); }
+	virtual void	SecondaryAttack	(void) final { return DefaultScopeSight(Vector(-6.2f, -2, 1.1f), 25); }
+	virtual void	WeaponIdle		(void) final { return DefaultIdle(DASHING); }
+	virtual bool	Reload			(void) final;
+	virtual bool	HolsterStart	(void) final;
+	virtual	void	DashStart		(void) final { return DefaultDashStart(DASH_ENTER, DASH_ENTER_TIME); }
+	virtual void	DashEnd			(void) final { return DefaultDashEnd(DASH_ENTER, DASH_ENTER_TIME, DASH_EXIT, DASH_EXIT_TIME); }
+
+public:	// util funcs
+	virtual float	GetMaxSpeed		(void) final;
+	virtual void	ResetModel		(void) final;
+	virtual bool	SetLeftHand		(bool bAppear) final { return DefaultSetLHand(bAppear, LHAND_UP, LHAND_UP_TIME, LHAND_DOWN, LHAND_DOWN_TIME); }
+	virtual void	PlayBlockAnim	(void) final { return DefaultBlock(BLOCK_UP, BLOCK_UP_TIME, BLOCK_DOWN, BLOCK_DOWN_TIME); }
+	virtual float	GetSpread		(void) final;
+
+public:	// new funcs
+	void PSG1Fire(float flSpread, float flCycleTime = FIRE_INTERVAL);
 };
 
 #define C4_VIEW_MODEL	"models/weapons/v_c4.mdl"
