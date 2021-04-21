@@ -77,7 +77,7 @@ d_mp5navy			640 cod8_mp5	0	180	42	18
 d_anaconda			640 cod8_.44	0	180	37	18
 d_p90				640 cod8_p90	0	180	46	20
 d_m200				640 cod6_m200	0	180	73	19
-d_m14ebr			640 cod8_mk14	0	180	66	15
+d_psg1				640 cod8_mk14	0	180	66	15
 d_scarl				640 cod8_scar	0	180	54	18
 d_ump45				640 cod8_ump45	0	180	45	23
 d_usp				640 cod8_usp	0	180	43	20

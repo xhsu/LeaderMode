@@ -19,8 +19,8 @@ weapon_fiveseven		640 cod8_57			0	0	170	45
 weapon_fiveseven_s		640 cod8_57			0	90	170	45
 weapon_ump45			640 cod8_ump45		0	0	170	66
 weapon_ump45_s			640 cod8_ump45		0	90	170	66
-weapon_m14ebr			640 cod8_mk14		0	0	170	45
-weapon_m14ebr_s			640 cod8_mk14		0	90	170	45
+weapon_psg1			640 cod8_mk14		0	0	170	45
+weapon_psg1_s			640 cod8_mk14		0	90	170	45
 weapon_cm901			640 cod8_cm901		0	0	170	50
 weapon_cm901_s			640 cod8_cm901		0	90	170	50
 weapon_qbz95			640 cod8_95			0	0	170	65
