@@ -1804,14 +1804,15 @@ public:	// Constants / Database
 	static constexpr int RELOAD_EMPTY = 3;
 	static constexpr int DRAW = 4;
 	static constexpr int DRAW_FIRST = 5;
-	static constexpr int CHECK_MAGAZINE = 6;
-	static constexpr int BLOCK_UP = 7;
-	static constexpr int BLOCK_DOWN = 8;
-	static constexpr int DASH_ENTER = 9;
-	static constexpr int DASHING = 10;
-	static constexpr int DASH_EXIT = 11;
-	static constexpr int LHAND_DOWN = 12;
-	static constexpr int LHAND_UP = 13;
+	static constexpr int HOLSTER = 6;
+	static constexpr int CHECK_MAGAZINE = 7;
+	static constexpr int BLOCK_UP = 8;
+	static constexpr int BLOCK_DOWN = 9;
+	static constexpr int DASH_ENTER = 10;
+	static constexpr int DASHING = 11;
+	static constexpr int DASH_EXIT = 12;
+	static constexpr int LHAND_DOWN = 13;
+	static constexpr int LHAND_UP = 14;
 
 	static constexpr float	MAX_SPEED = 210.0f;
 	static constexpr float	MAX_SPEED_ZOOM = 150.0f;
@@ -1823,7 +1824,7 @@ public:	// Constants / Database
 	static constexpr float	RELOAD_EMPTY_TIME = 3.8667F;
 	static constexpr float	DEPLOY_TIME = 0.833F;
 	static constexpr float	DRAW_FIRST_TIME = 2.033F;
-	static constexpr float	HOLSTER_TIME = 0.7333F;	// UNDONE
+	static constexpr float	HOLSTER_TIME = 0.8333F;
 	static constexpr float	CHECK_MAGAZINE_TIME = 3.0667F;
 	static constexpr float	BLOCK_UP_TIME = 0.3667F;
 	static constexpr float	BLOCK_DOWN_TIME = 0.3667F;
@@ -1852,7 +1853,7 @@ public:	// CL exclusive functions.
 public:	// basic logic funcs
 	virtual bool	Deploy			(void) final;
 	virtual void	PrimaryAttack	(void) final { return PSG1Fire(GetSpread()); }
-	virtual void	SecondaryAttack	(void) final { return DefaultScopeSight(Vector(-6.2f, -2, 1.1f), 25); }
+	virtual void	SecondaryAttack	(void) final { return DefaultScopeSight(Vector(-4.9f, 5, 0.5f), 25); }
 	virtual void	WeaponIdle		(void) final { return DefaultIdle(DASHING); }
 	virtual bool	Reload			(void) final;
 	virtual bool	HolsterStart	(void) final;

@@ -19,6 +19,8 @@ typedef sfxcache_t* (*ENGFUNC_S_LoadSound)			(sfx_t* s, /*channel_t* */void* ch)
 typedef void		(*ENGFUNC_S_StopAllSounds)		(bool STFU);	// @param: clear the sound buffer instantly?
 
 #ifndef CLIENT_DLL
+void Sound_InstallHook();
+
 namespace engine
 {
 	extern ENGFUNC_S_StartSound S_StartStaticSound;

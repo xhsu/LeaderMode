@@ -31,11 +31,11 @@ static constexpr unsigned LSLEEVE = 3U;
 static constexpr unsigned HIDE = 1U;
 static constexpr unsigned SHOW = 0U;
 
-static constexpr unsigned SCOPE = 9U;
+static constexpr unsigned SCOPE = 7U;
 static constexpr unsigned NO_SCOPE = 1U;
 static constexpr unsigned HENSOLDT = 0U;
 
-static constexpr unsigned MUZZLE = 7U;
+static constexpr unsigned MUZZLE = 8U;
 static constexpr unsigned NO_MUZZLE = 0U;
 static constexpr unsigned SILENCER = 1U;
 
@@ -197,7 +197,7 @@ void CPSG1::PSG1Fire(float flSpread, float flCycleTime)
 	args.origin = m_pPlayer->pev->origin;
 	args.velocity = m_pPlayer->pev->velocity;
 
-	//EV_FirePSG1(&args);	// UNDONE
+	EV_FirePSG1(&args);
 #endif
 
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
@@ -238,7 +238,7 @@ bool CPSG1::HolsterStart()
 		SecondaryAttack();
 
 	// then holster.
-	return DefaultHolster(IDLE, 0.1f);	// UNDONE
+	return DefaultHolster(HOLSTER, HOLSTER_TIME);
 }
 
 float CPSG1::GetMaxSpeed()

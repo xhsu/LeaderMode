@@ -38,6 +38,7 @@ void IPlugins::LoadEngine(void)
 	// load hooks.
 	LargerTexture_InstallHook();
 	FullBLight_InstallHook();
+	Sound_InstallHook();
 
 	// Search engine function for client.dll
 	SearchEngineFunctions();

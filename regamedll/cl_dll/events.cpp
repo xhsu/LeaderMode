@@ -1335,7 +1335,7 @@ DECLARE_EVENT(Fire57)
 	else
 		EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -12.0, -4.0);
 
-	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iPShell, TE_BOUNCE_SHELL, idx, 4);
+	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iPShell, TE_BOUNCE_SHELL, 4);
 
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
@@ -1394,7 +1394,7 @@ DECLARE_EVENT(FireSVD)
 	else
 		EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -12.0, -4.0);
 
-	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iRShell, TE_BOUNCE_SHELL, idx, 17);
+	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iRShell, TE_BOUNCE_SHELL, 17);
 
 	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, SVD_FIRE_SFX, 1.0, 0.6, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
 
@@ -1457,7 +1457,7 @@ DECLARE_EVENT(Fireglock18)
 	else
 		EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -12.0, -4.0);
 
-	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iPShell, TE_BOUNCE_SHELL, idx, 4);
+	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iPShell, TE_BOUNCE_SHELL, 4);
 
 	gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, G18C_FIRE_SFX, 1.0, ATTN_NORM, 0, 94 + gEngfuncs.pfnRandomLong(0, 0xf));
 
@@ -1517,7 +1517,7 @@ DECLARE_EVENT(FireMK46)
 	else
 		EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -12.0, -4.0);
 
-	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iRShell, TE_BOUNCE_SHELL, idx, 10);
+	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iRShell, TE_BOUNCE_SHELL, 10);
 
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
@@ -1606,7 +1606,7 @@ DECLARE_EVENT(FireM4A1)
 	else
 		EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -12.0, -4.0);
 
-	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iRShell, TE_BOUNCE_SHELL, idx, 10);
+	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iRShell, TE_BOUNCE_SHELL, 10);
 
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
@@ -1680,10 +1680,53 @@ DECLARE_EVENT(FireScout)
 
 }
 
-DECLARE_EVENT(FireSG550)
+DECLARE_EVENT(FirePSG1)
 {
+	int    idx = args->entindex;
+	Vector angles(
+		args->iparam1 / 100.0f + args->angles[0],
+		args->iparam2 / 100.0f + args->angles[1],
+		args->angles[2]
+	);
 
+	Vector forward, right, up;
+	AngleVectors(angles, forward, right, up);
+
+	Vector ShellVelocity, ShellOrigin;
+	if (EV_IsLocal(idx))
+	{
+		EV_MuzzleFlash();
+
+		if (g_pCurWeapon)
+			g_pCurWeapon->SendWeaponAnim(CPSG1::SHOOT);
+
+		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 3, 0.3, 35, 35, 35, EV_RIFLE_SMOKE, args->velocity, false, 35);
+		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 35, 0.35, 30, 30, 30, EV_WALL_PUFF, args->velocity, false, 35);
+		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 70, 0.3, 25, 25, 25, EV_WALL_PUFF, args->velocity, false, 35);
+
+		if (!cl_righthand->value)
+			EV_GetDefaultShellInfo(args, args->origin, args->velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -8.0, -10.0);
+		else
+			EV_GetDefaultShellInfo(args, args->origin, args->velocity, ShellVelocity, ShellOrigin, forward, right, up, 17.0, -8.0, 10.0);
+
+		ShellOrigin = g_pViewEnt->attachment[1];
+		ShellVelocity *= 1.5f;
+		ShellVelocity.z -= 50.0;
+	}
+	else
+		EV_GetDefaultShellInfo(args, args->origin, args->velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -12.0, 4.0);
+
+	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iRShell, TE_BOUNCE_SHELL, 17);
+
+	Vector vecSrc = EV_GetGunPosition(args, args->origin);
+	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
+
+	// original goldsrc api: VOL = 1.0, ATTN = 0.6
+	EV_PlayGunFire2(vecSrc + forward * 10.0f, PSG1_FIRE_SFX, CPSG1::GUN_VOLUME);
+
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, CPSG1::EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_PSG1].m_iAmmoType, CPSG1::PENETRATION);
 }
+
 
 DECLARE_EVENT(FireSCARH)
 {
@@ -1730,7 +1773,7 @@ DECLARE_EVENT(FireSCARH)
 	else
 		EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -12.0, -4.0);
 
-	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iRShell, TE_BOUNCE_SHELL, idx, 15);
+	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iRShell, TE_BOUNCE_SHELL, 15);
 
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
@@ -1830,7 +1873,7 @@ DECLARE_EVENT(FireUMP45)
 	else
 		EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -12.0, -4.0);
 
-	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iPShell, TE_BOUNCE_SHELL, idx, 13);
+	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iPShell, TE_BOUNCE_SHELL, 13);
 
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
@@ -1896,7 +1939,7 @@ DECLARE_EVENT(FireUSP)
 	else
 		EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -12.0, 4.0);
 
-	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iPShell, TE_BOUNCE_SHELL);
+	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, g_iPShell, TE_BOUNCE_SHELL, 5);
 
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
@@ -1972,7 +2015,7 @@ DECLARE_EVENT(FireM1014)
 	else
 		EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -12.0, -4.0);
 
-	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, shell, TE_BOUNCE_SHOTSHELL, idx, 3);
+	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, shell, TE_BOUNCE_SHOTSHELL, 3);
 
 	int shared_rand = args->iparam2;
 	Vector vecSrc = EV_GetGunPosition(args, origin);
@@ -2413,6 +2456,7 @@ void Events_Init(void)
 	HOOK_EVENT(mac10, FireMAC10);
 	HOOK_EVENT(mp5n, FireMP5);
 	HOOK_EVENT(anaconda, FireAnaconda);
+	HOOK_EVENT(psg1, FirePSG1);
 	HOOK_EVENT(p90, FireP90);
 	HOOK_EVENT(scarh, FireSCARH);
 	HOOK_EVENT(mp7a1, FireMP7A1);
