@@ -33,6 +33,9 @@
 #include <wchar.h>
 #endif
 
+#define charsmax(x)		(_countof(x) - 1U)
+#define wcharsmax(x)	(_countof(x) - 1U)
+
 wchar_t *SharedWVarArgs(const wchar_t *format, ...);
 char *SharedVarArgs(const char *format, ...);
 char *BufPrintf(char *buf, int &len, const char *fmt, ...);
@@ -88,3 +91,4 @@ struct BodyEnumInfo_t
 
 int CalcBody(BodyEnumInfo_t* info, int count);
 template<size_t N> int CalcBody(BodyEnumInfo_t (&info)[N]);
+void NORETURN Sys_Error(const char* fmt, ...);

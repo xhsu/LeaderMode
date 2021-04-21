@@ -1665,30 +1665,6 @@ void MAKE_STRING_CLASS(const char *str, entvars_t *pev)
 	AddEntityHashValue(pev, STRING(pev->classname), CLASSNAME);
 }
 
-void NORETURN Sys_Error(const char *error, ...)
-{
-	va_list argptr;
-	static char text[1024];
-
-	va_start(argptr, error);
-	vsnprintf(text, sizeof(text), error, argptr);
-	va_end(argptr);
-
-	FILE *fl = fopen("regamedll_error.txt", "w");
-	if (fl)
-	{
-		fprintf(fl, "%s\n", text);
-		fclose(fl);
-	}
-
-	CONSOLE_ECHO("FATAL ERROR (shutting down): %s\n", text);
-
-	//TerminateProcess(GetCurrentProcess(), 1);
-	int *null = 0;
-	*null = 0;
-	exit(-1);
-}
-
 int UTIL_CountPlayersInBrushVolume(bool bOnlyAlive, CBaseEntity *pBrushEntity, int &playersInCount, int &playersOutCount, CPlayerInVolumeAdapter *pAdapter)
 {
 	playersInCount = 0;

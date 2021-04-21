@@ -647,6 +647,17 @@
 #define CHAN_NETWORKVOICE_END       500 // network voice data reserves slots (CHAN_NETWORKVOICE_BASE through CHAN_NETWORKVOICE_END).
 #define CHAN_BOT                    501 // channel used for bot chatter.
 
+// From xash3d
+#define SND_VOLUME					(1<<0)	// a scaled byte
+#define SND_ATTENUATION				(1<<1)	// a byte
+#define SND_LARGE_INDEX				(1<<2)	// a send sound as short
+#define SND_PITCH					(1<<3)	// a byte
+#define SND_SENTENCE				(1<<4)	// set if sound num is actually a sentence num
+#define SND_STOP					(1<<5)	// stop the sound
+#define SND_CHANGE_VOL				(1<<6)	// change sound vol
+#define SND_CHANGE_PITCH			(1<<7)	// change sound pitch
+#define SND_SPAWNING				(1<<8)	// we're spawning, used in some cases for ambients (not sent across network)
+
 // attenuation values
 #define ATTN_NONE                   0
 #define ATTN_NORM                   0.8f

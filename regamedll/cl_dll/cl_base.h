@@ -19,6 +19,7 @@ Created Date: 05 Mar 2020
 #include <string>
 #include <random>
 #include <iterator>
+#include <unordered_map>
 
 // const, OH, why you are const!
 #include "../common/const.h"
@@ -126,6 +127,7 @@ Created Date: 05 Mar 2020
 
 // functions loaded(or extended) from metahook module.
 #include "../metahook/engine.h"
+#include "../metahook/sound.h"
 #include "../metahook/client.h"
 
 // custom header starts from here.

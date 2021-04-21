@@ -25,4 +25,16 @@ typedef struct
 }
 cl_extendedfunc_t;
 
-typedef bool (*FUNC_GetExtFuncs)	(cl_extendedfunc_t* pStructReturned);
+#ifndef CLIENT_DLL
+
+// Obvious these are not for client.dll
+void GetClientCallbacks(void);
+const char* Safe_Key_NameForBinding(const char* pszCommand);
+
+namespace cl
+{
+	extern bool (*MH_LoadClient)(unsigned short iVersion, const cl_extendedfunc_t* pfn);
+	extern void (*S_StartSound)(int iEntity, int iChannel, sfx_t* pSFXin, Vector& vecOrigin, float flVolume, float flAttenuation, int bitsFlags, int iPitch);
+	extern void (*S_StopAllSounds)(bool STFU);
+};
+#endif

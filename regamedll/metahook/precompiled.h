@@ -11,6 +11,7 @@ Modern Warfare Dev Team
 
 #pragma once
 
+
 #include "../public/basetypes.h"
 #include "../engine/maintypes.h"
 #include "../engine/archtypes.h"
@@ -47,9 +48,13 @@ Modern Warfare Dev Team
 // hook client export funcs
 #include "exportfuncs.h"
 
-// client extended funcs
-#include "client.h"
+// Share utils. The one you must have.
+#include "../game_shared/shared_util.h"
 
 // specific functions
 #include "larger_textures.h"
 #include "fullbright_textures.h"
+#include "sound.h"
+
+// client extended funcs
+#include "client.h"

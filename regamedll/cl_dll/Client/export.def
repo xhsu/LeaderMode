@@ -46,3 +46,4 @@ EXPORTS
 
 	MH_LoadClient					@44
 	S_StartSound					@45
+	S_StopAllSounds					@46

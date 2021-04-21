@@ -42,11 +42,6 @@
 #define VIEW_FIELD_NARROW		0.7		// +-45 degrees, more narrow check used to set up ranged attacks
 #define VIEW_FIELD_ULTRA_NARROW	0.9		// +-25 degrees, more narrow check used to set up ranged attacks
 
-#define SND_STOP				BIT(5)	// duplicated in protocol.h stop sound
-#define SND_CHANGE_VOL			BIT(6)	// duplicated in protocol.h change sound vol
-#define SND_CHANGE_PITCH		BIT(7)	// duplicated in protocol.h change sound pitch
-#define SND_SPAWNING			BIT(8)	// duplicated in protocol.h we're spawing, used in some cases for ambients
-
 // All monsters need this data
 #define DONT_BLEED			-1
 #define BLOOD_COLOR_DARKRED	(byte)223
@@ -291,7 +286,6 @@ bool UTIL_IsBeta();
 int UTIL_GetNumPlayers();
 bool UTIL_IsSpawnPointOccupied(CBaseEntity *pSpot);
 void MAKE_STRING_CLASS(const char *str, entvars_t *pev);
-void NORETURN Sys_Error(const char *error, ...);
 void replace_all(std::string& str, const std::string& from, const std::string& to);
 void UTIL_PlayEarSound(CBasePlayer* player, const char* sfx);
 bool UTIL_CheckPassibility(const Vector& vecPoint);	// return true is accessable

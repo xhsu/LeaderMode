@@ -9,40 +9,57 @@ Modern Warfare Dev Team
 
 #include "precompiled.h"
 
+namespace cl
+{
+	bool (*MH_LoadClient)(unsigned short iVersion, const cl_extendedfunc_t* pfn) = nullptr;
+	void (*S_StartSound)(int iEntity, int iChannel, sfx_t* pSFXin, Vector& vecOrigin, float flVolume, float flAttenuation, int bitsFlags, int iPitch) = nullptr;
+	void (*S_StopAllSounds)(bool STFU) = nullptr;
+};
+
+void GetClientCallbacks(void)
+{
+	HMODULE hClientDLL = LoadLibrary("client.dll");
+
+	if (!hClientDLL)
+	{
+		Sys_Error("client.dll no found!");
+		return;
+	}
+
+	*(void**)&cl::MH_LoadClient = GetProcAddress(hClientDLL, "MH_LoadClient");
+	*(void**)&cl::S_StartSound = GetProcAddress(hClientDLL, "S_StartSound");
+	*(void**)&cl::S_StopAllSounds = GetProcAddress(hClientDLL, "S_StopAllSounds");
+
+	if (!cl::MH_LoadClient)
+	{
+		Sys_Error("client.dll export function \"MH_LoadClient\" no found!");
+		return;
+	}
+	else if (!cl::S_StartSound)
+	{
+		Sys_Error("client.dll export function \"S_StartSound\" no found!");
+		return;
+	}
+	else if (!cl::S_StopAllSounds)
+	{
+		Sys_Error("client.dll export function \"S_StopAllSounds\" no found!");
+		return;
+	}
+}
+
 const char* Safe_Key_NameForBinding(const char* pszCommand)
 {
-	if (!g_pfnKey_NameForBinding)
-		return "Engine Function Error";
+	if (!engine::Key_NameForBinding)
+		return "Engine Function no found!";
 
 	if (!pszCommand)
 		return "Null Command";
 
 	static const char* psz = nullptr;
-	psz = g_pfnKey_NameForBinding(pszCommand);	// you can't put them in the same line.
+	psz = engine::Key_NameForBinding(pszCommand);	// you can't put them in the same line.
 
 	if (!psz)
 		return "UNBIND";
 
 	return psz;
-}
-
-bool CL_GetExtendedFuncs(cl_extendedfunc_t* pStructReturned)
-{
-	if (!pStructReturned)
-		return false;
-
-	*pStructReturned =
-	{
-		CLIENT_EXTENDED_FUNCS_API_VERSION,
-
-		g_pfnLoadTGA,
-		&Safe_Key_NameForBinding,
-		nullptr,
-		nullptr,
-		nullptr,
-		nullptr,
-		nullptr,
-	};
-
-	return true;
 }

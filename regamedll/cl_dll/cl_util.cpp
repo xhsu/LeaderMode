@@ -453,22 +453,46 @@ void UTIL_ReplaceAll(std::wstring& str, const std::wstring& from, const std::wst
 	}
 }
 
-void Sys_Error(const char* fmt, ...)
-{
-	static char output[1024];
-	va_list ptr;
-
-	va_start(ptr, fmt);
-	vsnprintf(output, charsmax(output), fmt, ptr);
-	va_end(ptr);
-
-	HWND hwnd = GetActiveWindow();
-	MessageBox(hwnd, output, "Fatal Error", MB_OK | MB_ICONERROR | MB_TOPMOST);
-
-	_exit(-1);
-}
-
 GLuint UTIL_VguiSurfaceNewTextureId(void)
 {
 	return (GLuint)VGUI_SURFACE->CreateNewTextureID();
+}
+
+std::string& strip(std::string& s, const std::string& chars = " ")
+{
+	s.erase(0, s.find_first_not_of(chars.c_str()));
+	s.erase(s.find_last_not_of(chars.c_str()) + 1);
+	return s;
+}
+
+void UTIL_Split(const std::string& s, std::vector<std::string>& tokens, const std::string& delimiters)
+{
+	std::string::size_type lastPos = s.find_first_not_of(delimiters, 0);
+	std::string::size_type pos = s.find_first_of(delimiters, lastPos);
+
+	while (std::string::npos != pos || std::string::npos != lastPos)
+	{
+		tokens.push_back(s.substr(lastPos, pos - lastPos));
+		lastPos = s.find_first_not_of(delimiters, pos);
+		pos = s.find_first_of(delimiters, lastPos);
+	}
+}
+
+void parse(std::string& s, std::unordered_map<std::string, std::string>& items)
+{
+	std::vector<std::string> elements;
+	s.erase(0, s.find_first_not_of(" {"));
+	s.erase(s.find_last_not_of("} ") + 1);
+	UTIL_Split(s, elements, ",");
+
+	for (auto iter = elements.begin(); iter != elements.end(); iter++)
+	{
+		std::vector<std::string> kv;
+		UTIL_Split(*iter, kv, ":");
+
+		if (kv.size() != 2)
+			continue;
+
+		items[strip(kv[0], " \"")] = strip(kv[1], " \"");
+	}
 }

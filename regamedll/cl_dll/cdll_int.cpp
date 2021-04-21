@@ -262,30 +262,6 @@ BOOL CL_DLLEXPORT Initialize_(cl_enginefunc_t* pEnginefuncs, int iVersion)	// LU
 	// LUNA: UNDONE, crsky told me to do it later.
 	//CL_LoadParticleMan();
 
-	// Load metahook extended functions.
-	HMODULE hMetahookDLL = LoadLibrary("lm_metahook_module.dll");
-	if (!hMetahookDLL)
-	{
-		Sys_Error("Metahook module no found!");
-		return FALSE;
-	}
-
-	FUNC_GetExtFuncs pfn = (FUNC_GetExtFuncs)GetProcAddress(hMetahookDLL, "CL_GetExtendedFuncs");
-
-	if (pfn)
-		pfn(&gExtFuncs);
-	else
-	{
-		Sys_Error("Function \"CL_GetExtendedFuncs\" no found!");
-		return FALSE;
-	}
-
-	if (gExtFuncs.version != CLIENT_EXTENDED_FUNCS_API_VERSION)
-	{
-		Sys_Error("Version mismatch between client and metahook module!\nExpect Version: %d\nReceived Version: %d", CLIENT_EXTENDED_FUNCS_API_VERSION, gExtFuncs.version);
-		return FALSE;
-	}
-
 	// get tracker interface, if any
 	return TRUE;
 }
@@ -346,5 +322,13 @@ bool MH_LoadClient(unsigned short iVersion, const cl_extendedfunc_t* pfn)
 
 void S_StartSound(int iEntity, int iChannel, sfx_t* pSFXin, Vector& vecOrigin, float flVolume, float flAttenuation, int bitsFlags, int iPitch)
 {
+	if (iChannel == CHAN_STATIC)
+		gExtFuncs.pfnS_StartStaticSound(iEntity, iChannel, pSFXin, vecOrigin, flVolume, flAttenuation, bitsFlags, iPitch);
+	else
+		gExtFuncs.pfnS_StartDynamicSound(iEntity, iChannel, pSFXin, vecOrigin, flVolume, flAttenuation, bitsFlags, iPitch);
+}
 
+void S_StopAllSounds(bool STFU)
+{
+	gExtFuncs.pfnS_StopAllSounds(STFU);
 }

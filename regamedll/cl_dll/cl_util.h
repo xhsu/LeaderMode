@@ -6,9 +6,6 @@ Created Date: 05 Mar 2020
 
 #pragma once
 
-#define charsmax(x)		(_countof(x) - 1U)
-#define wcharsmax(x)	(_countof(x) - 1U)
-
 // some constants from MP
 #define TEAM_UNASSIGNED	0
 #define TEAM_TERRORIST	1
@@ -93,7 +90,6 @@ void UTIL_ReplaceAll(std::wstring& str, const std::wstring& from, const std::wst
 inline bool caseInsCharCompare(wchar_t a, wchar_t b) { return(towupper(a) == towupper(b)); }
 //template<typename stringTy> inline bool caseInsCharCompare(stringTy a, stringTy b) { return(std::toupper(a) == std::toupper(b)); }
 template<typename stringTy> inline bool UTIL_CaseInsensitiveCompare(const stringTy& s1, const stringTy& s2) { return ((s1.size() == s2.size()) && std::equal(s1.cbegin(), s1.cend(), s2.cbegin(), caseInsCharCompare)); }
-void Sys_Error(const char* fmt, ...);
 
 template<typename ... Args>
 std::string string_format(const std::string& format, Args ... args)
@@ -119,3 +115,5 @@ Iter select_randomly(Iter start, Iter end)
 
 	return start;
 }
+
+void UTIL_Split(const std::string& s, std::vector<std::string>& tokens, const std::string& delimiters = " ");

@@ -354,3 +354,33 @@ int CalcBody(BodyEnumInfo_t (&info)[N])
 
 	return 0;
 }
+
+void NORETURN Sys_Error(const char* fmt, ...)
+{
+	static char output[1024];
+	va_list ptr;
+
+	va_start(ptr, fmt);
+	vsnprintf(output, charsmax(output), fmt, ptr);
+	va_end(ptr);
+
+#ifndef _DEBUG
+	// In official release, there is no way to tell users tracing anything.
+	// Just give a hint window.
+	FILE* hFile = fopen("leadermode_error.txt", "w");
+	if (hFile)
+	{
+		fprintf(hFile, "%s\n", output);
+		fclose(hFile);
+	}
+
+	HWND hwnd = GetActiveWindow();
+	MessageBox(hwnd, output, "Fatal Error", MB_OK | MB_ICONERROR | MB_TOPMOST);
+#else
+	// However, in debug mode, you can trace the error via access violation.
+	//TerminateProcess(GetCurrentProcess(), 1);
+	* (int*)(nullptr) = 0;
+#endif
+
+	_exit(-1);
+}

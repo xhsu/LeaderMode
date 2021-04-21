@@ -300,6 +300,7 @@
     <ClInclude Include="..\..\game_shared\shared_util.h" />
     <ClInclude Include="..\..\metahook\client.h" />
     <ClInclude Include="..\..\metahook\engine.h" />
+    <ClInclude Include="..\..\metahook\sound.h" />
     <ClInclude Include="..\..\pm_shared\pm_debug.h" />
     <ClInclude Include="..\..\pm_shared\pm_defs.h" />
     <ClInclude Include="..\..\pm_shared\pm_info.h" />

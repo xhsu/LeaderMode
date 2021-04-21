@@ -542,6 +542,9 @@
     <ClInclude Include="..\..\engine\sfx.h">
       <Filter>engine</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\metahook\sound.h">
+      <Filter>metahook</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="export.def">

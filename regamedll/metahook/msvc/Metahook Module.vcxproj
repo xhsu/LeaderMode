@@ -157,6 +157,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\cl_dll\Graph\dxt.cpp" />
+    <ClCompile Include="..\..\game_shared\shared_util.cpp" />
     <ClCompile Include="..\..\public\interface.cpp" />
     <ClCompile Include="..\client.cpp" />
     <ClCompile Include="..\engine.cpp" />
@@ -168,9 +169,11 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\sound.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\cl_dll\Graph\dxt.h" />
+    <ClInclude Include="..\..\game_shared\shared_util.h" />
     <ClInclude Include="..\..\public\interface.h" />
     <ClInclude Include="..\cdll_export.h" />
     <ClInclude Include="..\client.h" />
@@ -180,6 +183,7 @@
     <ClInclude Include="..\larger_textures.h" />
     <ClInclude Include="..\metahook.h" />
     <ClInclude Include="..\precompiled.h" />
+    <ClInclude Include="..\sound.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="export.def" />

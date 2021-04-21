@@ -17,6 +17,9 @@
     <Filter Include="metahook\msvc">
       <UniqueIdentifier>{652fc0dd-4d0b-41cd-ad97-2fd6218bc9ea}</UniqueIdentifier>
     </Filter>
+    <Filter Include="game_shared">
+      <UniqueIdentifier>{ffee48a0-99b3-490b-b494-a02ff6769222}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\precompiled.cpp">
@@ -44,6 +47,12 @@
       <Filter>public</Filter>
     </ClCompile>
     <ClCompile Include="..\exportfuncs.cpp">
+      <Filter>metahook</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\game_shared\shared_util.cpp">
+      <Filter>game_shared</Filter>
+    </ClCompile>
+    <ClCompile Include="..\sound.cpp">
       <Filter>metahook</Filter>
     </ClCompile>
   </ItemGroup>
@@ -76,6 +85,12 @@
       <Filter>public</Filter>
     </ClInclude>
     <ClInclude Include="..\exportfuncs.h">
+      <Filter>metahook</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\game_shared\shared_util.h">
+      <Filter>game_shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\sound.h">
       <Filter>metahook</Filter>
     </ClInclude>
   </ItemGroup>

@@ -9,12 +9,6 @@ Modern Warfare Dev Team
 
 #pragma once
 
-typedef struct cache_user_s
-{
-	void* data;	// What the fuck, Valve?
-
-} cache_user_t;
-
 #define MAX_QPATH 64
 
 typedef struct sfx_s
