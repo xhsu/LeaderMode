@@ -18,7 +18,7 @@ namespace cl
 
 void GetClientCallbacks(void)
 {
-	HMODULE hClientDLL = LoadLibrary("client.dll");
+	HMODULE hClientDLL = GetModuleHandle("client.dll");
 
 	if (!hClientDLL)
 	{

@@ -2904,10 +2904,24 @@ void EXT_FUNC ServerDeactivate()
 	}
 }
 
+#define SetCStrikeFlags_SIG	"\xA1\x2A\x2A\x2A\x2A\x85\xC0\x0F\x85\x2A\x2A\x2A\x2A\x56\x68\x2A\x2A\x2A\x2A\x68\x2A\x2A\x2A\x2A\xE8\x2A\x2A\x2A\x2A\x83\xC4\x08"
+
 void EXT_FUNC ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 {
 	int i;
 	CBaseEntity *pClass;
+
+	// Patch the game.
+	// (Fake that we are czero)
+	// (For we can use pev->gamestate to enable/disable shield)
+	HMODULE hEngine = GetModuleHandle("hw.dll");
+	if (!hEngine)
+		hEngine = GetModuleHandle("swds.dll");	// Via HLDS.exe
+
+	DWORD addr = (DWORD)MH_SearchPattern((void*)MH_GetModuleBase(hEngine), MH_GetModuleSize(hEngine), SetCStrikeFlags_SIG, sizeof(SetCStrikeFlags_SIG) - 1U);
+	addr += (DWORD)0x5D;
+	addr += (DWORD)0x2;
+	**(BOOL**)addr = TRUE;	// g_bIsCZero
 
 	// Every call to ServerActivate should be matched by a call to ServerDeactivate
 	g_bServerActive = true;

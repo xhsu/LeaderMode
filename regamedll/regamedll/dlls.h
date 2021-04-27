@@ -123,6 +123,7 @@ using FloatRef = float;
 #include "addons/trigger_setorigin.h"
 #include "addons/trigger_random.h"
 #include "addons/point_command.h"
+#include "metahook/portable/metahook.h"
 
 // Tutor
 #include "tutor.h"

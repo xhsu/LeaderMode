@@ -425,6 +425,13 @@
     <ClCompile Include="..\game_shared\shared_util.cpp" />
     <ClCompile Include="..\game_shared\voice_gamemgr.cpp" />
     <ClCompile Include="..\game_shared\shared_string.cpp" />
+    <ClCompile Include="..\metahook\portable\metahook.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Play|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Tests|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Play|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\pm_shared\pm_debug.cpp" />
     <ClCompile Include="..\pm_shared\pm_math.cpp" />
     <ClCompile Include="..\pm_shared\pm_shared.cpp" />
@@ -652,6 +659,7 @@
     <ClInclude Include="..\game_shared\simple_checksum.h" />
     <ClInclude Include="..\game_shared\steam_util.h" />
     <ClInclude Include="..\game_shared\voice_gamemgr.h" />
+    <ClInclude Include="..\metahook\portable\metahook.h" />
     <ClInclude Include="..\pm_shared\pm_debug.h" />
     <ClInclude Include="..\pm_shared\pm_defs.h" />
     <ClInclude Include="..\pm_shared\pm_info.h" />
