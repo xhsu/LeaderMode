@@ -14,6 +14,7 @@ namespace cl
 	bool (*MH_LoadClient)(unsigned short iVersion, const cl_extendedfunc_t* pfn) = nullptr;
 	void (*S_StartSound)(int iEntity, int iChannel, sfx_t* pSFXin, Vector& vecOrigin, float flVolume, float flAttenuation, int bitsFlags, int iPitch) = nullptr;
 	void (*S_StopAllSounds)(bool STFU) = nullptr;
+	void (*CL_Disconnect)(void) = nullptr;
 };
 
 void GetClientCallbacks(void)
@@ -29,6 +30,7 @@ void GetClientCallbacks(void)
 	*(void**)&cl::MH_LoadClient = GetProcAddress(hClientDLL, "MH_LoadClient");
 	*(void**)&cl::S_StartSound = GetProcAddress(hClientDLL, "S_StartSound");
 	*(void**)&cl::S_StopAllSounds = GetProcAddress(hClientDLL, "S_StopAllSounds");
+	*(void**)&cl::CL_Disconnect = GetProcAddress(hClientDLL, "CL_Disconnect");
 
 	if (!cl::MH_LoadClient)
 	{
@@ -43,6 +45,11 @@ void GetClientCallbacks(void)
 	else if (!cl::S_StopAllSounds)
 	{
 		Sys_Error("client.dll export function \"S_StopAllSounds\" no found!");
+		return;
+	}
+	else if (!cl::CL_Disconnect)
+	{
+		Sys_Error("client.dll export function \"CL_Disconnect\" no found!");
 		return;
 	}
 }

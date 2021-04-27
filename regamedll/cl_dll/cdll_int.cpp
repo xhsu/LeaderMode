@@ -301,7 +301,14 @@ void CL_DLLEXPORT V_CalcRefdef(ref_params_s* pparams)
 // From here are the extended functions called from metahook module.
 //
 
-bool MH_LoadClient(unsigned short iVersion, const cl_extendedfunc_t* pfn)
+// Command 'changelevel' and things like that won't trigger this.
+// You may still use HUD_VidInit to make a complement.
+void CL_DLLEXPORT CL_Disconnect(void)
+{
+	gExtFuncs.pfnCL_Disconnect();
+}
+
+bool CL_DLLEXPORT MH_LoadClient(unsigned short iVersion, const cl_extendedfunc_t* pfn)
 {
 	if (iVersion != CLIENT_EXTENDED_FUNCS_API_VERSION)
 	{
@@ -320,7 +327,7 @@ bool MH_LoadClient(unsigned short iVersion, const cl_extendedfunc_t* pfn)
 	return true;
 }
 
-void S_StartSound(int iEntity, int iChannel, sfx_t* pSFXin, Vector& vecOrigin, float flVolume, float flAttenuation, int bitsFlags, int iPitch)
+void CL_DLLEXPORT S_StartSound(int iEntity, int iChannel, sfx_t* pSFXin, Vector& vecOrigin, float flVolume, float flAttenuation, int bitsFlags, int iPitch)
 {
 	if (iChannel == CHAN_STATIC)
 		gExtFuncs.pfnS_StartStaticSound(iEntity, iChannel, pSFXin, vecOrigin, flVolume, flAttenuation, bitsFlags, iPitch);
@@ -328,7 +335,7 @@ void S_StartSound(int iEntity, int iChannel, sfx_t* pSFXin, Vector& vecOrigin, f
 		gExtFuncs.pfnS_StartDynamicSound(iEntity, iChannel, pSFXin, vecOrigin, flVolume, flAttenuation, bitsFlags, iPitch);
 }
 
-void S_StopAllSounds(bool STFU)
+void CL_DLLEXPORT S_StopAllSounds(bool STFU)
 {
 	gExtFuncs.pfnS_StopAllSounds(STFU);
 }

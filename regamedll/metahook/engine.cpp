@@ -14,7 +14,13 @@ namespace engine
 	ENGFUNC_LoadTGA LoadTGA = nullptr;
 	ENGFUNC_Key_NameForBinding Key_NameForBinding = nullptr;
 	ENGFUNC_Cache_Check Cache_Check = nullptr;
+	ENGFUNC_CL_Disconnect CL_Disconnect = nullptr;
 };
+
+void CL_Disconnect(void)
+{
+	cl::CL_Disconnect();
+}
 
 void SearchEngineFunctions(void)
 {
@@ -31,4 +37,10 @@ void SearchEngineFunctions(void)
 	*(void**)&engine::Cache_Check = g_pMetaHookAPI->SearchPattern((void*)g_dwEngineBase, g_dwEngineSize, Cache_Check_SIG, sizeof(Cache_Check_SIG) - 1U);
 	if (!engine::Cache_Check)
 		Sys_Error("Function \"Cache_Check\" no found!\nEngine buildnum %d unsupported!", g_dwEngineBuildnum);
+
+	*(void**)&engine::CL_Disconnect = g_pMetaHookAPI->SearchPattern((void*)g_dwEngineBase, g_dwEngineSize, CL_Disconnect_SIG, sizeof(CL_Disconnect_SIG) - 1U);
+	if (engine::CL_Disconnect)
+		g_pMetaHookAPI->InlineHook(engine::CL_Disconnect, CL_Disconnect, (void*&)engine::CL_Disconnect);
+	else
+		Sys_Error("Function \"CL_Disconnect\" no found!\nEngine buildnum %d unsupported!", g_dwEngineBuildnum);
 }

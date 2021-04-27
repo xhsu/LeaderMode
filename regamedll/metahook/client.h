@@ -9,7 +9,7 @@ Modern Warfare Dev Team
 
 #pragma once
 
-#define CLIENT_EXTENDED_FUNCS_API_VERSION	2
+#define CLIENT_EXTENDED_FUNCS_API_VERSION	3
 
 typedef struct
 {
@@ -22,6 +22,7 @@ typedef struct
 	ENGFUNC_S_StartSound pfnS_StartDynamicSound;
 	ENGFUNC_S_StopAllSounds pfnS_StopAllSounds;
 	ENGFUNC_Cache_Check pfnCache_Check;
+	ENGFUNC_CL_Disconnect pfnCL_Disconnect;
 }
 cl_extendedfunc_t;
 
@@ -36,5 +37,6 @@ namespace cl
 	extern bool (*MH_LoadClient)(unsigned short iVersion, const cl_extendedfunc_t* pfn);
 	extern void (*S_StartSound)(int iEntity, int iChannel, sfx_t* pSFXin, Vector& vecOrigin, float flVolume, float flAttenuation, int bitsFlags, int iPitch);
 	extern void (*S_StopAllSounds)(bool STFU);
+	extern void	(*CL_Disconnect)(void);
 };
 #endif

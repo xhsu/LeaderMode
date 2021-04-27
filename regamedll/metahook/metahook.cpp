@@ -69,6 +69,7 @@ void IPlugins::LoadClient(cl_exportfuncs_t* pExportFunc)
 		engine::S_StartDynamicSound,
 		engine::S_StopAllSounds,
 		engine::Cache_Check,
+		engine::CL_Disconnect,
 	};
 
 	cl::MH_LoadClient(CLIENT_EXTENDED_FUNCS_API_VERSION, &table);

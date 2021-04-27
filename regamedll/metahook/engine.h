@@ -13,10 +13,12 @@ Modern Warfare Dev Team
 #define LOAD_TGA_SIG_NEW			"\x55\x8B\xEC\x8B\x45\x18\x8B\x4D\x14\x8B\x55\x10\x6A\x00\x50\x8B\x45\x0C"
 #define	KEY_NAME_FOR_BINDING_SIG	"\x55\x8B\xEC\x8D\x45\x08\x56\x50\xFF\x15\x2A\x2A\x2A\x2A\x83\xC4\x04"
 #define Cache_Check_SIG				"\x55\x8B\xEC\x57\x8B\x7D\x08\x8B\x07\x85\xC0\x75\x2A\x5F\x5D\xC3"
+#define CL_Disconnect_SIG			"\x55\x8B\xEC\x83\xEC\x14\x53\x56\x33\xDB\x57\x53\x89\x1D\x2A\x2A\x2A\x2A\xC7\x05"
 
 typedef qboolean	(*ENGFUNC_LoadTGA)				(const char* szFilename, unsigned char* buffer, int bufferSize, int* width, int* height);
 typedef const char*	(*ENGFUNC_Key_NameForBinding)	(const char* pszCommand);
 typedef void*		(*ENGFUNC_Cache_Check)			(cache_user_t* c);
+typedef void		(*ENGFUNC_CL_Disconnect)		(void);
 
 
 // don't input these if this is loaded by client.dll.
@@ -30,6 +32,7 @@ namespace engine
 	extern ENGFUNC_LoadTGA LoadTGA;
 	extern ENGFUNC_Key_NameForBinding Key_NameForBinding;
 	extern ENGFUNC_Cache_Check Cache_Check;
+	extern ENGFUNC_CL_Disconnect CL_Disconnect;
 };
 
 #endif
