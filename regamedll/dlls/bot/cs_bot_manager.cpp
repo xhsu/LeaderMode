@@ -59,19 +59,9 @@ CCSBotManager::CCSBotManager()
 	// make sure default voice bank is first
 	TheBotProfiles->FindVoiceBankIndex("BotChatter.db");
 
-	const char *filename;
-	if (IS_CAREER_MATCH())
-	{
-		filename = "MissionPacks/BotPackList.db";
-	}
-	else
-	{
-		filename = "BotPackList.db";
-	}
-
 	// read in the list of bot profile DBs
 	int dataLength;
-	char *dataPointer = (char *)LOAD_FILE_FOR_ME((char *)filename, &dataLength);
+	char *dataPointer = (char *)LOAD_FILE_FOR_ME("BotPackList.db", &dataLength);
 	if (!dataPointer)
 	{
 		TheBotProfiles->Init("BotProfile.db");

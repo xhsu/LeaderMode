@@ -3,8 +3,6 @@
 DebugOutputLevel outputLevel[] =
 {
 	{ "bot",     DEBUG_BOT     },
-	{ "career",  DEBUG_CAREER  },
-	{ "tutor",   DEBUG_TUTOR   },
 	{ "stats",   DEBUG_STATS   },
 	{ "hostage", DEBUG_HOSTAGE },
 	{ "all",     DEBUG_ALL     },
@@ -127,38 +125,6 @@ NOXREF void UTIL_BotDPrintf(char *pszMsg, ...)
 		return;
 
 	if (theDebugOutputTypes & DEBUG_BOT)
-	{
-		va_list argptr;
-		va_start(argptr, pszMsg);
-		vsprintf(theDebugBuffer, pszMsg, argptr);
-		va_end(argptr);
-
-		SERVER_PRINT(theDebugBuffer);
-	}
-}
-
-void UTIL_CareerDPrintf(char *pszMsg, ...)
-{
-	if (!IsDeveloper())
-		return;
-
-	if (theDebugOutputTypes & DEBUG_CAREER)
-	{
-		va_list argptr;
-		va_start(argptr, pszMsg);
-		vsprintf(theDebugBuffer, pszMsg, argptr);
-		va_end(argptr);
-
-		SERVER_PRINT(theDebugBuffer);
-	}
-}
-
-NOXREF void UTIL_TutorDPrintf(char *pszMsg, ...)
-{
-	if (!IsDeveloper())
-		return;
-
-	if (theDebugOutputTypes & DEBUG_TUTOR)
 	{
 		va_list argptr;
 		va_start(argptr, pszMsg);

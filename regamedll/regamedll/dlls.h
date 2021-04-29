@@ -133,7 +133,6 @@ using FloatRef = float;
 #include "mapinfo.h"
 #include "maprules.h"
 #include "monsterevent.h"
-#include "soundent.h"
 #include "spectator.h"
 #include "talkmonster.h"
 #include "animation.h"

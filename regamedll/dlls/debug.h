@@ -32,8 +32,6 @@ enum DebugOutputType
 {
 	DEBUG_NONE    = 0,
 	DEBUG_BOT     = BIT(0),
-	DEBUG_CAREER  = BIT(1),
-	DEBUG_TUTOR   = BIT(2),
 	DEBUG_STATS   = BIT(3),
 	DEBUG_HOSTAGE = BIT(4),
 	DEBUG_ALL     = 0xFFFFFFFF,
@@ -57,7 +55,5 @@ void PrintDebugFlag(const char *flagStr);
 void UTIL_SetDprintfFlags(const char *flagStr);
 
 void UTIL_BotDPrintf(char *pszMsg, ...);
-void UTIL_CareerDPrintf(char *pszMsg, ...);
-void UTIL_TutorDPrintf(char *pszMsg, ...);
 void UTIL_StatsDPrintf(char *pszMsg, ...);
 void UTIL_HostageDPrintf(char *pszMsg, ...);

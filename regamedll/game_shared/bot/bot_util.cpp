@@ -587,11 +587,6 @@ void BotPrecache()
 	PRECACHE_SOUND("buttons/latchunlocked2.wav");
 	PRECACHE_SOUND("buttons/lightswitch2.wav");
 	PRECACHE_SOUND("ambience/quail1.wav");
-
-	PRECACHE_SOUND("events/tutor_msg.wav");
-	PRECACHE_SOUND("events/enemy_died.wav");
-	PRECACHE_SOUND("events/friend_died.wav");
-	PRECACHE_SOUND("events/task_complete.wav");
 }
 
 void InitBotTrig()
