@@ -383,8 +383,9 @@ MSG_FUNC(WeapPickup)
 	gHUD::m_WeaponList.m_iPhase = CHudWeaponList::MOVING_IN;
 
 	// if this weapon would be auto-deploy, let's predict it.
-	if (g_pCurWeapon && g_pCurWeapon->m_pItemInfo->m_iWeight < g_rgWpnInfo[iWeaponId].m_iWeight)
-		gPseudoPlayer.StartSwitchingWeapon((WeaponIdType)iWeaponId);
+	//g_flClientTime
+	/*if (g_pCurWeapon && g_pCurWeapon->m_pItemInfo->m_iWeight < g_rgWpnInfo[iWeaponId].m_iWeight)
+		gPseudoPlayer.StartSwitchingWeapon((WeaponIdType)iWeaponId);*/
 
 	return TRUE;
 }
@@ -453,7 +454,8 @@ MSG_FUNC(AmmoX)
 	int iAmmoId = READ_BYTE();
 	int iAmount = READ_BYTE();
 
-	gPseudoPlayer.m_rgAmmo[iAmmoId] = Q_abs(iAmount);
+	// WPN_UNDONE
+	//gPseudoPlayer.m_rgAmmo[iAmmoId] = Q_abs(iAmount);
 	return TRUE;
 }
 
@@ -1071,12 +1073,13 @@ MSG_FUNC(Role)
 		}
 
 		// we have to update the m_iVariation of all weapons, since their behaviour would change sometimes.
-		for (auto pWeapon : g_rgpClientWeapons)
-		{
-			// non-nullptr members only.
-			if (pWeapon)
-				pWeapon->SetVariation(g_iRoleType);
-		}
+		// WPN_UNDONE
+		//for (auto pWeapon : g_rgpClientWeapons)
+		//{
+		//	// non-nullptr members only.
+		//	if (pWeapon)
+		//		pWeapon->SetVariation(g_iRoleType);
+		//}
 	}
 
 	return TRUE;
@@ -1130,33 +1133,14 @@ MSG_FUNC(Shoot)
 {
 	BEGIN_READ(pbuf, iSize);
 
-	int iSeed = READ_SHORT();
-
-	if (g_pCurWeapon)
-	{
-		int iSave = gPseudoPlayer.random_seed;
-		gPseudoPlayer.random_seed = iSeed;
-		g_pCurWeapon->PrimaryAttack();	// use the seed for primary attack only.
-		gPseudoPlayer.random_seed = iSave;
-	}
+	//WPN_UNDONE
 
 	return TRUE;
 }
 
 MSG_FUNC(SteelSight)
 {
-#ifndef CLIENT_PREDICT_AIM
-	BEGIN_READ(pbuf, iSize);
-
-	bool bInitialState = READ_BYTE();
-
-	if (g_pCurWeapon)
-	{
-		g_pCurWeapon->m_bInZoom = bInitialState;
-		g_pCurWeapon->SecondaryAttack();
-	}
-#endif
-
+	//WPN_UNDONE
 	return TRUE;
 }
 
@@ -1166,7 +1150,8 @@ MSG_FUNC(EqpSelect)
 
 	EquipmentIdType iId = (EquipmentIdType)READ_BYTE();
 
-	gPseudoPlayer.m_iUsingGrenadeId = iId;
+	// WPN_UNDONE
+	//gPseudoPlayer.m_iUsingGrenadeId = iId;
 	return TRUE;
 }
 
@@ -1279,7 +1264,8 @@ MSG_FUNC(Equipment)
 	EquipmentIdType iEquipmentId = (EquipmentIdType)READ_BYTE();
 	bool bCanUse = !!READ_BYTE();
 
-	gPseudoPlayer.m_rgbHasEquipment[iEquipmentId] = bCanUse;
+	// WPN_UNDONE
+	//gPseudoPlayer.m_rgbHasEquipment[iEquipmentId] = bCanUse;
 
 	return TRUE;
 }

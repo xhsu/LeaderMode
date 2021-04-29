@@ -279,11 +279,14 @@ namespace gHUD
 	extern float m_flUCDTime;
 	extern float m_flUCDOldTime;
 	extern float m_flUCDTimeDelta;
+	extern client_sprite_t* m_pAmmoHudList;
+	extern int m_iAmmoHudListCount;
+	extern std::array<hSprite, AMMO_MAXTYPE> m_rghAmmoSprite;
+	extern std::array<wrect_t, AMMO_MAXTYPE> m_rgrcAmmoSprite;
 
 	extern SCREENINFO m_scrinfo;
 
 	// HUD elements.
-	extern CHudAmmo m_Ammo;
 	extern CHudHealth m_Health;
 	extern CHudSpectator m_Spectator;
 	extern CHudGeiger m_Geiger;

@@ -144,7 +144,9 @@ Created Date: 05 Mar 2020
 #include "interpolation.h"	// UTIL from CSBTE.
 #include "corpse.h"
 #include "viewport_interface.h"
-#include "weapons.h"
+#include "../dlls/ammo.h"
+#include "../dlls/weapontype.h"
+#include "../dlls/player_classes.h"
 #include "tri.h"
 #include "sound.h"
 
@@ -164,7 +166,6 @@ Created Date: 05 Mar 2020
 
 // HUD
 #include "hud/hud.h"
-#include "hud/hud_ammo.h"
 #include "hud/hud_health.h"
 #include "hud/hud_spectator.h"
 #include "hud/hud_geiger.h"

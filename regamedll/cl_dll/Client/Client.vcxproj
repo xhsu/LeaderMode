@@ -171,28 +171,6 @@
     <ClCompile Include="..\..\dlls\weapontype.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_ak47.cpp" />
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_anaconda.cpp" />
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_awp.cpp" />
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_deagle.cpp" />
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_fiveseven.cpp" />
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_glock18.cpp" />
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_ksg12.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_m1014.cpp" />
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_m45a1.cpp" />
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_m4a1.cpp" />
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_mk46.cpp" />
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_mp7a1.cpp" />
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_psg1.cpp" />
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_scarh.cpp" />
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_svd.cpp" />
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_ump45.cpp" />
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_usp.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_xm8.cpp" />
     <ClCompile Include="..\..\game_shared\shared_string.cpp" />
     <ClCompile Include="..\..\game_shared\shared_util.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
@@ -244,7 +222,6 @@
     <ClCompile Include="..\Graph\dxt.cpp" />
     <ClCompile Include="..\Graph\tga.cpp" />
     <ClCompile Include="..\hud\hud.cpp" />
-    <ClCompile Include="..\hud\hud_ammo.cpp" />
     <ClCompile Include="..\hud\hud_battery.cpp" />
     <ClCompile Include="..\HUD\hud_class_indicator.cpp" />
     <ClCompile Include="..\hud\hud_crosshair.cpp" />
@@ -287,7 +264,6 @@
     <ClCompile Include="..\UI\ui_text.cpp" />
     <ClCompile Include="..\view.cpp" />
     <ClCompile Include="..\viewport_interface.cpp" />
-    <ClCompile Include="..\weapons.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\common\parsemsg.h" />
@@ -325,7 +301,6 @@
     <ClInclude Include="..\Graph\dxt.h" />
     <ClInclude Include="..\Graph\tga.h" />
     <ClInclude Include="..\hud\hud.h" />
-    <ClInclude Include="..\hud\hud_ammo.h" />
     <ClInclude Include="..\hud\hud_battery.h" />
     <ClInclude Include="..\HUD\hud_class_indicator.h" />
     <ClInclude Include="..\hud\hud_crosshair.h" />
@@ -367,7 +342,6 @@
     <ClInclude Include="..\UI\ui_text.h" />
     <ClInclude Include="..\view.h" />
     <ClInclude Include="..\viewport_interface.h" />
-    <ClInclude Include="..\weapons.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="export.def" />

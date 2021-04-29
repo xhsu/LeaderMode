@@ -31,15 +31,15 @@
 
 #define VFUNC virtual
 
-
-using VectorRef = Vector;
-using FloatRef = float;
-
 #include "archtypes.h"
 #include "enginecallback.h"
 #include "../common/entity_state.h"
 #include "../common/screenfade.h"
 #include "utlvector.h"
+
+#include "ammo.h"
+#include "weapontype.h"
+#include "player_classes.h"
 
 // SDK
 #include "../common/usercmd.h"

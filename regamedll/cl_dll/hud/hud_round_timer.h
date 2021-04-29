@@ -6,6 +6,8 @@ Created Date: Mar 11 2020
 
 #pragma once
 
+extern bool g_bFreezeTimeOver;
+
 class CHudRoundTimer : public CBaseHudElement
 {
 public:

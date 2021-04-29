@@ -122,14 +122,15 @@ int CHudSniperScope::Draw(float flTime)
 		DrawUtils::Draw2DQuad(0, 0, ScreenWidth, ScreenHeight);
 	}
 
-	if (g_pCurWeapon && m_rghScopes[g_pCurWeapon->m_iId] && gHUD::m_iFOV <= 40)	// have a customised scope? draw it.
-	{
-		gEngfuncs.pfnSetCrosshair(m_rghScopes[g_pCurWeapon->m_iId], m_rgrcScopes[g_pCurWeapon->m_iId], 255, 255, 255);
-	}
-	else
-	{
-		gEngfuncs.pfnSetCrosshair(0, nullrc, 0, 0, 0);
-	}
+	//WPN_UNDONE
+	//if (g_pCurWeapon && m_rghScopes[g_pCurWeapon->m_iId] && gHUD::m_iFOV <= 40)	// have a customised scope? draw it.
+	//{
+	//	gEngfuncs.pfnSetCrosshair(m_rghScopes[g_pCurWeapon->m_iId], m_rgrcScopes[g_pCurWeapon->m_iId], 255, 255, 255);
+	//}
+	//else
+	//{
+	//	gEngfuncs.pfnSetCrosshair(0, nullrc, 0, 0, 0);
+	//}
 
 	return TRUE;
 }

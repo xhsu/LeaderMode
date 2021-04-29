@@ -25,7 +25,7 @@ int CHudCrosshair::Init(void)
 
 int CHudCrosshair::Draw(float flTime)
 {
-	if (!g_pCurWeapon || CL_IsDead())
+	if (CL_IsDead())
 		return TRUE;
 
 	// in steel sight calibrating mode.
@@ -36,8 +36,8 @@ int CHudCrosshair::Draw(float flTime)
 	}
 
 	g_flSpread = 0.1f;
-	if (g_pCurWeapon)
-		g_flSpread = g_pCurWeapon->GetSpread();
+	//if (g_pCurWeapon)
+		//g_flSpread = g_pCurWeapon->GetSpread();	// WPN_UNDONE
 
 	m_flCrosshairDistance = round(float(ScreenWidth) * g_flSpread);
 	m_flCurChDistance += (m_flCrosshairDistance - m_flCurChDistance) * g_flClientTimeDelta * 5;

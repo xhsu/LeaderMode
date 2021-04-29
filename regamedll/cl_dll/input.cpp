@@ -297,10 +297,11 @@ int CL_ButtonBits(bool bResetState)
 		bits |= IN_THROW;
 	}
 
-	if (g_bIsBlocked)
+	// WPN_UNDONE
+	/*if (g_bIsBlocked)
 	{
 		bits |= IN_BLOCK;
-	}
+	}*/
 
 	if (bResetState)
 	{
@@ -390,8 +391,9 @@ void CL_CreateMove2(float frametime, usercmd_s* cmd, int active)
 
 		// slow down if we are not running.
 		// don't interfere the speed control of a ducking player. PM_Shared.cpp line 1895 would mul 0.333 to original speed.
-		if (!IS_DASHING && !(pmove->flags & FL_DUCKING))
-			spd *= cl_walkingspeedmodifier->value;
+		//WPN_UNDONE
+		/*if (!IS_DASHING && !(pmove->flags & FL_DUCKING))
+			spd *= cl_walkingspeedmodifier->value;*/
 
 		if (spd != 0.0)
 		{
@@ -415,8 +417,9 @@ void CL_CreateMove2(float frametime, usercmd_s* cmd, int active)
 	in_impulse = 0;
 
 	// LUNA: this is needed for the Holster() & Deploy() prediction.
-	cmd->weaponselect = g_iSelectedWeapon;
-	g_iSelectedWeapon = WEAPON_NONE;
+	//WPN_UNDONE
+	/*cmd->weaponselect = g_iSelectedWeapon;
+	g_iSelectedWeapon = WEAPON_NONE;*/
 
 	//
 	// set button and flag bits

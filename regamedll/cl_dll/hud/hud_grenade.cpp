@@ -38,12 +38,12 @@ int CHudGrenade::VidInit(void)
 
 		if (iAmmoId)
 		{
-			m_rghGrenadeIcons[i] = gHUD::m_Ammo.m_rghAmmoSprite[iAmmoId];
-			m_rgrcGrenadeIcons[i] = gHUD::m_Ammo.m_rgrcAmmoSprite[iAmmoId];
+			m_rghGrenadeIcons[i] = gHUD::m_rghAmmoSprite[iAmmoId];
+			m_rgrcGrenadeIcons[i] = gHUD::m_rgrcAmmoSprite[iAmmoId];
 		}
 		else
 		{
-			auto p = gHUD::GetSpriteFromList(gHUD::m_Ammo.m_pTxtList, g_rgEquipmentInfo[i].m_pszInternalName, 640, gHUD::m_Ammo.m_iTxtListCount);
+			auto p = gHUD::GetSpriteFromList(gHUD::m_pAmmoHudList, g_rgEquipmentInfo[i].m_pszInternalName, 640, gHUD::m_iAmmoHudListCount);
 			gHUD::GetSprite(p, m_rghGrenadeIcons[i], m_rgrcGrenadeIcons[i]);
 		}
 	}
@@ -62,6 +62,7 @@ int CHudGrenade::Draw(float flTime)
 
 	AmmoIdType iAmmoId = AMMO_NONE;
 
+	/* WPN_UNDONE
 	for (int i = EQP_NONE; i < EQP_COUNT; i++)
 	{
 		// we can't draw voidness. TODO: maybe a default icon later??
@@ -90,6 +91,7 @@ int CHudGrenade::Draw(float flTime)
 		// for the last one, give some space for next set of icons.
 		x += iIconWidth;
 	}
+	*/
 
 	return 1;
 }

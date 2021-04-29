@@ -30,12 +30,24 @@
 
 #define ENGINE_WEAPON_LIMIT	32
 
+// WPN_UNDONE: Move to the new modular weapons.h
+#if (TRUE)
 #define SLOT_NO				0
 #define PRIMARY_WEAPON_SLOT	1
 #define PISTOL_SLOT			2
 #define KNIFE_SLOT			3
 #define GRENADE_SLOT		4
 #define EQUIPMENT_SLOT		5
+
+#define ITEM_FLAG_NONE				0
+#define ITEM_FLAG_SELECTONEMPTY		1
+#define ITEM_FLAG_NOAUTORELOAD		2
+#define ITEM_FLAG_NOAUTOSWITCHEMPTY	4
+#define ITEM_FLAG_LIMITINWORLD		8
+#define ITEM_FLAG_EXHAUSTIBLE		16	// A player can totally exhaust their ammo supply and lose this weapon
+
+#define WEAPON_NOCLIP				-1
+#endif
 
 #define WPN_P	-1	// penalty: price * 2
 #define WPN_F	0	// forbidden: price * 99999

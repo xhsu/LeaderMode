@@ -308,20 +308,15 @@ inline void CBot::Walk()
 
 inline bool CBot::IsActiveWeaponReloading() const
 {
-	if (!m_pActiveItem)
-		return false;
-
-	return m_pActiveItem->m_bInReload;
+	// WPN_UNDONE
+	return false;
 }
 
 inline bool CBot::IsActiveWeaponRecoilHigh() const
 {
-	if (m_pActiveItem)
-	{
-		const float highRecoil = 0.4f;
-		return (m_pActiveItem->m_flAccuracy > highRecoil) != 0;
-	}
+	constexpr float highRecoil = 0.4f;	// m_flAccuracy
 
+	// WPN_UNDONE
 	return false;
 }
 

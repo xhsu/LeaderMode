@@ -993,6 +993,8 @@ void EV_PlayGunFire2(const Vector& src, const char* sample, float rad, float vol
 	Play3DSound(sample, 0.0f, rad, src, vol, RANDOM_LONG(94, 110));
 }
 
+// WPN_UNDONE
+/*
 DECLARE_EVENT(FireAK47)
 {
 	int idx = args->entindex;
@@ -1727,7 +1729,6 @@ DECLARE_EVENT(FirePSG1)
 	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, CPSG1::EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_PSG1].m_iAmmoType, CPSG1::PENETRATION);
 }
 
-
 DECLARE_EVENT(FireSCARH)
 {
 	int idx = args->entindex;
@@ -2024,7 +2025,7 @@ DECLARE_EVENT(FireM1014)
 	// original goldsrc api: VOL = 1.0, ATTN = 0.52
 	EV_PlayGunFire2(vecSrc + forward * 10.0f, M1014_FIRE_SFX, M1014_GUN_VOLUME);
 }
-
+*/
 DECLARE_EVENT(CreateExplo)
 {
 	// regional fog VFX.
@@ -2443,6 +2444,7 @@ DECLARE_EVENT(C4Explo)
 
 void Events_Init(void)
 {
+	/* WPN_UNDONE
 	HOOK_EVENT(ak47, FireAK47);
 	HOOK_EVENT(awp, FireAWP);
 	HOOK_EVENT(deagle, FireDEagle);
@@ -2464,7 +2466,7 @@ void Events_Init(void)
 	HOOK_EVENT(usp, FireUSP);
 	HOOK_EVENT(m1014, FireM1014);
 	HOOK_EVENT(xm8, FireXM8);
-
+	*/
 	HOOK_EVENT(createexplo, CreateExplo);
 	HOOK_EVENT(createsmoke, CreateSmoke);
 	HOOK_EVENT(CryoExplo, CryoExplo);

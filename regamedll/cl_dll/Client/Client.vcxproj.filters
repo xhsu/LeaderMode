@@ -19,9 +19,6 @@
     <Filter Include="dlls">
       <UniqueIdentifier>{242a3c40-d0ca-42f1-808c-74f82efcf1e6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="dlls\wpn_shared">
-      <UniqueIdentifier>{9080ac44-de2b-4d54-a24a-46ca03f9994e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="cl_dll\Graph">
       <UniqueIdentifier>{73ee3683-7138-4eb4-a873-bafc41d8319b}</UniqueIdentifier>
     </Filter>
@@ -95,9 +92,6 @@
     </ClCompile>
     <ClCompile Include="..\interpolation.cpp">
       <Filter>cl_dll</Filter>
-    </ClCompile>
-    <ClCompile Include="..\hud\hud_ammo.cpp">
-      <Filter>cl_dll\HUD</Filter>
     </ClCompile>
     <ClCompile Include="..\..\game_shared\shared_util.cpp">
       <Filter>game_shared</Filter>
@@ -174,23 +168,11 @@
     <ClCompile Include="..\hud\hud_vgui2print.cpp">
       <Filter>cl_dll\HUD</Filter>
     </ClCompile>
-    <ClCompile Include="..\weapons.cpp">
-      <Filter>cl_dll</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\dlls\ammo.cpp">
       <Filter>dlls</Filter>
     </ClCompile>
     <ClCompile Include="..\..\dlls\weapontype.cpp">
       <Filter>dlls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_usp.cpp">
-      <Filter>dlls\wpn_shared</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_ksg12.cpp">
-      <Filter>dlls\wpn_shared</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_awp.cpp">
-      <Filter>dlls\wpn_shared</Filter>
     </ClCompile>
     <ClCompile Include="..\tri.cpp">
       <Filter>cl_dll</Filter>
@@ -206,21 +188,6 @@
     </ClCompile>
     <ClCompile Include="..\hud\hud_weaponlist.cpp">
       <Filter>cl_dll\HUD</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_anaconda.cpp">
-      <Filter>dlls\wpn_shared</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_mp7a1.cpp">
-      <Filter>dlls\wpn_shared</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_ak47.cpp">
-      <Filter>dlls\wpn_shared</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_deagle.cpp">
-      <Filter>dlls\wpn_shared</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_svd.cpp">
-      <Filter>dlls\wpn_shared</Filter>
     </ClCompile>
     <ClCompile Include="..\hud\hud_grenade.cpp">
       <Filter>cl_dll\HUD</Filter>
@@ -239,18 +206,6 @@
     </ClCompile>
     <ClCompile Include="..\Fonts\Win32Font.cpp">
       <Filter>cl_dll\Fonts</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_fiveseven.cpp">
-      <Filter>dlls\wpn_shared</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_ump45.cpp">
-      <Filter>dlls\wpn_shared</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_glock18.cpp">
-      <Filter>dlls\wpn_shared</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_m4a1.cpp">
-      <Filter>dlls\wpn_shared</Filter>
     </ClCompile>
     <ClCompile Include="..\UI\ui_panel.cpp">
       <Filter>cl_dll\UI</Filter>
@@ -273,26 +228,11 @@
     <ClCompile Include="..\UI\ui_button.cpp">
       <Filter>cl_dll\UI</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_mk46.cpp">
-      <Filter>dlls\wpn_shared</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_scarh.cpp">
-      <Filter>dlls\wpn_shared</Filter>
-    </ClCompile>
     <ClCompile Include="..\HUD\hud_class_indicator.cpp">
       <Filter>cl_dll\HUD</Filter>
     </ClCompile>
     <ClCompile Include="..\..\dlls\player_classes.cpp">
       <Filter>dlls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_m1014.cpp">
-      <Filter>dlls\wpn_shared</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_xm8.cpp">
-      <Filter>dlls\wpn_shared</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_m45a1.cpp">
-      <Filter>dlls\wpn_shared</Filter>
     </ClCompile>
     <ClCompile Include="..\..\game_shared\shared_string.cpp">
       <Filter>game_shared</Filter>
@@ -305,9 +245,6 @@
     </ClCompile>
     <ClCompile Include="..\..\public\interface.cpp">
       <Filter>public</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\dlls\wpn_shared\wpn_psg1.cpp">
-      <Filter>dlls\wpn_shared</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -373,9 +310,6 @@
     </ClInclude>
     <ClInclude Include="..\interpolation.h">
       <Filter>cl_dll</Filter>
-    </ClInclude>
-    <ClInclude Include="..\hud\hud_ammo.h">
-      <Filter>cl_dll\HUD</Filter>
     </ClInclude>
     <ClInclude Include="..\..\game_shared\shared_util.h">
       <Filter>game_shared</Filter>
@@ -448,9 +382,6 @@
     </ClInclude>
     <ClInclude Include="..\hud\hud_vgui2print.h">
       <Filter>cl_dll\HUD</Filter>
-    </ClInclude>
-    <ClInclude Include="..\weapons.h">
-      <Filter>cl_dll</Filter>
     </ClInclude>
     <ClInclude Include="..\..\dlls\ammo.h">
       <Filter>dlls</Filter>

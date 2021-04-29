@@ -1333,7 +1333,7 @@ inline bool CCSBot::IsNotMoving() const
 
 inline bool CCSBot::HasAnyAmmo(CBaseWeapon *weapon) const
 {
-	return (weapon->m_iClip != 0 || m_rgAmmo[weapon->m_iPrimaryAmmoType] > 0);
+	return false;	// WPN_UNDONE
 }
 
 class CollectRetreatSpotsFunctor

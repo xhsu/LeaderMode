@@ -87,11 +87,14 @@ namespace gHUD
 	float m_flUCDTime = 1;
 	float m_flUCDOldTime = 0;
 	float m_flUCDTimeDelta = 1;
+	client_sprite_t* m_pAmmoHudList = nullptr;
+	int m_iAmmoHudListCount = 0;
+	std::array<hSprite, AMMO_MAXTYPE> m_rghAmmoSprite;
+	std::array<wrect_t, AMMO_MAXTYPE> m_rgrcAmmoSprite;
 
 	SCREENINFO m_scrinfo;
 
 	// HUD elements.
-	CHudAmmo m_Ammo;
 	CHudHealth m_Health;
 	CHudSpectator m_Spectator;
 	CHudGeiger m_Geiger;
@@ -150,7 +153,6 @@ void gHUD::Init(void)
 	}*/
 
 	// instead, we should:
-	m_Ammo.Init();
 	m_Health.Init();
 	m_SayText.Init();	// m_SayText should place before m_Spectator, since m_Spectator.init() is calling some vars from m_SayText.Init().
 	m_Spectator.Init();
@@ -324,6 +326,34 @@ void gHUD::VidInit(void)
 			}
 
 			p++;
+		}
+	}
+
+	m_rghAmmoSprite.fill(0);
+	m_rgrcAmmoSprite.fill({ 0, 0, 0, 0 });
+
+	m_pAmmoHudList = gEngfuncs.pfnSPR_GetList("sprites/ammo.txt", &m_iAmmoHudListCount);
+
+	if (m_pAmmoHudList)
+	{
+		char sz[128];
+		client_sprite_t* p = nullptr;
+
+		for (int j = 0; j < AMMO_MAXTYPE; j++)
+		{
+			if (!g_rgAmmoInfo[j].m_pszName || g_rgAmmoInfo[j].m_pszName[0] == '\0')
+				continue;
+
+			p = gHUD::GetSpriteFromList(m_pAmmoHudList, g_rgAmmoInfo[j].m_pszName, 640, m_iAmmoHudListCount);
+
+			if (p)
+			{
+				Q_snprintf(sz, charsmax(sz), "sprites/%s.spr", p->szSprite);
+				m_rghAmmoSprite[j] = gEngfuncs.pfnSPR_Load(sz);
+				m_rgrcAmmoSprite[j] = p->rc;
+			}
+			else
+				m_rghAmmoSprite[j] = NULL;
 		}
 	}
 
@@ -906,7 +936,7 @@ void gHUD::SlotInput(int iSlot)
 		char sz[128];
 		Q_strlcpy(sz, psz);
 		gEngfuncs.pfnServerCmd(sz);
-		gPseudoPlayer.StartSwitchingWeapon(gHUD::m_WeaponList.m_rgiWeapons[iSlot]);
+		//gPseudoPlayer.StartSwitchingWeapon(gHUD::m_WeaponList.m_rgiWeapons[iSlot]);	// WPN_UNDONE
 
 		gEngfuncs.pfnPlaySoundByName(WEAPONLIST_SELECT_SFX, VOL_NORM);
 	}
@@ -929,6 +959,7 @@ void CommandFunc_Slot10(void) { gHUD::SlotInput(10); }
 
 void CommandFunc_NextWeapon(void)
 {
+	/* WPN_UNDONE
 	if (gHUD::m_bPlayerDead)
 		return;
 
@@ -976,11 +1007,12 @@ void CommandFunc_NextWeapon(void)
 		}
 	}
 
-	gEngfuncs.pfnPlaySoundByName(WEAPONLIST_EMPTY_SFX, VOL_NORM);
+	gEngfuncs.pfnPlaySoundByName(WEAPONLIST_EMPTY_SFX, VOL_NORM);*/
 }
 
 void CommandFunc_PrevWeapon(void)
 {
+	/* WPN_UNDONE
 	if (gHUD::m_bPlayerDead)
 		return;
 
@@ -1029,10 +1061,12 @@ void CommandFunc_PrevWeapon(void)
 	}
 
 	gEngfuncs.pfnPlaySoundByName(WEAPONLIST_EMPTY_SFX, VOL_NORM);
+	*/
 }
 
 void CommandFunc_SelectLastItem(void)	// an equivlent function of void CBasePlayer::SelectLastItem() on SV.
 {
+	/* WPN_UNDONE
 	// this cmd can cancel grenade throw aswell.
 	if (g_pCurWeapon && g_pCurWeapon->m_bitsFlags & WPNSTATE_QUICK_THROWING)
 	{
@@ -1065,10 +1099,12 @@ void CommandFunc_SelectLastItem(void)	// an equivlent function of void CBasePlay
 LAB_LASTINV_END:
 	// don't forget to forward this command to SV.
 	gEngfuncs.pfnServerCmd("lastinv\n");
+	*/
 }
 
 void CommandFunc_NextEquipment(void)
 {
+	/* WPN_UNDONE
 	// the drawing sequence is the select sequence. and the drawing sequence is the index.
 
 	// you can't do this on the halfway.
@@ -1108,10 +1144,12 @@ void CommandFunc_NextEquipment(void)
 
 	gPseudoPlayer.m_iUsingGrenadeId = iCandidate;
 	gEngfuncs.pfnServerCmd(SharedVarArgs("eqpselect %d\n", iCandidate));
+	*/
 }
 
 void CommandFunc_PrevEquipment(void)
 {
+	/* WPN_UNDONE
 	// the drawing sequence is the select sequence. and the drawing sequence is the index.
 
 	// you can't do this on the halfway.
@@ -1151,13 +1189,16 @@ void CommandFunc_PrevEquipment(void)
 
 	gPseudoPlayer.m_iUsingGrenadeId = iCandidate;
 	gEngfuncs.pfnServerCmd(SharedVarArgs("eqpselect %d\n", iCandidate));
+	*/
 }
 
 void CommandFunc_AlterAct(void)
 {
+	/* WPN_UNDONE
 	// only pass to server when it is allowed in client.
 	if (g_pCurWeapon && g_pCurWeapon->AlterAct())
 		gEngfuncs.pfnServerCmd("changemode\n");
+		*/
 }
 
 /*

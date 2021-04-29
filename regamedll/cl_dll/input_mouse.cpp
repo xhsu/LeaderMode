@@ -201,9 +201,9 @@ void IN_ResetMouse(void)
 		ThreadInterlockedExchange(&old_mouse_pos.y, gEngfuncs.GetWindowCenterY());
 	}
 
-	if (gpGlobals && gpGlobals->time - s_flRawInputUpdateTime > 1.0f)
+	if (g_flClientTime - s_flRawInputUpdateTime > 1.0f)
 	{
-		s_flRawInputUpdateTime = gpGlobals->time;
+		s_flRawInputUpdateTime = g_flClientTime;
 		m_bRawInput = CVAR_GET_FLOAT("m_rawinput") != 0;
 	}
 }

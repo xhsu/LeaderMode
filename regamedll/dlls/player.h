@@ -29,7 +29,6 @@
 #pragma once
 
 #include "ggrenade.h"
-#include "weapons.h"
 #include "weaponbox.h"
 #include "items.h"
 #include "pm_materials.h"
@@ -788,13 +787,7 @@ public:
 
 inline bool CBasePlayer::IsReloading() const
 {
-	CBaseWeapon *pCurrentWeapon = static_cast<CBaseWeapon*>(m_pActiveItem);
-	if (pCurrentWeapon && pCurrentWeapon->m_bInReload)
-	{
-		return true;
-	}
-
-	return false;
+	return false;	// WPN_UNDONE
 }
 
 // returns a CBaseEntity pointer to a player by index.  Only returns if the player is spawned and connected otherwise returns NULL

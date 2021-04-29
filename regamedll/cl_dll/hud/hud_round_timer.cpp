@@ -6,6 +6,8 @@ Created Date: Mar 11 2020
 
 #include "precompiled.h"
 
+bool g_bFreezeTimeOver = false;
+
 int CHudRoundTimer::Init(void)
 {
 	// LUNA: in leader mod, we don't need a timer in whole round.

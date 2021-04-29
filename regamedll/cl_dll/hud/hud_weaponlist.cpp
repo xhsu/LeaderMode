@@ -81,202 +81,203 @@ int CHudWeaponList::VidInit(void)
 
 int CHudWeaponList::Draw(float flTime)
 {
-	if (!g_pCurWeapon)
-		return 0;
+	// WPN_UNDONE
+	//if (!g_pCurWeapon)
+	//	return 0;
 
-	if (m_iLastWpnId != g_pCurWeapon->m_iId)
-	{
-		// switch a weapon? play the anim.
-		m_iLastWpnId = g_pCurWeapon->m_iId;
-		m_iPhase = MOVING_IN;
-	}
+	//if (m_iLastWpnId != g_pCurWeapon->m_iId)
+	//{
+	//	// switch a weapon? play the anim.
+	//	m_iLastWpnId = g_pCurWeapon->m_iId;
+	//	m_iPhase = MOVING_IN;
+	//}
 
-	int iTotalHeight = 0;
+	//int iTotalHeight = 0;
 
-	for (int i = 0; i < MAX_ITEM_TYPES; i++)
-	{
-		// bind the SPR info to the pointers.
-		if (m_rgiWeapons[i] <= WEAPON_NONE || m_rgiWeapons[i] >= LAST_WEAPON)
-		{
-			m_rgphList[i] = nullptr;
-			m_rgprcList[i] = nullptr;
-		}
-		else if (g_pCurWeapon->m_iId == m_rgiWeapons[i])
-		{
-			m_rgphList[i] = &m_rghHighlightedWeaponSprite[m_rgiWeapons[i]];
-			m_rgprcList[i] = &m_rgrcHighlightedWeaponSprite[m_rgiWeapons[i]];
-		}
-		else
-		{
-			m_rgphList[i] = &m_rghWeaponSprite[m_rgiWeapons[i]];
-			m_rgprcList[i] = &m_rgrcWeaponSprite[m_rgiWeapons[i]];
-		}
+	//for (int i = 0; i < MAX_ITEM_TYPES; i++)
+	//{
+	//	// bind the SPR info to the pointers.
+	//	if (m_rgiWeapons[i] <= WEAPON_NONE || m_rgiWeapons[i] >= LAST_WEAPON)
+	//	{
+	//		m_rgphList[i] = nullptr;
+	//		m_rgprcList[i] = nullptr;
+	//	}
+	//	else if (g_pCurWeapon->m_iId == m_rgiWeapons[i])
+	//	{
+	//		m_rgphList[i] = &m_rghHighlightedWeaponSprite[m_rgiWeapons[i]];
+	//		m_rgprcList[i] = &m_rgrcHighlightedWeaponSprite[m_rgiWeapons[i]];
+	//	}
+	//	else
+	//	{
+	//		m_rgphList[i] = &m_rghWeaponSprite[m_rgiWeapons[i]];
+	//		m_rgprcList[i] = &m_rgrcWeaponSprite[m_rgiWeapons[i]];
+	//	}
 
-		// gap between items.
-		if (iTotalHeight)
-			iTotalHeight += WEAPONLIST_GAP;
+	//	// gap between items.
+	//	if (iTotalHeight)
+	//		iTotalHeight += WEAPONLIST_GAP;
 
-		if (m_rgprcList[i] != nullptr)
-			iTotalHeight += m_rgprcList[i]->bottom - m_rgprcList[i]->top;
-	}
+	//	if (m_rgprcList[i] != nullptr)
+	//		iTotalHeight += m_rgprcList[i]->bottom - m_rgprcList[i]->top;
+	//}
 
-	if (!iTotalHeight)
-		return 0;
+	//if (!iTotalHeight)
+	//	return 0;
 
-	// LUNA: weaponlist would now replace the position of original Money & Clip/Ammo.
-	int x, y = (ScreenHeight - iTotalHeight)/* / 2*/;
+	//// LUNA: weaponlist would now replace the position of original Money & Clip/Ammo.
+	//int x, y = (ScreenHeight - iTotalHeight)/* / 2*/;
 
-	// calculate the Dest coordinate.
-	for (int i = 0; i < MAX_ITEM_TYPES; i++)
-	{
-		if (!m_rgphList[i] || !*m_rgphList[i] || !m_rgprcList[i])
-			continue;
+	//// calculate the Dest coordinate.
+	//for (int i = 0; i < MAX_ITEM_TYPES; i++)
+	//{
+	//	if (!m_rgphList[i] || !*m_rgphList[i] || !m_rgprcList[i])
+	//		continue;
 
-		// x coord is the width of this SPR.
-		x = ScreenWidth - (m_rgprcList[i]->right - m_rgprcList[i]->left);
+	//	// x coord is the width of this SPR.
+	//	x = ScreenWidth - (m_rgprcList[i]->right - m_rgprcList[i]->left);
 
-		// calc of dest coord.
-		m_rgvecDestCoord[i] = Vector2D(x, y);
+	//	// calc of dest coord.
+	//	m_rgvecDestCoord[i] = Vector2D(x, y);
 
-		// if this slot is the current weapon, make it shifted out a little bit.
-		if (m_rgiWeapons[i] == g_pCurWeapon->m_iId)
-			m_rgvecDestCoord[i].x -= WEAPONLIST_ACTIVE_WPN_OFS;
-		else	// as for the others, move it out of screen a little bit.
-			m_rgvecDestCoord[i].x += WEAPONLIST_ACTIVE_WPN_OFS;
+	//	// if this slot is the current weapon, make it shifted out a little bit.
+	//	if (m_rgiWeapons[i] == g_pCurWeapon->m_iId)
+	//		m_rgvecDestCoord[i].x -= WEAPONLIST_ACTIVE_WPN_OFS;
+	//	else	// as for the others, move it out of screen a little bit.
+	//		m_rgvecDestCoord[i].x += WEAPONLIST_ACTIVE_WPN_OFS;
 
-		// the global phase.
-		switch (m_iPhase)
-		{
-		case MOVING_OUT:
-			m_rgvecDestCoord[i].x = ScreenWidth;	// out of screen.
-			break;
+	//	// the global phase.
+	//	switch (m_iPhase)
+	//	{
+	//	case MOVING_OUT:
+	//		m_rgvecDestCoord[i].x = ScreenWidth;	// out of screen.
+	//		break;
 
-		case MOVING_IN:
-		default:
-			break;
-		}
+	//	case MOVING_IN:
+	//	default:
+	//		break;
+	//	}
 
-		// increase Y slot after slot.
-		y += m_rgprcList[i]->bottom - m_rgprcList[i]->top + WEAPONLIST_GAP;
-	}
+	//	// increase Y slot after slot.
+	//	y += m_rgprcList[i]->bottom - m_rgprcList[i]->top + WEAPONLIST_GAP;
+	//}
 
-	// changing alpha by HUD behaviour.
-	float flTargetAlpha = 0;
-	switch (m_iPhase)
-	{
-	case MOVING_IN:
-		flTargetAlpha = 225;
-		break;
+	//// changing alpha by HUD behaviour.
+	//float flTargetAlpha = 0;
+	//switch (m_iPhase)
+	//{
+	//case MOVING_IN:
+	//	flTargetAlpha = 225;
+	//	break;
 
-	default:
-		flTargetAlpha = 0;
-		break;
-	}
+	//default:
+	//	flTargetAlpha = 0;
+	//	break;
+	//}
 
-	m_flAlpha += (flTargetAlpha - m_flAlpha) * gHUD::m_flTimeDelta * WEAPONLIST_DRIFT_SPEED;
+	//m_flAlpha += (flTargetAlpha - m_flAlpha) * gHUD::m_flTimeDelta * WEAPONLIST_DRIFT_SPEED;
 
-	// DRAW.
-	int r, g, b;
-	Vector2D vecAmmoBarCoord, vecDiff;
-	Vector2D vecAmmoTextCoord, vecClipTextCoord;
-	int iTextWidth = 0, iTextHeight = 0;
-	wchar_t wszText[16];
-	float flCardHeight, flCurHeight;
-	CBaseWeapon* pWeapon;
-	m_flLastY = ScreenHeight;
+	//// DRAW.
+	//int r, g, b;
+	//Vector2D vecAmmoBarCoord, vecDiff;
+	//Vector2D vecAmmoTextCoord, vecClipTextCoord;
+	//int iTextWidth = 0, iTextHeight = 0;
+	//wchar_t wszText[16];
+	//float flCardHeight, flCurHeight;
+	//CBaseWeapon* pWeapon;
+	//m_flLastY = ScreenHeight;
 
-	for (size_t i = 0; i < MAX_ITEM_TYPES; i++)
-	{
-		if (!m_rgphList[i] || !*m_rgphList[i] || !m_rgprcList[i])
-			continue;
+	//for (size_t i = 0; i < MAX_ITEM_TYPES; i++)
+	//{
+	//	if (!m_rgphList[i] || !*m_rgphList[i] || !m_rgprcList[i])
+	//		continue;
 
-		// find the highest (smallest) one.
-		if (m_rgvecDestCoord[i].y < m_flLastY)
-			m_flLastY = m_rgvecDestCoord[i].y;
+	//	// find the highest (smallest) one.
+	//	if (m_rgvecDestCoord[i].y < m_flLastY)
+	//		m_flLastY = m_rgvecDestCoord[i].y;
 
-		pWeapon = g_rgpClientWeapons[m_rgiWeapons[i]];
+	//	pWeapon = g_rgpClientWeapons[m_rgiWeapons[i]];
 
-		// make the current coord move to dest coord step by step.
-		vecDiff = m_rgvecDestCoord[i] - m_rgvecCurCoord[i];
-		m_rgvecCurCoord[i] += vecDiff * gHUD::m_flTimeDelta * WEAPONLIST_DRIFT_SPEED;
+	//	// make the current coord move to dest coord step by step.
+	//	vecDiff = m_rgvecDestCoord[i] - m_rgvecCurCoord[i];
+	//	m_rgvecCurCoord[i] += vecDiff * gHUD::m_flTimeDelta * WEAPONLIST_DRIFT_SPEED;
 
-		// teleport if it's so close.
-		if (vecDiff.Length() <= 0.01f)
-			m_rgvecCurCoord[i] = m_rgvecDestCoord[i];
+	//	// teleport if it's so close.
+	//	if (vecDiff.Length() <= 0.01f)
+	//		m_rgvecCurCoord[i] = m_rgvecDestCoord[i];
 
-		// we should get this anyway.
-		flCardHeight = m_rgprcList[i]->bottom - m_rgprcList[i]->top;
+	//	// we should get this anyway.
+	//	flCardHeight = m_rgprcList[i]->bottom - m_rgprcList[i]->top;
 
-		// ammo bar & text
-		if (pWeapon->m_iPrimaryAmmoType > AMMO_NONE && pWeapon->m_iPrimaryAmmoType < AMMO_MAXTYPE)
-		{
-			// calculate alpha for this item first.
-			flTargetAlpha = pWeapon == g_pCurWeapon ? 255.0f : 0.0f;
-			m_rgflFontAlpha[i] += (flTargetAlpha - m_rgflFontAlpha[i]) * gHUD::m_flTimeDelta * WEAPONLIST_DRIFT_SPEED;
+	//	// ammo bar & text
+	//	if (pWeapon->m_iPrimaryAmmoType > AMMO_NONE && pWeapon->m_iPrimaryAmmoType < AMMO_MAXTYPE)
+	//	{
+	//		// calculate alpha for this item first.
+	//		flTargetAlpha = pWeapon == g_pCurWeapon ? 255.0f : 0.0f;
+	//		m_rgflFontAlpha[i] += (flTargetAlpha - m_rgflFontAlpha[i]) * gHUD::m_flTimeDelta * WEAPONLIST_DRIFT_SPEED;
 
-			// ammo bar on the side.
-			flCurHeight = (float(gPseudoPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType]) / float(pWeapon->m_pAmmoInfo->m_iMax)) * flCardHeight;
-			vecAmmoBarCoord = m_rgvecCurCoord[i] + Vector2D(-AMMOBAR_WIDTH, flCardHeight - flCurHeight);
+	//		// ammo bar on the side.
+	//		flCurHeight = (float(gPseudoPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType]) / float(pWeapon->m_pAmmoInfo->m_iMax)) * flCardHeight;
+	//		vecAmmoBarCoord = m_rgvecCurCoord[i] + Vector2D(-AMMOBAR_WIDTH, flCardHeight - flCurHeight);
 
-			UnpackRGB(r, g, b, gPseudoPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType] ? RGB_YELLOWISH : RGB_REDISH);
-			gEngfuncs.pfnFillRGBA(vecAmmoBarCoord.x, m_rgvecCurCoord[i].y, AMMOBAR_WIDTH, flCardHeight, r, g, b, 64);
+	//		UnpackRGB(r, g, b, gPseudoPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType] ? RGB_YELLOWISH : RGB_REDISH);
+	//		gEngfuncs.pfnFillRGBA(vecAmmoBarCoord.x, m_rgvecCurCoord[i].y, AMMOBAR_WIDTH, flCardHeight, r, g, b, 64);
 
-			UnpackRGB(r, g, b, gPseudoPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType] >= pWeapon->m_pItemInfo->m_iMaxClip ? RGB_GREENISH : RGB_REDISH);
-			gEngfuncs.pfnFillRGBA(vecAmmoBarCoord.x, vecAmmoBarCoord.y, AMMOBAR_WIDTH, flCurHeight, r, g, b, 255);
+	//		UnpackRGB(r, g, b, gPseudoPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType] >= pWeapon->m_pItemInfo->m_iMaxClip ? RGB_GREENISH : RGB_REDISH);
+	//		gEngfuncs.pfnFillRGBA(vecAmmoBarCoord.x, vecAmmoBarCoord.y, AMMOBAR_WIDTH, flCurHeight, r, g, b, 255);
 
-			// ammo text.
-			_snwprintf(wszText, wcharsmax(wszText), L"%d", gPseudoPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType]);
-			gFontFuncs::GetTextSize(pWeapon->m_pItemInfo->m_iMaxClip == WEAPON_NOCLIP ? m_hClipFont : m_hAmmoFont, wszText, &iTextWidth, &iTextHeight);
-			vecAmmoTextCoord = m_rgvecCurCoord[i] + Vector2D(-AMMOBAR_WIDTH - iTextWidth - WEAPONLIST_GAP, (flCardHeight - iTextHeight) / 2);
+	//		// ammo text.
+	//		_snwprintf(wszText, wcharsmax(wszText), L"%d", gPseudoPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType]);
+	//		gFontFuncs::GetTextSize(pWeapon->m_pItemInfo->m_iMaxClip == WEAPON_NOCLIP ? m_hClipFont : m_hAmmoFont, wszText, &iTextWidth, &iTextHeight);
+	//		vecAmmoTextCoord = m_rgvecCurCoord[i] + Vector2D(-AMMOBAR_WIDTH - iTextWidth - WEAPONLIST_GAP, (flCardHeight - iTextHeight) / 2);
 
-			gFontFuncs::DrawSetTextFont(pWeapon->m_pItemInfo->m_iMaxClip == WEAPON_NOCLIP ? m_hClipFont : m_hAmmoFont);	// if this weapon is directly using ammo, then we should treat ammo as clip.
-			gFontFuncs::DrawSetTextPos(vecAmmoTextCoord.x, vecAmmoTextCoord.y);
-			gFontFuncs::DrawSetTextColor(gPseudoPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType] ? 0xFFFFFF : RGB_REDISH, m_rgflFontAlpha[i]);
-			gFontFuncs::DrawPrintText(wszText);
+	//		gFontFuncs::DrawSetTextFont(pWeapon->m_pItemInfo->m_iMaxClip == WEAPON_NOCLIP ? m_hClipFont : m_hAmmoFont);	// if this weapon is directly using ammo, then we should treat ammo as clip.
+	//		gFontFuncs::DrawSetTextPos(vecAmmoTextCoord.x, vecAmmoTextCoord.y);
+	//		gFontFuncs::DrawSetTextColor(gPseudoPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType] ? 0xFFFFFF : RGB_REDISH, m_rgflFontAlpha[i]);
+	//		gFontFuncs::DrawPrintText(wszText);
 
-			// clip text
-			if (pWeapon->m_pItemInfo->m_iMaxClip != WEAPON_NOCLIP)	// we must have a clip to do so.
-			{
-				_snwprintf(wszText, wcharsmax(wszText), L"%d", pWeapon->m_iClip);
-				gFontFuncs::GetTextSize(m_hClipFont, wszText, &iTextWidth, &iTextHeight);
+	//		// clip text
+	//		if (pWeapon->m_pItemInfo->m_iMaxClip != WEAPON_NOCLIP)	// we must have a clip to do so.
+	//		{
+	//			_snwprintf(wszText, wcharsmax(wszText), L"%d", pWeapon->m_iClip);
+	//			gFontFuncs::GetTextSize(m_hClipFont, wszText, &iTextWidth, &iTextHeight);
 
-				// don't reset the coord, we need to recalculate based on it!
-				vecAmmoTextCoord.x -= iTextWidth + WEAPONLIST_GAP * 5;
-				vecAmmoTextCoord.y = m_rgvecCurCoord[i].y + (flCardHeight - iTextHeight) / 2;
+	//			// don't reset the coord, we need to recalculate based on it!
+	//			vecAmmoTextCoord.x -= iTextWidth + WEAPONLIST_GAP * 5;
+	//			vecAmmoTextCoord.y = m_rgvecCurCoord[i].y + (flCardHeight - iTextHeight) / 2;
 
-				gFontFuncs::DrawSetTextFont(m_hClipFont);
-				gFontFuncs::DrawSetTextPos(vecAmmoTextCoord.x, vecAmmoTextCoord.y);
-				gFontFuncs::DrawSetTextColor(pWeapon->m_iClip ? 0xFFFFFF : RGB_REDISH, m_rgflFontAlpha[i]);
-				gFontFuncs::DrawPrintText(wszText);
-			}
-		}
+	//			gFontFuncs::DrawSetTextFont(m_hClipFont);
+	//			gFontFuncs::DrawSetTextPos(vecAmmoTextCoord.x, vecAmmoTextCoord.y);
+	//			gFontFuncs::DrawSetTextColor(pWeapon->m_iClip ? 0xFFFFFF : RGB_REDISH, m_rgflFontAlpha[i]);
+	//			gFontFuncs::DrawPrintText(wszText);
+	//		}
+	//	}
 
-		// draw the item card.
-		UnpackRGB(r, g, b, pWeapon->m_iClip ? 0xFFFFFFFF : RGB_REDISH);	// PURE WHITE.
-		ScaleColors(r, g, b, m_flAlpha);
-		gEngfuncs.pfnSPR_Set(*m_rgphList[i], r, g, b);
-		gEngfuncs.pfnSPR_DrawAdditive(0, m_rgvecCurCoord[i].x, m_rgvecCurCoord[i].y, m_rgprcList[i]);
-	}
+	//	// draw the item card.
+	//	UnpackRGB(r, g, b, pWeapon->m_iClip ? 0xFFFFFFFF : RGB_REDISH);	// PURE WHITE.
+	//	ScaleColors(r, g, b, m_flAlpha);
+	//	gEngfuncs.pfnSPR_Set(*m_rgphList[i], r, g, b);
+	//	gEngfuncs.pfnSPR_DrawAdditive(0, m_rgvecCurCoord[i].x, m_rgvecCurCoord[i].y, m_rgprcList[i]);
+	//}
 
-	// the change of phases is depending on active item card.
-	int iCurSlot = g_pCurWeapon->m_pItemInfo->m_iSlot;
+	//// the change of phases is depending on active item card.
+	//int iCurSlot = g_pCurWeapon->m_pItemInfo->m_iSlot;
 
-	// almost there...
-	auto len = (m_rgvecCurCoord[iCurSlot] - m_rgvecDestCoord[iCurSlot]).Length();
-	if (len <= 0.01f)
-	{
-		m_rgvecCurCoord[iCurSlot] = m_rgvecDestCoord[iCurSlot];
+	//// almost there...
+	//auto len = (m_rgvecCurCoord[iCurSlot] - m_rgvecDestCoord[iCurSlot]).Length();
+	//if (len <= 0.01f)
+	//{
+	//	m_rgvecCurCoord[iCurSlot] = m_rgvecDestCoord[iCurSlot];
 
-		switch (m_iPhase)
-		{
-		case MOVING_IN:
-			m_iPhase = MOVING_OUT;
-			break;
+	//	switch (m_iPhase)
+	//	{
+	//	case MOVING_IN:
+	//		m_iPhase = MOVING_OUT;
+	//		break;
 
-		default:
-			break;
-		}
-	}
+	//	default:
+	//		break;
+	//	}
+	//}
 
 	return 1;
 }
