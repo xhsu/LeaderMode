@@ -410,7 +410,6 @@ public:
 	BOOL FlashlightIsOn();
 	void FlashlightTurnOn();
 	void FlashlightTurnOff();
-	void UpdatePlayerSound();
 	void DeathSound();
 	void SetAnimation(PLAYER_ANIM playerAnim);
 	void SetWeaponAnimType(const char *szExtention) { Q_strcpy(m_szAnimExtention, szExtention); }
@@ -604,7 +603,6 @@ public:
 	float m_tmHandleSignals;
 	CUnifiedSignals m_signals;
 	edict_t *m_pentCurBombTarget;
-	int m_iPlayerSound;
 	int m_iTargetVolume;
 	int m_iWeaponVolume;
 	int m_iExtraSoundTypes;

@@ -3744,115 +3744,6 @@ void CBasePlayer::SetNewPlayerModel(const char *modelName)
 	ResetSequenceInfo();
 }
 
-// UpdatePlayerSound - updates the position of the player's
-// reserved sound slot in the sound list.
-void CBasePlayer::UpdatePlayerSound()
-{
-	int iBodyVolume;
-	int iVolume;
-
-	CSound *pSound = CSoundEnt::SoundPointerForIndex(CSoundEnt::ClientSoundIndex(edict()));
-
-	if (!pSound)
-	{
-		ALERT(at_console, "Client lost reserved sound!\n");
-		return;
-	}
-
-	pSound->m_iType = bits_SOUND_NONE;
-
-	// now calculate the best target volume for the sound. If the player's weapon
-	// is louder than his body/movement, use the weapon volume, else, use the body volume.
-	// now figure out how loud the player's movement is.
-
-	if (pev->flags & FL_ONGROUND)
-	{
-		iBodyVolume = pev->velocity.Length();
-
-		// clamp the noise that can be made by the body, in case a push trigger,
-		// weapon recoil, or anything shoves the player abnormally fast.
-		// NOTE: 512 units is a pretty large radius for a sound made by the player's body.
-		// then again, I think some materials are pretty loud.
-		if (iBodyVolume > 512)
-		{
-			iBodyVolume = 512;
-		}
-	}
-	else
-	{
-		iBodyVolume = 0;
-	}
-
-	if (pev->button & IN_JUMP)
-	{
-		// Jumping is a little louder.
-		iBodyVolume += 100;
-	}
-
-	// convert player move speed and actions into sound audible by monsters.
-	if (m_iWeaponVolume > iBodyVolume)
-	{
-		m_iTargetVolume = m_iWeaponVolume;
-
-		// OR in the bits for COMBAT sound if the weapon is being louder than the player.
-		pSound->m_iType |= bits_SOUND_COMBAT;
-	}
-	else
-	{
-		m_iTargetVolume = iBodyVolume;
-	}
-
-	// decay weapon volume over time so bits_SOUND_COMBAT stays set for a while
-	m_iWeaponVolume -= 250 * gpGlobals->frametime;
-
-	// if target volume is greater than the player sound's current volume, we paste the new volume in
-	// immediately. If target is less than the current volume, current volume is not set immediately to the
-	// lower volume, rather works itself towards target volume over time. This gives monsters a much better chance
-	// to hear a sound, especially if they don't listen every frame.
-	iVolume = pSound->m_iVolume;
-
-	if (m_iTargetVolume > iVolume)
-	{
-		iVolume = m_iTargetVolume;
-	}
-	else if (iVolume > m_iTargetVolume)
-	{
-		iVolume -= 250 * gpGlobals->frametime;
-
-		if (iVolume < m_iTargetVolume)
-			iVolume = 0;
-	}
-
-	if (m_fNoPlayerSound)
-	{
-		// debugging flag, lets players move around and shoot without monsters hearing.
-		iVolume = 0;
-	}
-
-	if (gpGlobals->time > m_flStopExtraSoundTime)
-	{
-		// since the extra sound that a weapon emits only lasts for one client frame, we keep that sound around for a server frame or two
-		// after actual emission to make sure it gets heard.
-		m_iExtraSoundTypes = 0;
-	}
-
-	if (pSound)
-	{
-		pSound->m_vecOrigin = pev->origin;
-		pSound->m_iVolume = iVolume;
-		pSound->m_iType |= (bits_SOUND_PLAYER | m_iExtraSoundTypes);
-	}
-
-	// keep track of virtual muzzle flash
-	m_iWeaponFlash -= 256 * gpGlobals->frametime;
-
-	if (m_iWeaponFlash < 0)
-		m_iWeaponFlash = 0;
-
-	UTIL_MakeVectors(pev->angles);
-	gpGlobals->v_forward.z = 0;
-}
-
 void EXT_FUNC CBasePlayer::PostThink()
 {
 	// intermission or finale
@@ -3946,9 +3837,6 @@ void EXT_FUNC CBasePlayer::PostThink()
 	{
 		pev->flTimeStepSound = int(m_flTimeStepSound);
 	}
-
-	// NOTE: this is useless for CS 1.6 - s1lent
-	UpdatePlayerSound();
 
 	// no Overhealing think for the dead, of course.
 	gOverHealingMgr::Think(this);
@@ -4348,11 +4236,6 @@ void EXT_FUNC CBasePlayer::Spawn()
 	Precache();
 
 	m_HackedGunPos = Vector(0, 32, 0);
-
-	if (m_iPlayerSound == SOUNDLIST_EMPTY)
-	{
-		ALERT(at_console, "Couldn't alloc player sound slot!\n");
-	}
 
 	m_iHideHUD &= ~(HIDEHUD_WEAPONS | HIDEHUD_HEALTH | HIDEHUD_TIMER | HIDEHUD_MONEY | HIDEHUD_CROSSHAIR);
 	m_fNoPlayerSound = FALSE;

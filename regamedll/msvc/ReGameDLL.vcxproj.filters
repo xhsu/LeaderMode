@@ -409,9 +409,6 @@
     <ClCompile Include="..\dlls\player_classes.cpp">
       <Filter>dlls</Filter>
     </ClCompile>
-    <ClCompile Include="..\dlls\soundent.cpp">
-      <Filter>dlls</Filter>
-    </ClCompile>
     <ClCompile Include="..\dlls\gamerules.cpp">
       <Filter>dlls</Filter>
     </ClCompile>
@@ -907,9 +904,6 @@
       <Filter>dlls\addons</Filter>
     </ClInclude>
     <ClInclude Include="..\dlls\player_classes.h">
-      <Filter>dlls</Filter>
-    </ClInclude>
-    <ClInclude Include="..\dlls\soundent.h">
       <Filter>dlls</Filter>
     </ClInclude>
     <ClInclude Include="..\dlls\menus.h">
