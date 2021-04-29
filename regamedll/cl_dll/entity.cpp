@@ -19,21 +19,6 @@ HUD_GetUserEntity
 #include "precompiled.h"
 
 int iOnTrain[MAX_PLAYERS];
-
-// MOVEME : hud_scoreboard.cpp
-int g_iUser1;
-int g_iUser2;
-int g_iUser3;
-int g_iTeam;
-int g_iPlayerClass;
-int g_iPlayerFlags;
-Vector g_vPlayerVelocity;
-float g_flPlayerSpeed;
-int g_iWeaponFlags;
-int g_iWaterLevel;
-float g_flRoundTime = 0;
-RoleTypes g_iRoleType = Role_UNASSIGNED;
-
 extra_player_info_t	g_PlayerExtraInfo[MAX_PLAYERS]; // additional player info sent directly to the client.dll
 
 /*

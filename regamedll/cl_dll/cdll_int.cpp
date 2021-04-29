@@ -159,7 +159,7 @@ char CL_DLLEXPORT HUD_PlayerMoveTexture(char* name)
 
 void CL_DLLEXPORT HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct usercmd_s* cmd, int runfuncs, double time, unsigned int random_seed)
 {
-	//HUD_PostRunCmd2(from, to, cmd, runfuncs, time, random_seed);	// WPN_UNDONE
+	HUD_PostRunCmd2(from, to, cmd, runfuncs, time, random_seed);
 }
 
 void CL_DLLEXPORT HUD_ProcessPlayerState(entity_state_s* dst, const entity_state_s* src)
@@ -301,7 +301,7 @@ void CL_DLLEXPORT V_CalcRefdef(ref_params_s* pparams)
 // From here are the extended functions called from metahook module.
 //
 
-// Command 'changelevel' and things like that won't trigger this.
+// Server command 'changelevel' and things like that won't trigger this.
 // You may still use HUD_VidInit to make a complement.
 void CL_DLLEXPORT CL_Disconnect(void)
 {

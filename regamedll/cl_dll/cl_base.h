@@ -147,6 +147,7 @@ Created Date: 05 Mar 2020
 #include "../dlls/ammo.h"
 #include "../dlls/weapontype.h"
 #include "../dlls/player_classes.h"
+#include "pseudoplayer.h"
 #include "tri.h"
 #include "sound.h"
 
