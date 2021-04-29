@@ -48,14 +48,7 @@ int gmsgNVGToggle = 0;
 int gmsgRadar = 0;
 int gmsgSpectator = 0;
 int gmsgVGUIMenu = 0;
-int gmsgCZCareer = 0;
-int gmsgCZCareerHUD = 0;
-int gmsgTaskTime = 0;
-int gmsgTutorText = 0;
-int gmsgTutorLine = 0;
 int gmsgShadowIdx = 0;
-int gmsgTutorState = 0;
-int gmsgTutorClose = 0;
 int gmsgAllowSpec = 0;
 int gmsgGeigerRange = 0;
 int gmsgSendCorpse = 0;
@@ -104,8 +97,6 @@ char *sPlayerModelFiles[] =
 	"models/player/spetsnaz/spetsnaz.mdl", // CZ
 	"models/player/militia/militia.mdl"    // CZ
 };
-
-bool g_skipCareerInitialSpawn = false;
 
 static entity_field_alias_t entity_field_alias[] =
 {
@@ -194,20 +185,13 @@ void LinkUserMessages()
 	gmsgRadar         = REG_USER_MSG("Radar", 7);
 	gmsgSpectator     = REG_USER_MSG("Spectator", 2);
 	gmsgVGUIMenu      = REG_USER_MSG("VGUIMenu", -1);
-	gmsgTutorText     = REG_USER_MSG("TutorText", -1);
-	gmsgTutorLine     = REG_USER_MSG("TutorLine", -1);
-	gmsgTutorState    = REG_USER_MSG("TutorState", -1);
-	gmsgTutorClose    = REG_USER_MSG("TutorClose", -1);
 	gmsgAllowSpec     = REG_USER_MSG("AllowSpec", 1);
 	gmsgSendCorpse    = REG_USER_MSG("ClCorpse", -1);
 	gmsgHLTV          = REG_USER_MSG("HLTV", 2);
 	gmsgSpecHealth    = REG_USER_MSG("SpecHealth", 1);
 	gmsgForceCam      = REG_USER_MSG("ForceCam", 3);
 	gmsgReceiveW      = REG_USER_MSG("ReceiveW", 1);
-	gmsgCZCareer      = REG_USER_MSG("CZCareer", -1);
-	gmsgCZCareerHUD   = REG_USER_MSG("CZCareerHUD", -1);
 	gmsgShadowIdx     = REG_USER_MSG("ShadowIdx", 4);
-	gmsgTaskTime      = REG_USER_MSG("TaskTime", 4);
 	gmsgBotVoice      = REG_USER_MSG("BotVoice", 2);
 	gmsgBuyClose      = REG_USER_MSG("BuyClose", 0);
 	gmsgSpecHealth2   = REG_USER_MSG("SpecHealth2", 2);
@@ -321,11 +305,7 @@ void respawn(entvars_t *pev, BOOL fCopyCorpse)
 			CSGameRules()->MarkSpawnSkipped();
 
 		CBasePlayer *pPlayer = GetClassPtr((CBasePlayer *)pev);
-		if (CSGameRules()->IsCareer() && CSGameRules()->ShouldSkipSpawn() && pPlayer->IsAlive())
-			g_skipCareerInitialSpawn = true;
-
 		pPlayer->Spawn();
-		g_skipCareerInitialSpawn = false;
 	}
 	else if (pev->deadflag > DEAD_NO)
 	{
@@ -1174,11 +1154,6 @@ void BuyEquipment(CBasePlayer *pPlayer, EquipmentIdType iSlot)
 	{
 		pPlayer->AddAccount(-iItemPrice, RT_PLAYER_BOUGHT_SOMETHING);
 	}
-
-	if (TheTutor)
-	{
-		TheTutor->OnEvent(EVENT_PLAYER_BOUGHT_SOMETHING, pPlayer);
-	}
 }
 
 CBaseWeapon*BuyWeapon(CBasePlayer *pPlayer, WeaponIdType weaponID)
@@ -1222,11 +1197,6 @@ CBaseWeapon*BuyWeapon(CBasePlayer *pPlayer, WeaponIdType weaponID)
 	if (refill_bpammo_weapons.value > 1)
 	{
 		pPlayer->GiveAmmo(g_rgAmmoInfo[info->m_iAmmoType].m_iCountPerBox, info->m_iAmmoType);
-	}
-
-	if (TheTutor)
-	{
-		TheTutor->OnEvent(EVENT_PLAYER_BOUGHT_SOMETHING, pPlayer);
 	}
 
 	return pWeapon;
@@ -1356,14 +1326,6 @@ void EXT_FUNC HandleMenu_ChooseAppearance(CBasePlayer *pPlayer, int slot)
 	case PICKINGTEAM:
 	{
 		pPlayer->m_iJoiningState = GETINTOGAME;
-
-		if (CSGameRules()->IsCareer())
-		{
-			if (!pPlayer->IsBot())
-			{
-				CSGameRules()->CheckWinConditions();
-			}
-		}
 		break;
 	}
 	}
@@ -1615,24 +1577,21 @@ BOOL EXT_FUNC HandleMenu_ChooseTeam(CBasePlayer *pPlayer, int slot)
 
 	if (!CSGameRules()->ShouldSkipShowMenu())
 	{
-		if (!CSGameRules()->IsCareer())
+		switch (team)
 		{
-			switch (team)
-			{
-			case CT:
-				if (AreRunningCZero())
-					ShowVGUIMenu(pPlayer, VGUI_Menu_Class_CT, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5 | MENU_KEY_6), "#CT_Select");
-				else
-					ShowVGUIMenu(pPlayer, VGUI_Menu_Class_CT, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5), "#CT_Select");
-				break;
+		case CT:
+			if (AreRunningCZero())
+				ShowVGUIMenu(pPlayer, VGUI_Menu_Class_CT, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5 | MENU_KEY_6), "#CT_Select");
+			else
+				ShowVGUIMenu(pPlayer, VGUI_Menu_Class_CT, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5), "#CT_Select");
+			break;
 
-			case TERRORIST:
-				if (AreRunningCZero())
-					ShowVGUIMenu(pPlayer, VGUI_Menu_Class_T, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5 | MENU_KEY_6), "#Terrorist_Select");
-				else
-					ShowVGUIMenu(pPlayer, VGUI_Menu_Class_T, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5), "#Terrorist_Select");
-				break;
-			}
+		case TERRORIST:
+			if (AreRunningCZero())
+				ShowVGUIMenu(pPlayer, VGUI_Menu_Class_T, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5 | MENU_KEY_6), "#Terrorist_Select");
+			else
+				ShowVGUIMenu(pPlayer, VGUI_Menu_Class_T, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5), "#Terrorist_Select");
+			break;
 		}
 
 		pPlayer->m_iMenu = Menu_ChooseAppearance;
@@ -2187,11 +2146,6 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 		if (pPlayer->m_signals.GetState() & SIGNAL_BUY)
 		{
 			OpenMenu_Buy3(pPlayer);
-
-			if (TheTutor)
-			{
-				TheTutor->OnEvent(EVENT_TUTOR_BUY_MENU_OPENNED);
-			}
 		}
 		else
 		{
@@ -2346,16 +2300,12 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 				return;
 			}
 		}
+		pPlayer->m_iMenu = Menu_ChooseTeam;
 
-		if (!CSGameRules()->IsCareer())
-		{
-			pPlayer->m_iMenu = Menu_ChooseTeam;
-
-			if (CSGameRules()->IsFreezePeriod() || pPlayer->pev->deadflag != DEAD_NO)
-				ShowVGUIMenu(pPlayer, VGUI_Menu_Team, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_5 | MENU_KEY_6 | MENU_KEY_0), "#IG_Team_Select_Spect");
-			else
-				ShowVGUIMenu(pPlayer, VGUI_Menu_Team, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_5 | MENU_KEY_0), "#IG_Team_Select");
-		}
+		if (CSGameRules()->IsFreezePeriod() || pPlayer->pev->deadflag != DEAD_NO)
+			ShowVGUIMenu(pPlayer, VGUI_Menu_Team, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_5 | MENU_KEY_6 | MENU_KEY_0), "#IG_Team_Select_Spect");
+		else
+			ShowVGUIMenu(pPlayer, VGUI_Menu_Team, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_5 | MENU_KEY_0), "#IG_Team_Select");
 	}
 	else if (FStrEq(pcmd, "showbriefing"))
 	{
@@ -2608,11 +2558,6 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 				{
 					if (pPlayer->m_rgpPlayerItems[PRIMARY_WEAPON_SLOT])
 						BuyGunAmmo(pPlayer, pPlayer->m_rgpPlayerItems[PRIMARY_WEAPON_SLOT]);	// buy only 1 box of ammo.
-
-					if (TheTutor)
-					{
-						TheTutor->OnEvent(EVENT_PLAYER_BOUGHT_SOMETHING, pPlayer);
-					}
 				}
 			}
 			else if (FStrEq(pcmd, "buyammo2"))
@@ -2621,11 +2566,6 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 				{
 					if (pPlayer->m_rgpPlayerItems[PISTOL_SLOT])
 						BuyGunAmmo(pPlayer, pPlayer->m_rgpPlayerItems[PISTOL_SLOT]);	// buy only 1 box of ammo.
-
-					if (TheTutor)
-					{
-						TheTutor->OnEvent(EVENT_PLAYER_BOUGHT_SOMETHING, pPlayer);
-					}
 				}
 			}
 			else if (FStrEq(pcmd, "primammo"))
@@ -2633,11 +2573,6 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 				if (pPlayer->m_signals.GetState() & SIGNAL_BUY)
 				{
 					BuyAmmo(pPlayer, PRIMARY_WEAPON_SLOT);	// buy full ammo.
-
-					if (TheTutor)
-					{
-						TheTutor->OnEvent(EVENT_PLAYER_BOUGHT_SOMETHING, pPlayer);
-					}
 				}
 			}
 			else if (FStrEq(pcmd, "secammo"))
@@ -2645,11 +2580,6 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 				if (pPlayer->m_signals.GetState() & SIGNAL_BUY)
 				{
 					BuyAmmo(pPlayer, PISTOL_SLOT);	// buy full ammo.
-
-					if (TheTutor)
-					{
-						TheTutor->OnEvent(EVENT_PLAYER_BOUGHT_SOMETHING, pPlayer);
-					}
 				}
 			}
 			else if (FStrEq(pcmd, "buy"))
@@ -3023,11 +2953,6 @@ void EXT_FUNC StartFrame()
 	if (TheBots)
 	{
 		TheBots->StartFrame();
-	}
-
-	if (TheTutor)
-	{
-		TheTutor->StartFrame(gpGlobals->time);
 	}
 
 	if (!CBaseWeapon::m_lstWeapons.empty())

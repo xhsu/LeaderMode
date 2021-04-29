@@ -205,7 +205,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Play|Win32'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\dlls\buttons.cpp" />
-    <ClCompile Include="..\dlls\career_tasks.cpp" />
     <ClCompile Include="..\dlls\cbase.cpp" />
     <ClCompile Include="..\dlls\client.cpp" />
     <ClCompile Include="..\dlls\cmdhandler.cpp" />
@@ -227,7 +226,6 @@
     <ClCompile Include="..\dlls\h_cycler.cpp" />
     <ClCompile Include="..\dlls\h_export.cpp" />
     <ClCompile Include="..\dlls\items.cpp" />
-    <ClCompile Include="..\dlls\lefthandmgr.cpp" />
     <ClCompile Include="..\dlls\lights.cpp" />
     <ClCompile Include="..\dlls\mapinfo.cpp" />
     <ClCompile Include="..\dlls\maprules.cpp" />
@@ -247,11 +245,6 @@
     <ClCompile Include="..\dlls\spectator.cpp" />
     <ClCompile Include="..\dlls\subs.cpp" />
     <ClCompile Include="..\dlls\triggers.cpp" />
-    <ClCompile Include="..\dlls\tutor.cpp" />
-    <ClCompile Include="..\dlls\tutor_base_states.cpp" />
-    <ClCompile Include="..\dlls\tutor_base_tutor.cpp" />
-    <ClCompile Include="..\dlls\tutor_cs_states.cpp" />
-    <ClCompile Include="..\dlls\tutor_cs_tutor.cpp" />
     <ClCompile Include="..\dlls\util.cpp" />
     <ClCompile Include="..\dlls\vehicle.cpp" />
     <ClCompile Include="..\dlls\weaponbox.cpp" />
@@ -561,7 +554,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Play|Win32'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\dlls\buttons.h" />
-    <ClInclude Include="..\dlls\career_tasks.h" />
     <ClInclude Include="..\dlls\cbase.h" />
     <ClInclude Include="..\dlls\cdll_dll.h" />
     <ClInclude Include="..\dlls\client.h" />
@@ -588,7 +580,6 @@
     <ClInclude Include="..\dlls\h_battery.h" />
     <ClInclude Include="..\dlls\h_cycler.h" />
     <ClInclude Include="..\dlls\items.h" />
-    <ClInclude Include="..\dlls\lefthandmgr.h" />
     <ClInclude Include="..\dlls\lights.h" />
     <ClInclude Include="..\dlls\mapinfo.h" />
     <ClInclude Include="..\dlls\maprules.h" />
@@ -615,11 +606,6 @@
     <ClInclude Include="..\dlls\talkmonster.h" />
     <ClInclude Include="..\dlls\trains.h" />
     <ClInclude Include="..\dlls\triggers.h" />
-    <ClInclude Include="..\dlls\tutor.h" />
-    <ClInclude Include="..\dlls\tutor_base_states.h" />
-    <ClInclude Include="..\dlls\tutor_base_tutor.h" />
-    <ClInclude Include="..\dlls\tutor_cs_states.h" />
-    <ClInclude Include="..\dlls\tutor_cs_tutor.h" />
     <ClInclude Include="..\dlls\unisignals.h" />
     <ClInclude Include="..\dlls\util.h" />
     <ClInclude Include="..\dlls\vector.h" />

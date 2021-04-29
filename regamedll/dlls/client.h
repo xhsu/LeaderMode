@@ -91,7 +91,6 @@ C_DLLEXPORT int CountTeams();
 C_DLLEXPORT int CountTeamPlayers(int iTeam);
 
 extern bool g_bServerActive;
-extern bool g_skipCareerInitialSpawn;
 extern bool g_bClientPrintEnable;
 
 extern unsigned short m_usResetDecals;
@@ -227,14 +226,7 @@ extern int gmsgNVGToggle;
 extern int gmsgRadar;
 extern int gmsgSpectator;
 extern int gmsgVGUIMenu;
-extern int gmsgCZCareer;
-extern int gmsgCZCareerHUD;
-extern int gmsgTaskTime;
-extern int gmsgTutorText;
-extern int gmsgTutorLine;
 extern int gmsgShadowIdx;
-extern int gmsgTutorState;
-extern int gmsgTutorClose;
 extern int gmsgAllowSpec;
 extern int gmsgGeigerRange;
 extern int gmsgSendCorpse;

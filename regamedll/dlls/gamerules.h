@@ -324,11 +324,6 @@ public:
 	void CheckLevelInitialized();
 	void CheckRestartRound();
 
-	BOOL IsCareer();
-	void QueueCareerRoundEndMenu(float tmDelay, int iWinStatus);
-	void SetCareerMatchLimit(int minWins, int winDifference);
-	bool IsInCareerRound();
-	void CareerRestart();
 	bool ShouldSkipShowMenu() const { return m_bSkipShowMenu; }
 	void MarkShowMenuSkipped() { m_bSkipShowMenu = false; }
 	bool ShouldSkipSpawn() const { return m_bSkipSpawn; }
@@ -357,7 +352,7 @@ public:
 	// BOMB MAP FUNCTIONS
 	VFUNC TeamName SelectDefaultTeam();
 
-	bool IsMatchStarted() { return (m_flRestartRoundTime != 0.0f || m_fCareerRoundMenuTime != 0.0f || m_fCareerMatchMenuTime != 0.0f); }
+	bool IsMatchStarted() { return !!(m_flRestartRoundTime != 0.0f); }
 	void SendMOTDToClient(edict_t *client);
 
 	void TerminateRound(float tmDelay, int iWinStatus);
@@ -466,11 +461,7 @@ protected:
 	BOOL m_iEndIntermissionButtonHit;
 	float m_tmNextPeriodicThink;
 	bool m_bGameStarted;				// TRUE = the game commencing when there is at least one CT and T, FALSE = scoring will not start until both teams have players (deprecated name m_bFirstConnected)
-	bool m_bInCareerGame;
-	float m_fCareerRoundMenuTime;
-	int m_iCareerMatchWins;
 	int m_iRoundWinDifference;
-	float m_fCareerMatchMenuTime;
 	bool m_bSkipSpawn;
 
 	// custom
@@ -579,12 +570,6 @@ inline bool HasRoundInfinite(int flags = 0)
 }
 
 bool IsBotSpeaking();
-void SV_Continue_f();
-void SV_Tutor_Toggle_f();
-void SV_Career_Restart_f();
-void SV_Career_EndRound_f();
-void SV_CareerAddTask_f();
-void SV_CareerMatchLimit_f();
 void Broadcast(const char *sentence);
 char *GetTeam(int team);
 void DestroyMapCycle(mapcycle_t *cycle);

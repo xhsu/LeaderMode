@@ -211,15 +211,6 @@
     <ClCompile Include="..\game_shared\bot\nav_area.cpp">
       <Filter>game_shared\bot</Filter>
     </ClCompile>
-    <ClCompile Include="..\dlls\tutor_base_tutor.cpp">
-      <Filter>dlls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\dlls\tutor_cs_tutor.cpp">
-      <Filter>dlls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\dlls\tutor_base_states.cpp">
-      <Filter>dlls</Filter>
-    </ClCompile>
     <ClCompile Include="..\dlls\hintmessage.cpp">
       <Filter>dlls</Filter>
     </ClCompile>
@@ -236,9 +227,6 @@
       <Filter>dlls</Filter>
     </ClCompile>
     <ClCompile Include="..\dlls\ggrenade.cpp">
-      <Filter>dlls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\dlls\career_tasks.cpp">
       <Filter>dlls</Filter>
     </ClCompile>
     <ClCompile Include="..\dlls\bot\states\cs_bot_attack.cpp">
@@ -321,12 +309,6 @@
     </ClCompile>
     <ClCompile Include="..\dlls\bot\cs_bot_vision.cpp">
       <Filter>dlls\bot</Filter>
-    </ClCompile>
-    <ClCompile Include="..\dlls\tutor_cs_states.cpp">
-      <Filter>dlls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\dlls\tutor.cpp">
-      <Filter>dlls</Filter>
     </ClCompile>
     <ClCompile Include="..\dlls\bot\cs_gamestate.cpp">
       <Filter>dlls\bot</Filter>
@@ -483,9 +465,6 @@
     </ClCompile>
     <ClCompile Include="..\dlls\wpn_shared\wpn_fiveseven.cpp">
       <Filter>dlls\wpn_shared\Sanctioned</Filter>
-    </ClCompile>
-    <ClCompile Include="..\dlls\lefthandmgr.cpp">
-      <Filter>dlls</Filter>
     </ClCompile>
     <ClCompile Include="..\game_shared\shared_string.cpp">
       <Filter>game_shared</Filter>
@@ -711,15 +690,6 @@
     <ClInclude Include="..\game_shared\simple_checksum.h">
       <Filter>game_shared</Filter>
     </ClInclude>
-    <ClInclude Include="..\dlls\tutor_base_tutor.h">
-      <Filter>dlls</Filter>
-    </ClInclude>
-    <ClInclude Include="..\dlls\tutor_cs_tutor.h">
-      <Filter>dlls</Filter>
-    </ClInclude>
-    <ClInclude Include="..\dlls\tutor_base_states.h">
-      <Filter>dlls</Filter>
-    </ClInclude>
     <ClInclude Include="..\pm_shared\pm_math.h">
       <Filter>pm_shared</Filter>
     </ClInclude>
@@ -733,9 +703,6 @@
       <Filter>public</Filter>
     </ClInclude>
     <ClInclude Include="..\dlls\airtank.h">
-      <Filter>dlls</Filter>
-    </ClInclude>
-    <ClInclude Include="..\dlls\career_tasks.h">
       <Filter>dlls</Filter>
     </ClInclude>
     <ClInclude Include="..\game_shared\bot\improv.h">
@@ -758,12 +725,6 @@
     </ClInclude>
     <ClInclude Include="..\regamedll\sse_mathfun.h">
       <Filter>regamedll</Filter>
-    </ClInclude>
-    <ClInclude Include="..\dlls\tutor_cs_states.h">
-      <Filter>dlls</Filter>
-    </ClInclude>
-    <ClInclude Include="..\dlls\tutor.h">
-      <Filter>dlls</Filter>
     </ClInclude>
     <ClInclude Include="..\dlls\globals.h">
       <Filter>dlls</Filter>
@@ -967,9 +928,6 @@
       <Filter>dlls</Filter>
     </ClInclude>
     <ClInclude Include="..\dlls\skills.h">
-      <Filter>dlls</Filter>
-    </ClInclude>
-    <ClInclude Include="..\dlls\lefthandmgr.h">
       <Filter>dlls</Filter>
     </ClInclude>
     <ClInclude Include="..\game_shared\shared_string.h">

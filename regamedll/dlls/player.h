@@ -476,10 +476,6 @@ public:
 	void InhibitAutoFollow(float duration) { m_allowAutoFollowTime = gpGlobals->time + duration; }
 	void AllowAutoFollow() { m_allowAutoFollowTime = 0; }
 	void ClientCommand(const char *cmd, const char *arg1 = nullptr, const char *arg2 = nullptr, const char *arg3 = nullptr);
-	const char *PickPrimaryCareerTaskWeapon();
-	const char *PickSecondaryCareerTaskWeapon();
-	const char *PickFlashKillWeaponString();
-	const char *PickGrenadeKillWeaponString();
 	void ParseAutoBuy();
 	void ParseRebuy();
 	void SaveRebuy();

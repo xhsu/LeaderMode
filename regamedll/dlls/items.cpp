@@ -343,11 +343,6 @@ BOOL CItemKevlar::MyTouch(CBasePlayer *pPlayer)
 		WRITE_BYTE(pPlayer->pev->armortype == ARMOR_KEVLAR ? 0 : 1); // 0 = ARMOR_KEVLAR, 1 = ARMOR_VESTHELM
 	MESSAGE_END();
 
-	if (TheTutor)
-	{
-		TheTutor->OnEvent(EVENT_PLAYER_BOUGHT_SOMETHING, pPlayer);
-	}
-
 	return TRUE;
 }
 
@@ -385,11 +380,6 @@ BOOL CItemAssaultSuit::MyTouch(CBasePlayer *pPlayer)
 	MESSAGE_BEGIN(MSG_ONE, gmsgArmorType, nullptr, pPlayer->pev);
 		WRITE_BYTE(1); // 0 = ARMOR_KEVLAR, 1 = ARMOR_VESTHELM
 	MESSAGE_END();
-
-	if (TheTutor)
-	{
-		TheTutor->OnEvent(EVENT_PLAYER_BOUGHT_SOMETHING, pPlayer);
-	}
 
 	return TRUE;
 }

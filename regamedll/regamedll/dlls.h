@@ -84,7 +84,6 @@ using FloatRef = float;
 #include "debug.h"
 #include "observer.h"
 #include "client.h"
-#include "lefthandmgr.h"
 
 #include "trains.h"
 #include "pathcorner.h"
@@ -125,13 +124,6 @@ using FloatRef = float;
 #include "addons/point_command.h"
 #include "metahook/portable/metahook.h"
 
-// Tutor
-#include "tutor.h"
-#include "tutor_base_states.h"
-#include "tutor_base_tutor.h"
-#include "tutor_cs_states.h"
-#include "tutor_cs_tutor.h"
-
 #include "revert_saved.h"
 #include "triggers.h"
 #include "subs.h"
@@ -139,7 +131,6 @@ using FloatRef = float;
 #include "explode.h"
 #include "gamerules.h"
 #include "mapinfo.h"
-#include "career_tasks.h"
 #include "maprules.h"
 #include "monsterevent.h"
 #include "soundent.h"

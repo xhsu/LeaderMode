@@ -624,15 +624,7 @@ void CCSBot::Update()
 								// follow this human
 								Follow(pLeader);
 								PrintIfWatched("Auto-Following %s\n", STRING(pLeader->pev->netname));
-
-								if (CSGameRules()->IsCareer())
-								{
-									GetChatter()->Say("FollowingCommander", 10.0f);
-								}
-								else
-								{
-									GetChatter()->Say("FollowingSir", 10.0f);
-								}
+								GetChatter()->Say("FollowingSir", 10.0f);
 							}
 						}
 					}

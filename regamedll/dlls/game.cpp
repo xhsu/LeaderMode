@@ -288,7 +288,6 @@ void EXT_FUNC GameDLLInit()
 	CONSOLE_ECHO("ReGameDLL version: " APP_VERSION "\n");
 
 	Bot_RegisterCVars();
-	Tutor_RegisterCVars();
 
 	VoiceGameMgr_RegisterCVars();
 
