@@ -68,40 +68,8 @@ const char* CHalfLifeMultiplay::GetGameDescription()
 	return "Counter-Strike";
 }
 
-bool CHalfLifeMultiplay::IsInCareerRound()
-{
-	return IsMatchStarted() ? false : true;
-}
-
-void CHalfLifeMultiplay::SetCareerMatchLimit(int minWins, int winDifference)
-{
-	if (!IsCareer())
-	{
-		return;
-	}
-
-	if (!m_iCareerMatchWins)
-	{
-		m_iCareerMatchWins = minWins;
-		m_iRoundWinDifference = winDifference;
-	}
-}
-
-BOOL CHalfLifeMultiplay::IsCareer()
-{
-	return IS_CAREER_MATCH();
-}
-
 void EXT_FUNC CHalfLifeMultiplay::ServerDeactivate()
 {
-	if (!IsCareer())
-	{
-		return;
-	}
-
-	CVAR_SET_FLOAT("pausable", 0);
-	CVAR_SET_FLOAT("mp_windifference", 1);
-	UTIL_LogPrintf("Career End\n");
 }
 
 bool CCStrikeGameMgrHelper::CanPlayerHearPlayer(CBasePlayer *pListener, CBasePlayer *pSender)
@@ -381,23 +349,11 @@ CHalfLifeMultiplay::CHalfLifeMultiplay()
 		m_fMaxIdlePeriod = flAutoKickIdle;
 	}
 
-	m_bInCareerGame = false;
 	m_iRoundTimeSecs = m_iIntroRoundTime;
 
 	if (IS_DEDICATED_SERVER())
 	{
 		CVAR_SET_FLOAT("pausable", 0);
-	}
-	else if (IsCareer())
-	{
-		CVAR_SET_FLOAT("pausable", 1);
-		CVAR_SET_FLOAT("sv_aim", 0);
-		CVAR_SET_FLOAT("sv_maxspeed", 322);
-		CVAR_SET_FLOAT("sv_cheats", 0);
-		CVAR_SET_FLOAT("mp_windifference", 2);
-
-		m_bInCareerGame = true;
-		UTIL_LogPrintf("Career Start\n");
 	}
 	else
 	{
@@ -422,32 +378,17 @@ CHalfLifeMultiplay::CHalfLifeMultiplay()
 	m_fRoundStartTime = 0;
 	m_fRoundStartTimeReal = 0;
 
-#ifndef CSTRIKE
 	InstallBotControl();
-#endif
-
 	InstallCommands();
 
-	m_bSkipSpawn = m_bInCareerGame;
-
-	m_fCareerRoundMenuTime = 0;
-	m_fCareerMatchMenuTime = 0;
-	m_iCareerMatchWins = 0;
-
+	m_bSkipSpawn = false;
 	m_iRoundWinDifference = int(CVAR_GET_FLOAT("mp_windifference"));
-
-	if (IsCareer())
-	{
-		CCareerTaskManager::Create();
-	}
 
 	if (m_iRoundWinDifference < 1)
 	{
 		m_iRoundWinDifference = 1;
 		CVAR_SET_FLOAT("mp_windifference", 1);
 	}
-
-	InstallTutor(CVAR_GET_FLOAT("tutor_enable") != 0.0f);
 
 	m_bSkipShowMenu = false;
 	m_bNeededPlayers = false;
@@ -561,58 +502,6 @@ void EXT_FUNC CHalfLifeMultiplay::CleanUpMap()
 
 	RemoveGuns();
 	PLAYBACK_EVENT((FEV_GLOBAL | FEV_RELIABLE), 0, m_usResetDecals);
-}
-
-void CHalfLifeMultiplay::QueueCareerRoundEndMenu(float tmDelay, int iWinStatus)
-{
-	if (!TheCareerTasks)
-		return;
-
-	if (m_fCareerMatchMenuTime != 0.0f)
-		return;
-
-	m_fCareerRoundMenuTime = tmDelay + gpGlobals->time;
-
-	bool humansAreCTs = (Q_strcmp(humans_join_team.string, "CT") == 0);
-
-	switch (iWinStatus)
-	{
-	case WINSTATUS_CTS:
-		TheCareerTasks->HandleEvent(humansAreCTs ? EVENT_ROUND_WIN : EVENT_ROUND_LOSS);
-		break;
-	case WINSTATUS_TERRORISTS:
-		TheCareerTasks->HandleEvent(humansAreCTs ? EVENT_ROUND_LOSS : EVENT_ROUND_WIN);
-		break;
-	default:
-		TheCareerTasks->HandleEvent(EVENT_ROUND_DRAW);
-		break;
-	}
-
-	if (m_fCareerMatchMenuTime == 0.0f && m_iCareerMatchWins)
-	{
-		bool canTsWin = true;
-		bool canCTsWin = true;
-
-		if (m_iNumCTWins < m_iCareerMatchWins || (m_iNumCTWins - m_iNumTerroristWins < m_iRoundWinDifference))
-			canCTsWin = false;
-
-		if (m_iNumTerroristWins < m_iCareerMatchWins || (m_iNumTerroristWins - m_iNumCTWins < m_iRoundWinDifference))
-			canTsWin = false;
-
-		if (!TheCareerTasks->AreAllTasksComplete())
-		{
-			if (humansAreCTs)
-				return;
-
-			canTsWin = false;
-		}
-
-		if (canCTsWin || canTsWin)
-		{
-			m_fCareerRoundMenuTime = 0;
-			m_fCareerMatchMenuTime = gpGlobals->time + 3.0f;
-		}
-	}
 }
 
 // Check if the scenario has been won/lost.
@@ -755,16 +644,7 @@ bool EXT_FUNC CHalfLifeMultiplay::NeededPlayersCheck()
 
 	if (!m_bGameStarted && m_iNumSpawnableTerrorist != 0 && m_iNumSpawnableCT != 0)
 	{
-		if (IsCareer())
-		{
-			CBasePlayer *pPlayer = UTIL_PlayerByIndex(gpGlobals->maxClients);
-			if (!pPlayer || !pPlayer->IsBot())
-			{
-				return true;
-			}
-		}
-
-		return OnRoundEnd(WINSTATUS_DRAW, ROUND_GAME_COMMENCE, IsCareer() ? 0 : 3);
+		return OnRoundEnd(WINSTATUS_DRAW, ROUND_GAME_COMMENCE, 3);
 	}
 
 	return false;
@@ -785,11 +665,6 @@ bool CHalfLifeMultiplay::Round_Cts(float tmDelay)
 	EndRoundMessage("#CTs_Win", ROUND_CTS_WIN);
 	TerminateRound(tmDelay, WINSTATUS_CTS);
 
-	if (IsCareer())
-	{
-		QueueCareerRoundEndMenu(tmDelay, WINSTATUS_CTS);
-	}
-
 	return true;
 }
 
@@ -807,11 +682,6 @@ bool CHalfLifeMultiplay::Round_Ts(float tmDelay)
 
 	EndRoundMessage("#Terrorists_Win", ROUND_TERRORISTS_WIN);
 	TerminateRound(tmDelay, WINSTATUS_TERRORISTS);
-
-	if (IsCareer())
-	{
-		QueueCareerRoundEndMenu(tmDelay, WINSTATUS_TERRORISTS);
-	}
 
 	return true;
 }
@@ -1285,7 +1155,6 @@ BOOL CHalfLifeMultiplay::TeamStacked(int newTeam_id, int curTeam_id)
 
 void CHalfLifeMultiplay::Think()
 {
-	MonitorTutorStatus();
 	m_VoiceGameMgr.Update(gpGlobals->frametime);
 
 	if (g_psv_clienttrace->value != 1.0f)
@@ -1304,9 +1173,9 @@ void CHalfLifeMultiplay::Think()
 		|| m_flFadeToBlackValue != fadetoblack.value)
 	{
 		MESSAGE_BEGIN(MSG_ALL, gmsgForceCam);
-			WRITE_BYTE(forcecamera.value != 0);
-			WRITE_BYTE(forcechasecam.value != 0);
-			WRITE_BYTE(fadetoblack.value != 0);
+		WRITE_BYTE(forcecamera.value != 0);
+		WRITE_BYTE(forcechasecam.value != 0);
+		WRITE_BYTE(fadetoblack.value != 0);
 		MESSAGE_END();
 
 		m_flForceCameraValue = forcecamera.value;
@@ -1326,185 +1195,76 @@ void CHalfLifeMultiplay::Think()
 	if (CheckFragLimit())
 		return;
 
-	if (!IsCareer())
-	{
-		// have we hit the max rounds?
-		if (CheckMaxRounds())
-			return;
+	// have we hit the max rounds?
+	if (CheckMaxRounds())
+		return;
 
-		if (CheckWinLimit())
-			return;
+	if (CheckWinLimit())
+		return;
+
+	if (m_iStoredSpectValue != allow_spectators.value)
+	{
+		m_iStoredSpectValue = allow_spectators.value;
+
+		MESSAGE_BEGIN(MSG_ALL, gmsgAllowSpec);
+		WRITE_BYTE(int(allow_spectators.value));
+		MESSAGE_END();
 	}
 
-	if (!IsCareer() || (m_fCareerMatchMenuTime <= 0.0 || m_fCareerMatchMenuTime >= gpGlobals->time))
+	// Check for the end of the round.
+	if (IsFreezePeriod())
 	{
-		if (m_iStoredSpectValue != allow_spectators.value)
-		{
-			m_iStoredSpectValue = allow_spectators.value;
-
-			MESSAGE_BEGIN(MSG_ALL, gmsgAllowSpec);
-				WRITE_BYTE(int(allow_spectators.value));
-			MESSAGE_END();
-		}
-
-		// Check for the end of the round.
-		if (IsFreezePeriod())
-		{
-			CheckFreezePeriodExpired();
-		}
-		else
-		{
-			CheckRoundTimeExpired();
-		}
-
-		if (m_flRestartRoundTime > 0.0f && m_flRestartRoundTime <= gpGlobals->time)
-		{
-			if (!IsCareer() || !m_fCareerRoundMenuTime)
-			{
-				RestartRound();
-			}
-			else if (TheCareerTasks)
-			{
-				bool isBotSpeaking = false;
-
-				if (m_flRestartRoundTime + 10.0f > gpGlobals->time)
-				{
-					isBotSpeaking = IsBotSpeaking();
-				}
-
-				if (!isBotSpeaking)
-				{
-					if (m_fCareerMatchMenuTime == 0.0f && m_iCareerMatchWins)
-					{
-						bool canCTsWin = true;
-						bool canTsWin = true;
-
-						if (m_iNumCTWins < m_iCareerMatchWins || (m_iNumCTWins - m_iNumTerroristWins < m_iRoundWinDifference))
-							canCTsWin = false;
-
-						if (m_iNumTerroristWins < m_iCareerMatchWins || (m_iNumTerroristWins - m_iNumCTWins < m_iRoundWinDifference))
-							canTsWin = false;
-
-						if (!Q_strcmp(humans_join_team.string, "CT"))
-						{
-							if (!TheCareerTasks->AreAllTasksComplete())
-							{
-								canCTsWin = false;
-							}
-						}
-						else if (!TheCareerTasks->AreAllTasksComplete())
-						{
-							canTsWin = false;
-						}
-
-						if (canCTsWin || canTsWin)
-						{
-							m_fCareerRoundMenuTime = 0;
-							m_fCareerMatchMenuTime = gpGlobals->time + 3.0f;
-
-							return;
-						}
-					}
-
-					m_bFreezePeriod = TRUE;
-
-					for (int i = 1; i <= gpGlobals->maxClients; i++)
-					{
-						CBasePlayer *pPlayer = UTIL_PlayerByIndex(i);
-
-						if (pPlayer && !pPlayer->IsBot())
-						{
-							MESSAGE_BEGIN(MSG_ONE, gmsgCZCareerHUD, nullptr, pPlayer->pev);
-								WRITE_STRING("ROUND");
-								WRITE_LONG(m_iNumCTWins);
-								WRITE_LONG(m_iNumTerroristWins);
-								WRITE_BYTE(m_iCareerMatchWins);
-								WRITE_BYTE(m_iRoundWinDifference);
-								WRITE_BYTE(m_iRoundWinStatus);
-							MESSAGE_END();
-
-							pPlayer->m_iHideHUD |= HIDEHUD_ALL;
-							m_flRestartRoundTime = gpGlobals->time + 100000.0;
-
-							UTIL_LogPrintf("Career Round %d %d %d %d\n", m_iRoundWinStatus, m_iNumCTWins, m_iNumTerroristWins, TheCareerTasks->AreAllTasksComplete());
-							break;
-						}
-					}
-
-					m_fCareerRoundMenuTime = 0;
-				}
-			}
-
-			if (TheTutor)
-			{
-				TheTutor->PurgeMessages();
-			}
-		}
-
-		CheckLevelInitialized();
-
-		if (gpGlobals->time > m_tmNextPeriodicThink)
-		{
-			CheckRestartRound();
-			m_tmNextPeriodicThink = gpGlobals->time + 1.0f;
-
-			if (g_psv_accelerate->value != 5.0f)
-			{
-				CVAR_SET_FLOAT("sv_accelerate", 5.0f);
-			}
-
-			if (g_psv_friction->value != 4.0f)
-			{
-				CVAR_SET_FLOAT("sv_friction", 4.0f);
-			}
-
-			if (g_psv_stopspeed->value != 75.0f)
-			{
-				CVAR_SET_FLOAT("sv_stopspeed", 75.0f);
-			}
-
-			m_iMaxRounds = int(maxrounds.value);
-
-			if (m_iMaxRounds < 0)
-			{
-				m_iMaxRounds = 0;
-				CVAR_SET_FLOAT("mp_maxrounds", 0);
-			}
-
-			m_iMaxRoundsWon = int(winlimit.value);
-
-			if (m_iMaxRoundsWon < 0)
-			{
-				m_iMaxRoundsWon = 0;
-				CVAR_SET_FLOAT("mp_winlimit", 0);
-			}
-		}
+		CheckFreezePeriodExpired();
 	}
 	else
 	{
-		if (m_fCareerMatchMenuTime + 10 <= gpGlobals->time || !IsBotSpeaking())
+		CheckRoundTimeExpired();
+	}
+
+	if (m_flRestartRoundTime > 0.0f && m_flRestartRoundTime <= gpGlobals->time)
+	{
+		RestartRound();
+	}
+
+	CheckLevelInitialized();
+
+	if (gpGlobals->time > m_tmNextPeriodicThink)
+	{
+		CheckRestartRound();
+		m_tmNextPeriodicThink = gpGlobals->time + 1.0f;
+
+		if (g_psv_accelerate->value != 5.0f)
 		{
-			UTIL_CareerDPrintf("Ending career match...one team has won the specified number of rounds\n");
+			CVAR_SET_FLOAT("sv_accelerate", 5.0f);
+		}
 
-			MESSAGE_BEGIN(MSG_ALL, gmsgCZCareer);
-				WRITE_STRING("MATCH");
-				WRITE_LONG(m_iNumCTWins);
-				WRITE_LONG(m_iNumTerroristWins);
-			MESSAGE_END();
+		if (g_psv_friction->value != 4.0f)
+		{
+			CVAR_SET_FLOAT("sv_friction", 4.0f);
+		}
 
-			MESSAGE_BEGIN(MSG_ALL, gmsgCZCareerHUD);
-				WRITE_STRING("MATCH");
-				WRITE_LONG(m_iNumCTWins);
-				WRITE_LONG(m_iNumTerroristWins);
-				WRITE_BYTE(m_iCareerMatchWins);
-				WRITE_BYTE(m_iRoundWinDifference);
-				WRITE_BYTE(m_iRoundWinStatus);
-			MESSAGE_END();
+		if (g_psv_stopspeed->value != 75.0f)
+		{
+			CVAR_SET_FLOAT("sv_stopspeed", 75.0f);
+		}
 
-			UTIL_LogPrintf("Career Match %d %d %d %d\n", m_iRoundWinStatus, m_iNumCTWins, m_iNumTerroristWins, TheCareerTasks->AreAllTasksComplete());
-			SERVER_COMMAND("setpause\n");
+		m_iMaxRounds = int(maxrounds.value);
+
+		if (m_iMaxRounds < 0)
+		{
+			m_iMaxRounds = 0;
+			CVAR_SET_FLOAT("mp_maxrounds", 0);
+		}
+
+		m_iMaxRoundsWon = int(winlimit.value);
+
+		if (m_iMaxRoundsWon < 0)
+		{
+			m_iMaxRoundsWon = 0;
+			CVAR_SET_FLOAT("mp_winlimit", 0);
 		}
 	}
+
 
 	// menpower check. just a broadcasting function, nothing related to win-lost determination.
 	CheckMenpower(CT);
@@ -1587,7 +1347,7 @@ bool CHalfLifeMultiplay::CheckGameOver()
 		m_flIntermissionEndTime = m_flIntermissionStartTime + mp_chattime.value;
 
 		// check to see if we should change levels now
-		if (m_flIntermissionEndTime < gpGlobals->time && !IsCareer())
+		if (m_flIntermissionEndTime < gpGlobals->time)
 		{
 			if (!UTIL_HumansInGame()				// if only bots, just change immediately
 				|| IsMultiplayer()
@@ -1613,29 +1373,26 @@ bool CHalfLifeMultiplay::CheckTimeLimit()
 		return false;
 	}
 
-	if (!IsCareer())
+	if (timelimit.value)
 	{
-		if (timelimit.value)
+		m_flTimeLimit = m_flGameStartTime + timelimit.value * 60.0f;
+
+		if (gpGlobals->time >= m_flTimeLimit)
 		{
-			m_flTimeLimit = m_flGameStartTime + timelimit.value * 60.0f;
-
-			if (gpGlobals->time >= m_flTimeLimit)
-			{
-				ALERT(at_console, "Changing maps because time limit has been met\n");
-				GoToIntermission();
-				return true;
-			}
+			ALERT(at_console, "Changing maps because time limit has been met\n");
+			GoToIntermission();
+			return true;
 		}
+	}
 
-		static int lastTime = 0;
-		int timeRemaining = (int)(timelimit.value ? (m_flTimeLimit - gpGlobals->time) : 0);
+	static int lastTime = 0;
+	int timeRemaining = (int)(timelimit.value ? (m_flTimeLimit - gpGlobals->time) : 0);
 
-		// Updates once per second
-		if (timeRemaining != lastTime)
-		{
-			lastTime = timeRemaining;
-			g_engfuncs.pfnCvar_DirectSet(&timeleft, UTIL_VarArgs("%02d:%02d", timeRemaining / 60, timeRemaining % 60));
-		}
+	// Updates once per second
+	if (timeRemaining != lastTime)
+	{
+		lastTime = timeRemaining;
+		g_engfuncs.pfnCvar_DirectSet(&timeleft, UTIL_VarArgs("%02d:%02d", timeRemaining / 60, timeRemaining % 60));
 	}
 
 	return false;
@@ -1754,11 +1511,6 @@ void EXT_FUNC CHalfLifeMultiplay::OnRoundFreezeEnd()
 	bool bCTPlayed = false;
 	bool bTPlayed = false;
 
-	if (TheCareerTasks)
-	{
-		TheCareerTasks->HandleEvent(EVENT_ROUND_START);
-	}
-
 	for (int i = 1; i <= gpGlobals->maxClients; i++)
 	{
 		CBasePlayer *plr = UTIL_PlayerByIndex(i);
@@ -1822,11 +1574,6 @@ void EXT_FUNC CHalfLifeMultiplay::OnRoundFreezeEnd()
 	if (TheBots)
 	{
 		TheBots->OnEvent(EVENT_ROUND_START);
-	}
-
-	if (TheCareerTasks)
-	{
-		TheCareerTasks->HandleEvent(EVENT_ROUND_START);
 	}
 }
 
@@ -1903,7 +1650,6 @@ bool CHalfLifeMultiplay::RestartRoundCheck(float tmDelay)
 	CVAR_SET_FLOAT("sv_restartround", 0);
 	CVAR_SET_FLOAT("sv_restart", 0);
 
-	CareerRestart();
 	return true;
 }
 
@@ -2169,41 +1915,6 @@ void CHalfLifeMultiplay::MarkLivingPlayersOnTeamAsNotReceivingMoneyNextRound(int
 	}
 }
 
-void CHalfLifeMultiplay::CareerRestart()
-{
-	m_bGameOver = false;
-
-	if (m_flRestartRoundTime == 0.0f)
-	{
-		m_flRestartRoundTime = gpGlobals->time + 1.0f;
-	}
-
-	// for reset everything
-	m_bCompleteReset = true;
-	m_fCareerRoundMenuTime = 0;
-	m_fCareerMatchMenuTime = 0;
-
-	if (TheCareerTasks)
-	{
-		TheCareerTasks->Reset(false);
-	}
-
-	m_bSkipSpawn = false;
-
-	for (int i = 1; i <= gpGlobals->maxClients; i++)
-	{
-		CBasePlayer *pPlayer = UTIL_PlayerByIndex(i);
-
-		if (!pPlayer || FNullEnt(pPlayer->pev))
-			continue;
-
-		if (!pPlayer->IsBot())
-		{
-			pPlayer->ForceClientDllUpdate();
-		}
-	}
-}
-
 BOOL CHalfLifeMultiplay::IsMultiplayer()
 {
 	return TRUE;
@@ -2370,15 +2081,7 @@ void CHalfLifeMultiplay::InitHUD(CBasePlayer *pl)
 		WRITE_LONG(g_iShadowSprite);
 	MESSAGE_END();
 
-	if (IsCareer())
-	{
-		MESSAGE_BEGIN(MSG_ONE, gmsgCZCareer, nullptr, pl->edict());
-			WRITE_STRING("START");
-			WRITE_SHORT(m_iRoundTime);
-		MESSAGE_END();
-	}
-	else
-		SendMOTDToClient(pl->edict());
+	SendMOTDToClient(pl->edict());
 
 	// loop through all active players and send their score info to the new client
 	for (i = 1; i <= gpGlobals->maxClients; i++)
@@ -2579,7 +2282,7 @@ void CHalfLifeMultiplay::PlayerThink(CBasePlayer *pPlayer)
 	if (m_bGameOver)
 	{
 		// check for button presses
-		if (!IsCareer() && (pPlayer->m_afButtonPressed & (IN_DUCK | IN_ATTACK | IN_ATTACK2 | IN_USE | IN_JUMP)))
+		if ((pPlayer->m_afButtonPressed & (IN_DUCK | IN_ATTACK | IN_ATTACK2 | IN_USE | IN_JUMP)))
 		{
 			m_iEndIntermissionButtonHit = TRUE;
 		}
@@ -2682,7 +2385,7 @@ void CHalfLifeMultiplay::PlayerThink(CBasePlayer *pPlayer)
 
 			if (HandleMenu_ChooseTeam(pPlayer, slot))
 			{
-				if (slot != MENU_SLOT_TEAM_SPECT && (IsCareer() || m_bSkipShowMenu))
+				if (slot != MENU_SLOT_TEAM_SPECT && m_bSkipShowMenu)
 				{
 					// slot 6 - chooses randomize the appearance to model player
 					HandleMenu_ChooseAppearance(pPlayer, 6);
@@ -2950,10 +2653,10 @@ void EXT_FUNC CHalfLifeMultiplay::PlayerKilled(CBasePlayer *pVictim, entvars_t *
 	}
 }
 
-void EXT_FUNC CHalfLifeMultiplay::DeathNotice(CBasePlayer *pVictim, entvars_t *pKiller, entvars_t *pevInflictor)
+void EXT_FUNC CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, entvars_t* pKiller, entvars_t* pevInflictor)
 {
 	// by default, the player is killed by the world
-	const char *killer_weapon_name = "world";
+	const char* killer_weapon_name = "world";
 	int killer_index = 0;
 
 	// Is the killer a client?
@@ -2966,7 +2669,7 @@ void EXT_FUNC CHalfLifeMultiplay::DeathNotice(CBasePlayer *pVictim, entvars_t *p
 			if (pevInflictor == pKiller)
 			{
 				// If the inflictor is the killer, then it must be their current weapon doing the damage
-				CBasePlayer *pAttacker = CBasePlayer::Instance(pKiller);
+				CBasePlayer* pAttacker = CBasePlayer::Instance(pKiller);
 				if (pAttacker && pAttacker->IsPlayer())
 				{
 					if (pAttacker->m_pActiveItem)
@@ -3002,30 +2705,27 @@ void EXT_FUNC CHalfLifeMultiplay::DeathNotice(CBasePlayer *pVictim, entvars_t *p
 	else if (!Q_strncmp(killer_weapon_name, cut_func, sizeof(cut_func) - 1))
 		killer_weapon_name += sizeof(cut_func) - 1;
 
-	if (!TheTutor)
-	{
-		MESSAGE_BEGIN(MSG_ALL, gmsgDeathMsg);
-			WRITE_BYTE(killer_index);				// the killer
-			WRITE_BYTE(ENTINDEX(pVictim->edict()));	// the victim
-			WRITE_BYTE(pVictim->m_bHeadshotKilled);	// is killed headshot
-			WRITE_STRING(killer_weapon_name);		// what they were killed by (should this be a string?)
-		MESSAGE_END();
-	}
+	MESSAGE_BEGIN(MSG_ALL, gmsgDeathMsg);
+	WRITE_BYTE(killer_index);				// the killer
+	WRITE_BYTE(ENTINDEX(pVictim->edict()));	// the victim
+	WRITE_BYTE(pVictim->m_bHeadshotKilled);	// is killed headshot
+	WRITE_STRING(killer_weapon_name);		// what they were killed by (should this be a string?)
+	MESSAGE_END();
 
 	// Did he kill himself?
 	if (pVictim->pev == pKiller)
 	{
 		// killed self
-		char *team = GetTeam(pVictim->m_iTeam);
+		char* team = GetTeam(pVictim->m_iTeam);
 		UTIL_LogPrintf("\"%s<%i><%s><%s>\" committed suicide with \"%s\"\n", STRING(pVictim->pev->netname), GETPLAYERUSERID(pVictim->edict()),
 			GETPLAYERAUTHID(pVictim->edict()), team, killer_weapon_name);
 	}
 	else if (pKiller->flags & FL_CLIENT)
 	{
-		CBasePlayer *pAttacker = CBasePlayer::Instance(pKiller);
+		CBasePlayer* pAttacker = CBasePlayer::Instance(pKiller);
 
-		const char *VictimTeam = GetTeam(pVictim->m_iTeam);
-		const char *KillerTeam = (pAttacker && pAttacker->IsPlayer()) ? GetTeam(pAttacker->m_iTeam) : "";
+		const char* VictimTeam = GetTeam(pVictim->m_iTeam);
+		const char* KillerTeam = (pAttacker && pAttacker->IsPlayer()) ? GetTeam(pAttacker->m_iTeam) : "";
 
 		UTIL_LogPrintf("\"%s<%i><%s><%s>\" killed \"%s<%i><%s><%s>\" with \"%s\"\n", STRING(pKiller->netname), GETPLAYERUSERID(ENT(pKiller)), GETPLAYERAUTHID(ENT(pKiller)),
 			KillerTeam, STRING(pVictim->pev->netname), GETPLAYERUSERID(pVictim->edict()), GETPLAYERAUTHID(pVictim->edict()), VictimTeam, killer_weapon_name);
@@ -3033,7 +2733,7 @@ void EXT_FUNC CHalfLifeMultiplay::DeathNotice(CBasePlayer *pVictim, entvars_t *p
 	else
 	{
 		// killed by the world
-		char *team = GetTeam(pVictim->m_iTeam);
+		char* team = GetTeam(pVictim->m_iTeam);
 		UTIL_LogPrintf("\"%s<%i><%s><%s>\" committed suicide with \"%s\" (world)\n", STRING(pVictim->pev->netname), GETPLAYERUSERID(pVictim->edict()),
 			GETPLAYERAUTHID(pVictim->edict()), team, killer_weapon_name);
 	}
@@ -3043,9 +2743,9 @@ void EXT_FUNC CHalfLifeMultiplay::DeathNotice(CBasePlayer *pVictim, entvars_t *p
 	CheckWinConditions();
 
 	MESSAGE_BEGIN(MSG_SPEC, SVC_DIRECTOR);
-		WRITE_BYTE(9);								// command length in bytes
-		WRITE_BYTE(DRC_CMD_EVENT);					// player killed
-		WRITE_SHORT(ENTINDEX(pVictim->edict()));	// index number of primary entity
+	WRITE_BYTE(9);								// command length in bytes
+	WRITE_BYTE(DRC_CMD_EVENT);					// player killed
+	WRITE_SHORT(ENTINDEX(pVictim->edict()));	// index number of primary entity
 
 	if (pevInflictor)
 		WRITE_SHORT(ENTINDEX(ENT(pevInflictor)));	// index number of secondary entity
@@ -3355,36 +3055,8 @@ void EXT_FUNC CHalfLifeMultiplay::GoToIntermission()
 	UTIL_LogPrintf("Team \"CT\" scored \"%i\" with \"%i\" players\n", m_iNumCTWins, m_iNumCT);
 	UTIL_LogPrintf("Team \"TERRORIST\" scored \"%i\" with \"%i\" players\n", m_iNumTerroristWins, m_iNumTerrorist);
 
-	if (IsCareer())
-	{
-		MESSAGE_BEGIN(MSG_ALL, gmsgCZCareer);
-			WRITE_STRING("MATCH");
-			WRITE_LONG(m_iNumCTWins);
-			WRITE_LONG(m_iNumTerroristWins);
-		MESSAGE_END();
-
-		MESSAGE_BEGIN(MSG_ALL, gmsgCZCareerHUD);
-			WRITE_STRING("MATCH");
-			WRITE_LONG(m_iNumCTWins);
-			WRITE_LONG(m_iNumTerroristWins);
-			WRITE_BYTE(m_iCareerMatchWins);
-			WRITE_BYTE(m_iRoundWinDifference);
-			WRITE_BYTE(m_iRoundWinStatus);
-		MESSAGE_END();
-
-		if (TheCareerTasks)
-		{
-			UTIL_LogPrintf("Career Match %d %d %d %d\n", m_iRoundWinStatus, m_iNumCTWins, m_iNumTerroristWins, TheCareerTasks->AreAllTasksComplete());
-		}
-	}
-
 	MESSAGE_BEGIN(MSG_ALL, SVC_INTERMISSION);
 	MESSAGE_END();
-
-	if (IsCareer())
-	{
-		SERVER_COMMAND("setpause\n");
-	}
 
 	// bounds check
 	int time = int(CVAR_GET_FLOAT("mp_chattime"));

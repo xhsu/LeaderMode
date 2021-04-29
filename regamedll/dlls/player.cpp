@@ -907,15 +907,6 @@ BOOL CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 			{
 				TheBots->OnEvent(EVENT_PLAYER_TOOK_DAMAGE, this, pAttack);
 			}
-
-			if (TheCareerTasks)
-			{
-				CBasePlayer *pPlayerAttacker = CBasePlayer::Instance(pevAttacker);
-				if (pPlayerAttacker && !pPlayerAttacker->IsBot() && pPlayerAttacker->m_iTeam != m_iTeam)
-				{
-					TheCareerTasks->HandleEnemyInjury(GetWeaponName(pevInflictor, pevAttacker), pPlayerAttacker->HasShield(), pPlayerAttacker);
-				}
-			}
 		}
 
 		// reset damage time countdown for each type of time based damage player just sustained
@@ -1147,15 +1138,6 @@ BOOL CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 		if (TheBots)
 		{
 			TheBots->OnEvent(EVENT_PLAYER_TOOK_DAMAGE, this, pAttack);
-		}
-
-		if (TheCareerTasks)
-		{
-			CBasePlayer *pPlayerAttacker = CBasePlayer::Instance(pevAttacker);
-			if (pPlayerAttacker && !pPlayerAttacker->IsBot() && pPlayerAttacker->m_iTeam != m_iTeam)
-			{
-				TheCareerTasks->HandleEnemyInjury(GetWeaponName(pevInflictor, pevAttacker), pPlayerAttacker->HasShield(), pPlayerAttacker);
-			}
 		}
 	}
 
@@ -1471,50 +1453,6 @@ void EXT_FUNC CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 
 	if (m_flBurningTimeUp > 0.0f)
 		gBurningDOTMgr::Free(this);
-
-	if (CSGameRules()->IsCareer())
-	{
-		bool killerHasShield = false;
-		bool wasBlind = false;
-
-		if (TheCareerTasks)
-		{
-			if (!IsBot())
-			{
-				TheCareerTasks->HandleEvent(EVENT_DIE, nullptr, this);
-			}
-
-			TheCareerTasks->HandleDeath(m_iTeam, this);
-		}
-
-		CBasePlayer *pAttacker = CBasePlayer::Instance(pevAttacker);
-
-		if (pAttacker->HasShield())
-			killerHasShield = true;
-
-		if (IsBot() && IsBlind())
-		{
-			wasBlind = true;
-		}
-
-		for (int i = 1; i <= gpGlobals->maxClients; i++)
-
-		{
-			CBasePlayer *pPlayer = UTIL_PlayerByIndex(i);
-
-			if (!pPlayer)
-				continue;
-
-			bool killedByHumanPlayer = (!pPlayer->IsBot() && pPlayer->pev == pevAttacker && pPlayer->m_iTeam != m_iTeam);
-			if (killedByHumanPlayer)
-			{
-				if (TheCareerTasks)
-				{
-					TheCareerTasks->HandleEnemyKill(wasBlind, GetWeaponName(g_pevLastInflictor, pevAttacker), m_bHeadshotKilled, killerHasShield, this, pPlayer);
-				}
-			}
-		}
-	}
 
 	CSGameRules()->PlayerKilled(this, pevAttacker, g_pevLastInflictor);
 
@@ -2675,58 +2613,6 @@ void CBasePlayer::SyncRoundTimer()
 	MESSAGE_BEGIN(MSG_ONE, gmsgRoundTime, nullptr, pev);
 		WRITE_SHORT(int(tmRemaining));
 	MESSAGE_END();
-
-	if (!g_pGameRules->IsMultiplayer())
-		return;
-
-	if (bFreezePeriod && TheTutor && GetObserverMode() == OBS_NONE)
-	{
-		MESSAGE_BEGIN(MSG_ONE, gmsgBlinkAcct, nullptr, pev);
-			WRITE_BYTE(MONEY_BLINK_AMOUNT);
-		MESSAGE_END();
-	}
-
-	if (TheCareerTasks && CSGameRules()->IsCareer())
-	{
-		int remaining = 0;
-		bool shouldCountDown = false;
-		int fadeOutDelay = 0;
-
-		if (tmRemaining != 0.0f)
-		{
-			remaining = TheCareerTasks->GetTaskTime() - (gpGlobals->time - CSGameRules()->m_fRoundStartTime);
-		}
-
-		if (remaining < 0)
-			remaining = 0;
-
-		if (bFreezePeriod)
-			remaining = -1;
-
-		if (TheCareerTasks->GetFinishedTaskTime())
-			remaining = -TheCareerTasks->GetFinishedTaskTime();
-
-		if (!bFreezePeriod && !TheCareerTasks->GetFinishedTaskTime())
-		{
-			shouldCountDown = true;
-		}
-		if (!bFreezePeriod)
-		{
-			if (TheCareerTasks->GetFinishedTaskTime() || (TheCareerTasks->GetTaskTime() <= TheCareerTasks->GetRoundElapsedTime()))
-			{
-				fadeOutDelay = 3;
-			}
-		}
-
-		if (!TheCareerTasks->GetFinishedTaskTime() || TheCareerTasks->GetFinishedTaskRound() == CSGameRules()->m_iTotalRoundsPlayed)
-		{
-			MESSAGE_BEGIN(MSG_ONE, gmsgTaskTime, nullptr, pev);
-				WRITE_SHORT(remaining);			// remaining of time, -1 the timer is disappears
-				WRITE_BYTE(shouldCountDown);	// timer counts down
-				WRITE_BYTE(fadeOutDelay); 		// fade in time, hide HUD timer after the expiration time
-			MESSAGE_END();
-		}
-	}
 }
 
 void CBasePlayer::RemoveLevelText()
@@ -3017,12 +2903,12 @@ void EXT_FUNC CBasePlayer::StartDeathCam()
 	}
 }
 
-void EXT_FUNC CBasePlayer::StartObserver(Vector &vecPosition, Vector &vecViewAngle)
+void EXT_FUNC CBasePlayer::StartObserver(Vector& vecPosition, Vector& vecViewAngle)
 {
 	// clear any clientside entities attached to this player
 	MESSAGE_BEGIN(MSG_PAS, SVC_TEMPENTITY, pev->origin);
-		WRITE_BYTE(TE_KILLPLAYERATTACHMENTS);
-		WRITE_BYTE(entindex());
+	WRITE_BYTE(TE_KILLPLAYERATTACHMENTS);
+	WRITE_BYTE(entindex());
 	MESSAGE_END();
 
 	// Holster weapon immediately, to allow it to cleanup
@@ -3071,22 +2957,14 @@ void EXT_FUNC CBasePlayer::StartObserver(Vector &vecPosition, Vector &vecViewAng
 
 	pev->iuser1 = OBS_NONE;
 
-	static int iFirstTime = 1;
-	if (iFirstTime != 0 && CSGameRules() && CSGameRules()->IsCareer() && !IsBot())
-	{
-		Observer_SetMode(OBS_CHASE_LOCKED);
-		CLIENT_COMMAND(edict(), "spec_autodirector_internal 1\n");
-		iFirstTime = 0;
-	}
-	else
-		Observer_SetMode(m_iObserverLastMode);
+	Observer_SetMode(m_iObserverLastMode);
 
 	ResetMaxSpeed();
 
 	// Tell all clients this player is now a spectator
 	MESSAGE_BEGIN(MSG_ALL, gmsgSpectator);
-		WRITE_BYTE(entindex());
-		WRITE_BYTE(1);
+	WRITE_BYTE(entindex());
+	WRITE_BYTE(1);
 	MESSAGE_END();
 }
 
@@ -4449,10 +4327,7 @@ void EXT_FUNC CBasePlayer::Spawn()
 
 	m_flFallVelocity = 0;
 
-	if (!g_skipCareerInitialSpawn)
-	{
-		CSGameRules()->GetPlayerSpawnSpot(this);
-	}
+	CSGameRules()->GetPlayerSpawnSpot(this);
 
 	if (!pev->modelindex)
 	{
@@ -6776,11 +6651,6 @@ void CBasePlayer::SpawnClientSideCorpse()
 	MESSAGE_END();
 
 	m_canSwitchObserverModes = true;
-
-	if (TheTutor)
-	{
-		TheTutor->OnEvent(EVENT_CLIENT_CORPSE_SPAWNED, this);
-	}
 }
 
 BOOL CBasePlayer::IsArmored(int nHitGroup)
@@ -6972,194 +6842,6 @@ bool CurrentWeaponSatisfies(CBaseWeapon *pWeapon, int id, int classId)
 		return true;
 
 	return false;
-}
-
-const char *CBasePlayer::PickPrimaryCareerTaskWeapon()
-{
-	const int BufLen = 256;
-	static char buf[BufLen];
-	CBaseWeapon *pPrimary = m_rgpPlayerItems[PRIMARY_WEAPON_SLOT];
-	std::vector<CCareerTask *> taskVector;
-
-	if (!TheCareerTasks)
-	{
-		return nullptr;
-	}
-
-	buf[0] = '\0';
-
-	for (auto pTask : *TheCareerTasks->GetTasks())
-	{
-		if (pTask->IsComplete())
-			continue;
-
-		if (!IsPrimaryWeaponId(pTask->GetWeaponId()))
-		{
-			if (!IsPrimaryWeaponClass(pTask->GetWeaponClassId()))
-			{
-				continue;
-			}
-		}
-
-		if (pPrimary)
-		{
-			if (CurrentWeaponSatisfies(pPrimary, pTask->GetWeaponId(), pTask->GetWeaponClassId()))
-			{
-				if (IsPrimaryWeaponId(pTask->GetWeaponId()))
-				{
-					return WeaponIDToAlias(pTask->GetWeaponId());
-				}
-				else
-				{
-					return GetBuyStringForWeaponClass(pTask->GetWeaponClassId());
-				}
-			}
-		}
-
-		taskVector.push_back(pTask);
-	}
-
-	int taskNum = taskVector.size();
-	if (taskNum > 1)
-	{
-		// randomize names weapons of list
-		int rand = RANDOM_LONG(0, taskNum - 1);
-		SWAP(taskVector[0], taskVector[rand]);
-	}
-
-	if (!taskNum)
-	{
-		return nullptr;
-	}
-
-	for (int i = 0; i < taskNum; i++)
-	{
-		CCareerTask *pTask = taskVector[i];
-
-		if (IsPrimaryWeaponId(pTask->GetWeaponId()))
-			Q_strncat(buf, WeaponIDToAlias(pTask->GetWeaponId()), sizeof(buf) - Q_strlen(buf) - 1);
-		else
-			Q_strncat(buf, GetBuyStringForWeaponClass(pTask->GetWeaponClassId()), sizeof(buf) - Q_strlen(buf) - 1);
-
-		Q_strncat(buf, " ", sizeof(buf) - Q_strlen(buf) - 1);
-	}
-
-	return buf;
-}
-
-const char *CBasePlayer::PickSecondaryCareerTaskWeapon()
-{
-	const int BufLen = 256;
-	static char buf[BufLen];
-	CBaseWeapon *pSecondary = m_rgpPlayerItems[PISTOL_SLOT];
-	std::vector<CCareerTask *> taskVector;
-
-	if (!TheCareerTasks)
-	{
-		return nullptr;
-	}
-
-	for (auto pTask : *TheCareerTasks->GetTasks())
-	{
-		if (pTask->IsComplete())
-			continue;
-
-		if (!IsSecondaryWeaponId(pTask->GetWeaponId()))
-		{
-			if (!IsSecondaryWeaponClass(pTask->GetWeaponClassId()))
-			{
-				continue;
-			}
-		}
-
-		if (pSecondary)
-		{
-			if (CurrentWeaponSatisfies(pSecondary, pTask->GetWeaponId(), pTask->GetWeaponClassId()))
-			{
-				if (IsSecondaryWeaponId(pTask->GetWeaponId()))
-				{
-					return WeaponIDToAlias(pTask->GetWeaponId());
-				}
-				else
-				{
-					return GetBuyStringForWeaponClass(pTask->GetWeaponClassId());
-				}
-			}
-		}
-
-		taskVector.push_back(pTask);
-	}
-
-	int taskNum = taskVector.size();
-	if (taskNum > 1)
-	{
-		// randomize names weapons of list
-		int rand = RANDOM_LONG(0, taskNum - 1);
-		SWAP(taskVector[0], taskVector[rand]);
-	}
-
-	if (!taskNum)
-	{
-		return nullptr;
-	}
-
-	buf[0] = '\0';
-
-	for (int i = 0; i < taskNum; i++)
-	{
-		CCareerTask *pTask = taskVector[i];
-
-		if (IsSecondaryWeaponId(pTask->GetWeaponId()))
-			Q_strncat(buf, WeaponIDToAlias(pTask->GetWeaponId()), sizeof(buf) - Q_strlen(buf) - 1);
-		else
-			Q_strncat(buf, GetBuyStringForWeaponClass(pTask->GetWeaponClassId()), sizeof(buf) - Q_strlen(buf) - 1);
-
-		Q_strncat(buf, " ", sizeof(buf) - Q_strlen(buf) - 1);
-	}
-
-	return buf;
-}
-
-const char *CBasePlayer::PickFlashKillWeaponString()
-{
-	if (!TheCareerTasks)
-		return nullptr;
-
-	bool foundOne = false;
-	for (auto pTask : *TheCareerTasks->GetTasks())
-	{
-		if (!pTask->IsComplete() && !Q_strcmp(pTask->GetTaskName(), "killblind"))
-		{
-			foundOne = true;
-			break;
-		}
-	}
-
-	if (foundOne)
-		return "flash flash";
-
-	return nullptr;
-}
-
-const char *CBasePlayer::PickGrenadeKillWeaponString()
-{
-	if (!TheCareerTasks)
-		return nullptr;
-
-	bool foundOne = false;
-	for (auto pTask : *TheCareerTasks->GetTasks())
-	{
-		if (!pTask->IsComplete())
-		{
-			foundOne = true;
-			break;
-		}
-	}
-
-	if (foundOne)
-		return "hegren";
-
-	return nullptr;
 }
 
 void CBasePlayer::ParseAutoBuy()

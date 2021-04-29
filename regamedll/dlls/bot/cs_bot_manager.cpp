@@ -765,12 +765,7 @@ bool CCSBotManager::BotAddCommand(BotProfileTeamType team, bool isFromConsole)
 	}
 	else
 	{
-		// in career, ignore humans
-		bool ignoreHumans = false;
-		if (CSGameRules() && CSGameRules()->IsCareer())
-			ignoreHumans = true;
-
-		if (UTIL_IsNameTaken(CMD_ARGV(1), ignoreHumans))
+		if (UTIL_IsNameTaken(CMD_ARGV(1)))
 		{
 			CONSOLE_ECHO("Error - %s is already in the game.\n", CMD_ARGV(1));
 			return true;
@@ -963,30 +958,6 @@ void CCSBotManager::MaintainBotQuota()
 		{
 			CONSOLE_ECHO("These bots kicked to maintain quota.\n");
 		}
-	}
-	else
-	{
-		if (CSGameRules() && !CSGameRules()->IsCareer())
-			return;
-
-		bool humansAreCTs = (Q_strcmp(humans_join_team.string, "CT") == 0);
-
-		if (humansAreCTs)
-		{
-			if (CSGameRules()->m_iNumCT <= 6)
-				return;
-
-			UTIL_KickBotFromTeam(CT);
-		}
-		else
-		{
-			if (CSGameRules()->m_iNumTerrorist <= 6)
-				return;
-
-			UTIL_KickBotFromTeam(TERRORIST);
-		}
-
-		CVAR_SET_FLOAT("bot_quota", cv_bot_quota.value - 1.0f);
 	}
 }
 

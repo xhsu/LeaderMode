@@ -1523,14 +1523,12 @@ NOXREF int GetPlayerTeam(int index)
 
 bool UTIL_IsGame(const char *pszGameName)
 {
-#ifndef CSTRIKE
 	if (pszGameName)
 	{
 		char szGameDir[256];
 		GET_GAME_DIR(szGameDir);
 		return (Q_stricmp(szGameDir, pszGameName) == 0);
 	}
-#endif
 
 	return false;
 }

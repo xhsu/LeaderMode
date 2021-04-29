@@ -104,12 +104,6 @@ void CCSBot::OnEvent(GameEventType event, CBaseEntity *pEntity, CBaseEntity *pOt
 		CBasePlayer *pVictim = pPlayer;
 		CBasePlayer *pKiller = (pOther && pOther->IsPlayer()) ? static_cast<CBasePlayer *>(pOther) : nullptr;
 
-		// if the human player died in the single player game, tell the team
-		if (CSGameRules()->IsCareer() && !pVictim->IsBot() && BotRelationship(pVictim) == BOT_TEAMMATE)
-		{
-			GetChatter()->Say("CommanderDown", 20.0f);
-		}
-
 		// keep track of the last player we killed
 		if (pKiller == this)
 		{
@@ -173,11 +167,7 @@ void CCSBot::OnEvent(GameEventType event, CBaseEntity *pEntity, CBaseEntity *pOt
 							}
 							else
 							{
-								// humans get the honorific
-								if (CSGameRules()->IsCareer())
-									GetChatter()->Say("NiceShotCommander", 3.0f, delay);
-								else
-									GetChatter()->Say("NiceShotSir", 3.0f, delay);
+								GetChatter()->Say("NiceShotSir", 3.0f, delay);
 							}
 						}
 					}
