@@ -61,7 +61,7 @@ bool EV_IsLocal(int idx)
 {
 	// check if we are in some way in first person spec mode
 	if (IS_FIRSTPERSON_SPEC)
-		return (g_iUser2 == idx);
+		return (gLocalPlayer.pev->iuser2 == idx);
 	else
 		return gEngfuncs.pEventAPI->EV_IsLocal(idx - 1) ? true : false;
 }
@@ -1015,7 +1015,7 @@ DECLARE_EVENT(FireAK47)
 		EV_MuzzleFlash();
 
 		if (g_pCurWeapon)
-			g_pCurWeapon->SendWeaponAnim(UTIL_SharedRandomLong(gPseudoPlayer.random_seed, AK47_SHOOT1, AK47_SHOOT3));
+			g_pCurWeapon->SendWeaponAnim(UTIL_SharedRandomLong(gLocalPlayer.random_seed, AK47_SHOOT1, AK47_SHOOT3));
 
 		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 3, 0.35, 20, 20, 20, EV_RIFLE_SMOKE, velocity, false, 35);
 	}
@@ -1226,7 +1226,7 @@ DECLARE_EVENT(FireM45A1)
 			if (args->bparam1)	// m_iClip >= 0
 			{
 				if (args->bparam2)	// m_bInZoom
-					iAnim = UTIL_SharedRandomLong(gPseudoPlayer.random_seed, M45A1_AIM_SHOOT_A, M45A1_AIM_SHOOT_B);
+					iAnim = UTIL_SharedRandomLong(gLocalPlayer.random_seed, M45A1_AIM_SHOOT_A, M45A1_AIM_SHOOT_B);
 				else
 					iAnim = M45A1_SHOOT;
 			}
@@ -1268,7 +1268,7 @@ DECLARE_EVENT(FireM45A1)
 
 	// on non-host sending, the bparam1 is reserved for silencer status.
 	if (EV_IsLocal(idx))
-		args->bparam1 = g_iRoleType == Role_Assassin;	// needs convertion for local EV.
+		args->bparam1 = gLocalPlayer.m_iRoleType == Role_Assassin;	// needs convertion for local EV.
 
 	// original goldsrc api: VOL = 1.0, ATTN = 0.6
 	EV_PlayGunFire2(vecSrc + forward * 10.0f, args->bparam1 ? M45A1_FIRE_SFX_SIL : M45A1_FIRE_SFX, args->bparam1 ? QUIET_GUN_VOLUME : M45A1_GUN_VOLUME);
@@ -1344,7 +1344,7 @@ DECLARE_EVENT(Fire57)
 
 	// on non-host sending, the bparam1 is reserved for silencer status.
 	if (EV_IsLocal(idx))
-		args->bparam1 = g_iRoleType == Role_Assassin;
+		args->bparam1 = gLocalPlayer.m_iRoleType == Role_Assassin;
 
 	// original goldsrc api: VOL = 1.0, ATTN = 0.8
 	EV_PlayGunFire2(vecSrc + forward * 10.0f,
@@ -1374,7 +1374,7 @@ DECLARE_EVENT(FireSVD)
 		EV_MuzzleFlash();
 
 		if (g_pCurWeapon)
-			g_pCurWeapon->SendWeaponAnim(UTIL_SharedRandomLong(gPseudoPlayer.random_seed, SVD_SHOOT, SVD_SHOOT2));
+			g_pCurWeapon->SendWeaponAnim(UTIL_SharedRandomLong(gLocalPlayer.random_seed, SVD_SHOOT, SVD_SHOOT2));
 
 		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 3, 0.3, 35, 35, 35, EV_RIFLE_SMOKE, velocity, false, 35);
 		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 35, 0.35, 30, 30, 30, EV_WALL_PUFF, velocity, false, 35);
@@ -1435,7 +1435,7 @@ DECLARE_EVENT(Fireglock18)
 		if (empty)
 			seq = GLOCK18_SHOOT_EMPTY;
 		else
-			seq = UTIL_SharedRandomLong(gPseudoPlayer.random_seed, GLOCK18_SHOOT, GLOCK18_SHOOT3);
+			seq = UTIL_SharedRandomLong(gLocalPlayer.random_seed, GLOCK18_SHOOT, GLOCK18_SHOOT3);
 
 		if (g_pCurWeapon)
 			g_pCurWeapon->SendWeaponAnim(seq);
@@ -1496,7 +1496,7 @@ DECLARE_EVENT(FireMK46)
 
 		int seq = MK46_SHOOT_UNSCOPE;
 		if (bInScope)
-			seq = UTIL_SharedRandomLong(gPseudoPlayer.random_seed, MK46_SHOOT1, MK46_SHOOT3);
+			seq = UTIL_SharedRandomLong(gLocalPlayer.random_seed, MK46_SHOOT1, MK46_SHOOT3);
 
 		if (g_pCurWeapon)
 			g_pCurWeapon->SendWeaponAnim(seq);
@@ -1553,7 +1553,7 @@ DECLARE_EVENT(FireKSG12)
 
 		// shoot anim.
 		if (g_pCurWeapon)
-			g_pCurWeapon->SendWeaponAnim(UTIL_SharedRandomLong(gPseudoPlayer.random_seed, KSG12_FIRE1, KSG12_FIRE2));
+			g_pCurWeapon->SendWeaponAnim(UTIL_SharedRandomLong(gLocalPlayer.random_seed, KSG12_FIRE1, KSG12_FIRE2));
 
 		// first personal smoke VFX.
 		EV_HLDM_CreateSmoke(ent->attachment[0], forward, 3, 0.5, 25, 25, 25, EV_PISTOL_SMOKE, velocity, false, 35);
@@ -1589,7 +1589,7 @@ DECLARE_EVENT(FireM4A1)
 		EV_MuzzleFlash();
 
 		if (g_pCurWeapon)
-			g_pCurWeapon->SendWeaponAnim(UTIL_SharedRandomLong(gPseudoPlayer.random_seed, M4A1_SHOOT_BACKWARD, M4A1_SHOOT_RIGHTWARD));
+			g_pCurWeapon->SendWeaponAnim(UTIL_SharedRandomLong(gLocalPlayer.random_seed, M4A1_SHOOT_BACKWARD, M4A1_SHOOT_RIGHTWARD));
 
 		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[1], forward, 3, 0.2, 16, 16, 16, EV_RIFLE_SMOKE, velocity, false, 35);
 	}
@@ -1655,7 +1655,7 @@ DECLARE_EVENT(FireAnaconda)
 		if (empty)
 			g_pCurWeapon->SendWeaponAnim(ANACONDA_SHOOT_EMPTY);
 		else
-			g_pCurWeapon->SendWeaponAnim(UTIL_SharedRandomLong(gPseudoPlayer.random_seed, ANACONDA_SHOOT1, ANACONDA_SHOOT3));
+			g_pCurWeapon->SendWeaponAnim(UTIL_SharedRandomLong(gLocalPlayer.random_seed, ANACONDA_SHOOT1, ANACONDA_SHOOT3));
 
 		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 0, 0.25, 10, 10, 10, EV_PISTOL_SMOKE, velocity, false, 35);
 		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 25, 0.3, 15, 15, 15, EV_WALL_PUFF, velocity, false, 35);
@@ -1751,7 +1751,7 @@ DECLARE_EVENT(FireSCARH)
 
 		int seq = SCARH_SHOOT_LAST;
 		if (!bLastBullet)
-			seq = UTIL_SharedRandomLong(gPseudoPlayer.random_seed, SCARH_SHOOT1, SCARH_SHOOT3);
+			seq = UTIL_SharedRandomLong(gLocalPlayer.random_seed, SCARH_SHOOT1, SCARH_SHOOT3);
 
 		if (g_pCurWeapon)
 			g_pCurWeapon->SendWeaponAnim(seq);
@@ -1805,7 +1805,7 @@ DECLARE_EVENT(FireMP7A1)
 		EV_MuzzleFlash();
 
 		if (g_pCurWeapon)
-			g_pCurWeapon->SendWeaponAnim(UTIL_SharedRandomLong(gPseudoPlayer.random_seed, MP7A1_SHOOT1, MP7A1_SHOOT3));
+			g_pCurWeapon->SendWeaponAnim(UTIL_SharedRandomLong(gLocalPlayer.random_seed, MP7A1_SHOOT1, MP7A1_SHOOT3));
 
 		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 3, 0.2, 10, 10, 10, EV_PISTOL_SMOKE, velocity, false, 35);
 	}
@@ -1912,7 +1912,7 @@ DECLARE_EVENT(FireUSP)
 		int seq;
 		EV_MuzzleFlash();
 		if (!empty)
-			seq = UTIL_SharedRandomFloat(gPseudoPlayer.random_seed, USP_SHOOT1, USP_SHOOT3);
+			seq = UTIL_SharedRandomFloat(gLocalPlayer.random_seed, USP_SHOOT1, USP_SHOOT3);
 		else
 			seq = USP_SHOOT_EMPTY;
 
@@ -2316,7 +2316,7 @@ DECLARE_EVENT(DecalReset)
 	for (int i = 0; i < decalnum; i++)
 		gEngfuncs.pEfxAPI->R_DecalRemoveAll(i);
 
-	g_flRoundTime = gEngfuncs.GetClientTime();
+	g_flLastResetDecalTime = gEngfuncs.GetClientTime();
 }
 
 DECLARE_EVENT(Vehicle)

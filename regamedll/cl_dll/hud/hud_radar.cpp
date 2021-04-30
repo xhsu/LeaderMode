@@ -42,7 +42,7 @@ int CHudRadar::VidInit(void)
 
 int CHudRadar::Draw(float flTime)
 {
-	if ((gHUD::m_bitsHideHUDDisplay & HIDEHUD_HEALTH) || g_iUser1)	// TODO: maybe add an independent flag to turn radar off?
+	if ((gHUD::m_bitsHideHUDDisplay & HIDEHUD_HEALTH) || gLocalPlayer.pev->iuser1)	// TODO: maybe add an independent flag to turn radar off?
 		return 1;
 
 	if (!gHUD::m_bPlayerDead && m_bDrawRadar == true)
@@ -201,7 +201,7 @@ void CHudRadar::DrawRadar(float flTime)
 	vecTranslated = Vector2D(BORDER_GAP + HUD_SIZE / 2, BORDER_GAP + HUD_SIZE / 2);	// I must be the centre of this radar map. Otherwise it will be meaningless.
 	color = gHUD::GetColor(gHUD::m_iPlayerNum);
 
-	if (g_iRoleType > Role_UNASSIGNED && g_iRoleType < ROLE_COUNT)
+	if (gLocalPlayer.m_iRoleType > Role_UNASSIGNED && gLocalPlayer.m_iRoleType < ROLE_COUNT)
 	{
 		gEngfuncs.pTriAPI->RenderMode(kRenderTransColor);
 		gEngfuncs.pTriAPI->Brightness(1.0);
@@ -212,7 +212,7 @@ void CHudRadar::DrawRadar(float flTime)
 		gEngfuncs.pTriAPI->CullFace(TRI_NONE);
 
 		glColor4f(color.r, color.g, color.b, 1);
-		glBindTexture(GL_TEXTURE_2D, m_rgiRadarIcons[g_iRoleType]);
+		glBindTexture(GL_TEXTURE_2D, m_rgiRadarIcons[gLocalPlayer.m_iRoleType]);
 		DrawUtils::Draw2DQuad(vecTranslated.x - ICON_SIZE / 2, vecTranslated.y - ICON_SIZE / 2, vecTranslated.x + ICON_SIZE / 2, vecTranslated.y + ICON_SIZE / 2);
 	}
 	else
@@ -244,7 +244,7 @@ void CHudRadar::DrawRadar(float flTime)
 		if (!g_PlayerInfoList[i].name || !g_PlayerInfoList[i].name[0])
 			continue;
 
-		if (gHUD::m_iPlayerNum == i || g_PlayerExtraInfo[i].m_iTeam != g_iTeam || g_PlayerExtraInfo[i].m_bIsDead)
+		if (gHUD::m_iPlayerNum == i || g_PlayerExtraInfo[i].m_iTeam != gLocalPlayer.m_iTeam || g_PlayerExtraInfo[i].m_bIsDead)
 			continue;
 
 		if (g_PlayerExtraInfo[i].m_iHealth <= 0)	// no dead guy allowed.

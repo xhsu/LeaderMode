@@ -71,7 +71,7 @@ static constexpr Vector VEC_WHITE_RED_DIFF = VEC_REDISH - Vector(1, 1, 1);
 
 int CHudScenarioStatus::Draw(float fTime)
 {
-	if ((gHUD::m_bitsHideHUDDisplay & HIDEHUD_HEALTH) || g_iUser1)
+	if ((gHUD::m_bitsHideHUDDisplay & HIDEHUD_HEALTH) || gLocalPlayer.pev->iuser1)
 		return 1;
 
 	if (gEngfuncs.IsSpectateOnly())
@@ -95,7 +95,7 @@ int CHudScenarioStatus::Draw(float fTime)
 		if (!g_PlayerInfoList[i].name || !g_PlayerInfoList[i].name[0])
 			continue;
 
-		if (g_PlayerExtraInfo[i].m_iTeam != g_iTeam)
+		if (g_PlayerExtraInfo[i].m_iTeam != gLocalPlayer.m_iTeam)
 			continue;
 
 		// hide unimportant players.
@@ -169,7 +169,7 @@ int CHudScenarioStatus::Draw(float fTime)
 	iWidth = round(m_flManpowerTextureRatio * float(iTall));
 
 	// no more than 10 manpower icon. use text and numbers for the rests.
-	for (size_t i = 0; i < Q_min(g_rgiManpower[g_iTeam], 10U); i++)
+	for (size_t i = 0; i < Q_min(g_rgiManpower[gLocalPlayer.m_iTeam], 10U); i++)
 	{
 		glColor4f(1, 1, 1, MANPOWER_ALPHAS[i]);
 		DrawUtils::Draw2DQuad(x, y, x + iWidth, y + iTall);
@@ -177,10 +177,10 @@ int CHudScenarioStatus::Draw(float fTime)
 		x += iWidth + GAP_MANPOWER_INTERICON;	// right shift.
 	}
 
-	if (g_rgiManpower[g_iTeam] > 10)
+	if (g_rgiManpower[gLocalPlayer.m_iTeam] > 10)
 	{
 		gFontFuncs::DrawSetTextPos(x, y);
-		gFontFuncs::DrawPrintText(m_rgwcsManpowerTexts[g_iTeam].c_str());
+		gFontFuncs::DrawPrintText(m_rgwcsManpowerTexts[gLocalPlayer.m_iTeam].c_str());
 	}
 
 	// Scheme Indicator
@@ -194,7 +194,7 @@ int CHudScenarioStatus::Draw(float fTime)
 	y = CHudRadar::BORDER_GAP + CHudRadar::HUD_SIZE + 10;
 
 	// red-white flashing if its contesting.
-	if (g_rgiTeamSchemes[g_iTeam] == Scheme_UNASSIGNED)
+	if (g_rgiTeamSchemes[gLocalPlayer.m_iTeam] == Scheme_UNASSIGNED)
 	{
 		auto vecColor = Vector(1, 1, 1) + VEC_WHITE_RED_DIFF * gHUD::GetOscillation();
 		glColor4f(vecColor.r, vecColor.g, vecColor.b, 1);
@@ -205,13 +205,13 @@ int CHudScenarioStatus::Draw(float fTime)
 		glColor4f(1, 1, 1, 1);
 	}
 
-	glBindTexture(GL_TEXTURE_2D, m_rgiIdSchemeTexture[g_rgiTeamSchemes[g_iTeam]]);
+	glBindTexture(GL_TEXTURE_2D, m_rgiIdSchemeTexture[g_rgiTeamSchemes[gLocalPlayer.m_iTeam]]);
 	DrawUtils::Draw2DQuad(x, y, x + SCHEME_ICON_SIZE, y + SCHEME_ICON_SIZE);
 
 	// text of scheme name
 	gFontFuncs::DrawSetTextFont(gHUD::m_ClassIndicator.m_hClassFont);
 	gFontFuncs::DrawSetTextPos(x + SCHEME_ICON_SIZE + GAP_SCHEMEICON_TEXT, y);
-	gFontFuncs::DrawPrintText(g_rgwcsSchemeNames[g_rgiTeamSchemes[g_iTeam]].c_str());
+	gFontFuncs::DrawPrintText(g_rgwcsSchemeNames[g_rgiTeamSchemes[gLocalPlayer.m_iTeam]].c_str());
 
 	wcsKeyName = L"[" + std::wstring(ANSIToUnicode(gExtFuncs.pfnKey_NameForBinding("votescheme"))) + L"]";
 	gFontFuncs::DrawSetTextPos(x + SCHEME_ICON_SIZE + GAP_SCHEMEICON_TEXT, y + SCHEME_ICON_SIZE - CHudClassIndicator::FONT_TALL);

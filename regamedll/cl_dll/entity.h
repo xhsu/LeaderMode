@@ -43,6 +43,7 @@ extern extra_player_info_t	g_PlayerExtraInfo[MAX_PLAYERS]; // additional player 
 
 extern double g_flEntUpdateAbsoluteTime;
 extern double g_flEntUpdateFrameTime;
+extern float g_flLastResetDecalTime;
 
 int HUD_AddEntity2(int iType, cl_entity_s* pEntity, const char* szModelName);
 void HUD_TxferLocalOverrides2(entity_state_s* pState, const clientdata_s* pClient);

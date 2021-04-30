@@ -20,6 +20,7 @@ HUD_GetUserEntity
 
 int iOnTrain[MAX_PLAYERS];
 extra_player_info_t	g_PlayerExtraInfo[MAX_PLAYERS]; // additional player info sent directly to the client.dll
+float g_flLastResetDecalTime = 0;
 
 /*
 ========================
@@ -51,12 +52,12 @@ int HUD_AddEntity2(int iType, cl_entity_s* pEntity, const char* szModelName)
 	// each frame every entity passes this function, so the overview hooks 
 	// it to filter the overview entities
 
-	if (g_iUser1)
+	if (gLocalPlayer.pev->iuser1)
 	{
 		gHUD::m_Spectator.AddOverviewEntity(iType, pEntity, szModelName);
 
-		if ((g_iUser1 == OBS_IN_EYE || gHUD::m_Spectator.m_pip->value == INSET_IN_EYE) &&
-			pEntity->index == g_iUser2)
+		if ((gLocalPlayer.pev->iuser1 == OBS_IN_EYE || gHUD::m_Spectator.m_pip->value == INSET_IN_EYE) &&
+			pEntity->index == gLocalPlayer.pev->iuser2)
 			return 0;	// don't draw the player we are following in eye
 
 	}
@@ -143,11 +144,11 @@ void HUD_ProcessPlayerState2(entity_state_s* pDestination, const entity_state_s*
 	cl_entity_t* pPlayer = gEngfuncs.GetLocalPlayer();	// Get the local player's index
 	if (pDestination->number == pPlayer->index)
 	{
-		g_iTeam = g_PlayerExtraInfo[pDestination->number].m_iTeam;
+		gLocalPlayer.m_iTeam = g_PlayerExtraInfo[pDestination->number].m_iTeam;
 
-		pDestination->iuser1 = g_iUser1 = pSource->iuser1;
-		pDestination->iuser2 = g_iUser2 = pSource->iuser2;
-		pDestination->iuser3 = g_iUser3 = pSource->iuser3;
+		pDestination->iuser1 = gLocalPlayer.pev->iuser1 = pSource->iuser1;
+		pDestination->iuser2 = gLocalPlayer.pev->iuser2 = pSource->iuser2;
+		pDestination->iuser3 = gLocalPlayer.pev->iuser3 = pSource->iuser3;
 	}
 
 	pDestination->fuser2 = pSource->fuser2;
@@ -190,9 +191,9 @@ void HUD_TxferPredictionData2(entity_state_s* ps, const entity_state_s* pps, cli
 	pcd->deadflag = ppcd->deadflag;
 	if (gEngfuncs.IsSpectateOnly())
 	{
-		pcd->iuser1 = g_iUser1;	// observer mode
-		pcd->iuser2 = g_iUser2; // first target
-		pcd->iuser3 = g_iUser3; // second target
+		pcd->iuser1 = gLocalPlayer.pev->iuser1;	// observer mode
+		pcd->iuser2 = gLocalPlayer.pev->iuser2; // first target
+		pcd->iuser3 = gLocalPlayer.pev->iuser3; // second target
 	}
 	else
 	{
@@ -664,10 +665,11 @@ cl_entity_t* HUD_GetUserEntity2(int index)
 
 void EV_CS16Client_KillEveryRound(TEMPENTITY* te, float frametime, float current_time)
 {
-	if (g_flRoundTime > te->entity.curstate.fuser4)
+	if (g_flLastResetDecalTime > te->entity.curstate.fuser4)
 	{
 		// Mark it die on next TempEntUpdate
 		te->die = 0.0f;
+
 		// Set null renderamt, so it will be invisible now
 		// Also it will die immediately, if FTEMP_FADEOUT was set
 		te->entity.curstate.renderamt = 0;

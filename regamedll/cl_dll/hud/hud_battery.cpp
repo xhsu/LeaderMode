@@ -33,7 +33,7 @@ int CHudBattery::VidInit(void)
 
 int CHudBattery::Draw(float flTime)
 {
-	if ((gHUD::m_bitsHideHUDDisplay & HIDEHUD_HEALTH) || g_iUser1)
+	if ((gHUD::m_bitsHideHUDDisplay & HIDEHUD_HEALTH) || gLocalPlayer.pev->iuser1)
 		return 1;
 
 	auto hSpriteEmpty = m_hSuitEmpty;
@@ -112,7 +112,7 @@ int CHudBattery::Draw(float flTime)
 	glColor4f(r / 255.0, g / 255.0, b / 255.0, a / 255.0);
 
 	float flLength = HEALTH_BAR_LENGTH;
-	if (g_iRoleType == Role_SWAT)
+	if (gLocalPlayer.m_iRoleType == Role_SWAT)
 		flLength *= 2.0f;
 
 	DrawUtils::Draw2DLinearProgressBar(x, y, HEALTH_BAR_WIDTH, flLength, flPercent);
@@ -156,7 +156,7 @@ void CHudBattery::MsgFunc_ArmorType(int& iArmourType)
 
 float CHudBattery::GetMaxArmour(void)
 {
-	if (g_iRoleType == Role_SWAT)
+	if (gLocalPlayer.m_iRoleType == Role_SWAT)
 		return 200.0f;
 
 	return 100.0f;

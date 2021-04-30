@@ -40,6 +40,7 @@
 #include "ammo.h"
 #include "weapontype.h"
 #include "player_classes.h"
+#include "../wpn_shared/weapons_lite.h"
 
 // SDK
 #include "../common/usercmd.h"

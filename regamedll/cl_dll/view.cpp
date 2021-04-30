@@ -377,8 +377,8 @@ void V_GetChasePos(int target, float* cl_angles, float* origin, float* angles)
 
 	if (ent->index == local->index)
 	{
-		if (g_iUser3 && g_iUser3 != 1)
-			V_GetDeathCam(ent, gEngfuncs.GetEntityByIndex(g_iUser3),
+		if (gLocalPlayer.pev->iuser3 && gLocalPlayer.pev->iuser3 != 1)
+			V_GetDeathCam(ent, gEngfuncs.GetEntityByIndex(gLocalPlayer.pev->iuser3),
 				angles, origin);
 		else
 			V_GetDeathCam(ent, NULL,
@@ -386,8 +386,8 @@ void V_GetChasePos(int target, float* cl_angles, float* origin, float* angles)
 	}
 	else if (gHUD::m_Spectator.m_autoDirector->value)
 	{
-		if (g_iUser3 && g_iUser3 != 1)
-			V_GetDirectedChasePosition(ent, gEngfuncs.GetEntityByIndex(g_iUser3),
+		if (gLocalPlayer.pev->iuser3 && gLocalPlayer.pev->iuser3 != 1)
+			V_GetDirectedChasePosition(ent, gEngfuncs.GetEntityByIndex(gLocalPlayer.pev->iuser3),
 				angles, origin);
 		else
 			V_GetDirectedChasePosition(ent, (cl_entity_t*)BAD_ENT_PTR,
@@ -500,7 +500,7 @@ void V_CalcSpectatorRefdef(ref_params_s* pparams)
 	static int lastWeaponModelIndex = 0;
 	static int lastViewModelIndex = 0;
 
-	cl_entity_t* ent = gEngfuncs.GetEntityByIndex(g_iUser2);
+	cl_entity_t* ent = gEngfuncs.GetEntityByIndex(gLocalPlayer.pev->iuser2);
 
 	pparams->onlyClientDraw = false;
 
@@ -512,7 +512,7 @@ void V_CalcSpectatorRefdef(ref_params_s* pparams)
 	VectorCopy (pparams->viewangles, v_angles);
 	VectorCopy (pparams->vieworg, v_origin);
 
-	if ((g_iUser1 == OBS_IN_EYE || gHUD::m_Spectator.m_pip->value == INSET_IN_EYE) && ent)
+	if ((gLocalPlayer.pev->iuser1 == OBS_IN_EYE || gHUD::m_Spectator.m_pip->value == INSET_IN_EYE) && ent)
 	{
 		// calculate player velocity
 		float timeDiff = ent->curstate.msg_time - ent->prevstate.msg_time;
@@ -533,7 +533,7 @@ void V_CalcSpectatorRefdef(ref_params_s* pparams)
 		// predict missing client data and set weapon model ( in HLTV mode or inset in eye mode )
 		if (gEngfuncs.IsSpectateOnly())
 		{
-			V_GetInEyePos(g_iUser2, pparams->simorg, pparams->cl_viewangles);
+			V_GetInEyePos(gLocalPlayer.pev->iuser2, pparams->simorg, pparams->cl_viewangles);
 
 			pparams->health = 1;
 
@@ -563,7 +563,7 @@ void V_CalcSpectatorRefdef(ref_params_s* pparams)
 				gunModel->curstate.modelindex = lastViewModelIndex;
 				gunModel->curstate.frame = 0;
 				gunModel->curstate.colormap = 0;
-				gunModel->index = g_iUser2;
+				gunModel->index = gLocalPlayer.pev->iuser2;
 			}
 			else
 			{
@@ -584,14 +584,14 @@ void V_CalcSpectatorRefdef(ref_params_s* pparams)
 	{
 		// first renderer cycle, full screen
 
-		switch (g_iUser1)
+		switch (gLocalPlayer.pev->iuser1)
 		{
 		case OBS_CHASE_LOCKED:
-			V_GetChasePos(g_iUser2, NULL, v_origin, v_angles);
+			V_GetChasePos(gLocalPlayer.pev->iuser2, NULL, v_origin, v_angles);
 			break;
 
 		case OBS_CHASE_FREE:
-			V_GetChasePos(g_iUser2, v_cl_angles, v_origin, v_angles);
+			V_GetChasePos(gLocalPlayer.pev->iuser2, v_cl_angles, v_origin, v_angles);
 			break;
 
 		case OBS_ROAMING:
@@ -610,7 +610,7 @@ void V_CalcSpectatorRefdef(ref_params_s* pparams)
 
 		case OBS_MAP_CHASE:
 			pparams->onlyClientDraw = true;
-			V_GetMapChasePosition(g_iUser2, v_cl_angles, v_origin, v_angles);
+			V_GetMapChasePosition(gLocalPlayer.pev->iuser2, v_cl_angles, v_origin, v_angles);
 			break;
 		}
 
@@ -634,7 +634,7 @@ void V_CalcSpectatorRefdef(ref_params_s* pparams)
 		switch ((int)gHUD::m_Spectator.m_pip->value)
 		{
 		case INSET_CHASE_FREE:
-			V_GetChasePos(g_iUser2, v_cl_angles, v_origin, v_angles);
+			V_GetChasePos(gLocalPlayer.pev->iuser2, v_cl_angles, v_origin, v_angles);
 			break;
 
 		case INSET_IN_EYE:
@@ -649,10 +649,10 @@ void V_CalcSpectatorRefdef(ref_params_s* pparams)
 		case INSET_MAP_CHASE:
 			pparams->onlyClientDraw = true;
 
-			if (g_iUser1 == OBS_ROAMING)
+			if (gLocalPlayer.pev->iuser1 == OBS_ROAMING)
 				V_GetMapChasePosition(0, v_cl_angles, v_origin, v_angles);
 			else
-				V_GetMapChasePosition(g_iUser2, v_cl_angles, v_origin, v_angles);
+				V_GetMapChasePosition(gLocalPlayer.pev->iuser2, v_cl_angles, v_origin, v_angles);
 
 			break;
 		}
@@ -834,7 +834,7 @@ void V_CalcGunBob(ref_params_s* pparams)
 		// integrate the time.
 		// if you attempts to directly scale time, it would cause the "weapon shake" in speed change.
 		// that's due to a sudden drop of speed will discontious the t curve.
-		t += pparams->frametime * g_flGunBobOmegaModifier * g_vPlayerVelocity.Length() * 0.035f;
+		t += pparams->frametime * g_flGunBobOmegaModifier * g_flPlayerSpeed * 0.035f;
 
 		// a fucking circle.
 		//vecGoal = Vector(Q_sin(t), 0, Q_cos(t));
@@ -901,7 +901,7 @@ void V_CalcNormalRefdef(ref_params_s* pparams)
 
 	if (gEngfuncs.IsSpectateOnly())
 	{
-		pPlayer = gEngfuncs.GetEntityByIndex(g_iUser2);
+		pPlayer = gEngfuncs.GetEntityByIndex(gLocalPlayer.pev->iuser2);
 	}
 	else
 	{
@@ -1052,8 +1052,8 @@ void V_CalcNormalRefdef(ref_params_s* pparams)
 	pparams->viewangles += pparams->punchangle;
 
 	// add the VShift to the viewangle
-	pparams->cl_viewangles += gPseudoPlayer.m_vecVAngleShift;
-	gPseudoPlayer.m_vecVAngleShift = g_vecZero;
+	pparams->cl_viewangles += gLocalPlayer.m_vecVAngleShift;
+	gLocalPlayer.m_vecVAngleShift = g_vecZero;
 
 	// smooth out stair step ups
 	if (!pparams->smoothing && pparams->onground && pparams->simorg[2] - oldz > 0)

@@ -49,7 +49,7 @@ int CHudAccountBalance::Draw(float flTime)
 	if (gEngfuncs.IsSpectateOnly())
 		return 1;
 
-	if ((gHUD::m_bitsHideHUDDisplay & HIDEHUD_MONEY) || g_iUser1)
+	if ((gHUD::m_bitsHideHUDDisplay & HIDEHUD_MONEY) || gLocalPlayer.pev->iuser1)
 		return 1;
 
 	if (gHUD::m_bPlayerDead)

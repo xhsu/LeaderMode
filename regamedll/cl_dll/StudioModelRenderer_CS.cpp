@@ -206,7 +206,7 @@ namespace gViewModelHandsTexture
 		{
 			if (!Q_strcmp(pTexture->name, "v_hands.bmp"))
 			{
-				pTexture->index = ((g_iTeam == TEAM_CT) ? m_iCTHandTexture : m_iTRHandTexture);
+				pTexture->index = ((gLocalPlayer.m_iTeam == TEAM_CT) ? m_iCTHandTexture : m_iTRHandTexture);
 				break;
 			}
 
@@ -230,7 +230,7 @@ namespace gViewModelHandsTexture
 		{
 			if (!Q_strcmp(pTexture->name, "v_hands.bmp"))
 			{
-				pTexture->index = ((g_iTeam == TEAM_CT) ? m_iCTHandTexture : m_iTRHandTexture);
+				pTexture->index = ((gLocalPlayer.m_iTeam == TEAM_CT) ? m_iCTHandTexture : m_iTRHandTexture);
 				break;
 			}
 
@@ -1277,8 +1277,8 @@ int R_StudioDrawModel(int flags)
 		g_pViewEnt->curstate.framerate = g_flViewModelFramerate;
 
 		// special treatment for certain weapons.
-		if (g_pCurWeapon)
-			cl_righthand->value = g_pCurWeapon->UsingInvertedVMDL();
+		/*if (g_pCurWeapon)	// WPN_UNDONE
+			cl_righthand->value = g_pCurWeapon->UsingInvertedVMDL();*/
 
 		// detecting vmdl changing and swapping the vmdl v_hands.bmp texture.
 		gViewModelHandsTexture::Think();

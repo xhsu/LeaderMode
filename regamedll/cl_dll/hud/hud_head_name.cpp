@@ -11,7 +11,7 @@ int CHudHeadName::Draw(float flTime)
 	if (m_iDrawType == HEADNAME_HIDE)
 		return 1;
 
-	if ((gHUD::m_bitsHideHUDDisplay & HIDEHUD_ALL) || g_iUser1)
+	if ((gHUD::m_bitsHideHUDDisplay & HIDEHUD_ALL) || gLocalPlayer.pev->iuser1)
 		return 1;
 
 	if (gHUD::m_flTime > m_flNextBuild)

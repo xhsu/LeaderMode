@@ -65,6 +65,12 @@
     <Filter Include="metahook\portable">
       <UniqueIdentifier>{27021908-dbd5-4445-bd34-258366f7efd4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="wpn_shared">
+      <UniqueIdentifier>{a73de6c2-2dbb-4607-bc30-4ab518a0ff39}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="wpn_shared\Deprecated">
+      <UniqueIdentifier>{f9899d76-0b7f-4380-8873-f18a632ef9eb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\version\version.cpp">
@@ -390,6 +396,12 @@
     </ClCompile>
     <ClCompile Include="..\metahook\portable\metahook.cpp">
       <Filter>metahook\portable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\wpn_shared\Deprecated\sv_weapons.cpp">
+      <Filter>wpn_shared\Deprecated</Filter>
+    </ClCompile>
+    <ClCompile Include="..\wpn_shared\weapons_lite.cpp">
+      <Filter>wpn_shared</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -842,6 +854,12 @@
     </ClInclude>
     <ClInclude Include="..\metahook\portable\metahook.h">
       <Filter>metahook\portable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\wpn_shared\Deprecated\sv_weapons.h">
+      <Filter>wpn_shared\Deprecated</Filter>
+    </ClInclude>
+    <ClInclude Include="..\wpn_shared\weapons_lite.h">
+      <Filter>wpn_shared</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -40,6 +40,12 @@
     <Filter Include="engine">
       <UniqueIdentifier>{0d255911-e99c-44e4-8e0e-26bda0537596}</UniqueIdentifier>
     </Filter>
+    <Filter Include="wpn_shared">
+      <UniqueIdentifier>{807d69a0-bf68-41e2-8b25-499a058c2719}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="wpn_shared\Deprecated">
+      <UniqueIdentifier>{61ad07ad-d53a-4439-89ef-b270e57e49c0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\cdll_int.cpp">
@@ -248,6 +254,9 @@
     </ClCompile>
     <ClCompile Include="..\pseudoplayer.cpp">
       <Filter>cl_dll</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\wpn_shared\Deprecated\cl_weapons.cpp">
+      <Filter>wpn_shared\Deprecated</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -481,6 +490,9 @@
     </ClInclude>
     <ClInclude Include="..\pseudoplayer.h">
       <Filter>cl_dll</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\wpn_shared\Deprecated\cl_weapons.h">
+      <Filter>wpn_shared\Deprecated</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

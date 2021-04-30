@@ -36,16 +36,16 @@ public:
 public:
 	bool IsEmpty();
 
-	void EXPORT Kill();
+	void Kill();
 	void SetModel(const char* pszModelName);
 
 	bool HasWeapon(WeaponIdType iId);
-	bool PackWeapon(CBaseWeapon* pWeapon);
+	//bool PackWeapon(CBaseWeapon* pWeapon);	WPN_UNDONE
 
 public:
 	static TYPEDESCRIPTION m_SaveData[];
 
-	CBaseWeapon* m_rgpPlayerItems[MAX_ITEM_TYPES];
+	//CBaseWeapon* m_rgpPlayerItems[MAX_ITEM_TYPES];	WPN_UNDONE
 	int m_rgAmmo[MAX_AMMO_SLOTS];
 	bool m_bHadBeenSold;
 	float m_flNextPhysSFX;

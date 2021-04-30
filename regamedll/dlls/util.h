@@ -186,7 +186,6 @@ inline void STOP_SOUND_MSG(edict_t *entity, int msg_type, int channel, const cha
 
 class CBaseEntity;
 class CBasePlayer;
-class CBaseWeapon;	// LUNA: this is NOT a derived class of CBaseEntity anymore!
 
 void UTIL_ParametricRocket(entvars_t *pev, Vector vecOrigin, Vector vecAngles, edict_t *owner);
 void UTIL_SetGroupTrace(int groupmask, int op);

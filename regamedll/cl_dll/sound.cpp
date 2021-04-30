@@ -216,10 +216,10 @@ void Play3DSound(const char* szSound, float flMinDist, float flMaxDist, const Ve
 void Sound_Think(double flDeltaTime)
 {
 	Vector vecFwd, vecRight, vecUp;
-	gEngfuncs.pfnAngleVectors(gPseudoPlayer.pev->v_angle, vecFwd, vecRight, vecUp);
+	gEngfuncs.pfnAngleVectors(gLocalPlayer.pev->v_angle, vecFwd, vecRight, vecUp);
 
-	FMOD_VECTOR pos = VecConverts(gPseudoPlayer.GetGunPosition(), true);
-	FMOD_VECTOR vel = VecConverts(g_vPlayerVelocity, true);
+	FMOD_VECTOR pos = VecConverts(gLocalPlayer.GetGunPosition(), true);
+	FMOD_VECTOR vel = VecConverts(gLocalPlayer.pev->velocity, true);
 	FMOD_VECTOR forward = VecConverts(vecFwd);
 	FMOD_VECTOR up = VecConverts(vecUp);
 

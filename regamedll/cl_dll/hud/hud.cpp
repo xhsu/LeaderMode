@@ -504,10 +504,10 @@ void gHUD::Think(void)
 
 	if (gEngfuncs.IsSpectateOnly())
 	{
-		if (g_iUser1 == OBS_IN_EYE && g_iUser2 != 0)
+		if (gLocalPlayer.pev->iuser1 == OBS_IN_EYE && gLocalPlayer.pev->iuser2 != 0)
 		{
-			if (g_iUser2 <= gEngfuncs.GetMaxClients())
-				m_iFOV = m_PlayerFOV[g_iUser2];
+			if (gLocalPlayer.pev->iuser2 <= gEngfuncs.GetMaxClients())
+				m_iFOV = m_PlayerFOV[gLocalPlayer.pev->iuser2];
 			else
 				m_iFOV = Q_max(default_fov->value, 90.0f);
 		}
@@ -936,7 +936,7 @@ void gHUD::SlotInput(int iSlot)
 		char sz[128];
 		Q_strlcpy(sz, psz);
 		gEngfuncs.pfnServerCmd(sz);
-		//gPseudoPlayer.StartSwitchingWeapon(gHUD::m_WeaponList.m_rgiWeapons[iSlot]);	// WPN_UNDONE
+		//gLocalPlayer.StartSwitchingWeapon(gHUD::m_WeaponList.m_rgiWeapons[iSlot]);	// WPN_UNDONE
 
 		gEngfuncs.pfnPlaySoundByName(WEAPONLIST_SELECT_SFX, VOL_NORM);
 	}
@@ -1000,7 +1000,7 @@ void CommandFunc_NextWeapon(void)
 			char sz[128];
 			Q_strlcpy(sz, psz);
 			gEngfuncs.pfnServerCmd(sz);
-			gPseudoPlayer.StartSwitchingWeapon(iId);
+			gLocalPlayer.StartSwitchingWeapon(iId);
 
 			gEngfuncs.pfnPlaySoundByName(WEAPONLIST_WHEEL_SFX, VOL_NORM);
 			return;
@@ -1053,7 +1053,7 @@ void CommandFunc_PrevWeapon(void)
 			char sz[128];
 			Q_strlcpy(sz, psz);
 			gEngfuncs.pfnServerCmd(sz);
-			gPseudoPlayer.StartSwitchingWeapon(iId);
+			gLocalPlayer.StartSwitchingWeapon(iId);
 
 			gEngfuncs.pfnPlaySoundByName(WEAPONLIST_WHEEL_SFX, VOL_NORM);
 			return;
@@ -1071,30 +1071,30 @@ void CommandFunc_SelectLastItem(void)	// an equivlent function of void CBasePlay
 	if (g_pCurWeapon && g_pCurWeapon->m_bitsFlags & WPNSTATE_QUICK_THROWING)
 	{
 		g_pCurWeapon->m_bitsFlags |= WPNSTATE_QT_EXIT;
-		gPseudoPlayer.m_flNextAttack = 0;
+		gLocalPlayer.m_flNextAttack = 0;
 		goto LAB_LASTINV_END;
 	}
 
-	if (gPseudoPlayer.m_pActiveItem && !gPseudoPlayer.m_pActiveItem->CanHolster())
+	if (gLocalPlayer.m_pActiveItem && !gLocalPlayer.m_pActiveItem->CanHolster())
 		goto LAB_LASTINV_END;
 
-	if (!gPseudoPlayer.m_pLastItem || gPseudoPlayer.m_pLastItem == gPseudoPlayer.m_pActiveItem)
+	if (!gLocalPlayer.m_pLastItem || gLocalPlayer.m_pLastItem == gLocalPlayer.m_pActiveItem)
 	{
 		for (int i = PRIMARY_WEAPON_SLOT; i < MAX_ITEM_TYPES; i++)
 		{
-			if (g_rgpClientWeapons[gHUD::m_WeaponList.m_rgiWeapons[i]] && g_rgpClientWeapons[gHUD::m_WeaponList.m_rgiWeapons[i]] != gPseudoPlayer.m_pActiveItem)
+			if (g_rgpClientWeapons[gHUD::m_WeaponList.m_rgiWeapons[i]] && g_rgpClientWeapons[gHUD::m_WeaponList.m_rgiWeapons[i]] != gLocalPlayer.m_pActiveItem)
 			{
-				gPseudoPlayer.m_pLastItem = g_rgpClientWeapons[gHUD::m_WeaponList.m_rgiWeapons[i]];
+				gLocalPlayer.m_pLastItem = g_rgpClientWeapons[gHUD::m_WeaponList.m_rgiWeapons[i]];
 				break;
 			}
 		}
 	}
 
-	if (!gPseudoPlayer.m_pLastItem || gPseudoPlayer.m_pLastItem == gPseudoPlayer.m_pActiveItem)
+	if (!gLocalPlayer.m_pLastItem || gLocalPlayer.m_pLastItem == gLocalPlayer.m_pActiveItem)
 		goto LAB_LASTINV_END;
 
 	// on client, we only needs to do one thing.
-	gPseudoPlayer.StartSwitchingWeapon(gPseudoPlayer.m_pLastItem);
+	gLocalPlayer.StartSwitchingWeapon(gLocalPlayer.m_pLastItem);
 
 LAB_LASTINV_END:
 	// don't forget to forward this command to SV.
@@ -1104,24 +1104,24 @@ LAB_LASTINV_END:
 
 void CommandFunc_NextEquipment(void)
 {
-	/* WPN_UNDONE
 	// the drawing sequence is the select sequence. and the drawing sequence is the index.
 
 	// you can't do this on the halfway.
-	if (g_pCurWeapon && g_pCurWeapon->m_bitsFlags & WPNSTATE_QUICK_THROWING)
-		return;
+	// WPN_UNDONE
+	//if (g_pCurWeapon && g_pCurWeapon->m_bitsFlags & WPNSTATE_QUICK_THROWING)
+	//	return;
 
 	AmmoIdType iAmmoId = AMMO_NONE;
 	EquipmentIdType iCandidate = EQP_NONE;
 
-	for (int i = gPseudoPlayer.m_iUsingGrenadeId; i < EQP_COUNT; i++)
+	for (int i = gLocalPlayer.m_iUsingGrenadeId; i < EQP_COUNT; i++)
 	{
-		if (i == gPseudoPlayer.m_iUsingGrenadeId)
+		if (i == gLocalPlayer.m_iUsingGrenadeId)
 			continue;
 
 		iAmmoId = GetAmmoIdOfEquipment((EquipmentIdType)i);
 
-		if ((!iAmmoId || gPseudoPlayer.m_rgAmmo[iAmmoId] <= 0) && !gPseudoPlayer.m_rgbHasEquipment[i])	// you can still selection some item even if it has no ammo. These items are not to be consumed.
+		if ((!iAmmoId || gLocalPlayer.m_rgAmmo[iAmmoId] <= 0) && !gLocalPlayer.m_rgbHasEquipment[i])	// you can still selection some item even if it has no ammo. These items are not to be consumed.
 			continue;
 
 		iCandidate = (EquipmentIdType)i;
@@ -1134,7 +1134,7 @@ void CommandFunc_NextEquipment(void)
 		{
 			iAmmoId = GetAmmoIdOfEquipment((EquipmentIdType)i);
 
-			if ((!iAmmoId || gPseudoPlayer.m_rgAmmo[iAmmoId] <= 0) && !gPseudoPlayer.m_rgbHasEquipment[i])
+			if ((!iAmmoId || gLocalPlayer.m_rgAmmo[iAmmoId] <= 0) && !gLocalPlayer.m_rgbHasEquipment[i])
 				continue;
 
 			iCandidate = (EquipmentIdType)i;
@@ -1142,9 +1142,8 @@ void CommandFunc_NextEquipment(void)
 		}
 	}
 
-	gPseudoPlayer.m_iUsingGrenadeId = iCandidate;
+	gLocalPlayer.m_iUsingGrenadeId = iCandidate;
 	gEngfuncs.pfnServerCmd(SharedVarArgs("eqpselect %d\n", iCandidate));
-	*/
 }
 
 void CommandFunc_PrevEquipment(void)
@@ -1155,18 +1154,18 @@ void CommandFunc_PrevEquipment(void)
 	// you can't do this on the halfway.
 	if (g_pCurWeapon && g_pCurWeapon->m_bitsFlags & WPNSTATE_QUICK_THROWING)
 		return;
-
+		*/
 	AmmoIdType iAmmoId = AMMO_NONE;
 	EquipmentIdType iCandidate = EQP_NONE;
 
-	for (int i = gPseudoPlayer.m_iUsingGrenadeId; i > EQP_NONE; i--)
+	for (int i = gLocalPlayer.m_iUsingGrenadeId; i > EQP_NONE; i--)
 	{
-		if (i == gPseudoPlayer.m_iUsingGrenadeId)
+		if (i == gLocalPlayer.m_iUsingGrenadeId)
 			continue;
 
 		iAmmoId = GetAmmoIdOfEquipment((EquipmentIdType)i);
 
-		if ((!iAmmoId || gPseudoPlayer.m_rgAmmo[iAmmoId] <= 0) && !gPseudoPlayer.m_rgbHasEquipment[i])	// you can still selection some item even if it has no ammo. These items are not to be consumed.
+		if ((!iAmmoId || gLocalPlayer.m_rgAmmo[iAmmoId] <= 0) && !gLocalPlayer.m_rgbHasEquipment[i])	// you can still selection some item even if it has no ammo. These items are not to be consumed.
 			continue;
 
 		iCandidate = (EquipmentIdType)i;
@@ -1179,7 +1178,7 @@ void CommandFunc_PrevEquipment(void)
 		{
 			iAmmoId = GetAmmoIdOfEquipment((EquipmentIdType)i);
 
-			if ((!iAmmoId || gPseudoPlayer.m_rgAmmo[iAmmoId] <= 0) && !gPseudoPlayer.m_rgbHasEquipment[i])
+			if ((!iAmmoId || gLocalPlayer.m_rgAmmo[iAmmoId] <= 0) && !gLocalPlayer.m_rgbHasEquipment[i])
 				continue;
 
 			iCandidate = (EquipmentIdType)i;
@@ -1187,9 +1186,8 @@ void CommandFunc_PrevEquipment(void)
 		}
 	}
 
-	gPseudoPlayer.m_iUsingGrenadeId = iCandidate;
+	gLocalPlayer.m_iUsingGrenadeId = iCandidate;
 	gEngfuncs.pfnServerCmd(SharedVarArgs("eqpselect %d\n", iCandidate));
-	*/
 }
 
 void CommandFunc_AlterAct(void)

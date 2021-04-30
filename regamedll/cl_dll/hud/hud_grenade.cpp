@@ -62,7 +62,6 @@ int CHudGrenade::Draw(float flTime)
 
 	AmmoIdType iAmmoId = AMMO_NONE;
 
-	/* WPN_UNDONE
 	for (int i = EQP_NONE; i < EQP_COUNT; i++)
 	{
 		// we can't draw voidness. TODO: maybe a default icon later??
@@ -70,17 +69,17 @@ int CHudGrenade::Draw(float flTime)
 			continue;
 
 		iAmmoId = GetAmmoIdOfEquipment((EquipmentIdType)i);	// no grenade, no drawing.
-		if ((!iAmmoId || gPseudoPlayer.m_rgAmmo[iAmmoId] <= 0) && !gPseudoPlayer.m_rgbHasEquipment[i])	// Alternatively, if this is a special usable item, you can take it on your hand.
+		if ((!iAmmoId || gLocalPlayer.m_rgAmmo[iAmmoId] <= 0) && !gLocalPlayer.m_rgbHasEquipment[i])	// Alternatively, if this is a special usable item, you can take it on your hand.
 			continue;
 
 		y = ScreenHeight - (m_rgrcGrenadeIcons[i].bottom - m_rgrcGrenadeIcons[i].top);	// Y is not a constant, it depents on icon.
 		iIconWidth = m_rgrcGrenadeIcons[i].right - m_rgrcGrenadeIcons[i].left;
 
-		iAlphaStep = 255 / Q_max(gPseudoPlayer.m_rgAmmo[iAmmoId], 1);	// CAREFUL! don't divide it by naught!
+		iAlphaStep = 255 / Q_max(gLocalPlayer.m_rgAmmo[iAmmoId], 1);	// CAREFUL! don't divide it by naught!
 
 		for (iAlpha = 255; iAlpha > 0; iAlpha -= iAlphaStep)
 		{
-			UnpackRGB(r, g, b, gPseudoPlayer.m_iUsingGrenadeId == i ? 0xFFFFFF : RGB_YELLOWISH);
+			UnpackRGB(r, g, b, gLocalPlayer.m_iUsingGrenadeId == i ? 0xFFFFFF : RGB_YELLOWISH);
 			ScaleColors(r, g, b, iAlpha);
 
 			gEngfuncs.pfnSPR_Set(m_rghGrenadeIcons[i], r, g, b);
@@ -91,7 +90,6 @@ int CHudGrenade::Draw(float flTime)
 		// for the last one, give some space for next set of icons.
 		x += iIconWidth;
 	}
-	*/
 
 	return 1;
 }

@@ -1,6 +1,6 @@
 /*
 
-Created Date: Apr 29 2020
+Created Date: Apr 29 2021
 
 Modern Warfare Dev Team
  - Luna the Reborn
@@ -193,7 +193,6 @@ void HUD_PostRunCmd2(local_state_t* from, local_state_t* to, usercmd_s* cmd, int
 	gLocalPlayer.pev->fov = gHUD::m_iFOV;	// 11072020 LUNA: from->client.fov is broken, keeping give me 0.
 	gLocalPlayer.pev->weaponanim = from->client.weaponanim;
 	gLocalPlayer.pev->viewmodel = from->client.viewmodel;
-	gLocalPlayer.m_flNextAttack = from->client.m_flNextAttack;
 
 	gLocalPlayer.pev->flags = from->client.flags;
 	gLocalPlayer.pev->velocity = from->client.velocity;
@@ -210,117 +209,18 @@ void HUD_PostRunCmd2(local_state_t* from, local_state_t* to, usercmd_s* cmd, int
 	flags = from->client.iuser3;
 	gLocalPlayer.m_bCanShoot = (flags & PLAYER_CAN_SHOOT) != 0;
 	g_bFreezeTimeOver = !(flags & PLAYER_FREEZE_TIME_OVER);
-	gLocalPlayer.m_bOwnsShield = (flags & PLAYER_HOLDING_SHIELD) != 0;
 
 	// Assume that we are not going to switch weapons
 	to->client.m_iId = from->client.m_iId;
 
-	// Now see if we issued a changeweapon command ( and we're not dead )
-	// g_iSelectedWeapon was assign to cmd->weaponselect in input.cpp
-	// this is a weapon switching prediction.
-	if (cmd->weaponselect && (gPseudoPlayer.pev->deadflag != (DEAD_DISCARDBODY + 1)))
-	{
-		// Switched to a different weapon?
-		if (from->weapondata[cmd->weaponselect].m_iId == cmd->weaponselect)
-		{
-			CBaseWeapon* pNew = g_rgpClientWeapons[cmd->weaponselect];
-			if (pNew && (pNew != g_pCurWeapon))
-			{
-				// Put away old weapon
-				if (gPseudoPlayer.m_pActiveItem)
-					gPseudoPlayer.m_pActiveItem->Holstered();
-
-				gPseudoPlayer.m_pLastItem = gPseudoPlayer.m_pActiveItem;
-				gPseudoPlayer.m_pActiveItem = pNew;
-
-				// Deploy new weapon
-				if (gPseudoPlayer.m_pActiveItem)
-				{
-					gPseudoPlayer.m_pActiveItem->Deploy();
-				}
-
-				// Update weapon id so we can predict things correctly.
-				to->client.m_iId = cmd->weaponselect;
-			}
-		}
-	}
-
 	// Copy in results of prediction code
-	to->client.viewmodel = gPseudoPlayer.pev->viewmodel;
-	to->client.fov = gPseudoPlayer.pev->fov;
-	to->client.weaponanim = gPseudoPlayer.pev->weaponanim;
-	to->client.m_flNextAttack = gPseudoPlayer.m_flNextAttack;
-	to->client.maxspeed = gPseudoPlayer.pev->maxspeed;
-	to->client.punchangle = gPseudoPlayer.pev->punchangle;
+	to->client.viewmodel = gLocalPlayer.pev->viewmodel;
+	to->client.fov = gLocalPlayer.pev->fov;
+	to->client.weaponanim = gLocalPlayer.pev->weaponanim;
+	to->client.maxspeed = gLocalPlayer.pev->maxspeed;
+	to->client.punchangle = gLocalPlayer.pev->punchangle;
 
 	to->client.iuser3 = flags;
-
-	// FIXME: this was working fine until the push-pop anim comes out. Why my predict code being override right on next frame?
-	// Make sure that weapon animation matches what the game .dll is telling us
-	//  over the wire ( fixes some animation glitches )
-	if (g_runfuncs && (g_iCurViewModelAnim != to->client.weaponanim))
-		// Force a fixed anim down to viewmodel. LUNA: FIXME: wired, how did that happens? it seems impossible.
-		g_pCurWeapon->SendWeaponAnim(to->client.weaponanim);
-
-	if (g_pCurWeapon->m_iPrimaryAmmoType < AMMO_MAXTYPE)
-	{
-		to->client.vuser4.x = g_pCurWeapon->m_iPrimaryAmmoType;
-		to->client.vuser4.y = gPseudoPlayer.m_rgAmmo[g_pCurWeapon->m_iPrimaryAmmoType];
-	}
-	else
-	{
-		to->client.vuser4.x = -1.0;
-		to->client.vuser4.y = 0;
-	}
-
-	for (i = 0; i < LAST_WEAPON; i++)
-	{
-		CBaseWeapon* pCurrent = g_rgpClientWeapons[i];
-
-		weapon_data_t* pto = to->weapondata + i;
-
-		if (!pCurrent)
-		{
-			Q_memset(pto, NULL, sizeof(weapon_data_t));
-			continue;
-		}
-
-		// Decrement weapon counters, server does this at same time ( during post think, after doing everything else )
-		// LUNA: is this gpGlobals->framerate ???
-		pCurrent->m_flNextPrimaryAttack -= cmd->msec / 1000.0f;
-		pCurrent->m_flNextSecondaryAttack -= cmd->msec / 1000.0f;
-		pCurrent->m_flTimeWeaponIdle -= cmd->msec / 1000.0f;
-
-		if (pCurrent->m_flNextPrimaryAttack < -1.0)
-			pCurrent->m_flNextPrimaryAttack = -1.0;
-
-		if (pCurrent->m_flNextSecondaryAttack < -0.001)
-			pCurrent->m_flNextSecondaryAttack = -0.001;
-
-		if (pCurrent->m_flTimeWeaponIdle < -0.001)
-			pCurrent->m_flTimeWeaponIdle = -0.001;
-
-		pto->m_iClip = pCurrent->m_iClip;
-
-		pto->m_flNextPrimaryAttack = pCurrent->m_flNextPrimaryAttack;
-		pto->m_flNextSecondaryAttack = pCurrent->m_flNextSecondaryAttack;
-		pto->m_flTimeWeaponIdle = pCurrent->m_flTimeWeaponIdle;
-
-		pto->m_fInReload = pCurrent->m_bInReload;
-		pto->m_fInSpecialReload = pCurrent->m_bInZoom;
-		//pto->m_flNextReload = pCurrent->m_flNextReload / 1s;
-		//pto->fuser2 = pCurrent->m_flStartThrow.time_since_epoch() / 1s;
-		//pto->fuser3 = pCurrent->m_flReleaseThrow.time_since_epoch() / 1s;
-		//pto->iuser1 = pCurrent->m_iSwing;
-		pto->m_iWeaponState = pCurrent->m_bitsFlags;
-		pto->m_fInZoom = pCurrent->m_iShotsFired;
-		pto->m_fAimedDamage = pCurrent->m_flLastFire;
-	}
-
-#ifdef CHECKING_NEXT_PRIM_ATTACK_SYNC
-	if (g_pCurWeapon && g_pCurWeapon->m_flNextPrimaryAttack > 0.0f)
-		gEngfuncs.pfnConsolePrint(SharedVarArgs("[Client] m_flNextPrimaryAttack: %f\n", g_pCurWeapon->m_flNextPrimaryAttack));
-#endif
 
 	// m_flNextAttack is now part of the weapons, but is part of the player instead
 	to->client.m_flNextAttack -= cmd->msec / 1000.0f;

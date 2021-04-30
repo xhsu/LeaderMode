@@ -1,6 +1,6 @@
 /*
 
-Created Date: Apr 29 2020
+Created Date: Apr 29 2021
 
 Modern Warfare Dev Team
  - Luna the Reborn
@@ -45,9 +45,9 @@ struct pseudo_ent_var_s	// pseudo entvars_t
 	int		maxspeed;
 	float	health;
 
-	int		iuser1;
-	int		iuser2;
-	int		iuser3;
+	int		iuser1;	// observer mode
+	int		iuser2;	// first target
+	int		iuser3;	// second target
 };
 
 struct pseudo_global_vars_s	// pseudo globalvars_t
@@ -88,6 +88,11 @@ public:
 	int		m_afButtonPressed;
 	int		m_afButtonReleased;
 	RoleTypes m_iRoleType;
+	Vector	m_vecVAngleShift;
+	EquipmentIdType m_iUsingGrenadeId;
+	WeaponIdType m_iWpnSwitchingTo;	// use this instead of g_iSelectedWeapon.
+	std::array<bool, EQP_COUNT>	m_rgbHasEquipment;
+	short	m_iTeam;
 
 public:
 	void	SetAnimation(PLAYER_ANIM playerAnim) {}

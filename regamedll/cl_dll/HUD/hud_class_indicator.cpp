@@ -11,7 +11,7 @@ Modern Warfare Dev Team
 
 SkillIndex CHudClassIndicator::GetPrimarySkill(void)
 {
-	switch (g_iRoleType)
+	switch (gLocalPlayer.m_iRoleType)
 	{
 	case Role_Arsonist:
 		return SkillIndex_IncendiaryAmmo;
@@ -96,7 +96,7 @@ BOOL CHudClassIndicator::Draw(float flTime)
 	DrawLeftPortion(flTime);	// At the left bottom conor.
 
 	// careful for the array bound!
-	if (g_iRoleType < Role_UNASSIGNED || g_iRoleType >= ROLE_COUNT)
+	if (gLocalPlayer.m_iRoleType < Role_UNASSIGNED || gLocalPlayer.m_iRoleType >= ROLE_COUNT)
 		return FALSE;
 
 	m_iAlpha = 255;
@@ -168,7 +168,7 @@ void CHudClassIndicator::SetSkillTimer(float flTotalTime, MODE iMode, float flCu
 void CHudClassIndicator::DrawLeftPortion(float flTime)
 {
 	int iTall = 0, iWidth = 0;
-	gFontFuncs::GetTextSize(m_hClassFont, g_rgwcsRoleNames[g_iRoleType].c_str(), &iWidth, &iTall);
+	gFontFuncs::GetTextSize(m_hClassFont, g_rgwcsRoleNames[gLocalPlayer.m_iRoleType].c_str(), &iWidth, &iTall);
 
 	int x = 0, y = gHUD::m_Battery.m_flLastDrawingY - iTall / 2;
 	int x2 = HEALTH_BASIC_OFS - 2, y2 = y - HEALTH_BASIC_OFS;
@@ -202,7 +202,7 @@ void CHudClassIndicator::DrawLeftPortion(float flTime)
 	gFontFuncs::DrawSetTextFont(m_hClassFont);
 	gFontFuncs::DrawSetTextPos(x2 + 2, y2 - iTall / 2);
 	gFontFuncs::DrawSetTextColor(235, 235, 235, m_iAlpha);	// have to keep the text white.
-	gFontFuncs::DrawPrintText(g_rgwcsRoleNames[g_iRoleType].c_str());
+	gFontFuncs::DrawPrintText(g_rgwcsRoleNames[gLocalPlayer.m_iRoleType].c_str());
 }
 
 void CHudClassIndicator::DrawRightPortion(float flTime)
@@ -224,7 +224,7 @@ void CHudClassIndicator::DrawRightPortion(float flTime)
 
 	gEngfuncs.pTriAPI->CullFace(TRI_NONE);
 
-	glBindTexture(GL_TEXTURE_2D, m_iClassesIcon[g_iRoleType]);
+	glBindTexture(GL_TEXTURE_2D, m_iClassesIcon[gLocalPlayer.m_iRoleType]);
 	DrawUtils::Draw2DQuad(x, y, x + INDICATOR_SIZE, y + INDICATOR_SIZE);
 
 	// for CHudMoney. It's already the highest point.

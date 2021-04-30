@@ -65,7 +65,7 @@ int CHudHealth::Draw(float flTime)
 	int a = 0, x, y;
 	int HealthWidth;
 
-	if ((gHUD::m_bitsHideHUDDisplay & HIDEHUD_HEALTH) || g_iUser1)
+	if ((gHUD::m_bitsHideHUDDisplay & HIDEHUD_HEALTH) || gLocalPlayer.pev->iuser1)
 		return 1;
 
 	if (!m_hSprite)
@@ -136,7 +136,7 @@ int CHudHealth::Draw(float flTime)
 
 	// health bar.
 	float flFullLength = HEALTH_BAR_LENGTH;
-	if (g_iRoleType == Role_Commander || g_iRoleType == Role_Godfather)
+	if (gLocalPlayer.m_iRoleType == Role_Commander || gLocalPlayer.m_iRoleType == Role_Godfather)
 		flFullLength *= 2.0f;
 
 	glDisable(GL_TEXTURE_2D);
@@ -191,7 +191,7 @@ void CHudHealth::Reset(void)
 	m_fAttackFront = m_fAttackRear = m_fAttackRight = m_fAttackLeft = 0;
 	m_bitsDamage = 0;
 
-	if (g_iRoleType == Role_Commander || g_iRoleType == Role_Godfather)
+	if (gLocalPlayer.m_iRoleType == Role_Commander || gLocalPlayer.m_iRoleType == Role_Godfather)
 	{
 		m_iHealth = 1000;
 		m_flDrawingHealth = 1000;
@@ -458,7 +458,7 @@ void CHudHealth::UpdateTiles(float flTime, long bitsDamage)
 
 float CHudHealth::GetMaxHealth(void)
 {
-	if (g_iRoleType == Role_Commander || g_iRoleType == Role_Godfather)
+	if (gLocalPlayer.m_iRoleType == Role_Commander || gLocalPlayer.m_iRoleType == Role_Godfather)
 		return 1000.0f;
 
 	return 100.0f;

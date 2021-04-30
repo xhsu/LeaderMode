@@ -296,7 +296,7 @@ MSG_FUNC(TeamInfo)
 	g_PlayerExtraInfo[iPlayerId].m_iTeam = iTeam;
 
 	if (iPlayerId == gHUD::m_iPlayerNum)
-		g_iTeam = iTeam;
+		gLocalPlayer.m_iTeam = iTeam;
 
 	return TRUE;
 }
@@ -385,7 +385,7 @@ MSG_FUNC(WeapPickup)
 	// if this weapon would be auto-deploy, let's predict it.
 	//g_flClientTime
 	/*if (g_pCurWeapon && g_pCurWeapon->m_pItemInfo->m_iWeight < g_rgWpnInfo[iWeaponId].m_iWeight)
-		gPseudoPlayer.StartSwitchingWeapon((WeaponIdType)iWeaponId);*/
+		gLocalPlayer.StartSwitchingWeapon((WeaponIdType)iWeaponId);*/
 
 	return TRUE;
 }
@@ -455,7 +455,7 @@ MSG_FUNC(AmmoX)
 	int iAmount = READ_BYTE();
 
 	// WPN_UNDONE
-	//gPseudoPlayer.m_rgAmmo[iAmmoId] = Q_abs(iAmount);
+	//gLocalPlayer.m_rgAmmo[iAmmoId] = Q_abs(iAmount);
 	return TRUE;
 }
 
@@ -1059,7 +1059,7 @@ MSG_FUNC(Role)
 
 	if (EV_IsLocal(iPlayerId))
 	{
-		g_iRoleType = (RoleTypes)iRole;
+		gLocalPlayer.m_iRoleType = (RoleTypes)iRole;
 
 		// light up the class indicator.
 		gHUD::m_ClassIndicator.LightUp();
@@ -1078,7 +1078,7 @@ MSG_FUNC(Role)
 		//{
 		//	// non-nullptr members only.
 		//	if (pWeapon)
-		//		pWeapon->SetVariation(g_iRoleType);
+		//		pWeapon->SetVariation(gLocalPlayer.m_iRoleType);
 		//}
 	}
 
@@ -1151,7 +1151,7 @@ MSG_FUNC(EqpSelect)
 	EquipmentIdType iId = (EquipmentIdType)READ_BYTE();
 
 	// WPN_UNDONE
-	//gPseudoPlayer.m_iUsingGrenadeId = iId;
+	//gLocalPlayer.m_iUsingGrenadeId = iId;
 	return TRUE;
 }
 
@@ -1265,7 +1265,7 @@ MSG_FUNC(Equipment)
 	bool bCanUse = !!READ_BYTE();
 
 	// WPN_UNDONE
-	//gPseudoPlayer.m_rgbHasEquipment[iEquipmentId] = bCanUse;
+	//gLocalPlayer.m_rgbHasEquipment[iEquipmentId] = bCanUse;
 
 	return TRUE;
 }

@@ -26,7 +26,7 @@ void CL_DLLEXPORT CL_CreateMove(float frametime, usercmd_s* cmd, int active)
 
 BOOL CL_DLLEXPORT CL_IsThirdPerson(void)
 {
-	return (cam_thirdperson ? 1 : 0) || (g_iUser1 && (g_iUser2 == gEngfuncs.GetLocalPlayer()->index));
+	return (cam_thirdperson ? 1 : 0) || (gLocalPlayer.pev->iuser1 && (gLocalPlayer.pev->iuser2 == gEngfuncs.GetLocalPlayer()->index));
 }
 
 void* CL_DLLEXPORT ClientFactory(void)
@@ -278,7 +278,7 @@ void CL_DLLEXPORT V_CalcRefdef(ref_params_s* pparams)
 	{
 		V_CalcIntermissionRefdef(pparams);
 	}
-	else if (pparams->spectator || g_iUser1)	// g_iUser true if in spectator mode
+	else if (pparams->spectator || gLocalPlayer.pev->iuser1)	// gLocalPlayer.pev->iuser true if in spectator mode
 	{
 		V_CalcSpectatorRefdef(pparams);
 	}

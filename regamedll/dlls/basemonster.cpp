@@ -1,5 +1,47 @@
 #include "precompiled.h"
 
+MULTIDAMAGE gMultiDamage;
+
+void ClearMultiDamage()
+{
+	gMultiDamage.pEntity = nullptr;
+	gMultiDamage.amount = 0;
+	gMultiDamage.type = 0;
+}
+
+// Inflicts contents of global multi damage register on gMultiDamage.pEntity
+void ApplyMultiDamage(entvars_t* pevInflictor, entvars_t* pevAttacker)
+{
+	if (!gMultiDamage.pEntity)
+		return;
+
+	gMultiDamage.pEntity->TakeDamage(pevInflictor, pevAttacker, gMultiDamage.amount, gMultiDamage.type);
+
+}
+
+void AddMultiDamage(entvars_t* pevInflictor, CBaseEntity* pEntity, float flDamage, int bitsDamageType)
+{
+	if (!pEntity)
+		return;
+
+	gMultiDamage.type |= bitsDamageType;
+
+	if (pEntity != gMultiDamage.pEntity)
+	{
+		// UNDONE: wrong attacker!
+		ApplyMultiDamage(pevInflictor, pevInflictor);
+		gMultiDamage.pEntity = pEntity;
+		gMultiDamage.amount = 0;
+	}
+
+	gMultiDamage.amount += flDamage;
+}
+
+void SpawnBlood(Vector vecSpot, int bloodColor, float flDamage)
+{
+	UTIL_BloodDrips(vecSpot, g_vecAttackDir, bloodColor, int(flDamage));
+}
+
 void CBaseMonster::GibMonster()
 {
 	TraceResult tr;

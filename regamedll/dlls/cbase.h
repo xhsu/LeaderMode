@@ -39,7 +39,6 @@ class CRestore;
 class CBasePlayer;
 class CBaseEntity;
 class CBaseMonster;
-class CBaseWeapon;	// LUNA: this is NOT a derived class of CBaseEntity anymore!
 class CSquadMonster;
 
 enum AmmoIdType;

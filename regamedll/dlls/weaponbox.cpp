@@ -9,7 +9,7 @@ Created Date: Mar 13 2020
 TYPEDESCRIPTION CWeaponBox::m_SaveData[] =
 {
 	DEFINE_ARRAY(CWeaponBox, m_rgAmmo, FIELD_INTEGER, MAX_AMMO_SLOTS),
-	DEFINE_ARRAY(CWeaponBox, m_rgpPlayerItems, FIELD_CLASSPTR, MAX_ITEM_TYPES),
+	// DEFINE_ARRAY(CWeaponBox, m_rgpPlayerItems, FIELD_CLASSPTR, MAX_ITEM_TYPES),WPN_UNDONE
 };
 
 const float CWeaponBox::THROWING_FORCE = 350.0f;
@@ -85,11 +85,12 @@ void CWeaponBox::Spawn()
 void CWeaponBox::Kill()
 {
 	// destroy the weapons
-	for (int i = 0; i < MAX_ITEM_TYPES; i++)
+	// WPN_UNDONE
+	/*for (int i = 0; i < MAX_ITEM_TYPES; i++)
 	{
 		if (m_rgpPlayerItems[i])
 			m_rgpPlayerItems[i]->Kill();
-	}
+	}*/
 
 	// remove the box
 	UTIL_Remove(this);

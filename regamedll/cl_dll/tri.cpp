@@ -87,7 +87,7 @@ void HUD_DrawTransparentTriangles2(void)
 	/*if (CL_IsDead() || !g_pCurWeapon)
 		return;
 	g_flSpread = g_pCurWeapon->GetSpread();
-	Vector vecOrigin = gPseudoPlayer.GetGunPosition();
+	Vector vecOrigin = gLocalPlayer.GetGunPosition();
 	Vector vDir = g_pparams.viewangles.MakeVector();
 
 	Vector vUp = vecOrigin + (vDir + g_pparams.up * g_flSpread) * 4096;

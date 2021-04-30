@@ -32,6 +32,15 @@
 #include "combat.h"
 #include "activity.h"
 
+struct MULTIDAMAGE
+{
+	CBaseEntity* pEntity;
+	float amount;
+	int type;
+};
+
+extern MULTIDAMAGE gMultiDamage;
+
 enum
 {
 	ITBD_PARALLYZE = 0,

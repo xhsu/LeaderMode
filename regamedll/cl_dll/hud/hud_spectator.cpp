@@ -35,7 +35,7 @@ int CHudSpectator::ToggleInset(bool allowOff)
 {
 	int newInsetMode = (int)m_pip->value + 1;
 
-	if (g_iUser1 < OBS_MAP_FREE)
+	if (gLocalPlayer.pev->iuser1 < OBS_MAP_FREE)
 	{
 		if (newInsetMode > INSET_MAP_CHASE)
 		{
@@ -66,12 +66,12 @@ void CHudSpectator::CheckSettings(void)
 {
 	m_pip->value = (int)m_pip->value;
 
-	if ((g_iUser1 < OBS_MAP_FREE) && (m_pip->value == INSET_CHASE_FREE || m_pip->value == INSET_IN_EYE))
+	if ((gLocalPlayer.pev->iuser1 < OBS_MAP_FREE) && (m_pip->value == INSET_CHASE_FREE || m_pip->value == INSET_IN_EYE))
 	{
 		m_pip->value = INSET_MAP_FREE;
 	}
 
-	if ((g_iUser1 >= OBS_MAP_FREE) && (m_pip->value >= INSET_MAP_FREE))
+	if ((gLocalPlayer.pev->iuser1 >= OBS_MAP_FREE) && (m_pip->value >= INSET_MAP_FREE))
 	{
 		m_pip->value = INSET_CHASE_FREE;
 	}
@@ -91,7 +91,7 @@ void CHudSpectator::CheckSettings(void)
 		}
 	}
 
-	if (((g_iTeam == TEAM_TERRORIST) || (g_iTeam == TEAM_CT)) && (g_iUser1 == OBS_IN_EYE))
+	if (((gLocalPlayer.m_iTeam == TEAM_TERRORIST) || (gLocalPlayer.m_iTeam == TEAM_CT)) && (gLocalPlayer.pev->iuser1 == OBS_IN_EYE))
 	{
 		if (m_pip->value != INSET_OFF)
 		{
@@ -101,7 +101,7 @@ void CHudSpectator::CheckSettings(void)
 	}
 
 	// UNDONE
-	/*if (gEngfuncs.GetLocalPlayer()->index == g_iUser2)
+	/*if (gEngfuncs.GetLocalPlayer()->index == gLocalPlayer.pev->iuser2)
 	{
 		gViewPortInterface->SpectatorGUIEnableInsetView(false);
 	}
@@ -118,14 +118,14 @@ void CHudSpectator::InitHUDData(void)
 	m_lastHudMessage = 0;
 	m_iSpectatorNumber = 0;
 	iJumpSpectator = 0;
-	g_iUser1 = g_iUser2 = 0;
+	gLocalPlayer.pev->iuser1 = gLocalPlayer.pev->iuser2 = 0;
 
 	memset(&m_OverviewData, 0, sizeof(m_OverviewData));
 	memset(&m_OverviewEntities, 0, sizeof(m_OverviewEntities));
 
 	Reset();
 
-	g_iUser2 = 0;
+	gLocalPlayer.pev->iuser2 = 0;
 
 	gHUD::m_iFOV = gHUD::default_fov->value;
 }
@@ -218,10 +218,10 @@ void CHudSpectator::CheckOverviewEntities(void)
 
 void CHudSpectator::DrawOverview(void)
 {
-	if (!g_iUser1)
+	if (!gLocalPlayer.pev->iuser1)
 		return;
 
-	if (m_iDrawCycle == 0 && ((g_iUser1 != OBS_MAP_FREE) && (g_iUser1 != OBS_MAP_CHASE)))
+	if (m_iDrawCycle == 0 && ((gLocalPlayer.pev->iuser1 != OBS_MAP_FREE) && (gLocalPlayer.pev->iuser1 != OBS_MAP_CHASE)))
 		return;
 
 	if (m_iDrawCycle == 1 && m_pip->value < INSET_MAP_FREE)
@@ -374,21 +374,21 @@ void CHudSpectator::DrawOverviewEntities(void)
 	if (!m_pip->value || !m_drawcone->value)
 		return;
 
-	if (m_pip->value == INSET_IN_EYE || g_iUser1 == OBS_IN_EYE)
+	if (m_pip->value == INSET_IN_EYE || gLocalPlayer.pev->iuser1 == OBS_IN_EYE)
 	{
-		V_GetInEyePos(g_iUser2, origin, angles);
+		V_GetInEyePos(gLocalPlayer.pev->iuser2, origin, angles);
 	}
-	else if (m_pip->value == INSET_CHASE_FREE || g_iUser1 == OBS_CHASE_FREE)
+	else if (m_pip->value == INSET_CHASE_FREE || gLocalPlayer.pev->iuser1 == OBS_CHASE_FREE)
 	{
-		V_GetChasePos(g_iUser2, v_cl_angles, origin, angles);
+		V_GetChasePos(gLocalPlayer.pev->iuser2, v_cl_angles, origin, angles);
 	}
-	else if (g_iUser1 == OBS_ROAMING)
+	else if (gLocalPlayer.pev->iuser1 == OBS_ROAMING)
 	{
 		VectorCopy(v_sim_org, origin);
 		VectorCopy(v_cl_angles, angles);
 	}
 	else
-		V_GetChasePos(g_iUser2, NULL, origin, angles);
+		V_GetChasePos(gLocalPlayer.pev->iuser2, NULL, origin, angles);
 
 	x = origin[0];
 	y = origin[1];
@@ -727,7 +727,7 @@ bool CHudSpectator::IsActivePlayer(cl_entity_t* ent)
 void CHudSpectator::SetModes(int iNewMainMode, int iNewInsetMode)
 {
 	if (iNewMainMode == -1)
-		iNewMainMode = g_iUser1;
+		iNewMainMode = gLocalPlayer.pev->iuser1;
 
 	if (iNewInsetMode == -1)
 		iNewInsetMode = m_pip->value;
@@ -749,7 +749,7 @@ void CHudSpectator::SetModes(int iNewMainMode, int iNewInsetMode)
 	m_IsInterpolating = false;
 	m_ChaseEntity = 0;
 
-	if (iNewMainMode != g_iUser1)
+	if (iNewMainMode != gLocalPlayer.pev->iuser1)
 	{
 		if (!gEngfuncs.IsSpectateOnly())
 		{
@@ -763,12 +763,12 @@ void CHudSpectator::SetModes(int iNewMainMode, int iNewInsetMode)
 			return;
 		}
 
-		if (!g_iUser2 && (iNewMainMode != OBS_ROAMING))
+		if (!gLocalPlayer.pev->iuser2 && (iNewMainMode != OBS_ROAMING))
 		{
 			if (IsActivePlayer(gEngfuncs.GetEntityByIndex(m_lastPrimaryObject)))
 			{
-				g_iUser2 = m_lastPrimaryObject;
-				g_iUser3 = m_lastSecondaryObject;
+				gLocalPlayer.pev->iuser2 = m_lastPrimaryObject;
+				gLocalPlayer.pev->iuser3 = m_lastSecondaryObject;
 			}
 			else
 			{
@@ -780,24 +780,24 @@ void CHudSpectator::SetModes(int iNewMainMode, int iNewInsetMode)
 		{
 		case OBS_CHASE_LOCKED:
 		{
-			g_iUser1 = OBS_CHASE_LOCKED;
+			gLocalPlayer.pev->iuser1 = OBS_CHASE_LOCKED;
 			break;
 		}
 
 		case OBS_CHASE_FREE:
 		{
-			g_iUser1 = OBS_CHASE_FREE;
+			gLocalPlayer.pev->iuser1 = OBS_CHASE_FREE;
 			m_autoDirector->value = 0;
 			break;
 		}
 
 		case OBS_ROAMING:
 		{
-			g_iUser1 = OBS_ROAMING;
+			gLocalPlayer.pev->iuser1 = OBS_ROAMING;
 
-			if (g_iUser2)
+			if (gLocalPlayer.pev->iuser2)
 			{
-				V_GetChasePos(g_iUser2, v_cl_angles, vJumpOrigin, vJumpAngles);
+				V_GetChasePos(gLocalPlayer.pev->iuser2, v_cl_angles, vJumpOrigin, vJumpAngles);
 				gEngfuncs.SetViewAngles(vJumpAngles);
 				iJumpSpectator = 1;
 			}
@@ -807,13 +807,13 @@ void CHudSpectator::SetModes(int iNewMainMode, int iNewInsetMode)
 
 		case OBS_IN_EYE:
 		{
-			g_iUser1 = OBS_IN_EYE;
+			gLocalPlayer.pev->iuser1 = OBS_IN_EYE;
 			break;
 		}
 
 		case OBS_MAP_FREE:
 		{
-			g_iUser1 = OBS_MAP_FREE;
+			gLocalPlayer.pev->iuser1 = OBS_MAP_FREE;
 
 			m_mapZoom = m_OverviewData.zoom;
 			m_mapOrigin = m_OverviewData.origin;
@@ -822,7 +822,7 @@ void CHudSpectator::SetModes(int iNewMainMode, int iNewInsetMode)
 
 		case OBS_MAP_CHASE:
 		{
-			g_iUser1 = OBS_MAP_CHASE;
+			gLocalPlayer.pev->iuser1 = OBS_MAP_CHASE;
 
 			m_mapZoom = m_OverviewData.zoom;
 			m_mapOrigin = m_OverviewData.origin;
@@ -830,7 +830,7 @@ void CHudSpectator::SetModes(int iNewMainMode, int iNewInsetMode)
 		}
 		}
 
-		if (g_iUser1 == OBS_ROAMING)
+		if (gLocalPlayer.pev->iuser1 == OBS_ROAMING)
 		{
 			if (gEngfuncs.pfnGetCvarFloat("cl_observercrosshair") != 0.0)
 			{
@@ -853,7 +853,7 @@ void CHudSpectator::HandleButtonsDown(int ButtonPressed)
 {
 	double time = gEngfuncs.GetClientTime();
 
-	int newMainMode = g_iUser1;
+	int newMainMode = gLocalPlayer.pev->iuser1;
 	int newInsetMode = m_pip->value;
 
 	// UNDONE
@@ -863,7 +863,7 @@ void CHudSpectator::HandleButtonsDown(int ButtonPressed)
 	if (gHUD::m_bIntermission)
 		return;
 
-	if (!g_iUser1)
+	if (!gLocalPlayer.pev->iuser1)
 		return;
 
 	if (gEngfuncs.pDemoAPI->IsPlayingback() && !gEngfuncs.IsSpectateOnly())
@@ -888,15 +888,15 @@ void CHudSpectator::HandleButtonsDown(int ButtonPressed)
 	{
 		if (ButtonPressed & IN_JUMP)
 		{
-			if (g_iUser1 == OBS_CHASE_LOCKED)
+			if (gLocalPlayer.pev->iuser1 == OBS_CHASE_LOCKED)
 				newMainMode = OBS_CHASE_FREE;
-			else if (g_iUser1 == OBS_CHASE_FREE)
+			else if (gLocalPlayer.pev->iuser1 == OBS_CHASE_FREE)
 				newMainMode = OBS_IN_EYE;
-			else if (g_iUser1 == OBS_IN_EYE)
+			else if (gLocalPlayer.pev->iuser1 == OBS_IN_EYE)
 				newMainMode = OBS_ROAMING;
-			else if (g_iUser1 == OBS_ROAMING)
+			else if (gLocalPlayer.pev->iuser1 == OBS_ROAMING)
 				newMainMode = OBS_MAP_FREE;
-			else if (g_iUser1 == OBS_MAP_FREE)
+			else if (gLocalPlayer.pev->iuser1 == OBS_MAP_FREE)
 				newMainMode = OBS_MAP_CHASE;
 			else
 				newMainMode = OBS_CHASE_FREE;
@@ -906,11 +906,11 @@ void CHudSpectator::HandleButtonsDown(int ButtonPressed)
 		{
 			FindNextPlayer((ButtonPressed & IN_ATTACK2) ? true : false);
 
-			if (g_iUser1 == OBS_ROAMING)
+			if (gLocalPlayer.pev->iuser1 == OBS_ROAMING)
 			{
 				gEngfuncs.SetViewAngles(vJumpAngles);
 				iJumpSpectator = 1;
-				gHUD::m_Radar.m_iPlayerLastPointedAt = g_iUser2;
+				gHUD::m_Radar.m_iPlayerLastPointedAt = gLocalPlayer.pev->iuser2;
 			}
 
 			m_autoDirector->value = 0.0f;
@@ -919,7 +919,7 @@ void CHudSpectator::HandleButtonsDown(int ButtonPressed)
 
 	SetModes(newMainMode, newInsetMode);
 
-	if (g_iUser1 == OBS_MAP_FREE)
+	if (gLocalPlayer.pev->iuser1 == OBS_MAP_FREE)
 	{
 		if (ButtonPressed & IN_FORWARD)
 			m_zoomDelta = 0.01f;
@@ -966,8 +966,8 @@ void CHudSpectator::FindNextPlayer(bool bReverse)
 		return;
 	}
 
-	if (g_iUser2)
-		iStart = g_iUser2;
+	if (gLocalPlayer.pev->iuser2)
+		iStart = gLocalPlayer.pev->iuser2;
 	else
 		iStart = 1;
 
@@ -992,12 +992,12 @@ void CHudSpectator::FindNextPlayer(bool bReverse)
 		if (!IsActivePlayer(pEnt))
 			continue;
 
-		g_iUser2 = iCurrent;
+		gLocalPlayer.pev->iuser2 = iCurrent;
 		break;
 
 	} while (iCurrent != iStart);
 
-	if (!g_iUser2)
+	if (!gLocalPlayer.pev->iuser2)
 	{
 		gEngfuncs.Con_DPrintf("No observer targets.\n");
 
@@ -1025,7 +1025,7 @@ void CHudSpectator::FindPlayer(const char* name)
 		return;
 	}
 
-	g_iUser2 = 0;
+	gLocalPlayer.pev->iuser2 = 0;
 	//gViewPortInterface->GetAllPlayersInfo();	// UNDONE
 
 	cl_entity_t* pEnt = NULL;
@@ -1039,12 +1039,12 @@ void CHudSpectator::FindPlayer(const char* name)
 
 		if (!Q_stricmp(g_PlayerInfoList[pEnt->index].name, name))
 		{
-			g_iUser2 = i;
+			gLocalPlayer.pev->iuser2 = i;
 			break;
 		}
 	}
 
-	if (!g_iUser2)
+	if (!gLocalPlayer.pev->iuser2)
 	{
 		gEngfuncs.Con_DPrintf("No observer targets.\n");
 
@@ -1077,8 +1077,8 @@ bool CHudSpectator::DirectorMessage(int iSize, void* pbuf)
 	{
 	case DRC_CMD_START:
 	{
-		g_iPlayerClass = 0;
-		g_iTeam = 0;
+		gLocalPlayer.m_iRoleType = Role_UNASSIGNED;
+		gLocalPlayer.m_iTeam = 0;
 
 		MsgFunc_InitHUD(NULL, 0, NULL);
 		MsgFunc_ResetHUD(NULL, 0, NULL);
@@ -1119,11 +1119,11 @@ bool CHudSpectator::DirectorMessage(int iSize, void* pbuf)
 
 		if (m_autoDirector->value)
 		{
-			if ((g_iUser2 != m_lastPrimaryObject) || (g_iUser3 != m_lastSecondaryObject))
+			if ((gLocalPlayer.pev->iuser2 != m_lastPrimaryObject) || (gLocalPlayer.pev->iuser3 != m_lastSecondaryObject))
 				V_ResetChaseCam();
 
-			g_iUser2 = m_lastPrimaryObject;
-			g_iUser3 = m_lastSecondaryObject;
+			gLocalPlayer.pev->iuser2 = m_lastPrimaryObject;
+			gLocalPlayer.pev->iuser3 = m_lastSecondaryObject;
 			m_IsInterpolating = false;
 			m_ChaseEntity = 0;
 		}
@@ -1528,7 +1528,7 @@ int CHudSpectator::Draw(float flTime)
 	char string[256];
 	float* color;
 
-	if (!g_iUser1)
+	if (!gLocalPlayer.pev->iuser1)
 	{
 		// UNDONE
 		//if (gViewPortInterface->IsSpectatorGUIVisible())
@@ -1543,17 +1543,17 @@ int CHudSpectator::Draw(float flTime)
 
 		gEngfuncs.pfnClientCmd(SharedVarArgs("spec_set_ad %f", m_autoDirector->value));
 
-		if ((m_lastAutoDirector != 0.0f) && (g_iUser1 == OBS_CHASE_FREE))
+		if ((m_lastAutoDirector != 0.0f) && (gLocalPlayer.pev->iuser1 == OBS_CHASE_FREE))
 		{
 			SetModes(OBS_CHASE_LOCKED, -1);
 		}
-		else if ((m_lastAutoDirector == 0.0f) && (g_iUser1 == OBS_CHASE_LOCKED))
+		else if ((m_lastAutoDirector == 0.0f) && (gLocalPlayer.pev->iuser1 == OBS_CHASE_LOCKED))
 		{
 			SetModes(OBS_CHASE_FREE, -1);
 		}
 	}
 
-	if ((m_zoomDelta != 0.0f) && (g_iUser1 == OBS_MAP_FREE))
+	if ((m_zoomDelta != 0.0f) && (gLocalPlayer.pev->iuser1 == OBS_MAP_FREE))
 	{
 		m_mapZoom += m_zoomDelta;
 
@@ -1564,7 +1564,7 @@ int CHudSpectator::Draw(float flTime)
 			m_mapZoom = 0.5;
 	}
 
-	if ((m_moveDelta != 0.0f) && (g_iUser1 != OBS_ROAMING))
+	if ((m_moveDelta != 0.0f) && (gLocalPlayer.pev->iuser1 != OBS_ROAMING))
 	{
 		vec3_t right;
 		AngleVectors(v_angles, NULL, right, NULL);
@@ -1573,12 +1573,12 @@ int CHudSpectator::Draw(float flTime)
 		VectorAdd(m_mapOrigin, right, m_mapOrigin);
 	}
 
-	if (g_iUser1 != m_mode->value)
+	if (gLocalPlayer.pev->iuser1 != m_mode->value)
 	{
-		gEngfuncs.Cvar_SetValue("spec_mode_internal", g_iUser1);
+		gEngfuncs.Cvar_SetValue("spec_mode_internal", gLocalPlayer.pev->iuser1);
 	}
 
-	if (g_iUser1 < OBS_MAP_FREE)
+	if (gLocalPlayer.pev->iuser1 < OBS_MAP_FREE)
 		return 1;
 
 	if (!m_drawnames->value)

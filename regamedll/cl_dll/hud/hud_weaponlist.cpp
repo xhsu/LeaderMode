@@ -216,23 +216,23 @@ int CHudWeaponList::Draw(float flTime)
 	//		m_rgflFontAlpha[i] += (flTargetAlpha - m_rgflFontAlpha[i]) * gHUD::m_flTimeDelta * WEAPONLIST_DRIFT_SPEED;
 
 	//		// ammo bar on the side.
-	//		flCurHeight = (float(gPseudoPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType]) / float(pWeapon->m_pAmmoInfo->m_iMax)) * flCardHeight;
+	//		flCurHeight = (float(gLocalPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType]) / float(pWeapon->m_pAmmoInfo->m_iMax)) * flCardHeight;
 	//		vecAmmoBarCoord = m_rgvecCurCoord[i] + Vector2D(-AMMOBAR_WIDTH, flCardHeight - flCurHeight);
 
-	//		UnpackRGB(r, g, b, gPseudoPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType] ? RGB_YELLOWISH : RGB_REDISH);
+	//		UnpackRGB(r, g, b, gLocalPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType] ? RGB_YELLOWISH : RGB_REDISH);
 	//		gEngfuncs.pfnFillRGBA(vecAmmoBarCoord.x, m_rgvecCurCoord[i].y, AMMOBAR_WIDTH, flCardHeight, r, g, b, 64);
 
-	//		UnpackRGB(r, g, b, gPseudoPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType] >= pWeapon->m_pItemInfo->m_iMaxClip ? RGB_GREENISH : RGB_REDISH);
+	//		UnpackRGB(r, g, b, gLocalPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType] >= pWeapon->m_pItemInfo->m_iMaxClip ? RGB_GREENISH : RGB_REDISH);
 	//		gEngfuncs.pfnFillRGBA(vecAmmoBarCoord.x, vecAmmoBarCoord.y, AMMOBAR_WIDTH, flCurHeight, r, g, b, 255);
 
 	//		// ammo text.
-	//		_snwprintf(wszText, wcharsmax(wszText), L"%d", gPseudoPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType]);
+	//		_snwprintf(wszText, wcharsmax(wszText), L"%d", gLocalPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType]);
 	//		gFontFuncs::GetTextSize(pWeapon->m_pItemInfo->m_iMaxClip == WEAPON_NOCLIP ? m_hClipFont : m_hAmmoFont, wszText, &iTextWidth, &iTextHeight);
 	//		vecAmmoTextCoord = m_rgvecCurCoord[i] + Vector2D(-AMMOBAR_WIDTH - iTextWidth - WEAPONLIST_GAP, (flCardHeight - iTextHeight) / 2);
 
 	//		gFontFuncs::DrawSetTextFont(pWeapon->m_pItemInfo->m_iMaxClip == WEAPON_NOCLIP ? m_hClipFont : m_hAmmoFont);	// if this weapon is directly using ammo, then we should treat ammo as clip.
 	//		gFontFuncs::DrawSetTextPos(vecAmmoTextCoord.x, vecAmmoTextCoord.y);
-	//		gFontFuncs::DrawSetTextColor(gPseudoPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType] ? 0xFFFFFF : RGB_REDISH, m_rgflFontAlpha[i]);
+	//		gFontFuncs::DrawSetTextColor(gLocalPlayer.m_rgAmmo[pWeapon->m_iPrimaryAmmoType] ? 0xFFFFFF : RGB_REDISH, m_rgflFontAlpha[i]);
 	//		gFontFuncs::DrawPrintText(wszText);
 
 	//		// clip text

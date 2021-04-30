@@ -95,7 +95,7 @@ public:	// skill action
 	virtual void TerminatePeers() const;
 
 	// passive skill: weapons
-	virtual float WeaponFireIntervalModifier(CBaseWeapon* pWeapon) { return 1.0f; }
+	virtual float WeaponFireIntervalModifier(CBaseWeaponLite* pWeapon) { return 1.0f; }
 	virtual void OnGrenadeThrew(EquipmentIdType iId, CGrenade* pGrenade) { }
 
 	// passive skill: damage
@@ -155,7 +155,7 @@ public:
 
 	SkillIndex GetIndex() const { return SkillIndex_FireRate; }
 
-	float WeaponFireIntervalModifier(CBaseWeapon* pWeapon) { return m_bUsingSkill ? FIREINTERVAL_MODIFIER : 1.0f; }
+	float WeaponFireIntervalModifier(CBaseWeaponLite* pWeapon) { return m_bUsingSkill ? FIREINTERVAL_MODIFIER : 1.0f; }
 };
 
 // Role_Commander: Stainless Steel
@@ -409,7 +409,7 @@ public:
 
 	SkillIndex GetIndex() const { return SkillIndex_TaserGun; }
 
-	float WeaponFireIntervalModifier(CBaseWeapon* pWeapon);
+	float WeaponFireIntervalModifier(CBaseWeaponLite* pWeapon);
 	void OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr);
 };
 
