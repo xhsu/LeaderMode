@@ -31,6 +31,7 @@
 #include "bot/cs_gamestate.h"
 #include "bot/cs_bot_manager.h"
 #include "bot/cs_bot_chatter.h"
+#include "../wpn_shared/weapons_lite.h"
 
 enum
 {
@@ -1331,9 +1332,9 @@ inline bool CCSBot::IsNotMoving() const
 	return pev->velocity < stillSpeed;
 }
 
-inline bool CCSBot::HasAnyAmmo(CBaseWeapon *weapon) const
+WPN_BOT_CHEAT inline bool CCSBot::HasAnyAmmo(CBaseWeaponLite *weapon) const
 {
-	return false;	// WPN_UNDONE
+	return true;
 }
 
 class CollectRetreatSpotsFunctor

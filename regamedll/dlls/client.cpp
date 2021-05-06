@@ -79,6 +79,7 @@ int gmsgSecVMDL = 0;
 int gmsgEquipment = 0;
 int gmsgManpower = 0;
 int gmsgScheme = 0;
+int gmsgGiveWpn = 0;
 
 bool g_bClientPrintEnable = true;
 
@@ -216,6 +217,7 @@ void LinkUserMessages()
 	gmsgEquipment	  = REG_USER_MSG("Equipment", 2);
 	gmsgManpower	  = REG_USER_MSG("Manpower", 2);
 	gmsgScheme		  = REG_USER_MSG("Scheme", 2);
+	gmsgGiveWpn		  = REG_USER_MSG("GiveWpn", 2);
 }
 
 void WriteSigonMessages()

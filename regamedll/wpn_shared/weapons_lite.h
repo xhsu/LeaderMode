@@ -35,7 +35,8 @@ public:	// Construct & Destruct
 	virtual ~CBaseWeaponLite() {}
 
 public:	// Members
-	float	m_flNextAttack;
+	float	m_flNextAttack{ 0.0f };
+	int		m_iClip{ 0 };
 
 public:
 	void Fire() {}

@@ -257,3 +257,4 @@ extern int gmsgSecVMDL;
 extern int gmsgEquipment;
 extern int gmsgManpower;
 extern int gmsgScheme;
+extern int gmsgGiveWpn;

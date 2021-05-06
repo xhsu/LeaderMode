@@ -9,7 +9,6 @@ Created Date: Mar 13 2020
 TYPEDESCRIPTION CWeaponBox::m_SaveData[] =
 {
 	DEFINE_ARRAY(CWeaponBox, m_rgAmmo, FIELD_INTEGER, MAX_AMMO_SLOTS),
-	// DEFINE_ARRAY(CWeaponBox, m_rgpPlayerItems, FIELD_CLASSPTR, MAX_ITEM_TYPES),WPN_UNDONE
 };
 
 const float CWeaponBox::THROWING_FORCE = 350.0f;
@@ -84,15 +83,8 @@ void CWeaponBox::Spawn()
 // The think function that removes the box from the world.
 void CWeaponBox::Kill()
 {
-	// destroy the weapons
-	// WPN_UNDONE
-	/*for (int i = 0; i < MAX_ITEM_TYPES; i++)
-	{
-		if (m_rgpPlayerItems[i])
-			m_rgpPlayerItems[i]->Kill();
-	}*/
+	m_lstSavedWeapons.clear();
 
-	// remove the box
 	UTIL_Remove(this);
 }
 
@@ -152,6 +144,29 @@ void CWeaponBox::Touch(CBaseEntity* pOther)
 	// go through my weapons and try to give the usable ones to the player.
 	// it's important the the player be given ammo first, so the weapons code doesn't refuse
 	// to deploy a better weapon that the player may pick up because he has no ammo for it.
+	auto iter = m_lstSavedWeapons.begin();
+	while (iter != m_lstSavedWeapons.end())
+	{
+		if (iter->m_iId <= WEAPON_NONE || iter->m_iId >= LAST_WEAPON)
+		{
+			iter = m_lstSavedWeapons.erase(iter);
+			continue;
+		}
+
+		MESSAGE_BEGIN(MSG_ONE, gmsgGiveWpn, g_vecZero, pPlayer->edict());
+		WRITE_BYTE(iter->m_iId);
+		WRITE_BYTE(iter->m_iClip);
+		MESSAGE_END();
+
+		iter = m_lstSavedWeapons.erase(iter);
+	}
+
+	for (auto& data : m_lstSavedWeapons)
+	{
+		if (data.m_iId <= WEAPON_NONE || data.m_iId >= LAST_WEAPON)
+			continue;
+
+	}
 	for (int i = 0; i < MAX_ITEM_TYPES; i++)
 	{
 		if (!m_rgpPlayerItems[i])

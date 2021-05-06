@@ -14,6 +14,14 @@ LUNA:	The concept here is quite simple:
 
 class CWeaponBox : public CBaseEntity
 {
+public:
+	typedef struct
+	{
+		WeaponIdType m_iId;
+		int m_iClip;
+
+	} saved_wpn_t;
+
 	static const float THROWING_FORCE;
 
 public:
@@ -40,12 +48,12 @@ public:
 	void SetModel(const char* pszModelName);
 
 	bool HasWeapon(WeaponIdType iId);
-	//bool PackWeapon(CBaseWeapon* pWeapon);	WPN_UNDONE
+	bool PackWeapon(CBaseWeaponLite* pWeapon);
 
 public:
 	static TYPEDESCRIPTION m_SaveData[];
 
-	//CBaseWeapon* m_rgpPlayerItems[MAX_ITEM_TYPES];	WPN_UNDONE
+	std::list<saved_wpn_t> m_lstSavedWeapons;
 	int m_rgAmmo[MAX_AMMO_SLOTS];
 	bool m_bHadBeenSold;
 	float m_flNextPhysSFX;

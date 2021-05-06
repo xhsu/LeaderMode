@@ -460,15 +460,12 @@ public:
 	BOOL ShouldDoLargeFlinch(int nHitGroup, int nGunType);
 	void SetPrefsFromUserinfo(char *infobuffer);
 	void SendWeatherInfo();
-	void UpdateShieldCrosshair(bool draw);
 	bool HasShield();
 	bool IsProtectedByShield() { return HasShield() && m_bShieldDrawn; }
 	void RemoveShield();
-	CBaseEntity *DropShield(bool bDeploy = true);
-	void GiveShield(bool bDeploy = true);
+	void GiveShield();
 	bool IsHittingShield(Vector &vecDirection, TraceResult *ptr);
 	bool SelectSpawnSpot(const char *pEntClassName, CBaseEntity* &pSpot);
-	bool IsReloading() const;
 	bool IsBlind() const { return (m_blindUntilTime > gpGlobals->time); }
 	bool IsAutoFollowAllowed() const { return (gpGlobals->time > m_allowAutoFollowTime); }
 	void InhibitAutoFollow(float duration) { m_allowAutoFollowTime = gpGlobals->time + duration; }
@@ -553,7 +550,6 @@ public:
 	bool m_bNotKilled;
 	TeamName m_iTeam;
 	int m_iAccount;
-	bool m_bHasPrimary;
 	float m_flDeathThrowTime;
 	int m_iThrowDirection;
 	float m_flLastTalk;
@@ -653,10 +649,7 @@ public:
 	int m_iClientHideHUD;
 	int m_iClientFOV;	// m_iFOV is now merged with pev->fov.
 	int m_iNumSpawns;
-	CBaseWeapon* m_rgpPlayerItems[MAX_ITEM_TYPES];
-	CBaseWeapon* m_pActiveItem;
-	CBaseWeapon* m_pClientActiveItem;
-	CBaseWeapon* m_pLastItem;
+	std::list<WeaponIdType> m_lstWeaponOwned;
 	std::array<int, MAX_AMMO_SLOTS> m_rgAmmo;
 	std::array<int, MAX_AMMO_SLOTS> m_rgAmmoLast;
 	Vector m_vecAutoAim;
@@ -766,29 +759,6 @@ public:
 	float m_flBurningNextDamage;
 	float m_flBurningSFX;
 };
-
-class CWShield: public CBaseEntity
-{
-public:
-	virtual void Spawn();
-	virtual void EXPORT Touch(CBaseEntity *pOther);
-
-public:
-	void SetCantBePickedUpByUser(CBasePlayer *pPlayer, float time)
-	{
-		m_hEntToIgnoreTouchesFrom = pPlayer;
-		m_flTimeToIgnoreTouches = gpGlobals->time + time;
-	}
-
-public:
-	EntityHandle<CBasePlayer> m_hEntToIgnoreTouchesFrom;
-	float m_flTimeToIgnoreTouches;
-};
-
-inline bool CBasePlayer::IsReloading() const
-{
-	return false;	// WPN_UNDONE
-}
 
 // returns a CBaseEntity pointer to a player by index.  Only returns if the player is spawned and connected otherwise returns NULL
 // Index is 1 based

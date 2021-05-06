@@ -43,6 +43,10 @@
 #define UNTESTED
 // Function is doubt reversed
 #define TODOBODY
+// Weapons doesn't finished yet.
+#define WPN_UNDONE
+// Bot can cheat on these.
+#define WPN_BOT_CHEAT
 
 #define BIT(n) (1<<(n))
 

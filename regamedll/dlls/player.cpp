@@ -1487,51 +1487,7 @@ void EXT_FUNC CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 
 	SetAnimation(PLAYER_DIE);
 
-	// WPN_UNDONE
-	/*if (m_pActiveItem && m_pActiveItem->m_pPlayer)
-	{
-		switch (m_pActiveItem->m_iId)
-		{
-		case WEAPON_HEGRENADE:
-		{
-			CHEGrenade *pHEGrenade = static_cast<CHEGrenade *>(m_pActiveItem);
-			if ((pev->button & IN_ATTACK) && m_rgAmmo[pHEGrenade->m_iPrimaryAmmoType])
-			{
-				ThrowGrenade(pHEGrenade, (pev->origin + pev->view_ofs), pev->angles, 1.5, pHEGrenade->m_usCreateExplosion);
-
-				m_rgAmmo[GetWeaponInfo(m_pActiveItem->m_iId)->m_iAmmoType]--;
-				pHEGrenade->m_flStartThrow = 0;
-			}
-			break;
-		}
-		case WEAPON_FLASHBANG:
-		{
-			CFlashbang *pFlashbang = static_cast<CFlashbang *>(m_pActiveItem);
-			if ((pev->button & IN_ATTACK) && m_rgAmmo[pFlashbang->m_iPrimaryAmmoType])
-			{
-				ThrowGrenade(pFlashbang, (pev->origin + pev->view_ofs), pev->angles, 1.5);
-
-				m_rgAmmo[GetWeaponInfo(m_pActiveItem->m_iId)->m_iAmmoType]--;
-				pFlashbang->m_flStartThrow = 0;
-			}
-			break;
-		}
-		case WEAPON_SMOKEGRENADE:
-		{
-			CSmokeGrenade *pSmoke = static_cast<CSmokeGrenade *>(m_pActiveItem);
-			if ((pev->button & IN_ATTACK) && m_rgAmmo[pSmoke->m_iPrimaryAmmoType])
-			{
-				ThrowGrenade(pSmoke, (pev->origin + pev->view_ofs), pev->angles, 1.5, pSmoke->m_usCreateSmoke);
-
-				m_rgAmmo[GetWeaponInfo(m_pActiveItem->m_iId)->m_iAmmoType]--;
-				pSmoke->m_flStartThrow = 0;
-			}
-			break;
-		}
-		default:
-			break;
-		}
-	}*/
+	WPN_UNDONE	// CLIENT should single server to drop a on-death grenade.
 
 	pev->modelindex = m_modelIndexPlayer;
 	pev->deadflag = DEAD_DYING;
@@ -2367,73 +2323,10 @@ BOOL CBasePlayer::IsOnLadder()
 	return pev->movetype == MOVETYPE_FLY;
 }
 
-LINK_ENTITY_TO_CLASS(weapon_shield, CWShield)
-
-void CWShield::Spawn()
-{
-	pev->movetype = MOVETYPE_TOSS;
-	pev->solid = SOLID_TRIGGER;
-
-	UTIL_SetSize(pev, g_vecZero, g_vecZero);
-	SET_MODEL(ENT(pev), "models/w_shield.mdl");
-}
-
-void CWShield::Touch(CBaseEntity *pOther)
-{
-	if (!pOther->IsPlayer())
-		return;
-
-	CBasePlayer *pPlayer = (CBasePlayer *)pOther;
-
-	if (pPlayer->pev->deadflag != DEAD_NO)
-		return;
-
-	if (m_hEntToIgnoreTouchesFrom && m_hEntToIgnoreTouchesFrom == pPlayer)
-	{
-		if (m_flTimeToIgnoreTouches > gpGlobals->time)
-			return;
-
-		m_hEntToIgnoreTouchesFrom = nullptr;
-	}
-
-	if (!pPlayer->m_bHasPrimary)
-	{
-		if (pPlayer->m_pActiveItem)
-		{
-			if (!pPlayer->m_pActiveItem->CanHolster())
-				return;
-		}
-
-		if (CSGameRules()->CanHavePlayerItem(pPlayer, WEAPON_SHIELDGUN, false))
-			return;
-
-		pPlayer->GiveShield();
-
-		EMIT_SOUND(edict(), CHAN_ITEM, "items/gunpickup2.wav", VOL_NORM, ATTN_NORM);
-		UTIL_Remove(this);
-
-		pev->nextthink = gpGlobals->time + 0.1;
-	}
-}
-
-void EXT_FUNC CBasePlayer::GiveShield(bool bDeploy)
+void CBasePlayer::GiveShield()
 {
 	m_bOwnsShield = true;
-	m_bHasPrimary = true;
-
 	pev->gamestate = HITGROUP_SHIELD_ENABLED;
-
-	if (m_pActiveItem)
-	{
-		if (bDeploy)
-		{
-			if (m_rgAmmo[m_pActiveItem->m_iPrimaryAmmoType] > 0)
-				m_pActiveItem->Holstered();
-
-			if (!m_pActiveItem->Deploy())
-				CSGameRules()->GetNextBestWeapon(this, m_pActiveItem);
-		}
-	}
 }
 
 void CBasePlayer::RemoveShield()
@@ -2441,57 +2334,8 @@ void CBasePlayer::RemoveShield()
 	if (HasShield())
 	{
 		m_bOwnsShield = false;
-		m_bHasPrimary = false;
-		m_bShieldDrawn = false;
 		pev->gamestate = HITGROUP_SHIELD_DISABLED;
-
-		UpdateShieldCrosshair(true);
 	}
-}
-
-CBaseEntity *EXT_FUNC CBasePlayer::DropShield(bool bDeploy)
-{
-	if (!HasShield())
-		return nullptr;
-
-	if (m_pActiveItem && !m_pActiveItem->CanHolster())
-		return nullptr;
-
-	if (m_pActiveItem)
-	{
-		// WPN_UNDONE
-		//if (m_pActiveItem->m_flStartThrow != 0.0f)
-			//m_pActiveItem->Holster();
-	}
-
-	if (IsReloading())
-	{
-		m_pActiveItem->m_bInReload = false;
-		m_flNextAttack = 0;
-	}
-
-	if (m_pActiveItem && IsProtectedByShield())
-		m_pActiveItem->SecondaryAttack();
-
-	m_bShieldDrawn = false;
-
-	RemoveShield();
-
-	if (m_pActiveItem && bDeploy)
-		m_pActiveItem->Deploy();
-
-	UTIL_MakeVectors(pev->angles);
-
-	CWShield *pShield = (CWShield *)CBaseEntity::Create("weapon_shield", pev->origin + gpGlobals->v_forward * 10, pev->angles, edict());
-
-	pShield->pev->angles.x = 0;
-	pShield->pev->angles.z = 0;
-	pShield->pev->velocity = gpGlobals->v_forward * 400;
-	pShield->SetThink(&CBaseEntity::SUB_Remove);
-	pShield->pev->nextthink = gpGlobals->time + item_staytime.value;
-	pShield->SetCantBePickedUpByUser(this, 2.0);
-
-	return pShield;
 }
 
 bool CBasePlayer::HasShield()

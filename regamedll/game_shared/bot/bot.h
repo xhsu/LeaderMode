@@ -29,6 +29,7 @@
 #pragma once
 
 #include "gamerules.h"
+#include "../wpn_shared/weapons_lite.h"
 
 // 30 times per second, just like human clients
 constexpr float g_flBotCommandInterval = 1.0 / 30.0;
@@ -281,6 +282,9 @@ private:
 
 	// index of top of stack
 	int m_postureStackIndex;
+
+	// Only bot has these simplified weapon.
+	CBaseWeaponLite* m_pActiveWeapon{ nullptr };
 };
 
 inline void CBot::SetModel(const char *modelName)
@@ -308,15 +312,13 @@ inline void CBot::Walk()
 
 inline bool CBot::IsActiveWeaponReloading() const
 {
-	// WPN_UNDONE
-	return false;
+	return m_pActiveWeapon && m_pActiveItem->m_flNextAttack > gpGlobals->time && m_pActiveItem->m_iClip <= 0;
 }
 
-inline bool CBot::IsActiveWeaponRecoilHigh() const
+WPN_BOT_CHEAT inline bool CBot::IsActiveWeaponRecoilHigh() const
 {
 	constexpr float highRecoil = 0.4f;	// m_flAccuracy
 
-	// WPN_UNDONE
 	return false;
 }
 
