@@ -236,8 +236,8 @@ public:	// basic API and behaviour for weapons.
 	bool	DefaultHolster	(int iHolsterAnim, float flHolsterDelay);
 	void	DefaultSteelSight(const Vector& vecOfs, int iFOV, float flDriftingSpeed = 10.0f, float flNextSecondaryAttack = 0.3f);
 	void	DefaultScopeSight(const Vector& vecOfs, int iFOV, float flEnterScopeDelay = 0.25f, float flFadeFromBlack = 5.0f, float flDriftingSpeed = 10.0f, float flNextSecondaryAttack = 0.3f);
-	void	DefaultDashStart(int iEnterAnim, float flEnterTime);
-	void	DefaultDashEnd	(int iEnterAnim, float flEnterTime, int iExitAnim, float flExitTime);
+	template<class CWpn> void	DefaultDashStart	(void);
+	template<class CWpn> void	DefaultDashEnd		(void);
 	bool	DefaultSetLHand	(bool bAppear, int iLHandUpAnim, float flLHandUpTime, int iLHandDownAnim, float flLHandDownTime);
 	void	DefaultBlock	(int iEnterAnim, float flEnterTime, int iExitAnim, float flExitTime);
 	float	DefaultSpread	(float flBaseline, float flAimingMul, float flDuckingMul, float flWalkingMul, float flJumpingMul);
@@ -1613,56 +1613,57 @@ public:	// new functions
 #define FN57_FIRE_SFX		"weapons/fiveseven/fiveseven_fire.wav"
 #define FN57_FIRE_SIL_SFX	"weapons/fiveseven/fiveseven_fire-sil.wav"
 
-constexpr float FIVESEVEN_MAX_SPEED			= 250.0f;
-constexpr float FIVESEVEN_DAMAGE			= 24;
-constexpr float FIVESEVEN_RANGE_MODIFER		= 1.149658245;	// 80% damage @800 inches.
-constexpr float FIVESEVEN_RELOAD_TIME		= 1.94F;
-constexpr float FIVESEVEN_RELOAD_EMPTY_TIME	= 1.86F;
-constexpr float FIVESEVEN_DRAW_FIRST_TIME	= 1.56F;
-constexpr float FIVESEVEN_DRAW_TIME			= 0.7F;
-constexpr float FIVESEVEN_HOLSTER_TIME		= 0.7F;
-constexpr float FIVESEVEN_CHECKMAG_TIME		= 2.033F;
-constexpr float FIVESEVEN_DASH_ENTER_TIME	= 0.8F;
-constexpr float FIVESEVEN_DASH_EXIT_TIME	= 0.37F;
-constexpr float	FIVESEVEN_BLOCK_UP_TIME		= 0.4666f;
-constexpr float	FIVESEVEN_BLOCK_DOWN_TIME	= 0.4666f;
-constexpr float	FIVESEVEN_LHAND_UP_TIME		= 0.2666f;
-constexpr float	FIVESEVEN_LHAND_DOWN_TIME	= 0.2666f;
-constexpr float FIVESEVEN_FIRE_INTERVAL		= 0.132f;
-constexpr float	FIVESEVEN_EFFECTIVE_RANGE	= 4096.0f;
-constexpr int	FIVESEVEN_PENETRATION		= 1;
-constexpr int	FIVESEVEN_GUN_VOLUME		= NORMAL_GUN_VOLUME;
-constexpr float FIVESEVEN_SPREAD_BASELINE	= 0.4f;
-
-enum fiveseven_e
-{
-	FIVESEVEN_IDLE = 0,
-	FIVESEVEN_SHOOT,
-	FIVESEVEN_SHOOT_LAST,
-	FIVESEVEN_AIM_SHOOT,
-	FIVESEVEN_AIM_SHOOT_LAST,
-	FIVESEVEN_RELOAD,
-	FIVESEVEN_RELOAD_EMPTY,
-	FIVESEVEN_DRAW,
-	FIVESEVEN_DRAW_FIRST,
-	FIVESEVEN_HOLSTER,
-	FIVESEVEN_CHECK_MAGAZINE,
-	FIVESEVEN_BLOCK_UP,
-	FIVESEVEN_BLOCK_DOWN,
-	FIVESEVEN_LHAND_UP,
-	FIVESEVEN_LHAND_DOWN,
-	FIVESEVEN_DASH_ENTER,
-	FIVESEVEN_DASHING,
-	FIVESEVEN_DASH_EXIT,
-	FIVESEVEN_SH_RELOAD,
-	FIVESEVEN_SH_RELOAD_EMPTY,
-	FIVESEVEN_SH_DASH_ENTER,
-	FIVESEVEN_SH_DASHING,
-	FIVESEVEN_SH_DASH_EXIT,
-};
-
 class CFN57 : public CBaseWeapon
 {
+public:
+	enum fiveseven_anim_e
+	{
+		IDLE = 0,
+		SHOOT,
+		SHOOT_LAST,
+		AIM_SHOOT,
+		AIM_SHOOT_LAST,
+		RELOAD,
+		RELOAD_EMPTY,
+		DRAW,
+		DRAW_FIRST,
+		HOLSTER,
+		CHECK_MAGAZINE,
+		BLOCK_UP,
+		BLOCK_DOWN,
+		LHAND_UP,
+		LHAND_DOWN,
+		DASH_ENTER,
+		DASHING,
+		DASH_EXIT,
+		SH_RELOAD,
+		SH_RELOAD_EMPTY,
+		SH_DASH_ENTER,
+		SH_DASHING,
+		SH_DASH_EXIT,
+	};
+
+	static constexpr float	MAX_SPEED = 250.0f;
+	static constexpr float	DAMAGE = 24;
+	static constexpr float	RANGE_MODIFER = 1.149658245;	// 80% damage @800 inches.
+	static constexpr float	RELOAD_TIME = 1.94F;
+	static constexpr float	RELOAD_EMPTY_TIME = 1.86F;
+	static constexpr float	DRAW_FIRST_TIME = 1.56F;
+	static constexpr float	DRAW_TIME = 0.7F;
+	static constexpr float	HOLSTER_TIME = 0.7F;
+	static constexpr float	CHECKMAG_TIME = 2.033F;
+	static constexpr float	DASH_ENTER_TIME = 0.8F;
+	static constexpr float	DASH_EXIT_TIME = 0.37F;
+	static constexpr float	BLOCK_UP_TIME = 0.4666f;
+	static constexpr float	BLOCK_DOWN_TIME = 0.4666f;
+	static constexpr float	LHAND_UP_TIME = 0.2666f;
+	static constexpr float	LHAND_DOWN_TIME = 0.2666f;
+	static constexpr float	FIRE_INTERVAL = 0.132f;
+	static constexpr float	EFFECTIVE_RANGE = 4096.0f;
+	static constexpr int	PENETRATION = 1;
+	static constexpr int	GUN_VOLUME = NORMAL_GUN_VOLUME;
+	static constexpr float	SPREAD_BASELINE = 0.4f;
+
 #ifndef CLIENT_DLL
 public:	// SV exclusive variables.
 	static unsigned short m_usEvent;
@@ -1677,34 +1678,34 @@ public:	// CL exclusive functions.
 #endif
 
 	// Slide stop available anims.
-	static constexpr int BITS_SLIDE_STOP_ANIM = (1 << FIVESEVEN_IDLE) |
-												(1 << FIVESEVEN_DRAW) |
-												(1 << FIVESEVEN_HOLSTER) |
-												(1 << FIVESEVEN_CHECK_MAGAZINE) |
-												(1 << FIVESEVEN_LHAND_DOWN) | (1 << FIVESEVEN_LHAND_UP) |
-												(1 << FIVESEVEN_BLOCK_DOWN) | (1 << FIVESEVEN_BLOCK_UP) |
-												(1 << FIVESEVEN_DASH_ENTER) | (1 << FIVESEVEN_DASHING) | (1 << FIVESEVEN_DASH_EXIT) |
-												(1 << FIVESEVEN_SH_DASH_ENTER) | (1 << FIVESEVEN_SH_DASHING) | (1 << FIVESEVEN_SH_DASH_EXIT);
+	static constexpr int BITS_SLIDE_STOP_ANIM = (1 << IDLE) |
+												(1 << DRAW) |
+												(1 << HOLSTER) |
+												(1 << CHECK_MAGAZINE) |
+												(1 << LHAND_DOWN) | (1 << LHAND_UP) |
+												(1 << BLOCK_DOWN) | (1 << BLOCK_UP) |
+												(1 << DASH_ENTER) | (1 << DASHING) | (1 << DASH_EXIT) |
+												(1 << SH_DASH_ENTER) | (1 << SH_DASHING) | (1 << SH_DASH_EXIT);
 
 public:	// basic logic funcs
 	virtual bool	Deploy			(void);
 	virtual void	PrimaryAttack	(void) { return FiveSevenFire(GetSpread()); }
 	virtual void	SecondaryAttack	(void);
 	virtual bool	Reload			(void);
-	virtual void	WeaponIdle		(void) { return DefaultIdle(FIVESEVEN_DASHING); }
-	virtual bool	HolsterStart	(void) { return DefaultHolster(FIVESEVEN_HOLSTER, FIVESEVEN_HOLSTER_TIME); }
-	virtual	void	DashStart		(void) { return DefaultDashStart(FIVESEVEN_DASH_ENTER, FIVESEVEN_DASH_ENTER_TIME); }
-	virtual void	DashEnd			(void) { return DefaultDashEnd(FIVESEVEN_DASH_ENTER, FIVESEVEN_DASH_ENTER_TIME, FIVESEVEN_DASH_EXIT, FIVESEVEN_DASH_EXIT_TIME); }
+	virtual void	WeaponIdle		(void) { return DefaultIdle(DASHING); }
+	virtual bool	HolsterStart	(void) { return DefaultHolster(HOLSTER, HOLSTER_TIME); }
+	virtual	void	DashStart		(void) { return DefaultDashStart<CFN57>(); }
+	virtual void	DashEnd			(void) { return DefaultDashEnd<CFN57>(); }
 
 public:	// util funcs
-	virtual	float	GetMaxSpeed		(void) { return FIVESEVEN_MAX_SPEED; }
+	virtual	float	GetMaxSpeed		(void) { return MAX_SPEED; }
 	virtual void	ResetModel		(void);	// declare by marco.
-	virtual bool	SetLeftHand		(bool bAppear)	{ return DefaultSetLHand(bAppear, FIVESEVEN_LHAND_UP, FIVESEVEN_LHAND_UP_TIME, FIVESEVEN_LHAND_DOWN, FIVESEVEN_LHAND_DOWN_TIME); }
-	virtual void	PlayBlockAnim	(void)	{ return DefaultBlock(FIVESEVEN_BLOCK_UP, FIVESEVEN_BLOCK_UP_TIME, FIVESEVEN_BLOCK_DOWN, FIVESEVEN_BLOCK_DOWN_TIME); }
+	virtual bool	SetLeftHand		(bool bAppear)	{ return DefaultSetLHand(bAppear, LHAND_UP, LHAND_UP_TIME, LHAND_DOWN, LHAND_DOWN_TIME); }
+	virtual void	PlayBlockAnim	(void)	{ return DefaultBlock(BLOCK_UP, BLOCK_UP_TIME, BLOCK_DOWN, BLOCK_DOWN_TIME); }
 	virtual float	GetSpread		(void);
 
 public:	// new functions
-	void FiveSevenFire(float flSpread, float flCycleTime = FIVESEVEN_FIRE_INTERVAL);
+	void FiveSevenFire(float flSpread, float flCycleTime = FIRE_INTERVAL);
 };
 
 #define UMP45_VIEW_MODEL	"models/weapons/v_ump45.mdl"
@@ -1712,51 +1713,52 @@ public:	// new functions
 #define UMP45_FIRE_SFX		"weapons/ump45/ump45_fire.wav"
 #define UMP45_FIRE_SIL_SFX	"weapons/ump45/ump45_fire.wav"	// FIXME
 
-constexpr float UMP45_MAX_SPEED			= 250.0f;
-constexpr float UMP45_DAMAGE			= 32;
-constexpr float UMP45_RANGE_MODIFER		= 1.149658245;	// 80% damage @800 inches.
-constexpr float UMP45_RELOAD_TIME		= 2.8667F;
-constexpr float UMP45_RELOAD_EMPTY_TIME	= 3.0667F;
-constexpr float UMP45_DRAW_TIME			= 0.6333F;
-constexpr float UMP45_DRAW_FIRST_TIME	= 1.2F;
-constexpr float UMP45_HOLSTER_TIME		= 0.6333F;
-constexpr float UMP45_CHECKMAG_TIME		= 3.6F;
-constexpr float UMP45_BLOCK_UP_TIME		= 0.3667F;
-constexpr float UMP45_BLOCK_DOWN_TIME	= 0.3667F;
-constexpr float UMP45_LHAND_DOWN_TIME	= 0.7F;
-constexpr float UMP45_LHAND_UP_TIME		= 0.7F;
-constexpr float UMP45_DASH_ENTER_TIME	= 0.3667F;
-constexpr float UMP45_DASH_EXIT_TIME	= 0.3667F;
-constexpr float UMP45_RPM				= 600.0f;
-constexpr float	UMP45_EFFECTIVE_RANGE	= 8192.0f;
-constexpr int	UMP45_PENETRATION		= 1;
-constexpr float UMP45_SPREAD_BASELINE	= 0.15f;
-constexpr int	UMP45_GUN_VOLUME		= NORMAL_GUN_VOLUME;
-
-enum ump45_e
-{
-	UMP45_IDLE1,
-	UMP45_SHOOT,
-	UMP45_SHOOT_AIM,
-	UMP45_RELOAD,
-	UMP45_RELOAD_EMPTY,
-	UMP45_DRAW,
-	UMP45_DRAW_FIRST,
-	UMP45_HOLSTER,
-	UMP45_CHECKMAG,
-	UMP45_TO_SEMI,
-	UMP45_TO_AUTO,
-	UMP45_BLOCK_UP,
-	UMP45_BLOCK_DOWN,
-	UMP45_LHAND_DOWN,
-	UMP45_LHAND_UP,
-	UMP45_DASH_ENTER,
-	UMP45_DASHING,
-	UMP45_DASH_EXIT
-};
-
 class CUMP45 : public CBaseWeapon
 {
+public:	// Constants / Database
+	enum ump45_anim_e
+	{
+		IDLE,
+		SHOOT,
+		SHOOT_AIM,
+		RELOAD,
+		RELOAD_EMPTY,
+		DRAW,
+		DRAW_FIRST,
+		HOLSTER,
+		CHECKMAG,
+		TO_SEMI,
+		TO_AUTO,
+		BLOCK_UP,
+		BLOCK_DOWN,
+		LHAND_DOWN,
+		LHAND_UP,
+		DASH_ENTER,
+		DASHING,
+		DASH_EXIT
+	};
+
+	static constexpr float	MAX_SPEED		= 250.0f;
+	static constexpr float	DAMAGE			= 32;
+	static constexpr float	RANGE_MODIFER	= 1.149658245;	// 80% damage @800 inches.
+	static constexpr float	RELOAD_TIME		= 2.8667F;
+	static constexpr float	RELOAD_EMPTY_TIME = 3.0667F;
+	static constexpr float	DRAW_TIME		= 0.6333F;
+	static constexpr float	DRAW_FIRST_TIME	= 1.2F;
+	static constexpr float	HOLSTER_TIME	= 0.6333F;
+	static constexpr float	CHECKMAG_TIME	= 3.6F;
+	static constexpr float	BLOCK_UP_TIME	= 0.3667F;
+	static constexpr float	BLOCK_DOWN_TIME	= 0.3667F;
+	static constexpr float	LHAND_DOWN_TIME	= 0.7F;
+	static constexpr float	LHAND_UP_TIME	= 0.7F;
+	static constexpr float	DASH_ENTER_TIME	= 0.3667F;
+	static constexpr float	DASH_EXIT_TIME	= 0.3667F;
+	static constexpr float	RPM				= 600.0f;
+	static constexpr float	EFFECTIVE_RANGE	= 8192.0f;
+	static constexpr int	PENETRATION		= 1;
+	static constexpr float	SPREAD_BASELINE	= 0.15f;
+	static constexpr int	GUN_VOLUME		= NORMAL_GUN_VOLUME;
+
 #ifndef CLIENT_DLL
 public:	// SV exclusive variables.
 	static unsigned short m_usEvent;
@@ -1775,20 +1777,20 @@ public:	// basic logic funcs
 	virtual void	PrimaryAttack	(void)	{ return UMP45Fire(GetSpread()); }
 	virtual void	SecondaryAttack	(void);
 	virtual	bool	Reload			(void);
-	virtual void	WeaponIdle		(void)	{ return DefaultIdle(UMP45_DASHING); }
-	virtual bool	HolsterStart	(void)	{ return DefaultHolster(UMP45_HOLSTER, UMP45_HOLSTER_TIME); }
-	virtual	void	DashStart		(void)	{ return DefaultDashStart(UMP45_DASH_ENTER, UMP45_DASH_ENTER_TIME); }
-	virtual void	DashEnd			(void)	{ return DefaultDashEnd(UMP45_DASH_ENTER, UMP45_DASH_ENTER_TIME, UMP45_DASH_EXIT, UMP45_DASH_EXIT_TIME); }
+	virtual void	WeaponIdle		(void)	{ return DefaultIdle(DASHING); }
+	virtual bool	HolsterStart	(void)	{ return DefaultHolster(HOLSTER, HOLSTER_TIME); }
+	virtual	void	DashStart		(void)	{ return DefaultDashStart<CUMP45>(); }
+	virtual void	DashEnd			(void)	{ return DefaultDashEnd<CUMP45>(); }
 
 public:	// util funcs
-	virtual	float	GetMaxSpeed		(void)	{ return UMP45_MAX_SPEED; }
+	virtual	float	GetMaxSpeed		(void)	{ return MAX_SPEED; }
 	virtual void	ResetModel		(void);
-	virtual bool	SetLeftHand		(bool bAppear)	{ return DefaultSetLHand(bAppear, UMP45_LHAND_UP, UMP45_LHAND_UP_TIME, UMP45_LHAND_DOWN, UMP45_LHAND_DOWN_TIME); }
-	virtual void	PlayBlockAnim	(void)	{ return DefaultBlock(UMP45_BLOCK_UP, UMP45_BLOCK_UP_TIME, UMP45_BLOCK_DOWN, UMP45_BLOCK_DOWN_TIME); }
+	virtual bool	SetLeftHand		(bool bAppear)	{ return DefaultSetLHand(bAppear, LHAND_UP, LHAND_UP_TIME, LHAND_DOWN, LHAND_DOWN_TIME); }
+	virtual void	PlayBlockAnim	(void)	{ return DefaultBlock(BLOCK_UP, BLOCK_UP_TIME, BLOCK_DOWN, BLOCK_DOWN_TIME); }
 	virtual float	GetSpread		(void);
 
 public:	// new functions
-	void UMP45Fire(float flSpread, float flCycleTime = 60.0f / UMP45_RPM);
+	void UMP45Fire(float flSpread, float flCycleTime = 60.0f / RPM);
 };
 
 #define PSG1_VIEW_MODEL		"models/weapons/v_psg1.mdl"
@@ -1798,44 +1800,47 @@ public:	// new functions
 class CPSG1 : public CBaseWeapon
 {
 public:	// Constants / Database
-	static constexpr int IDLE = 0;
-	static constexpr int SHOOT = 1;
-	static constexpr int RELOAD = 2;
-	static constexpr int RELOAD_EMPTY = 3;
-	static constexpr int DRAW = 4;
-	static constexpr int DRAW_FIRST = 5;
-	static constexpr int HOLSTER = 6;
-	static constexpr int CHECK_MAGAZINE = 7;
-	static constexpr int BLOCK_UP = 8;
-	static constexpr int BLOCK_DOWN = 9;
-	static constexpr int DASH_ENTER = 10;
-	static constexpr int DASHING = 11;
-	static constexpr int DASH_EXIT = 12;
-	static constexpr int LHAND_DOWN = 13;
-	static constexpr int LHAND_UP = 14;
+	enum psg1_anim_e
+	{
+		IDLE,
+		SHOOT,
+		RELOAD,
+		RELOAD_EMPTY,
+		DRAW,
+		DRAW_FIRST,
+		HOLSTER,
+		CHECK_MAGAZINE,
+		BLOCK_UP,
+		BLOCK_DOWN,
+		DASH_ENTER,
+		DASHING,
+		DASH_EXIT,
+		LHAND_DOWN,
+		LHAND_UP,
+	};
 
-	static constexpr float	MAX_SPEED = 210.0f;
-	static constexpr float	MAX_SPEED_ZOOM = 150.0f;
-	static constexpr float	DAMAGE = 90.0f;
-	static constexpr float	RANGE_MODIFER = 1.03443782f;	// 85% damage @2400 inches.
-	static constexpr float	FIRE_INTERVAL = 0.125f;
-	static constexpr float	FIRE_ANIMTIME = 0.4333f;
-	static constexpr float	RELOAD_TIME = 3.0667F;
-	static constexpr float	RELOAD_EMPTY_TIME = 3.8667F;
-	static constexpr float	DEPLOY_TIME = 0.833F;
-	static constexpr float	DRAW_FIRST_TIME = 2.033F;
-	static constexpr float	HOLSTER_TIME = 0.8333F;
-	static constexpr float	CHECK_MAGAZINE_TIME = 3.0667F;
-	static constexpr float	BLOCK_UP_TIME = 0.3667F;
-	static constexpr float	BLOCK_DOWN_TIME = 0.3667F;
-	static constexpr float	LHAND_UP_TIME = 0.4333F;
-	static constexpr float	LHAND_DOWN_TIME = 0.4333F;
-	static constexpr float	DASH_ENTER_TIME = 0.3667F;
-	static constexpr float	DASH_EXIT_TIME = 0.3667F;
-	static constexpr int	PENETRATION = 2;
-	static constexpr float	EFFECTIVE_RANGE = 8192.0f;
-	static constexpr int	GUN_VOLUME = BIG_EXPLOSION_VOLUME;
-	static constexpr float	SPREAD_BASELINE = 0.0025f;
+	static constexpr float	MAX_SPEED			= 210.0f;
+	static constexpr float	MAX_SPEED_ZOOM		= 150.0f;
+	static constexpr float	DAMAGE				= 90.0f;
+	static constexpr float	RANGE_MODIFER		= 1.03443782f;	// 85% damage @2400 inches.
+	static constexpr float	FIRE_INTERVAL		= 0.125f;
+	static constexpr float	FIRE_ANIMTIME		= 0.4333f;
+	static constexpr float	RELOAD_TIME			= 3.0667F;
+	static constexpr float	RELOAD_EMPTY_TIME	= 3.8667F;
+	static constexpr float	DEPLOY_TIME			= 0.833F;
+	static constexpr float	DRAW_FIRST_TIME		= 2.033F;
+	static constexpr float	HOLSTER_TIME		= 0.8333F;
+	static constexpr float	CHECK_MAGAZINE_TIME	= 3.0667F;
+	static constexpr float	BLOCK_UP_TIME		= 0.3667F;
+	static constexpr float	BLOCK_DOWN_TIME		= 0.3667F;
+	static constexpr float	LHAND_UP_TIME		= 0.4333F;
+	static constexpr float	LHAND_DOWN_TIME		= 0.4333F;
+	static constexpr float	DASH_ENTER_TIME		= 0.3667F;
+	static constexpr float	DASH_EXIT_TIME		= 0.3667F;
+	static constexpr int	PENETRATION			= 2;
+	static constexpr float	EFFECTIVE_RANGE		= 8192.0f;
+	static constexpr int	GUN_VOLUME			= BIG_EXPLOSION_VOLUME;
+	static constexpr float	SPREAD_BASELINE		= 0.0025f;
 
 #ifndef CLIENT_DLL
 public:	// SV exclusive variables.
@@ -1857,8 +1862,8 @@ public:	// basic logic funcs
 	virtual void	WeaponIdle		(void) final { return DefaultIdle(DASHING); }
 	virtual bool	Reload			(void) final;
 	virtual bool	HolsterStart	(void) final;
-	virtual	void	DashStart		(void) final { return DefaultDashStart(DASH_ENTER, DASH_ENTER_TIME); }
-	virtual void	DashEnd			(void) final { return DefaultDashEnd(DASH_ENTER, DASH_ENTER_TIME, DASH_EXIT, DASH_EXIT_TIME); }
+	virtual	void	DashStart		(void) final { return DefaultDashStart<CPSG1>(); }
+	virtual void	DashEnd			(void) final { return DefaultDashEnd<CPSG1>(); }
 
 public:	// util funcs
 	virtual float	GetMaxSpeed		(void) final;

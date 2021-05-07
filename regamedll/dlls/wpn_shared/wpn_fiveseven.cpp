@@ -139,9 +139,9 @@ bool CFN57::Deploy()
 
 	return DefaultDeploy(
 		FN57_VIEW_MODEL, FN57_WORLD_MODEL,
-		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? FIVESEVEN_DRAW_FIRST : FIVESEVEN_DRAW,
+		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? CFN57::DRAW_FIRST : CFN57::DRAW,
 		"onehanded",
-		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? FIVESEVEN_DRAW_FIRST_TIME : FIVESEVEN_DRAW_TIME);
+		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? CFN57::DRAW_FIRST_TIME : CFN57::DRAW_TIME);
 }
 
 void CFN57::SecondaryAttack()
@@ -180,7 +180,7 @@ float CFN57::GetSpread(void)
 		}
 	}
 
-	return DefaultSpread(FIVESEVEN_SPREAD_BASELINE * (1.0f - m_flAccuracy), 0.1f, 0.75f, 2.0f, 5.0f);
+	return DefaultSpread(CFN57::SPREAD_BASELINE * (1.0f - m_flAccuracy), 0.1f, 0.75f, 2.0f, 5.0f);
 }
 
 void CFN57::FiveSevenFire(float flSpread, float flCycleTime)
@@ -213,29 +213,29 @@ void CFN57::FiveSevenFire(float flSpread, float flCycleTime)
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 
-	m_pPlayer->m_iWeaponVolume = m_iVariation == Role_Assassin ? QUIET_GUN_VOLUME : FIVESEVEN_GUN_VOLUME;
+	m_pPlayer->m_iWeaponVolume = m_iVariation == Role_Assassin ? QUIET_GUN_VOLUME : CFN57::GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = DIM_GUN_FLASH;
 
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecAiming = gpGlobals->v_forward;
 
-	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, FIVESEVEN_EFFECTIVE_RANGE, FIVESEVEN_PENETRATION, m_iPrimaryAmmoType, FIVESEVEN_DAMAGE, FIVESEVEN_RANGE_MODIFER, m_pPlayer->random_seed);
+	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, CFN57::EFFECTIVE_RANGE, CFN57::PENETRATION, m_iPrimaryAmmoType, CFN57::DAMAGE, CFN57::RANGE_MODIFER, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
 	int iAnim = 0;
 	if (m_iClip > 0)
 	{
 		if (m_bInZoom)
-			iAnim = FIVESEVEN_AIM_SHOOT;
+			iAnim = CFN57::AIM_SHOOT;
 		else
-			iAnim = FIVESEVEN_SHOOT;
+			iAnim = CFN57::SHOOT;
 	}
 	else
 	{
 		if (m_bInZoom)
-			iAnim = FIVESEVEN_AIM_SHOOT_LAST;
+			iAnim = CFN57::AIM_SHOOT_LAST;
 		else
-			iAnim = FIVESEVEN_SHOOT_LAST;
+			iAnim = CFN57::SHOOT_LAST;
 	}
 
 	SendWeaponAnim(iAnim);	// LUNA: I don't know why, but this has to be done on SV side, or client fire anim would be override.
@@ -275,8 +275,8 @@ void CFN57::FiveSevenFire(float flSpread, float flCycleTime)
 bool CFN57::Reload()
 {
 	if (DefaultReload(m_pItemInfo->m_iMaxClip,
-		m_iClip ? FIVESEVEN_RELOAD : FIVESEVEN_RELOAD_EMPTY,
-		m_iClip ? FIVESEVEN_RELOAD_TIME : FIVESEVEN_RELOAD_EMPTY_TIME,
+		m_iClip ? CFN57::RELOAD : CFN57::RELOAD_EMPTY,
+		m_iClip ? CFN57::RELOAD_TIME : CFN57::RELOAD_EMPTY_TIME,
 		m_iClip ? 0.48f : 0.47f))
 	{
 		m_flAccuracy = 0.92f;
@@ -284,13 +284,13 @@ bool CFN57::Reload()
 	}
 
 	// KF2 ???
-	if (m_pPlayer->pev->weaponanim != FIVESEVEN_CHECK_MAGAZINE)
+	if (m_pPlayer->pev->weaponanim != CFN57::CHECK_MAGAZINE)
 	{
 		if (m_bInZoom)
 			SecondaryAttack();
 
-		SendWeaponAnim(FIVESEVEN_CHECK_MAGAZINE);
-		m_flTimeWeaponIdle = FIVESEVEN_CHECKMAG_TIME;
+		SendWeaponAnim(CFN57::CHECK_MAGAZINE);
+		m_flTimeWeaponIdle = CFN57::CHECKMAG_TIME;
 	}
 
 	return false;

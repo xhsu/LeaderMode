@@ -1207,12 +1207,13 @@ void CBaseWeapon::DefaultScopeSight(const Vector& vecOfs, int iFOV, float flEnte
 	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flNextSecondaryAttack;
 }
 
-void CBaseWeapon::DefaultDashStart(int iEnterAnim, float flEnterTime)
+template<class CWpn>
+void CBaseWeapon::DefaultDashStart(void)
 {
 	if (m_bInReload)
 		m_bInReload = false;
 
-	if (m_bInZoom || m_pPlayer->pev->fov < 90)
+	if (m_bInZoom || m_pPlayer->pev->fov < DEFAULT_FOV)
 	{
 #ifndef CLIENT_DLL
 		SecondaryAttack();
@@ -1223,27 +1224,28 @@ void CBaseWeapon::DefaultDashStart(int iEnterAnim, float flEnterTime)
 #endif
 	}
 
-	SendWeaponAnim(iEnterAnim);
-	m_pPlayer->m_flNextAttack = flEnterTime;
-	m_flTimeWeaponIdle = flEnterTime;
+	SendWeaponAnim(CWpn::DASH_ENTER);
+	m_pPlayer->m_flNextAttack = CWpn::DASH_ENTER_TIME;
+	m_flTimeWeaponIdle = CWpn::DASH_ENTER_TIME;
 	m_bitsFlags |= WPNSTATE_DASHING;
 }
 
-void CBaseWeapon::DefaultDashEnd(int iEnterAnim, float flEnterTime, int iExitAnim, float flExitTime)
+template<class CWpn>
+void CBaseWeapon::DefaultDashEnd(void)
 {
-	if (m_pPlayer->m_flNextAttack > 0.0f && m_pPlayer->pev->weaponanim == iEnterAnim)
+	if (m_pPlayer->m_flNextAttack > 0.0f && m_pPlayer->pev->weaponanim == CWpn::DASH_ENTER)
 	{
 		// this is how much you procees to the dashing phase.
 		// for example, assuming the whole length is 1.0s, you start 0.7s and decide to cancel.
 		// although there's only 0.3s to the dashing phase, but turning back still requires another equally 0.7s.
 		// "m_pPlayer->m_flNextAttack" is the 0.3s of full length. you need to get the rest part, i.e. the 70%.
-		float flRunStartUnplayedRatio = 1.0f - m_pPlayer->m_flNextAttack / flEnterTime;
+		float flRunStartUnplayedRatio = 1.0f - m_pPlayer->m_flNextAttack / CWpn::DASH_ENTER_TIME;
 
 		// stick on the last instance in the comment: 70% * 1.0s(full length) = 0.7s, this is the time we need to turning back.
-		float flRunStopTimeLeft = flExitTime * flRunStartUnplayedRatio;
+		float flRunStopTimeLeft = CWpn::DASH_EXIT_TIME * flRunStartUnplayedRatio;
 
 		// play the anim.
-		SendWeaponAnim(iExitAnim);
+		SendWeaponAnim(CWpn::DASH_EXIT);
 
 #ifdef CLIENT_DLL
 		// why we are using the "0.3s" here?
@@ -1259,9 +1261,9 @@ void CBaseWeapon::DefaultDashEnd(int iEnterAnim, float flEnterTime, int iExitAni
 	// if RUN_START is normally played and finished, go normal.
 	else
 	{
-		SendWeaponAnim(iExitAnim);
-		m_pPlayer->m_flNextAttack = flExitTime;
-		m_flTimeWeaponIdle = flExitTime;
+		SendWeaponAnim(CWpn::DASH_EXIT);
+		m_pPlayer->m_flNextAttack = CWpn::DASH_EXIT_TIME;
+		m_flTimeWeaponIdle = CWpn::DASH_EXIT_TIME;
 	}
 
 	// either way, we have to remove this flag.

@@ -102,7 +102,7 @@ bool CUMP45::Deploy()
 {
 	m_flAccuracy = 0.4f;
 
-	return DefaultDeploy(UMP45_VIEW_MODEL, UMP45_WORLD_MODEL, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? UMP45_DRAW_FIRST : UMP45_DRAW, "m249", (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? UMP45_DRAW_FIRST_TIME : UMP45_DRAW_TIME);
+	return DefaultDeploy(UMP45_VIEW_MODEL, UMP45_WORLD_MODEL, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DRAW_FIRST : DRAW, "m249", (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DRAW_FIRST_TIME : DRAW_TIME);
 }
 
 void CUMP45::SecondaryAttack(void)
@@ -132,7 +132,7 @@ float CUMP45::GetSpread(void)
 	if (m_flAccuracy > 1.0f)
 		m_flAccuracy = 1.0f;
 
-	return DefaultSpread(UMP45_SPREAD_BASELINE * m_flAccuracy, 0.1f, 0.75f, 1.0f, 5.0f);	// no additional penalty on dashing.
+	return DefaultSpread(SPREAD_BASELINE * m_flAccuracy, 0.1f, 0.75f, 1.0f, 5.0f);	// no additional penalty on dashing.
 }
 
 void CUMP45::UMP45Fire(float flSpread, float flCycleTime)
@@ -164,10 +164,10 @@ void CUMP45::UMP45Fire(float flSpread, float flCycleTime)
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecAiming = gpGlobals->v_forward;
 
-	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, UMP45_EFFECTIVE_RANGE, UMP45_PENETRATION, m_iPrimaryAmmoType, UMP45_DAMAGE, UMP45_RANGE_MODIFER, m_pPlayer->random_seed);
+	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, EFFECTIVE_RANGE, PENETRATION, m_iPrimaryAmmoType, DAMAGE, RANGE_MODIFER, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
-	SendWeaponAnim(m_bInZoom ? UMP45_SHOOT_AIM : UMP45_SHOOT);
+	SendWeaponAnim(m_bInZoom ? SHOOT_AIM : SHOOT);
 	PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL, m_pPlayer->edict(), m_usEvent, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y,
 		int(m_pPlayer->pev->punchangle.x * 100), int(m_pPlayer->pev->punchangle.y * 100), m_bInZoom, m_iVariation == Role_Assassin);
 
@@ -195,7 +195,7 @@ void CUMP45::UMP45Fire(float flSpread, float flCycleTime)
 	EV_FireUMP45(&args);
 #endif
 
-	m_pPlayer->m_iWeaponVolume = UMP45_GUN_VOLUME;
+	m_pPlayer->m_iWeaponVolume = GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = DIM_GUN_FLASH;
 
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
@@ -222,8 +222,8 @@ void CUMP45::UMP45Fire(float flSpread, float flCycleTime)
 bool CUMP45::Reload()
 {
 	if (DefaultReload(m_pItemInfo->m_iMaxClip,
-		m_iClip ? UMP45_RELOAD : UMP45_RELOAD_EMPTY,
-		m_iClip ? UMP45_RELOAD_TIME : UMP45_RELOAD_EMPTY_TIME,
+		m_iClip ? RELOAD : RELOAD_EMPTY,
+		m_iClip ? RELOAD_TIME : RELOAD_EMPTY_TIME,
 		m_iClip ? 0.7667f : 0.4667f))
 	{
 		m_flAccuracy = 0.4f;
@@ -231,13 +231,13 @@ bool CUMP45::Reload()
 	}
 
 	// KF2 ???
-	if (m_pPlayer->pev->weaponanim != UMP45_CHECKMAG)
+	if (m_pPlayer->pev->weaponanim != CHECKMAG)
 	{
 		if (m_bInZoom)
 			SecondaryAttack();
 
-		SendWeaponAnim(UMP45_CHECKMAG);
-		m_flTimeWeaponIdle = UMP45_CHECKMAG_TIME;
+		SendWeaponAnim(CHECKMAG);
+		m_flTimeWeaponIdle = CHECKMAG_TIME;
 	}
 
 	return false;

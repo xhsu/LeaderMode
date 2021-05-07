@@ -1300,16 +1300,16 @@ DECLARE_EVENT(Fire57)
 			if (args->bparam1)	// m_iClip > 0
 			{
 				if (args->bparam2)	// m_bInZoom
-					iAnim = FIVESEVEN_AIM_SHOOT;
+					iAnim = CFN57::AIM_SHOOT;
 				else
-					iAnim = FIVESEVEN_SHOOT;
+					iAnim = CFN57::SHOOT;
 			}
 			else
 			{
 				if (args->bparam2)	// m_bInZoom
-					iAnim = FIVESEVEN_AIM_SHOOT_LAST;
+					iAnim = CFN57::AIM_SHOOT_LAST;
 				else
-					iAnim = FIVESEVEN_SHOOT_LAST;
+					iAnim = CFN57::SHOOT_LAST;
 			}
 
 			g_pCurWeapon->SendWeaponAnim(iAnim);
@@ -1347,9 +1347,9 @@ DECLARE_EVENT(Fire57)
 	// original goldsrc api: VOL = 1.0, ATTN = 0.8
 	EV_PlayGunFire2(vecSrc + forward * 10.0f,
 		args->bparam1 ? FN57_FIRE_SIL_SFX : FN57_FIRE_SFX,
-		args->bparam1 ? QUIET_GUN_VOLUME : FIVESEVEN_GUN_VOLUME);
+		args->bparam1 ? QUIET_GUN_VOLUME : CFN57::GUN_VOLUME);
 
-	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, FIVESEVEN_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_FIVESEVEN].m_iAmmoType, FIVESEVEN_PENETRATION);
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, CFN57::EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_FIVESEVEN].m_iAmmoType, CFN57::PENETRATION);
 }
 
 DECLARE_EVENT(FireSVD)
@@ -1854,7 +1854,7 @@ DECLARE_EVENT(FireUMP45)
 		EV_MuzzleFlash();
 
 		if (g_pCurWeapon)
-			g_pCurWeapon->SendWeaponAnim(args->bparam1 ? UMP45_SHOOT_AIM : UMP45_SHOOT);
+			g_pCurWeapon->SendWeaponAnim(args->bparam1 ? CUMP45::SHOOT_AIM : CUMP45::SHOOT);
 
 		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 3, 0.25, 10, 10, 10, EV_PISTOL_SMOKE, velocity, false, 35);
 	}
@@ -1881,10 +1881,10 @@ DECLARE_EVENT(FireUMP45)
 	// original API: vol = 1.0, attn = 0.64, pitch = 94~110
 	EV_PlayGunFire(vecSrc + forward * 10.0f,
 		args->bparam2 ? UMP45_FIRE_SIL_SFX : UMP45_FIRE_SFX,
-		args->bparam2 ? QUIET_GUN_VOLUME : UMP45_GUN_VOLUME,
+		args->bparam2 ? QUIET_GUN_VOLUME : CUMP45::GUN_VOLUME,
 		1.0f, RANDOM_LONG(87, 105));
 
-	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, UMP45_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_UMP45].m_iAmmoType, UMP45_PENETRATION);
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, CUMP45::EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_UMP45].m_iAmmoType, CUMP45::PENETRATION);
 }
 
 DECLARE_EVENT(FireUSP)
