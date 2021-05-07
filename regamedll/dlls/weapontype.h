@@ -115,34 +115,34 @@ enum ItemCostType
 enum WeaponState
 {
 	// Manager markers.
-	WPNSTATE_DEAD				= BIT(0),	// mark for remove.
+	WPNSTATE_DEAD				= (1<<0),	// mark for remove.
 
 	// Melee
-	WPNSTATE_MELEE				= BIT(1),	// mark for melee fight
+	WPNSTATE_MELEE				= (1<<1),	// mark for melee fight
 
 	// Grenade
-	WPNSTATE_QUICK_THROWING		= BIT(2),	// mark for using a throwable
-	WPNSTATE_QT_RELEASE			= BIT(3),	// mark for the release of the throwable
-	WPNSTATE_QT_SHOULD_SPAWN	= BIT(4),	// mark for spawning the selected GR.
-	WPNSTATE_QT_EXIT			= BIT(5),	// mark for the end of QT seq.
+	WPNSTATE_QUICK_THROWING		= (1<<2),	// mark for using a throwable
+	WPNSTATE_QT_RELEASE			= (1<<3),	// mark for the release of the throwable
+	WPNSTATE_QT_SHOULD_SPAWN	= (1<<4),	// mark for spawning the selected GR.
+	WPNSTATE_QT_EXIT			= (1<<5),	// mark for the end of QT seq.
 
 	// Standard behaviours: Draw, Reload, Holster and Dash.
-	WPNSTATE_DRAW_FIRST			= BIT(6),	// play draw_first?
-	WPNSTATE_RELOAD_EMPTY		= BIT(7),	// play reload_empty?
-	WPNSTATE_HOLSTERING			= BIT(8),	// disable all other behaviours?
-	WPNSTATE_DASHING			= BIT(9),	// get a speed boost?
-	WPNSTATE_NO_LHAND			= BIT(10),	// left hand is currently doing something...
-	WPNSTATE_AUTO_LAND_UP		= BIT(11),	// left hand will automaticlly backup when the m_flNextAttack is up.
+	WPNSTATE_DRAW_FIRST			= (1<<6),	// play draw_first?
+	WPNSTATE_RELOAD_EMPTY		= (1<<7),	// play reload_empty?
+	WPNSTATE_HOLSTERING			= (1<<8),	// disable all other behaviours?
+	WPNSTATE_DASHING			= (1<<9),	// get a speed boost?
+	WPNSTATE_NO_LHAND			= (1<<10),	// left hand is currently doing something...
+	WPNSTATE_AUTO_LAND_UP		= (1<<11),	// left hand will automaticlly backup when the m_flNextAttack is up.
 
 	// Weapon-specific flags.
-	WPNSTATE_XM8_CHANGING		= BIT(12),
+	WPNSTATE_XM8_CHANGING		= (1<<12),
 
 	// Sets
 	WPNSTATE_SPECIAL_STATE		= WPNSTATE_XM8_CHANGING,
 	WPNSTATE_BUSY				= WPNSTATE_MELEE | WPNSTATE_QUICK_THROWING | WPNSTATE_HOLSTERING | WPNSTATE_DASHING | WPNSTATE_SPECIAL_STATE | WPNSTATE_NO_LHAND,	// unable to do other 'busy' things.
 
 	// Disused
-	WPNSTATE_SHIELD_DRAWN		= BIT(31)	// disused, but reserved.
+	WPNSTATE_SHIELD_DRAWN		= (1<<31)	// disused, but reserved.
 };
 
 enum WeaponClassWeight

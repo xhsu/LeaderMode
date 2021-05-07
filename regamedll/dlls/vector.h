@@ -71,7 +71,7 @@ public:
 	// Methods
 	inline void Clear() { x = 0; y = 0; }
 	inline void CopyToArray(float *rgfl) const { *(int *)&rgfl[0] = *(int *)&x; *(int *)&rgfl[1] = *(int *)&y; }
-	real_t Length() const { return Q_sqrt(X() * X() + Y() * Y()); }	// Get the vector's magnitude
+	real_t Length() const { return sqrt(X() * X() + Y() * Y()); }	// Get the vector's magnitude
 	constexpr real_t LengthSquared() const { return (X() * X() + Y() * Y()); }	// Get the vector's magnitude squared
 	inline constexpr real_t X() const { return static_cast<real_t>(x); }
 	inline constexpr real_t Y() const { return static_cast<real_t>(y); }
@@ -127,8 +127,8 @@ public:
 	Vector2D Rotate(float angle) const
 	{
 		auto a = (angle * M_PI / 180.0);
-		auto c = Q_cos(a);
-		auto s = Q_sin(a);
+		auto c = cos(a);
+		auto s = sin(a);
 
 		return Vector2D(c * x - s * y,
 						s * x + c * y
@@ -156,7 +156,7 @@ inline real_t operator^(const Vector2D& a, const Vector2D& b)
 	if (length_ab == 0.0)
 		return 0.0;
 
-	return (real_t)(Q_acos(DotProduct(a, b) / length_ab) * (180.0 / M_PI));
+	return (real_t)(acos(DotProduct(a, b) / length_ab) * (180.0 / M_PI));
 }
 
 // 2x2 Matrix
@@ -176,8 +176,8 @@ public:
 	Matrix2x2(float flAngle)	// by a anti-clockwise rotation.
 	{
 		auto rad = (flAngle * M_PI / 180.0);
-		auto sine = Q_sin(rad);
-		auto cosine = Q_cos(rad);
+		auto sine = sin(rad);
+		auto cosine = cos(rad);
 
 		a = cosine;	b = -sine;
 		c = sine;	d = cosine;
@@ -282,8 +282,8 @@ public:
 	static decltype(auto) Rotation2D(float flAngle)
 	{
 		auto rad = (flAngle * M_PI / 180.0);
-		auto sine = Q_sin(rad);
-		auto cosine = Q_cos(rad);
+		auto sine = sin(rad);
+		auto cosine = cos(rad);
 
 		return Matrix3x3(
 			cosine,	-sine,	0,
@@ -543,9 +543,9 @@ public:
 		*(int *)&rgfl[2] = *(int *)&z;
 	}
 
-	real_t Length() const { return Q_sqrt(X() * X() + Y() * Y() + Z() * Z()); }	// Get the vector's magnitude
+	real_t Length() const { return sqrt(X() * X() + Y() * Y() + Z() * Z()); }	// Get the vector's magnitude
 	constexpr real_t LengthSquared() const { return (X() * X() + Y() * Y() + Z() * Z()); }	// Get the vector's magnitude squared
-	real_t Length2D() const { return Q_sqrt(X() * X() + Y() * Y()); }	// Get the vector's magnitude, but only consider its X and Y component
+	real_t Length2D() const { return sqrt(X() * X() + Y() * Y()); }	// Get the vector's magnitude, but only consider its X and Y component
 	constexpr real_t Length2DSquared() const { return (X() * X() + Y() * Y()); }
 
 	constexpr operator float*()             { return &x; } // Vectors will now automatically convert to float * when needed
@@ -611,11 +611,11 @@ public:
 	{
 		auto rad_pitch = (pitch * M_PI / 180.0f);
 		auto rad_yaw = (yaw * M_PI / 180.0f);
-		auto tmp = Q_cos(rad_pitch);
+		auto tmp = cos(rad_pitch);
 
-		return Vector(	vec_t(-tmp * -Q_cos(rad_yaw)),	// x
-						vec_t(Q_sin(rad_yaw) * tmp),	// y
-						vec_t(-Q_sin(rad_pitch))		// z
+		return Vector(	vec_t(-tmp * -cos(rad_yaw)),	// x
+						vec_t(sin(rad_yaw) * tmp),	// y
+						vec_t(-sin(rad_pitch))		// z
 		);
 	}
 
@@ -636,14 +636,14 @@ public:
 		}
 		else
 		{
-			a.yaw = vec_t(Q_atan2(-y, x) * 180.0 / M_PI);
+			a.yaw = vec_t(atan2(-y, x) * 180.0 / M_PI);
 			if (a.yaw < 0)
 				a.yaw += 360;
 
 			a.yaw = 360.0f - a.yaw;	// LUNA: why???
 
-			auto tmp = Q_sqrt(x * x + y * y);
-			a.pitch = vec_t(Q_atan2(z, tmp) * 180.0 / M_PI);
+			auto tmp = sqrt(x * x + y * y);
+			a.pitch = vec_t(atan2(z, tmp) * 180.0 / M_PI);
 			if (a.pitch < 0)
 				a.pitch += 360;
 		}
@@ -654,8 +654,8 @@ public:
 	Vector RotateX(float angle) const
 	{
 		auto a = (angle * M_PI / 180.0);
-		auto c = Q_cos(a);
-		auto s = Q_sin(a);
+		auto c = cos(a);
+		auto s = sin(a);
 
 		return Vector(	x,
 						c * y - s * z,
@@ -666,8 +666,8 @@ public:
 	Vector RotateY(float angle) const
 	{
 		auto a = (angle * M_PI / 180.0);
-		auto c = Q_cos(a);
-		auto s = Q_sin(a);
+		auto c = cos(a);
+		auto s = sin(a);
 
 		return Vector(	c * x + s * z,
 						y,
@@ -678,8 +678,8 @@ public:
 	Vector RotateZ(float angle) const
 	{
 		auto a = (angle * M_PI / 180.0);
-		auto c = Q_cos(a);
-		auto s = Q_sin(a);
+		auto c = cos(a);
+		auto s = sin(a);
 
 		return Vector(	c * x - s * y,
 						s * x + c * y,
@@ -729,5 +729,5 @@ inline real_t operator^(const Vector& a, const Vector& b)
 	if (length_ab == 0.0)
 		return 0.0;
 
-	return (real_t)(Q_acos(DotProduct(a, b) / length_ab) * (180.0 / M_PI));
+	return (real_t)(acos(DotProduct(a, b) / length_ab) * (180.0 / M_PI));
 }

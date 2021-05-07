@@ -6869,22 +6869,6 @@ void CBasePlayer::DropPrimary()
 	}
 }
 
-CBaseWeapon *CBasePlayer::GetItemById(WeaponIdType weaponID)
-{
-	for (auto pWeapon : CBaseWeapon::m_lstWeapons)
-	{
-		if (pWeapon->m_pPlayer != this)
-			continue;
-
-		if (pWeapon->m_iId != weaponID)
-			continue;
-
-		return pWeapon;
-	}
-
-	return nullptr;
-}
-
 void CBasePlayer::Disconnect()
 {
 	SetThink(nullptr);

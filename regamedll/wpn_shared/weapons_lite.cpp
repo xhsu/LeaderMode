@@ -7,4 +7,5 @@ Modern Warfare Dev Team
 
 */
 
+#include "weapontype.h"
 #include "weapons_lite.h"
