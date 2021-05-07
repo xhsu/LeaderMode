@@ -170,7 +170,7 @@ bool CXM8::Deploy()
 	m_flAccuracy = 0.25f;
 	m_iShotsFired = 0;
 
-	return DefaultDeploy(XM8_VIEW_MODEL, XM8_WORLD_MODEL, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? XM8_DRAW_FIRST : XM8_DRAW, "carbine", (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? XM8_DRAW_FIRST_TIME : XM8_DRAW_TIME);
+	return DefaultDeploy(VIEW_MODEL, WORLD_MODEL, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DRAW_FIRST : DRAW, "carbine", (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DRAW_FIRST_TIME : DRAW_TIME);
 }
 
 void CXM8::PostFrame(void)
@@ -222,7 +222,7 @@ void CXM8::SecondaryAttack()
 
 void CXM8::PrimaryAttack()
 {
-	float flInterval = 60.0f / XM8_RPM;
+	float flInterval = 60.0f / RPM;
 
 	// slower fire interval for sharpshooter mode.
 	if (m_iVariation == Role_Sharpshooter)
@@ -238,7 +238,7 @@ float CXM8::GetSpread(void)
 	if (m_flAccuracy > 1.0f)
 		m_flAccuracy = 1.0f;
 
-	return DefaultSpread(XM8_SPREAD_BASELINE * m_flAccuracy, 0.1f, 0.75f, 2.0f, 5.0f);
+	return DefaultSpread(SPREAD_BASELINE * m_flAccuracy, 0.1f, 0.75f, 2.0f, 5.0f);
 }
 
 void CXM8::XM8Fire(float flSpread, float flCycleTime)
@@ -270,7 +270,7 @@ void CXM8::XM8Fire(float flSpread, float flCycleTime)
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
-	m_pPlayer->m_iWeaponVolume = XM8_GUN_VOLUME;
+	m_pPlayer->m_iWeaponVolume = GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = BRIGHT_GUN_FLASH;
 
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
@@ -278,20 +278,20 @@ void CXM8::XM8Fire(float flSpread, float flCycleTime)
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecAiming = gpGlobals->v_forward;
 
-	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, XM8_EFFECTIVE_RANGE, XM8_PENETRATION, m_iPrimaryAmmoType, XM8_DAMAGE, XM8_RANGE_MODIFER, m_pPlayer->random_seed);
+	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, EFFECTIVE_RANGE, PENETRATION, m_iPrimaryAmmoType, DAMAGE, RANGE_MODIFER, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
-	int iAnim = XM8_FIRE;
+	int iAnim = FIRE;
 	
 	if (m_bInZoom)
 	{
-		iAnim = XM8_FIRE_AIM;
+		iAnim = FIRE_AIM;
 
 		if (m_iClip <= 0)
-			iAnim = XM8_FIRE_AIM_LAST;
+			iAnim = FIRE_AIM_LAST;
 	}
 	else if (m_iClip <= 0)
-		iAnim = XM8_FIRE_LAST;
+		iAnim = FIRE_LAST;
 
 	SendWeaponAnim(iAnim);
 	PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL, m_pPlayer->edict(), m_usEvent, 0, (float*)&g_vecZero, (float*)&g_vecZero, vecDir.x, vecDir.y,
@@ -345,8 +345,8 @@ void CXM8::XM8Fire(float flSpread, float flCycleTime)
 bool CXM8::Reload()
 {
 	if (DefaultReload(m_pItemInfo->m_iMaxClip,
-		m_iClip ? XM8_RELOAD : XM8_RELOAD_EMPTY,
-		m_iClip ? XM8_RELOAD_TIME : XM8_RELOAD_EMPTY_TIME,
+		m_iClip ? RELOAD : RELOAD_EMPTY,
+		m_iClip ? RELOAD_TIME : RELOAD_EMPTY_TIME,
 		m_iClip ? 0.7f : 0.7f))
 	{
 		m_flAccuracy = 0.25f;
@@ -354,13 +354,13 @@ bool CXM8::Reload()
 	}
 
 	// KF2 ???
-	if (m_pPlayer->pev->weaponanim != XM8_CHECK_MAGAZINE)
+	if (m_pPlayer->pev->weaponanim != CHECK_MAGAZINE)
 	{
 		if (m_bInZoom)
 			SecondaryAttack();
 
-		SendWeaponAnim(XM8_CHECK_MAGAZINE);
-		m_flTimeWeaponIdle = XM8_CHECKMAG_TIME;
+		SendWeaponAnim(CHECK_MAGAZINE);
+		m_flTimeWeaponIdle = CHECKMAG_TIME;
 	}
 
 	return false;
@@ -374,9 +374,9 @@ bool CXM8::AlterAct(void)
 	if (m_bitsFlags & WPNSTATE_BUSY)
 		return false;
 
-	SendWeaponAnim(m_iVariation == Role_Sharpshooter ? XM8_SWITCH_TO_CARBINE : XM8_SWITCH_TO_SHARPSHOOTER);
-	m_pPlayer->m_flNextAttack = m_iVariation == Role_Sharpshooter ? XM8_TO_CARBIN_TIME : XM8_TO_SHARPSHOOTER_TIME;
-	m_flTimeWeaponIdle = m_iVariation == Role_Sharpshooter ? XM8_TO_CARBIN_TIME : XM8_TO_SHARPSHOOTER_TIME;
+	SendWeaponAnim(m_iVariation == Role_Sharpshooter ? SWITCH_TO_CARBINE : SWITCH_TO_SHARPSHOOTER);
+	m_pPlayer->m_flNextAttack = m_iVariation == Role_Sharpshooter ? TO_CARBIN_TIME : TO_SHARPSHOOTER_TIME;
+	m_flTimeWeaponIdle = m_iVariation == Role_Sharpshooter ? TO_CARBIN_TIME : TO_SHARPSHOOTER_TIME;
 	m_bitsFlags |= WPNSTATE_XM8_CHANGING;
 
 	return true;

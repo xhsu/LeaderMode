@@ -124,10 +124,10 @@ bool CM45A1::Deploy()
 		m_bitsFlags &= ~WPNSTATE_DRAW_FIRST;
 
 	return DefaultDeploy(
-		M45A1_VIEW_MODEL, M45A1_WORLD_MODEL,
-		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? M45A1_DRAW_FIRST : M45A1_DRAW,
+		VIEW_MODEL, WORLD_MODEL,
+		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DRAW_FIRST : DRAW,
 		"onehanded",
-		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? M45A1_DRAW_FIRST_TIME : M45A1_DRAW_TIME);
+		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DRAW_FIRST_TIME : DRAW_TIME);
 }
 
 void CM45A1::SecondaryAttack()
@@ -166,7 +166,7 @@ float CM45A1::GetSpread(void)
 		}
 	}
 
-	return DefaultSpread(M45A1_SPREAD_BASELINE * (1.0f - m_flAccuracy), 0.1f, 0.75f, 2.0f, 5.0f);
+	return DefaultSpread(SPREAD_BASELINE * (1.0f - m_flAccuracy), 0.1f, 0.75f, 2.0f, 5.0f);
 }
 
 void CM45A1::M45A1Fire(float flSpread, float flCycleTime)
@@ -196,7 +196,7 @@ void CM45A1::M45A1Fire(float flSpread, float flCycleTime)
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
 
 	m_iClip--;
-	m_pPlayer->m_iWeaponVolume = M45A1_GUN_VOLUME;
+	m_pPlayer->m_iWeaponVolume = GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = DIM_GUN_FLASH;
 
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
@@ -206,7 +206,7 @@ void CM45A1::M45A1Fire(float flSpread, float flCycleTime)
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecAiming = gpGlobals->v_forward;
 
-	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, M45A1_EFFECTIVE_RANGE, M45A1_PENETRATION, m_iPrimaryAmmoType, M45A1_DAMAGE, M45A1_RANGE_MODIFER, m_pPlayer->random_seed);
+	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, EFFECTIVE_RANGE, PENETRATION, m_iPrimaryAmmoType, DAMAGE, RANGE_MODIFER, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
 
@@ -214,16 +214,16 @@ void CM45A1::M45A1Fire(float flSpread, float flCycleTime)
 	if (m_iClip > 0)
 	{
 		if (m_bInZoom)
-			iAnim = UTIL_SharedRandomLong(m_pPlayer->random_seed, M45A1_AIM_SHOOT_A, M45A1_AIM_SHOOT_B);
+			iAnim = UTIL_SharedRandomLong(m_pPlayer->random_seed, AIM_SHOOT_A, AIM_SHOOT_B);
 		else
-			iAnim = M45A1_SHOOT;
+			iAnim = SHOOT;
 	}
 	else
 	{
 		if (m_bInZoom)
-			iAnim = M45A1_AIM_SHOOT_LAST;
+			iAnim = AIM_SHOOT_LAST;
 		else
-			iAnim = M45A1_SHOOT_LAST;
+			iAnim = SHOOT_LAST;
 	}
 
 	SendWeaponAnim(iAnim);	// LUNA: I don't know why, but this has to be done on SV side, or client fire anim would be override.
@@ -261,8 +261,8 @@ void CM45A1::M45A1Fire(float flSpread, float flCycleTime)
 bool CM45A1::Reload()
 {
 	if (DefaultReload(m_pItemInfo->m_iMaxClip,
-		m_iClip ? M45A1_RELOAD : M45A1_RELOAD_EMPTY,
-		m_iClip ? M45A1_RELOAD_TIME : M45A1_RELOAD_EMPYT_TIME,
+		m_iClip ? RELOAD : RELOAD_EMPTY,
+		m_iClip ? RELOAD_TIME : RELOAD_EMPYT_TIME,
 		m_iClip ? 0.566f : 0.5f))
 	{
 		m_flAccuracy = 0.88f;
@@ -270,13 +270,13 @@ bool CM45A1::Reload()
 	}
 
 	// KF2 ???
-	if (m_pPlayer->pev->weaponanim != M45A1_CHECK_MAGAZINE)
+	if (m_pPlayer->pev->weaponanim != CHECK_MAGAZINE)
 	{
 		if (m_bInZoom)
 			SecondaryAttack();
 
-		SendWeaponAnim(M45A1_CHECK_MAGAZINE);
-		m_flTimeWeaponIdle = M45A1_CHECK_MAGAZINE_TIME;
+		SendWeaponAnim(CHECK_MAGAZINE);
+		m_flTimeWeaponIdle = CHECK_MAGAZINE_TIME;
 	}
 
 	return false;

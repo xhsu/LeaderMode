@@ -95,10 +95,10 @@ bool CM1014::Deploy()
 {
 	m_bAllowNextEmptySound = true;
 
-	return DefaultDeploy(M1014_VIEW_MODEL, M1014_WORLD_MODEL,
-		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? M1014_DRAW_FIRST : M1014_DRAW,
+	return DefaultDeploy(VIEW_MODEL, WORLD_MODEL,
+		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DRAW_FIRST : DRAW,
 		"mp5",
-		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? M1014_DRAW_FIRST_TIME : M1014_DRAW_TIME);
+		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DRAW_FIRST_TIME : DRAW_TIME);
 }
 
 void CM1014::PostFrame(void)
@@ -107,10 +107,10 @@ void CM1014::PostFrame(void)
 	{
 		if (m_flNextInsertAnim <= gpGlobals->time && m_iClip < m_pItemInfo->m_iMaxClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] > 0)
 		{
-			SendWeaponAnim(M1014_INSERT);
+			SendWeaponAnim(INSERT);
 			m_pPlayer->SetAnimation(PLAYER_RELOAD);
 
-			m_flNextInsertAnim = gpGlobals->time + M1014_TIME_INSERT;
+			m_flNextInsertAnim = gpGlobals->time + TIME_INSERT;
 		}
 
 		// place this before the ammo add. Or the m_bStartFromEmpty flag will be erased.
@@ -125,13 +125,13 @@ void CM1014::PostFrame(void)
 			if (m_bStartFromEmpty)
 			{
 				// this needs to treat specially.
-				m_flNextInsertionSFX = gpGlobals->time + (M1014_TIME_START_RELOAD_FIRST - M1014_TIME_SIDELOAD_SFX) + (M1014_TIME_INSERT - M1014_TIME_INSERT_SFX);
+				m_flNextInsertionSFX = gpGlobals->time + (TIME_START_RELOAD_FIRST - TIME_SIDELOAD_SFX) + (TIME_INSERT - TIME_INSERT_SFX);
 
 				// do not cancel the m_bStartFromEmpty flag.
 				// the function below still needs it.
 			}
 			else
-				m_flNextInsertionSFX = gpGlobals->time + M1014_TIME_INSERT;
+				m_flNextInsertionSFX = gpGlobals->time + TIME_INSERT;
 		}
 
 		if (m_flNextAddAmmo <= gpGlobals->time && m_iClip < m_pItemInfo->m_iMaxClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] > 0)
@@ -142,19 +142,19 @@ void CM1014::PostFrame(void)
 			if (m_bStartFromEmpty)
 			{
 				// this needs to treat specially.
-				m_flNextAddAmmo = gpGlobals->time + (M1014_TIME_START_RELOAD_FIRST - M1014_TIME_ADD_AMMO_FIRST) + (M1014_TIME_INSERT - M1014_TIME_ADD_AMMO);
+				m_flNextAddAmmo = gpGlobals->time + (TIME_START_RELOAD_FIRST - TIME_ADD_AMMO_FIRST) + (TIME_INSERT - TIME_ADD_AMMO);
 				m_bStartFromEmpty = false;
 			}
 			else
-				m_flNextAddAmmo = gpGlobals->time + M1014_TIME_INSERT;	// yeah, that's right, not M1014_TIME_ADD_AMMO.
+				m_flNextAddAmmo = gpGlobals->time + TIME_INSERT;	// yeah, that's right, not TIME_ADD_AMMO.
 		}
 
 		if (((m_iClip >= m_pItemInfo->m_iMaxClip || m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0) && m_flNextInsertAnim <= gpGlobals->time)
 			|| m_bSetForceStopReload || m_pPlayer->pev->button & (IN_ATTACK | IN_RUN))
 		{
-			SendWeaponAnim(M1014_AFTER_RELOAD);
-			m_pPlayer->m_flNextAttack = M1014_TIME_AFTER_RELOAD;
-			m_flTimeWeaponIdle = M1014_TIME_AFTER_RELOAD;
+			SendWeaponAnim(AFTER_RELOAD);
+			m_pPlayer->m_flNextAttack = TIME_AFTER_RELOAD;
+			m_flTimeWeaponIdle = TIME_AFTER_RELOAD;
 
 			m_bInReload = false;
 		}
@@ -188,7 +188,7 @@ void CM1014::PrimaryAttack()
 		return;
 	}
 
-	m_pPlayer->m_iWeaponVolume = M1014_GUN_VOLUME;
+	m_pPlayer->m_iWeaponVolume = GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = BRIGHT_GUN_FLASH;
 	m_iClip--;
 
@@ -198,23 +198,23 @@ void CM1014::PrimaryAttack()
 
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 
-	int iSeedOfs = m_pPlayer->FireBuckshots(M1014_PROJECTILE_COUNT, m_pPlayer->GetGunPosition(), gpGlobals->v_forward, M1014_CONE_VECTOR, M1014_EFFECTIVE_RANGE, M1014_DAMAGE, M1014_RANGE_MODIFIER, m_pPlayer->random_seed);
+	int iSeedOfs = m_pPlayer->FireBuckshots(PROJECTILE_COUNT, m_pPlayer->GetGunPosition(), gpGlobals->v_forward, CONE_VECTOR, EFFECTIVE_RANGE, DAMAGE, RANGE_MODIFIER, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
 	int iAnim = 0;
 	if (m_iClip > 0)
 	{
 		if (m_bInZoom)
-			iAnim = M1014_AIM_SHOOT;
+			iAnim = AIM_SHOOT;
 		else
-			iAnim = M1014_SHOOT;
+			iAnim = SHOOT;
 	}
 	else
 	{
 		if (m_bInZoom)
-			iAnim = M1014_AIM_SHOOT_LAST;
+			iAnim = AIM_SHOOT_LAST;
 		else
-			iAnim = M1014_SHOOT_LAST;
+			iAnim = SHOOT_LAST;
 	}
 
 	// LUNA: I don't know why, but this has to be done on SV side, or client fire anim would be override.
@@ -246,7 +246,7 @@ void CM1014::PrimaryAttack()
 	EV_FireM1014(&args);
 #endif
 
-	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + M1014_FIRE_INTERVAL;
+	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + FIRE_INTERVAL;
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.55f;
 
 	if (m_pPlayer->pev->flags & FL_ONGROUND)
@@ -281,15 +281,15 @@ bool CM1014::Reload(void)
 	if (m_iClip >= m_pItemInfo->m_iMaxClip || m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_pPlayer->pev->button & IN_ATTACK)	// you just can't hold ATTACK and attempts reload.
 	{
 		// KF2 ???
-		if (m_iClip <= 0 && m_pPlayer->pev->weaponanim != M1014_INSPECTION)	// inspection anim.
+		if (m_iClip <= 0 && m_pPlayer->pev->weaponanim != INSPECTION)	// inspection anim.
 		{
-			SendWeaponAnim(M1014_INSPECTION);
-			m_flTimeWeaponIdle = M1014_INSPECTION_TIME;
+			SendWeaponAnim(INSPECTION);
+			m_flTimeWeaponIdle = INSPECTION_TIME;
 		}
-		else if (m_iClip > 0 && m_pPlayer->pev->weaponanim != M1014_CHECKMAG)
+		else if (m_iClip > 0 && m_pPlayer->pev->weaponanim != CHECKMAG)
 		{
-			SendWeaponAnim(M1014_CHECKMAG);
-			m_flTimeWeaponIdle = M1014_CHECKMAG_TIME;
+			SendWeaponAnim(CHECKMAG);
+			m_flTimeWeaponIdle = CHECKMAG_TIME;
 		}
 
 		return false;
@@ -302,12 +302,12 @@ bool CM1014::Reload(void)
 	m_bInReload = true;
 	m_bStartFromEmpty = !!(m_iClip <= 0);
 	m_pPlayer->m_flNextAttack = 0;
-	m_flTimeWeaponIdle = m_bStartFromEmpty ? M1014_TIME_START_RELOAD_FIRST : M1014_TIME_START_RELOAD;
-	m_flNextInsertAnim = gpGlobals->time + (m_bStartFromEmpty ? M1014_TIME_START_RELOAD_FIRST : M1014_TIME_START_RELOAD);
-	m_flNextAddAmmo = gpGlobals->time + (m_bStartFromEmpty ? M1014_TIME_ADD_AMMO_FIRST : (M1014_TIME_ADD_AMMO + M1014_TIME_START_RELOAD));
-	m_flNextInsertionSFX = gpGlobals->time + (m_bStartFromEmpty ? M1014_TIME_SIDELOAD_SFX : (M1014_TIME_INSERT_SFX + M1014_TIME_START_RELOAD));
+	m_flTimeWeaponIdle = m_bStartFromEmpty ? TIME_START_RELOAD_FIRST : TIME_START_RELOAD;
+	m_flNextInsertAnim = gpGlobals->time + (m_bStartFromEmpty ? TIME_START_RELOAD_FIRST : TIME_START_RELOAD);
+	m_flNextAddAmmo = gpGlobals->time + (m_bStartFromEmpty ? TIME_ADD_AMMO_FIRST : (TIME_ADD_AMMO + TIME_START_RELOAD));
+	m_flNextInsertionSFX = gpGlobals->time + (m_bStartFromEmpty ? TIME_SIDELOAD_SFX : (TIME_INSERT_SFX + TIME_START_RELOAD));
 
-	SendWeaponAnim(m_bStartFromEmpty ? M1014_START_RELOAD_FIRST : M1014_START_RELOAD);
+	SendWeaponAnim(m_bStartFromEmpty ? START_RELOAD_FIRST : START_RELOAD);
 	return true;
 }
 

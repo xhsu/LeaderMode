@@ -104,7 +104,7 @@ bool CM4A1::Deploy()
 	m_flAccuracy = 0.25f;
 	m_iShotsFired = 0;
 
-	return DefaultDeploy(M4A1_VIEW_MODEL, M4A1_WORLD_MODEL, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? M4A1_DRAW_FIRST : M4A1_DRAW, "rifle", (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? M4A1_DRAW_FIRST_TIME : M4A1_DRAW_TIME);
+	return DefaultDeploy(VIEW_MODEL, WORLD_MODEL, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DRAW_FIRST : DRAW, "rifle", (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DRAW_FIRST_TIME : DRAW_TIME);
 }
 
 void CM4A1::SecondaryAttack()
@@ -130,7 +130,7 @@ float CM4A1::GetSpread(void)
 	if (m_flAccuracy > 1.0f)
 		m_flAccuracy = 1.0f;
 
-	return DefaultSpread(M4A1_SPREAD_BASELINE * m_flAccuracy, 0.1f, 0.75f, 2.0f, 5.0f);
+	return DefaultSpread(SPREAD_BASELINE * m_flAccuracy, 0.1f, 0.75f, 2.0f, 5.0f);
 }
 
 void CM4A1::M4A1Fire(float flSpread, float flCycleTime)
@@ -157,17 +157,17 @@ void CM4A1::M4A1Fire(float flSpread, float flCycleTime)
 
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 
-	m_pPlayer->m_iWeaponVolume = M4A1_GUN_VOLUME;
+	m_pPlayer->m_iWeaponVolume = GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = BRIGHT_GUN_FLASH;
 
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecAiming = gpGlobals->v_forward;
 
-	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, M4A1_EFFECTIVE_RANGE, M4A1_PENETRATION, m_iPrimaryAmmoType, M4A1_DAMAGE, M4A1_RANGE_MODIFER, m_pPlayer->random_seed);
+	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, EFFECTIVE_RANGE, PENETRATION, m_iPrimaryAmmoType, DAMAGE, RANGE_MODIFER, m_pPlayer->random_seed);
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 
 #ifndef CLIENT_DLL
-	SendWeaponAnim(UTIL_SharedRandomLong(m_pPlayer->random_seed, M4A1_SHOOT_BACKWARD, M4A1_SHOOT_RIGHTWARD));
+	SendWeaponAnim(UTIL_SharedRandomLong(m_pPlayer->random_seed, SHOOT_BACKWARD, SHOOT_RIGHTWARD));
 	PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL, m_pPlayer->edict(), m_usEvent, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, int(m_pPlayer->pev->punchangle.x * 100), int(m_pPlayer->pev->punchangle.y * 100), FALSE, FALSE);
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
@@ -218,8 +218,8 @@ void CM4A1::M4A1Fire(float flSpread, float flCycleTime)
 bool CM4A1::Reload()
 {
 	if (DefaultReload(m_pItemInfo->m_iMaxClip,
-		m_iClip ? M4A1_RELOAD : M4A1_RELOAD_EMPTY,
-		m_iClip ? M4A1_RELOAD_TIME : M4A1_RELOAD_EMPTY_TIME,
+		m_iClip ? RELOAD : RELOAD_EMPTY,
+		m_iClip ? RELOAD_TIME : RELOAD_EMPTY_TIME,
 		m_iClip ? 0.7f : 0.6f))
 	{
 		m_flAccuracy = 0.25f;
@@ -227,13 +227,13 @@ bool CM4A1::Reload()
 	}
 
 	// KF2 ???
-	if (m_pPlayer->pev->weaponanim != M4A1_CHECK_MAGAZINE)
+	if (m_pPlayer->pev->weaponanim != CHECK_MAGAZINE)
 	{
 		if (m_bInZoom)
 			SecondaryAttack();
 
-		SendWeaponAnim(M4A1_CHECK_MAGAZINE);
-		m_flTimeWeaponIdle = M4A1_CHECK_MAGAZINE_TIME;
+		SendWeaponAnim(CHECK_MAGAZINE);
+		m_flTimeWeaponIdle = CHECK_MAGAZINE_TIME;
 	}
 
 	return false;

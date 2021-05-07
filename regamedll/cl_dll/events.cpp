@@ -1061,16 +1061,16 @@ DECLARE_EVENT(FireXM8)
 	{
 		EV_MuzzleFlash();
 
-		int iAnim = XM8_FIRE;
+		int iAnim = CXM8::FIRE;
 		if (args->bparam2)	// m_bInZoom
 		{
-			iAnim = XM8_FIRE_AIM;
+			iAnim = CXM8::FIRE_AIM;
 
 			if (args->bparam1)	// !!(m_iClip <= 0)
-				iAnim = XM8_FIRE_AIM_LAST;
+				iAnim = CXM8::FIRE_AIM_LAST;
 		}
 		else if (args->bparam1)	// !!(m_iClip <= 0)
-			iAnim = XM8_FIRE_LAST;
+			iAnim = CXM8::FIRE_LAST;
 
 		if (g_pCurWeapon)
 			g_pCurWeapon->SendWeaponAnim(iAnim);
@@ -1099,9 +1099,9 @@ DECLARE_EVENT(FireXM8)
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
 	// original goldsrc api: VOL = 1.0, ATTN = 0.48
-	EV_PlayGunFire2(vecSrc + forward * 10.0f, XM8_FIRE_SFX, XM8_GUN_VOLUME);
+	EV_PlayGunFire2(vecSrc + forward * 10.0f, CXM8::FIRE_SFX, CXM8::GUN_VOLUME);
 
-	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, XM8_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_XM8].m_iAmmoType, XM8_PENETRATION);
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, CXM8::EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_XM8].m_iAmmoType, CXM8::PENETRATION);
 }
 
 DECLARE_EVENT(FireAWP)
@@ -1124,9 +1124,9 @@ DECLARE_EVENT(FireAWP)
 		if (g_pCurWeapon)
 		{
 			if (args->bparam1)	// m_iClip > 0
-				g_pCurWeapon->SendWeaponAnim(AWP_SHOOT_REC);
+				g_pCurWeapon->SendWeaponAnim(CAWP::SHOOT_REC);
 			else
-				g_pCurWeapon->SendWeaponAnim(AWP_SHOOT_LAST);
+				g_pCurWeapon->SendWeaponAnim(CAWP::SHOOT_LAST);
 		}
 
 		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 3, 0.5, 20, 20, 20, EV_PISTOL_SMOKE, velocity, false, 35);
@@ -1139,9 +1139,9 @@ DECLARE_EVENT(FireAWP)
 
 	// in awp, bparam2 is SILENCER.
 	// original goldsrc api: VOL = 1.0, ATTN = 0.28
-	EV_PlayGunFire2(vecSrc + forward * 10.0f, AWP_FIRE_SFX, args->bparam2 ? NORMAL_GUN_VOLUME : AWP_GUN_VOLUME);
+	EV_PlayGunFire2(vecSrc + forward * 10.0f, CAWP::FIRE_SFX, args->bparam2 ? NORMAL_GUN_VOLUME : CAWP::GUN_VOLUME);
 
-	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, AWP_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_AWP].m_iAmmoType, AWP_PENETRATION);
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, CAWP::EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_AWP].m_iAmmoType, CAWP::PENETRATION);
 }
 
 DECLARE_EVENT(FireDEagle)
@@ -1165,7 +1165,7 @@ DECLARE_EVENT(FireDEagle)
 		EV_MuzzleFlash();
 
 		if (g_pCurWeapon)
-				g_pCurWeapon->SendWeaponAnim(empty ? DEAGLE_SHOOT_EMPTY : DEAGLE_SHOOT);
+			g_pCurWeapon->SendWeaponAnim(empty ? CDEagle::SHOOT_EMPTY : CDEagle::SHOOT);
 
 		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 0, 0.25, 10, 10, 10, EV_PISTOL_SMOKE, velocity, false, 35);
 		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 25, 0.3, 15, 15, 15, EV_WALL_PUFF, velocity, false, 35);
@@ -1193,9 +1193,9 @@ DECLARE_EVENT(FireDEagle)
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
 	// original goldsrc api: VOL = 1.0, ATTN = 0.6
-	EV_PlayGunFire2(vecSrc + forward * 10.0f, DEagle_FIRE_SFX, DEAGLE_GUN_VOLUME);
+	EV_PlayGunFire2(vecSrc + forward * 10.0f, CDEagle::FIRE_SFX, CDEagle::GUN_VOLUME);
 
-	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, DEAGLE_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_DEAGLE].m_iAmmoType, DEAGLE_PENETRATION);
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, CDEagle::EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_DEAGLE].m_iAmmoType, CDEagle::PENETRATION);
 }
 
 DECLARE_EVENT(FireM45A1)
@@ -1224,16 +1224,16 @@ DECLARE_EVENT(FireM45A1)
 			if (args->bparam1)	// m_iClip >= 0
 			{
 				if (args->bparam2)	// m_bInZoom
-					iAnim = UTIL_SharedRandomLong(gPseudoPlayer.random_seed, M45A1_AIM_SHOOT_A, M45A1_AIM_SHOOT_B);
+					iAnim = UTIL_SharedRandomLong(gPseudoPlayer.random_seed, CM45A1::AIM_SHOOT_A, CM45A1::AIM_SHOOT_B);
 				else
-					iAnim = M45A1_SHOOT;
+					iAnim = CM45A1::SHOOT;
 			}
 			else
 			{
 				if (args->bparam2)	// m_bInZoom
-					iAnim = M45A1_AIM_SHOOT_LAST;
+					iAnim = CM45A1::AIM_SHOOT_LAST;
 				else
-					iAnim = M45A1_SHOOT_LAST;
+					iAnim = CM45A1::SHOOT_LAST;
 			}
 
 			g_pCurWeapon->SendWeaponAnim(iAnim);
@@ -1269,9 +1269,9 @@ DECLARE_EVENT(FireM45A1)
 		args->bparam1 = g_iRoleType == Role_Assassin;	// needs convertion for local EV.
 
 	// original goldsrc api: VOL = 1.0, ATTN = 0.6
-	EV_PlayGunFire2(vecSrc + forward * 10.0f, args->bparam1 ? M45A1_FIRE_SFX_SIL : M45A1_FIRE_SFX, args->bparam1 ? QUIET_GUN_VOLUME : M45A1_GUN_VOLUME);
+	EV_PlayGunFire2(vecSrc + forward * 10.0f, args->bparam1 ? CM45A1::FIRE_SFX_SIL : CM45A1::FIRE_SFX, args->bparam1 ? QUIET_GUN_VOLUME : CM45A1::GUN_VOLUME);
 
-	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, M45A1_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_DEAGLE].m_iAmmoType, M45A1_PENETRATION);
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, CM45A1::EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_DEAGLE].m_iAmmoType, CM45A1::PENETRATION);
 }
 
 DECLARE_EVENT(Fire57)
@@ -1492,9 +1492,9 @@ DECLARE_EVENT(FireMK46)
 	{
 		EV_MuzzleFlash();
 
-		int seq = MK46_SHOOT_UNSCOPE;
+		int seq = CMK46::SHOOT_UNSCOPE;
 		if (bInScope)
-			seq = UTIL_SharedRandomLong(gPseudoPlayer.random_seed, MK46_SHOOT1, MK46_SHOOT3);
+			seq = UTIL_SharedRandomLong(gPseudoPlayer.random_seed, CMK46::SHOOT1, CMK46::SHOOT3);
 
 		if (g_pCurWeapon)
 			g_pCurWeapon->SendWeaponAnim(seq);
@@ -1523,9 +1523,9 @@ DECLARE_EVENT(FireMK46)
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
 	// original goldsrc api: VOL = 1.0, ATTN = 0.52
-	EV_PlayGunFire2(vecSrc + forward * 10.0f, MK46_FIRE_SFX, MK46_GUN_VOLUME);
+	EV_PlayGunFire2(vecSrc + forward * 10.0f, CMK46::FIRE_SFX, CMK46::GUN_VOLUME);
 
-	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, MK46_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_MK46].m_iAmmoType, MK46_PENETRATION);
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, CMK46::EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_MK46].m_iAmmoType, CMK46::PENETRATION);
 }
 
 DECLARE_EVENT(FireKSG12)
@@ -1587,7 +1587,7 @@ DECLARE_EVENT(FireM4A1)
 		EV_MuzzleFlash();
 
 		if (g_pCurWeapon)
-			g_pCurWeapon->SendWeaponAnim(UTIL_SharedRandomLong(gPseudoPlayer.random_seed, M4A1_SHOOT_BACKWARD, M4A1_SHOOT_RIGHTWARD));
+			g_pCurWeapon->SendWeaponAnim(UTIL_SharedRandomLong(gPseudoPlayer.random_seed, CM4A1::SHOOT_BACKWARD, CM4A1::SHOOT_RIGHTWARD));
 
 		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[1], forward, 3, 0.2, 16, 16, 16, EV_RIFLE_SMOKE, velocity, false, 35);
 	}
@@ -1612,9 +1612,9 @@ DECLARE_EVENT(FireM4A1)
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
 	// original goldsrc api: VOL = 1.0, ATTN = 0.52
-	EV_PlayGunFire2(vecSrc + forward * 10.0f, M4A1_FIRE_SFX, M4A1_GUN_VOLUME);
+	EV_PlayGunFire2(vecSrc + forward * 10.0f, CM4A1::FIRE_SFX, CM4A1::GUN_VOLUME);
 
-	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, M4A1_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_M4A1].m_iAmmoType, M4A1_PENETRATION);
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, CM4A1::EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_M4A1].m_iAmmoType, CM4A1::PENETRATION);
 }
 
 DECLARE_EVENT(FireMAC10)
@@ -1748,9 +1748,9 @@ DECLARE_EVENT(FireSCARH)
 	{
 		EV_MuzzleFlash();
 
-		int seq = SCARH_SHOOT_LAST;
+		int seq = CSCARH::SHOOT_LAST;
 		if (!bLastBullet)
-			seq = UTIL_SharedRandomLong(gPseudoPlayer.random_seed, SCARH_SHOOT1, SCARH_SHOOT3);
+			seq = UTIL_SharedRandomLong(gPseudoPlayer.random_seed, CSCARH::SHOOT1, CSCARH::SHOOT3);
 
 		if (g_pCurWeapon)
 			g_pCurWeapon->SendWeaponAnim(seq);
@@ -1778,10 +1778,10 @@ DECLARE_EVENT(FireSCARH)
 	Vector vecSrc = EV_GetGunPosition(args, origin);
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
-	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, SCARH_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_SCARH].m_iAmmoType, SCARH_PENETRATION);
+	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, CSCARH::EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_SCARH].m_iAmmoType, CSCARH::PENETRATION);
 
 	// original goldsrc api: VOL = 1.0, ATTN = 0.4
-	EV_PlayGunFire2(vecSrc + forward * 10.0f, SCARH_FIRE_SFX, SCARH_GUN_VOLUME);
+	EV_PlayGunFire2(vecSrc + forward * 10.0f, CSCARH::FIRE_SFX, CSCARH::GUN_VOLUME);
 }
 
 DECLARE_EVENT(FireMP7A1)
@@ -1981,16 +1981,16 @@ DECLARE_EVENT(FireM1014)
 			if (args->bparam1)	// m_iClip >= 0
 			{
 				if (args->bparam2)	// m_bInZoom
-					iAnim = M1014_AIM_SHOOT;
+					iAnim = CM1014::AIM_SHOOT;
 				else
-					iAnim = M1014_SHOOT;
+					iAnim = CM1014::SHOOT;
 			}
 			else
 			{
 				if (args->bparam2)	// m_bInZoom
-					iAnim = M1014_AIM_SHOOT_LAST;
+					iAnim = CM1014::AIM_SHOOT_LAST;
 				else
-					iAnim = M1014_SHOOT_LAST;
+					iAnim = CM1014::SHOOT_LAST;
 			}
 
 			g_pCurWeapon->SendWeaponAnim(iAnim);
@@ -2019,10 +2019,10 @@ DECLARE_EVENT(FireM1014)
 
 	int shared_rand = args->iparam2;
 	Vector vecSrc = EV_GetGunPosition(args, origin);
-	EV_HLDM_FireBullets(idx, forward, right, up, M1014_PROJECTILE_COUNT, vecSrc, forward, M1014_CONE_VECTOR, M1014_EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_M1014].m_iAmmoType, 1, shared_rand);
+	EV_HLDM_FireBullets(idx, forward, right, up, CM1014::PROJECTILE_COUNT, vecSrc, forward, CM1014::CONE_VECTOR, CM1014::EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_M1014].m_iAmmoType, 1, shared_rand);
 
 	// original goldsrc api: VOL = 1.0, ATTN = 0.52
-	EV_PlayGunFire2(vecSrc + forward * 10.0f, M1014_FIRE_SFX, M1014_GUN_VOLUME);
+	EV_PlayGunFire2(vecSrc + forward * 10.0f, CM1014::FIRE_SFX, CM1014::GUN_VOLUME);
 }
 
 DECLARE_EVENT(CreateExplo)

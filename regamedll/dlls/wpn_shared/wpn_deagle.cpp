@@ -122,10 +122,10 @@ bool CDEagle::Deploy()
 		m_bitsFlags &= ~WPNSTATE_DRAW_FIRST;
 
 	return DefaultDeploy(
-		DEagle_VIEW_MODEL, DEagle_WORLD_MODEL,
-		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DEAGLE_DRAW_FIRST : DEAGLE_DRAW,
+		VIEW_MODEL, WORLD_MODEL,
+		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DRAW_FIRST : DRAW,
 		"onehanded",
-		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DEAGLE_DRAW_FIRST_TIME : DEAGLE_DRAW_TIME);
+		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DRAW_FIRST_TIME : DRAW_TIME);
 }
 
 float CDEagle::GetSpread(void)
@@ -144,7 +144,7 @@ float CDEagle::GetSpread(void)
 		}
 	}
 
-	return DefaultSpread(DEAGLE_SPREAD_BASELINE * (1.0f - m_flAccuracy), 0.1f, 0.75f, 2.0f, 5.0f);
+	return DefaultSpread(SPREAD_BASELINE * (1.0f - m_flAccuracy), 0.1f, 0.75f, 2.0f, 5.0f);
 }
 
 void CDEagle::DEagleFire(float flSpread, float flCycleTime)
@@ -177,16 +177,16 @@ void CDEagle::DEagleFire(float flSpread, float flCycleTime)
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 
-	m_pPlayer->m_iWeaponVolume = DEAGLE_GUN_VOLUME;
+	m_pPlayer->m_iWeaponVolume = GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = NORMAL_GUN_FLASH;
 
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecAiming = gpGlobals->v_forward;
 
-	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, DEAGLE_EFFECTIVE_RANGE, DEAGLE_PENETRATION, m_iPrimaryAmmoType, DEAGLE_DAMAGE, DEAGLE_RANGE_MODIFER, m_pPlayer->random_seed);
+	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, EFFECTIVE_RANGE, PENETRATION, m_iPrimaryAmmoType, DAMAGE, RANGE_MODIFER, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
-	SendWeaponAnim(m_iClip == 0 ? DEAGLE_SHOOT_EMPTY : DEAGLE_SHOOT);	// LUNA: I don't know why, but this has to be done on SV side, or client fire anim would be override.
+	SendWeaponAnim(m_iClip == 0 ? SHOOT_EMPTY : SHOOT);	// LUNA: I don't know why, but this has to be done on SV side, or client fire anim would be override.
 	PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL, m_pPlayer->edict(), m_usEvent, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y,
 		int(m_pPlayer->pev->punchangle.x * 100), int(m_pPlayer->pev->punchangle.y * 100), m_iClip == 0, FALSE);
 
@@ -225,8 +225,8 @@ void CDEagle::DEagleFire(float flSpread, float flCycleTime)
 bool CDEagle::Reload()
 {
 	if (DefaultReload(m_pItemInfo->m_iMaxClip,
-		m_iClip ? DEAGLE_RELOAD : DEAGLE_RELOAD_EMPTY,
-		m_iClip ? DEAGLE_RELOAD_TIME : DEAGLE_RELOAD_EMPTY_TIME,
+		m_iClip ? RELOAD : RELOAD_EMPTY,
+		m_iClip ? RELOAD_TIME : RELOAD_EMPTY_TIME,
 		m_iClip ? 0.628f : 0.571f))
 	{
 		m_flAccuracy = 0.9f;
@@ -234,13 +234,13 @@ bool CDEagle::Reload()
 	}
 
 	// KF2 ???
-	if (m_pPlayer->pev->weaponanim != DEAGLE_CHECK_MAGAZINE)
+	if (m_pPlayer->pev->weaponanim != CHECK_MAGAZINE)
 	{
 		if (m_bInZoom)
 			SecondaryAttack();
 
-		SendWeaponAnim(DEAGLE_CHECK_MAGAZINE);
-		m_flTimeWeaponIdle = DEAGLE_CHECKMAG_TIME;
+		SendWeaponAnim(CHECK_MAGAZINE);
+		m_flTimeWeaponIdle = CHECKMAG_TIME;
 	}
 
 	return false;

@@ -146,7 +146,7 @@ bool CMK46::Deploy()
 	m_flAccuracy = 0.35f;
 	m_iShotsFired = 0;
 
-	return DefaultDeploy(MK46_VIEW_MODEL, MK46_WORLD_MODEL, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? MK46_DRAW_FIRST : MK46_DRAW, "m249", (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? MK46_DRAW_FIRST_TIME : MK46_DEPLOY_TIME);
+	return DefaultDeploy(VIEW_MODEL, WORLD_MODEL, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DRAW_FIRST : DRAW, "m249", (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DRAW_FIRST_TIME : DEPLOY_TIME);
 }
 
 void CMK46::SecondaryAttack(void)
@@ -185,7 +185,7 @@ float CMK46::GetSpread(void)
 	if (m_flAccuracy > 0.9f)
 		m_flAccuracy = 0.9f;
 
-	return DefaultSpread(MK46_SPREAD_BASELINE * m_flAccuracy, 0.1f, 0.75f, 2.0f, 5.0f);
+	return DefaultSpread(SPREAD_BASELINE * m_flAccuracy, 0.1f, 0.75f, 2.0f, 5.0f);
 }
 
 void CMK46::MK46Fire(float flSpread, float flCycleTime)
@@ -213,18 +213,18 @@ void CMK46::MK46Fire(float flSpread, float flCycleTime)
 
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 
-	m_pPlayer->m_iWeaponVolume = MK46_GUN_VOLUME;
+	m_pPlayer->m_iWeaponVolume = GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = BRIGHT_GUN_FLASH;
 
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecAiming = gpGlobals->v_forward;
 
-	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, MK46_EFFECTIVE_RANGE, MK46_PENETRATION, m_iPrimaryAmmoType, MK46_DAMAGE, MK46_RANGE_MODIFER, m_pPlayer->random_seed);
+	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, EFFECTIVE_RANGE, PENETRATION, m_iPrimaryAmmoType, DAMAGE, RANGE_MODIFER, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
-	int seq = UTIL_SharedRandomFloat(m_pPlayer->random_seed, MK46_SHOOT1, MK46_SHOOT3);
+	int seq = UTIL_SharedRandomFloat(m_pPlayer->random_seed, SHOOT1, SHOOT3);
 	if (!m_bInZoom)
-		seq = MK46_SHOOT_UNSCOPE;
+		seq = SHOOT_UNSCOPE;
 
 	SendWeaponAnim(seq);
 	PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL, m_pPlayer->edict(), m_usEvent, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y,
@@ -283,8 +283,8 @@ bool CMK46::Reload()
 	}
 
 	if (DefaultReload(m_pItemInfo->m_iMaxClip,
-		m_iClip ? MK46_RELOAD : MK46_RELOAD_EMPTY,
-		m_iClip ? MK46_RELOAD_TIME : MK46_RELOAD_EMPTY_TIME,
+		m_iClip ? RELOAD : RELOAD_EMPTY,
+		m_iClip ? RELOAD_TIME : RELOAD_EMPTY_TIME,
 		1.16f))
 	{
 		m_flAccuracy = 0.35f;
@@ -292,13 +292,13 @@ bool CMK46::Reload()
 	}
 
 	// KF2 ???
-	if (m_pPlayer->pev->weaponanim != MK46_INSPECTION)
+	if (m_pPlayer->pev->weaponanim != INSPECTION)
 	{
 		if (m_bInZoom)
 			SecondaryAttack();
 
-		SendWeaponAnim(MK46_INSPECTION);
-		m_flTimeWeaponIdle = MK46_INSPECTION_TIME;
+		SendWeaponAnim(INSPECTION);
+		m_flTimeWeaponIdle = INSPECTION_TIME;
 	}
 
 	return false;

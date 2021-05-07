@@ -103,7 +103,7 @@ bool CSCARH::Deploy()
 {
 	m_flAccuracy = 0.25f;
 	m_iShotsFired = 0;
-	return DefaultDeploy(SCARH_VIEW_MODEL, SCARH_WORLD_MODEL, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? SCARH_DRAW_FIRST : SCARH_DEPLOY, "mp5", (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? SCARH_DRAW_FIRST_TIME : SCARH_DEPLOY_TIME);
+	return DefaultDeploy(VIEW_MODEL, WORLD_MODEL, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DRAW_FIRST : DEPLOY, "mp5", (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DRAW_FIRST_TIME : DEPLOY_TIME);
 }
 
 void CSCARH::SecondaryAttack()
@@ -129,7 +129,7 @@ float CSCARH::GetSpread(void)
 	if (m_flAccuracy > 1.0f)
 		m_flAccuracy = 1.0f;
 
-	return DefaultSpread(SCARH_SPREAD_BASELINE * m_flAccuracy, 0.1f, 0.75f, 2.0f, 5.0f);
+	return DefaultSpread(SPREAD_BASELINE * m_flAccuracy, 0.1f, 0.75f, 2.0f, 5.0f);
 }
 
 void CSCARH::SCARHFire(float flSpread, float flCycleTime)
@@ -155,7 +155,7 @@ void CSCARH::SCARHFire(float flSpread, float flCycleTime)
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
-	m_pPlayer->m_iWeaponVolume = SCARH_GUN_VOLUME;
+	m_pPlayer->m_iWeaponVolume = GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = BRIGHT_GUN_FLASH;
 
 	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
@@ -163,12 +163,12 @@ void CSCARH::SCARHFire(float flSpread, float flCycleTime)
 	auto vecSrc = m_pPlayer->GetGunPosition();
 	auto vecAiming = gpGlobals->v_forward;
 
-	auto vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, SCARH_EFFECTIVE_RANGE, SCARH_PENETRATION, m_iPrimaryAmmoType, SCARH_DAMAGE, SCARH_RANGE_MODIFER, m_pPlayer->random_seed);
+	auto vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, EFFECTIVE_RANGE, PENETRATION, m_iPrimaryAmmoType, DAMAGE, RANGE_MODIFER, m_pPlayer->random_seed);
 
 #ifndef CLIENT_DLL
-	int seq = UTIL_SharedRandomLong(m_pPlayer->random_seed, SCARH_SHOOT1, SCARH_SHOOT3);
+	int seq = UTIL_SharedRandomLong(m_pPlayer->random_seed, SHOOT1, SHOOT3);
 	if (m_iClip == 0)
-		seq = SCARH_SHOOT_LAST;
+		seq = SHOOT_LAST;
 
 	SendWeaponAnim(seq);
 	PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL, m_pPlayer->edict(), m_usEvent, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y,
@@ -222,8 +222,8 @@ void CSCARH::SCARHFire(float flSpread, float flCycleTime)
 bool CSCARH::Reload()
 {
 	if (DefaultReload(m_pItemInfo->m_iMaxClip,
-		m_iClip ? SCARH_RELOAD : SCARH_RELOAD_EMPTY,
-		m_iClip ? SCARH_RELOAD_TIME : SCARH_RELOAD_EMPTY_TIME,
+		m_iClip ? RELOAD : RELOAD_EMPTY,
+		m_iClip ? RELOAD_TIME : RELOAD_EMPTY_TIME,
 		m_iClip ? 0.69f : 0.54f))
 	{
 		m_flAccuracy = 0.25f;
@@ -231,13 +231,13 @@ bool CSCARH::Reload()
 	}
 
 	// KF2 ???
-	if (m_pPlayer->pev->weaponanim != SCARH_CHECK_MAGAZINE)
+	if (m_pPlayer->pev->weaponanim != CHECK_MAGAZINE)
 	{
 		if (m_bInZoom)
 			SecondaryAttack();
 
-		SendWeaponAnim(SCARH_CHECK_MAGAZINE);
-		m_flTimeWeaponIdle = SCARH_CHECK_MAGAZINE_TIME;
+		SendWeaponAnim(CHECK_MAGAZINE);
+		m_flTimeWeaponIdle = CHECK_MAGAZINE_TIME;
 	}
 
 	return false;
