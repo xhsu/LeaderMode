@@ -2938,7 +2938,7 @@ void EXT_FUNC ParmsChangeLevel()
 	}
 }
 
-static float g_flLastServerTime = 0.0f;	// You can't and shouldn't use it outside of StartFrame().
+//static float g_flLastServerTime = 0.0f;	// You can't and shouldn't use it outside of StartFrame().
 float g_flTrueServerFrameRate = 0.0f;
 
 void EXT_FUNC StartFrame()
@@ -2949,8 +2949,12 @@ void EXT_FUNC StartFrame()
 	// On server side, manually calculate the change of gpGlobals->time.
 	// On client side, manually calculate the change of "time" parameter from ExportFunc::HUD_PostRunCmd().
 
-	g_flTrueServerFrameRate = gpGlobals->time - g_flLastServerTime;
-	g_flLastServerTime = gpGlobals->time;
+	//g_flTrueServerFrameRate = gpGlobals->time - g_flLastServerTime;
+	//g_flLastServerTime = gpGlobals->time;
+	static auto last_hr_clock = std::chrono::high_resolution_clock::now();	// init only.
+	auto dur = std::chrono::high_resolution_clock::now() - last_hr_clock;
+	last_hr_clock = std::chrono::high_resolution_clock::now();
+	g_flTrueServerFrameRate = std::chrono::duration_cast<std::chrono::microseconds>(dur).count() / 1000000.0;	// Method offered by Crsky.
 
 	/*
 	MESSAGE_BEGIN(MSG_ALL, gmsgFrameRate);

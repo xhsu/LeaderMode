@@ -24,7 +24,7 @@ typedef struct metahook_api_s
 	HMODULE (*GetEngineModule)(void);
 	DWORD (*GetEngineBase)(void);
 	DWORD (*GetEngineSize)(void);
-	void *(*SearchPattern)(void *pStartSearch, DWORD dwSearchLen, char *pPattern, DWORD dwPatternLen);
+	void *(*SearchPattern)(void *pStartSearch, DWORD dwSearchLen, const char *pPattern, DWORD dwPatternLen);
 	void (*WriteDWORD)(void *pAddress, DWORD dwValue);
 	DWORD (*ReadDWORD)(void *pAddress);
 	DWORD (*WriteMemory)(void *pAddress, BYTE *pData, DWORD dwDataSize);

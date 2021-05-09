@@ -20,6 +20,7 @@ Created Date: 05 Mar 2020
 #include <random>
 #include <iterator>
 #include <unordered_map>
+#include <chrono>
 
 // const, OH, why you are const!
 #include "../common/const.h"
@@ -164,7 +165,6 @@ Created Date: 05 Mar 2020
 
 // HUD
 #include "hud/hud.h"
-#include "hud/hud_ammo.h"
 #include "hud/hud_health.h"
 #include "hud/hud_spectator.h"
 #include "hud/hud_geiger.h"

@@ -93,7 +93,6 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)..\;$(ProjectDir)..\..\pm_shared;$(ProjectDir)..\..\engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>/Zc:strictStrings- %(AdditionalOptions)</AdditionalOptions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
       <DisableSpecificWarnings>4244;26402;26429;26430;26433;26440;26446;26451;26461;26462;26481;26482;26485;26486;26489;26493;26496;26812;26814;%(DisableSpecificWarnings)</DisableSpecificWarnings>
@@ -244,7 +243,6 @@
     <ClCompile Include="..\Graph\dxt.cpp" />
     <ClCompile Include="..\Graph\tga.cpp" />
     <ClCompile Include="..\hud\hud.cpp" />
-    <ClCompile Include="..\hud\hud_ammo.cpp" />
     <ClCompile Include="..\hud\hud_battery.cpp" />
     <ClCompile Include="..\HUD\hud_class_indicator.cpp" />
     <ClCompile Include="..\hud\hud_crosshair.cpp" />
@@ -325,7 +323,6 @@
     <ClInclude Include="..\Graph\dxt.h" />
     <ClInclude Include="..\Graph\tga.h" />
     <ClInclude Include="..\hud\hud.h" />
-    <ClInclude Include="..\hud\hud_ammo.h" />
     <ClInclude Include="..\hud\hud_battery.h" />
     <ClInclude Include="..\HUD\hud_class_indicator.h" />
     <ClInclude Include="..\hud\hud_crosshair.h" />

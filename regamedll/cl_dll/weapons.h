@@ -51,6 +51,7 @@ struct pseudo_ent_var_s	// pseudo entvars_t
 struct pseudo_global_vars_s	// pseudo globalvars_t
 {
 	double	time;
+	double	frametime;
 	Vector	v_forward;
 	Vector	v_right;
 	Vector	v_up;

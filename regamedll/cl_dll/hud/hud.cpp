@@ -87,11 +87,14 @@ namespace gHUD
 	float m_flUCDTime = 1;
 	float m_flUCDOldTime = 0;
 	float m_flUCDTimeDelta = 1;
+	std::array<hSprite, AMMO_MAXTYPE> m_rghAmmoSprite;
+	std::array<wrect_t, AMMO_MAXTYPE> m_rgrcAmmoSprite;
+	client_sprite_t* m_pAmmoTxtList = nullptr;	// original data. for others to inquiry.
+	int m_iAmmoTxtListCount = 0;
 
 	SCREENINFO m_scrinfo;
 
 	// HUD elements.
-	CHudAmmo m_Ammo;
 	CHudHealth m_Health;
 	CHudSpectator m_Spectator;
 	CHudGeiger m_Geiger;
@@ -150,7 +153,6 @@ void gHUD::Init(void)
 	}*/
 
 	// instead, we should:
-	m_Ammo.Init();
 	m_Health.Init();
 	m_SayText.Init();	// m_SayText should place before m_Spectator, since m_Spectator.init() is calling some vars from m_SayText.Init().
 	m_Spectator.Init();
@@ -324,6 +326,34 @@ void gHUD::VidInit(void)
 			}
 
 			p++;
+		}
+	}
+
+	m_pAmmoTxtList = gEngfuncs.pfnSPR_GetList("sprites/ammo.txt", &m_iAmmoTxtListCount);
+
+	if (m_pAmmoTxtList)
+	{
+		char sz[128];
+		client_sprite_t* p = nullptr;
+
+		m_rghAmmoSprite.fill(0);
+		m_rgrcAmmoSprite.fill({ 0, 0, 0, 0 });
+
+		for (int j = 0; j < AMMO_MAXTYPE; j++)
+		{
+			if (!g_rgAmmoInfo[j].m_pszName || g_rgAmmoInfo[j].m_pszName[0] == '\0')
+				continue;
+
+			p = gHUD::GetSpriteFromList(m_pAmmoTxtList, g_rgAmmoInfo[j].m_pszName, 640, m_iAmmoTxtListCount);
+
+			if (p)
+			{
+				Q_snprintf(sz, charsmax(sz), "sprites/%s.spr", p->szSprite);
+				m_rghAmmoSprite[j] = gEngfuncs.pfnSPR_Load(sz);
+				m_rgrcAmmoSprite[j] = p->rc;
+			}
+			else
+				m_rghAmmoSprite[j] = NULL;
 		}
 	}
 

@@ -26,14 +26,14 @@
 *
 */
 
+#include <vector>
+#include <unordered_map>
+#include <array>
+#include <memory>
+#include <list>
+#include <chrono>	// For accurate time.
+
 #include "extdll.h"
-
-
-#define VFUNC virtual
-
-
-using VectorRef = Vector;
-using FloatRef = float;
 
 #include "archtypes.h"
 #include "enginecallback.h"

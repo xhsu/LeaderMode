@@ -1427,6 +1427,8 @@ Run Weapon firing code on client
 */
 void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd, double time, unsigned int random_seed)
 {
+	using hr_clock = std::chrono::high_resolution_clock;
+
 	if (!from || !to || !cmd || !g_bInGameWorld)
 		return;
 
@@ -1434,12 +1436,18 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	int buttonsChanged;
 	static int lasthealth;
 	int flags;
+	static auto last_hr_clock = hr_clock::now();	// init only.
 
 	// initiation
 	HUD_InitClientWeapons();
 
 	// Get current clock
-	gpGlobals->time = float(g_flClientTime);
+	gpGlobals->time = g_flClientTime;
+	gpGlobals->frametime = g_flClientTimeDelta;
+
+	auto dur = hr_clock::now() - last_hr_clock;
+	last_hr_clock = hr_clock::now();
+	gpGlobals->frametime = std::chrono::duration_cast<std::chrono::microseconds>(dur).count() / 1000000.0;	// Method offered by Crsky.
 
 	// Fill in data based on selected weapon
 	if (from->client.m_iId > WEAPON_NONE && from->client.m_iId < LAST_WEAPON)
@@ -1642,9 +1650,9 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 
 		// Decrement weapon counters, server does this at same time ( during post think, after doing everything else )
 		// LUNA: is this gpGlobals->framerate ???
-		pCurrent->m_flNextPrimaryAttack -= g_flClientTimeDelta;	// LUNA: NEVER use cmd->msec / 1000.0f
-		pCurrent->m_flNextSecondaryAttack -= g_flClientTimeDelta;
-		pCurrent->m_flTimeWeaponIdle -= g_flClientTimeDelta;
+		pCurrent->m_flNextPrimaryAttack -= gpGlobals->frametime;	// LUNA: NEVER use cmd->msec / 1000.0f
+		pCurrent->m_flNextSecondaryAttack -= gpGlobals->frametime;
+		pCurrent->m_flTimeWeaponIdle -= gpGlobals->frametime;
 
 		if (pCurrent->m_flNextPrimaryAttack < -1.0)
 			pCurrent->m_flNextPrimaryAttack = -1.0;
@@ -1678,7 +1686,7 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 #endif
 
 	// m_flNextAttack is now part of the weapons, but is part of the player instead
-	to->client.m_flNextAttack -= g_flClientTimeDelta;
+	to->client.m_flNextAttack -= gpGlobals->frametime;
 	if (to->client.m_flNextAttack < -0.001)
 	{
 		to->client.m_flNextAttack = -0.001;

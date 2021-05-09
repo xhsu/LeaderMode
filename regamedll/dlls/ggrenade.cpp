@@ -708,6 +708,12 @@ void CGrenade::Precache()
 
 	PRECACHE_SOUND("weapons/sg_explode.wav");
 
+	PRECACHE_MODEL("models/w_hegrenade.mdl");
+	PRECACHE_MODEL("models/w_flashbang.mdl");
+	PRECACHE_MODEL("models/w_smokegrenade.mdl");
+	PRECACHE_MODEL(C4_WORLD_MODEL);
+	PRECACHE_MODEL(C4_VIEW_MODEL);
+
 	PRECACHE_MODEL("sprites/VFX/fire3.spr");
 
 	g_iSpriteGroundexp1 = PRECACHE_MODEL("sprites/VFX/groundexp1.spr");

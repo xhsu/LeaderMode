@@ -96,9 +96,6 @@
     <ClCompile Include="..\interpolation.cpp">
       <Filter>cl_dll</Filter>
     </ClCompile>
-    <ClCompile Include="..\hud\hud_ammo.cpp">
-      <Filter>cl_dll\HUD</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\game_shared\shared_util.cpp">
       <Filter>game_shared</Filter>
     </ClCompile>
@@ -373,9 +370,6 @@
     </ClInclude>
     <ClInclude Include="..\interpolation.h">
       <Filter>cl_dll</Filter>
-    </ClInclude>
-    <ClInclude Include="..\hud\hud_ammo.h">
-      <Filter>cl_dll\HUD</Filter>
     </ClInclude>
     <ClInclude Include="..\..\game_shared\shared_util.h">
       <Filter>game_shared</Filter>

@@ -293,7 +293,7 @@ public:
 	bool NeededPlayersCheck();
 
 	// Setup counts for m_iNumTerrorist, m_iNumCT, m_iNumSpawnableTerrorist, m_iNumSpawnableCT, etc.
-	VFUNC void InitializePlayerCounts(int &NumAliveTerrorist, int &NumAliveCT, int &NumDeadTerrorist, int &NumDeadCT);
+	void InitializePlayerCounts(int &NumAliveTerrorist, int &NumAliveCT, int &NumDeadTerrorist, int &NumDeadCT);
 
 	// Check to see if the teams exterminated each other. Ends the round and returns true if so.
 	bool TeamExterminationCheck(int NumAliveTerrorist, int NumAliveCT, int NumDeadTerrorist, int NumDeadCT);
@@ -338,19 +338,19 @@ public:
 	BOOL TeamFull(int team_id);
 	BOOL TeamStacked(int newTeam_id, int curTeam_id);
 
-	VFUNC void BalanceTeams();
-	VFUNC void SwapAllPlayers();
-	VFUNC void UpdateTeamScores();
-	VFUNC void EndRoundMessage(const char *sentence, ScenarioEventEndRound event);
-	VFUNC void SetAccountRules(RewardRules rules, int amount) { m_rgRewardAccountRules[rules] = static_cast<RewardAccount>(amount); }
-	VFUNC RewardAccount GetAccountRules(RewardRules rules) const { return m_rgRewardAccountRules[rules]; }
+	void BalanceTeams();
+	void SwapAllPlayers();
+	void UpdateTeamScores();
+	void EndRoundMessage(const char *sentence, ScenarioEventEndRound event);
+	void SetAccountRules(RewardRules rules, int amount) { m_rgRewardAccountRules[rules] = static_cast<RewardAccount>(amount); }
+	RewardAccount GetAccountRules(RewardRules rules) const { return m_rgRewardAccountRules[rules]; }
 
 	void DisplayMaps(CBasePlayer *pPlayer, int iVote);
 	void ResetAllMapVotes();
 	void ProcessMapVote(CBasePlayer *pPlayer, int iVote);
 
 	// BOMB MAP FUNCTIONS
-	VFUNC TeamName SelectDefaultTeam();
+	TeamName SelectDefaultTeam();
 
 	bool IsMatchStarted() { return !!(m_flRestartRoundTime != 0.0f); }
 	void SendMOTDToClient(edict_t *client);
@@ -365,14 +365,14 @@ public:
 	bool IsFreeForAll() const;
 	bool CanPlayerBuy(CBasePlayer *pPlayer) const;
 
-	VFUNC bool HasRoundTimeExpired();
+	bool HasRoundTimeExpired();
 
 	// inline function's
 	inline bool IsGameOver() const { return m_bGameOver; }
 	inline void SetGameOver() { m_bGameOver = true; }
 
 	// new functions of leader mod.
-	VFUNC bool CanSkillBeUsed();
+	bool CanSkillBeUsed();
 	void AssignCommander(CBasePlayer* pPlayer);
 	void AssignGodfather(CBasePlayer* pPlayer);
 	RoleTypes FindAvaliableRole(TeamName iTeam);

@@ -56,8 +56,10 @@ class CBaseEntity;
 class CBasePlayer;
 class CWeaponBox;
 
-const float MAX_NORMAL_BATTERY    = 100.0f;
-const float MAX_DIST_RELOAD_SOUND = 512.0f;
+using pcchar = const char* const;
+
+constexpr float MAX_NORMAL_BATTERY    = 100.0f;
+constexpr float MAX_DIST_RELOAD_SOUND = 512.0f;
 
 #define ITEM_FLAG_NONE				0
 #define ITEM_FLAG_SELECTONEMPTY     1
@@ -393,9 +395,9 @@ public:	// Constants / Database
 		DASH_EXIT,
 	};
 
-	static constexpr char*	VIEW_MODEL			= "models/weapons/v_scarh.mdl";
-	static constexpr char*	WORLD_MODEL			= "models/weapons/w_scarl.mdl";
-	static constexpr char*	FIRE_SFX			= "weapons/SCARH/mk17_shoot.wav";
+	static constexpr pcchar	VIEW_MODEL			= "models/weapons/v_scarh.mdl";
+	static constexpr pcchar	WORLD_MODEL			= "models/weapons/w_scarl.mdl";
+	static constexpr pcchar	FIRE_SFX			= "weapons/SCARH/mk17_shoot.wav";
 	static constexpr float	MAX_SPEED			= 235.0f;
 	static constexpr float	DAMAGE				= 54;
 	static constexpr float	RANGE_MODIFER		= 1.057371263;	// 80% damage @2000 inches.
@@ -530,9 +532,9 @@ public:	// Constants / Database
 		SWITCH_TO_CARBINE
 	};
 
-	static constexpr char*	VIEW_MODEL				= "models/weapons/v_xm8.mdl";
-	static constexpr char*	WORLD_MODEL				= "models/weapons/w_xm8.mdl";
-	static constexpr char*	FIRE_SFX				= "weapons/xm8/xm8_shoot.wav";
+	static constexpr pcchar	VIEW_MODEL				= "models/weapons/v_xm8.mdl";
+	static constexpr pcchar	WORLD_MODEL				= "models/weapons/w_xm8.mdl";
+	static constexpr pcchar	FIRE_SFX				= "weapons/xm8/xm8_shoot.wav";
 	static constexpr float	MAX_SPEED				= 240.0f;
 	static constexpr float	DAMAGE					= 32.0f;
 	static constexpr float	RANGE_MODIFER			= 1.057371263;	// 80% damage @2000 inches
@@ -621,9 +623,9 @@ public:	// Constants / Database
 		DASH_EXIT
 	};
 
-	static constexpr char*	VIEW_MODEL			= "models/weapons/v_awp.mdl";
-	static constexpr char*	WORLD_MODEL			= "models/weapons/w_awp.mdl";
-	static constexpr char*	FIRE_SFX			= "weapons/l115a3/l115a3_fire.wav";
+	static constexpr pcchar	VIEW_MODEL			= "models/weapons/v_awp.mdl";
+	static constexpr pcchar	WORLD_MODEL			= "models/weapons/w_awp.mdl";
+	static constexpr pcchar	FIRE_SFX			= "weapons/l115a3/l115a3_fire.wav";
 	static constexpr float	MAX_SPEED			= 210.0f;
 	static constexpr float	MAX_SPEED_ZOOM		= 150.0f;
 	static constexpr float	DAMAGE				= 125.0f;
@@ -734,9 +736,9 @@ public:	// Constants / Database
 		SH_DASH_EXIT,
 	};
 
-	static constexpr char*	VIEW_MODEL			= "models/weapons/v_deagle.mdl";
-	static constexpr char*	WORLD_MODEL			= "models/weapons/w_deagle.mdl";
-	static constexpr char*	FIRE_SFX			= "weapons/deagle/deagle_fire.wav";
+	static constexpr pcchar	VIEW_MODEL			= "models/weapons/v_deagle.mdl";
+	static constexpr pcchar	WORLD_MODEL			= "models/weapons/w_deagle.mdl";
+	static constexpr pcchar	FIRE_SFX			= "weapons/deagle/deagle_fire.wav";
 	static constexpr float	MAX_SPEED			= 245.0f;
 	static constexpr float	DAMAGE				= 60;
 	static constexpr float	RANGE_MODIFER		= 1.106751211;	// 80% damage @1100 inches.
@@ -1016,9 +1018,9 @@ public:	// Constants / Database
 		DASH_EXIT,
 	};
 
-	static constexpr char*	VIEW_MODEL		= "models/weapons/v_mk46.mdl";
-	static constexpr char*	WORLD_MODEL		= "models/weapons/w_mk46.mdl";
-	static constexpr char*	FIRE_SFX		= "weapons/mk46/mk46_fire.wav";
+	static constexpr pcchar	VIEW_MODEL		= "models/weapons/v_mk46.mdl";
+	static constexpr pcchar	WORLD_MODEL		= "models/weapons/w_mk46.mdl";
+	static constexpr pcchar	FIRE_SFX		= "weapons/mk46/mk46_fire.wav";
 	static constexpr float	MAX_SPEED		= 210.0f;
 	static constexpr float	DAMAGE			= 32.0f;
 	static constexpr float	RANGE_MODIFER	= 1.077217345;	// 80% damage @1500 inches.
@@ -1185,9 +1187,9 @@ public:	// Constants / Database
 		DASH_EXIT,
 	};
 
-	static constexpr char*	VIEW_MODEL			= "models/weapons/v_m4a1.mdl";
-	static constexpr char*	WORLD_MODEL			= "models/weapons/w_m4a1.mdl";
-	static constexpr char*	FIRE_SFX			= "weapons/AR15/ar15_shoot.wav";
+	static constexpr pcchar	VIEW_MODEL			= "models/weapons/v_m4a1.mdl";
+	static constexpr pcchar	WORLD_MODEL			= "models/weapons/w_m4a1.mdl";
+	static constexpr pcchar	FIRE_SFX			= "weapons/AR15/ar15_shoot.wav";
 	static constexpr float	MAX_SPEED			= 230.0f;
 	static constexpr float	DAMAGE				= 32.0f;
 	static constexpr float	RANGE_MODIFER		= 1.072221173;	// 80% damage @1600 inches.
@@ -1451,9 +1453,9 @@ public:	// Constants / Database
 		DASH_EXIT,
 	};
 
-	static constexpr char*	VIEW_MODEL				= "models/weapons/v_m1014.mdl";
-	static constexpr char*	WORLD_MODEL				= "models/weapons/w_m1014.mdl";
-	static constexpr char*	FIRE_SFX				= "weapons/m1014/m1014_fire.wav";
+	static constexpr pcchar	VIEW_MODEL				= "models/weapons/v_m1014.mdl";
+	static constexpr pcchar	WORLD_MODEL				= "models/weapons/w_m1014.mdl";
+	static constexpr pcchar	FIRE_SFX				= "weapons/m1014/m1014_fire.wav";
 	static constexpr float	MAX_SPEED				= 240.0f;
 	static constexpr float	DAMAGE					= 20.0f;
 	static constexpr int	PROJECTILE_COUNT		= 6;
@@ -1582,10 +1584,10 @@ public:	// Constants / Database
 		CHECK_MAGAZINE
 	};
 
-	static constexpr char*	VIEW_MODEL			= "models/weapons/v_m45a1.mdl";
-	static constexpr char*	WORLD_MODEL			= "models/w_elite.mdl";	// FIXME, BUGBUG
-	static constexpr char*	FIRE_SFX			= "weapons/m45a1/m45a1_fire.wav";
-	static constexpr char*	FIRE_SFX_SIL		= "weapons/m45a1/m45a1_fire_sil.wav";
+	static constexpr pcchar	VIEW_MODEL			= "models/weapons/v_m45a1.mdl";
+	static constexpr pcchar	WORLD_MODEL			= "models/w_elite.mdl";	// FIXME, BUGBUG
+	static constexpr pcchar	FIRE_SFX			= "weapons/m45a1/m45a1_fire.wav";
+	static constexpr pcchar	FIRE_SFX_SIL		= "weapons/m45a1/m45a1_fire_sil.wav";
 	static constexpr float	MAX_SPEED			= 250.0f;
 	static constexpr float	RELOAD_EMPYT_TIME	= 2.6f;
 	static constexpr float	RELOAD_TIME			= 2.166f;
@@ -1865,9 +1867,9 @@ public:	// Constants / Database
 		LHAND_UP,
 	};
 
-	static constexpr char*	VIEW_MODEL			= "models/weapons/v_psg1.mdl";
-	static constexpr char*	WORLD_MODEL			= "models/weapons/w_awp.mdl";	// UNDONE
-	static constexpr char*	FIRE_SFX			= "weapons/m14ebr/m14ebr_fire.wav";	// UNDONE
+	static constexpr pcchar	VIEW_MODEL			= "models/weapons/v_psg1.mdl";
+	static constexpr pcchar	WORLD_MODEL			= "models/weapons/w_awp.mdl";	// UNDONE
+	static constexpr pcchar	FIRE_SFX			= "weapons/m14ebr/m14ebr_fire.wav";	// UNDONE
 	static constexpr float	MAX_SPEED			= 210.0f;
 	static constexpr float	MAX_SPEED_ZOOM		= 150.0f;
 	static constexpr float	DAMAGE				= 90.0f;
