@@ -48,6 +48,8 @@ namespace DrawUtils
 	inline void Draw2DQuadNoTex(const Vector2D& lefttop, const Vector2D& rightbottom) { Draw2DQuadNoTex(lefttop.x, lefttop.y, rightbottom.x, rightbottom.y); }
 	inline void Draw2DQuadCustomTex(const Vector2D& lefttop, const Vector2D& rightbottom, const Vector2D& texLT, const Vector2D& texRB) { Draw2DQuadCustomTex(lefttop.x, lefttop.y, rightbottom.x, rightbottom.y, texLT.x, texLT.y, texRB.x, texRB.y); }
 	inline void Draw2DQuadCustomTex(const Vector2D& lefttop, const Vector2D& rightbottom, const Vector2D* vecs) { Draw2DQuadCustomTex(lefttop.x, lefttop.y, rightbottom.x, rightbottom.y, vecs); }
+	inline void Draw2DQuadProgressBar(const Vector2D& lefttop, const Vector2D& innersize, float flThickness, float flPercent) { Draw2DQuadProgressBar(lefttop.x, lefttop.y, innersize.x, innersize.y, flThickness, flPercent); }
+	inline void Draw2DQuadProgressBar2(const Vector2D& lefttop, const Vector2D& totalsize, float flThickness, float flPercent) { Draw2DQuadProgressBar2(lefttop.x, lefttop.y, totalsize.x, totalsize.y, flThickness, flPercent); }
 }
 
 // export funcs

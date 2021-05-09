@@ -166,6 +166,7 @@ Created Date: 05 Mar 2020
 // HUD
 #include "hud/hud.h"
 #include "hud/hud_health.h"
+#include "HUD/hud_vitality.h"
 #include "hud/hud_spectator.h"
 #include "hud/hud_geiger.h"
 #include "hud/hud_battery.h"

@@ -137,7 +137,7 @@ void CHudBattery::InitHUDData(void)
 
 void CHudBattery::MsgFunc_Battery(int& iNewArmourValue)
 {
-	m_bitsFlags |= HUD_ACTIVE;
+	//m_bitsFlags |= HUD_ACTIVE;
 
 	if (iNewArmourValue != m_flArmour)
 	{

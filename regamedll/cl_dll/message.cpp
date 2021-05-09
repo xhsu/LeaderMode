@@ -156,7 +156,7 @@ MSG_FUNC(ResetHUD)
 	OverviewMgr::OnHUDReset();
 
 	// then goes the regular elements.
-	for (auto pHudElem : gHUD::m_lstHudElements)
+	for (auto& pHudElem : gHUD::m_lstHudElements)
 	{
 		pHudElem->Reset();
 	}
@@ -177,7 +177,7 @@ MSG_FUNC(InitHUD)
 {
 	// this msg have no arguments.
 
-	for (auto pHudElem : gHUD::m_lstHudElements)
+	for (auto& pHudElem : gHUD::m_lstHudElements)
 	{
 		pHudElem->InitHUDData();
 	}
@@ -1077,6 +1077,8 @@ MSG_FUNC(Role)
 			if (pWeapon)
 				pWeapon->SetVariation(g_iRoleType);
 		}
+
+		gHUD::m_Vitality.MsgFunc_Role(g_iRoleType);
 	}
 
 	return TRUE;

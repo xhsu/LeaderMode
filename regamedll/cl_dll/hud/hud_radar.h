@@ -31,10 +31,14 @@ struct radar_point_s
 class CHudRadar : public CBaseHudElement
 {
 public:
-	static constexpr float	BORDER_GAP	= 12;
-	static constexpr float	HUD_SIZE	= 240;
-	static constexpr float	DIAMETER	= 2048;
-	static constexpr int	ICON_SIZE	= 16;
+	static Vector2D	MARGIN;	// This is variable now.
+
+	static constexpr Vector2D	SIZE		= Vector2D(280, 200);
+	static constexpr float		DIAMETER	= 2048;
+	static constexpr int		ICON_SIZE	= 16;
+
+	static constexpr float	BORDER_GAP = 12;
+	static constexpr float	HUD_SIZE = 240;
 
 public:
 	int Init(void);
@@ -42,7 +46,7 @@ public:
 	int Draw(float fTime);
 
 	void DrawRadarDot(int x, int y, float z_diff, int iBaseDotSize, int flags, int r, int g, int b, int a);
-	void DrawRadar(float flTime);
+	void DrawRadar(float flTime, const Vector2D& vecMargin = MARGIN, const Vector2D& vecSize = SIZE);
 	void DrawPlayerLocation(void);
 
 public:
@@ -50,6 +54,7 @@ public:
 	inline void DrawRadarDot(const Vector2D& vec, float z_diff, int iBaseDotSize, int flags, const PackedColorVec& colour) { DrawRadarDot(vec.x, vec.y, z_diff, iBaseDotSize, flags, colour.r, colour.g, colour.b, colour.a); }
 	inline void DrawRadarDot(const Vector& vec, int iBaseDotSize, int flags, int r, int g, int b, int a) { DrawRadarDot(vec.x, vec.y, vec.z, iBaseDotSize, flags, r, g, b, a); }
 	inline void DrawRadarDot(const Vector& vec, int iBaseDotSize, int flags, const PackedColorVec& colour) { DrawRadarDot(vec.x, vec.y, vec.z, iBaseDotSize, flags, colour.r, colour.g, colour.b, colour.a); }
+	inline static Vector2D GetBottom(void) { return Vector2D(MARGIN.x, MARGIN.y + SIZE.y); }
 
 public:
 	unsigned int							m_iPlayerLastPointedAt	{ 0U };

@@ -7,6 +7,8 @@ Reincarnation Date: Nov 21 2020
 
 #include "precompiled.h"
 
+Vector2D CHudRadar::MARGIN = Vector2D(12, 12);
+
 int CHudRadar::Init(void)
 {
 	m_iPlayerLastPointedAt = 0;
@@ -36,6 +38,9 @@ int CHudRadar::Init(void)
 int CHudRadar::VidInit(void)
 {
 	m_bitsFlags |= HUD_ACTIVE;
+
+	MARGIN.x = 12;
+	MARGIN.y = ScreenHeight - SIZE.y - 50;
 
 	return 1;
 }
@@ -110,13 +115,28 @@ void CHudRadar::DrawRadarDot(int x, int y, float z_diff, int iBaseDotSize, int f
 // view.cpp
 extern Vector v_angles, v_origin;
 
-void CHudRadar::DrawRadar(float flTime)
+void CHudRadar::DrawRadar(float flTime, const Vector2D& vecMargin, const Vector2D& vecSize)
 {
 	int iBaseDotSize = 2;
 	Vector color;
 	Vector2D vecTranslated;
 	float flZDiff = 0;
 	bool bClampped = false;
+	const Vector2D vecMarginRB = vecMargin + vecSize;
+
+	// If the window is not a square, it would be some trouble.
+	float X_DIAMETER = DIAMETER;
+	float Y_DIAMETER = DIAMETER * vecSize.y / vecSize.x;
+
+	if (vecSize.y > vecSize.x)
+	{
+		X_DIAMETER = DIAMETER * vecSize.x / vecSize.y;
+		Y_DIAMETER = DIAMETER;
+	}
+
+	// This line comes from experience, not some mathematical deduction.
+	if (!OverviewMgr::m_bRotated)
+		std::swap(X_DIAMETER, Y_DIAMETER);
 
 	// draw white board.
 	glDisable(GL_TEXTURE_2D);
@@ -124,10 +144,11 @@ void CHudRadar::DrawRadar(float flTime)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glColor4f(0, 0, 0, 0.5);
-	DrawUtils::Draw2DQuad(BORDER_GAP, BORDER_GAP, BORDER_GAP + HUD_SIZE, BORDER_GAP + HUD_SIZE);
+	DrawUtils::Draw2DQuad(vecMargin, vecMarginRB);
 
-	glColor4f(1, 1, 1, 1);
-	DrawUtils::Draw2DQuadProgressBar(BORDER_GAP, BORDER_GAP, HUD_SIZE, HUD_SIZE, 2, 1);
+	// HL&CL: We don't need a border.
+	//glColor4f(1, 1, 1, 1);
+	//DrawUtils::Draw2DQuadProgressBar(vecMargin, vecSize, 2, 1);
 
 	glDisable(GL_BLEND);
 	glEnable(GL_TEXTURE_2D);
@@ -147,8 +168,8 @@ void CHudRadar::DrawRadar(float flTime)
 		glBindTexture(GL_TEXTURE_2D, OverviewMgr::m_iIdTexture);
 
 		// Build two points: left-top and right-bottom
-		Vector2D vecLT = OverviewMgr::m_mxTransform * Vector2D(gHUD::m_vecOrigin.x - DIAMETER / 2.0f, gHUD::m_vecOrigin.y - DIAMETER / 2.0f);
-		Vector2D vecRB = OverviewMgr::m_mxTransform * Vector2D(gHUD::m_vecOrigin.x + DIAMETER / 2.0f, gHUD::m_vecOrigin.y + DIAMETER / 2.0f);
+		Vector2D vecLT = OverviewMgr::m_mxTransform * Vector2D(gHUD::m_vecOrigin.x - X_DIAMETER / 2.0f, gHUD::m_vecOrigin.y - Y_DIAMETER / 2.0f);
+		Vector2D vecRB = OverviewMgr::m_mxTransform * Vector2D(gHUD::m_vecOrigin.x + X_DIAMETER / 2.0f, gHUD::m_vecOrigin.y + Y_DIAMETER / 2.0f);
 
 		// and myself.
 		Vector2D vecMe = OverviewMgr::m_mxTransform * Vector2D(gHUD::m_vecOrigin.x, gHUD::m_vecOrigin.y);
@@ -194,11 +215,11 @@ void CHudRadar::DrawRadar(float flTime)
 			}
 		}
 
-		DrawUtils::Draw2DQuadCustomTex(Vector2D(BORDER_GAP, BORDER_GAP), Vector2D(BORDER_GAP + HUD_SIZE, BORDER_GAP + HUD_SIZE), vecs);
+		DrawUtils::Draw2DQuadCustomTex(vecMargin, vecMarginRB, vecs);
 	}
 
 	// Draw ourself.
-	vecTranslated = Vector2D(BORDER_GAP + HUD_SIZE / 2, BORDER_GAP + HUD_SIZE / 2);	// I must be the centre of this radar map. Otherwise it will be meaningless.
+	vecTranslated = vecMargin + vecSize / 2;	// I must be the centre of this radar map. Otherwise it will be meaningless.
 	color = gHUD::GetColor(gHUD::m_iPlayerNum);
 
 	if (g_iRoleType > Role_UNASSIGNED && g_iRoleType < ROLE_COUNT)
@@ -221,17 +242,21 @@ void CHudRadar::DrawRadar(float flTime)
 		DrawRadarDot(vecTranslated, 0, iBaseDotSize, RADAR_DOT_NORMAL, color.r, color.g, color.b, 235);
 	}
 
+	// Swap them back, we are not dealing with overview map right now.
+	if (!OverviewMgr::m_bRotated)
+		std::swap(X_DIAMETER, Y_DIAMETER);
+
 	// Build a matrix which transform a world point onto our mini-map.
 	m_mxRadarTransform =
 
 		// Step 5: Offset it to avoid negative value. After the first 4 steps, the center of the coordinate system is (0, 0), the left-top corner of the screen. We have to make it centered with the radar's center.
-		Matrix3x3::Translation2D(Vector2D(HUD_SIZE / 2, HUD_SIZE / 2)) *
+		Matrix3x3::Translation2D(vecSize / 2) *
 
 		// Step 4: Reverse our Y coord, since the 2D coord system on our monitor is +X for RIGHT, +Y for DOWNWARD.
 		Matrix3x3::Stretch2D(1, -1) *
 
-		// Step 3: Squeeze the coord to fit our radar and map range.
-		Matrix3x3::Stretch2D(HUD_SIZE / DIAMETER) *
+		// Step 3: You will have to scale the distance between you and the dots into your visible range. These are the scale factors.
+		Matrix3x3::Stretch2D(vecSize.x / X_DIAMETER, vecSize.y / Y_DIAMETER) *
 
 		// Step 2: Rotate the point according to our yaw.
 		Matrix3x3::Rotation2D(90.0f - v_angles.yaw) *
@@ -255,12 +280,13 @@ void CHudRadar::DrawRadar(float flTime)
 		flZDiff = gEngfuncs.GetEntityByIndex(i)->origin.z - gHUD::m_vecOrigin.z;
 
 		// this is because we don't want the icon clipping through radar border.
-		if (vecTranslated.x < ICON_SIZE / 2 || vecTranslated.x > HUD_SIZE - ICON_SIZE / 2 ||
-			vecTranslated.y < ICON_SIZE / 2 || vecTranslated.y > HUD_SIZE - ICON_SIZE / 2)
+		// Don't need to consider border and margin here.
+		if (vecTranslated.x < ICON_SIZE / 2 || vecTranslated.x > vecSize.x - ICON_SIZE / 2 ||
+			vecTranslated.y < ICON_SIZE / 2 || vecTranslated.y > vecSize.y - ICON_SIZE / 2)
 		{
 			// makes sure that they stay on the radar border..
-			vecTranslated.x = Q_clamp(vecTranslated.x, float(ICON_SIZE / 2), float(HUD_SIZE - ICON_SIZE / 2));
-			vecTranslated.y = Q_clamp(vecTranslated.y, float(ICON_SIZE / 2), float(HUD_SIZE - ICON_SIZE / 2));
+			vecTranslated.x = Q_clamp(vecTranslated.x, float(ICON_SIZE / 2), float(vecSize.x - ICON_SIZE / 2));
+			vecTranslated.y = Q_clamp(vecTranslated.y, float(ICON_SIZE / 2), float(vecSize.y - ICON_SIZE / 2));
 
 			bClampped = true;
 		}
@@ -268,8 +294,7 @@ void CHudRadar::DrawRadar(float flTime)
 			bClampped = false;
 
 		// offset it with the radar location.
-		vecTranslated.x += BORDER_GAP;
-		vecTranslated.y += BORDER_GAP;
+		vecTranslated += vecMargin;
 
 		// determind color.
 		color = gHUD::GetColor(i);

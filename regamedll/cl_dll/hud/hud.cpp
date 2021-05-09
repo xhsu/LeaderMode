@@ -123,6 +123,7 @@ namespace gHUD
 	CHudScoreboard m_Scoreboard;
 	CHudClassIndicator m_ClassIndicator;
 	CUIBuyMenu m_UI_BuyMenu;
+	CHudVitality m_Vitality;
 };
 
 void gHUD::Init(void)
@@ -179,6 +180,7 @@ void gHUD::Init(void)
 	m_Crosshair.Init();
 	m_WeaponList.Init();
 	m_ClassIndicator.Init();
+	m_Vitality.Init();
 	m_Scoreboard.Init();	// this is definately the last layer.
 
 	// UI is always above all other HUD elements.
@@ -365,7 +367,7 @@ void gHUD::VidInit(void)
 	m_szMOTD[0] = 0;
 	m_flTimeLeft = 0;
 
-	for (auto pHudElement : m_lstHudElements)
+	for (auto& pHudElement : m_lstHudElements)
 	{
 		pHudElement->VidInit();
 	}
@@ -433,7 +435,7 @@ int gHUD::Redraw(float flTime, int intermission)
 
 	if (m_pCvarDraw->value)
 	{
-		for (auto pHudElements : m_lstHudElements)
+		for (auto& pHudElements : m_lstHudElements)
 		{
 			if (!intermission)
 			{
@@ -519,7 +521,7 @@ void gHUD::Think(void)
 	m_flDisplayedFOV += (float(m_iFOV) - m_flDisplayedFOV) * m_flTimeDelta * 7.0f;	// this 7.0 is the transition speed.
 
 	// draw or not, you must think.
-	for (auto pHudElements : m_lstHudElements)
+	for (auto& pHudElements : m_lstHudElements)
 	{
 		if (pHudElements->m_bitsFlags & HUD_ACTIVE || pHudElements->m_bitsFlags & HUD_ENFORCE_THINK)
 			pHudElements->Think();

@@ -269,6 +269,7 @@
     <ClCompile Include="..\hud\hud_text_message.cpp" />
     <ClCompile Include="..\hud\hud_train.cpp" />
     <ClCompile Include="..\hud\hud_vgui2print.cpp" />
+    <ClCompile Include="..\HUD\hud_vitality.cpp" />
     <ClCompile Include="..\hud\hud_weaponlist.cpp" />
     <ClCompile Include="..\input.cpp" />
     <ClCompile Include="..\input_mouse.cpp" />
@@ -349,6 +350,7 @@
     <ClInclude Include="..\hud\hud_text_message.h" />
     <ClInclude Include="..\hud\hud_train.h" />
     <ClInclude Include="..\hud\hud_vgui2print.h" />
+    <ClInclude Include="..\HUD\hud_vitality.h" />
     <ClInclude Include="..\hud\hud_weaponlist.h" />
     <ClInclude Include="..\input.h" />
     <ClInclude Include="..\input_mouse.h" />

@@ -213,7 +213,7 @@ void CHudHealth::InitHUDData(void)
 
 void CHudHealth::MsgFunc_Health(int& iNewHealth)
 {
-	m_bitsFlags |= HUD_ACTIVE;
+	//m_bitsFlags |= HUD_ACTIVE;
 
 	if (iNewHealth != m_iHealth)
 	{

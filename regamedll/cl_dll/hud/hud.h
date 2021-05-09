@@ -202,6 +202,7 @@ class CHudGrenade;
 class CHudScoreboard;
 class CHudClassIndicator;
 class CUIBuyMenu;
+class CHudVitality;
 
 namespace gHUD
 {
@@ -315,6 +316,7 @@ namespace gHUD
 	extern CHudScoreboard m_Scoreboard;
 	extern CHudClassIndicator m_ClassIndicator;
 	extern CUIBuyMenu m_UI_BuyMenu;
+	extern CHudVitality m_Vitality;
 };
 
 class CScreenFade
