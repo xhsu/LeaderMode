@@ -238,7 +238,7 @@ public:	// basic API and behaviour for weapons.
 	void	DefaultScopeSight(const Vector& vecOfs, int iFOV, float flEnterScopeDelay = 0.25f, float flFadeFromBlack = 5.0f, float flDriftingSpeed = 10.0f, float flNextSecondaryAttack = 0.3f);
 	template<class CWpn> void	DefaultDashStart	(void);
 	template<class CWpn> void	DefaultDashEnd		(void);
-	bool	DefaultSetLHand	(bool bAppear, int iLHandUpAnim, float flLHandUpTime, int iLHandDownAnim, float flLHandDownTime);
+	template<class CWpn> bool	DefaultSetLHand		(bool bAppear);
 	void	DefaultBlock	(int iEnterAnim, float flEnterTime, int iExitAnim, float flExitTime);
 	float	DefaultSpread	(float flBaseline, float flAimingMul, float flDuckingMul, float flWalkingMul, float flJumpingMul);
 
@@ -260,6 +260,23 @@ public:	// util funcs
 	virtual bool	SetLeftHand		(bool bAppear) { return false; }
 	virtual void	PlayBlockAnim	(void) { }
 	virtual float	GetSpread		(void) { return 0.0f; }
+};
+
+template <class CWpn>
+class CBaseWeaponTemplate : public CBaseWeapon
+{
+public:	// basic logic funcs
+	//virtual bool	Deploy		(void) override;
+	//virtual void	WeaponIdle	(void) override;
+	//virtual bool	HolsterStart(void) override;
+	virtual	void	DashStart	(void) override { return DefaultDashStart<CWpn>(); }
+	virtual void	DashEnd		(void) override { return DefaultDashEnd<CWpn>(); }
+
+public:
+	virtual	float	GetMaxSpeed		(void) override { return CWpn::MAX_SPEED; }
+	//virtual void	ResetModel		(void) override;
+	virtual bool	SetLeftHand		(bool bAppear) override { return DefaultSetLHand<CWpn>(bAppear); }
+	//virtual void	PlayBlockAnim	(void) override { return DefaultBlock(BLOCK_UP, BLOCK_UP_TIME, BLOCK_DOWN, BLOCK_DOWN_TIME); }
 };
 
 
@@ -339,7 +356,7 @@ enum mp5n_e
 #define SCARH_WORLD_MODEL	"models/weapons/w_scarl.mdl"
 #define SCARH_FIRE_SFX		"weapons/SCARH/mk17_shoot.wav"
 
-class CSCARH : public CBaseWeapon
+class CSCARH : public CBaseWeaponTemplate<CSCARH>
 {
 public:	// Constants / Database
 	enum scarh_anim_e
@@ -420,13 +437,9 @@ public:	// basic logic funcs
 	virtual void	WeaponIdle		(void) { return DefaultIdle(DASHING); }
 	virtual bool	Reload			(void);
 	virtual bool	HolsterStart	(void) { return DefaultHolster(HOLSTER, HOLSTER_TIME); }
-	virtual	void	DashStart		(void) { return DefaultDashStart<CSCARH>(); }
-	virtual void	DashEnd			(void) { return DefaultDashEnd<CSCARH>(); }
 
 public:	// util funcs
-	virtual	float	GetMaxSpeed		(void) { return MAX_SPEED; }
 	virtual void	ResetModel		(void);
-	virtual bool	SetLeftHand		(bool bAppear) { return DefaultSetLHand(bAppear, LHAND_UP, LHAND_UP_TIME, LHAND_DOWN, LHAND_DOWN_TIME); }
 	virtual void	PlayBlockAnim	(void) { return DefaultBlock(BLOCK_UP, BLOCK_UP_TIME, BLOCK_DOWN, BLOCK_DOWN_TIME); }
 	virtual float	GetSpread		(void);
 
@@ -572,7 +585,7 @@ public:	// basic logic funcs
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void)	{ return MAX_SPEED; }
 	virtual void	ResetModel		(void);
-	virtual bool	SetLeftHand		(bool bAppear) { return DefaultSetLHand(bAppear, LHAND_UP, LHAND_UP_TIME, LHAND_DOWN, LHAND_DOWN_TIME); }
+	virtual bool	SetLeftHand		(bool bAppear) { return DefaultSetLHand<CXM8>(bAppear); }
 	virtual void	PlayBlockAnim	(void)	{ return DefaultBlock(BLOCK_UP, BLOCK_UP_TIME, BLOCK_DOWN, BLOCK_DOWN_TIME); }
 	virtual float	GetSpread		(void);
 
@@ -681,7 +694,7 @@ public:	// basic logic funcs
 public:	// util funcs
 	virtual float	GetMaxSpeed		(void);
 	virtual void	ResetModel		(void);
-	virtual bool	SetLeftHand		(bool bAppear)	{ return DefaultSetLHand(bAppear, LHAND_UP, LHAND_UP_TIME, LHAND_DOWN, LHAND_DOWN_TIME); }
+	virtual bool	SetLeftHand		(bool bAppear)	{ return DefaultSetLHand<CAWP>(bAppear); }
 	virtual void	PlayBlockAnim	(void)	{ return DefaultBlock(BLOCK_UP, BLOCK_UP_TIME, BLOCK_DOWN, BLOCK_DOWN_TIME); }
 	virtual float	GetSpread		(void);
 
@@ -786,7 +799,7 @@ public:	// basic logic funcs
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void)	{ return MAX_SPEED; }
 	virtual void	ResetModel		(void);	// declare by marco.
-	virtual bool	SetLeftHand		(bool bAppear)	{ return DefaultSetLHand(bAppear, LHAND_UP, LHAND_UP_TIME, LHAND_DOWN, LHAND_DOWN_TIME); }
+	virtual bool	SetLeftHand		(bool bAppear)	{ return DefaultSetLHand<CDEagle>(bAppear); }
 	virtual void	PlayBlockAnim	(void)	{ return DefaultBlock(BLOCK_UP, BLOCK_UP_TIME, BLOCK_DOWN, BLOCK_DOWN_TIME); }
 	virtual float	GetSpread		(void);
 
@@ -1053,7 +1066,7 @@ public:	// basic logic funcs
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void)	{ return MAX_SPEED; }
 	virtual void	ResetModel		(void);
-	virtual bool	SetLeftHand		(bool bAppear)	{ return DefaultSetLHand(bAppear, LHAND_UP, LHAND_UP_TIME, LHAND_DOWN, LHAND_DOWN_TIME); }
+	virtual bool	SetLeftHand		(bool bAppear)	{ return DefaultSetLHand<CMK46>(bAppear); }
 	virtual void	PlayBlockAnim	(void)	{ return DefaultBlock(BLOCK_UP, BLOCK_UP_TIME, BLOCK_DOWN, BLOCK_DOWN_TIME); }
 	virtual float	GetSpread		(void);
 
@@ -1222,7 +1235,7 @@ public:	// basic logic funcs
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void)	{ return MAX_SPEED; }
 	virtual void	ResetModel		(void);
-	virtual bool	SetLeftHand		(bool bAppear)	{ return DefaultSetLHand(bAppear, LHAND_UP, LHAND_UP_TIME, LHAND_DOWN, LHAND_DOWN_TIME); }
+	virtual bool	SetLeftHand		(bool bAppear)	{ return DefaultSetLHand<CM4A1>(bAppear); }
 	virtual void	PlayBlockAnim	(void)	{ return DefaultBlock(BLOCK_UP, BLOCK_UP_TIME, BLOCK_DOWN, BLOCK_DOWN_TIME); }
 	virtual float	GetSpread		(void);
 
@@ -1527,7 +1540,7 @@ public:	// util funcs
 	virtual void	PushAnim		(void);
 	virtual void	PopAnim			(void);
 	virtual void	ResetModel		(void);
-	virtual bool	SetLeftHand		(bool bAppear) { return DefaultSetLHand(bAppear, LHAND_UP, LHAND_UP_TIME, LHAND_DOWN, LHAND_DOWN_TIME); }
+	virtual bool	SetLeftHand		(bool bAppear) { return DefaultSetLHand<CM1014>(bAppear); }
 	virtual void	PlayBlockAnim	(void)	{ return DefaultBlock(BLOCK_UP, BLOCK_UP_TIME, BLOCK_DOWN, BLOCK_DOWN_TIME); }
 	virtual float	GetSpread		(void)	{ return CONE_VECTOR.x; }
 };
@@ -1633,7 +1646,7 @@ public:	// basic logic funcs
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void)	{ return MAX_SPEED; }
 	virtual void	ResetModel		(void);	// declare by marco.
-	virtual bool	SetLeftHand		(bool bAppear)	{ return DefaultSetLHand(bAppear, LHAND_UP, LHAND_UP_TIME, LHAND_DOWN, LHAND_DOWN_TIME); }
+	virtual bool	SetLeftHand		(bool bAppear)	{ return DefaultSetLHand<CM45A1>(bAppear); }
 	virtual void	PlayBlockAnim	(void)	{ return DefaultBlock(BLOCK_UP, BLOCK_UP_TIME, BLOCK_DOWN, BLOCK_DOWN_TIME); }
 	virtual float	GetSpread		(void);
 
@@ -1733,7 +1746,7 @@ public:	// basic logic funcs
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void) { return MAX_SPEED; }
 	virtual void	ResetModel		(void);	// declare by marco.
-	virtual bool	SetLeftHand		(bool bAppear)	{ return DefaultSetLHand(bAppear, LHAND_UP, LHAND_UP_TIME, LHAND_DOWN, LHAND_DOWN_TIME); }
+	virtual bool	SetLeftHand		(bool bAppear)	{ return DefaultSetLHand<CFN57>(bAppear); }
 	virtual void	PlayBlockAnim	(void)	{ return DefaultBlock(BLOCK_UP, BLOCK_UP_TIME, BLOCK_DOWN, BLOCK_DOWN_TIME); }
 	virtual float	GetSpread		(void);
 
@@ -1818,7 +1831,7 @@ public:	// basic logic funcs
 public:	// util funcs
 	virtual	float	GetMaxSpeed		(void)	{ return MAX_SPEED; }
 	virtual void	ResetModel		(void);
-	virtual bool	SetLeftHand		(bool bAppear)	{ return DefaultSetLHand(bAppear, LHAND_UP, LHAND_UP_TIME, LHAND_DOWN, LHAND_DOWN_TIME); }
+	virtual bool	SetLeftHand		(bool bAppear)	{ return DefaultSetLHand<CUMP45>(bAppear); }
 	virtual void	PlayBlockAnim	(void)	{ return DefaultBlock(BLOCK_UP, BLOCK_UP_TIME, BLOCK_DOWN, BLOCK_DOWN_TIME); }
 	virtual float	GetSpread		(void);
 
@@ -1904,7 +1917,7 @@ public:	// basic logic funcs
 public:	// util funcs
 	virtual float	GetMaxSpeed		(void) final;
 	virtual void	ResetModel		(void) final;
-	virtual bool	SetLeftHand		(bool bAppear) final { return DefaultSetLHand(bAppear, LHAND_UP, LHAND_UP_TIME, LHAND_DOWN, LHAND_DOWN_TIME); }
+	virtual bool	SetLeftHand		(bool bAppear) final { return DefaultSetLHand<CPSG1>(bAppear); }
 	virtual void	PlayBlockAnim	(void) final { return DefaultBlock(BLOCK_UP, BLOCK_UP_TIME, BLOCK_DOWN, BLOCK_DOWN_TIME); }
 	virtual float	GetSpread		(void) final;
 

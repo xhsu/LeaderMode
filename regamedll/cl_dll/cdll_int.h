@@ -16,6 +16,7 @@ Created Date: 05 Mar 2020
 // core of cores
 extern cl_enginefunc_t gEngfuncs;
 extern cl_extendedfunc_t gExtFuncs;
+extern bool g_bInGameWorld;
 
 // function list.
 BOOL CL_DLLEXPORT CL_IsThirdPerson(void);

@@ -2938,8 +2938,26 @@ void EXT_FUNC ParmsChangeLevel()
 	}
 }
 
+static float g_flLastServerTime = 0.0f;	// You can't and shouldn't use it outside of StartFrame().
+float g_flTrueServerFrameRate = 0.0f;
+
 void EXT_FUNC StartFrame()
 {
+	// LUNA: Credits to Crsky.
+	// If you run the client.dll standalone, the cmd->msec is UTTERLY wrong.
+	// You will have to calculate it manually.
+	// On server side, manually calculate the change of gpGlobals->time.
+	// On client side, manually calculate the change of "time" parameter from ExportFunc::HUD_PostRunCmd().
+
+	g_flTrueServerFrameRate = gpGlobals->time - g_flLastServerTime;
+	g_flLastServerTime = gpGlobals->time;
+
+	/*
+	MESSAGE_BEGIN(MSG_ALL, gmsgFrameRate);
+	WRITE_LONG(*(int*)&g_flTrueServerFrameRate);
+	MESSAGE_END();
+	*/
+
 	if (g_pGameRules)
 	{
 		g_pGameRules->Think();

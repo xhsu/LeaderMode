@@ -1275,22 +1275,23 @@ void CBaseWeapon::DefaultDashEnd(void)
 #endif
 }
 
-bool CBaseWeapon::DefaultSetLHand(bool bAppear, int iLHandUpAnim, float flLHandUpTime, int iLHandDownAnim, float flLHandDownTime)
+template<class CWpn>
+bool CBaseWeapon::DefaultSetLHand(bool bAppear)
 {
 	if (bAppear && m_bitsFlags & WPNSTATE_NO_LHAND)
 	{
-		SendWeaponAnim(iLHandUpAnim);
-		m_pPlayer->m_flNextAttack = flLHandUpTime;
-		m_flTimeWeaponIdle = flLHandUpTime;
+		SendWeaponAnim(CWpn::LHAND_UP);
+		m_pPlayer->m_flNextAttack = CWpn::LHAND_UP_TIME;
+		m_flTimeWeaponIdle = CWpn::LHAND_UP_TIME;
 		m_bitsFlags &= ~WPNSTATE_NO_LHAND;
 
 		return true;
 	}
 	else if (!(m_bitsFlags & WPNSTATE_NO_LHAND))
 	{
-		SendWeaponAnim(iLHandDownAnim);
-		m_pPlayer->m_flNextAttack = flLHandDownTime;
-		m_flTimeWeaponIdle = flLHandDownTime;
+		SendWeaponAnim(CWpn::LHAND_DOWN);
+		m_pPlayer->m_flNextAttack = CWpn::LHAND_DOWN_TIME;
+		m_flTimeWeaponIdle = CWpn::LHAND_DOWN_TIME;
 		m_bitsFlags |= WPNSTATE_NO_LHAND;
 
 		return true;

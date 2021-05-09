@@ -3849,12 +3849,12 @@ pt_end:
 	{
 		if (m_rgpPlayerItems[i])
 		{
-			m_rgpPlayerItems[i]->m_flNextPrimaryAttack = Q_max(m_rgpPlayerItems[i]->m_flNextPrimaryAttack - gpGlobals->frametime, -1.0f);
-			m_rgpPlayerItems[i]->m_flNextSecondaryAttack = Q_max(m_rgpPlayerItems[i]->m_flNextSecondaryAttack - gpGlobals->frametime, -0.001f);
+			m_rgpPlayerItems[i]->m_flNextPrimaryAttack = Q_max(m_rgpPlayerItems[i]->m_flNextPrimaryAttack - g_flTrueServerFrameRate, -1.0f);	// LUNA: Should never use gpGlobals->frametime on weapon.
+			m_rgpPlayerItems[i]->m_flNextSecondaryAttack = Q_max(m_rgpPlayerItems[i]->m_flNextSecondaryAttack - g_flTrueServerFrameRate, -0.001f);
 
 			if (m_rgpPlayerItems[i]->m_flTimeWeaponIdle != 1000.0f)
 			{
-				m_rgpPlayerItems[i]->m_flTimeWeaponIdle = Q_max(m_rgpPlayerItems[i]->m_flTimeWeaponIdle - gpGlobals->frametime, -0.001f);
+				m_rgpPlayerItems[i]->m_flTimeWeaponIdle = Q_max(m_rgpPlayerItems[i]->m_flTimeWeaponIdle - g_flTrueServerFrameRate, -0.001f);
 			}
 
 			// used by original CBasePlayerItem.
@@ -3867,7 +3867,7 @@ pt_end:
 		SERVER_PRINT(SharedVarArgs("[Server] m_flNextPrimaryAttack: %f\n", m_pActiveItem->m_flNextPrimaryAttack));
 #endif
 
-	m_flNextAttack -= gpGlobals->frametime;
+	m_flNextAttack -= g_flTrueServerFrameRate;
 
 	if (m_flNextAttack < -0.001)
 		m_flNextAttack = -0.001;

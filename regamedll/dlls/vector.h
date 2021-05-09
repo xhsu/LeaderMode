@@ -28,6 +28,8 @@
 
 #pragma once
 
+#include <float.h>
+
 // Used for many pathfinding and many other operations that are treated as planar rather than 3D.
 class Vector2D
 {
@@ -481,6 +483,11 @@ inline constexpr Vector2D operator*(const Matrix3x3& m, const Vector2D& v)
 	);
 }
 
+inline constexpr float Q_fabs2(float f1)	// constexpr version of Q_fabs
+{
+	return f1 > 0.0 ? f1 : -f1;
+}
+
 // 3D Vector
 // Same data-layout as engine's vec3_t, which is a vec_t[3]
 class Vector
@@ -498,7 +505,7 @@ public:
 
 	// Operators
 	constexpr decltype(auto) operator-()       const { return Vector(-x, -y, -z); }
-	constexpr bool operator==(const Vector &v) const { return x == v.x && y == v.y && z == v.z; }
+	constexpr bool operator==(const Vector &v) const { return Q_fabs2(x - v.x) <= FLT_EPSILON && Q_fabs2(y - v.y) <= FLT_EPSILON && Q_fabs2(z - v.z) <= FLT_EPSILON; }
 	constexpr bool operator!=(const Vector &v) const { return !(*this == v); }
 
 	constexpr decltype(auto) operator+(const Vector &v) const { return Vector(x + v.x, y + v.y, z + v.z); }
@@ -555,7 +562,7 @@ public:
 	Vector Normalize() const
 	{
 		real_t flLen = Length();
-		if (flLen == 0.0)
+		if (Q_fabs(flLen) <= FLT_EPSILON || std::isnan(flLen))
 			return Vector(0, 0, 1);
 
 		flLen = 1.0 / flLen;
@@ -584,7 +591,7 @@ public:
 	{
 		T flLen = Length();
 
-		if (flLen > 0)
+		if (Q_fabs(flLen) > FLT_EPSILON && !std::isnan(flLen))
 		{
 			x = vec_t(1.0 / flLen * x);
 			y = vec_t(1.0 / flLen * y);
@@ -600,11 +607,16 @@ public:
 		return flLen;
 	}
 
-	constexpr bool IsZero(float tolerance = 0.01f) const
+	constexpr bool IsZero() const
 	{
-		return (x > -tolerance && x < tolerance &&
-			y > -tolerance && y < tolerance &&
-			z > -tolerance && z < tolerance);
+		return (x > -FLT_EPSILON && x < FLT_EPSILON &&
+			y > -FLT_EPSILON && y < FLT_EPSILON &&
+			z > -FLT_EPSILON && z < FLT_EPSILON);
+	}
+
+	bool IsNaN() const
+	{
+		return std::isnan(x) || std::isnan(y) || std::isnan(z);
 	}
 
 	Vector MakeVector() const

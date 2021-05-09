@@ -459,6 +459,10 @@ void CStudioModelRenderer::StudioCalcAttachments(void)
 
 	for (i = 0; i < m_pStudioHeader->numattachments; i++)
 		VectorTransform(pattachment[i].org, (*m_plighttransform)[pattachment[i].bone], m_pCurrentEntity->attachment[i]);
+
+	// LUNA: after changing the weapon frame into HUD_Frame, some FCs will occur since the g_pViewEnt->attachment[] are NaN.
+	if (m_pCurrentEntity == g_pViewEnt)
+		Q_memcpy(&g_rgvecViewModelAttachments, &m_pCurrentEntity->attachment, sizeof(g_rgvecViewModelAttachments));
 }
 
 void CStudioModelRenderer::StudioSaveBones(void)

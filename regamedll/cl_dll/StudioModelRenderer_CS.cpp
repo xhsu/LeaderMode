@@ -16,6 +16,7 @@ float g_flStartScaleTime;
 int iPrevRenderState;
 int iRenderStateChanged;
 cl_entity_t* g_pViewEnt = nullptr;
+Vector g_rgvecViewModelAttachments[4];
 
 typedef struct
 {

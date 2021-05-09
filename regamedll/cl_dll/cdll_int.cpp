@@ -8,6 +8,7 @@ Created Date: 05 Mar 2020
 
 cl_enginefunc_t gEngfuncs;
 cl_extendedfunc_t gExtFuncs;
+bool g_bInGameWorld = false;
 
 void CL_DLLEXPORT CAM_Think(void)
 {
@@ -77,6 +78,7 @@ void CL_DLLEXPORT HUD_Frame(double flDeltaTime)
 	g_flClientTimeDelta = flDeltaTime;
 	g_flClientTime += flDeltaTime;
 
+	HUD_WeaponsPostThink(&g_sWpnFrom, &g_sWpnTo, &g_sWpnCmd, g_flClientTime, gPseudoPlayer.random_seed);
 	Sound_Think(flDeltaTime);
 	RegionalFogThink();
 }
@@ -212,6 +214,7 @@ BOOL CL_DLLEXPORT HUD_UpdateClientData(client_data_t* pcldata, float flTime)
 BOOL CL_DLLEXPORT HUD_VidInit(void)
 {
 	g_pViewEnt = gEngfuncs.GetViewModel();
+	g_bInGameWorld = true;
 
 	gHUD::VidInit();
 	gFontFuncs::Init();
@@ -306,6 +309,8 @@ void CL_DLLEXPORT V_CalcRefdef(ref_params_s* pparams)
 void CL_DLLEXPORT CL_Disconnect(void)
 {
 	gExtFuncs.pfnCL_Disconnect();
+
+	g_bInGameWorld = false;
 }
 
 bool CL_DLLEXPORT MH_LoadClient(unsigned short iVersion, const cl_extendedfunc_t* pfn)

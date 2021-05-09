@@ -110,7 +110,9 @@ public:
 };
 
 extern int g_runfuncs;
-extern double g_flGameTime;
+extern local_state_t g_sWpnFrom;
+extern local_state_t g_sWpnTo;
+extern usercmd_t g_sWpnCmd;
 extern std::shared_ptr<pseudo_global_vars_s> gpGlobals;
 extern const Vector g_vecZero;
 extern std::array<CBaseWeapon*, LAST_WEAPON> g_rgpClientWeapons;
@@ -129,5 +131,6 @@ extern bool g_bIsBlocked;	// this should be override, but tell the server!
 void UTIL_MakeVectors(const Vector& vec);
 
 // export func
+void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd, double time, unsigned int random_seed);
 void HUD_PostRunCmd2(local_state_t* from, local_state_t* to, usercmd_s* cmd, int runfuncs, double time, unsigned int random_seed);
 void Wpn_Init();

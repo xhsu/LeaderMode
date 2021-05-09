@@ -7,12 +7,13 @@ Created Date: Mar 12 2020
 #include "precompiled.h"
 
 int g_runfuncs = 0;
-double g_flGameTime = 0;
+local_state_t g_sWpnFrom;
+local_state_t g_sWpnTo;
+usercmd_t g_sWpnCmd;
 const Vector g_vecZero = Vector(0, 0, 0);
 int g_iCurViewModelAnim = 0;
 CBaseWeapon* g_pCurWeapon = nullptr;
 WeaponIdType g_iSelectedWeapon = WEAPON_NONE;	// this means directly switch weapon. try to use gPseudoPlayer.StartSwitchingWeapon() instead!
-usercmd_t* g_pCurUserCmd = nullptr;	// WARNING: use this within weapon's prediction code only.
 cvar_t* cl_holdtoaim = nullptr;	// HOLD to aim vs. PRESS to aim.
 
 CBasePlayer gPseudoPlayer;
@@ -347,7 +348,7 @@ bool CBaseWeapon::AddToPlayer(CBasePlayer* pPlayer)
 
 void CBaseWeapon::PostFrame()
 {
-	int usableButtons = m_pPlayer->pev->button;
+	int usableButtons = CL_ButtonBits();//m_pPlayer->pev->button;
 
 	// if we should be holster, then just do it. stop everything else.
 	if (m_bitsFlags & WPNSTATE_HOLSTERING)
@@ -355,7 +356,7 @@ void CBaseWeapon::PostFrame()
 		// only assign g_iSelectedWeapon is not quick enough. it has to wait another frame to work.
 		// therefore, we must directly set cmd->weaponselect.
 		g_iSelectedWeapon = m_pPlayer->m_iWpnSwitchingTo;
-		g_pCurUserCmd->weaponselect = m_pPlayer->m_iWpnSwitchingTo;
+		g_sWpnCmd.weaponselect = m_pPlayer->m_iWpnSwitchingTo;
 		return;
 	}
 
@@ -577,6 +578,10 @@ void CBaseWeapon::PostFrame()
 		pmtrace_t tr;
 		Vector vecMuzzle = g_pViewEnt->attachment[0]; // this is always the muzzle.
 		Vector vecLastMuzzle = g_pparams.vieworg + g_pparams.forward * m_vecBlockOffset.x + g_pparams.right * m_vecBlockOffset.y + g_pparams.up * m_vecBlockOffset.z;
+
+		// LUNA: After moving ItemPostFrame() of client.dll into HUD_Frame(), occurationally g_pViewEnt->attachment[] snap to NaN.
+		if (vecMuzzle.IsNaN())
+			vecMuzzle = g_rgvecViewModelAttachments[0];	// Using backup database.
 
 		// Why we have to use offsets?
 		// If you directly Trace from player eyes to muzzle, once the BLOCK_UP anim is played, the muzzle origin will change due to this new animation.
@@ -1151,22 +1156,23 @@ void CBaseWeapon::DefaultDashEnd(void)
 #endif
 }
 
-bool CBaseWeapon::DefaultSetLHand(bool bAppear, int iLHandUpAnim, float flLHandUpTime, int iLHandDownAnim, float flLHandDownTime)
+template<class CWpn>
+bool CBaseWeapon::DefaultSetLHand(bool bAppear)
 {
 	if (bAppear && m_bitsFlags & WPNSTATE_NO_LHAND)
 	{
-		SendWeaponAnim(iLHandUpAnim);
-		m_pPlayer->m_flNextAttack = flLHandUpTime;
-		m_flTimeWeaponIdle = flLHandUpTime;
+		SendWeaponAnim(CWpn::LHAND_UP);
+		m_pPlayer->m_flNextAttack = CWpn::LHAND_UP_TIME;
+		m_flTimeWeaponIdle = CWpn::LHAND_UP_TIME;
 		m_bitsFlags &= ~WPNSTATE_NO_LHAND;
 
 		return true;
 	}
 	else if (!(m_bitsFlags & WPNSTATE_NO_LHAND))
 	{
-		SendWeaponAnim(iLHandDownAnim);
-		m_pPlayer->m_flNextAttack = flLHandDownTime;
-		m_flTimeWeaponIdle = flLHandDownTime;
+		SendWeaponAnim(CWpn::LHAND_DOWN);
+		m_pPlayer->m_flNextAttack = CWpn::LHAND_DOWN_TIME;
+		m_flTimeWeaponIdle = CWpn::LHAND_DOWN_TIME;
 		m_bitsFlags |= WPNSTATE_NO_LHAND;
 
 		return true;
@@ -1409,11 +1415,6 @@ void HUD_InitClientWeapons(void)
 		g_rgpClientWeapons[i] = CBaseWeapon::Give((WeaponIdType)i, &gPseudoPlayer);
 }
 
-// During our weapon prediction processing, we'll need to reference some data that is part of
-//  the final state passed into the postthink functionality.  We'll set this pointer and then
-//  reset it to NULL as appropriate
-local_state_t* g_finalstate = nullptr;
-
 // from view.cpp
 extern Vector v_angles;
 
@@ -1426,6 +1427,9 @@ Run Weapon firing code on client
 */
 void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd, double time, unsigned int random_seed)
 {
+	if (!from || !to || !cmd || !g_bInGameWorld)
+		return;
+
 	int i;
 	int buttonsChanged;
 	static int lasthealth;
@@ -1435,16 +1439,11 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	HUD_InitClientWeapons();
 
 	// Get current clock
-	gpGlobals->time = float(time);
+	gpGlobals->time = float(g_flClientTime);
 
 	// Fill in data based on selected weapon
 	if (from->client.m_iId > WEAPON_NONE && from->client.m_iId < LAST_WEAPON)
 		g_pCurWeapon = g_rgpClientWeapons[from->client.m_iId];
-
-	// Store pointer to our destination entity_state_t so we can get our origin, etc. from it.
-	// for setting up events on the client.
-	g_finalstate = to;
-	g_pCurUserCmd = cmd;
 
 	// these vars have to be obtained nomatter what.
 	g_iWaterLevel = from->client.waterlevel;
@@ -1502,19 +1501,21 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	gPseudoPlayer.random_seed = random_seed;
 
 	// Get old buttons from previous state.
-	gPseudoPlayer.m_afButtonLast = from->playerstate.oldbuttons;
+	gPseudoPlayer.m_afButtonLast = gPseudoPlayer.pev->button;
+
+	// Refresh button.
+	gPseudoPlayer.pev->button = CL_ButtonBits();
 
 	// Which buttsons chave changed
-	buttonsChanged = (gPseudoPlayer.m_afButtonLast ^ cmd->buttons);	// These buttons have changed this frame
+	buttonsChanged = (gPseudoPlayer.m_afButtonLast ^ gPseudoPlayer.pev->button);	// These buttons have changed this frame
 
 	// Debounced button codes for pressed/released
 	// The changed ones still down are "pressed"
-	gPseudoPlayer.m_afButtonPressed = buttonsChanged & cmd->buttons;
+	gPseudoPlayer.m_afButtonPressed = buttonsChanged & gPseudoPlayer.pev->button;
 	// The ones not down are "released"
-	gPseudoPlayer.m_afButtonReleased = buttonsChanged & (~cmd->buttons);
+	gPseudoPlayer.m_afButtonReleased = buttonsChanged & (~gPseudoPlayer.pev->button);
 
 	// Set player variables that weapons code might check/alter
-	gPseudoPlayer.pev->button = cmd->buttons;
 
 	gPseudoPlayer.pev->deadflag = from->client.deadflag;
 	gPseudoPlayer.pev->waterlevel = from->client.waterlevel;
@@ -1641,9 +1642,9 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 
 		// Decrement weapon counters, server does this at same time ( during post think, after doing everything else )
 		// LUNA: is this gpGlobals->framerate ???
-		pCurrent->m_flNextPrimaryAttack -= cmd->msec / 1000.0f;
-		pCurrent->m_flNextSecondaryAttack -= cmd->msec / 1000.0f;
-		pCurrent->m_flTimeWeaponIdle -= cmd->msec / 1000.0f;
+		pCurrent->m_flNextPrimaryAttack -= g_flClientTimeDelta;	// LUNA: NEVER use cmd->msec / 1000.0f
+		pCurrent->m_flNextSecondaryAttack -= g_flClientTimeDelta;
+		pCurrent->m_flTimeWeaponIdle -= g_flClientTimeDelta;
 
 		if (pCurrent->m_flNextPrimaryAttack < -1.0)
 			pCurrent->m_flNextPrimaryAttack = -1.0;
@@ -1677,15 +1678,11 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 #endif
 
 	// m_flNextAttack is now part of the weapons, but is part of the player instead
-	to->client.m_flNextAttack -= cmd->msec / 1000.0f;
+	to->client.m_flNextAttack -= g_flClientTimeDelta;
 	if (to->client.m_flNextAttack < -0.001)
 	{
 		to->client.m_flNextAttack = -0.001;
 	}
-
-	// Wipe it so we can't use it after this frame
-	g_finalstate = nullptr;
-	g_pCurUserCmd = nullptr;
 }
 
 /*
@@ -1701,10 +1698,21 @@ be ignored
 */
 void HUD_PostRunCmd2(local_state_t* from, local_state_t* to, usercmd_s* cmd, int runfuncs, double time, unsigned int random_seed)
 {
-	g_runfuncs = runfuncs;
-	g_flGameTime = time;
+	// LUNA: Credits to Crsky.
+	// If you run the client.dll standalone, the cmd->msec is UTTERLY wrong.
+	// You will have to calculate it manually.
+	// On server side, manually calculate the change of gpGlobals->time.
+	// On client side, manually calculate the change of "time" parameter from ExportFunc::HUD_PostRunCmd().
 
-	HUD_WeaponsPostThink(from, to, cmd, time, random_seed);
+	//Q_memcpy(from, &g_sWpnFrom, sizeof(local_state_t));
+	//Q_memcpy(to, &g_sWpnTo, sizeof(local_state_t));
+	//Q_memcpy(cmd, &g_sWpnCmd, sizeof(usercmd_s));
+
+	g_sWpnFrom = *from;
+	g_sWpnTo = *to;
+	g_sWpnCmd = *cmd;
+	g_runfuncs = runfuncs;
+
 	to->client.fov = g_lastFOV;
 
 	if (runfuncs)
