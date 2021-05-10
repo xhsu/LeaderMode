@@ -9,7 +9,7 @@ Segmentation Date: Sep 20 2020
 #pragma once
 
 
-enum RoleTypes
+enum RoleTypes : BYTE
 {
 	Role_UNASSIGNED = 0,
 

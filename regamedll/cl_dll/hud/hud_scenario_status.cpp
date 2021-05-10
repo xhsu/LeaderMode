@@ -18,7 +18,6 @@ int CHudScenarioStatus::Init(void)
 
 	int iHeight = 0, iWidth = 0;
 
-	m_iIdSpeaker = LoadDDS("texture/HUD/Items/Speaker.dds");
 	m_iIdManpower = LoadDDS("texture/HUD/Items/Manpower.dds", &iWidth, &iHeight); m_flManpowerTextureRatio = float(iWidth) / float(iHeight);
 
 	m_rgiIdSchemeTexture[Scheme_UNASSIGNED]				= LoadDDS("texture/HUD/ClassesIcon/Doraemon.dds");	// FIXME
@@ -47,9 +46,6 @@ int CHudScenarioStatus::Init(void)
 	g_rgwcsRoleNames[Role_Assassin]		= UTIL_GetLocalisation("#LeaderMod_Role_Assassin");
 	g_rgwcsRoleNames[Role_Arsonist]		= UTIL_GetLocalisation("#LeaderMod_Role_Arsonist");
 
-	m_hNameFont = gFontFuncs::CreateFont();
-	gFontFuncs::AddGlyphSetToFont(m_hNameFont, "Trajan Pro", 20, FW_BOLD, 1, 0, FONTFLAG_ANTIALIAS | FONTFLAG_OUTLINE, 0x0, 0xFFFF);
-
 	gHUD::AddHudElem(this);
 	return 1;
 }
@@ -61,7 +57,6 @@ int CHudScenarioStatus::VidInit(void)
 
 void CHudScenarioStatus::Reset(void)
 {
-	m_rgflTimeSpeakerIconHide.fill(0.0f);
 	g_rgiManpower.fill(0);
 	g_rgiTeamSchemes.fill(Scheme_UNASSIGNED);
 }
@@ -84,72 +79,6 @@ int CHudScenarioStatus::Draw(float fTime)
 	int x = CHudRadar::BORDER_GAP * 2 + CHudRadar::HUD_SIZE;
 	int y = CHudRadar::BORDER_GAP;
 
-	//
-	Vector color = gHUD::GetColor(gHUD::m_iPlayerNum);
-
-	const wchar_t* pwcsName = nullptr;
-	int iTall = 0, iWidth = 0;
-
-	for (size_t i = 0; i < MAX_CLIENTS; i++)
-	{
-		if (!g_PlayerInfoList[i].name || !g_PlayerInfoList[i].name[0])
-			continue;
-
-		if (g_PlayerExtraInfo[i].m_iTeam != g_iTeam)
-			continue;
-
-		// hide unimportant players.
-		if (g_PlayerExtraInfo[i].m_iRoleType <= Role_UNASSIGNED || g_PlayerExtraInfo[i].m_iRoleType >= ROLE_COUNT)
-			continue;
-
-		x = CHudRadar::BORDER_GAP * 2 + CHudRadar::HUD_SIZE;	// Reset X pos on each loop.
-
-		pwcsName = UTF8ToUnicode(g_PlayerInfoList[i].name);
-		gFontFuncs::GetTextSize(gHUD::m_Scoreboard.m_hPlayerNameFont, pwcsName, &iWidth, &iTall);
-
-		// Draw class icon.
-		gEngfuncs.pTriAPI->RenderMode(kRenderTransColor);
-		gEngfuncs.pTriAPI->Brightness(1.0);
-
-		// in order to make transparent fx on dds texture...
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		gEngfuncs.pTriAPI->CullFace(TRI_NONE);
-
-		color = gHUD::GetColor(i);
-		glColor4f(color.r, color.g, color.b, 1);
-
-		glBindTexture(GL_TEXTURE_2D, gHUD::m_Radar.m_rgiRadarIcons[g_PlayerExtraInfo[i].m_iRoleType]);
-		DrawUtils::Draw2DQuad(x, y, x + iTall, y + iTall);	// yeah, it's a square.
-
-		x += iTall + GAP_PLAYERNAME_ICON;	// move to the right side of that icon.
-
-		// Draw the name text follow.
-		gFontFuncs::DrawSetTextFont(m_hNameFont);
-		gFontFuncs::DrawSetTextPos(x, y);
-		gFontFuncs::DrawSetTextColor(235, 235, 235, 255);	// have to keep the text white.
-		gFontFuncs::DrawPrintText(pwcsName);
-
-		x += iWidth + GAP_PLAYERNAME_ICON;	// move to the right side of that text.
-
-		if (m_rgflTimeSpeakerIconHide[i] > g_flClientTime)
-		{
-			gEngfuncs.pTriAPI->RenderMode(kRenderTransColor);
-			gEngfuncs.pTriAPI->Brightness(1.0);
-
-			// in order to make transparent fx on dds texture...
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-			gEngfuncs.pTriAPI->CullFace(TRI_NONE);
-
-			glColor4f(1, 1, 1, 1);
-			glBindTexture(GL_TEXTURE_2D, m_iIdSpeaker);
-			DrawUtils::Draw2DQuad(x, y, x + iTall, y + iTall);	// yeah, it's a square.
-		}
-
-		y += iTall + GAP_ROWS;	// To the next row.
-	}
-
 	// Manpower Indicator
 	x = CHudRadar::BORDER_GAP * 2 + CHudRadar::HUD_SIZE;	// Reset X pos on manpower indicator.
 	y += GAP_PLAYERNAME_MANPOWER;
@@ -165,8 +94,8 @@ int CHudScenarioStatus::Draw(float fTime)
 	glColor4f(1, 1, 1, 1);
 	glBindTexture(GL_TEXTURE_2D, m_iIdManpower);
 
-	iTall = MANPOWER_ICON_SIZE;
-	iWidth = round(m_flManpowerTextureRatio * float(iTall));
+	auto iTall = MANPOWER_ICON_SIZE;
+	auto iWidth = round(m_flManpowerTextureRatio * float(iTall));
 
 	// no more than 10 manpower icon. use text and numbers for the rests.
 	for (size_t i = 0; i < Q_min(g_rgiManpower[g_iTeam], 10U); i++)

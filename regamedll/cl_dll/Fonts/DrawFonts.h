@@ -18,8 +18,8 @@ namespace gFontFuncs
 	void	Init				( void );
 	void	Shutdown			( void );
 	void	DrawSetTextFont		( int font );
-	void	DrawSetTextColor	( int r, int g, int b, int a );
-	void	DrawSetTextColor	( const Vector& color, float a );
+	void	DrawSetTextColor	( int r, int g, int b, int a );	// Scale between 0 to 255.
+	void	DrawSetTextColor	( const Vector& color, float a );	// Scale between 0 to 1.
 	void	DrawSetTextColor	( unsigned long ulRGB, int a );
 	void	DrawSetTextPos		( int x, int y );
 	void	DrawGetTextPos		( int *x, int *y );

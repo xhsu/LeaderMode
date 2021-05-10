@@ -319,7 +319,7 @@ hSprite LoadSprite(const char* pszName)
 // from view.cpp
 extern Vector v_origin, v_angles;
 
-bool CalcScreen(Vector& in, Vector2D& out)
+bool CalcScreen(const Vector& in, Vector2D& out)
 {
 	Vector aim = in - v_origin;
 	Vector view = v_angles.MakeVector();
@@ -495,4 +495,14 @@ void parse(std::string& s, std::unordered_map<std::string, std::string>& items)
 
 		items[strip(kv[0], " \"")] = strip(kv[1], " \"");
 	}
+}
+
+bool UTIL_EntityValid(const cl_entity_t* pEntity)	// Incomplete.
+{
+	bool bNotInPVS = (Q_abs(gEngfuncs.GetLocalPlayer()->curstate.messagenum - pEntity->curstate.messagenum) > 15);
+
+	if (pEntity && pEntity->model && pEntity->model->name && !bNotInPVS)
+		return true;
+
+	return false;
 }
