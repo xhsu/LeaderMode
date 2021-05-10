@@ -10,8 +10,10 @@ Modern Warfare Dev Team
 #pragma once
 
 #include <stdlib.h>
+#include <iostream>
 #include <memory>
-#include <array>
+#include <vector>
+#include <string>
 #include "../common/mathlib.h"
 #include "../dlls/vector.h"
 
@@ -34,38 +36,37 @@ public:	// basic logic funcs
 	virtual void	WeaponIdle(void) {}						// constantly called when nothing else to do.
 	virtual bool	Reload(void) { return false; }			// you know what it is, right?
 	virtual bool	Melee(void) { return false; }			// quick knife.
-	virtual bool	QuickThrowStart(EquipmentIdType iId) {}	// quick grenade (maybe something else in the future?).
-	virtual bool	QuickThrowRelease(void) {}				// triggered when +qtg button released.
+	virtual bool	QuickThrowStart(EquipmentIdType iId) { return false; }	// quick grenade (maybe something else in the future?).
+	virtual bool	QuickThrowRelease(void) { return false; }				// triggered when +qtg button released.
 	virtual bool	AlterAct(void) { return false; }		// special use. for instance, XM8 "morph".
-	virtual bool	HolsterStart(void) {}					// play holster anim, initialize holstering.
+	virtual bool	HolsterStart(void) { return false; }					// play holster anim, initialize holstering.
 	virtual void	Holstered(void) {}						// majorlly reset the weapon data. no visual stuff.
 	virtual	void	DashStart(void) { m_bitsFlags |= WPNSTATE_DASHING; }		// called when system thinks it's time to dash.
 	virtual void	DashEnd(void) { m_bitsFlags &= ~WPNSTATE_DASHING; }			// called when system thinks it's time to stop dash.
-	virtual bool	Drop(void** ppWeaponBoxReturned = nullptr) {}		// called when attempting to drop it on ground. ppWeaponBoxReturned is the CWeaponBox to be returned. (NOT avaliable on client side.)
-	virtual bool	Kill(void) {};							// called when attempting to remove it from your inventory.
+	virtual bool	Drop(void** ppWeaponBoxReturned = nullptr) { return false; }		// called when attempting to drop it on ground. ppWeaponBoxReturned is the CWeaponBox to be returned. (NOT avaliable on client side.)
+	virtual bool	Kill(void) { return true; }							// called when attempting to remove it from your inventory.
+
+public:	// Util funcs
+	virtual std::string	Info(void) const { return"CBaseWeaponInterface"; }
 };
 
 class CBaseWpnCmpt : public std::enable_shared_from_this<CBaseWpnCmpt>
 {
 public:
 	typedef std::shared_ptr<CBaseWpnCmpt> PTR;
-
-private:
-	CBaseWpnCmpt() = default;
+	typedef std::weak_ptr<CBaseWpnCmpt> W_PTR;
 
 public:
-	CBaseWpnCmpt(const CBaseWpnCmpt& s) = default;
-	CBaseWpnCmpt(CBaseWpnCmpt&& s) = default;
-	CBaseWpnCmpt& operator=(const CBaseWpnCmpt& s) = default;
-	CBaseWpnCmpt& operator=(CBaseWpnCmpt&& s) = default;
-	virtual ~CBaseWpnCmpt() {}
+	virtual ~CBaseWpnCmpt() { std::cout << Info() << " gets deleted!\n"; }
+
+	virtual std::string Info() const { return "CBaseWpnCmpt"; }
 
 protected:
-	CBaseWeaponInterface::PTR m_pWeapon	{ nullptr };
+	CBaseWeaponInterface* m_pWeapon	{ nullptr };
 
 public:
 	template <class CComponent>
-	static std::shared_ptr<CComponent> Create(CBaseWeaponInterface::PTR pWeapon)
+	static std::shared_ptr<CComponent> Create(CBaseWeaponInterface* pWeapon)
 	{
 		std::shared_ptr<CComponent> pComponent = std::make_shared<CComponent>();
 		pComponent->m_pWeapon = pWeapon;
@@ -79,44 +80,20 @@ template <	class CWeapon,
 >
 class CBaseWeaponTemplate : public CBaseWeaponInterface
 {
-public:
-	std::array<CBaseWpnCmpt::PTR, sizeof...(CComponents)> m_rgpComponents;
+	static_assert((std::is_base_of_v<CBaseWpnCmpt, CComponents> && ...), "'CComponents' arguments must inherit from 'CBaseWpnCmpt'.");
 
 public:
-	virtual void	SecondaryAttack(void)
-	{
-		for (auto& pComponent : m_rgpComponents)
-		{
-			pComponent->SecondaryAttack();
-		}
-	}
-};
+	CBaseWeaponTemplate() : m_rgpComponents{ CBaseWpnCmpt::Create<CComponents>(this)... } { }
 
-class CBaseWeaponLite
-{
-public:
-	// avoid the complex memset();
-	void* operator new(size_t size)
+	friend std::ostream& operator << (std::ostream& os, CBaseWeaponTemplate const& weapon_with_attachments)
 	{
-		return calloc(1, size);
-	}
-	void operator delete(void* ptr)
-	{
-		free(ptr);
+		for (auto const& a : weapon_with_attachments.m_rgpComponents)
+			std::cout << a->Info() << std::endl;
+
+		return os;
 	}
 
-public:	// Construct & Destruct
-	CBaseWeaponLite() = default;
-	CBaseWeaponLite(const CBaseWeaponLite& s) = default;
-	CBaseWeaponLite(CBaseWeaponLite&& s) = default;
-	CBaseWeaponLite& operator=(const CBaseWeaponLite& s) = default;
-	CBaseWeaponLite& operator=(CBaseWeaponLite&& s) = default;
-	virtual ~CBaseWeaponLite() {}
-
-public:	// Members
-	float	m_flNextAttack{ 0.0f };
-	int		m_iClip{ 0 };
-
-public:
-	void Fire() {}
+protected:
+	std::tuple<CComponents...>		m_AttachmentTypes;
+	std::vector<CBaseWpnCmpt::PTR>	m_rgpComponents;	// The existance of components depending on weapon, not vice versa.
 };
