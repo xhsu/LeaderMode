@@ -28,10 +28,10 @@
 
 #pragma once
 
-const int MAX_WEAPON_SLOTS = 5;		// hud item selection slots
-const int MAX_ITEM_TYPES   = 6;		// hud item selection slots
-const int MAX_AMMO_SLOTS   = 32;	// not really slots
-const int MAX_ITEMS        = 4;		// hard coded item types
+constexpr int MAX_WEAPON_SLOTS = 5;		// hud item selection slots
+constexpr int MAX_ITEM_TYPES   = 6;		// hud item selection slots
+constexpr int MAX_AMMO_SLOTS   = 32;	// not really slots
+constexpr int MAX_ITEMS        = 4;		// hard coded item types
 
 constexpr int DEFAULT_FOV      = 90;	// the default field of view
 

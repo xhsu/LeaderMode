@@ -44,11 +44,8 @@ public:
 	int Draw(float fTime);
 
 public:
-	std::array<float, MAX_PLAYERS> m_rgflTimeSpeakerIconHide;
-	GLuint m_iIdSpeaker{ 0U };
 	GLuint m_iIdManpower{ 0U };
 	float m_flManpowerTextureRatio{ 1.0f };
 	std::array<std::wstring, 4U> m_rgwcsManpowerTexts;
 	std::array<GLuint, SCHEMES_COUNT> m_rgiIdSchemeTexture{ 0U, 0U, 0U, 0U, 0U };
-	int m_hNameFont{ 0 };
 };

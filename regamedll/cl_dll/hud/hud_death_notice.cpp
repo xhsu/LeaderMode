@@ -122,7 +122,7 @@ void CHudDeathNotice::MsgFunc_DeathMsg(int iKillerIndex, int iVictimIndex, bool 
 
 	// the rest straight-forward data.
 	Q_strlcpy(item.m_szKiller, g_PlayerInfoList[iKillerIndex].name ? g_PlayerInfoList[iKillerIndex].name : "");
-	Q_strlcpy(item.m_szVictim, g_PlayerInfoList[iVictimIndex].name);
+	Q_strlcpy(item.m_szVictim, g_PlayerInfoList[iVictimIndex].name ? g_PlayerInfoList[iVictimIndex].name : "");
 	item.m_bHeadshot = bHeadshot;
 
 	// colour.

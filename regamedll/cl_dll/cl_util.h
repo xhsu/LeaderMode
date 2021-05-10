@@ -80,7 +80,7 @@ extern Vector g_ColorYellow;
 extern Vector g_ColorGrey;
 float* GetClientColor(int clientIndex);
 hSprite LoadSprite(const char* pszName);
-bool CalcScreen(Vector& in, Vector2D& out);	// a.k.a. WorldToScreen
+bool CalcScreen(const Vector& in, Vector2D& out);	// a.k.a. WorldToScreen
 void UTIL_TraceLine(Vector& vecSrc, Vector& vecEnd, int traceFlags, int ignore_pe, struct pmtrace_s* ptr, int index, int hull = 2);
 std::wstring UTIL_ArabicToRoman(unsigned value);
 const wchar_t* UTIL_GetLocalisation(const char* szToken);	// safe version of ILocalize::Find().
@@ -117,3 +117,4 @@ Iter select_randomly(Iter start, Iter end)
 }
 
 void UTIL_Split(const std::string& s, std::vector<std::string>& tokens, const std::string& delimiters = " ");
+bool UTIL_EntityValid(const cl_entity_t* pEntity);	// Incomplete.

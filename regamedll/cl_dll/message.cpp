@@ -500,7 +500,7 @@ MSG_FUNC(SendAudio)
 	g_PlayerExtraInfo[client].m_bRadarFlashing = true;
 
 	// speaker icon next to player name.
-	gHUD::m_scenarioStatus.m_rgflTimeSpeakerIconHide[client] = g_flClientTime + 3.5;
+	gHUD::m_headName.m_rgflTimeSpeakerIconHide[client] = g_flClientTime + 3.5;
 
 	return TRUE;
 }
