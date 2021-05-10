@@ -22,7 +22,7 @@ public:
 
 public:
 	void BuildUnicodeList(void);
-	bool IsValidEntity(cl_entity_s* pEntity);
+	bool IsValidEntity(cl_entity_s* pEntity, bool bCheckPVS = true);
 
 public:
 	void MsgFunc_HeadName(int& iDrawType);

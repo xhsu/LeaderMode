@@ -46,7 +46,10 @@ int CHudHeadName::Draw(float flTime)
 		{
 			cl_entity_t* ent = gEngfuncs.GetEntityByIndex(i);
 
-			if (!IsValidEntity(ent))
+			if (!IsValidEntity(ent, false))
+				continue;
+
+			if (g_PlayerExtraInfo[i].m_bIsDead || g_PlayerExtraInfo[i].m_iHealth <= 0)
 				continue;
 
 			model_t* model = ent->model;
@@ -177,11 +180,11 @@ void CHudHeadName::BuildUnicodeList(void)
 	}
 }
 
-bool CHudHeadName::IsValidEntity(cl_entity_s* pEntity)
+bool CHudHeadName::IsValidEntity(cl_entity_s* pEntity, bool bCheckPVS)
 {
 	bool bNotInPVS = (Q_abs(gEngfuncs.GetLocalPlayer()->curstate.messagenum - pEntity->curstate.messagenum) > 15);
 
-	if (pEntity && pEntity->model && pEntity->model->name && !bNotInPVS)
+	if (pEntity && pEntity->model && pEntity->model->name && (!bNotInPVS || !bCheckPVS))
 		return true;
 
 	return false;
