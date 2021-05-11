@@ -1323,6 +1323,19 @@ MSG_FUNC(Scheme)
 	return TRUE;
 }
 
+MSG_FUNC(NewRound)
+{
+	// This message has no param.
+
+	for (auto& hudpfns : gHUD::m_lstElements)
+	{
+		if (hudpfns.pfnOnNewRound)
+			(*hudpfns.pfnOnNewRound)();
+	}
+
+	return TRUE;
+}
+
 // player.cpp
 MSG_FUNC(Logo)
 {
@@ -1442,6 +1455,7 @@ void Msg_Init(void)
 	HOOK_USER_MSG(Equipment);
 	HOOK_USER_MSG(Manpower);
 	HOOK_USER_MSG(Scheme);
+	HOOK_USER_MSG(NewRound);
 
 	// player.cpp
 	HOOK_USER_MSG(Logo);

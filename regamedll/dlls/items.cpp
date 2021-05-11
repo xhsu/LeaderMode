@@ -340,7 +340,7 @@ BOOL CItemKevlar::MyTouch(CBasePlayer *pPlayer)
 	MESSAGE_END();
 
 	MESSAGE_BEGIN(MSG_ONE, gmsgArmorType, nullptr, pPlayer->pev);
-		WRITE_BYTE(pPlayer->pev->armortype == ARMOR_KEVLAR ? 0 : 1); // 0 = ARMOR_KEVLAR, 1 = ARMOR_VESTHELM
+		WRITE_BYTE(pPlayer->pev->armortype);
 	MESSAGE_END();
 
 	return TRUE;
@@ -378,7 +378,7 @@ BOOL CItemAssaultSuit::MyTouch(CBasePlayer *pPlayer)
 	MESSAGE_END();
 
 	MESSAGE_BEGIN(MSG_ONE, gmsgArmorType, nullptr, pPlayer->pev);
-		WRITE_BYTE(1); // 0 = ARMOR_KEVLAR, 1 = ARMOR_VESTHELM
+		WRITE_BYTE(ARMOR_VESTHELM);
 	MESSAGE_END();
 
 	return TRUE;

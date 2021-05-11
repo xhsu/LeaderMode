@@ -148,6 +148,9 @@ void gHUD::Init(void)
 	m_flUCDOldTime = 0;
 	m_flUCDTimeDelta = 1;
 
+	// Initialize fonts before elements.
+	gFontFuncs::AddCustomFontFile("resource/fonts/716.TTF");
+
 	// we can't use this in init() since all these elements are adding themselves into std::list in init().
 	/*for (auto pHudElement : m_lstHudElements)
 	{

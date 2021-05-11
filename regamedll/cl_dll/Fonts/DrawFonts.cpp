@@ -352,7 +352,14 @@ bool gFontFuncs::AddGlyphSetToFont(int font, const char *windowsFontName, int ta
 
 bool gFontFuncs::AddCustomFontFile(const char *fontFileName)
 {
+#ifdef FILE_SYSTEM
+	char szFullPath[256];
+	FILE_SYSTEM->GetLocalPath(fontFileName, szFullPath, charsmax(szFullPath));
+
+	return AddFontResourceExA(szFullPath, FR_PRIVATE, 0) != 0;
+#else
 	return AddFontResourceExA(fontFileName, FR_PRIVATE, 0) != 0;
+#endif // FILE_SYSTEM
 }
 
 int gFontFuncs::GetFontTall(int font)
@@ -372,6 +379,12 @@ int gFontFuncs::GetCharacterWidth(int font, int ch)
 
 void gFontFuncs::GetTextSize(int font, const wchar_t *text, int *wide, int *tall)
 {
+	int dummy1 = 0, dummy2 = 0;
+	if (!wide)
+		wide = &dummy1;
+	if (!tall)
+		tall = &dummy2;
+
 	return FontManager().GetTextSize(font, text, *wide, *tall);
 }
 

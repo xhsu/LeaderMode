@@ -647,7 +647,7 @@ void CSkillArmorRegen::Think()
 				MESSAGE_END();
 
 				MESSAGE_BEGIN(MSG_ONE, gmsgArmorType, pPlayer->pev->origin, pPlayer->pev);
-				WRITE_BYTE(1);
+				WRITE_BYTE(ARMOR_VESTHELM);
 				MESSAGE_END();
 			}
 		}
@@ -670,7 +670,7 @@ void CSkillArmorRegen::Think()
 			MESSAGE_END();
 
 			MESSAGE_BEGIN(MSG_ONE, gmsgArmorType, m_pPlayer->pev->origin, m_pPlayer->pev);
-			WRITE_BYTE(1);
+			WRITE_BYTE(ARMOR_VESTHELM);
 			MESSAGE_END();
 		}
 

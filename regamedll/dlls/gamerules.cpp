@@ -855,6 +855,9 @@ void EXT_FUNC CHalfLifeMultiplay::RestartRound()
 		WRITE_BYTE(0);		// to default FOV value
 	MESSAGE_END();
 
+	MESSAGE_BEGIN(MSG_ALL, gmsgNewRound);
+	MESSAGE_END();
+
 	auto shouldBalancedOnNextRound = []() -> bool
 	{
 		return autoteambalance.value == 1;
