@@ -18,13 +18,13 @@ int CHudScenarioStatus::Init(void)
 
 	int iHeight = 0, iWidth = 0;
 
-	m_iIdManpower = LoadDDS("texture/HUD/Items/Manpower.dds", &iWidth, &iHeight); m_flManpowerTextureRatio = float(iWidth) / float(iHeight);
+	m_iIdManpower = LoadDDS("sprites/Miscellaneous/Manpower.dds", &iWidth, &iHeight); m_flManpowerTextureRatio = float(iWidth) / float(iHeight);
 
-	m_rgiIdSchemeTexture[Scheme_UNASSIGNED]				= LoadDDS("texture/HUD/ClassesIcon/Doraemon.dds");	// FIXME
-	m_rgiIdSchemeTexture[Doctrine_GrandBattleplan]		= LoadDDS("texture/HUD/Schemes/Doctrine_GrandBattleplan.dds");
-	m_rgiIdSchemeTexture[Doctrine_MassAssault]			= LoadDDS("texture/HUD/Schemes/Doctrine_MassAssault.dds");
-	m_rgiIdSchemeTexture[Doctrine_MobileWarfare]		= LoadDDS("texture/HUD/Schemes/Doctrine_MobileWarfare.dds");
-	m_rgiIdSchemeTexture[Doctrine_SuperiorFirepower]	= LoadDDS("texture/HUD/Schemes/Doctrine_SuperiorFirepower.dds");
+	m_rgiIdSchemeTexture[Scheme_UNASSIGNED]				= LoadDDS("sprites/ClassesIcon/Doraemon.dds");	// FIXME
+	m_rgiIdSchemeTexture[Doctrine_GrandBattleplan]		= LoadDDS("sprites/Schemes/Doctrine_GrandBattleplan.dds");
+	m_rgiIdSchemeTexture[Doctrine_MassAssault]			= LoadDDS("sprites/Schemes/Doctrine_MassAssault.dds");
+	m_rgiIdSchemeTexture[Doctrine_MobileWarfare]		= LoadDDS("sprites/Schemes/Doctrine_MobileWarfare.dds");
+	m_rgiIdSchemeTexture[Doctrine_SuperiorFirepower]	= LoadDDS("sprites/Schemes/Doctrine_SuperiorFirepower.dds");
 
 	g_rgwcsSchemeNames[Scheme_UNASSIGNED]			= UTIL_GetLocalisation("#LeaderMod_Scheme_UNASSIGNED");
 	g_rgwcsSchemeNames[Doctrine_GrandBattleplan]	= UTIL_GetLocalisation("#LeaderMod_Doctrine_GrandBattleplan");

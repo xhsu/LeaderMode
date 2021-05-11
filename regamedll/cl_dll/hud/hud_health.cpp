@@ -54,7 +54,7 @@ int CHudHealth::VidInit(void)
 	giDmgHeight = gHUD::GetSpriteRect(m_HUD_dmg_bio)->right - gHUD::GetSpriteRect(m_HUD_dmg_bio)->left;
 	giDmgWidth = gHUD::GetSpriteRect(m_HUD_dmg_bio)->bottom - gHUD::GetSpriteRect(m_HUD_dmg_bio)->top;
 
-	m_hBloodScreen = LoadDDS("texture/Screen/BloodScreen.dds");
+	m_hBloodScreen = LoadDDS("gfx/Screen/BloodScreen.dds");
 
 	return 1;
 }

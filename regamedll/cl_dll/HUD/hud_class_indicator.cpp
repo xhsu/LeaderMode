@@ -67,21 +67,21 @@ int CHudClassIndicator::VidInit(void)
 {
 	m_fFade = 0;
 
-	m_iClassesIcon[Role_UNASSIGNED]	= LoadDDS("texture/HUD/ClassesIcon/Doraemon.dds");
+	m_iClassesIcon[Role_UNASSIGNED]	= LoadDDS("sprites/ClassesIcon/Doraemon.dds");
 
 	// CT
-	m_iClassesIcon[Role_Breacher]		= LoadDDS("texture/HUD/ClassesIcon/CT/Breacher.dds");
-	m_iClassesIcon[Role_Commander]		= LoadDDS("texture/HUD/ClassesIcon/CT/Commander.dds");
-	m_iClassesIcon[Role_Medic]			= LoadDDS("texture/HUD/ClassesIcon/CT/Medic.dds");
-	m_iClassesIcon[Role_Sharpshooter]	= LoadDDS("texture/HUD/ClassesIcon/CT/Sharpshooter.dds");
-	m_iClassesIcon[Role_SWAT]			= LoadDDS("texture/HUD/ClassesIcon/CT/SWAT.dds");
+	m_iClassesIcon[Role_Breacher]		= LoadDDS("sprites/ClassesIcon/CT/Breacher.dds");
+	m_iClassesIcon[Role_Commander]		= LoadDDS("sprites/ClassesIcon/CT/Commander.dds");
+	m_iClassesIcon[Role_Medic]			= LoadDDS("sprites/ClassesIcon/CT/Medic.dds");
+	m_iClassesIcon[Role_Sharpshooter]	= LoadDDS("sprites/ClassesIcon/CT/Sharpshooter.dds");
+	m_iClassesIcon[Role_SWAT]			= LoadDDS("sprites/ClassesIcon/CT/SWAT.dds");
 
 	// T
-	m_iClassesIcon[Role_Arsonist]		= LoadDDS("texture/HUD/ClassesIcon/T/Arsonist.dds");
-	m_iClassesIcon[Role_Assassin]		= LoadDDS("texture/HUD/ClassesIcon/T/Assassin.dds");
-	m_iClassesIcon[Role_Godfather]		= LoadDDS("texture/HUD/ClassesIcon/T/Godfather.dds");
-	m_iClassesIcon[Role_LeadEnforcer]	= LoadDDS("texture/HUD/ClassesIcon/T/LeadEnforcer.dds");
-	m_iClassesIcon[Role_MadScientist]	= LoadDDS("texture/HUD/ClassesIcon/T/MadScientist.dds");
+	m_iClassesIcon[Role_Arsonist]		= LoadDDS("sprites/ClassesIcon/T/Arsonist.dds");
+	m_iClassesIcon[Role_Assassin]		= LoadDDS("sprites/ClassesIcon/T/Assassin.dds");
+	m_iClassesIcon[Role_Godfather]		= LoadDDS("sprites/ClassesIcon/T/Godfather.dds");
+	m_iClassesIcon[Role_LeadEnforcer]	= LoadDDS("sprites/ClassesIcon/T/LeadEnforcer.dds");
+	m_iClassesIcon[Role_MadScientist]	= LoadDDS("sprites/ClassesIcon/T/MadScientist.dds");
 
 	return TRUE;
 }

@@ -17,6 +17,9 @@ int CHudHeadName::Draw(float flTime)
 	if ((gHUD::m_bitsHideHUDDisplay & HIDEHUD_ALL) || g_iUser1)
 		return 1;
 
+	if (gHUD::m_iFOV <= 40)
+		return 1;	// hide headname when we are using sniper scope.
+
 	if (gHUD::m_flTime > m_flTimeUpdatePlayerNames)
 	{
 		BuildUnicodeList();
@@ -69,9 +72,7 @@ int CHudHeadName::Draw(float flTime)
 			// default alpha.
 			float flAlpha = 192;
 
-			if (gHUD::m_iFOV <= 40)
-				flAlpha = 0;	// hide headname when we are using sniper scope.
-			else if (gHUD::m_iLastFOVDiff > 0)
+			if (gHUD::m_iLastFOVDiff > 0)
 			{
 				if (gHUD::m_iFOV >= 90)	// scoping out
 					flAlpha = float(flAlpha) * (1.0f - Q_abs(gHUD::m_flDisplayedFOV - float(gHUD::m_iFOV)) / float(gHUD::m_iLastFOVDiff));
@@ -136,7 +137,7 @@ int CHudHeadName::Draw(float flTime)
 
 int CHudHeadName::Init(void)
 {
-	m_iIdSpeaker = LoadDDS("texture/HUD/Items/Speaker.dds");
+	m_iIdSpeaker = LoadDDS("sprites/Miscellaneous/Speaker.dds");
 
 	gHUD::AddHudElem(this);
 	return 1;

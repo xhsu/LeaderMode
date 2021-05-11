@@ -15,21 +15,21 @@ int CHudRadar::Init(void)
 	m_bDrawRadar = true;
 
 	// CT
-	m_rgiRadarIcons[Role_Breacher]		= LoadDDS("texture/HUD/ClassesIcon/CT/Breacher_Radar.dds");
-	m_rgiRadarIcons[Role_Commander]		= LoadDDS("texture/HUD/ClassesIcon/CT/Commander_Radar.dds");
-	m_rgiRadarIcons[Role_Medic]			= LoadDDS("texture/HUD/ClassesIcon/CT/Medic_Radar.dds");
-	m_rgiRadarIcons[Role_Sharpshooter]	= LoadDDS("texture/HUD/ClassesIcon/CT/Sharpshooter_Radar.dds");
-	m_rgiRadarIcons[Role_SWAT]			= LoadDDS("texture/HUD/ClassesIcon/CT/SWAT_Radar.dds");
+	m_rgiRadarIcons[Role_Breacher]		= LoadDDS("sprites/ClassesIcon/CT/Breacher_Radar.dds");
+	m_rgiRadarIcons[Role_Commander]		= LoadDDS("sprites/ClassesIcon/CT/Commander_Radar.dds");
+	m_rgiRadarIcons[Role_Medic]			= LoadDDS("sprites/ClassesIcon/CT/Medic_Radar.dds");
+	m_rgiRadarIcons[Role_Sharpshooter]	= LoadDDS("sprites/ClassesIcon/CT/Sharpshooter_Radar.dds");
+	m_rgiRadarIcons[Role_SWAT]			= LoadDDS("sprites/ClassesIcon/CT/SWAT_Radar.dds");
 
 	// T
-	m_rgiRadarIcons[Role_Arsonist]		= LoadDDS("texture/HUD/ClassesIcon/T/Arsonist_Radar.dds");
-	m_rgiRadarIcons[Role_Assassin]		= LoadDDS("texture/HUD/ClassesIcon/T/Assassin_Radar.dds");
-	m_rgiRadarIcons[Role_Godfather]		= LoadDDS("texture/HUD/ClassesIcon/T/Godfather_Radar.dds");
-	m_rgiRadarIcons[Role_LeadEnforcer]	= LoadDDS("texture/HUD/ClassesIcon/T/LeadEnforcer_Radar.dds");
-	m_rgiRadarIcons[Role_MadScientist]	= LoadDDS("texture/HUD/ClassesIcon/T/MadScientist_Radar.dds");
+	m_rgiRadarIcons[Role_Arsonist]		= LoadDDS("sprites/ClassesIcon/T/Arsonist_Radar.dds");
+	m_rgiRadarIcons[Role_Assassin]		= LoadDDS("sprites/ClassesIcon/T/Assassin_Radar.dds");
+	m_rgiRadarIcons[Role_Godfather]		= LoadDDS("sprites/ClassesIcon/T/Godfather_Radar.dds");
+	m_rgiRadarIcons[Role_LeadEnforcer]	= LoadDDS("sprites/ClassesIcon/T/LeadEnforcer_Radar.dds");
+	m_rgiRadarIcons[Role_MadScientist]	= LoadDDS("sprites/ClassesIcon/T/MadScientist_Radar.dds");
 
 	// common
-	m_iIdArrow = LoadDDS("texture/HUD/Radar/Arrow.dds");
+	m_iIdArrow = LoadDDS("sprites/Radar/Arrow.dds");
 
 	gHUD::AddHudElem(this);
 	return 1;
