@@ -213,6 +213,56 @@ void DrawUtils::Draw2DLinearProgressBar(float x, float y, float flWidth, float f
 	glEnd();
 }
 
+static float flInnerBlockWidth = 0.0f;
+static float flInnerBlockHeight = 0.0f;
+
+void DrawUtils::Draw2DLinearProgressBar(float x, float y, float flTotalWidth, float flTotalHeight, float flThickness, float flGapSize, float flPercentage)
+{
+	flPercentage = Q_clamp(flPercentage, 0.0f, 1.0f);
+	flInnerBlockWidth = (flTotalWidth - flThickness * 2 - flGapSize * 2) * flPercentage;
+	flInnerBlockHeight = flTotalHeight - flThickness * 2 - flGapSize * 2;
+
+	// first bar: -x => +x
+	glBegin(GL_QUADS);
+	glVertex2f(x, y);
+	glVertex2f(x + flTotalWidth, y);
+	glVertex2f(x + flTotalWidth, y + flThickness * 1);
+	glVertex2f(x, y + flThickness * 1);
+	glEnd();
+
+	// second bar: -y => +y
+	glBegin(GL_QUADS);
+	glVertex2f(x + flTotalWidth - flThickness * 1, y + flThickness * 1);
+	glVertex2f(x + flTotalWidth, y + flThickness * 1);
+	glVertex2f(x + flTotalWidth, y + flThickness + (flTotalHeight - flThickness));
+	glVertex2f(x + flTotalWidth - flThickness * 1, y + flThickness + (flTotalHeight - flThickness));
+	glEnd();
+
+	// third bar: +x => -x
+	glBegin(GL_QUADS);
+	glVertex2f(x + (flTotalWidth - flThickness * 1), y + flTotalHeight - flThickness * 1);
+	glVertex2f(x + flTotalWidth - flThickness * 1, y + flTotalHeight - flThickness * 1);
+	glVertex2f(x + flTotalWidth - flThickness * 1, y + flTotalHeight);
+	glVertex2f(x + (flTotalWidth - flThickness * 1), y + flTotalHeight);
+	glEnd();
+
+	// fourth bar: +y => -y
+	glBegin(GL_QUADS);
+	glVertex2f(x, y + flThickness * 1 + (flTotalHeight - flThickness * 2));
+	glVertex2f(x + flThickness * 1, y + flThickness * 1 + (flTotalHeight - flThickness * 2));
+	glVertex2f(x + flThickness * 1, y + flTotalHeight - flThickness * 1);
+	glVertex2f(x, y + flTotalHeight - flThickness * 1);
+	glEnd();
+
+	// Inner block
+	glBegin(GL_QUADS);
+	glVertex2f(x + flThickness + flGapSize, y + flThickness + flGapSize);
+	glVertex2f(x + flThickness + flGapSize + flInnerBlockWidth, y + flThickness + flGapSize);
+	glVertex2f(x + flThickness + flGapSize + flInnerBlockWidth, y + flThickness + flGapSize + flInnerBlockHeight);
+	glVertex2f(x + flThickness + flGapSize, y + flThickness + flGapSize + flInnerBlockHeight);
+	glEnd();
+}
+
 void DrawUtils::Draw2DHollowQuad(float x, float y, float flWidth, float flHeight)
 {
 	glBegin(GL_LINE_LOOP);

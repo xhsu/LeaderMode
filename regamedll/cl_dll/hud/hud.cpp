@@ -95,10 +95,11 @@ namespace gHUD
 	SCREENINFO m_scrinfo;
 
 	// HUD elements.
+	std::list<element_t> m_lstElements;
 	CHudHealth m_Health;
 	CHudSpectator m_Spectator;
 	CHudGeiger m_Geiger;
-	CHudBattery m_Battery;
+	//CHudBattery m_Battery;
 	CHudTrain m_Train;
 	CHudFlashlight m_Flash;
 	CHudMessage m_Message;
@@ -123,12 +124,12 @@ namespace gHUD
 	CHudScoreboard m_Scoreboard;
 	CHudClassIndicator m_ClassIndicator;
 	CUIBuyMenu m_UI_BuyMenu;
-	CHudVitality m_Vitality;
 };
 
 void gHUD::Init(void)
 {
-	Shutdown();
+	m_lstHudElements.clear();
+	m_lstElements.clear();
 
 	/* UNDONE
 	if (gConfigs.bEnableClientUI)
@@ -154,37 +155,37 @@ void gHUD::Init(void)
 	}*/
 
 	// instead, we should:
-	m_Health.Init();
-	m_SayText.Init();	// m_SayText should place before m_Spectator, since m_Spectator.init() is calling some vars from m_SayText.Init().
-	m_Spectator.Init();
-	m_Geiger.Init();
-	m_Battery.Init();
-	m_Train.Init();
-	m_Flash.Init();
-	m_Message.Init();
-	m_StatusBar.Init();
-	m_TextMessage.Init();
-	m_roundTimer.Init();
-	m_accountBalance.Init();
-	m_headName.Init();
-	m_Radar.Init();
-	m_StatusIcons.Init();
-	m_scenarioStatus.Init();
-	m_progressBar.Init();
-	m_VGUI2Print.Init();
-	m_Grenade.Init();
-	m_SniperScope.Init();	// this is a important borderline. Any HUD should not be block by Scope DDS should place behind on this.
-	m_DeathNotice.Init();
-	m_Menu.Init();
-	m_NightVision.Init();
-	m_Crosshair.Init();
-	m_WeaponList.Init();
-	m_ClassIndicator.Init();
-	m_Vitality.Init();
-	m_Scoreboard.Init();	// this is definately the last layer.
+	AddElementsToList<CHudBattery>();
+	//m_Health.Init();
+	//m_SayText.Init();	// m_SayText should place before m_Spectator, since m_Spectator.init() is calling some vars from m_SayText.Init().
+	//m_Spectator.Init();
+	//m_Geiger.Init();
+	//m_Battery.Init();
+	//m_Train.Init();
+	//m_Flash.Init();
+	//m_Message.Init();
+	//m_StatusBar.Init();
+	//m_TextMessage.Init();
+	//m_roundTimer.Init();
+	//m_accountBalance.Init();
+	//m_headName.Init();
+	//m_Radar.Init();
+	//m_StatusIcons.Init();
+	//m_scenarioStatus.Init();
+	//m_progressBar.Init();
+	//m_VGUI2Print.Init();
+	//m_Grenade.Init();
+	//m_SniperScope.Init();	// this is a important borderline. Any HUD should not be block by Scope DDS should place behind on this.
+	//m_DeathNotice.Init();
+	//m_Menu.Init();
+	//m_NightVision.Init();
+	//m_Crosshair.Init();
+	//m_WeaponList.Init();
+	//m_ClassIndicator.Init();
+	//m_Scoreboard.Init();	// this is definately the last layer.
 
 	// UI is always above all other HUD elements.
-	m_UI_BuyMenu.Init();
+	//m_UI_BuyMenu.Init();
 
 	// UNDONE
 	//GetClientVoice()->Init(&g_VoiceStatusHelper);
@@ -250,6 +251,13 @@ void gHUD::Init(void)
 void gHUD::Shutdown(void)
 {
 	m_lstHudElements.clear();
+	m_lstElements.clear();
+
+	for (auto& hudpfns : m_lstElements)
+	{
+		if (hudpfns.pfnShutdown)
+			(*hudpfns.pfnShutdown)();
+	}
 }
 
 void gHUD::VidInit(void)
@@ -390,6 +398,12 @@ void gHUD::VidInit(void)
 		//g_pViewPort->VidInit();
 
 	m_pGLUquadricHandle = gluNewQuadric();
+
+	for (auto& hudpfns : m_lstElements)
+	{
+		if (hudpfns.pfnConnectToServer)
+			(*hudpfns.pfnConnectToServer)();
+	}
 }
 
 int gHUD::Redraw(float flTime, int intermission)
@@ -450,6 +464,12 @@ int gHUD::Redraw(float flTime, int intermission)
 				if (pHudElements->m_bitsFlags & HUD_INTERMISSION)
 					pHudElements->Draw(flTime);
 			}
+		}
+
+		for (auto& hudpfns : m_lstElements)
+		{
+			if (hudpfns.pfnDraw)
+				(*hudpfns.pfnDraw)(flTime, m_bIntermission);
 		}
 	}
 
@@ -525,6 +545,12 @@ void gHUD::Think(void)
 	{
 		if (pHudElements->m_bitsFlags & HUD_ACTIVE || pHudElements->m_bitsFlags & HUD_ENFORCE_THINK)
 			pHudElements->Think();
+	}
+
+	for (auto& hudpfns : m_lstElements)
+	{
+		if (hudpfns.pfnThink)
+			(*hudpfns.pfnThink)();
 	}
 }
 

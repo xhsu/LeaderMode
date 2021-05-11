@@ -177,7 +177,7 @@ class CHudAmmo;
 class CHudHealth;
 class CHudSpectator;
 class CHudGeiger;
-class CHudBattery;
+//class CHudBattery;
 class CHudTrain;
 class CHudFlashlight;
 class CHudMessage;
@@ -202,7 +202,6 @@ class CHudGrenade;
 class CHudScoreboard;
 class CHudClassIndicator;
 class CUIBuyMenu;
-class CHudVitality;
 
 namespace gHUD
 {
@@ -215,6 +214,28 @@ namespace gHUD
 	int UpdateClientData(client_data_t* cdata, float time);
 	void CalcRefdef(ref_params_s* pparams);
 	bool KeyEvent(bool bDown, int iKeyIndex, const char* pszCurrentBinding);	// Return true to allow engine to process the key, otherwise, act on it as needed
+
+	typedef struct element_s
+	{
+		void	(*pfnInitialize)		(void);
+		void	(*pfnShutdown)			(void);
+		void	(*pfnConnectToServer)	(void);
+		void	(*pfnDraw)				(float flTime, bool bIntermission);
+		void	(*pfnThink)				(void);	// Use gHUD::m_flUCDTime
+		void	(*pfnOnNewRound)		(void);
+		void	(*pfnServerAsksReset)	(void);
+
+		/*
+		static void	Initialize		(void);
+		static void	Shutdown		(void);
+		static void	ConnectToServer	(void);
+		static void	Draw			(float flTime, bool bIntermission);
+		static void	Think			(void);	// Use gHUD::m_flUCDTime
+		static void	OnNewRound		(void);
+		static void	ServerAsksReset	(void);
+		*/
+
+	} element_t;
 
 	// HUD utils
 	int GetSpriteIndex(const char* SpriteName);
@@ -238,6 +259,17 @@ namespace gHUD
 
 	// HUD bridges
 	void SlotInput(int iSlot);
+
+	template<typename... CElements>
+	inline void AddElementsToList(void)
+	{
+		(CElements::Initialize(), ...);
+	}
+
+	//inline void AddElementsToList(void (*func ...)(void))
+	//{
+	//	(func(), ...);
+	//}
 
 	// VARs
 	extern std::list<CBaseHudElement*> m_lstHudElements;
@@ -288,10 +320,11 @@ namespace gHUD
 	extern SCREENINFO m_scrinfo;
 
 	// HUD elements.
+	extern std::list<element_t> m_lstElements;
 	extern CHudHealth m_Health;
 	extern CHudSpectator m_Spectator;
 	extern CHudGeiger m_Geiger;
-	extern CHudBattery m_Battery;
+	//extern CHudBattery m_Battery;
 	extern CHudTrain m_Train;
 	extern CHudFlashlight m_Flash;
 	extern CHudMessage m_Message;
@@ -316,7 +349,6 @@ namespace gHUD
 	extern CHudScoreboard m_Scoreboard;
 	extern CHudClassIndicator m_ClassIndicator;
 	extern CUIBuyMenu m_UI_BuyMenu;
-	extern CHudVitality m_Vitality;
 };
 
 class CScreenFade

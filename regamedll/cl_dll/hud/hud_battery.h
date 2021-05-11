@@ -1,34 +1,46 @@
 /*
 
 Created Date: Mar 11 2020
+Remastered Date: May 11 2021
 
+Modern Warfare Dev Team
+	Programmer	- Luna the Reborn
+	Artist		- HL&CL
 */
 
 #pragma once
 
-class CHudBattery : public CBaseHudElement
+struct CHudBattery	// Place after CHudRadar
 {
-public:
-	int Init(void);
-	int VidInit(void);
-	int Draw(float flTime);
-	void Reset(void);
-	void InitHUDData(void);
+	// Event functions.
+	static void	Initialize		(void);
+	//static void	Shutdown		(void);
+	//static void	ConnectToServer	(void);
+	static void	Draw			(float flTime, bool bIntermission);
+	static void	Think			(void);
+	//static void	OnNewRound		(void);
+	//static void	ServerAsksReset	(void);
 
-	void MsgFunc_Battery(int& iNewArmourValue);
-	void MsgFunc_ArmorType(int& iArmourType);
+	// Message functions.
+	static void MsgFunc_Battery(int& iNewArmourValue);
+	static void MsgFunc_ArmorType(int& iArmourType);
 
-	float GetMaxArmour(void);
+	// Custom functions.
+	static float GetMaxArmour(void);
+	static void	Reset(void);
 
-public:
-	hSprite m_hSuitEmpty, m_hSuitHelmetEmpty;
-	const wrect_t* m_prcSuitEmpty, *m_prcSuitHelmetEmpty;
-	hSprite m_hSuitFull, m_hSuitHelmetFull;
-	const wrect_t* m_prcSuitFull, *m_prcSuitHelmetFull;
-	float m_flArmour;
-	float m_flDrawingArmour;
-	float m_fFade;
-	int m_iArmorType;
-	int m_iHeight;		// width of the battery innards
-	float m_flLastDrawingY;	// for other HUD elements.
+	// Game data.
+	static inline GLuint m_iIdKevlar = 0U, m_iIdAssaultSuit = 0U;
+	static inline unsigned short m_iMaxAP = 100, m_iAP = 0, m_iArmorType = ARMOR_NONE;
+
+	// Drawing data.
+	static constexpr decltype(auto) COLOR = Vector(8.0 / 255.0, 131.0 / 255.0, 211.0 / 255.0);
+	static constexpr decltype(auto) BORDER_THICKNESS = 2;
+	static constexpr decltype(auto) PROGRESS_BAR_GAP_SIZE = 2;
+	static constexpr decltype(auto) GAP_SIZE = 12;
+	static constexpr decltype(auto) BAR_SIZE = Vector2D(96, 24), ICON_SIZE = Vector2D(24, 24);
+	static inline Vector2D BAR_MARGINE = Vector2D(), ICON_MARGINE = Vector2D();
+	static inline Vector2D INNERBLOCK_MARGINE = Vector2D(), INNERBLOCK_SIZE = Vector2D();
+	static inline float m_flAlpha = 255;
+	static inline int m_hFont = 0;
 };

@@ -79,7 +79,7 @@ MSG_FUNC(Battery)
 
 	int iArmour = READ_SHORT();
 
-	gHUD::m_Battery.MsgFunc_Battery(iArmour);
+	CHudBattery::MsgFunc_Battery(iArmour);
 	return TRUE;
 }
 
@@ -159,6 +159,12 @@ MSG_FUNC(ResetHUD)
 	for (auto& pHudElem : gHUD::m_lstHudElements)
 	{
 		pHudElem->Reset();
+	}
+
+	for (auto& hudpfns : gHUD::m_lstElements)
+	{
+		if (hudpfns.pfnServerAsksReset)
+			(*hudpfns.pfnServerAsksReset)();
 	}
 
 	gHUD::m_flMouseSensitivity = 0;
@@ -537,7 +543,7 @@ MSG_FUNC(ArmorType)
 
 	int iArmourType = READ_BYTE();
 
-	gHUD::m_Battery.MsgFunc_ArmorType(iArmourType);
+	CHudBattery::MsgFunc_ArmorType(iArmourType);
 	return TRUE;
 }
 
@@ -1077,8 +1083,6 @@ MSG_FUNC(Role)
 			if (pWeapon)
 				pWeapon->SetVariation(g_iRoleType);
 		}
-
-		gHUD::m_Vitality.MsgFunc_Role(g_iRoleType);
 	}
 
 	return TRUE;

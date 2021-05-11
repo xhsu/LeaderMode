@@ -138,7 +138,8 @@ public:
 	}
 
 	// Members
-	vec_t x, y;
+	union { vec_t x; vec_t width;	};
+	union { vec_t y; vec_t height;	};
 };
 
 inline constexpr real_t DotProduct(const Vector2D &a, const Vector2D &b)

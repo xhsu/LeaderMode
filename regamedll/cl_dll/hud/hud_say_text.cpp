@@ -80,7 +80,7 @@ void CHudSayText::Think(void)
 
 int CHudSayText::GetTextPrintY(void)
 {
-	return (gHUD::m_Battery.m_flLastDrawingY - gHUD::m_Battery.m_iHeight - CHudClassIndicator::FONT_TALL) - (s_iLineHeight * 5) - (s_iLineHeight * 0.5);
+	return (gHUD::m_Health.m_flLastDrawingY - /*gHUD::m_Battery.m_iHeight*/ - CHudClassIndicator::FONT_TALL) - (s_iLineHeight * 5) - (s_iLineHeight * 0.5);
 }
 
 void CHudSayText::GetColorFromText(int client_index, const std::wstring& wcsColorText, Vector& vecColor)

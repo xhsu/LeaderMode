@@ -170,7 +170,7 @@ void CHudClassIndicator::DrawLeftPortion(float flTime)
 	int iTall = 0, iWidth = 0;
 	gFontFuncs::GetTextSize(m_hClassFont, g_rgwcsRoleNames[g_iRoleType].c_str(), &iWidth, &iTall);
 
-	int x = 0, y = gHUD::m_Battery.m_flLastDrawingY - iTall / 2;
+	int x = 0, y = gHUD::m_Health.m_flLastDrawingY - iTall / 2;
 	int x2 = HEALTH_BASIC_OFS - 2, y2 = y - HEALTH_BASIC_OFS;
 
 	glDisable(GL_TEXTURE_2D);
@@ -191,8 +191,8 @@ void CHudClassIndicator::DrawLeftPortion(float flTime)
 
 	glBegin(GL_QUADS);
 	glVertex2f(x2 + 2 + iWidth + 4, y2 - 1);
-	glVertex2f(HEALTH_BASIC_OFS + gHUD::m_Battery.m_iHeight + HEALTH_ICON_BAR_INTERSPACE + HEALTH_BAR_LENGTH * 2, y2 - 1);
-	glVertex2f(HEALTH_BASIC_OFS + gHUD::m_Battery.m_iHeight + HEALTH_ICON_BAR_INTERSPACE + HEALTH_BAR_LENGTH * 2, y2 + 1);
+	glVertex2f(HEALTH_BASIC_OFS + /*gHUD::m_Battery.m_iHeight + */HEALTH_ICON_BAR_INTERSPACE + HEALTH_BAR_LENGTH * 2, y2 - 1);
+	glVertex2f(HEALTH_BASIC_OFS + /*gHUD::m_Battery.m_iHeight + */HEALTH_ICON_BAR_INTERSPACE + HEALTH_BAR_LENGTH * 2, y2 + 1);
 	glVertex2f(x2 + 2 + iWidth + 4, y2 + 1);
 	glEnd();
 
