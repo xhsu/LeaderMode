@@ -1,6 +1,10 @@
 /*
 
 Created Date: Mar 11 2020
+Remastered Date: May 12 2021
+
+Modern Warfare Dev Team
+	Programmer	- Luna the Reborn
 
 */
 
@@ -15,36 +19,44 @@ struct DeathNoticeItem
 	hSprite	m_hWeaponSprite;
 	wrect_t m_rcWeaponSpriteInfo;
 	float	m_flTimeToRemove;
-	float*	m_rgflVictimColour;
-	float*	m_rgflKillerColour;
+	Vector	m_vecVictimColour;
+	Vector	m_vecKillerColour;
 };
 
 #define MAX_DEATHNOTICES		8
 #define MAX_DRAWDEATHNOTICES	4
 
-#define DEATHNOTICE_DISPLAY_TIME	6
-#define DEATHNOTICE_X_BASE_OFS		24
-#define DEATHNOTICE_Y_BASE_OFS		24	// below flashlight hud.
-#define DEATHNOTICE_INTERSPACE		5
-
 // TODO, UNDONE : this entire class needs to reconstruct due to both CSBTE and CSMoE are sabortaging this class via implanting tons of CSOL code.
-class CHudDeathNotice : public CBaseHudElement
+struct CHudDeathNotice
 {
-public:
-	int Init(void);
-	void InitHUDData(void);
-	void Reset(void);
-	int VidInit(void);
-	int Draw(float flTime);
-	void Think(void);
+	// Event functions.
+	static void	Initialize(void);
+	//static void	Shutdown(void);
+	static void	ConnectToServer(void);
+	static void	Draw(float flTime, bool bIntermission);
+	static void	Think(void);	// Use gHUD::m_flUCDTime
+	//static void	OnNewRound(void);
+	//static void	ServerAsksReset(void);
 
-public:
-	void MsgFunc_DeathMsg(int iKillerIndex, int iVictimIndex, bool bHeadshot, const char *szWeaponName);
+	// Message functions.
+	static void MsgFunc_DeathMsg(int iKillerIndex, int iVictimIndex, bool bHeadshot, const char* szWeaponName);
+#ifdef _DEBUG
+	static void CmdFunc_DeathMsg(void);
+	static void CmdFunc_GhostKill(void);
+#endif // _DEBUG
 
-private:
-	int m_HUD_d_skull;
-	int m_headSprite;
-	int m_headWidth;
-	int m_iFontHeight;
-	std::list<DeathNoticeItem> m_lstQueue;	// we should not use std::quene, because we need 4 items per time.
+	// Custom functions.
+	static void Reset(void);
+
+	// Game data.
+	static inline std::list<DeathNoticeItem> m_lstQueue;	// we should not use std::quene, because we need 4 items per time.
+
+	// Drawing data.
+	static constexpr decltype(auto) DISPLAY_TIME = 6;
+	static constexpr decltype(auto) MARGIN = Vector2D(24);
+	static constexpr decltype(auto) LINE_MARGIN = 12;
+	static constexpr decltype(auto) ELEM_MARGIN = 5;
+	static inline Vector2D ANCHOR = Vector2D();
+	static inline int HUDINDEX_HEADSHOT = -1, HUDINDEX_SKULL = -1;
+	static inline int HUDWIDTH_HEADSHOT = 0;
 };

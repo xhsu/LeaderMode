@@ -138,7 +138,7 @@ int CHudScenarioStatus::Draw(float fTime)
 	DrawUtils::Draw2DQuad(x, y, x + SCHEME_ICON_SIZE, y + SCHEME_ICON_SIZE);
 
 	// text of scheme name
-	gFontFuncs::DrawSetTextFont(gHUD::m_ClassIndicator.m_hClassFont);
+	gFontFuncs::DrawSetTextFont(gHUD::m_hTrajanProFont);	//gHUD::m_ClassIndicator.m_hClassFont
 	gFontFuncs::DrawSetTextPos(x + SCHEME_ICON_SIZE + GAP_SCHEMEICON_TEXT, y);
 	gFontFuncs::DrawPrintText(g_rgwcsSchemeNames[g_rgiTeamSchemes[g_iTeam]].c_str());
 

@@ -6,6 +6,7 @@ Remastered Date: May 11 2021
 Modern Warfare Dev Team
 	Programmer	- Luna the Reborn
 	Artist		- HL&CL
+
 */
 
 #pragma once
@@ -37,13 +38,13 @@ struct CHudBattery	// Place after CHudRadar
 	// Drawing data.
 	static constexpr decltype(auto) COLOR = Vector(8.0 / 255.0, 131.0 / 255.0, 211.0 / 255.0);
 	static constexpr decltype(auto) BORDER_THICKNESS = 2;
-	static constexpr decltype(auto) PROGRESS_BAR_GAP_SIZE = 2;
+	static constexpr decltype(auto) PROGRESS_BAR_MARGIN = 2;
 	static constexpr decltype(auto) GAP_SIZE = 12;	// Gap between icon and progress bar.
-	static constexpr decltype(auto) BAR_SIZE = Vector2D(96, 24), ICON_SIZE = Vector2D(24, 24);
-	static constexpr decltype(auto) TEXT_HEIGHT = BAR_SIZE.y - PROGRESS_BAR_GAP_SIZE * 2;	// Y is the height.
-	static inline Vector2D BAR_MARGINE = Vector2D(), ICON_MARGINE = Vector2D();
-	static inline Vector2D INNERBLOCK_MARGINE = Vector2D(), INNERBLOCK_SIZE = Vector2D();
-	static inline Vector2D TEXT_MARGINE = Vector2D();
+	static constexpr decltype(auto) ICON_SIZE = Vector2D(64), BAR_SIZE = Vector2D(144, ICON_SIZE.width);
+	static constexpr decltype(auto) TEXT_HEIGHT = BAR_SIZE.y - PROGRESS_BAR_MARGIN * 2;	// Y is the height.
+	static inline Vector2D ICON_ANCHOR = Vector2D(), BAR_ANCHOR = Vector2D();
+	static inline Vector2D INNERBLOCK_ANCHOR = Vector2D(), INNERBLOCK_SIZE = Vector2D();
+	static inline Vector2D TEXT_ANCHOR = Vector2D();
 	static inline float m_flAlpha = 255;
 	static inline int m_hFont = 0;
 	static inline int m_iTextLength = 1;

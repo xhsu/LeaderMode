@@ -283,25 +283,6 @@ int UTIL_FindEntityInMap(const char* name, float* origin, float* angle)
 	return 0;
 }
 
-Vector g_ColorBlue = Vector(0.6, 0.8, 1.0);
-Vector g_ColorRed = Vector(1.0, 0.25, 0.25);
-Vector g_ColorGreen = Vector(0.6, 1.0, 0.6);
-Vector g_ColorYellow = Vector(1.0, 0.7, 0.0);
-Vector g_ColorGrey = Vector(0.8, 0.8, 0.8);
-
-float* GetClientColor(int clientIndex)
-{
-	switch (g_PlayerExtraInfo[clientIndex].m_iTeam)
-	{
-	case TEAM_TERRORIST:  return g_ColorRed;
-	case TEAM_CT:         return g_ColorBlue;
-	case TEAM_SPECTATOR:
-	case TEAM_UNASSIGNED: return g_ColorYellow;
-	case 4:               return g_ColorGreen;
-	default:              return g_ColorGrey;
-	}
-}
-
 hSprite LoadSprite(const char* pszName)
 {
 	int i;

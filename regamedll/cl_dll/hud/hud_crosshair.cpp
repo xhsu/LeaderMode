@@ -9,105 +9,104 @@ Modern Warfare Dev Team
 
 #include "precompiled.h"
 
-float g_flSpread = 0;
-static wrect_t nullrc = { 0, 0, 0, 0 };
-
-int CHudCrosshair::Init(void)
+void CHudCrosshair::Initialize(void)
 {
-	gHUD::AddHudElem(this);
+	gHUD::m_lstElements.push_back({
+		Initialize,
+		nullptr,
+		Reset,
+		Draw,
+		Think,
+		nullptr,
+		Reset,
+		});
+}
 
-	Reset();
-
-	m_bitsFlags |= HUD_ACTIVE;
-
-	return TRUE;
-};
-
-int CHudCrosshair::Draw(float flTime)
+void CHudCrosshair::Draw(float flTime, bool bIntermission)
 {
-	if (!g_pCurWeapon || CL_IsDead())
-		return TRUE;
+	if (!g_pCurWeapon || CL_IsDead() || g_iUser1 || bIntermission)
+		return;
+
+	if (gHUD::m_bitsHideHUDDisplay & HIDEHUD_CROSSHAIR)
+		return;
 
 	// in steel sight calibrating mode.
 	if (cl_gun_ofs[0]->value || cl_gun_ofs[1]->value || cl_gun_ofs[2]->value)
 	{
-		gEngfuncs.pfnFillRGBA(ScreenWidth / 2 - 1, ScreenHeight / 2 - 1, 2, 2, 255, 255, 255, 255);
-		return TRUE;
+		gEngfuncs.pfnFillRGBA((ScreenWidth - CALIBRATING_CROSSHAIR_SIZE) / 2, (ScreenHeight - CALIBRATING_CROSSHAIR_SIZE) / 2, CALIBRATING_CROSSHAIR_SIZE, CALIBRATING_CROSSHAIR_SIZE, 255, 255, 255, 255);
+		return;
 	}
 
-	g_flSpread = 0.1f;
-	if (g_pCurWeapon)
-		g_flSpread = g_pCurWeapon->GetSpread();
-
-	m_flCrosshairDistance = round(float(ScreenWidth) * g_flSpread);
-	m_flCurChDistance += (m_flCrosshairDistance - m_flCurChDistance) * g_flClientTimeDelta * 5;
-	m_flAlphaMul = gHUD::m_iFOV >= DEFAULT_FOV ? 1.0 : 0.0;
-
-	glDisable(GL_TEXTURE_2D);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 	// black part. (Background)
-	glColor4f(0, 0, 0, 0.5 * m_flAlphaMul);
-	DrawUtils::Draw2DQuad(
+	DrawUtils::glRegularPureColorDrawingInit(0x000000, byte(0.5f * m_flAlpha));
+	DrawUtils::Draw2DQuadNoTex(
 		float(ScreenWidth) / 2.0f - 3,
-		float(ScreenHeight) / 2.0f - m_flCurChDistance / 2.0f - m_flCrosshairBarLength - 2,
+		float(ScreenHeight) / 2.0f - m_flCurChDistance / 2.0f - CROSSHAIR_LENGTH - 2,
 		float(ScreenWidth) / 2.0f + 3,
-		float(ScreenHeight) / 2.0f - m_flCurChDistance / 2.0);
-
-	DrawUtils::Draw2DQuad(
+		float(ScreenHeight) / 2.0f - m_flCurChDistance / 2.0
+	);
+	DrawUtils::Draw2DQuadNoTex(
 		float(ScreenWidth) / 2.0f - 3,
 		float(ScreenHeight) / 2.0f + m_flCurChDistance / 2.0f,
 		float(ScreenWidth) / 2.0f + 3,
-		float(ScreenHeight) / 2.0f + m_flCurChDistance / 2.0 + m_flCrosshairBarLength + 2);
-
-	DrawUtils::Draw2DQuad(
-		float(ScreenWidth) / 2.0f - m_flCurChDistance / 2.0f - m_flCrosshairBarLength - 2,
+		float(ScreenHeight) / 2.0f + m_flCurChDistance / 2.0 + CROSSHAIR_LENGTH + 2
+	);
+	DrawUtils::Draw2DQuadNoTex(
+		float(ScreenWidth) / 2.0f - m_flCurChDistance / 2.0f - CROSSHAIR_LENGTH - 2,
 		float(ScreenHeight) / 2.0f - 3,
 		float(ScreenWidth) / 2.0f - m_flCurChDistance / 2.0f,
-		float(ScreenHeight) / 2.0f + 3);
-
-	DrawUtils::Draw2DQuad(
+		float(ScreenHeight) / 2.0f + 3
+	);
+	DrawUtils::Draw2DQuadNoTex(
 		float(ScreenWidth) / 2.0f + m_flCurChDistance / 2.0f,
 		float(ScreenHeight) / 2.0f - 3,
-		float(ScreenWidth) / 2.0f + m_flCurChDistance / 2.0f + m_flCrosshairBarLength + 2,
-		float(ScreenHeight) / 2.0f + 3);
+		float(ScreenWidth) / 2.0f + m_flCurChDistance / 2.0f + CROSSHAIR_LENGTH + 2,
+		float(ScreenHeight) / 2.0f + 3
+	);
 
 	// white part. (Front)
-	glColor4f(1, 1, 1, 1 * m_flAlphaMul);
-	DrawUtils::Draw2DQuad(
+	DrawUtils::glSetColor(0xFFFFFF, byte(m_flAlpha));
+	DrawUtils::Draw2DQuadNoTex(
 		float(ScreenWidth) / 2.0f - 1.0f,
-		float(ScreenHeight) / 2.0f - m_flCurChDistance / 2.0f - m_flCrosshairBarLength,
+		float(ScreenHeight) / 2.0f - m_flCurChDistance / 2.0f - CROSSHAIR_LENGTH,
 		float(ScreenWidth) / 2.0f + 1,
-		float(ScreenHeight) / 2.0f - m_flCurChDistance / 2.0);
-
-	DrawUtils::Draw2DQuad(
+		float(ScreenHeight) / 2.0f - m_flCurChDistance / 2.0
+	);
+	DrawUtils::Draw2DQuadNoTex(
 		float(ScreenWidth) / 2.0f - 1.0f,
 		float(ScreenHeight) / 2.0f + m_flCurChDistance / 2.0f,
 		float(ScreenWidth) / 2.0f + 1.0f,
-		float(ScreenHeight) / 2.0f + m_flCurChDistance / 2.0 + m_flCrosshairBarLength);
-
-	DrawUtils::Draw2DQuad(
-		float(ScreenWidth) / 2.0f - m_flCurChDistance / 2.0f - m_flCrosshairBarLength,
+		float(ScreenHeight) / 2.0f + m_flCurChDistance / 2.0 + CROSSHAIR_LENGTH
+	);
+	DrawUtils::Draw2DQuadNoTex(
+		float(ScreenWidth) / 2.0f - m_flCurChDistance / 2.0f - CROSSHAIR_LENGTH,
 		float(ScreenHeight) / 2.0f - 1,
 		float(ScreenWidth) / 2.0f - m_flCurChDistance / 2.0f,
-		float(ScreenHeight) / 2.0f + 1);
-
-	DrawUtils::Draw2DQuad(
+		float(ScreenHeight) / 2.0f + 1
+	);
+	DrawUtils::Draw2DQuadNoTex(
 		float(ScreenWidth) / 2.0f + m_flCurChDistance / 2.0f,
 		float(ScreenHeight) / 2.0f - 1,
-		float(ScreenWidth) / 2.0f + m_flCurChDistance / 2.0f + m_flCrosshairBarLength,
-		float(ScreenHeight) / 2.0f + 1);
+		float(ScreenWidth) / 2.0f + m_flCurChDistance / 2.0f + CROSSHAIR_LENGTH,
+		float(ScreenHeight) / 2.0f + 1
+	);
 
-	glDisable(GL_BLEND);
-	glEnable(GL_TEXTURE_2D);
+	DrawUtils::glRegularPureColorDrawingExit();
+}
 
-	return TRUE;
+void CHudCrosshair::Think(void)
+{
+	m_flSpread = g_pCurWeapon ? g_pCurWeapon->GetSpread() : 0.1f;
+	m_flCrosshairDistance = round(float(ScreenWidth) * m_flSpread);
+	m_flCurChDistance += (m_flCrosshairDistance - m_flCurChDistance) * gHUD::m_flUCDTimeDelta * 5;
+
+	m_flAlpha += ((gHUD::m_iFOV >= DEFAULT_FOV ? 255.0f : 0.0f) - m_flAlpha) * gHUD::m_flUCDTimeDelta * 3;
 }
 
 void CHudCrosshair::Reset(void)
 {
-	m_bitsFlags |= HUD_ACTIVE;
+	m_flSpread = 0.1f;
+	m_flCrosshairDistance = 0.1f, m_flCurChDistance = 0.1f;
 
-	gHUD::m_bitsHideHUDDisplay = 0;
+	m_flAlpha = 255;
 }

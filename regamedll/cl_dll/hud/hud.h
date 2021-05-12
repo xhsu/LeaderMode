@@ -28,6 +28,8 @@ Created Date: 07 Mar 2020
 #define VEC_VIOLET			Vector(0.75, 0.0f, 1.0f)
 #define RGB_ORANGE			0x00FF8000
 #define VEC_ORANGE			Vector(1.0f, 0.5f, 0.0f)
+#define RGB_GRAY			0x00CCCCCC
+#define VEC_GRAY			Vector(0.8, 0.8, 0.8)
 
 #define DHN_DRAWZERO	BIT(0)
 #define DHN_2DIGITS		BIT(1)
@@ -170,6 +172,23 @@ public:
 	virtual void InitHUDData(void) {}
 	virtual void Shutdown(void) {}
 };
+
+struct CHudExample2
+{
+	// Event functions.
+	static void	Initialize(void);
+	static void	Shutdown(void);
+	static void	ConnectToServer(void);
+	static void	Draw(float flTime, bool bIntermission);
+	static void	Think(void);	// Use gHUD::m_flUCDTime
+	static void	OnNewRound(void);
+	static void	ServerAsksReset(void);
+
+	// Message functions.
+	// Custom functions.
+	// Game data.
+	// Drawing data.
+};
 */
 
 // dummy classes derived from CBaseHudElement.
@@ -182,7 +201,7 @@ class CHudTrain;
 class CHudFlashlight;
 class CHudMessage;
 class CHudStatusBar;
-class CHudDeathNotice;
+//class CHudDeathNotice;
 class CHudSayText;
 class CHudMenu;
 class CHudNightVision;
@@ -196,11 +215,11 @@ class CHudScenarioStatus;
 class CHudProgressBar;
 class CHudVGUI2Print;
 class CHudSniperScope;
-class CHudCrosshair;
+//class CHudCrosshair;
 class CHudWeaponList;
 class CHudGrenade;
 class CHudScoreboard;
-class CHudClassIndicator;
+//class CHudClassIndicator;
 class CUIBuyMenu;
 
 namespace gHUD
@@ -329,7 +348,7 @@ namespace gHUD
 	extern CHudFlashlight m_Flash;
 	extern CHudMessage m_Message;
 	extern CHudStatusBar m_StatusBar;
-	extern CHudDeathNotice m_DeathNotice;
+	//extern CHudDeathNotice m_DeathNotice;
 	extern CHudSayText m_SayText;
 	extern CHudMenu m_Menu;
 	extern CHudNightVision m_NightVision;
@@ -343,11 +362,11 @@ namespace gHUD
 	extern CHudProgressBar m_progressBar;
 	extern CHudVGUI2Print m_VGUI2Print;
 	extern CHudSniperScope m_SniperScope;
-	extern CHudCrosshair m_Crosshair;
+	//extern CHudCrosshair m_Crosshair;
 	extern CHudWeaponList m_WeaponList;
 	extern CHudGrenade m_Grenade;
 	extern CHudScoreboard m_Scoreboard;
-	extern CHudClassIndicator m_ClassIndicator;
+	//extern CHudClassIndicator m_ClassIndicator;
 	extern CUIBuyMenu m_UI_BuyMenu;
 };
 

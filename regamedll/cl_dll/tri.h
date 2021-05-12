@@ -35,6 +35,15 @@ void RegionalFogThink(void);	// update regional fog, e.g. removal.
 
 namespace DrawUtils
 {
+	void glRegularTexDrawingInit(const Vector& color, const float& alpha);
+	void glRegularTexDrawingInit(const unsigned long& ulRGB, byte alpha);
+	void glRegularPureColorDrawingInit(const Vector& color, const float& alpha);
+	void glRegularPureColorDrawingInit(const unsigned long& ulRGB, byte alpha);
+	void glRegularPureColorDrawingExit();
+	void glSetColor(const unsigned long& ulRGB, byte alpha);
+	void glSetColor(const Vector& color, const float& alpha);
+	void glSetTexture(const GLuint& iId);
+
 	void Draw2DQuad(float x1, float y1, float x2, float y2);
 	void Draw2DQuadNoTex(float x1, float y1, float x2, float y2);
 	void Draw2DQuadCustomTex(float x1, float y1, float x2, float y2, float u1, float v1, float u2, float v2);

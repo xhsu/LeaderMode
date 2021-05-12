@@ -31,5 +31,5 @@ protected:
 
 	int m_bReparseString;
 
-	float* m_pflNameColors[MAX_STATUSBAR_LINES];
+	Vector m_rgvecNameColors[MAX_STATUSBAR_LINES];
 };

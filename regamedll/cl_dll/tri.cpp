@@ -118,6 +118,64 @@ void HUD_DrawTransparentTriangles2(void)
 	RenderFog();
 }
 
+//////////////
+// GL Tools //
+//////////////
+
+void DrawUtils::glRegularTexDrawingInit(const Vector& color, const float& alpha)
+{
+	gEngfuncs.pTriAPI->RenderMode(kRenderTransColor);
+	gEngfuncs.pTriAPI->Brightness(1.0);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glColor4f(color.r, color.g, color.b, alpha);
+	gEngfuncs.pTriAPI->CullFace(TRI_NONE);
+}
+
+void DrawUtils::glRegularTexDrawingInit(const unsigned long& ulRGB, byte alpha)
+{
+	gEngfuncs.pTriAPI->RenderMode(kRenderTransColor);
+	gEngfuncs.pTriAPI->Brightness(1.0);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glSetColor(ulRGB, alpha);
+	gEngfuncs.pTriAPI->CullFace(TRI_NONE);
+}
+
+void DrawUtils::glRegularPureColorDrawingInit(const Vector& color, const float& alpha)
+{
+	glDisable(GL_TEXTURE_2D);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glColor4f(color.r, color.g, color.b, alpha);
+}
+
+void DrawUtils::glRegularPureColorDrawingInit(const unsigned long& ulRGB, byte alpha)
+{
+	glDisable(GL_TEXTURE_2D);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glSetColor(ulRGB, alpha);
+}
+
+void DrawUtils::glRegularPureColorDrawingExit()
+{
+	glDisable(GL_BLEND);
+	glEnable(GL_TEXTURE_2D);
+}
+
+void DrawUtils::glSetColor(const unsigned long& ulRGB, byte alpha)
+{
+	glColor4ub((ulRGB & 0xFF0000) >> 16, (ulRGB & 0xFF00) >> 8, ulRGB & 0xFF, alpha);
+}
+
+void DrawUtils::glSetColor(const Vector& color, const float& alpha)
+{
+	glColor4f(color.r, color.g, color.b, alpha);
+}
+
+void DrawUtils::glSetTexture(const GLuint& iId)
+{
+	glBindTexture(GL_TEXTURE_2D, iId);
+}
 
 ////////////////
 // Draw2DQuad //

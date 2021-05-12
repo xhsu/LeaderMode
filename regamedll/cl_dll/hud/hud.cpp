@@ -104,7 +104,7 @@ namespace gHUD
 	CHudFlashlight m_Flash;
 	CHudMessage m_Message;
 	CHudStatusBar m_StatusBar;
-	CHudDeathNotice m_DeathNotice;
+	//CHudDeathNotice m_DeathNotice;
 	CHudSayText m_SayText;
 	CHudMenu m_Menu;
 	CHudNightVision m_NightVision;
@@ -118,11 +118,11 @@ namespace gHUD
 	CHudProgressBar m_progressBar;
 	CHudVGUI2Print m_VGUI2Print;
 	CHudSniperScope m_SniperScope;
-	CHudCrosshair m_Crosshair;
+	//CHudCrosshair m_Crosshair;
 	CHudWeaponList m_WeaponList;
 	CHudGrenade m_Grenade;
 	CHudScoreboard m_Scoreboard;
-	CHudClassIndicator m_ClassIndicator;
+	//CHudClassIndicator m_ClassIndicator;
 	CUIBuyMenu m_UI_BuyMenu;
 };
 
@@ -158,7 +158,7 @@ void gHUD::Init(void)
 	}*/
 
 	// instead, we should:
-	AddElementsToList<CHudBattery>();
+	AddElementsToList<CHudClassIndicator, CHudBattery, CHudCrosshair, CHudDeathNotice>();
 	//m_Health.Init();
 	//m_SayText.Init();	// m_SayText should place before m_Spectator, since m_Spectator.init() is calling some vars from m_SayText.Init().
 	//m_Spectator.Init();
@@ -879,8 +879,8 @@ void gHUD::GetSprite(client_sprite_t* p, hSprite& hSPR, wrect_t& rcSPR)
 	}
 }
 
-static const Vector GODFATHER_COLOR_DIFF = VEC_SPRINGGREENISH - VEC_T_COLOUR;
-static const Vector COMMANDER_COLOR_DIFF = VEC_SPRINGGREENISH - VEC_CT_COLOUR;
+static constexpr Vector GODFATHER_COLOR_DIFF = VEC_SPRINGGREENISH - VEC_T_COLOUR;
+static constexpr Vector COMMANDER_COLOR_DIFF = VEC_SPRINGGREENISH - VEC_CT_COLOUR;
 
 Vector gHUD::GetColor(size_t iPlayerIndex)
 {
@@ -894,6 +894,7 @@ Vector gHUD::GetColor(size_t iPlayerIndex)
 	case Role_Medic:
 	case Role_Sharpshooter:
 	case Role_SWAT:
+	default:
 		switch (g_PlayerExtraInfo[iPlayerIndex].m_iTeam)
 		{
 		case TEAM_CT:
@@ -901,6 +902,9 @@ Vector gHUD::GetColor(size_t iPlayerIndex)
 
 		case TEAM_TERRORIST:
 			return VEC_T_COLOUR;
+
+		case TEAM_SPECTATOR:
+			return VEC_GRAY;
 
 		default:
 			return VEC_YELLOWISH;
@@ -911,9 +915,6 @@ Vector gHUD::GetColor(size_t iPlayerIndex)
 
 	case Role_Godfather:
 		return VEC_T_COLOUR + GetOscillation() * GODFATHER_COLOR_DIFF;
-
-	default:
-		return VEC_YELLOWISH;
 	}
 }
 

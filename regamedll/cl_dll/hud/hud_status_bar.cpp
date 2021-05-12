@@ -20,7 +20,7 @@ int CHudStatusBar::Draw(float fTime)
 	{
 		for (int i = 0; i < MAX_STATUSBAR_LINES; i++)
 		{
-			m_pflNameColors[i] = g_ColorYellow;
+			m_rgvecNameColors[i] = VEC_YELLOWISH;
 			ParseStatusString(i);
 		}
 
@@ -35,8 +35,8 @@ int CHudStatusBar::Draw(float fTime)
 		int x = Q_max(0, Q_max(2, (ScreenWidth - TextWidth)) / 2);
 		int y = (ScreenHeight / 2) + (TextHeight);
 
-		if (m_pflNameColors[i])
-			gEngfuncs.pfnDrawSetTextColor(m_pflNameColors[i][0], m_pflNameColors[i][1], m_pflNameColors[i][2]);
+		if (m_rgvecNameColors[i])
+			gEngfuncs.pfnDrawSetTextColor(m_rgvecNameColors[i][0], m_rgvecNameColors[i][1], m_rgvecNameColors[i][2]);
 
 		gEngfuncs.pfnDrawConsoleString(x, y, m_szStatusBar[i]);
 	}
@@ -58,7 +58,7 @@ void CHudStatusBar::Reset(void)
 	m_iStatusValues[0] = 1;
 
 	for (i = 0; i < MAX_STATUSBAR_LINES; i++)
-		m_pflNameColors[i] = g_ColorYellow;
+		m_rgvecNameColors[i] = VEC_YELLOWISH;
 }
 
 void CHudStatusBar::ParseStatusString(int line_num)
@@ -131,7 +131,7 @@ void CHudStatusBar::ParseStatusString(int line_num)
 							{
 								Q_strncpy(szRepString, g_PlayerInfoList[indexval].name, MAX_PLAYER_NAME_LENGTH);
 								gHUD::m_Radar.m_iPlayerLastPointedAt = indexval;
-								m_pflNameColors[line_num] = GetClientColor(indexval);
+								m_rgvecNameColors[line_num] = gHUD::GetColor(indexval);
 							}
 							else
 							{

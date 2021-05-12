@@ -5602,7 +5602,9 @@ void EXT_FUNC CBasePlayer::UpdateClientData()
 		if (pSkill)
 		{
 			iTotalTime = pSkill->IsCoolingDown() ? pSkill->GetCooldown() : pSkill->GetDuration();
-			iTimerSent = pSkill->GetCountingTime() * 10000.0f;
+
+			float flCountingTime = pSkill->GetCountingTime();
+			iTimerSent = *(int*)&flCountingTime;
 
 			if (pSkill->IsCoolingDown())
 				iMode = 1;	// increase.

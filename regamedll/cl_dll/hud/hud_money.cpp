@@ -84,7 +84,7 @@ int CHudAccountBalance::Draw(float flTime)
 	gFontFuncs::GetTextSize(m_hSignFont, wszText, &iWidth, &iHeight);
 
 	int x = ScreenWidth - iWidth - 10;
-	int y = gHUD::m_ClassIndicator.m_flLastY - iHeight - 10;
+	int y = ScreenHeight - iHeight - 10;
 
 	gFontFuncs::DrawSetTextFont(m_hSignFont);
 	gFontFuncs::DrawSetTextPos(x, y);

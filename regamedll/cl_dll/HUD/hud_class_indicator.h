@@ -1,44 +1,54 @@
 /*
 
 Created Date: Sep 20 2020
+Remastered Date: May 12 2021
 
 Modern Warfare Dev Team
- - Luna the Reborn
+	Programmer	- Luna the Reborn
+	Artist		- HL&CL
 
 */
 
 #pragma once
 
-class CHudClassIndicator : public CBaseHudElement
+#ifdef COLOR_HIGHLIGHT
+#undef COLOR_HIGHLIGHT
+#endif
+
+struct CHudClassIndicator
 {
-public:
-	typedef enum { DECREASE = -1, FREEZED = 0, INCREASE = 1} MODE;
+	typedef enum : char { DECREASE = -1, FREEZED = 0, INCREASE = 1} MODE;
 
 	static constexpr int INDICATOR_SIZE = 128;
 	static constexpr int FONT_TALL = 24;
 
-public:
-	static	SkillIndex	GetPrimarySkill(void);
+	// Event functions.
+	static void	Initialize(void);
+	//static void	Shutdown(void);
+	//static void	ConnectToServer(void);
+	static void	Draw(float flTime, bool bIntermission);
+	static void	Think(void);	// Use gHUD::m_flUCDTime
+	//static void	OnNewRound(void);
+	//static void	ServerAsksReset(void);
 
-public:
-	virtual int Init(void);
-	virtual int VidInit(void);
-	virtual int Draw(float flTime);
-	virtual void Think(void);
-	virtual void Reset(void);
+	// Message functions.
+	static void MsgFunc_Role(const RoleTypes& iRole);
+	static void MsgFunc_SkillTimer(const float& flTotalTime, const MODE& iMode, const float& flCurrentTime);
 
-public:
-	void	LightUp(void);
-	void	SetSkillTimer(float flTotalTime, MODE iMode, float flCurrentTime);
-	void	DrawLeftPortion(float flTime);
-	void	DrawRightPortion(float flTime);
+	// Custom functions.
+	static SkillIndex	GetPrimarySkill(RoleTypes iRole = g_iRoleType);
+	static void			Reset(void);
 
-public:
-	std::array<GLuint, ROLE_COUNT> m_iClassesIcon;
-	float m_fFade;
-	float m_flTotalTime;
-	MODE m_iMode;
-	float m_flCurrentTime;
-	int m_iAlpha{ 255 };
-	int m_hClassFont{ 0 };
+	// Game data.
+	static inline float m_flTotalTime = 10.0, m_flCurrentTime = 10.0, m_flPercentage = 1;
+	static inline MODE m_iMode = FREEZED;
+
+	// Drawing data.
+	static constexpr decltype(auto) BORDER_THICKNESS = 3;
+	static constexpr decltype(auto) COLOR_REGULAR = Vector(1, 1, 1), COLOR_READY = VEC_SPRINGGREENISH, COLOR_WARNING = VEC_REDISH;
+	static constexpr decltype(auto) ICON_SIZE = Vector2D(CHudBattery::ICON_SIZE.width * 2);
+	static inline Vector2D ICON_ANCHOR = Vector2D();
+	static inline std::array<GLuint, ROLE_COUNT> CLASS_PORTRAIT;
+	static inline float m_flAlpha = 255;
+	static inline Vector m_vecCurColor = COLOR_REGULAR;
 };

@@ -28,6 +28,10 @@
 
 #pragma once
 
+#ifdef RGB
+#undef RGB
+#endif
+
 #include <float.h>
 
 // Used for many pathfinding and many other operations that are treated as planar rather than 3D.
@@ -40,6 +44,7 @@ public:
 	Vector2D& operator=(Vector2D&& s) = default;
 	constexpr Vector2D() : x(0), y(0) {}
 	constexpr Vector2D(float X, float Y) : x(X), y(Y) {}
+	constexpr Vector2D(float sideLength) : width(sideLength), height(sideLength) {}
 	Vector2D(const Vector2D &v) { *(int *)&x = *(int *)&v.x; *(int *)&y = *(int *)&v.y; }
 	explicit Vector2D(const float rgfl[2]) { *(int*)&x = *(int*)&rgfl[0]; *(int*)&y = *(int*)&rgfl[1]; }
 
@@ -700,10 +705,119 @@ public:
 		);
 	}
 
+	constexpr Vector HSV() const
+	{
+		Vector	out;
+
+		double min = r < g ? r : g;
+		min = min < b ? min : b;
+
+		double max = r > g ? r : g;
+		max = max > b ? max : b;
+
+		out.v = max;	// v
+		double delta = max - min;
+		if (delta < DBL_EPSILON)
+		{
+			out.s = 0;
+			out.h = NAN;	// undefined
+			return out;
+		}
+
+		if (max > 0.0)	// NOTE: if Max is == 0, this divide would cause a crash
+		{
+			out.s = (delta / max);	// s
+		}
+		else
+		{
+			// if max is 0, then r = g = b = 0              
+			// s = 0, h is undefined
+			out.s = 0.0;
+			out.h = NAN;	// its now undefined
+			return out;
+		}
+
+		if (r >= max)					// > is bogus, just keeps compilor happy
+			out.h = (g - b) / delta;	// between yellow & magenta
+		else if (g >= max)
+			out.h = 2.0 + (b - r) / delta;	// between cyan & yellow
+		else
+			out.h = 4.0 + (r - g) / delta;	// between magenta & cyan
+
+		out.h *= 60.0;	// degrees
+
+		if (out.h < 0.0)
+			out.h += 360.0;
+
+		return out;
+	}
+
+
+	constexpr Vector RGB()	const
+	{
+		Vector	out;
+
+		if (s <= 0.0)	// < is bogus, just shuts up warnings
+		{
+			out.r = v;
+			out.g = v;
+			out.b = v;
+			return out;
+		}
+
+		double hh = h;
+		if (hh >= 360.0)
+			hh = 0.0;
+		hh /= 60.0;
+
+		long i = (long)hh;
+		double ff = hh - i;
+		double p = v * (1.0 - s);
+		double q = v * (1.0 - (s * ff));
+		double t = v * (1.0 - (s * (1.0 - ff)));
+
+		switch (i) {
+		case 0:
+			out.r = v;
+			out.g = t;
+			out.b = p;
+			break;
+		case 1:
+			out.r = q;
+			out.g = v;
+			out.b = p;
+			break;
+		case 2:
+			out.r = p;
+			out.g = v;
+			out.b = t;
+			break;
+
+		case 3:
+			out.r = p;
+			out.g = q;
+			out.b = v;
+			break;
+		case 4:
+			out.r = t;
+			out.g = p;
+			out.b = v;
+			break;
+		case 5:
+		default:
+			out.r = v;
+			out.g = p;
+			out.b = q;
+			break;
+		}
+
+		return out;
+	}
+
 	// Members
-	union { vec_t x; vec_t pitch;	vec_t r; };
-	union { vec_t y; vec_t yaw;		vec_t g; };
-	union { vec_t z; vec_t roll;	vec_t b; };
+	union { vec_t x; vec_t pitch;	vec_t r;	vec_t h; };
+	union { vec_t y; vec_t yaw;		vec_t g;	vec_t s; };
+	union { vec_t z; vec_t roll;	vec_t b;	vec_t v; };
 };
 
 inline constexpr Vector operator*(float fl, const Vector &v)

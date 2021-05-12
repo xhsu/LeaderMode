@@ -1598,8 +1598,8 @@ int CHudSpectator::Draw(float flTime)
 				continue;
 		}
 
-		color = GetClientColor(i + 1);
-		sprintf(string, "%s", g_PlayerInfoList[i + 1].name);
+		color = gHUD::GetColor(i + 1);
+		Q_strlcpy(string, g_PlayerInfoList[i + 1].name);
 		lx = strlen(string) * 3;
 
 		if (m_pip->value != INSET_OFF)

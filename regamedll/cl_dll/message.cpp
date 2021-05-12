@@ -256,7 +256,7 @@ MSG_FUNC(DeathMsg)
 	int iVictimId = READ_BYTE();
 	BOOL FHeadShot = READ_BYTE();
 
-	gHUD::m_DeathNotice.MsgFunc_DeathMsg(iKillId, iVictimId, FHeadShot, READ_STRING());	// STRING: weapon name.
+	CHudDeathNotice::MsgFunc_DeathMsg(iKillId, iVictimId, FHeadShot, READ_STRING());	// STRING: weapon name.
 
 	return TRUE;
 }
@@ -1057,16 +1057,16 @@ MSG_FUNC(Role)
 	BEGIN_READ(pbuf, iSize);
 
 	int iPlayerId = READ_BYTE();
-	int iRole = READ_BYTE();
+	RoleTypes iRole = (RoleTypes)READ_BYTE();
 
-	g_PlayerExtraInfo[iPlayerId].m_iRoleType = (RoleTypes)iRole;
+	g_PlayerExtraInfo[iPlayerId].m_iRoleType = iRole;
 
 	if (EV_IsLocal(iPlayerId))
 	{
-		g_iRoleType = (RoleTypes)iRole;
+		g_iRoleType = iRole;
 
 		// light up the class indicator.
-		gHUD::m_ClassIndicator.LightUp();
+		CHudClassIndicator::MsgFunc_Role(iRole);
 
 		// fix the flash blood screen bug.
 		// LUNA: in the SV, we update the Role info on the frame we assign, however, we won't update health info until next frame.
@@ -1182,9 +1182,10 @@ MSG_FUNC(SkillTimer)
 
 	float flTotalTime = float(READ_BYTE());
 	int iMode = READ_BYTE() - 1;	// the BYTE type contains only 0~255.
-	float flCurrentTime = float(READ_LONG()) / 10000.0f;
+	int iTimeReceived = READ_LONG();
+	float flCurrentTime = *(float*)&iTimeReceived;
 
-	gHUD::m_ClassIndicator.SetSkillTimer(flTotalTime, CHudClassIndicator::MODE(iMode), flCurrentTime);
+	CHudClassIndicator::MsgFunc_SkillTimer(flTotalTime, CHudClassIndicator::MODE(iMode), flCurrentTime);
 
 	return TRUE;
 }

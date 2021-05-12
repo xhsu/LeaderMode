@@ -219,7 +219,9 @@ enum RoleTypes : BYTE
 		Retexture with bondage and burn marks. Flamethrower attachments?
 	**/
 
-	ROLE_COUNT
+	ROLE_COUNT,
+	ROLE_START = Role_UNASSIGNED,	// unassign can actually selected and play.
+	ROLE_END = ROLE_COUNT - 1,
 };
 
 enum SkillType
