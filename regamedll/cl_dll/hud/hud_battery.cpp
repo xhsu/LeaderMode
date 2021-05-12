@@ -81,7 +81,7 @@ void CHudBattery::Reset(void)
 	ICON_ANCHOR = CHudClassIndicator::ICON_ANCHOR + Vector2D(CHudClassIndicator::ICON_SIZE.width + 5, 0);
 	BAR_ANCHOR = ICON_ANCHOR + Vector2D(ICON_SIZE.width + GAP_SIZE, 0);
 	INNERBLOCK_ANCHOR = BAR_ANCHOR + Vector2D(BORDER_THICKNESS + PROGRESS_BAR_MARGIN, BORDER_THICKNESS + PROGRESS_BAR_MARGIN);
-	INNERBLOCK_SIZE = Vector2D(0, BAR_SIZE.height - BORDER_THICKNESS * 2 - PROGRESS_BAR_MARGIN * 2);	// No width on reset.
+	INNERBLOCK_SIZE = Vector2D(0, INNERBLOCK_HEIGHT);	// No width upon reset.
 	TEXT_ANCHOR = BAR_ANCHOR + Vector2D((BAR_SIZE.width - float(m_iTextLength)) / 2, (BAR_SIZE.height - TEXT_HEIGHT) / 2);
 	m_flAlpha = 255;
 }

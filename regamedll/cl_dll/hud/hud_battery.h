@@ -41,9 +41,10 @@ struct CHudBattery	// Place after CHudRadar
 	static constexpr decltype(auto) PROGRESS_BAR_MARGIN = 2;
 	static constexpr decltype(auto) GAP_SIZE = 12;	// Gap between icon and progress bar.
 	static constexpr decltype(auto) ICON_SIZE = Vector2D(64), BAR_SIZE = Vector2D(144, ICON_SIZE.width);
-	static constexpr decltype(auto) TEXT_HEIGHT = BAR_SIZE.y - PROGRESS_BAR_MARGIN * 2;	// Y is the height.
+	static constexpr decltype(auto) INNERBLOCK_HEIGHT = BAR_SIZE.y - BORDER_THICKNESS * 2 - PROGRESS_BAR_MARGIN * 2;	// standalone version. for font initialization.
+	static constexpr decltype(auto) TEXT_HEIGHT = INNERBLOCK_HEIGHT;	// Since the text must be placed inside innerblock.
 	static inline Vector2D ICON_ANCHOR = Vector2D(), BAR_ANCHOR = Vector2D();
-	static inline Vector2D INNERBLOCK_ANCHOR = Vector2D(), INNERBLOCK_SIZE = Vector2D();
+	static inline Vector2D INNERBLOCK_ANCHOR = Vector2D(), INNERBLOCK_SIZE = Vector2D(0, INNERBLOCK_HEIGHT);
 	static inline Vector2D TEXT_ANCHOR = Vector2D();
 	static inline float m_flAlpha = 255;
 	static inline int m_hFont = 0;

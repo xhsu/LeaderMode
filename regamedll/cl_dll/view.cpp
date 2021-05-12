@@ -512,7 +512,7 @@ void V_CalcSpectatorRefdef(ref_params_s* pparams)
 	VectorCopy (pparams->viewangles, v_angles);
 	VectorCopy (pparams->vieworg, v_origin);
 
-	if ((g_iUser1 == OBS_IN_EYE || CHudSpectator::m_pip->value == INSET_IN_EYE) && ent)
+	if (g_iUser1 == OBS_IN_EYE && ent)
 	{
 		// calculate player velocity
 		float timeDiff = ent->curstate.msg_time - ent->prevstate.msg_time;
@@ -602,20 +602,7 @@ void V_CalcSpectatorRefdef(ref_params_s* pparams)
 		case OBS_IN_EYE:
 			V_CalcNormalRefdef (pparams);
 			break;
-
-		case OBS_MAP_FREE:
-			pparams->onlyClientDraw = true;
-			V_GetMapFreePosition(v_cl_angles, v_origin, v_angles);
-			break;
-
-		case OBS_MAP_CHASE:
-			pparams->onlyClientDraw = true;
-			V_GetMapChasePosition(g_iUser2, v_cl_angles, v_origin, v_angles);
-			break;
 		}
-
-		if (CHudSpectator::m_pip->value)
-			pparams->nextView = 1;	// force a second renderer view
 
 		CHudSpectator::m_iDrawCycle = 0;
 	}
@@ -631,31 +618,7 @@ void V_CalcSpectatorRefdef(ref_params_s* pparams)
 		pparams->nextView = 0;	// on further view
 
 		// override some settings in certain modes
-		switch ((int)CHudSpectator::m_pip->value)
-		{
-		case INSET_CHASE_FREE:
-			V_GetChasePos(g_iUser2, v_cl_angles, v_origin, v_angles);
-			break;
-
-		case INSET_IN_EYE:
-			V_CalcNormalRefdef (pparams);
-			break;
-
-		case INSET_MAP_FREE:
-			pparams->onlyClientDraw = true;
-			V_GetMapFreePosition(v_cl_angles, v_origin, v_angles);
-			break;
-
-		case INSET_MAP_CHASE:
-			pparams->onlyClientDraw = true;
-
-			if (g_iUser1 == OBS_ROAMING)
-				V_GetMapChasePosition(0, v_cl_angles, v_origin, v_angles);
-			else
-				V_GetMapChasePosition(g_iUser2, v_cl_angles, v_origin, v_angles);
-
-			break;
-		}
+		// REMOVED.
 
 		CHudSpectator::m_iDrawCycle = 1;
 	}

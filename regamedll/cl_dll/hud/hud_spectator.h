@@ -1,28 +1,37 @@
 /*
 
-Created Date: 10 Mar 2020
+Created Date: Mar 11 2020
+Remastered Date: May 12 2021
+
+Modern Warfare Dev Team
+	Programmer	- Luna the Reborn
 
 */
 
 #pragma once
 
 #define MAX_SPEC_HUD_MESSAGES 8
-#define MAX_OVERVIEW_ENTITIES 128
 #define MAX_CAM_WAYPOINTS 32
 
-#define OVERVIEW_TILE_SIZE 128
-#define OVERVIEW_MAX_LAYERS 1
+#define IS_FIRSTPERSON_SPEC ( g_iUser1 == OBS_IN_EYE )
 
-// defaults for clientinfo messages
-#define IS_FIRSTPERSON_SPEC ( g_iUser1 == OBS_IN_EYE || (g_iUser1 && (CHudSpectator::m_pip->value == INSET_IN_EYE)) )
+typedef struct cameraWayPoint_s
+{
+	float time;
+	Vector position;
+	Vector angle;
+	float fov;
+	int flags;
+}
+cameraWayPoint_t;
 
 struct CHudSpectator
 {
 	// Event functions.
 	static void	Initialize		(void);
-	static void	Shutdown		(void);
-	static void	ConnectToServer	(void);
-	static void	Draw			(float flTime, bool bIntermission);
+	//static void	Shutdown		(void);
+	//static void	ConnectToServer	(void);
+	//static void	Draw			(float flTime, bool bIntermission);
 	static void	Think			(void);	// Use gHUD::m_flUCDTime
 	static void	OnNewRound		(void);
 	static void	ServerAsksReset	(void);
@@ -40,6 +49,9 @@ struct CHudSpectator
 	static void ButtonUpdate	(void);
 	static void SetCameraView	(const Vector& pos, const Vector& angle, float fov);
 	static void SetSpectatorStartPosition(void);
+	static bool GetDirectorCamera(Vector& position, Vector& angle);
+	static void SetWayInterpolation(cameraWayPoint_t* prev, cameraWayPoint_t* start, cameraWayPoint_t* end, cameraWayPoint_t* next);
+	static void AddWaypoint		(float time, const Vector& pos, const Vector& angle, float fov, int flags);
 
 	// Game data.
 	static inline cvar_t* m_autoDirector = nullptr;
@@ -50,12 +62,12 @@ struct CHudSpectator
 	static inline int m_iSpectatorNumber = 0;
 	static inline bool m_IsInterpolating = false;
 	static inline int m_ChaseEntity = 0;
-	static inline int m_WayPoint = 0;
-	static inline int m_NumWayPoints = 0;
 	static inline std::array<client_textmessage_t, MAX_SPEC_HUD_MESSAGES> m_HUDMessages;
 	static inline std::array<std::string, MAX_SPEC_HUD_MESSAGES> m_HUDMessageText;
 	static inline byte m_lastHudMessage = 0U;
-	static inline unsigned short m_iFOV = DEFAULT_FOV;
+	static inline float m_flFOV = DEFAULT_FOV;
+	static inline short m_WayPoint = 0;
+	static inline short m_NumWayPoints = 0;
 	static inline Vector m_cameraOrigin;
 	static inline Vector m_cameraAngles;
 	static inline short m_iDrawCycle = 0;
@@ -65,20 +77,13 @@ struct CHudSpectator
 	static inline unsigned m_bitsButtonPressed = 0U;
 	static inline bool m_chatEnabled = true;
 	static inline double m_flNextObserverInput = 0.0;
+	static inline std::array<cameraWayPoint_t, MAX_CAM_WAYPOINTS> m_CamPath;
+	static inline CInterpolation m_WayInterpolation;
 
 	// Drawing data.
 };
 
 /*
-typedef struct cameraWayPoint_s
-{
-	float time;
-	Vector position;
-	Vector angle;
-	float fov;
-	int flags;
-}
-cameraWayPoint_t;
 
 typedef struct overviewInfo_s
 {

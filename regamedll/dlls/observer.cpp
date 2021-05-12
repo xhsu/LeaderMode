@@ -211,12 +211,6 @@ void CBasePlayer::Observer_HandleButtons()
 		case OBS_IN_EYE:
 			Observer_SetMode(OBS_ROAMING);
 			break;
-		case OBS_ROAMING:
-			Observer_SetMode(OBS_MAP_FREE);
-			break;
-		case OBS_MAP_FREE:
-			Observer_SetMode(OBS_MAP_CHASE);
-			break;
 		default:
 			Observer_SetMode(m_bObserverAutoDirector ? OBS_CHASE_LOCKED : OBS_CHASE_FREE);
 			break;
@@ -347,7 +341,7 @@ void CBasePlayer::Observer_SetMode(int iMode)
 	forcecamera = GetForceCamera(this);
 
 	// is valid mode ?
-	if (iMode < OBS_CHASE_LOCKED || iMode > OBS_MAP_CHASE)
+	if (iMode < OBS_FIRST || iMode > OBS_LAST)
 		iMode = OBS_IN_EYE;
 
 	oldMode = pev->iuser1;
@@ -357,7 +351,7 @@ void CBasePlayer::Observer_SetMode(int iMode)
 		if (forcecamera == CAMERA_MODE_SPEC_ONLY_TEAM)
 		{
 			if (iMode == OBS_ROAMING)
-				iMode = OBS_MAP_FREE;
+				iMode = OBS_CHASE_FREE;
 		}
 		else if (forcecamera == CAMERA_MODE_SPEC_ONLY_FIRST_PERSON)
 			iMode = OBS_IN_EYE;

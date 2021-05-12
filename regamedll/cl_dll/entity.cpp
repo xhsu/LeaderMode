@@ -65,7 +65,7 @@ int HUD_AddEntity2(int iType, cl_entity_s* pEntity, const char* szModelName)
 
 	if (g_iUser1)
 	{
-		if ((g_iUser1 == OBS_IN_EYE || CHudSpectator::m_pip->value == INSET_IN_EYE) && pEntity->index == g_iUser2)
+		if (g_iUser1 == OBS_IN_EYE && pEntity->index == g_iUser2)
 			return 0;	// don't draw the player we are following in eye
 
 	}

@@ -158,7 +158,7 @@ void gHUD::Init(void)
 	}*/
 
 	// instead, we should:
-	AddElementsToList<CHudClassIndicator, CHudBattery, CHudCrosshair, CHudDeathNotice>();
+	AddElementsToList<CHudClassIndicator, CHudBattery, CHudCrosshair, CHudDeathNotice, CHudSpectator>();
 	//m_Health.Init();
 	//m_SayText.Init();	// m_SayText should place before m_Spectator, since m_Spectator.init() is calling some vars from m_SayText.Init().
 	//m_Spectator.Init();
@@ -537,7 +537,7 @@ void gHUD::Think(void)
 				m_iFOV = Q_max(default_fov->value, 90.0f);
 		}
 		else
-			m_iFOV = CHudSpectator::m_iFOV;
+			m_iFOV = CHudSpectator::m_flFOV;
 	}
 
 	// make FOV transition nice and smooth.
@@ -1427,16 +1427,16 @@ bool OverviewMgr::LoadOverviewInfo(const char* pszFilePath)
 					pszParsePos = gEngfuncs.COM_ParseFile(pszParsePos, szToken);
 					m_bRotated = !!Q_atoi(szToken);
 				}
-				else if (!Q_strcmp(token, "inset"))
+				else if (!Q_strcmp(szToken, "inset"))
 				{
 					pszParsePos = gEngfuncs.COM_ParseFile(pszParsePos, szToken);
-					m_OverviewData.insetWindowX = Q_atof(szToken);
+					m_vecInsetWindowAnchor.x = Q_atof(szToken);
 					pszParsePos = gEngfuncs.COM_ParseFile(pszParsePos, szToken);
-					m_OverviewData.insetWindowY = Q_atof(szToken);
+					m_vecInsetWindowAnchor.y = Q_atof(szToken);
 					pszParsePos = gEngfuncs.COM_ParseFile(pszParsePos, szToken);
-					m_OverviewData.insetWindowWidth = Q_atof(szToken);
+					m_vecInsetWindowSize.width = Q_atof(szToken);
 					pszParsePos = gEngfuncs.COM_ParseFile(pszParsePos, szToken);
-					m_OverviewData.insetWindowHeight = Q_atof(szToken);
+					m_vecInsetWindowSize.height = Q_atof(szToken);
 
 				}
 				else if (!Q_stricmp(szToken, "}"))

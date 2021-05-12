@@ -1,6 +1,10 @@
 /*
 
-Created Date: 10 Mar 2020
+Created Date: Mar 11 2020
+Remastered Date: May 12 2021
+
+Modern Warfare Dev Team
+	Programmer	- Luna the Reborn
 
 */
 
@@ -11,27 +15,81 @@ extern int iJumpSpectator;
 extern float vJumpOrigin[3];
 extern float vJumpAngles[3];
 
+// Fuck C++
+extern void SpectatorMode(void);
+extern void SpectatorSpray(void);
+extern void SpectatorToggleAutoDirector(void);
+
+void CHudSpectator::Initialize(void)
+{
+	gHUD::m_lstElements.push_back({
+		Initialize,
+		nullptr,
+		nullptr,
+		nullptr,
+		Think,
+		OnNewRound,
+		ServerAsksReset,
+		});
+
+	//m_chatEnabled = (gHUD::m_SayText.m_pCVar_saytext->value != 0);
+	iJumpSpectator = 0;
+
+	gEngfuncs.pfnAddCommand("spec_mode", SpectatorMode);
+	gEngfuncs.pfnAddCommand("spec_decal", SpectatorSpray);
+	gEngfuncs.pfnAddCommand("spec_autodirector", SpectatorToggleAutoDirector);
+
+	m_autoDirector = gEngfuncs.pfnRegisterVariable("spec_autodirector_internal", "1", 0);
+
+	if (!m_autoDirector)
+	{
+		gEngfuncs.Con_Printf("ERROR! Couldn't register all spectator variables.\n");
+		return;
+	}
+}
 
 void CHudSpectator::Think(void)
 {
 	ButtonUpdate();
 }
 
-void CHudSpectator::Reset(void)
+void CHudSpectator::OnNewRound(void)
 {
-	m_FOV = 90.0f;
+	iJumpSpectator = 0;
+	g_iUser1 = g_iUser2 = 0;
 
+	ServerAsksReset();
+}
+
+void CHudSpectator::ServerAsksReset(void)
+{
+	m_lastPrimaryObject = 0;
+	m_lastSecondaryObject = 0;
+	m_lastAutoDirector = 0;
+	m_iObserverFlags = 0;
+	m_iSpectatorNumber = 0;
 	m_IsInterpolating = false;
-
 	m_ChaseEntity = 0;
+	m_lastHudMessage = 0U;
+	m_flFOV = DEFAULT_FOV;
+	m_WayPoint = 0;
+	m_NumWayPoints = 0;
+	m_iDrawCycle = 0;
+	m_bitsButtons = 0U;
+	m_bitsLastButtons = 0U;
+	m_bitsButtonReleased = 0U;
+	m_bitsButtonPressed = 0U;
+	m_chatEnabled = true;
+	m_flNextObserverInput = 0.0;
 
 	SetSpectatorStartPosition();
-	SetModes(m_mode->value, m_pip->value);
+	SetModes(-1);
 }
 
 void CHudSpectator::CheckSettings(void)
 {
-	if (m_chatEnabled != (gHUD::m_SayText.m_pCVar_saytext->value != 0))
+	// UNDONE
+	/*if (m_chatEnabled != (gHUD::m_SayText.m_pCVar_saytext->value != 0))
 	{
 		m_chatEnabled = (gHUD::m_SayText.m_pCVar_saytext->value != 0);
 
@@ -41,23 +99,7 @@ void CHudSpectator::CheckSettings(void)
 			Q_snprintf(chatcmd, sizeof(chatcmd) - 1, "ignoremsg %i", m_chatEnabled ? 0 : 1);
 			gEngfuncs.pfnServerCmd(chatcmd);
 		}
-	}
-}
-
-void CHudSpectator::InitHUDData(void)
-{
-	m_lastPrimaryObject = m_lastSecondaryObject = 0;
-	m_flNextObserverInput = 0.0f;
-	m_lastHudMessage = 0;
-	m_iSpectatorNumber = 0;
-	iJumpSpectator = 0;
-	g_iUser1 = g_iUser2 = 0;
-
-	Reset();
-
-	g_iUser2 = 0;
-
-	gHUD::m_iFOV = gHUD::default_fov->value;
+	}*/
 }
 
 void CHudSpectator::DeathMessage(int victim)
@@ -412,7 +454,7 @@ bool CHudSpectator::DirectorMessage(int iSize, void* pbuf)
 	case DRC_CMD_MODE:
 	{
 		if (m_autoDirector->value)
-			SetModes(READ_BYTE(), -1);
+			SetModes(READ_BYTE());
 
 		break;
 	}
@@ -536,10 +578,6 @@ bool CHudSpectator::DirectorMessage(int iSize, void* pbuf)
 	case DRC_CMD_WAYPOINTS:
 	{
 		i1 = READ_BYTE();
-
-		m_NumWayPoints = 0;
-		m_WayPoint = 0;
-
 		for (i2 = 0; i2 < i1; i2++)
 		{
 			f1 = gHUD::m_flTime + (float)(READ_SHORT()) / 100.0f;
@@ -655,71 +693,9 @@ void SpectatorToggleAutoDirector(void)
 		gEngfuncs.Cvar_SetValue("spec_autodirector_internal", 1);
 }
 
-int CHudSpectator::Init(void)
+void CHudSpectator::AddWaypoint(float time, const Vector& pos, const Vector& angle, float fov, int flags)
 {
-	gHUD::AddHudElem(this);
-
-	m_bitsFlags |= HUD_ACTIVE;
-	m_flNextObserverInput = 0.0f;
-	m_zoomDelta = 0.0f;
-	m_moveDelta = 0.0f;
-	m_FOV = 90.0f;
-	m_chatEnabled = (gHUD::m_SayText.m_pCVar_saytext->value != 0);
-	iJumpSpectator = 0;
-	m_lastAutoDirector = -1.0f;
-
-	Q_memset(&m_OverviewData, 0, sizeof(m_OverviewData));
-	Q_memset(&m_OverviewEntities, 0, sizeof(m_OverviewEntities));
-	m_lastPrimaryObject = m_lastSecondaryObject = 0;
-
-	gEngfuncs.pfnAddCommand("spec_mode", SpectatorMode);
-	gEngfuncs.pfnAddCommand("spec_toggleinset", SpectatorToggleInset);
-	gEngfuncs.pfnAddCommand("spec_decal", SpectatorSpray);
-	gEngfuncs.pfnAddCommand("spec_help", SpectatorHelp);
-	gEngfuncs.pfnAddCommand("spec_menu", SpectatorMenu);
-	gEngfuncs.pfnAddCommand("togglescores", ToggleScores);
-	gEngfuncs.pfnAddCommand("spec_drawnames", SpectatorToggleDrawNames);
-	gEngfuncs.pfnAddCommand("spec_drawcone", SpectatorToggleDrawCone);
-	gEngfuncs.pfnAddCommand("spec_drawstatus", SpectatorToggleDrawStatus);
-	gEngfuncs.pfnAddCommand("spec_autodirector", SpectatorToggleAutoDirector);
-
-	m_drawnames = gEngfuncs.pfnRegisterVariable("spec_drawnames_internal", "1", 0);
-	m_drawcone = gEngfuncs.pfnRegisterVariable("spec_drawcone_internal", "1", 0);
-	m_drawstatus = gEngfuncs.pfnRegisterVariable("spec_drawstatus_internal", "1", 0);
-	m_autoDirector = gEngfuncs.pfnRegisterVariable("spec_autodirector_internal", "1", 0);
-	m_mode = gEngfuncs.pfnRegisterVariable("spec_mode_internal", "1", 0);
-	m_pip = gEngfuncs.pfnRegisterVariable("spec_pip", "1", 0);
-
-	if (!m_drawnames || !m_drawcone || !m_drawstatus || !m_autoDirector || !m_pip)
-	{
-		gEngfuncs.Con_Printf("ERROR! Couldn't register all spectator variables.\n");
-		return 0;
-	}
-
-	return 1;
-}
-
-int CHudSpectator::VidInit(void)
-{
-	m_hsprPlayer = gEngfuncs.pfnSPR_Load("sprites/iplayer.spr");
-	m_hsprPlayerBlue = gEngfuncs.pfnSPR_Load("sprites/iplayerblue.spr");
-	m_hsprPlayerRed = gEngfuncs.pfnSPR_Load("sprites/iplayerred.spr");
-	m_hsprPlayerDead = gEngfuncs.pfnSPR_Load("sprites/iplayerdead.spr");
-	m_hsprPlayerVIP = gEngfuncs.pfnSPR_Load("sprites/iplayervip.spr");
-	m_hsprPlayerC4 = gEngfuncs.pfnSPR_Load("sprites/iplayerc4.spr");
-	m_hsprUnkownMap = gEngfuncs.pfnSPR_Load("sprites/tile.spr");
-	m_hsprBomb = gEngfuncs.pfnSPR_Load("sprites/ic4.spr");
-	m_hsprBackpack = gEngfuncs.pfnSPR_Load("sprites/ibackpack.spr");
-	m_hsprBeam = gEngfuncs.pfnSPR_Load("sprites/laserbeam.spr");
-	m_hsprCamera = gEngfuncs.pfnSPR_Load("sprites/camera.spr");
-	m_hsprHostage = gEngfuncs.pfnSPR_Load("sprites/ihostage.spr");
-
-	return 1;
-}
-
-void CHudSpectator::AddWaypoint(float time, Vector pos, Vector angle, float fov, int flags)
-{
-	if (!flags == 0 && time == 0.0f)
+	if (flags == 0 && time == 0.0f)
 	{
 		SetCameraView(pos, angle, fov);
 		return;
@@ -731,19 +707,18 @@ void CHudSpectator::AddWaypoint(float time, Vector pos, Vector angle, float fov,
 		return;
 	}
 
-	VectorCopy(angle, m_CamPath[m_NumWayPoints].angle);
-	VectorCopy(pos, m_CamPath[m_NumWayPoints].position);
+	m_CamPath[m_NumWayPoints].angle = angle;
+	m_CamPath[m_NumWayPoints].position = pos;
 	m_CamPath[m_NumWayPoints].flags = flags;
 	m_CamPath[m_NumWayPoints].fov = fov;
 	m_CamPath[m_NumWayPoints].time = time;
 
-	gEngfuncs.Con_DPrintf("Added waypoint %i\n", m_NumWayPoints);
-	m_NumWayPoints++;
+	gEngfuncs.Con_DPrintf("Added waypoint %i\n", m_NumWayPoints++);
 }
 
 void CHudSpectator::SetCameraView(const Vector& pos, const Vector& angle, float fov)
 {
-	m_iFOV = fov;
+	m_flFOV = fov;
 	VectorCopy(pos, vJumpOrigin);
 	VectorCopy(angle, vJumpAngles);
 	gEngfuncs.SetViewAngles(vJumpAngles);
