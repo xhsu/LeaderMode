@@ -100,7 +100,7 @@ void CHudCrosshair::Think(void)
 	m_flCrosshairDistance = round(float(ScreenWidth) * m_flSpread);
 	m_flCurChDistance += (m_flCrosshairDistance - m_flCurChDistance) * gHUD::m_flUCDTimeDelta * 5;
 
-	m_flAlpha += ((gHUD::m_iFOV >= DEFAULT_FOV ? 255.0f : 0.0f) - m_flAlpha) * gHUD::m_flUCDTimeDelta * 3;
+	m_flAlpha += ((gHUD::m_iFOV >= DEFAULT_FOV ? 255.0f : 0.0f) - m_flAlpha) * gHUD::m_flUCDTimeDelta * 6;
 }
 
 void CHudCrosshair::Reset(void)

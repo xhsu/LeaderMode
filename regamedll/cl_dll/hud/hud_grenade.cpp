@@ -1,14 +1,41 @@
 /*
 
 Created Date: Mar 23 2020
+Remastered Date: May 12 2021
 
 Modern Warfare Dev Team
-Code - Luna the Reborn
-Model - Matoilet
+	Programmer	- Luna the Reborn
+	Model		- Matoilet
+	Artist		- HL&CL
 
 */
 
 #include "precompiled.h"
+
+void CHudEquipments::Initialize(void)
+{
+	// Default
+	EQUIPMENT_ICONS[EQP_NONE] = LoadDDS("sprites/ClassesIcon/Doraemon.dds");
+
+	// Armor
+	EQUIPMENT_ICONS[EQP_KEVLAR] = LoadDDS("sprites/Inventory/Kevlar.dds");
+	EQUIPMENT_ICONS[EQP_ASSAULT_SUIT] = LoadDDS("sprites/Inventory/AssaultSuit.dds");
+
+	// Grenades
+	EQUIPMENT_ICONS[EQP_HEGRENADE] = LoadDDS("sprites/Inventory/HE.dds");
+	EQUIPMENT_ICONS[EQP_FLASHBANG] = LoadDDS("sprites/Inventory/Flashbang.dds");
+	EQUIPMENT_ICONS[EQP_SMOKEGRENADE] = LoadDDS("sprites/Inventory/SmokeGrenade.dds");
+	EQUIPMENT_ICONS[EQP_CRYOGRENADE] = LoadDDS("sprites/Inventory/Cryo.dds");
+	EQUIPMENT_ICONS[EQP_INCENDIARY_GR] = LoadDDS("sprites/Inventory/Molotov.dds");
+	EQUIPMENT_ICONS[EQP_HEALING_GR] = LoadDDS("sprites/Inventory/HealingGrenade.dds");
+	EQUIPMENT_ICONS[EQP_GAS_GR] = LoadDDS("sprites/Inventory/NerveGas.dds");
+	EQUIPMENT_ICONS[EQP_C4] = LoadDDS("sprites/Inventory/C4.dds");
+
+	// Equipments
+	EQUIPMENT_ICONS[EQP_DETONATOR] = LoadDDS("sprites/Inventory/Detonator.dds");
+	EQUIPMENT_ICONS[EQP_NVG] = LoadDDS("sprites/Inventory/NVG.dds");
+	EQUIPMENT_ICONS[EQP_FLASHLIGHT] = LoadDDS("sprites/Inventory/Flashlight.dds");
+}
 
 int CHudGrenade::Init(void)
 {

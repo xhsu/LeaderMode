@@ -203,6 +203,7 @@ enum EquipmentIdType
 	// misc
 	EQP_DETONATOR,
 	EQP_NVG,
+	EQP_FLASHLIGHT,
 
 	EQP_COUNT,
 };

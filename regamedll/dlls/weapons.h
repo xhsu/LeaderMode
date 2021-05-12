@@ -1842,7 +1842,7 @@ public:	// new functions
 };
 
 #define PSG1_VIEW_MODEL		"models/weapons/v_psg1.mdl"
-#define PSG1_WORLD_MODEL	"models/weapons/w_awp.mdl"	// UNDONE
+#define PSG1_WORLD_MODEL	"models/weapons/w_psg1.mdl"
 #define PSG1_FIRE_SFX		"weapons/m14ebr/m14ebr_fire.wav"	// UNDONE
 
 class CPSG1 : public CBaseWeapon
