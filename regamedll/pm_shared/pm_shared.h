@@ -35,8 +35,9 @@
 #define OBS_CHASE_FREE   2
 #define OBS_ROAMING      3
 #define OBS_IN_EYE       4
-#define OBS_MAP_FREE     5
-#define OBS_MAP_CHASE    6
+
+#define OBS_FIRST		OBS_CHASE_LOCKED
+#define OBS_LAST		OBS_IN_EYE
 
 #define STEP_CONCRETE 0
 #define STEP_METAL    1

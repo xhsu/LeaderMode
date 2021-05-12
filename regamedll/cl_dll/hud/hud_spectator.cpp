@@ -11,16 +11,14 @@ extern int iJumpSpectator;
 extern float vJumpOrigin[3];
 extern float vJumpAngles[3];
 
+
+void CHudSpectator::Think(void)
+{
+	ButtonUpdate();
+}
+
 void CHudSpectator::Reset(void)
 {
-	if (Q_strcmp(m_OverviewData.map, gEngfuncs.pfnGetLevelName()))
-	{
-		ParseOverviewFile();
-		LoadMapSprites();
-	}
-
-	Q_memset(&m_OverviewEntities, 0, sizeof(m_OverviewEntities));
-
 	m_FOV = 90.0f;
 
 	m_IsInterpolating = false;
@@ -31,54 +29,8 @@ void CHudSpectator::Reset(void)
 	SetModes(m_mode->value, m_pip->value);
 }
 
-int CHudSpectator::ToggleInset(bool allowOff)
-{
-	int newInsetMode = (int)m_pip->value + 1;
-
-	if (g_iUser1 < OBS_MAP_FREE)
-	{
-		if (newInsetMode > INSET_MAP_CHASE)
-		{
-			if (allowOff)
-				newInsetMode = INSET_OFF;
-			else
-				newInsetMode = INSET_MAP_FREE;
-		}
-
-		if (newInsetMode == INSET_CHASE_FREE)
-			newInsetMode = INSET_MAP_FREE;
-	}
-	else
-	{
-		if (newInsetMode > INSET_IN_EYE)
-		{
-			if (allowOff)
-				newInsetMode = INSET_OFF;
-			else
-				newInsetMode = INSET_CHASE_FREE;
-		}
-	}
-
-	return newInsetMode;
-}
-
 void CHudSpectator::CheckSettings(void)
 {
-	m_pip->value = (int)m_pip->value;
-
-	if ((g_iUser1 < OBS_MAP_FREE) && (m_pip->value == INSET_CHASE_FREE || m_pip->value == INSET_IN_EYE))
-	{
-		m_pip->value = INSET_MAP_FREE;
-	}
-
-	if ((g_iUser1 >= OBS_MAP_FREE) && (m_pip->value >= INSET_MAP_FREE))
-	{
-		m_pip->value = INSET_CHASE_FREE;
-	}
-
-	if (gHUD::m_bIntermission)
-		m_pip->value = INSET_OFF;
-
 	if (m_chatEnabled != (gHUD::m_SayText.m_pCVar_saytext->value != 0))
 	{
 		m_chatEnabled = (gHUD::m_SayText.m_pCVar_saytext->value != 0);
@@ -90,25 +42,6 @@ void CHudSpectator::CheckSettings(void)
 			gEngfuncs.pfnServerCmd(chatcmd);
 		}
 	}
-
-	if (((g_iTeam == TEAM_TERRORIST) || (g_iTeam == TEAM_CT)) && (g_iUser1 == OBS_IN_EYE))
-	{
-		if (m_pip->value != INSET_OFF)
-		{
-			gHUD::m_VGUI2Print.VGUI2HudPrint("#Spec_No_PIP", -1, ScreenHeight * 0.35, 1.0, 0.705, 0.118);
-			m_pip->value = INSET_OFF;
-		}
-	}
-
-	// UNDONE
-	/*if (gEngfuncs.GetLocalPlayer()->index == g_iUser2)
-	{
-		gViewPortInterface->SpectatorGUIEnableInsetView(false);
-	}
-	else
-	{
-		gViewPortInterface->SpectatorGUIEnableInsetView(m_pip->value != INSET_OFF);
-	}*/
 }
 
 void CHudSpectator::InitHUDData(void)
@@ -120,30 +53,11 @@ void CHudSpectator::InitHUDData(void)
 	iJumpSpectator = 0;
 	g_iUser1 = g_iUser2 = 0;
 
-	memset(&m_OverviewData, 0, sizeof(m_OverviewData));
-	memset(&m_OverviewEntities, 0, sizeof(m_OverviewEntities));
-
 	Reset();
 
 	g_iUser2 = 0;
 
 	gHUD::m_iFOV = gHUD::default_fov->value;
-}
-
-bool CHudSpectator::AddOverviewEntityToList(hSprite sprite, cl_entity_t* ent, double killTime)
-{
-	for (int i = 0; i < MAX_OVERVIEW_ENTITIES; i++)
-	{
-		if (m_OverviewEntities[i].entity == NULL)
-		{
-			m_OverviewEntities[i].entity = ent;
-			m_OverviewEntities[i].hSprite = sprite;
-			m_OverviewEntities[i].killTime = killTime;
-			return true;
-		}
-	}
-
-	return false;
 }
 
 void CHudSpectator::DeathMessage(int victim)
@@ -152,567 +66,16 @@ void CHudSpectator::DeathMessage(int victim)
 
 	if (pl && pl->player)
 	{
-		if (AddOverviewEntityToList(m_hsprPlayerDead, pl, gEngfuncs.GetClientTime() + 4.0f))
+		if (pl->index == gEngfuncs.GetLocalPlayer()->index)
 		{
-			if (pl->index == gEngfuncs.GetLocalPlayer()->index)
-			{
-				m_iObserverFlags = DRC_FLAG_DRAMATIC | DRC_FLAG_FINAL;
-				V_ResetChaseCam();
-			}
+			m_iObserverFlags = DRC_FLAG_DRAMATIC | DRC_FLAG_FINAL;
+			V_ResetChaseCam();
 		}
 	}
-}
-
-bool CHudSpectator::AddOverviewEntity(int type, cl_entity_s* ent, const char* modelname)
-{
-	hSprite hSprite = 0;
-	double duration = -1.0f;
-
-	if (!ent)
-		return false;
-
-	if (type == ET_PLAYER)
-	{
-		if (ent->curstate.solid != SOLID_NOT)
-		{
-			switch (g_PlayerExtraInfo[ent->index].m_iTeam)
-			{
-			case TEAM_TERRORIST: hSprite = m_hsprPlayerRed; break;
-			case TEAM_CT: hSprite = m_hsprPlayerBlue; break;
-			default: hSprite = m_hsprPlayer; break;
-			}
-
-			if (g_PlayerExtraInfo[ent->index].m_bIsCommander)
-				hSprite = m_hsprPlayerVIP;
-			else if (g_PlayerExtraInfo[ent->index].m_bIsGodfather)
-				hSprite = m_hsprPlayerC4;
-		}
-		else
-			return false;
-	}
-	else if (type == ET_NORMAL)
-	{
-		if (!strcmp(modelname, "models/w_c4.mdl"))
-			hSprite = m_hsprBomb;
-		else if (!strcmp(modelname, "models/w_backpack.mdl"))
-			hSprite = m_hsprBackpack;
-		else if (!strcmp(modelname, "models/hostage") || !strcmp(modelname, "models/scientist"))
-			hSprite = m_hsprHostage;
-	}
-	else
-		return false;
-
-	return AddOverviewEntityToList(hSprite, ent, gEngfuncs.GetClientTime() + duration);
-}
-
-void CHudSpectator::CheckOverviewEntities(void)
-{
-	double time = gEngfuncs.GetClientTime();
-
-	for (int i = 0; i < MAX_OVERVIEW_ENTITIES; i++)
-	{
-		if (m_OverviewEntities[i].killTime < time)
-			Q_memset(&m_OverviewEntities[i], 0, sizeof(overviewEntity_t));
-	}
-}
-
-void CHudSpectator::DrawOverview(void)
-{
-	if (!g_iUser1)
-		return;
-
-	if (m_iDrawCycle == 0 && ((g_iUser1 != OBS_MAP_FREE) && (g_iUser1 != OBS_MAP_CHASE)))
-		return;
-
-	if (m_iDrawCycle == 1 && m_pip->value < INSET_MAP_FREE)
-		return;
-
-	// UNDONE
-	/*if (gViewPortInterface->GetClientDllInterface()->InIntermission())
-	{
-		m_pip->value = 0;
-		return;
-	}*/
-
-	DrawOverviewLayer();
-	DrawOverviewEntities();
-	CheckOverviewEntities();
 }
 
 // from view.cpp
 extern Vector v_origin, v_angles, v_cl_angles, v_sim_org, v_lastAngles, v_lastFacing;
-
-void CHudSpectator::DrawOverviewEntities(void)
-{
-	int i, ir, ig, ib;
-	model_s* hSpriteModel;
-	Vector origin, angles, point, forward, right, left, up, world, screen, offset;
-	float x, y, z, r, g, b, sizeScale = 4.0f;
-	cl_entity_t* ent;
-	float rmatrix[3][4];
-
-	float zScale = (90.0f - v_angles[0]) / 90.0f;
-
-	z = m_OverviewData.layersHeights[0] * zScale;
-
-	UnpackRGB(ir, ig, ib, RGB_YELLOWISH);
-	r = (float)ir / 255.0f;
-	g = (float)ig / 255.0f;
-	b = (float)ib / 255.0f;
-
-	gEngfuncs.pTriAPI->CullFace(TRI_NONE);
-
-	for (i = 0; i < MAX_PLAYERS; i++)
-		m_vPlayerPos[i][2] = -1;
-
-	for (i = 0; i < MAX_OVERVIEW_ENTITIES; i++)
-	{
-		if (!m_OverviewEntities[i].hSprite)
-			continue;
-
-		if (m_OverviewEntities[i].entity == gEngfuncs.GetLocalPlayer() && m_OverviewEntities[i].hSprite == m_hsprPlayerDead)
-			continue;
-
-		hSpriteModel = (struct model_s*)gEngfuncs.GetSpritePointer(m_OverviewEntities[i].hSprite);
-		ent = m_OverviewEntities[i].entity;
-
-		gEngfuncs.pTriAPI->SpriteTexture(hSpriteModel, 0);
-		gEngfuncs.pTriAPI->RenderMode(kRenderTransAlpha);
-
-		AngleVectors(ent->angles, right, up, NULL);
-		VectorCopy(ent->origin, origin);
-
-		gEngfuncs.pTriAPI->Begin(TRI_QUADS);
-		gEngfuncs.pTriAPI->Color4f(1.0, 1.0, 1.0, 1.0);
-
-		gEngfuncs.pTriAPI->TexCoord2f(1, 0);
-		VectorMA(origin, 16.0f * sizeScale, up, point);
-		VectorMA(point, 16.0f * sizeScale, right, point);
-		point[2] *= zScale;
-		gEngfuncs.pTriAPI->Vertex3fv(point);
-
-		gEngfuncs.pTriAPI->TexCoord2f(0, 0);
-
-		VectorMA(origin, 16.0f * sizeScale, up, point);
-		VectorMA(point, -16.0f * sizeScale, right, point);
-		point[2] *= zScale;
-		gEngfuncs.pTriAPI->Vertex3fv(point);
-
-		gEngfuncs.pTriAPI->TexCoord2f(0, 1);
-		VectorMA(origin, -16.0f * sizeScale, up, point);
-		VectorMA(point, -16.0f * sizeScale, right, point);
-		point[2] *= zScale;
-		gEngfuncs.pTriAPI->Vertex3fv(point);
-
-		gEngfuncs.pTriAPI->TexCoord2f(1, 1);
-		VectorMA(origin, -16.0f * sizeScale, up, point);
-		VectorMA(point, 16.0f * sizeScale, right, point);
-		point[2] *= zScale;
-		gEngfuncs.pTriAPI->Vertex3fv(point);
-
-		gEngfuncs.pTriAPI->End();
-
-		if (!ent->player)
-			continue;
-
-		origin[2] *= zScale;
-
-		gEngfuncs.pTriAPI->RenderMode(kRenderTransAdd);
-
-		hSpriteModel = (struct model_s*)gEngfuncs.GetSpritePointer(m_hsprBeam);
-		gEngfuncs.pTriAPI->SpriteTexture(hSpriteModel, 0);
-
-		gEngfuncs.pTriAPI->Color4f(r, g, b, 0.3);
-
-		gEngfuncs.pTriAPI->Begin(TRI_QUADS);
-		gEngfuncs.pTriAPI->TexCoord2f(1, 0);
-		gEngfuncs.pTriAPI->Vertex3f(origin[0] + 4, origin[1] + 4, origin[2] - zScale);
-		gEngfuncs.pTriAPI->TexCoord2f(0, 0);
-		gEngfuncs.pTriAPI->Vertex3f(origin[0] - 4, origin[1] - 4, origin[2] - zScale);
-		gEngfuncs.pTriAPI->TexCoord2f(0, 1);
-		gEngfuncs.pTriAPI->Vertex3f(origin[0] - 4, origin[1] - 4, z);
-		gEngfuncs.pTriAPI->TexCoord2f(1, 1);
-		gEngfuncs.pTriAPI->Vertex3f(origin[0] + 4, origin[1] + 4, z);
-		gEngfuncs.pTriAPI->End();
-
-		gEngfuncs.pTriAPI->Begin(TRI_QUADS);
-		gEngfuncs.pTriAPI->TexCoord2f(1, 0);
-		gEngfuncs.pTriAPI->Vertex3f(origin[0] - 4, origin[1] + 4, origin[2] - zScale);
-		gEngfuncs.pTriAPI->TexCoord2f(0, 0);
-		gEngfuncs.pTriAPI->Vertex3f(origin[0] + 4, origin[1] - 4, origin[2] - zScale);
-		gEngfuncs.pTriAPI->TexCoord2f(0, 1);
-		gEngfuncs.pTriAPI->Vertex3f(origin[0] + 4, origin[1] - 4, z);
-		gEngfuncs.pTriAPI->TexCoord2f(1, 1);
-		gEngfuncs.pTriAPI->Vertex3f(origin[0] - 4, origin[1] + 4, z);
-		gEngfuncs.pTriAPI->End();
-
-		if (gEngfuncs.pTriAPI->WorldToScreen(origin, screen))
-			continue;
-
-		screen[0] = XPROJECT(screen[0]);
-		screen[1] = YPROJECT(screen[1]);
-		screen[2] = 0.0f;
-
-		origin[0] += 32.0f;
-		origin[1] += 32.0f;
-
-		gEngfuncs.pTriAPI->WorldToScreen(origin, offset);
-
-		offset[0] = XPROJECT(offset[0]);
-		offset[1] = YPROJECT(offset[1]);
-		offset[2] = 0.0f;
-
-		VectorSubtract(offset, screen, offset);
-
-		int playerNum = ent->index - 1;
-
-		m_vPlayerPos[playerNum][0] = screen[0];
-		m_vPlayerPos[playerNum][1] = screen[1] + Length(offset);
-		m_vPlayerPos[playerNum][2] = 1;
-	}
-
-	if (!m_pip->value || !m_drawcone->value)
-		return;
-
-	if (m_pip->value == INSET_IN_EYE || g_iUser1 == OBS_IN_EYE)
-	{
-		V_GetInEyePos(g_iUser2, origin, angles);
-	}
-	else if (m_pip->value == INSET_CHASE_FREE || g_iUser1 == OBS_CHASE_FREE)
-	{
-		V_GetChasePos(g_iUser2, v_cl_angles, origin, angles);
-	}
-	else if (g_iUser1 == OBS_ROAMING)
-	{
-		VectorCopy(v_sim_org, origin);
-		VectorCopy(v_cl_angles, angles);
-	}
-	else
-		V_GetChasePos(g_iUser2, NULL, origin, angles);
-
-	x = origin[0];
-	y = origin[1];
-	z = origin[2];
-
-	angles[0] = 0;
-
-	hSpriteModel = (struct model_s*)gEngfuncs.GetSpritePointer(m_hsprCamera);
-	gEngfuncs.pTriAPI->RenderMode(kRenderTransAdd);
-	gEngfuncs.pTriAPI->SpriteTexture(hSpriteModel, 0);
-
-	gEngfuncs.pTriAPI->Color4f(r, g, b, 1.0);
-
-	AngleVectors(angles, forward, NULL, NULL);
-	VectorScale(forward, 512.0f, forward);
-
-	offset[0] = 0.0f;
-	offset[1] = 45.0f;
-	offset[2] = 0.0f;
-
-	AngleMatrix(offset, rmatrix);
-	VectorTransform(forward, rmatrix, right);
-
-	offset[1] = -45.0f;
-
-	AngleMatrix(offset, rmatrix);
-	VectorTransform(forward, rmatrix, left);
-
-	gEngfuncs.pTriAPI->Begin(TRI_TRIANGLES);
-	gEngfuncs.pTriAPI->TexCoord2f(0, 0);
-	gEngfuncs.pTriAPI->Vertex3f(x + right[0], y + right[1], (z + right[2]) * zScale);
-
-	gEngfuncs.pTriAPI->TexCoord2f(0, 1);
-	gEngfuncs.pTriAPI->Vertex3f(x, y, z * zScale);
-
-	gEngfuncs.pTriAPI->TexCoord2f(1, 1);
-	gEngfuncs.pTriAPI->Vertex3f(x + left[0], y + left[1], (z + left[2]) * zScale);
-	gEngfuncs.pTriAPI->End();
-}
-
-void CHudSpectator::DrawOverviewLayer(void)
-{
-	float screenaspect, xs, ys, xStep, yStep, x, y, z;
-	int ix, iy, i, xTiles, yTiles, frame;
-
-	qboolean hasMapImage = m_MapSprite ? TRUE : FALSE;
-	model_t* dummySprite = (struct model_s*)gEngfuncs.GetSpritePointer(m_hsprUnkownMap);
-
-	if (hasMapImage)
-	{
-		i = m_MapSprite->numframes / (4 * 3);
-		i = Q_sqrt((float)i);
-		xTiles = i * 4;
-		yTiles = i * 3;
-	}
-	else
-	{
-		xTiles = 8;
-		yTiles = 6;
-	}
-
-	screenaspect = 4.0f / 3.0f;
-
-	xs = m_OverviewData.origin[0];
-	ys = m_OverviewData.origin[1];
-	z = (90.0f - v_angles[0]) / 90.0f;
-	z *= m_OverviewData.layersHeights[0];
-
-	gEngfuncs.pTriAPI->RenderMode(kRenderTransTexture);
-	gEngfuncs.pTriAPI->CullFace(TRI_NONE);
-	gEngfuncs.pTriAPI->Color4f(1.0, 1.0, 1.0, 1.0);
-
-	frame = 0;
-
-	if (m_OverviewData.rotated)
-	{
-		xStep = (2 * 4096.0f / m_OverviewData.zoom) / xTiles;
-		yStep = -(2 * 4096.0f / (m_OverviewData.zoom * screenaspect)) / yTiles;
-
-		y = ys + (4096.0f / (m_OverviewData.zoom * screenaspect));
-
-		for (iy = 0; iy < yTiles; iy++)
-		{
-			x = xs - (4096.0f / (m_OverviewData.zoom));
-
-			for (ix = 0; ix < xTiles; ix++)
-			{
-				if (hasMapImage)
-					gEngfuncs.pTriAPI->SpriteTexture(m_MapSprite, frame);
-				else
-					gEngfuncs.pTriAPI->SpriteTexture(dummySprite, 0);
-
-				gEngfuncs.pTriAPI->Begin(TRI_QUADS);
-				gEngfuncs.pTriAPI->TexCoord2f(0, 0);
-				gEngfuncs.pTriAPI->Vertex3f(x, y, z);
-
-				gEngfuncs.pTriAPI->TexCoord2f(1, 0);
-				gEngfuncs.pTriAPI->Vertex3f(x + xStep, y, z);
-
-				gEngfuncs.pTriAPI->TexCoord2f(1, 1);
-				gEngfuncs.pTriAPI->Vertex3f(x + xStep, y + yStep, z);
-
-				gEngfuncs.pTriAPI->TexCoord2f(0, 1);
-				gEngfuncs.pTriAPI->Vertex3f(x, y + yStep, z);
-				gEngfuncs.pTriAPI->End();
-
-				frame++;
-				x += xStep;
-			}
-
-			y += yStep;
-		}
-	}
-	else
-	{
-		xStep = -(2 * 4096.0f / m_OverviewData.zoom) / xTiles;
-		yStep = -(2 * 4096.0f / (m_OverviewData.zoom * screenaspect)) / yTiles;
-
-		x = xs + (4096.0f / (m_OverviewData.zoom * screenaspect));
-
-		for (ix = 0; ix < yTiles; ix++)
-		{
-			y = ys + (4096.0f / (m_OverviewData.zoom));
-
-			for (iy = 0; iy < xTiles; iy++)
-			{
-				if (hasMapImage)
-					gEngfuncs.pTriAPI->SpriteTexture(m_MapSprite, frame);
-				else
-					gEngfuncs.pTriAPI->SpriteTexture(dummySprite, 0);
-
-				gEngfuncs.pTriAPI->Begin(TRI_QUADS);
-				gEngfuncs.pTriAPI->TexCoord2f(0, 0);
-				gEngfuncs.pTriAPI->Vertex3f(x, y, z);
-
-				gEngfuncs.pTriAPI->TexCoord2f(0, 1);
-				gEngfuncs.pTriAPI->Vertex3f(x + xStep, y, z);
-
-				gEngfuncs.pTriAPI->TexCoord2f(1, 1);
-				gEngfuncs.pTriAPI->Vertex3f(x + xStep, y + yStep, z);
-
-				gEngfuncs.pTriAPI->TexCoord2f(1, 0);
-				gEngfuncs.pTriAPI->Vertex3f(x, y + yStep, z);
-				gEngfuncs.pTriAPI->End();
-
-				frame++;
-				y += yStep;
-			}
-
-			x += xStep;
-		}
-	}
-}
-
-void CHudSpectator::LoadMapSprites()
-{
-	// right now only support for one map layer
-	if (m_OverviewData.layers > 0)
-	{
-		m_MapSprite = gEngfuncs.LoadMapSprite(m_OverviewData.layersImages[0]);
-	}
-	else
-		m_MapSprite = nullptr; // the standard "unknown map" sprite will be used instead
-}
-
-bool CHudSpectator::ParseOverviewFile()
-{
-	char filename[255] = { 0 };
-	char levelname[255] = { 0 };
-	char token[1024] = { 0 };
-	float height;
-
-	char* pfile = nullptr;
-
-	Q_memset(&m_OverviewData, 0, sizeof(m_OverviewData));
-
-	// fill in standrd values
-	m_OverviewData.insetWindowX = 4;	// upper left corner
-	m_OverviewData.insetWindowY = 4;
-	m_OverviewData.insetWindowHeight = 180;
-	m_OverviewData.insetWindowWidth = 240;
-	m_OverviewData.origin[0] = 0.0f;
-	m_OverviewData.origin[1] = 0.0f;
-	m_OverviewData.origin[2] = 0.0f;
-	m_OverviewData.zoom = 1.0f;
-	m_OverviewData.layers = 0;
-	m_OverviewData.layersHeights[0] = 0.0f;
-	Q_strncpy(m_OverviewData.map, gEngfuncs.pfnGetLevelName(), sizeof(m_OverviewData.map));
-
-	if (Q_strlen(m_OverviewData.map) == 0)
-		return false; // not active yet
-
-	Q_strncpy(levelname, m_OverviewData.map + 5, sizeof(levelname));
-	levelname[Q_strlen(levelname) - 4] = 0;
-
-	Q_snprintf(filename, charsmax(filename), "overviews/%s.txt", levelname);
-
-	pfile = (char*)gEngfuncs.COM_LoadFile(filename, 5, NULL);
-
-	if (!pfile)
-	{
-		gEngfuncs.Con_Printf("Couldn't open file %s. Using default values for overiew mode.\n", filename);
-		return false;
-	}
-
-
-	while (true)
-	{
-		pfile = gEngfuncs.COM_ParseFile(pfile, token);
-
-		if (!pfile)
-			break;
-
-		if (!Q_strcmp(token, "global"))
-		{
-			// parse the global data
-			pfile = gEngfuncs.COM_ParseFile(pfile, token);
-			if (Q_strcmp(token, "{"))
-			{
-				gEngfuncs.Con_Printf("Error parsing overview file %s. (expected { )\n", filename);
-				return false;
-			}
-
-			pfile = gEngfuncs.COM_ParseFile(pfile, token);
-
-			while (Q_strcmp(token, "}"))
-			{
-				if (!Q_strcmp(token, "zoom"))
-				{
-					pfile = gEngfuncs.COM_ParseFile(pfile, token);
-					m_OverviewData.zoom = Q_atof(token);
-				}
-				else if (!Q_strcmp(token, "origin"))
-				{
-					pfile = gEngfuncs.COM_ParseFile(pfile, token);
-					m_OverviewData.origin[0] = Q_atof(token);
-					pfile = gEngfuncs.COM_ParseFile(pfile, token);
-					m_OverviewData.origin[1] = Q_atof(token);
-					pfile = gEngfuncs.COM_ParseFile(pfile, token);
-					m_OverviewData.origin[2] = Q_atof(token);
-				}
-				else if (!Q_strcmp(token, "rotated"))
-				{
-					pfile = gEngfuncs.COM_ParseFile(pfile, token);
-					m_OverviewData.rotated = Q_atoi(token);
-				}
-				else if (!Q_strcmp(token, "inset"))
-				{
-					pfile = gEngfuncs.COM_ParseFile(pfile, token);
-					m_OverviewData.insetWindowX = Q_atof(token);
-					pfile = gEngfuncs.COM_ParseFile(pfile, token);
-					m_OverviewData.insetWindowY = Q_atof(token);
-					pfile = gEngfuncs.COM_ParseFile(pfile, token);
-					m_OverviewData.insetWindowWidth = Q_atof(token);
-					pfile = gEngfuncs.COM_ParseFile(pfile, token);
-					m_OverviewData.insetWindowHeight = Q_atof(token);
-
-				}
-				else
-				{
-					gEngfuncs.Con_Printf("Error parsing overview file %s. (%s unknown)\n", filename, token);
-					return false;
-				}
-
-				pfile = gEngfuncs.COM_ParseFile(pfile, token); // parse next token
-
-			}
-		}
-		else if (!Q_strcmp(token, "layer"))
-		{
-			// parse a layer data
-
-			if (m_OverviewData.layers >= OVERVIEW_MAX_LAYERS)
-			{
-				gEngfuncs.Con_Printf("Error parsing overview file %s. ( too many layers )\n", filename);
-				return false;
-			}
-
-			pfile = gEngfuncs.COM_ParseFile(pfile, token);
-
-
-			if (Q_strcmp(token, "{"))
-			{
-				gEngfuncs.Con_Printf("Error parsing overview file %s. (expected { )\n", filename);
-				return false;
-			}
-
-			pfile = gEngfuncs.COM_ParseFile(pfile, token);
-
-			while (Q_strcmp(token, "}"))
-			{
-				if (!Q_strcmp(token, "image"))
-				{
-					pfile = gEngfuncs.COM_ParseFile(pfile, token);
-					Q_strncpy(m_OverviewData.layersImages[m_OverviewData.layers], token, 255);
-				}
-				else if (!Q_strcmp(token, "height"))
-				{
-					pfile = gEngfuncs.COM_ParseFile(pfile, token);
-					height = Q_atof(token);
-					m_OverviewData.layersHeights[m_OverviewData.layers] = height;
-				}
-				else
-				{
-					gEngfuncs.Con_Printf("Error parsing overview file %s. (%s unknown)\n", filename, token);
-					return false;
-				}
-
-				pfile = gEngfuncs.COM_ParseFile(pfile, token); // parse next token
-			}
-
-			m_OverviewData.layers++;
-
-		}
-	}
-
-	gEngfuncs.COM_FreeFile(pfile);
-
-	m_mapZoom = m_OverviewData.zoom;
-	m_mapOrigin = m_OverviewData.origin;
-
-	return true;
-
-}
 
 bool CHudSpectator::IsActivePlayer(cl_entity_t* ent)
 {
@@ -724,21 +87,12 @@ bool CHudSpectator::IsActivePlayer(cl_entity_t* ent)
 		);
 }
 
-void CHudSpectator::SetModes(int iNewMainMode, int iNewInsetMode)
+void CHudSpectator::SetModes(int iNewMainMode)
 {
 	if (iNewMainMode == -1)
 		iNewMainMode = g_iUser1;
 
-	if (iNewInsetMode == -1)
-		iNewInsetMode = m_pip->value;
-
-	m_pip->value = iNewInsetMode;
-
-	// UNDONE
-	//if (gViewPortInterface->GetClientDllInterface()->InIntermission())
-		//m_pip->value = INSET_OFF;
-
-	if (iNewMainMode < OBS_CHASE_LOCKED || iNewMainMode > OBS_MAP_CHASE)
+	if (iNewMainMode < OBS_FIRST || iNewMainMode > OBS_LAST)
 	{
 		gEngfuncs.Con_Printf("Invalid spectator mode.\n");
 		return;
@@ -772,7 +126,7 @@ void CHudSpectator::SetModes(int iNewMainMode, int iNewInsetMode)
 			}
 			else
 			{
-				FindNextPlayer(false);
+				FindNextPlayer();
 			}
 		}
 
@@ -810,55 +164,31 @@ void CHudSpectator::SetModes(int iNewMainMode, int iNewInsetMode)
 			g_iUser1 = OBS_IN_EYE;
 			break;
 		}
-
-		case OBS_MAP_FREE:
-		{
-			g_iUser1 = OBS_MAP_FREE;
-
-			m_mapZoom = m_OverviewData.zoom;
-			m_mapOrigin = m_OverviewData.origin;
-			break;
-		}
-
-		case OBS_MAP_CHASE:
-		{
-			g_iUser1 = OBS_MAP_CHASE;
-
-			m_mapZoom = m_OverviewData.zoom;
-			m_mapOrigin = m_OverviewData.origin;
-			break;
-		}
 		}
 
 		if (g_iUser1 == OBS_ROAMING)
 		{
-			if (gEngfuncs.pfnGetCvarFloat("cl_observercrosshair") != 0.0)
-			{
-				// UNDONE, get this thing back.
-				//gEngfuncs.pfnSetCrosshair(gHUD::m_Crosshair.m_hObserverCrosshair, gHUD::m_Crosshair.m_rcObserverCrosshair, 255, 255, 255);
-			}
-			else
-			{
-				static wrect_t nullrc;
-				gEngfuncs.pfnSetCrosshair(0, nullrc, 0, 0, 0);
-			}
+			// UNDONE: Observer crosshair.
 		}
-
-		// UNDONE
-		//gViewPortInterface->UpdateSpectatorPanel();
 	}
 }
 
-void CHudSpectator::HandleButtonsDown(int ButtonPressed)
+void CHudSpectator::ButtonUpdate(void)
 {
-	double time = gEngfuncs.GetClientTime();
+	// Get old buttons from previous state.
+	m_bitsLastButtons = m_bitsButtons;
 
-	int newMainMode = g_iUser1;
-	int newInsetMode = m_pip->value;
+	// Refresh button.
+	m_bitsButtons = CL_ButtonBits();
 
-	// UNDONE
-	//if (!gViewPortInterface)
-		//return;
+	// Which buttsons chave changed
+	unsigned buttonsChanged = (m_bitsLastButtons ^ m_bitsButtons);	// These buttons have changed this frame
+
+	// Debounced button codes for pressed/released
+	// The changed ones still down are "pressed"
+	m_bitsButtonPressed = buttonsChanged & m_bitsButtons;
+	// The ones not down are "released"
+	m_bitsButtonReleased = buttonsChanged & (~m_bitsButtons);
 
 	if (gHUD::m_bIntermission)
 		return;
@@ -869,42 +199,32 @@ void CHudSpectator::HandleButtonsDown(int ButtonPressed)
 	if (gEngfuncs.pDemoAPI->IsPlayingback() && !gEngfuncs.IsSpectateOnly())
 		return;
 
+	double time = g_flClientTime;
+	int newMainMode = g_iUser1;
+
 	if (m_flNextObserverInput > time)
 		return;
 
-	if (ButtonPressed & IN_DUCK)
+	if (m_bitsButtonPressed & IN_DUCK)
 	{
 		// UNDONE
 		//if (!gViewPortInterface->IsSpectatorBarVisible())
 			//gViewPortInterface->ShowSpectatorGUIBar();
 	}
 
-	if (ButtonPressed & IN_USE)
-	{
-		newInsetMode = ToggleInset(true);
-	}
-
 	if (gEngfuncs.IsSpectateOnly())
 	{
-		if (ButtonPressed & IN_JUMP)
+		if (m_bitsButtonPressed & IN_JUMP)
 		{
-			if (g_iUser1 == OBS_CHASE_LOCKED)
-				newMainMode = OBS_CHASE_FREE;
-			else if (g_iUser1 == OBS_CHASE_FREE)
-				newMainMode = OBS_IN_EYE;
-			else if (g_iUser1 == OBS_IN_EYE)
-				newMainMode = OBS_ROAMING;
-			else if (g_iUser1 == OBS_ROAMING)
-				newMainMode = OBS_MAP_FREE;
-			else if (g_iUser1 == OBS_MAP_FREE)
-				newMainMode = OBS_MAP_CHASE;
-			else
-				newMainMode = OBS_CHASE_FREE;
+			newMainMode = g_iUser1 + 1;
+
+			if (newMainMode > OBS_LAST)
+				newMainMode = OBS_FIRST;
 		}
 
-		if (ButtonPressed & (IN_ATTACK | IN_ATTACK2))
+		if (m_bitsButtonPressed & (IN_ATTACK | IN_ATTACK2))
 		{
-			FindNextPlayer((ButtonPressed & IN_ATTACK2) ? true : false);
+			FindNextPlayer((m_bitsButtonPressed & IN_ATTACK2) ? true : false);
 
 			if (g_iUser1 == OBS_ROAMING)
 			{
@@ -917,40 +237,8 @@ void CHudSpectator::HandleButtonsDown(int ButtonPressed)
 		}
 	}
 
-	SetModes(newMainMode, newInsetMode);
-
-	if (g_iUser1 == OBS_MAP_FREE)
-	{
-		if (ButtonPressed & IN_FORWARD)
-			m_zoomDelta = 0.01f;
-
-		if (ButtonPressed & IN_BACK)
-			m_zoomDelta = -0.01f;
-
-		if (ButtonPressed & IN_MOVELEFT)
-			m_moveDelta = -12.0f;
-
-		if (ButtonPressed & IN_MOVERIGHT)
-			m_moveDelta = 12.0f;
-	}
-
 	m_flNextObserverInput = time + 0.2;
-}
-
-void CHudSpectator::HandleButtonsUp(int ButtonPressed)
-{
-	// UNDONE
-	//if (!gViewPortInterface)
-		//return;
-
-	//if (!gViewPortInterface->IsSpectatorGUIVisible())
-		//return;
-
-	if (ButtonPressed & (IN_FORWARD | IN_BACK))
-		m_zoomDelta = 0.0f;
-
-	if (ButtonPressed & (IN_MOVELEFT | IN_MOVERIGHT))
-		m_moveDelta = 0.0f;
+	SetModes(newMainMode);
 }
 
 void CHudSpectator::FindNextPlayer(bool bReverse)
@@ -973,9 +261,6 @@ void CHudSpectator::FindNextPlayer(bool bReverse)
 
 	int iCurrent = iStart;
 	int iDir = bReverse ? -1 : 1;
-
-	// UNDONE
-	//gViewPortInterface->GetAllPlayersInfo();
 
 	do
 	{
@@ -1010,8 +295,6 @@ void CHudSpectator::FindNextPlayer(bool bReverse)
 		VectorCopy(pEnt->angles, vJumpAngles);
 	}
 
-	// UNDONE
-	//gViewPortInterface->UpdateSpectatorPanel();
 	iJumpSpectator = 1;
 }
 
@@ -1057,8 +340,6 @@ void CHudSpectator::FindPlayer(const char* name)
 		VectorCopy(pEnt->angles, vJumpAngles);
 	}
 
-	// UNDONE
-	//gViewPortInterface->UpdateSpectatorPanel();
 	iJumpSpectator = 1;
 }
 
@@ -1077,9 +358,6 @@ bool CHudSpectator::DirectorMessage(int iSize, void* pbuf)
 	{
 	case DRC_CMD_START:
 	{
-		g_iPlayerClass = 0;
-		g_iTeam = 0;
-
 		MsgFunc_InitHUD(NULL, 0, NULL);
 		MsgFunc_ResetHUD(NULL, 0, NULL);
 
@@ -1153,7 +431,7 @@ bool CHudSpectator::DirectorMessage(int iSize, void* pbuf)
 
 		if (m_autoDirector->value)
 		{
-			SetModes(OBS_ROAMING, -1);
+			SetModes(OBS_ROAMING);
 			SetCameraView(v1, v2, f1);
 			m_ChaseEntity = i1;
 		}
@@ -1182,10 +460,9 @@ bool CHudSpectator::DirectorMessage(int iSize, void* pbuf)
 		msg->holdtime = READ_FLOAT();
 		msg->fxtime = READ_FLOAT();
 
-		strncpy(m_HUDMessageText[m_lastHudMessage], READ_STRING(), 128);
-		m_HUDMessageText[m_lastHudMessage][127] = 0;
+		m_HUDMessageText[m_lastHudMessage] = READ_STRING();
 
-		msg->pMessage = m_HUDMessageText[m_lastHudMessage];
+		msg->pMessage = m_HUDMessageText[m_lastHudMessage].c_str();
 		msg->pName = "HUD_MESSAGE";
 
 		gHUD::m_Message.MessageAdd(msg);
@@ -1249,7 +526,7 @@ bool CHudSpectator::DirectorMessage(int iSize, void* pbuf)
 
 		if (m_autoDirector->value)
 		{
-			SetModes(OBS_ROAMING, -1);
+			SetModes(OBS_ROAMING);
 			SetCameraView(v1, v2, f1);
 		}
 
@@ -1286,7 +563,7 @@ bool CHudSpectator::DirectorMessage(int iSize, void* pbuf)
 			break;
 		}
 
-		SetModes(OBS_ROAMING, -1);
+		SetModes(OBS_ROAMING);
 
 		m_IsInterpolating = true;
 
@@ -1340,32 +617,13 @@ void CHudSpectator::SetSpectatorStartPosition(void)
 
 void SpectatorMode(void)
 {
-	if (gEngfuncs.Cmd_Argc() <= 1)
+	if (gEngfuncs.Cmd_Argc() != 2)
 	{
-		gEngfuncs.Con_Printf("usage:  spec_mode <Main Mode> [<Inset Mode>]\n");
+		gEngfuncs.Con_Printf("usage:  spec_mode <Main Mode>\n");
 		return;
 	}
 
-	if (gEngfuncs.Cmd_Argc() == 2)
-	{
-		gHUD::m_Spectator.SetModes(Q_atoi(gEngfuncs.Cmd_Argv(1)), -1);
-	}
-	else if (gEngfuncs.Cmd_Argc() == 3 && Q_atoi(gEngfuncs.Cmd_Argv(2)) != -1)
-	{
-		gHUD::m_Spectator.SetModes(Q_atoi(gEngfuncs.Cmd_Argv(1)), Q_atoi(gEngfuncs.Cmd_Argv(2)));
-	}
-	else if (gEngfuncs.Cmd_Argc() == 3 && Q_atoi(gEngfuncs.Cmd_Argv(2)) == -1)
-	{
-		if (gHUD::m_Spectator.m_pip->value == INSET_OFF)
-			gHUD::m_Spectator.SetModes(-1, INSET_CHASE_FREE);
-		else
-			gHUD::m_Spectator.SetModes(-1, INSET_OFF);
-	}
-}
-
-void SpectatorToggleInset(void)
-{
-	gHUD::m_Spectator.SetModes(-1, gHUD::m_Spectator.ToggleInset(false));
+	CHudSpectator::SetModes(Q_atoi(gEngfuncs.Cmd_Argv(1)));
 }
 
 void SpectatorSpray(void)
@@ -1389,71 +647,9 @@ void SpectatorSpray(void)
 	}
 }
 
-void SpectatorHelp(void)
-{
-	// UNDONE
-	//if (gViewPortInterface)
-		//gViewPortInterface->ShowVGUIMenu(MENU_SPECHELP);
-}
-
-void SpectatorMenu(void)
-{
-	if (gEngfuncs.Cmd_Argc() <= 1)
-	{
-		gEngfuncs.Con_Printf("usage:  spec_menu <0|1>\n");
-		return;
-	}
-
-	// UNDONE
-	/*if (atoi(gEngfuncs.Cmd_Argv(1)) != 0)
-		gViewPortInterface->ShowSpectatorGUI();
-	else
-		gViewPortInterface->DeactivateSpectatorGUI();*/
-}
-
-void ToggleScores(void)
-{
-	// UNDONE
-	/*if (gViewPortInterface)
-	{
-		if (gViewPortInterface->IsScoreBoardVisible())
-		{
-			gViewPortInterface->HideScoreBoard();
-		}
-		else
-		{
-			gViewPortInterface->ShowScoreBoard();
-		}
-	}*/
-}
-
-void SpectatorToggleDrawNames(void)
-{
-	if (gHUD::m_Spectator.m_drawnames->value)
-		gEngfuncs.Cvar_SetValue("spec_drawnames_internal", 0);
-	else
-		gEngfuncs.Cvar_SetValue("spec_drawnames_internal", 1);
-}
-
-void SpectatorToggleDrawCone(void)
-{
-	if (gHUD::m_Spectator.m_drawcone->value)
-		gEngfuncs.Cvar_SetValue("spec_drawcone_internal", 0);
-	else
-		gEngfuncs.Cvar_SetValue("spec_drawcone_internal", 1);
-}
-
-void SpectatorToggleDrawStatus(void)
-{
-	if (gHUD::m_Spectator.m_drawstatus->value)
-		gEngfuncs.Cvar_SetValue("spec_drawstatus_internal", 0);
-	else
-		gEngfuncs.Cvar_SetValue("spec_drawstatus_internal", 1);
-}
-
 void SpectatorToggleAutoDirector(void)
 {
-	if (gHUD::m_Spectator.m_autoDirector->value)
+	if (CHudSpectator::m_autoDirector->value)
 		gEngfuncs.Cvar_SetValue("spec_autodirector_internal", 0);
 	else
 		gEngfuncs.Cvar_SetValue("spec_autodirector_internal", 1);
@@ -1521,100 +717,6 @@ int CHudSpectator::VidInit(void)
 	return 1;
 }
 
-int CHudSpectator::Draw(float flTime)
-{
-	int lx;
-
-	char string[256];
-	float* color;
-
-	if (!g_iUser1)
-	{
-		// UNDONE
-		//if (gViewPortInterface->IsSpectatorGUIVisible())
-			//gViewPortInterface->HideSpectatorGUI();
-
-		return 0;
-	}
-
-	if (m_lastAutoDirector != m_autoDirector->value)
-	{
-		m_lastAutoDirector = m_autoDirector->value;
-
-		gEngfuncs.pfnClientCmd(SharedVarArgs("spec_set_ad %f", m_autoDirector->value));
-
-		if ((m_lastAutoDirector != 0.0f) && (g_iUser1 == OBS_CHASE_FREE))
-		{
-			SetModes(OBS_CHASE_LOCKED, -1);
-		}
-		else if ((m_lastAutoDirector == 0.0f) && (g_iUser1 == OBS_CHASE_LOCKED))
-		{
-			SetModes(OBS_CHASE_FREE, -1);
-		}
-	}
-
-	if ((m_zoomDelta != 0.0f) && (g_iUser1 == OBS_MAP_FREE))
-	{
-		m_mapZoom += m_zoomDelta;
-
-		if (m_mapZoom > 3.0f)
-			m_mapZoom = 3.0f;
-
-		if (m_mapZoom < 0.5f)
-			m_mapZoom = 0.5;
-	}
-
-	if ((m_moveDelta != 0.0f) && (g_iUser1 != OBS_ROAMING))
-	{
-		vec3_t right;
-		AngleVectors(v_angles, NULL, right, NULL);
-		VectorNormalize(right);
-		VectorScale(right, m_moveDelta, right);
-		VectorAdd(m_mapOrigin, right, m_mapOrigin);
-	}
-
-	if (g_iUser1 != m_mode->value)
-	{
-		gEngfuncs.Cvar_SetValue("spec_mode_internal", g_iUser1);
-	}
-
-	if (g_iUser1 < OBS_MAP_FREE)
-		return 1;
-
-	if (!m_drawnames->value)
-		return 1;
-
-	// UNDONE
-	//gViewPortInterface->GetAllPlayersInfo();
-
-	for (int i = 0; i < MAX_PLAYERS; i++)
-	{
-		if (m_vPlayerPos[i][2] < 0)
-			continue;
-
-		if (m_pip->value != INSET_OFF)
-		{
-			if (m_vPlayerPos[i][0] > m_OverviewData.insetWindowX&& m_vPlayerPos[i][1] > m_OverviewData.insetWindowY&& m_vPlayerPos[i][0] < m_OverviewData.insetWindowX + m_OverviewData.insetWindowWidth && m_vPlayerPos[i][1] < m_OverviewData.insetWindowY + m_OverviewData.insetWindowHeight)
-				continue;
-		}
-
-		color = gHUD::GetColor(i + 1);
-		Q_strlcpy(string, g_PlayerInfoList[i + 1].name);
-		lx = strlen(string) * 3;
-
-		if (m_pip->value != INSET_OFF)
-		{
-			if (m_vPlayerPos[i][0] - lx > m_OverviewData.insetWindowX&& m_vPlayerPos[i][1] > m_OverviewData.insetWindowY&& m_vPlayerPos[i][0] - lx < m_OverviewData.insetWindowX + m_OverviewData.insetWindowWidth && m_vPlayerPos[i][1] < m_OverviewData.insetWindowY + m_OverviewData.insetWindowHeight)
-				continue;
-		}
-
-		gEngfuncs.pfnDrawSetTextColor(color[0], color[1], color[2]);
-		gEngfuncs.pfnDrawConsoleString(m_vPlayerPos[i][0] - lx, m_vPlayerPos[i][1], string);
-	}
-
-	return 1;
-}
-
 void CHudSpectator::AddWaypoint(float time, Vector pos, Vector angle, float fov, int flags)
 {
 	if (!flags == 0 && time == 0.0f)
@@ -1639,18 +741,13 @@ void CHudSpectator::AddWaypoint(float time, Vector pos, Vector angle, float fov,
 	m_NumWayPoints++;
 }
 
-void CHudSpectator::SetCameraView(Vector pos, Vector angle, float fov)
+void CHudSpectator::SetCameraView(const Vector& pos, const Vector& angle, float fov)
 {
-	m_FOV = fov;
+	m_iFOV = fov;
 	VectorCopy(pos, vJumpOrigin);
 	VectorCopy(angle, vJumpAngles);
 	gEngfuncs.SetViewAngles(vJumpAngles);
 	iJumpSpectator = 1;
-}
-
-float CHudSpectator::GetFOV(void)
-{
-	return m_FOV;
 }
 
 bool CHudSpectator::GetDirectorCamera(Vector& position, Vector& angle)

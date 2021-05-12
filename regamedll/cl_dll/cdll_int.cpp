@@ -60,7 +60,7 @@ void CL_DLLEXPORT HUD_CreateEntities(void)
 
 void CL_DLLEXPORT HUD_DirectorMessage(int iSize, void* pbuf)
 {
-	gHUD::m_Spectator.DirectorMessage(iSize, pbuf);
+	CHudSpectator::DirectorMessage(iSize, pbuf);
 }
 
 void CL_DLLEXPORT HUD_DrawNormalTriangles(void)

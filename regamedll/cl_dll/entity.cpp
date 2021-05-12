@@ -25,7 +25,6 @@ int g_iUser1;
 int g_iUser2;
 int g_iUser3;
 int g_iTeam;
-int g_iPlayerClass;
 int g_iPlayerFlags;
 Vector g_vPlayerVelocity;
 float g_flPlayerSpeed;
@@ -61,17 +60,12 @@ int HUD_AddEntity2(int iType, cl_entity_s* pEntity, const char* szModelName)
 		break;
 	}
 
-	// each frame every entity passes this function, so the overview hooks it to filter the overview entities
 	// in spectator mode:
-	// each frame every entity passes this function, so the overview hooks 
-	// it to filter the overview entities
+	// each frame every entity passes this function, so the overview hooks it to filter the overview entities
 
 	if (g_iUser1)
 	{
-		gHUD::m_Spectator.AddOverviewEntity(iType, pEntity, szModelName);
-
-		if ((g_iUser1 == OBS_IN_EYE || gHUD::m_Spectator.m_pip->value == INSET_IN_EYE) &&
-			pEntity->index == g_iUser2)
+		if ((g_iUser1 == OBS_IN_EYE || CHudSpectator::m_pip->value == INSET_IN_EYE) && pEntity->index == g_iUser2)
 			return 0;	// don't draw the player we are following in eye
 
 	}

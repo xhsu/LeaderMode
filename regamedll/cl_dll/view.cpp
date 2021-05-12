@@ -100,8 +100,8 @@ void V_CalcIntermissionRefdef(ref_params_s* pparams)
 	if (gEngfuncs.IsSpectateOnly())
 	{
 		// in HLTV we must go to 'intermission' position by ourself
-		VectorCopy(gHUD::m_Spectator.m_cameraOrigin, pparams->vieworg);
-		VectorCopy(gHUD::m_Spectator.m_cameraAngles, pparams->viewangles);
+		VectorCopy(CHudSpectator::m_cameraOrigin, pparams->vieworg);
+		VectorCopy(CHudSpectator::m_cameraAngles, pparams->viewangles);
 	}
 
 	v_idlescale = old;
@@ -384,7 +384,7 @@ void V_GetChasePos(int target, float* cl_angles, float* origin, float* angles)
 			V_GetDeathCam(ent, NULL,
 				angles, origin);
 	}
-	else if (gHUD::m_Spectator.m_autoDirector->value)
+	else if (CHudSpectator::m_autoDirector->value)
 	{
 		if (g_iUser3 && g_iUser3 != 1)
 			V_GetDirectedChasePosition(ent, gEngfuncs.GetEntityByIndex(g_iUser3),
@@ -429,15 +429,15 @@ void V_GetMapFreePosition(float* cl_angles, float* origin, float* angles)
 	// modify angles since we don't wanna see map's bottom
 	angles[0] = 51.25f + 38.75f * (angles[0] / 90.0f);
 
-	zScaledTarget[0] = gHUD::m_Spectator.m_mapOrigin[0];
-	zScaledTarget[1] = gHUD::m_Spectator.m_mapOrigin[1];
-	zScaledTarget[2] = gHUD::m_Spectator.m_mapOrigin[2] * ((90.0f - angles[0]) / 90.0f);
+	zScaledTarget[0] = OverviewMgr::m_vecOrigin[0];
+	zScaledTarget[1] = OverviewMgr::m_vecOrigin[1];
+	zScaledTarget[2] = OverviewMgr::m_vecOrigin[2] * ((90.0f - angles[0]) / 90.0f);
 
 	AngleVectors(angles, forward, NULL, NULL);
 
 	VectorNormalize(forward);
 
-	VectorMA(zScaledTarget, -(4096.0f / gHUD::m_Spectator.m_mapZoom), forward, origin);
+	VectorMA(zScaledTarget, -(4096.0f / OverviewMgr::m_flZoom), forward, origin);
 }
 
 /*
@@ -453,7 +453,7 @@ void V_GetMapChasePosition(int target, float* cl_angles, float* origin, float* a
 	{
 		cl_entity_t* ent = gEngfuncs.GetEntityByIndex(target);
 
-		if (gHUD::m_Spectator.m_autoDirector->value)
+		if (CHudSpectator::m_autoDirector->value)
 		{
 			// this is done to get the angles made by director mode
 			V_GetChasePos(target, cl_angles, origin, angles);
@@ -512,7 +512,7 @@ void V_CalcSpectatorRefdef(ref_params_s* pparams)
 	VectorCopy (pparams->viewangles, v_angles);
 	VectorCopy (pparams->vieworg, v_origin);
 
-	if ((g_iUser1 == OBS_IN_EYE || gHUD::m_Spectator.m_pip->value == INSET_IN_EYE) && ent)
+	if ((g_iUser1 == OBS_IN_EYE || CHudSpectator::m_pip->value == INSET_IN_EYE) && ent)
 	{
 		// calculate player velocity
 		float timeDiff = ent->curstate.msg_time - ent->prevstate.msg_time;
@@ -614,24 +614,24 @@ void V_CalcSpectatorRefdef(ref_params_s* pparams)
 			break;
 		}
 
-		if (gHUD::m_Spectator.m_pip->value)
+		if (CHudSpectator::m_pip->value)
 			pparams->nextView = 1;	// force a second renderer view
 
-		gHUD::m_Spectator.m_iDrawCycle = 0;
+		CHudSpectator::m_iDrawCycle = 0;
 	}
 	else
 	{
 		// second renderer cycle, inset window
 
 		// set inset parameters
-		pparams->viewport[0] = XRES(gHUD::m_Spectator.m_OverviewData.insetWindowX);	// change viewport to inset window
-		pparams->viewport[1] = YRES(gHUD::m_Spectator.m_OverviewData.insetWindowY);
-		pparams->viewport[2] = XRES(gHUD::m_Spectator.m_OverviewData.insetWindowWidth);
-		pparams->viewport[3] = YRES(gHUD::m_Spectator.m_OverviewData.insetWindowHeight);
+		pparams->viewport[0] = XRES(OverviewMgr::m_vecInsetWindowAnchor.x);	// change viewport to inset window
+		pparams->viewport[1] = YRES(OverviewMgr::m_vecInsetWindowAnchor.y);
+		pparams->viewport[2] = XRES(OverviewMgr::m_vecInsetWindowSize.width);
+		pparams->viewport[3] = YRES(OverviewMgr::m_vecInsetWindowSize.height);
 		pparams->nextView = 0;	// on further view
 
 		// override some settings in certain modes
-		switch ((int)gHUD::m_Spectator.m_pip->value)
+		switch ((int)CHudSpectator::m_pip->value)
 		{
 		case INSET_CHASE_FREE:
 			V_GetChasePos(g_iUser2, v_cl_angles, v_origin, v_angles);
@@ -657,7 +657,7 @@ void V_CalcSpectatorRefdef(ref_params_s* pparams)
 			break;
 		}
 
-		gHUD::m_Spectator.m_iDrawCycle = 1;
+		CHudSpectator::m_iDrawCycle = 1;
 	}
 
 	// write back new values into pparams
@@ -1306,7 +1306,7 @@ void V_GetSingleTargetCam(cl_entity_t* ent1, float* angle, float* origin)
 {
 	float newAngle[3]; float newOrigin[3];
 
-	int flags = gHUD::m_Spectator.m_iObserverFlags;
+	int flags = CHudSpectator::m_iObserverFlags;
 	qboolean deadPlayer = ent1->player && (ent1->curstate.solid == SOLID_NOT);
 
 	float dfactor = (flags & DRC_FLAG_DRAMATIC) ? -1.0f : 1.0f;
@@ -1385,7 +1385,7 @@ void V_GetDoubleTargetsCam(cl_entity_t* ent1, cl_entity_t* ent2, float* angle, f
 {
 	float newAngle[3]; float newOrigin[3]; float tempVec[3];
 
-	int flags = gHUD::m_Spectator.m_iObserverFlags;
+	int flags = CHudSpectator::m_iObserverFlags;
 
 	float dfactor = (flags & DRC_FLAG_DRAMATIC) ? -1.0f : 1.0f;
 
@@ -1490,7 +1490,7 @@ void V_GetDirectedChasePosition(cl_entity_t* ent1, cl_entity_t* ent2, float* ang
 		// keep last good viewangle
 		float newOrigin[3];
 
-		int flags = gHUD::m_Spectator.m_iObserverFlags;
+		int flags = CHudSpectator::m_iObserverFlags;
 
 		float dfactor = (flags & DRC_FLAG_DRAMATIC) ? -1.0f : 1.0f;
 

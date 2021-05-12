@@ -6,12 +6,6 @@ Created Date: 10 Mar 2020
 
 #pragma once
 
-#define INSET_OFF 0
-#define INSET_CHASE_FREE 1
-#define INSET_IN_EYE 2
-#define INSET_MAP_FREE 3
-#define INSET_MAP_CHASE 4
-
 #define MAX_SPEC_HUD_MESSAGES 8
 #define MAX_OVERVIEW_ENTITIES 128
 #define MAX_CAM_WAYPOINTS 32
@@ -20,8 +14,62 @@ Created Date: 10 Mar 2020
 #define OVERVIEW_MAX_LAYERS 1
 
 // defaults for clientinfo messages
-#define IS_FIRSTPERSON_SPEC ( g_iUser1 == OBS_IN_EYE || (g_iUser1 && (gHUD::m_Spectator.m_pip->value == INSET_IN_EYE)) )
+#define IS_FIRSTPERSON_SPEC ( g_iUser1 == OBS_IN_EYE || (g_iUser1 && (CHudSpectator::m_pip->value == INSET_IN_EYE)) )
 
+struct CHudSpectator
+{
+	// Event functions.
+	static void	Initialize		(void);
+	static void	Shutdown		(void);
+	static void	ConnectToServer	(void);
+	static void	Draw			(float flTime, bool bIntermission);
+	static void	Think			(void);	// Use gHUD::m_flUCDTime
+	static void	OnNewRound		(void);
+	static void	ServerAsksReset	(void);
+
+	// Message functions.
+	static bool	DirectorMessage	(int iSize, void* pbuf);
+	static void	DeathMessage	(int victim);
+
+	// Custom functions.
+	static void	SetModes		(int iMainMode);
+	static void	CheckSettings	(void);
+	static bool	IsActivePlayer	(cl_entity_t* ent);
+	static void	FindNextPlayer	(bool bReverse = false);
+	static void	FindPlayer		(const char* name);
+	static void ButtonUpdate	(void);
+	static void SetCameraView	(const Vector& pos, const Vector& angle, float fov);
+	static void SetSpectatorStartPosition(void);
+
+	// Game data.
+	static inline cvar_t* m_autoDirector = nullptr;
+	static inline int m_lastPrimaryObject = 0;
+	static inline int m_lastSecondaryObject = 0;
+	static inline int m_lastAutoDirector = 0;
+	static inline int m_iObserverFlags = 0;
+	static inline int m_iSpectatorNumber = 0;
+	static inline bool m_IsInterpolating = false;
+	static inline int m_ChaseEntity = 0;
+	static inline int m_WayPoint = 0;
+	static inline int m_NumWayPoints = 0;
+	static inline std::array<client_textmessage_t, MAX_SPEC_HUD_MESSAGES> m_HUDMessages;
+	static inline std::array<std::string, MAX_SPEC_HUD_MESSAGES> m_HUDMessageText;
+	static inline byte m_lastHudMessage = 0U;
+	static inline unsigned short m_iFOV = DEFAULT_FOV;
+	static inline Vector m_cameraOrigin;
+	static inline Vector m_cameraAngles;
+	static inline short m_iDrawCycle = 0;
+	static inline unsigned m_bitsButtons = 0U;
+	static inline unsigned m_bitsLastButtons = 0U;
+	static inline unsigned m_bitsButtonReleased = 0U;
+	static inline unsigned m_bitsButtonPressed = 0U;
+	static inline bool m_chatEnabled = true;
+	static inline double m_flNextObserverInput = 0.0;
+
+	// Drawing data.
+};
+
+/*
 typedef struct cameraWayPoint_s
 {
 	float time;
@@ -147,3 +195,4 @@ private:
 
 	friend class CHudRadar;
 };
+*/

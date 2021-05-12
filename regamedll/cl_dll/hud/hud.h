@@ -194,7 +194,7 @@ struct CHudExample2
 // dummy classes derived from CBaseHudElement.
 class CHudAmmo;
 class CHudHealth;
-class CHudSpectator;
+//class CHudSpectator;
 class CHudGeiger;
 //class CHudBattery;
 class CHudTrain;
@@ -341,7 +341,7 @@ namespace gHUD
 	// HUD elements.
 	extern std::list<element_t> m_lstElements;
 	extern CHudHealth m_Health;
-	extern CHudSpectator m_Spectator;
+	//extern CHudSpectator m_Spectator;
 	extern CHudGeiger m_Geiger;
 	//extern CHudBattery m_Battery;
 	extern CHudTrain m_Train;
@@ -422,6 +422,8 @@ namespace OverviewMgr
 	extern int m_iWidth;
 	extern Matrix3x3 m_mxTransform;
 	extern model_t* m_pMapSprite;
+	extern Vector2D m_vecInsetWindowAnchor;	// upper left corner
+	extern Vector2D m_vecInsetWindowSize;
 
 	// event calls.
 	void OnHUDReset(void);

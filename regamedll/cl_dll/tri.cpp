@@ -73,7 +73,7 @@ void RenderFog(void)
 
 void HUD_DrawNormalTriangles2(void)
 {
-	gHUD::m_Spectator.DrawOverview();
+	// LUNA: draw global full overview here.
 }
 
 #define glVertex3fVec(vec)	glVertex3f(vec.x, vec.y, vec.z)

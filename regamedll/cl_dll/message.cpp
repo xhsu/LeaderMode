@@ -257,6 +257,7 @@ MSG_FUNC(DeathMsg)
 	BOOL FHeadShot = READ_BYTE();
 
 	CHudDeathNotice::MsgFunc_DeathMsg(iKillId, iVictimId, FHeadShot, READ_STRING());	// STRING: weapon name.
+	CHudSpectator::DeathMessage(iVictimId);
 
 	return TRUE;
 }

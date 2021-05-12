@@ -97,7 +97,7 @@ namespace gHUD
 	// HUD elements.
 	std::list<element_t> m_lstElements;
 	CHudHealth m_Health;
-	CHudSpectator m_Spectator;
+	//CHudSpectator m_Spectator;
 	CHudGeiger m_Geiger;
 	//CHudBattery m_Battery;
 	CHudTrain m_Train;
@@ -537,7 +537,7 @@ void gHUD::Think(void)
 				m_iFOV = Q_max(default_fov->value, 90.0f);
 		}
 		else
-			m_iFOV = m_Spectator.GetFOV();
+			m_iFOV = CHudSpectator::m_iFOV;
 	}
 
 	// make FOV transition nice and smooth.
@@ -1308,6 +1308,8 @@ namespace OverviewMgr
 	int m_iWidth = 0;
 	Matrix3x3 m_mxTransform = Matrix3x3::Identity();
 	model_t* m_pMapSprite = nullptr;
+	Vector2D m_vecInsetWindowAnchor = Vector2D(4, 4);
+	Vector2D m_vecInsetWindowSize = Vector2D(240, 180);
 };
 
 void OverviewMgr::OnHUDReset(void)
@@ -1320,6 +1322,8 @@ void OverviewMgr::OnHUDReset(void)
 	m_iWidth = 0;
 	m_mxTransform = Matrix3x3::Identity();
 	m_pMapSprite = nullptr;
+	m_vecInsetWindowAnchor = Vector2D(4, 4);
+	m_vecInsetWindowSize = Vector2D(240, 180);
 
 	char szPath[128], szMap[64];
 
@@ -1422,6 +1426,18 @@ bool OverviewMgr::LoadOverviewInfo(const char* pszFilePath)
 				{
 					pszParsePos = gEngfuncs.COM_ParseFile(pszParsePos, szToken);
 					m_bRotated = !!Q_atoi(szToken);
+				}
+				else if (!Q_strcmp(token, "inset"))
+				{
+					pszParsePos = gEngfuncs.COM_ParseFile(pszParsePos, szToken);
+					m_OverviewData.insetWindowX = Q_atof(szToken);
+					pszParsePos = gEngfuncs.COM_ParseFile(pszParsePos, szToken);
+					m_OverviewData.insetWindowY = Q_atof(szToken);
+					pszParsePos = gEngfuncs.COM_ParseFile(pszParsePos, szToken);
+					m_OverviewData.insetWindowWidth = Q_atof(szToken);
+					pszParsePos = gEngfuncs.COM_ParseFile(pszParsePos, szToken);
+					m_OverviewData.insetWindowHeight = Q_atof(szToken);
+
 				}
 				else if (!Q_stricmp(szToken, "}"))
 					break;
