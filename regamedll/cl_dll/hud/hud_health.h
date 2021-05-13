@@ -11,37 +11,6 @@ Modern Warfare Dev Team
 
 #pragma once
 
-#define DMG_IMAGE_LIFE 2
-
-#define DMG_IMAGE_POISON 0
-#define DMG_IMAGE_ACID 1
-#define DMG_IMAGE_COLD 2
-#define DMG_IMAGE_DROWN 3
-#define DMG_IMAGE_BURN 4
-#define DMG_IMAGE_NERVE 5
-#define DMG_IMAGE_RAD 6
-#define DMG_IMAGE_SHOCK 7
-
-#define NUM_DMG_TYPES 8
-
-// damage types definition.
-#include "../public/regamedll/regamedll_const.h"
-
-typedef struct
-{
-	float fExpire;
-	float fBaseline;
-	int x, y;
-}
-DAMAGE_IMAGE;
-
-#define MAX_POINTS 64
-
-constexpr int HEALTH_BASIC_OFS = 12;
-constexpr int HEALTH_BAR_LENGTH = 100;
-constexpr int HEALTH_BAR_WIDTH = 10;
-constexpr int HEALTH_SHAKE_AMPLITUDE = 3;
-constexpr int HEALTH_ICON_BAR_INTERSPACE = 10;
 
 struct CHudHealth	// Depends on: CHudBattery
 {

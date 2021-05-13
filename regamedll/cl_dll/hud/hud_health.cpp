@@ -11,22 +11,6 @@ Modern Warfare Dev Team
 
 #include "precompiled.h"
 
-#define PAIN_NAME "sprites/%d_pain.spr"
-#define DAMAGE_NAME "sprites/%d_dmg.spr"
-
-int giDmgHeight, giDmgWidth;
-
-int giDmgFlags[NUM_DMG_TYPES] =
-{
-	DMG_POISON,
-	DMG_ACID,
-	DMG_FREEZE | DMG_SLOWFREEZE,
-	DMG_DROWN,
-	DMG_BURN | DMG_SLOWBURN,
-	DMG_NERVEGAS,
-	DMG_RADIATION,
-	DMG_SHOCK,
-};
 
 void CHudHealth::Initialize(void)
 {
@@ -125,7 +109,7 @@ void CHudHealth::MsgFunc_Health(int iNewHealth)
 	{
 		m_flAlpha = 255;
 		m_iHealth = iNewHealth;
-		m_flPercentage = float(iNewHealth) / GetMaxHealth()/*float(m_iMaxAP)*/;
+		m_flPercentage = float(iNewHealth) / GetMaxHealth()/*float(m_iMaxHP)*/;
 
 		// Update the text.
 		m_wcsHPText = std::to_wstring(iNewHealth);
@@ -145,8 +129,7 @@ void CHudHealth::MsgFunc_Damage(int armor, int damageTaken, int bitsDamage, cons
 #ifdef _DEBUG
 void CHudHealth::CmdFunc_Health(void)
 {
-	int iHealth = Q_atoi(gEngfuncs.Cmd_Argv(1));
-	MsgFunc_Health(iHealth);
+	MsgFunc_Health(Q_atoi(gEngfuncs.Cmd_Argv(1)));
 }
 #endif // _DEBUG
 
