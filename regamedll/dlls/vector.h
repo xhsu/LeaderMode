@@ -89,11 +89,20 @@ public:
 	Vector2D Normalize() const
 	{
 		real_t flLen = Length();
-		if (!flLen)
+		if (flLen <= FLT_EPSILON)
 			return Vector2D(0, 0);
 
 		flLen = 1.0 / flLen;
+		return Vector2D(vec_t(x * flLen), vec_t(y * flLen));
+	}
 
+	Vector2D SetLength(float newlen) const
+	{
+		real_t flLen = Length();
+		if (flLen <= FLT_EPSILON)
+			return Vector2D(0, 0);
+
+		flLen = newlen / flLen;
 		return Vector2D(vec_t(x * flLen), vec_t(y * flLen));
 	}
 

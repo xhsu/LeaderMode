@@ -42,6 +42,9 @@ void CHudHealth::ConnectToServer(void)
 	m_flPercentage = 0;
 }
 
+// view.cpp
+//extern Vector v_angles, v_origin;
+
 void CHudHealth::Draw(float flTime, bool bIntermission)
 {
 	if (bIntermission)
@@ -79,6 +82,50 @@ void CHudHealth::Draw(float flTime, bool bIntermission)
 	gFontFuncs::DrawSetTextPos(vecTextOrigin);
 	gFontFuncs::DrawSetTextColor(255, 255, 255, 255);	// Text do not fade with others.
 	gFontFuncs::DrawPrintText(m_wcsHPText.c_str());
+	/*
+	auto mx =
+
+		// Step 3: Reverse our Y coord, since the 2D coord system on our monitor is +X for RIGHT, +Y for DOWNWARD.
+		Matrix3x3::Stretch2D(1, -1) *
+
+		// Step 2: Rotate the point according to our yaw.
+		Matrix3x3::Rotation2D(90.0f - v_angles.yaw) *
+
+		// Step 1: Make ourself the centre of coord system.
+		Matrix3x3::Translation2D(-v_origin.Make2D());
+
+	auto org0 = (mx * Vector2D()).SetLength(100);
+	auto org = org0 + Vector2D(ScreenWidth / 2, ScreenHeight / 2);
+	auto angle = org0 ^ Vector2D(0, -1);
+
+	if (DotProduct2D(org0, Vector2D(-1, 0)) > FLT_EPSILON)	// on the left side.
+		angle = 360 - angle;
+
+	constexpr auto s = 20;
+	Vector2D orgs[4];
+	orgs[0] = org + Vector2D(-s, -s).Rotate(angle);
+	orgs[1] = org + Vector2D(-s, s).Rotate(angle);
+	orgs[2] = org + Vector2D(s, s).Rotate(angle);
+	orgs[3] = org + Vector2D(s, -s).Rotate(angle);
+
+	DrawUtils::glRegularTexDrawingInit(0xFFFFFF, 255);
+	DrawUtils::glSetTexture(CHudRadar::RADAR_ICONS[Role_Breacher]);
+
+	gEngfuncs.pTriAPI->Begin(TRI_QUADS);
+
+	gEngfuncs.pTriAPI->TexCoord2f(0, 0);
+	gEngfuncs.pTriAPI->Vertex3f(orgs[0].x, orgs[0].y, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f(0, 1);
+	gEngfuncs.pTriAPI->Vertex3f(orgs[1].x, orgs[1].y, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f(1, 1);
+	gEngfuncs.pTriAPI->Vertex3f(orgs[2].x, orgs[2].y, 0);
+
+	gEngfuncs.pTriAPI->TexCoord2f(1, 0);
+	gEngfuncs.pTriAPI->Vertex3f(orgs[3].x, orgs[3].y, 0);
+
+	gEngfuncs.pTriAPI->End();*/
 }
 
 void CHudHealth::Think(void)
