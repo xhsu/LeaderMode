@@ -19,9 +19,6 @@ struct CHudClassIndicator
 {
 	typedef enum : char { DECREASE = -1, FREEZED = 0, INCREASE = 1} MODE;
 
-	static constexpr int INDICATOR_SIZE = 128;
-	static constexpr int FONT_TALL = 24;
-
 	// Event functions.
 	static void	Initialize(void);
 	//static void	Shutdown(void);
@@ -46,8 +43,9 @@ struct CHudClassIndicator
 	// Drawing data.
 	static constexpr decltype(auto) BORDER_THICKNESS = 3;
 	static constexpr decltype(auto) COLOR_REGULAR = Vector(1, 1, 1), COLOR_READY = VEC_SPRINGGREENISH, COLOR_WARNING = VEC_REDISH;
-	static constexpr decltype(auto) ICON_SIZE = Vector2D(CHudBattery::ICON_SIZE.width * 2);
-	static inline Vector2D ICON_ANCHOR = Vector2D();
+	static constexpr decltype(auto) PORTRAIT_SIZE = Vector2D(96);
+	static constexpr decltype(auto) MARGIN = 8;	// Between this and radar above.
+	static inline Vector2D PORTRAIT_ANCHOR = Vector2D();
 	static inline std::array<GLuint, ROLE_COUNT> CLASS_PORTRAIT;
 	static inline float m_flAlpha = 255;
 	static inline Vector m_vecCurColor = COLOR_REGULAR;

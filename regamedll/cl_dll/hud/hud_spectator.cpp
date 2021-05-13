@@ -272,7 +272,7 @@ void CHudSpectator::ButtonUpdate(void)
 			{
 				gEngfuncs.SetViewAngles(vJumpAngles);
 				iJumpSpectator = 1;
-				gHUD::m_Radar.m_iPlayerLastPointedAt = g_iUser2;
+				//gHUD::m_Radar.m_iPlayerLastPointedAt = g_iUser2; UNDONE RADAR
 			}
 
 			m_autoDirector->value = 0.0f;

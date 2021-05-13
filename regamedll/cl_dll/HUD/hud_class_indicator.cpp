@@ -50,14 +50,14 @@ void CHudClassIndicator::Draw(float flTime, bool bIntermission)
 
 	DrawUtils::glRegularTexDrawingInit(0xFFFFFF, m_flAlpha);	// Pure white.
 	DrawUtils::glSetTexture(CLASS_PORTRAIT[g_iRoleType]);
-	DrawUtils::Draw2DQuad(ICON_ANCHOR, ICON_ANCHOR + ICON_SIZE);
+	DrawUtils::Draw2DQuad(PORTRAIT_ANCHOR, PORTRAIT_ANCHOR + PORTRAIT_SIZE);
 
 	if (GetPrimarySkill() == SkillIndex_ERROR)
 		return;
 
 	// Outter line
 	DrawUtils::glRegularPureColorDrawingInit(m_vecCurColor, 1);	// Outter line always highlighted.
-	DrawUtils::Draw2DQuadProgressBar2(ICON_ANCHOR, ICON_SIZE, BORDER_THICKNESS, m_flPercentage);
+	DrawUtils::Draw2DQuadProgressBar2(PORTRAIT_ANCHOR, PORTRAIT_SIZE, BORDER_THICKNESS, m_flPercentage);
 	DrawUtils::glRegularPureColorDrawingExit();
 }
 
@@ -103,7 +103,7 @@ void CHudClassIndicator::Reset(void)
 	m_iMode = FREEZED;
 
 	// Drawing data.
-	ICON_ANCHOR = Vector2D();
+	PORTRAIT_ANCHOR = CHudRadar::ANCHOR + Vector2D(0, CHudRadar::SIZE.height + MARGIN);
 	m_flAlpha = 255;
 	m_vecCurColor = COLOR_REGULAR;
 }

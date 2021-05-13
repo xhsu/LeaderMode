@@ -78,7 +78,7 @@ void CHudBattery::Reset(void)
 	m_wcsAPText = L"0";
 	gFontFuncs::GetTextSize(m_hFont, m_wcsAPText.c_str(), &m_iTextLength, nullptr);
 
-	ICON_ANCHOR = CHudClassIndicator::ICON_ANCHOR + Vector2D(CHudClassIndicator::ICON_SIZE.width + 5, 0);
+	ICON_ANCHOR = CHudClassIndicator::PORTRAIT_ANCHOR + Vector2D(CHudClassIndicator::PORTRAIT_SIZE.width + MARGIN, 0);
 	BAR_ANCHOR = ICON_ANCHOR + Vector2D(ICON_SIZE.width + GAP_SIZE, 0);
 	INNERBLOCK_ANCHOR = BAR_ANCHOR + Vector2D(BORDER_THICKNESS + PROGRESS_BAR_MARGIN, BORDER_THICKNESS + PROGRESS_BAR_MARGIN);
 	INNERBLOCK_SIZE = Vector2D(0, INNERBLOCK_HEIGHT);	// No width upon reset.

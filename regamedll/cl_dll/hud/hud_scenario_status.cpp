@@ -76,11 +76,11 @@ int CHudScenarioStatus::Draw(float fTime)
 		return 1;
 
 	// Start from right next to radar.
-	int x = CHudRadar::BORDER_GAP * 2 + CHudRadar::HUD_SIZE;
-	int y = CHudRadar::BORDER_GAP;
+	int x = CHudRadar::MARGIN.width * 2 + CHudRadar::HUD_SIZE;
+	int y = CHudRadar::MARGIN.width;
 
 	// Manpower Indicator
-	x = CHudRadar::BORDER_GAP * 2 + CHudRadar::HUD_SIZE;	// Reset X pos on manpower indicator.
+	x = CHudRadar::MARGIN.width * 2 + CHudRadar::HUD_SIZE;	// Reset X pos on manpower indicator.
 	y += GAP_PLAYERNAME_MANPOWER;
 
 	gEngfuncs.pTriAPI->RenderMode(kRenderTransColor);
@@ -119,8 +119,8 @@ int CHudScenarioStatus::Draw(float fTime)
 		return TRUE;
 
 	// completely move x and y to another location.
-	x = CHudRadar::BORDER_GAP;
-	y = CHudRadar::BORDER_GAP + CHudRadar::HUD_SIZE + 10;
+	x = CHudRadar::MARGIN.width;
+	y = CHudRadar::MARGIN.width + CHudRadar::HUD_SIZE + 10;
 
 	// red-white flashing if its contesting.
 	if (g_rgiTeamSchemes[g_iTeam] == Scheme_UNASSIGNED)
@@ -143,7 +143,7 @@ int CHudScenarioStatus::Draw(float fTime)
 	gFontFuncs::DrawPrintText(g_rgwcsSchemeNames[g_rgiTeamSchemes[g_iTeam]].c_str());
 
 	wcsKeyName = L"[" + std::wstring(ANSIToUnicode(gExtFuncs.pfnKey_NameForBinding("votescheme"))) + L"]";
-	gFontFuncs::DrawSetTextPos(x + SCHEME_ICON_SIZE + GAP_SCHEMEICON_TEXT, y + SCHEME_ICON_SIZE - CHudClassIndicator::FONT_TALL);
+	gFontFuncs::DrawSetTextPos(x + SCHEME_ICON_SIZE + GAP_SCHEMEICON_TEXT, y + SCHEME_ICON_SIZE/* - CHudClassIndicator::FONT_TALL*/);
 	gFontFuncs::DrawPrintText(wcsKeyName.c_str());
 
 	// for CHudMoney, the below element.

@@ -102,7 +102,7 @@ int CHudHeadName::Draw(float flTime)
 				gEngfuncs.pTriAPI->CullFace(TRI_NONE);
 
 				glColor4f(color.r, color.g, color.b, flAlpha);
-				glBindTexture(GL_TEXTURE_2D, gHUD::m_Radar.m_rgiRadarIcons[g_PlayerExtraInfo[i].m_iRoleType]);
+				glBindTexture(GL_TEXTURE_2D, CHudRadar::RADAR_ICONS[g_PlayerExtraInfo[i].m_iRoleType]);
 				DrawUtils::Draw2DQuad(x, y, x + textTall, y + textTall);
 
 				x += textTall + INTERSPACE;

@@ -503,7 +503,7 @@ MSG_FUNC(SendAudio)
 
 	// flash radar icon.
 	g_PlayerExtraInfo[client].m_iRadarFlashRemains = 22;
-	g_PlayerExtraInfo[client].m_flTimeNextRadarFlash = gHUD::m_flTime;
+	g_PlayerExtraInfo[client].m_flTimeNextRadarFlash = gHUD::m_flUCDTime;	// in Think() we should use this.
 	g_PlayerExtraInfo[client].m_bRadarFlashing = true;
 
 	// speaker icon next to player name.
@@ -1093,21 +1093,20 @@ MSG_FUNC(RadarPoint)
 {
 	BEGIN_READ(pbuf, iSize);
 
-	int iIndex = READ_BYTE();
-	gHUD::m_Radar.m_rgCustomPoints[iIndex].m_bGlobalOn = true;
-	gHUD::m_Radar.m_rgCustomPoints[iIndex].m_bPhase = true;	// switch to drawing phase.
-	gHUD::m_Radar.m_rgCustomPoints[iIndex].m_flTimeSwitchPhase = 0.15f;
-	gHUD::m_Radar.m_rgCustomPoints[iIndex].m_color.r = 250;
-	gHUD::m_Radar.m_rgCustomPoints[iIndex].m_color.g = 0;
-	gHUD::m_Radar.m_rgCustomPoints[iIndex].m_color.b = 0;
-	gHUD::m_Radar.m_rgCustomPoints[iIndex].m_color.a = 245;
-	gHUD::m_Radar.m_rgCustomPoints[iIndex].m_vecCoord.x = READ_COORD();
-	gHUD::m_Radar.m_rgCustomPoints[iIndex].m_vecCoord.y = READ_COORD();
-	gHUD::m_Radar.m_rgCustomPoints[iIndex].m_vecCoord.z = READ_COORD();
-	gHUD::m_Radar.m_rgCustomPoints[iIndex].m_flFlashInterval = 0.15f;
-	gHUD::m_Radar.m_rgCustomPoints[iIndex].m_iFlashCounts = READ_BYTE();
-	gHUD::m_Radar.m_rgCustomPoints[iIndex].m_bitsFlags = RADAR_DOT_NORMAL;
-	gHUD::m_Radar.m_rgCustomPoints[iIndex].m_iDotSize = 1;
+	short iIndex = READ_BYTE();
+	CHudRadar::m_rgCustomPoints[iIndex].m_bPhase = true;	// switch to drawing phase.
+	CHudRadar::m_rgCustomPoints[iIndex].m_flTimeSwitchPhase = gHUD::m_flUCDTime + 0.15f;
+	CHudRadar::m_rgCustomPoints[iIndex].m_color.r = 250;
+	CHudRadar::m_rgCustomPoints[iIndex].m_color.g = 0;
+	CHudRadar::m_rgCustomPoints[iIndex].m_color.b = 0;
+	CHudRadar::m_rgCustomPoints[iIndex].m_color.a = 245;
+	CHudRadar::m_rgCustomPoints[iIndex].m_vecCoord.x = READ_COORD();
+	CHudRadar::m_rgCustomPoints[iIndex].m_vecCoord.y = READ_COORD();
+	CHudRadar::m_rgCustomPoints[iIndex].m_vecCoord.z = READ_COORD();
+	CHudRadar::m_rgCustomPoints[iIndex].m_flFlashInterval = 0.15f;
+	CHudRadar::m_rgCustomPoints[iIndex].m_iFlashCounts = READ_BYTE();
+	CHudRadar::m_rgCustomPoints[iIndex].m_bitsFlags = RADAR_DOT_NORMAL;
+	CHudRadar::m_rgCustomPoints[iIndex].m_iDotSize = 1;
 
 	return TRUE;
 }
@@ -1116,8 +1115,8 @@ MSG_FUNC(RadarRP)	// Radar remove point.
 {
 	BEGIN_READ(pbuf, iSize);
 
-	int iIndex = READ_BYTE();
-	gHUD::m_Radar.m_rgCustomPoints[iIndex].m_bGlobalOn = false;
+	short iIndex = READ_BYTE();
+	CHudRadar::m_rgCustomPoints.erase(iIndex);	// unordered_map: erase by key.
 
 	return TRUE;
 }

@@ -7,53 +7,76 @@ Reincarnation Date: Nov 21 2020
 
 #include "precompiled.h"
 
-Vector2D CHudRadar::MARGIN = Vector2D(12, 12);
 
-int CHudRadar::Init(void)
+void CHudRadar::Initialize(void)
 {
-	m_iPlayerLastPointedAt = 0;
-	m_bDrawRadar = true;
+	gHUD::m_lstElements.push_back({
+		Initialize,
+		nullptr,
+		Reset,
+		Draw,
+		Think,
+		nullptr,
+		Reset,
+		});
 
 	// CT
-	m_rgiRadarIcons[Role_Breacher]		= LoadDDS("sprites/ClassesIcon/CT/Breacher_Radar.dds");
-	m_rgiRadarIcons[Role_Commander]		= LoadDDS("sprites/ClassesIcon/CT/Commander_Radar.dds");
-	m_rgiRadarIcons[Role_Medic]			= LoadDDS("sprites/ClassesIcon/CT/Medic_Radar.dds");
-	m_rgiRadarIcons[Role_Sharpshooter]	= LoadDDS("sprites/ClassesIcon/CT/Sharpshooter_Radar.dds");
-	m_rgiRadarIcons[Role_SWAT]			= LoadDDS("sprites/ClassesIcon/CT/SWAT_Radar.dds");
+	RADAR_ICONS[Role_Breacher] = LoadDDS("sprites/ClassesIcon/CT/Breacher_Radar.dds");
+	RADAR_ICONS[Role_Commander] = LoadDDS("sprites/ClassesIcon/CT/Commander_Radar.dds");
+	RADAR_ICONS[Role_Medic] = LoadDDS("sprites/ClassesIcon/CT/Medic_Radar.dds");
+	RADAR_ICONS[Role_Sharpshooter] = LoadDDS("sprites/ClassesIcon/CT/Sharpshooter_Radar.dds");
+	RADAR_ICONS[Role_SWAT] = LoadDDS("sprites/ClassesIcon/CT/SWAT_Radar.dds");
 
 	// T
-	m_rgiRadarIcons[Role_Arsonist]		= LoadDDS("sprites/ClassesIcon/T/Arsonist_Radar.dds");
-	m_rgiRadarIcons[Role_Assassin]		= LoadDDS("sprites/ClassesIcon/T/Assassin_Radar.dds");
-	m_rgiRadarIcons[Role_Godfather]		= LoadDDS("sprites/ClassesIcon/T/Godfather_Radar.dds");
-	m_rgiRadarIcons[Role_LeadEnforcer]	= LoadDDS("sprites/ClassesIcon/T/LeadEnforcer_Radar.dds");
-	m_rgiRadarIcons[Role_MadScientist]	= LoadDDS("sprites/ClassesIcon/T/MadScientist_Radar.dds");
-
-	// common
-	m_iIdArrow = LoadDDS("sprites/Radar/Arrow.dds");
-
-	gHUD::AddHudElem(this);
-	return 1;
+	RADAR_ICONS[Role_Arsonist] = LoadDDS("sprites/ClassesIcon/T/Arsonist_Radar.dds");
+	RADAR_ICONS[Role_Assassin] = LoadDDS("sprites/ClassesIcon/T/Assassin_Radar.dds");
+	RADAR_ICONS[Role_Godfather] = LoadDDS("sprites/ClassesIcon/T/Godfather_Radar.dds");
+	RADAR_ICONS[Role_LeadEnforcer] = LoadDDS("sprites/ClassesIcon/T/LeadEnforcer_Radar.dds");
+	RADAR_ICONS[Role_MadScientist] = LoadDDS("sprites/ClassesIcon/T/MadScientist_Radar.dds");
 }
 
-int CHudRadar::VidInit(void)
+void CHudRadar::Reset(void)
 {
-	m_bitsFlags |= HUD_ACTIVE;
+	ANCHOR.x = MARGIN.width;
+	ANCHOR.y = ScreenHeight - SIZE.height - CHudClassIndicator::MARGIN - CHudClassIndicator::PORTRAIT_SIZE.height - MARGIN.height;
 
-	MARGIN.x = 12;
-	MARGIN.y = ScreenHeight - SIZE.y - 50;
-
-	return 1;
+	m_rgCustomPoints.clear();
 }
 
-int CHudRadar::Draw(float flTime)
+void CHudRadar::Draw(float flTime, bool bIntermission)
 {
-	if ((gHUD::m_bitsHideHUDDisplay & HIDEHUD_HEALTH) || g_iUser1)	// TODO: maybe add an independent flag to turn radar off?
-		return 1;
+	if (gHUD::m_bitsHideHUDDisplay & HIDEHUD_ALL || g_iUser1 || bIntermission)	// TODO: maybe add an independent flag to turn radar off?
+		return;
 
-	if (!gHUD::m_bPlayerDead && m_bDrawRadar == true)
-		DrawRadar(flTime);
+	if (!CL_IsDead())
+		DrawRadar();
+}
 
-	return 1;
+void CHudRadar::Think(void)
+{
+	// Player radio flash.
+	for (auto iter = std::begin(g_PlayerExtraInfo); iter != std::end(g_PlayerExtraInfo); ++iter)
+	{
+		if (iter->m_flTimeNextRadarFlash != -1.0 && gHUD::m_flUCDTime > iter->m_flTimeNextRadarFlash && iter->m_iRadarFlashRemains > 0)
+		{
+			iter->m_flTimeNextRadarFlash = gHUD::m_flUCDTime + 0.15f;
+			iter->m_iRadarFlashRemains--;
+			iter->m_bRadarFlashing = !iter->m_bRadarFlashing;
+		}
+	}
+
+	// Custom radar points.
+	for (auto iter = m_rgCustomPoints.begin(); iter != m_rgCustomPoints.end(); /* Do nothing. */)
+	{
+		if (iter->second.m_iFlashCounts <= 0 && iter->second.m_flTimeSwitchPhase <= gHUD::m_flUCDTime)	// the last flash
+		{
+			iter = m_rgCustomPoints.erase(iter);
+		}
+		else
+		{
+			iter++;
+		}
+	}
 }
 
 void CHudRadar::DrawRadarDot(int x, int y, float z_diff, int iBaseDotSize, int flags, int r, int g, int b, int a)
@@ -115,14 +138,31 @@ void CHudRadar::DrawRadarDot(int x, int y, float z_diff, int iBaseDotSize, int f
 // view.cpp
 extern Vector v_angles, v_origin;
 
-void CHudRadar::DrawRadar(float flTime, const Vector2D& vecMargin, const Vector2D& vecSize)
+void CHudRadar::DrawRadar(const Vector2D& vecAnchorLT, const Vector2D& vecSize)
 {
 	int iBaseDotSize = 2;
 	Vector color;
 	Vector2D vecTranslated;
 	float flZDiff = 0;
 	bool bClampped = false;
-	const Vector2D vecMarginRB = vecMargin + vecSize;
+	const Vector2D vecAnchorRB = vecAnchorLT + vecSize;
+
+	auto ClampCoord = [&bClampped, &vecSize](Vector2D& vecToClamp)
+	{
+		// this is because we don't want the icon clipping through radar border.
+		// Don't need to consider anchor and margin here.
+		if (vecToClamp.x < ICON_SIZE / 2 + BORDER_THICKNESS || vecToClamp.x > vecSize.x - ICON_SIZE / 2 - BORDER_THICKNESS ||
+			vecToClamp.y < ICON_SIZE / 2 + BORDER_THICKNESS || vecToClamp.y > vecSize.y - ICON_SIZE / 2 - BORDER_THICKNESS)
+		{
+			// makes sure that they stay on the radar border..
+			vecToClamp.x = Q_clamp(vecToClamp.x, float(ICON_SIZE / 2 + BORDER_THICKNESS), float(vecSize.x - ICON_SIZE / 2 - BORDER_THICKNESS));
+			vecToClamp.y = Q_clamp(vecToClamp.y, float(ICON_SIZE / 2 + BORDER_THICKNESS), float(vecSize.y - ICON_SIZE / 2 - BORDER_THICKNESS));
+
+			bClampped = true;
+		}
+		else
+			bClampped = false;
+	};
 
 	// If the window is not a square, it would be some trouble.
 	float X_DIAMETER = DIAMETER;
@@ -138,34 +178,16 @@ void CHudRadar::DrawRadar(float flTime, const Vector2D& vecMargin, const Vector2
 	if (!OverviewMgr::m_bRotated)
 		std::swap(X_DIAMETER, Y_DIAMETER);
 
-	// draw white board.
-	glDisable(GL_TEXTURE_2D);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	glColor4f(0, 0, 0, 0.5);
-	DrawUtils::Draw2DQuad(vecMargin, vecMarginRB);
-
-	// HL&CL: We don't need a border.
-	//glColor4f(1, 1, 1, 1);
-	//DrawUtils::Draw2DQuadProgressBar(vecMargin, vecSize, 2, 1);
-
-	glDisable(GL_BLEND);
-	glEnable(GL_TEXTURE_2D);
+	// draw black board.
+	DrawUtils::glRegularPureColorDrawingInit(0x000000, 128U);
+	DrawUtils::Draw2DQuad(vecAnchorLT, vecAnchorRB);
+	DrawUtils::glRegularPureColorDrawingExit();
 
 	// Got a minimap? Draw it first!
 	if (OverviewMgr::m_iIdTexture)
 	{
-		gEngfuncs.pTriAPI->RenderMode(kRenderTransColor);
-		gEngfuncs.pTriAPI->Brightness(1.0);
-
-		// in order to make transparent fx on dds texture...
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glColor4f(1, 1, 1, 1);
-
-		gEngfuncs.pTriAPI->CullFace(TRI_NONE);
-		
-		glBindTexture(GL_TEXTURE_2D, OverviewMgr::m_iIdTexture);
+		DrawUtils::glRegularTexDrawingInit(0xFFFFFF, 255U);
+		DrawUtils::glSetTexture(OverviewMgr::m_iIdTexture);
 
 		// Build two points: left-top and right-bottom
 		Vector2D vecLT = OverviewMgr::m_mxTransform * Vector2D(gHUD::m_vecOrigin.x - X_DIAMETER / 2.0f, gHUD::m_vecOrigin.y - Y_DIAMETER / 2.0f);
@@ -215,25 +237,22 @@ void CHudRadar::DrawRadar(float flTime, const Vector2D& vecMargin, const Vector2
 			}
 		}
 
-		DrawUtils::Draw2DQuadCustomTex(vecMargin, vecMarginRB, vecs);
+		DrawUtils::Draw2DQuadCustomTex(vecAnchorLT, vecAnchorRB, vecs);
 	}
 
+	// Draw the border to clampl the map range.
+	DrawUtils::glRegularPureColorDrawingInit(0xFFFFFF, 255U);
+	DrawUtils::Draw2DQuadProgressBar2(vecAnchorLT, vecSize, BORDER_THICKNESS, 1);
+	DrawUtils::glRegularPureColorDrawingExit();
+
 	// Draw ourself.
-	vecTranslated = vecMargin + vecSize / 2;	// I must be the centre of this radar map. Otherwise it will be meaningless.
+	vecTranslated = vecAnchorLT + vecSize / 2;	// I must be the centre of this radar map. Otherwise it will be meaningless.
 	color = gHUD::GetColor(gHUD::m_iPlayerNum);
 
 	if (g_iRoleType > Role_UNASSIGNED && g_iRoleType < ROLE_COUNT)
 	{
-		gEngfuncs.pTriAPI->RenderMode(kRenderTransColor);
-		gEngfuncs.pTriAPI->Brightness(1.0);
-
-		// in order to make transparent fx on dds texture...
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		gEngfuncs.pTriAPI->CullFace(TRI_NONE);
-
-		glColor4f(color.r, color.g, color.b, 1);
-		glBindTexture(GL_TEXTURE_2D, m_rgiRadarIcons[g_iRoleType]);
+		DrawUtils::glRegularTexDrawingInit(color, 1);
+		DrawUtils::glSetTexture(RADAR_ICONS[g_iRoleType]);
 		DrawUtils::Draw2DQuad(vecTranslated.x - ICON_SIZE / 2, vecTranslated.y - ICON_SIZE / 2, vecTranslated.x + ICON_SIZE / 2, vecTranslated.y + ICON_SIZE / 2);
 	}
 	else
@@ -279,22 +298,11 @@ void CHudRadar::DrawRadar(float flTime, const Vector2D& vecMargin, const Vector2
 		vecTranslated = m_mxRadarTransform * gEngfuncs.GetEntityByIndex(i)->origin.Make2D();
 		flZDiff = gEngfuncs.GetEntityByIndex(i)->origin.z - gHUD::m_vecOrigin.z;
 
-		// this is because we don't want the icon clipping through radar border.
-		// Don't need to consider border and margin here.
-		if (vecTranslated.x < ICON_SIZE / 2 || vecTranslated.x > vecSize.x - ICON_SIZE / 2 ||
-			vecTranslated.y < ICON_SIZE / 2 || vecTranslated.y > vecSize.y - ICON_SIZE / 2)
-		{
-			// makes sure that they stay on the radar border..
-			vecTranslated.x = Q_clamp(vecTranslated.x, float(ICON_SIZE / 2), float(vecSize.x - ICON_SIZE / 2));
-			vecTranslated.y = Q_clamp(vecTranslated.y, float(ICON_SIZE / 2), float(vecSize.y - ICON_SIZE / 2));
-
-			bClampped = true;
-		}
-		else
-			bClampped = false;
+		// Makes sure it drops within our border.
+		ClampCoord(vecTranslated);
 
 		// offset it with the radar location.
-		vecTranslated += vecMargin;
+		vecTranslated += vecAnchorLT;
 
 		// determind color.
 		color = gHUD::GetColor(i);
@@ -302,28 +310,14 @@ void CHudRadar::DrawRadar(float flTime, const Vector2D& vecMargin, const Vector2
 		// the noobie and illegit players have no icon.
 		if (g_PlayerExtraInfo[i].m_iRoleType > Role_UNASSIGNED && g_PlayerExtraInfo[i].m_iRoleType < ROLE_COUNT)
 		{
-			gEngfuncs.pTriAPI->RenderMode(kRenderTransColor);
-			gEngfuncs.pTriAPI->Brightness(1.0);
-
-			// in order to make transparent fx on dds texture...
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-			// to distinguish, the clampped icons will dim out a little bit.
-			glColor4f(color.r, color.g, color.b, bClampped ? 0.5 : 1.0);
-
-			gEngfuncs.pTriAPI->CullFace(TRI_NONE);
-
-			glBindTexture(GL_TEXTURE_2D, m_rgiRadarIcons[g_PlayerExtraInfo[i].m_iRoleType]);
+			DrawUtils::glRegularTexDrawingInit(color, bClampped ? 0.5 : 1.0);
+			DrawUtils::glSetTexture(RADAR_ICONS[g_PlayerExtraInfo[i].m_iRoleType]);
 			DrawUtils::Draw2DQuad(vecTranslated.x - ICON_SIZE / 2, vecTranslated.y - ICON_SIZE / 2, vecTranslated.x + ICON_SIZE / 2, vecTranslated.y + ICON_SIZE / 2);
 
 			if (Q_abs(flZDiff) > 128)
 			{
-				glDisable(GL_TEXTURE_2D);
-				glEnable(GL_BLEND);
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 				// take the same color for the above/below sign.
-				glColor4f(color.r, color.g, color.b, bClampped ? 0.5 : 1.0);
+				DrawUtils::glRegularPureColorDrawingInit(color, bClampped ? 0.5 : 1.0);
 
 				Vector2D vecPeak, vecLeftBottom, vecRightBottom;
 
@@ -346,21 +340,13 @@ void CHudRadar::DrawRadar(float flTime, const Vector2D& vecMargin, const Vector2
 				glVertex2f(vecRightBottom.x, vecRightBottom.y);
 				glEnd();
 
-				glDisable(GL_BLEND);
-				glEnable(GL_TEXTURE_2D);
+				DrawUtils::glRegularPureColorDrawingExit();
 			}
 		}
 		else
 		{
 			color *= 255.0f;	// due to gEngfuncs.pfnFillRGBA() do not accept 0~1 as its color parameters.
 			DrawRadarDot(vecTranslated, flZDiff, iBaseDotSize, RADAR_DOT_NORMAL, color.r, color.g, color.b, 235);
-		}
-
-		if (g_PlayerExtraInfo[i].m_flTimeNextRadarFlash != -1.0 && flTime > g_PlayerExtraInfo[i].m_flTimeNextRadarFlash && g_PlayerExtraInfo[i].m_iRadarFlashRemains > 0)
-		{
-			g_PlayerExtraInfo[i].m_flTimeNextRadarFlash = flTime + 0.15f;
-			g_PlayerExtraInfo[i].m_iRadarFlashRemains--;
-			g_PlayerExtraInfo[i].m_bRadarFlashing = !g_PlayerExtraInfo[i].m_bRadarFlashing;
 		}
 
 		if (g_PlayerExtraInfo[i].m_bRadarFlashing && g_PlayerExtraInfo[i].m_iRadarFlashRemains > 0)
@@ -373,29 +359,24 @@ void CHudRadar::DrawRadar(float flTime, const Vector2D& vecMargin, const Vector2
 		}
 	}
 
-	for (int i = 0; i < MAX_POINTS; i++)	// for the tracking skills
+	for (auto iter = m_rgCustomPoints.begin(); iter != m_rgCustomPoints.end(); ++iter)	// for the tracking skills
 	{
-		if (!m_rgCustomPoints[i].m_bGlobalOn)
-			continue;
-
-		if (m_rgCustomPoints[i].m_iFlashCounts <= 0 && m_rgCustomPoints[i].m_flTimeSwitchPhase <= gEngfuncs.GetClientTime())	// the last flash.
+		if (iter->second.m_flTimeSwitchPhase <= gHUD::m_flUCDTime)
 		{
-			m_rgCustomPoints[i].m_bGlobalOn = false;
-			continue;
+			iter->second.m_flTimeSwitchPhase = gHUD::m_flUCDTime + iter->second.m_flFlashInterval;
+			iter->second.m_bPhase = !iter->second.m_bPhase;
+			iter->second.m_iFlashCounts--;
 		}
 
-		if (m_rgCustomPoints[i].m_flTimeSwitchPhase <= gEngfuncs.GetClientTime())
+		if (iter->second.m_bPhase)
 		{
-			m_rgCustomPoints[i].m_flTimeSwitchPhase = gEngfuncs.GetClientTime() + m_rgCustomPoints[i].m_flFlashInterval;
-			m_rgCustomPoints[i].m_bPhase = !m_rgCustomPoints[i].m_bPhase;
-			m_rgCustomPoints[i].m_iFlashCounts--;
-		}
+			vecTranslated = m_mxRadarTransform * iter->second.m_vecCoord.Make2D();
+			flZDiff = iter->second.m_vecCoord.z - gHUD::m_vecOrigin.z;
 
-		if (m_rgCustomPoints[i].m_bPhase)
-		{
-			vecTranslated = m_mxRadarTransform * m_rgCustomPoints[i].m_vecCoord.Make2D();
-			flZDiff = m_rgCustomPoints[i].m_vecCoord.z - gHUD::m_vecOrigin.z;
-			DrawRadarDot(vecTranslated, flZDiff, iBaseDotSize * m_rgCustomPoints[i].m_iDotSize, m_rgCustomPoints[i].m_bitsFlags, m_rgCustomPoints[i].m_color);
+			ClampCoord(vecTranslated);	// Remember, it is need anyway!
+			vecTranslated += vecAnchorLT;
+
+			DrawRadarDot(vecTranslated, flZDiff, iBaseDotSize * iter->second.m_iDotSize, iter->second.m_bitsFlags, iter->second.m_color);
 		}
 	}
 

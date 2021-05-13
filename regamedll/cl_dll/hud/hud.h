@@ -209,7 +209,7 @@ class CHudTextMessage;
 class CHudRoundTimer;
 class CHudAccountBalance;
 class CHudHeadName;
-class CHudRadar;
+//class CHudRadar;
 class CHudStatusIcons;
 class CHudScenarioStatus;
 class CHudProgressBar;
@@ -356,7 +356,7 @@ namespace gHUD
 	extern CHudRoundTimer m_roundTimer;
 	extern CHudAccountBalance m_accountBalance;
 	extern CHudHeadName m_headName;
-	extern CHudRadar m_Radar;
+	//extern CHudRadar m_Radar;
 	extern CHudStatusIcons m_StatusIcons;
 	extern CHudScenarioStatus m_scenarioStatus;
 	extern CHudProgressBar m_progressBar;

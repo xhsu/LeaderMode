@@ -37,11 +37,12 @@ struct CHudBattery	// Place after CHudRadar
 
 	// Drawing data.
 	static constexpr decltype(auto) COLOR = Vector(8.0 / 255.0, 131.0 / 255.0, 211.0 / 255.0);
+	static constexpr decltype(auto) MARGIN = 5;	// Margin between this and class indicator.
 	static constexpr decltype(auto) BORDER_THICKNESS = 2;
 	static constexpr decltype(auto) PROGRESS_BAR_MARGIN = 2;
 	static constexpr decltype(auto) GAP_SIZE = 12;	// Gap between icon and progress bar.
-	static constexpr decltype(auto) ICON_SIZE = Vector2D(64), BAR_SIZE = Vector2D(144, ICON_SIZE.width);
-	static constexpr decltype(auto) INNERBLOCK_HEIGHT = BAR_SIZE.y - BORDER_THICKNESS * 2 - PROGRESS_BAR_MARGIN * 2;	// standalone version. for font initialization.
+	static constexpr decltype(auto) ICON_SIZE = Vector2D(CHudClassIndicator::PORTRAIT_SIZE.width / 2), BAR_SIZE = Vector2D(CHudRadar::SIZE.x - CHudClassIndicator::PORTRAIT_SIZE.width - MARGIN - ICON_SIZE.width - GAP_SIZE, ICON_SIZE.width);
+	static constexpr decltype(auto) INNERBLOCK_HEIGHT = BAR_SIZE.y - BORDER_THICKNESS * 2 - PROGRESS_BAR_MARGIN * 2;	// standalone, constexpr version. for font initialization.
 	static constexpr decltype(auto) TEXT_HEIGHT = INNERBLOCK_HEIGHT;	// Since the text must be placed inside innerblock.
 	static inline Vector2D ICON_ANCHOR = Vector2D(), BAR_ANCHOR = Vector2D();
 	static inline Vector2D INNERBLOCK_ANCHOR = Vector2D(), INNERBLOCK_SIZE = Vector2D(0, INNERBLOCK_HEIGHT);

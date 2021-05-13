@@ -130,7 +130,7 @@ void CHudStatusBar::ParseStatusString(int line_num)
 							if (g_PlayerInfoList[indexval].name != NULL)
 							{
 								Q_strncpy(szRepString, g_PlayerInfoList[indexval].name, MAX_PLAYER_NAME_LENGTH);
-								gHUD::m_Radar.m_iPlayerLastPointedAt = indexval;
+								//gHUD::m_Radar.m_iPlayerLastPointedAt = indexval; RADAR UNDONE
 								m_rgvecNameColors[line_num] = gHUD::GetColor(indexval);
 							}
 							else

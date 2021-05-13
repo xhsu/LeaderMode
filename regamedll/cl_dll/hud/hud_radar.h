@@ -7,8 +7,6 @@ Reincarnation Date: Nov 21 2020
 
 #pragma once
 
-#define MAX_POINTS 64
-
 #define RADAR_DOT_NORMAL		0
 #define RADAR_DOT_BOMB			BIT(0)
 #define RADAR_DOT_HOSTAGE		BIT(1)
@@ -17,50 +15,50 @@ Reincarnation Date: Nov 21 2020
 
 struct radar_point_s
 {
-	bool m_bGlobalOn;
 	bool m_bPhase;
 	float m_flTimeSwitchPhase;
 	PackedColorVec m_color;
-	Vector m_vecCoord;
-	float m_flFlashInterval;// the on-off phases change interval.
-	int	m_iFlashCounts;		// how many flashes in total?
-	int m_bitsFlags;
-	int m_iDotSize;
+	Vector	m_vecCoord;
+	float	m_flFlashInterval;// the on-off phases change interval.
+	short	m_iFlashCounts;		// how many flashes in total?
+	unsigned m_bitsFlags;
+	int		m_iDotSize;
 };
 
-class CHudRadar : public CBaseHudElement
+struct CHudRadar
 {
-public:
-	static Vector2D	MARGIN;	// This is variable now.
+	// Event functions.
+	static void	Initialize(void);
+	//static void	Shutdown(void);
+	//static void	ConnectToServer(void);
+	static void	Draw(float flTime, bool bIntermission);
+	static void	Think(void);	// Use gHUD::m_flUCDTime
+	//static void	OnNewRound(void);
+	//static void	ServerAsksReset(void);
 
-	static constexpr Vector2D	SIZE		= Vector2D(280, 200);
-	static constexpr float		DIAMETER	= 2048;
-	static constexpr int		ICON_SIZE	= 16;
+	// Message functions.
+	// Custom functions.
+	static void Reset(void);
+	static void DrawRadarDot(int x, int y, float z_diff, int iBaseDotSize, int flags, int r, int g, int b, int a);
+	static inline void DrawRadarDot(const Vector2D& vec, float z_diff, int iBaseDotSize, int flags, int r, int g, int b, int a) { DrawRadarDot(vec.x, vec.y, z_diff, iBaseDotSize, flags, r, g, b, a); }
+	static inline void DrawRadarDot(const Vector2D& vec, float z_diff, int iBaseDotSize, int flags, const PackedColorVec& colour) { DrawRadarDot(vec.x, vec.y, z_diff, iBaseDotSize, flags, colour.r, colour.g, colour.b, colour.a); }
+	static inline void DrawRadarDot(const Vector& vec, int iBaseDotSize, int flags, int r, int g, int b, int a) { DrawRadarDot(vec.x, vec.y, vec.z, iBaseDotSize, flags, r, g, b, a); }
+	static inline void DrawRadarDot(const Vector& vec, int iBaseDotSize, int flags, const PackedColorVec& colour) { DrawRadarDot(vec.x, vec.y, vec.z, iBaseDotSize, flags, colour.r, colour.g, colour.b, colour.a); }
+	static void DrawRadar(const Vector2D& vecAnchorLT = ANCHOR, const Vector2D& vecSize = SIZE);
+	static void DrawPlayerLocation(void);
 
-	static constexpr float	BORDER_GAP = 12;
-	static constexpr float	HUD_SIZE = 240;
+	// Game data.
+	static constexpr decltype(auto)	DIAMETER = 2048;	// radar viewable range.
+	static inline std::unordered_map<short, radar_point_s> m_rgCustomPoints;
+	static inline Matrix3x3 m_mxRadarTransform = Matrix3x3::Identity();
 
-public:
-	int Init(void);
-	int VidInit(void);
-	int Draw(float fTime);
+	// Drawing data.
+	static constexpr decltype(auto)	SIZE = Vector2D(320, 240), MARGIN = Vector2D(18);
+	static constexpr decltype(auto)	ICON_SIZE = 16;
+	static constexpr decltype(auto) BORDER_THICKNESS = 2;
+	static constexpr decltype(auto)	HUD_SIZE = 240;	// deprecated.
+	static inline Vector2D	ANCHOR = Vector2D();
+	static inline std::array<GLuint, ROLE_COUNT> RADAR_ICONS;
 
-	void DrawRadarDot(int x, int y, float z_diff, int iBaseDotSize, int flags, int r, int g, int b, int a);
-	void DrawRadar(float flTime, const Vector2D& vecMargin = MARGIN, const Vector2D& vecSize = SIZE);
-	void DrawPlayerLocation(void);
-
-public:
-	inline void DrawRadarDot(const Vector2D& vec, float z_diff, int iBaseDotSize, int flags, int r, int g, int b, int a) { DrawRadarDot(vec.x, vec.y, z_diff, iBaseDotSize, flags, r, g, b, a); }
-	inline void DrawRadarDot(const Vector2D& vec, float z_diff, int iBaseDotSize, int flags, const PackedColorVec& colour) { DrawRadarDot(vec.x, vec.y, z_diff, iBaseDotSize, flags, colour.r, colour.g, colour.b, colour.a); }
-	inline void DrawRadarDot(const Vector& vec, int iBaseDotSize, int flags, int r, int g, int b, int a) { DrawRadarDot(vec.x, vec.y, vec.z, iBaseDotSize, flags, r, g, b, a); }
-	inline void DrawRadarDot(const Vector& vec, int iBaseDotSize, int flags, const PackedColorVec& colour) { DrawRadarDot(vec.x, vec.y, vec.z, iBaseDotSize, flags, colour.r, colour.g, colour.b, colour.a); }
-	inline static Vector2D GetBottom(void) { return Vector2D(MARGIN.x, MARGIN.y + SIZE.y); }
-
-public:
-	unsigned int							m_iPlayerLastPointedAt	{ 0U };
-	bool									m_bDrawRadar			{ true };
-	std::array<radar_point_s, MAX_POINTS>	m_rgCustomPoints;
-	std::array<GLuint, ROLE_COUNT>			m_rgiRadarIcons;
-	GLuint									m_iIdArrow				{ 0U };
-	Matrix3x3								m_mxRadarTransform		{ Matrix3x3::Identity() };
+	inline static Vector2D GetBottom(void) { return Vector2D(ANCHOR.x, ANCHOR.y + SIZE.y); }	// deprecated.
 };
