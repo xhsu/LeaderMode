@@ -28,6 +28,12 @@ void CHudBattery::Initialize(void)
 
 	m_hFont = gFontFuncs::CreateFont();
 	gFontFuncs::AddGlyphSetToFont(m_hFont, "716", TEXT_HEIGHT, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0xFFFF);
+
+#ifdef _DEBUG
+	gEngfuncs.pfnAddCommand("cl_debug_setap", CmdFunc_SetAP);
+	gEngfuncs.pfnAddCommand("cl_debug_setat", CmdFunc_SetArmorType);
+#endif // _DEBUG
+
 }
 
 void CHudBattery::Draw(float flTime, bool bIntermission)
@@ -78,7 +84,7 @@ void CHudBattery::Reset(void)
 	m_wcsAPText = L"0";
 	gFontFuncs::GetTextSize(m_hFont, m_wcsAPText.c_str(), &m_iTextLength, nullptr);
 
-	ICON_ANCHOR = CHudClassIndicator::PORTRAIT_ANCHOR + Vector2D(CHudClassIndicator::PORTRAIT_SIZE.width + MARGIN, 0);
+	ICON_ANCHOR = CHudClassIndicator::PORTRAIT_ANCHOR + Vector2D(CHudClassIndicator::PORTRAIT_SIZE.width + MARGIN_LEFT, 0);
 	BAR_ANCHOR = ICON_ANCHOR + Vector2D(ICON_SIZE.width + GAP_SIZE, 0);
 	INNERBLOCK_ANCHOR = BAR_ANCHOR + Vector2D(BORDER_THICKNESS + PROGRESS_BAR_MARGIN, BORDER_THICKNESS + PROGRESS_BAR_MARGIN);
 	INNERBLOCK_SIZE = Vector2D(0, INNERBLOCK_HEIGHT);	// No width upon reset.
@@ -113,6 +119,18 @@ void CHudBattery::MsgFunc_ArmorType(const int& iArmourType)
 	m_iArmorType = iArmourType;
 	m_flAlpha = 255;	// light up for a while.
 }
+
+#ifdef _DEBUG
+void CHudBattery::CmdFunc_SetArmorType(void)
+{
+	MsgFunc_ArmorType(Q_atoi(gEngfuncs.Cmd_Argv(1)));
+}
+
+void CHudBattery::CmdFunc_SetAP(void)
+{
+	MsgFunc_Battery(Q_atoi(gEngfuncs.Cmd_Argv(1)));
+}
+#endif // _DEBUG
 
 float CHudBattery::GetMaxArmour(void)
 {

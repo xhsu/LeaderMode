@@ -1,6 +1,11 @@
 /*
 
 Created Date: Mar 11 2020
+Remastered Date: May 13 2021
+
+Modern Warfare Dev Team
+	Programmer	- Luna the Reborn
+	Artist		- HL&CL
 
 */
 
@@ -38,37 +43,46 @@ constexpr int HEALTH_BAR_WIDTH = 10;
 constexpr int HEALTH_SHAKE_AMPLITUDE = 3;
 constexpr int HEALTH_ICON_BAR_INTERSPACE = 10;
 
-class CHudHealth : public CBaseHudElement
+struct CHudHealth	// Depends on: CHudBattery
 {
-public:
-	int Init(void);
-	int VidInit(void);
-	int Draw(float fTime);
-	void Reset(void);
-	void InitHUDData(void);
+	// Event functions.
+	static void	Initialize(void);
+	//static void	Shutdown(void);
+	static void	ConnectToServer(void);
+	static void	Draw(float flTime, bool bIntermission);
+	static void	Think(void);	// Use gHUD::m_flUCDTime
+	//static void	OnNewRound(void);
+	static void	ServerAsksReset(void);
 
-	void MsgFunc_Health(int& iNewHealth);
-	void MsgFunc_Damage(int& armor, int& damageTaken, int& bitsDamage, Vector& vecFrom);
+	// Message functions.
+	static void MsgFunc_Health(int iNewHealth);
+	static void MsgFunc_Damage(int armor, int damageTaken, int bitsDamage, const Vector& vecFrom);
+#ifdef _DEBUG
+	static void CmdFunc_Health(void);
+#endif // _DEBUG
 
-	int DrawPain(float fTime);
-	int DrawDamage(float fTime);
-	void CalcDamageDirection(Vector vecFrom);
-	void UpdateTiles(float fTime, long bits);
-	float GetMaxHealth(void);
+	// Custom functions.
+	static float GetMaxHealth(void);
 
-public:
-	int m_iHealth{ 100 };
-	float m_flDrawingHealth{ 100 };
-	int m_HUD_dmg_bio{ 0 };
-	int m_HUD_cross{ 0 };
-	float m_fFade{ 0.0f };
-	float m_fAttackFront, m_fAttackRear, m_fAttackLeft, m_fAttackRight;
-	float m_flLastDrawingY;
+	// Game data.
+	static inline short m_iHealth = 100;
+	static inline float m_flPercentage = 1;
+	static inline std::wstring m_wcsHPText = L"100";
 
-private:
-	hSprite m_hSprite;
-	hSprite m_hDamage;
-	DAMAGE_IMAGE m_dmg[NUM_DMG_TYPES];
-	int m_bitsDamage;
-	unsigned int m_hBloodScreen;
+	// Drawing data.
+	static constexpr auto COLOR = VEC_REDISH;
+	static constexpr auto LOW_HP_ALPHA_OSCL_PERIOD = 0.25;
+	static constexpr auto LOW_HP_SHAKING_AMP = 2;
+	static constexpr auto MARGIN = Vector2D(CHudBattery::MARGIN_LEFT, CHudBattery::MARGIN_BOTTOM);	// X: between this and class portrait on the left. Y: between this and AP bar.
+	static constexpr auto SIZE = Vector2D(CHudRadar::SIZE.x - CHudClassIndicator::PORTRAIT_SIZE.width - MARGIN.x, CHudBattery::BAR_SIZE.y);
+	static constexpr auto BORDER_THICKNESS = 2;
+	static constexpr auto PROGRESS_BAR_MARGIN = 2;
+	static constexpr auto INNERBLOCK_HEIGHT = SIZE.y - BORDER_THICKNESS * 2 - PROGRESS_BAR_MARGIN * 2;	// standalone, constexpr version. for font initialization.
+	static constexpr auto FONT_SIZE = INNERBLOCK_HEIGHT;
+	static inline auto ANCHOR = CHudBattery::ICON_ANCHOR + Vector2D(0, CHudBattery::ICON_SIZE.height + MARGIN.height);
+	static inline auto INNERBLOCK_SIZE = Vector2D(SIZE.width - BORDER_THICKNESS * 2 - PROGRESS_BAR_MARGIN * 2, INNERBLOCK_HEIGHT), INNERBLOCK_ANCHOR = ANCHOR + Vector2D(BORDER_THICKNESS + PROGRESS_BAR_MARGIN);
+	static inline auto TEXT_ANCHOR = ANCHOR + Vector2D(0, (SIZE.height - FONT_SIZE) / 2);
+	static inline int m_hFont = 0;
+	static inline float m_flAlpha = 255;	// byte
+	static inline int m_iTextLength = 0;
 };

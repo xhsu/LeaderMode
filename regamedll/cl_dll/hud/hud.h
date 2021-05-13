@@ -38,7 +38,7 @@ Created Date: 07 Mar 2020
 #define DHN_4DIGITS		BIT(4)
 #define DHN_5DIGITS		BIT(5)
 
-#define MIN_ALPHA		100
+#define MIN_ALPHA		128
 
 #define MAX_SPRITE_NAME_LENGTH 24
 
@@ -193,7 +193,7 @@ struct CHudExample2
 
 // dummy classes derived from CBaseHudElement.
 class CHudAmmo;
-class CHudHealth;
+//class CHudHealth;
 //class CHudSpectator;
 class CHudGeiger;
 //class CHudBattery;
@@ -273,8 +273,8 @@ namespace gHUD
 	void GetSprite(client_sprite_t* pSprite, hSprite& hSPR, wrect_t& rcSPR);
 	Vector GetColor(size_t iPlayerIndex);
 	bool GetSprite(const char* szSpriteName, hSprite* phSPR, const wrect_t** pprcSPR);
-	float GetOscillation(void);
-	float GetOscillationUnfreezable(void);
+	float GetOscillation(float omega = 2);
+	float GetOscillationUnfreezable(float omega = 2);
 
 	// HUD bridges
 	void SlotInput(int iSlot);
@@ -340,7 +340,7 @@ namespace gHUD
 
 	// HUD elements.
 	extern std::list<element_t> m_lstElements;
-	extern CHudHealth m_Health;
+	//extern CHudHealth m_Health;
 	//extern CHudSpectator m_Spectator;
 	extern CHudGeiger m_Geiger;
 	//extern CHudBattery m_Battery;

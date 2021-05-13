@@ -84,11 +84,11 @@ void CHudClassIndicator::Think(void)
 
 	if (m_flPercentage >= 1.0f - FLT_EPSILON)
 	{
-		m_vecCurColor = COLOR_REGULAR + (COLOR_READY - COLOR_REGULAR) * gHUD::GetOscillationUnfreezable();
+		m_vecCurColor = COLOR_REGULAR + (COLOR_READY - COLOR_REGULAR) * gHUD::GetOscillation(2.0 * M_PI / READY_COLOR_OCSILLATING_PERIOD);
 	}
 	else if (m_flPercentage <= 0.25f)
 	{
-		m_vecCurColor = COLOR_REGULAR + (COLOR_WARNING - COLOR_REGULAR) * gHUD::GetOscillationUnfreezable();
+		m_vecCurColor = COLOR_REGULAR + (COLOR_WARNING - COLOR_REGULAR) * gHUD::GetOscillation(2.0 * M_PI / DEPLETING_COLOR_OCSILLATING_PERIOD);
 	}
 	else
 	{
@@ -115,6 +115,9 @@ void CHudClassIndicator::MsgFunc_Role(const RoleTypes& iRole)
 
 void CHudClassIndicator::MsgFunc_SkillTimer(const float& flTotalTime, const MODE& iMode, const float& flCurrentTime)
 {
+	if (iMode != m_iMode)
+		m_flAlpha = 255;	// lights up when READY/DEPLETED/USING.
+
 	m_flTotalTime = flTotalTime;
 	m_iMode = iMode;
 	m_flCurrentTime = flCurrentTime;

@@ -41,8 +41,9 @@ struct CHudClassIndicator
 	static inline MODE m_iMode = FREEZED;
 
 	// Drawing data.
-	static constexpr decltype(auto) BORDER_THICKNESS = 3;
 	static constexpr decltype(auto) COLOR_REGULAR = Vector(1, 1, 1), COLOR_READY = VEC_SPRINGGREENISH, COLOR_WARNING = VEC_REDISH;
+	static constexpr decltype(auto) DEPLETING_COLOR_OCSILLATING_PERIOD = 0.5, READY_COLOR_OCSILLATING_PERIOD = 3.5;
+	static constexpr decltype(auto) BORDER_THICKNESS = 3;
 	static constexpr decltype(auto) PORTRAIT_SIZE = Vector2D(96);
 	static constexpr decltype(auto) MARGIN = 8;	// Between this and radar above.
 	static inline Vector2D PORTRAIT_ANCHOR = Vector2D();

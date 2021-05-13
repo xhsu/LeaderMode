@@ -96,7 +96,7 @@ namespace gHUD
 
 	// HUD elements.
 	std::list<element_t> m_lstElements;
-	CHudHealth m_Health;
+	//CHudHealth m_Health;
 	//CHudSpectator m_Spectator;
 	CHudGeiger m_Geiger;
 	//CHudBattery m_Battery;
@@ -158,7 +158,7 @@ void gHUD::Init(void)
 	}*/
 
 	// instead, we should:
-	AddElementsToList<CHudRadar, CHudClassIndicator, CHudBattery,	// left-bottom. Everything is depened on CRadar, like a motherboard.
+	AddElementsToList<CHudRadar, CHudClassIndicator, CHudBattery, CHudHealth,	// left-bottom. Everything is depened on CRadar, like a motherboard.
 		CHudCrosshair, CHudDeathNotice, CHudSpectator>();
 	//m_Health.Init();
 	//m_SayText.Init();	// m_SayText should place before m_Spectator, since m_Spectator.init() is calling some vars from m_SayText.Init().
@@ -935,14 +935,14 @@ bool gHUD::GetSprite(const char* szSpriteName, hSprite* phSPR, const wrect_t** p
 	return true;
 }
 
-float gHUD::GetOscillation(void)
+float gHUD::GetOscillation(float omega)
 {
-	return (Q_sin(gHUD::m_flTime * 2.0f) + 1.0f) / 2.0f;
+	return (Q_sin(gHUD::m_flTime * omega) + 1.0f) / 2.0f;
 }
 
-float gHUD::GetOscillationUnfreezable(void)
+float gHUD::GetOscillationUnfreezable(float omega)
 {
-	return (Q_sin(gHUD::m_flUCDTime * 2.0f) + 1.0f) / 2.0f;
+	return (Q_sin(gHUD::m_flUCDTime * omega) + 1.0f) / 2.0f;
 }
 
 void gHUD::SlotInput(int iSlot)

@@ -72,7 +72,7 @@ int CHudScenarioStatus::Draw(float fTime)
 	if (gEngfuncs.IsSpectateOnly())
 		return 1;
 
-	if (gHUD::m_bPlayerDead)
+	if (CL_IsDead())
 		return 1;
 
 	// Start from right next to radar.

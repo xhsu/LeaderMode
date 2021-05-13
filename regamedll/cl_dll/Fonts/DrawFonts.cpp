@@ -55,6 +55,12 @@ void gFontFuncs::DrawSetTextPos(int x, int y)
 	s_Pos[1] = y;
 }
 
+void gFontFuncs::DrawSetTextPos(const Vector2D& pos)
+{
+	s_Pos[0] = pos.x;
+	s_Pos[1] = pos.y;
+}
+
 void gFontFuncs::DrawSetText3DPos(Vector vecSrc)
 {
 	s_vec3DPos = vecSrc;

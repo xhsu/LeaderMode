@@ -51,7 +51,7 @@ MSG_FUNC(Health)
 	g_PlayerExtraInfo[iClient].m_iHealth = iHealth;
 
 	if (iClient == gHUD::m_iPlayerNum)
-		gHUD::m_Health.MsgFunc_Health(iHealth);
+		CHudHealth::MsgFunc_Health(iHealth);
 
 	return TRUE;
 }
@@ -69,7 +69,7 @@ MSG_FUNC(Damage)
 	vecDamageSrc.y = READ_COORD();
 	vecDamageSrc.z = READ_COORD();
 
-	gHUD::m_Health.MsgFunc_Damage(iArmor, iDmgTaken, bitsDamageTypes, vecDamageSrc);
+	CHudHealth::MsgFunc_Damage(iArmor, iDmgTaken, bitsDamageTypes, vecDamageSrc);
 	return TRUE;
 }
 
@@ -1071,10 +1071,9 @@ MSG_FUNC(Role)
 
 		// fix the flash blood screen bug.
 		// LUNA: in the SV, we update the Role info on the frame we assign, however, we won't update health info until next frame.
-		if (gHUD::m_Health.m_iHealth == 100 && (iRole == Role_Commander || iRole == Role_Godfather))
+		if (CHudHealth::m_iHealth == 100 && (iRole == Role_Commander || iRole == Role_Godfather))
 		{
-			gHUD::m_Health.m_iHealth = 1000;
-			gHUD::m_Health.m_flDrawingHealth = 1000.0f;
+			CHudHealth::MsgFunc_Health(1000);
 		}
 
 		// we have to update the m_iVariation of all weapons, since their behaviour would change sometimes.
