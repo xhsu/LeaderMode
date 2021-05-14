@@ -171,6 +171,9 @@ Created Date: 05 Mar 2020
 #include "HUD/hud_class_indicator.h"
 #include "hud/hud_battery.h"
 
+// top.
+#include "HUD/hud_match_status.h"
+
 #include "hud/hud_health.h"
 #include "hud/hud_spectator.h"
 #include "hud/hud_geiger.h"
@@ -187,7 +190,6 @@ Created Date: 05 Mar 2020
 #include "hud/hud_money.h"
 #include "hud/hud_head_name.h"
 #include "hud/hud_status_icons.h"
-#include "hud/hud_scenario_status.h"
 #include "hud/hud_progress_bar.h"
 #include "hud/hud_vgui2print.h"
 #include "hud/hud_sniperscope.h"

@@ -584,7 +584,7 @@ MSG_FUNC(StatusText)
 
 MSG_FUNC(StatusIcon)
 {
-	gHUD::m_StatusIcons.MsgFunc_StatusIcon(iSize, pbuf);
+	CHudStatusIcons::MsgFunc_StatusIcon(iSize, pbuf);
 
 	return TRUE;
 }
@@ -1300,14 +1300,6 @@ MSG_FUNC(Manpower)
 	// update value
 	g_rgiManpower[iTeam] = iManpower;
 
-	// update text
-	if (iManpower <= 10)
-		gHUD::m_scenarioStatus.m_rgwcsManpowerTexts[iTeam].clear();
-	else
-	{
-		gHUD::m_scenarioStatus.m_rgwcsManpowerTexts[iTeam] = L"[•••" + UTIL_ArabicToRoman(iManpower - 10U) + L"]";
-	}
-
 	return TRUE;
 }
 
@@ -1319,6 +1311,9 @@ MSG_FUNC(Scheme)
 	TacticalSchemes iScheme = (TacticalSchemes)READ_BYTE();
 
 	g_rgiTeamSchemes[iTeam] = iScheme;
+
+	if (iTeam == g_iTeam)
+		CHudStatusIcons::MsgFunc_Scheme(iScheme);
 
 	return TRUE;
 }

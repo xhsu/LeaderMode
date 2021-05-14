@@ -150,7 +150,7 @@
     <ClCompile Include="..\hud\hud_status_icons.cpp">
       <Filter>cl_dll\HUD</Filter>
     </ClCompile>
-    <ClCompile Include="..\hud\hud_scenario_status.cpp">
+    <ClCompile Include="..\hud\hud_match_status.cpp">
       <Filter>cl_dll\HUD</Filter>
     </ClCompile>
     <ClCompile Include="..\hud\hud_progress_bar.cpp">
@@ -425,7 +425,7 @@
     <ClInclude Include="..\hud\hud_status_icons.h">
       <Filter>cl_dll\HUD</Filter>
     </ClInclude>
-    <ClInclude Include="..\hud\hud_scenario_status.h">
+    <ClInclude Include="..\hud\hud_match_status.h">
       <Filter>cl_dll\HUD</Filter>
     </ClInclude>
     <ClInclude Include="..\hud\hud_progress_bar.h">

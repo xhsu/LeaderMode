@@ -856,7 +856,7 @@ void CBaseWeapon::Holstered(void)
 
 	m_pPlayer->pev->viewmodel = 0;
 	m_pPlayer->pev->weaponmodel = 0;
-	m_pPlayer->pev->fov = gHUD::default_fov->value;
+	m_pPlayer->pev->fov = DEFAULT_FOV;
 }
 
 bool CBaseWeapon::Drop(void** ppWeaponBoxReturned)

@@ -210,8 +210,8 @@ class CHudRoundTimer;
 class CHudAccountBalance;
 class CHudHeadName;
 //class CHudRadar;
-class CHudStatusIcons;
-class CHudScenarioStatus;
+//class CHudStatusIcons;
+//class CHudScenarioStatus;
 class CHudProgressBar;
 class CHudVGUI2Print;
 class CHudSniperScope;
@@ -294,7 +294,6 @@ namespace gHUD
 	extern std::list<CBaseHudElement*> m_lstHudElements;
 
 	extern cvar_s* m_pCvarDraw;
-	extern cvar_s* default_fov;
 
 	extern client_sprite_t* m_pSpriteList;
 	extern int m_iPlayerNum;
@@ -357,8 +356,8 @@ namespace gHUD
 	extern CHudAccountBalance m_accountBalance;
 	extern CHudHeadName m_headName;
 	//extern CHudRadar m_Radar;
-	extern CHudStatusIcons m_StatusIcons;
-	extern CHudScenarioStatus m_scenarioStatus;
+	//extern CHudStatusIcons m_StatusIcons;
+	//extern CHudScenarioStatus m_scenarioStatus;
 	extern CHudProgressBar m_progressBar;
 	extern CHudVGUI2Print m_VGUI2Print;
 	extern CHudSniperScope m_SniperScope;

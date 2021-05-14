@@ -50,7 +50,6 @@ namespace gHUD
 	std::list<CBaseHudElement*> m_lstHudElements;
 
 	cvar_s* m_pCvarDraw = nullptr;
-	cvar_s* default_fov = nullptr;
 
 	client_sprite_t* m_pSpriteList = nullptr;
 	int m_iPlayerNum = 0;
@@ -113,8 +112,8 @@ namespace gHUD
 	CHudAccountBalance m_accountBalance;
 	CHudHeadName m_headName;
 	//CHudRadar m_Radar;
-	CHudStatusIcons m_StatusIcons;
-	CHudScenarioStatus m_scenarioStatus;
+	//CHudStatusIcons m_StatusIcons;
+	//CHudScenarioStatus m_scenarioStatus;
 	CHudProgressBar m_progressBar;
 	CHudVGUI2Print m_VGUI2Print;
 	CHudSniperScope m_SniperScope;
@@ -158,7 +157,9 @@ void gHUD::Init(void)
 	}*/
 
 	// instead, we should:
-	AddElementsToList<CHudRadar, CHudClassIndicator, CHudBattery, CHudHealth,	// left-bottom. Everything is depened on CRadar, like a motherboard.
+	AddElementsToList<CHudRadar, CHudClassIndicator, CHudBattery, CHudHealth,	// Bottom-left. Everything is depened on CRadar, like a motherboard.
+		CHudMatchStatus,	// Top.
+		CHudStatusIcons,	// Top-right, everything else depends on CHudStatusIcons.
 		CHudCrosshair, CHudDeathNotice, CHudSpectator>();
 	//m_Health.Init();
 	//m_SayText.Init();	// m_SayText should place before m_Spectator, since m_Spectator.init() is calling some vars from m_SayText.Init().
@@ -223,8 +224,6 @@ void gHUD::Init(void)
 	cl_fog_g = gEngfuncs.pfnRegisterVariable("cl_fog_g", "0", 0);
 	cl_fog_b = gEngfuncs.pfnRegisterVariable("cl_fog_b", "0", 0);
 	cl_fog_skybox = gEngfuncs.pfnRegisterVariable("cl_fog_skybox", "0", 0);
-
-	default_fov = CVAR_CREATE("default_fov", "90", 0);
 
 	m_iFontEngineHeight = VGUI_SURFACE->GetFontTall(font);
 
@@ -516,17 +515,17 @@ void gHUD::Think(void)
 	/*int newfov = HUD_GetFOV();
 
 	if (newfov == 0)
-		m_iFOV = default_fov->value;
+		m_iFOV = DEFAULT_FOV;
 	else
 		m_iFOV = newfov;*/
 
-	if (m_iFOV == default_fov->value)
+	if (m_iFOV == DEFAULT_FOV)
 		m_flMouseSensitivity = 0;
 	else
-		m_flMouseSensitivity = sensitivity->value * (m_flDisplayedFOV / (float)default_fov->value) * zoom_sensitivity_ratio->value;
+		m_flMouseSensitivity = sensitivity->value * (m_flDisplayedFOV / (float)DEFAULT_FOV) * zoom_sensitivity_ratio->value;
 
 	if (m_iFOV == 0)
-		m_iFOV = Q_max(default_fov->value, 90.0f);
+		m_iFOV = Q_max<float>(DEFAULT_FOV, 90.0f);
 
 	if (gEngfuncs.IsSpectateOnly())
 	{
@@ -535,7 +534,7 @@ void gHUD::Think(void)
 			if (g_iUser2 <= gEngfuncs.GetMaxClients())
 				m_iFOV = m_PlayerFOV[g_iUser2];
 			else
-				m_iFOV = Q_max(default_fov->value, 90.0f);
+				m_iFOV = Q_max<float>(DEFAULT_FOV, 90.0f);
 		}
 		else
 			m_iFOV = CHudSpectator::m_flFOV;

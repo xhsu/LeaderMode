@@ -1393,19 +1393,25 @@ void CBasePlayer::SetProgressBarTime2(int time, float timeElapsed)
 void BuyZoneIcon_Set(CBasePlayer *pPlayer)
 {
 	MESSAGE_BEGIN(MSG_ONE, gmsgStatusIcon, nullptr, pPlayer->pev);
-		WRITE_BYTE(STATUSICON_SHOW);
-		WRITE_STRING("buyzone");
-		WRITE_BYTE(0);
-		WRITE_BYTE(160);
-		WRITE_BYTE(0);
+	WRITE_STRING("buy");
+	WRITE_SHORT(STATUSICON_OSCLI_ALPHA | STATUSICON_TEXT_KEYBIND | STATUSICON_TEXT_ALPHA_INDEPENDENT | STATUSICON_TEXT_ALPHA_NOFADE);
+	WRITE_STRING("sprites/Miscellaneous/SupplyZone.dds");
+	WRITE_BYTE(0);		// r
+	WRITE_BYTE(160);	// g
+	WRITE_BYTE(0);		// b
+	WRITE_BYTE(160);	// a
+	WRITE_BYTE(255);	// oscli a
+	WRITE_BYTE(50);		// oscli period in 0.1's
+	WRITE_STRING("buy3");	// keybind
+	WRITE_BYTE(255);	// text a
 	MESSAGE_END();
 }
 
 void BuyZoneIcon_Clear(CBasePlayer *pPlayer)
 {
 	MESSAGE_BEGIN(MSG_ONE, gmsgStatusIcon, nullptr, pPlayer->pev);
-		WRITE_BYTE(STATUSICON_HIDE);
-		WRITE_STRING("buyzone");
+	WRITE_STRING("buy");
+	WRITE_SHORT(STATUSICON_MSGFL_DEL_THIS);
 	MESSAGE_END();
 
 	if (pPlayer->m_iMenu >= Menu_Buy3)
@@ -2670,10 +2676,7 @@ void CBasePlayer::JoiningThink()
 			ResetMenu();
 			m_iJoiningState = SHOWTEAMSELECT;
 
-			MESSAGE_BEGIN(MSG_ONE, gmsgStatusIcon, nullptr, pev);
-				WRITE_BYTE(STATUSICON_HIDE);
-				WRITE_STRING("defuser");
-			MESSAGE_END();
+			// LUNA: Del: remove defuser icon.
 
 			m_fLastMovement = gpGlobals->time;
 			m_bMissionBriefing = false;

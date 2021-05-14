@@ -260,7 +260,7 @@
     <ClCompile Include="..\hud\hud_radar.cpp" />
     <ClCompile Include="..\hud\hud_round_timer.cpp" />
     <ClCompile Include="..\hud\hud_say_text.cpp" />
-    <ClCompile Include="..\hud\hud_scenario_status.cpp" />
+    <ClCompile Include="..\hud\hud_match_status.cpp" />
     <ClCompile Include="..\HUD\hud_scoreboard.cpp" />
     <ClCompile Include="..\hud\hud_sniperscope.cpp" />
     <ClCompile Include="..\hud\hud_status_icons.cpp" />
@@ -340,7 +340,7 @@
     <ClInclude Include="..\hud\hud_radar.h" />
     <ClInclude Include="..\hud\hud_round_timer.h" />
     <ClInclude Include="..\hud\hud_say_text.h" />
-    <ClInclude Include="..\hud\hud_scenario_status.h" />
+    <ClInclude Include="..\hud\hud_match_status.h" />
     <ClInclude Include="..\HUD\hud_scoreboard.h" />
     <ClInclude Include="..\hud\hud_sniperscope.h" />
     <ClInclude Include="..\hud\hud_status_icons.h" />
