@@ -207,7 +207,7 @@ class CHudMenu;
 class CHudNightVision;
 class CHudTextMessage;
 class CHudRoundTimer;
-class CHudAccountBalance;
+//class CHudAccountBalance;
 class CHudHeadName;
 //class CHudRadar;
 //class CHudStatusIcons;
@@ -353,7 +353,7 @@ namespace gHUD
 	extern CHudNightVision m_NightVision;
 	extern CHudTextMessage m_TextMessage;
 	extern CHudRoundTimer m_roundTimer;
-	extern CHudAccountBalance m_accountBalance;
+	//extern CHudAccountBalance m_accountBalance;
 	extern CHudHeadName m_headName;
 	//extern CHudRadar m_Radar;
 	//extern CHudStatusIcons m_StatusIcons;

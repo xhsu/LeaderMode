@@ -46,7 +46,7 @@ void CHudDeathNotice::Draw(float flTime, bool bIntermission)
 	if (gHUD::m_bitsHideHUDDisplay & HIDEHUD_ALL)
 		return;
 
-	int x, y = MARGIN.height;
+	int x, y = CHudAccountBalance::GetBottom() + MARGIN.height;	// thus this element depends on CHudMoney.
 	int TextHeight, TextWidth;
 
 	for (auto& item : m_lstQueue)

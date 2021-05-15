@@ -177,6 +177,7 @@ void CHudStatusIcons::MsgFunc_StatusIcon(int iSize, void* pbuf)
 	if (m_mapShowing[szKey].m_bitsFlags & STATUSICON_TEXT_KEYBIND)
 	{
 		m_mapShowing[szKey].m_wcsText = L"[ " + std::wstring(ANSIToUnicode(gExtFuncs.pfnKey_NameForBinding(READ_STRING()))) + L" ]";
+		std::transform(m_mapShowing[szKey].m_wcsText.begin(), m_mapShowing[szKey].m_wcsText.end(), m_mapShowing[szKey].m_wcsText.begin(), std::toupper);	// Keeps it caps locked.
 	}
 	else if (m_mapShowing[szKey].m_bitsFlags & STATUSICON_TEXT_LOC)
 	{
@@ -236,7 +237,6 @@ void CHudStatusIcons::MsgFunc_Scheme(TacticalSchemes iScheme)
 		break;
 	}
 }
-
 
 void CHudStatusIcons::Reset(void)
 {

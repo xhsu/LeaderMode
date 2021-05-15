@@ -166,30 +166,32 @@ Created Date: 05 Mar 2020
 // HUD
 #include "hud/hud.h"
 
-// left bottom.
+// bottom-left
 #include "hud/hud_radar.h"	// motherboard of left-bottom region.
 #include "HUD/hud_class_indicator.h"
 #include "hud/hud_battery.h"
+#include "hud/hud_health.h"
 
 // top.
 #include "HUD/hud_match_status.h"
 
-#include "hud/hud_health.h"
+// top-right
+#include "HUD/hud_status_icons.h"
+#include "HUD/hud_money.h"
+#include "HUD/hud_death_notice.h"
+
 #include "hud/hud_spectator.h"
 #include "hud/hud_geiger.h"
 #include "hud/hud_train.h"
 #include "hud/hud_flashlight.h"
 #include "hud/hud_message.h"
 #include "hud/hud_status_bar.h"
-#include "hud/hud_death_notice.h"
 #include "hud/hud_say_text.h"
 #include "hud/hud_menu.h"
 #include "hud/hud_nightvision.h"
 #include "hud/hud_text_message.h"
 #include "hud/hud_round_timer.h"
-#include "hud/hud_money.h"
 #include "hud/hud_head_name.h"
-#include "hud/hud_status_icons.h"
 #include "hud/hud_progress_bar.h"
 #include "hud/hud_vgui2print.h"
 #include "hud/hud_sniperscope.h"

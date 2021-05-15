@@ -533,7 +533,7 @@ MSG_FUNC(Money)
 
 	// if it is the local player, call the HUD func.
 	if (iPlayerId == gHUD::m_iPlayerNum)
-		gHUD::m_accountBalance.MsgFunc_Money(iAccount);
+		CHudAccountBalance::MsgFunc_Money(iAccount);
 
 	return TRUE;
 }
@@ -554,7 +554,7 @@ MSG_FUNC(BlinkAcct)
 
 	int iNumBlinks = READ_BYTE();
 
-	gHUD::m_accountBalance.MsgFunc_BlinkAcct(iNumBlinks);
+	CHudAccountBalance::MsgFunc_BlinkAcct(iNumBlinks);
 	return TRUE;
 }
 

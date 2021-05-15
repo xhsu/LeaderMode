@@ -23,11 +23,7 @@ struct DeathNoticeItem
 	Vector	m_vecKillerColour;
 };
 
-#define MAX_DEATHNOTICES		8
-#define MAX_DRAWDEATHNOTICES	4
-
-// TODO, UNDONE : this entire class needs to reconstruct due to both CSBTE and CSMoE are sabortaging this class via implanting tons of CSOL code.
-struct CHudDeathNotice
+struct CHudDeathNotice	// depends on: CHudAccountBalance
 {
 	// Event functions.
 	static void	Initialize(void);

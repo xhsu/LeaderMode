@@ -109,7 +109,7 @@ namespace gHUD
 	CHudNightVision m_NightVision;
 	CHudTextMessage m_TextMessage;
 	CHudRoundTimer m_roundTimer;
-	CHudAccountBalance m_accountBalance;
+	//CHudAccountBalance m_accountBalance;
 	CHudHeadName m_headName;
 	//CHudRadar m_Radar;
 	//CHudStatusIcons m_StatusIcons;
@@ -159,8 +159,8 @@ void gHUD::Init(void)
 	// instead, we should:
 	AddElementsToList<CHudRadar, CHudClassIndicator, CHudBattery, CHudHealth,	// Bottom-left. Everything is depened on CRadar, like a motherboard.
 		CHudMatchStatus,	// Top.
-		CHudStatusIcons,	// Top-right, everything else depends on CHudStatusIcons.
-		CHudCrosshair, CHudDeathNotice, CHudSpectator>();
+		CHudStatusIcons, CHudAccountBalance, CHudDeathNotice,	// Top-right, everything else depends on CHudStatusIcons.
+		CHudCrosshair, CHudSpectator>();
 	//m_Health.Init();
 	//m_SayText.Init();	// m_SayText should place before m_Spectator, since m_Spectator.init() is calling some vars from m_SayText.Init().
 	//m_Spectator.Init();
