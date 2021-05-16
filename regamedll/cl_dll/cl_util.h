@@ -78,8 +78,22 @@ bool CalcScreen(const Vector& in, Vector2D& out);	// a.k.a. WorldToScreen
 void UTIL_TraceLine(Vector& vecSrc, Vector& vecEnd, int traceFlags, int ignore_pe, struct pmtrace_s* ptr, int index, int hull = 2);
 std::wstring UTIL_ArabicToRoman(unsigned value);
 const wchar_t* UTIL_GetLocalisation(const char* szToken);	// safe version of ILocalize::Find().
-void UTIL_ReplaceAll(std::string& str, const std::string& from, const std::string& to);
-void UTIL_ReplaceAll(std::wstring& str, const std::wstring& from, const std::wstring& to);
+
+template <typename stringTy>
+void UTIL_ReplaceAll(stringTy& str, const stringTy& from, const stringTy& to)
+{
+	if (from.empty())
+		return;
+
+	size_t start_pos = 0;
+
+	while ((start_pos = str.find(from, start_pos)) != stringTy::npos)
+	{
+		str.replace(start_pos, from.length(), to);
+		start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
+	}
+}
+
 //inline bool caseInsCharCompare(char a, char b) { return(toupper(a) == toupper(b)); }
 inline bool caseInsCharCompare(wchar_t a, wchar_t b) { return(towupper(a) == towupper(b)); }
 //template<typename stringTy> inline bool caseInsCharCompare(stringTy a, stringTy b) { return(std::toupper(a) == std::toupper(b)); }

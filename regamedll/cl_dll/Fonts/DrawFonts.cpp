@@ -25,7 +25,7 @@ void gFontFuncs::DrawSetTextFont(int font)
 	s_Font = font;
 }
 
-void gFontFuncs::DrawSetTextColor(int r, int g, int b, int a)
+void gFontFuncs::DrawSetTextColor(byte r, byte g, byte b, byte a)
 {
 	s_Color[0] = r;
 	s_Color[1] = g;
@@ -41,7 +41,7 @@ void gFontFuncs::DrawSetTextColor(const Vector& color, float a)
 	s_Color[3] = round(a * 255.0f);
 }
 
-void gFontFuncs::DrawSetTextColor(unsigned long ulRGB, int a)
+void gFontFuncs::DrawSetTextColor(unsigned long ulRGB, byte a)
 {
 	s_Color[0] = (ulRGB & 0xFF0000) >> 16;
 	s_Color[1] = (ulRGB & 0xFF00) >> 8;
@@ -402,4 +402,108 @@ int gFontFuncs::GetFontAscent(int font, wchar_t wch)
 int gFontFuncs::GetFontFlags(int font)
 {
 	return FontManager().GetFontFlags(font);
+}
+
+void gFontFuncs::ClampTextWidthROW(wchar_t* text, size_t size, int font, int iWidth)
+{
+	const auto count = size / sizeof(wchar_t);
+	const auto space_width = GetCharacterWidth(font, L' ');
+	wchar_t* result = (wchar_t*)malloc(size);
+	memset(result, L'\0', size);
+
+	// replace all '\n' with ' '
+	for (unsigned i = 0; i < count; i++)
+	{
+		if (text[i] == L'\n')
+			text[i] = L' ';
+	}
+
+	int iCurLineWidth = 0, iWordLength = 0;
+	wchar_t* pwc = nullptr, *pt = nullptr;
+
+	pwc = wcstok_s(text, L" ", &pt);
+	while (pwc != nullptr)
+	{
+		GetTextSize(font, pwc, &iWordLength, nullptr);
+
+		if (iCurLineWidth + iWordLength > iWidth)
+		{
+			wcscat_s(result, count, L"\n");
+			iCurLineWidth = 0;
+		}
+		else if (wcslen(result))	// only place a new line if something already in it.
+		{
+			wcscat_s(result, count, L" ");
+			iCurLineWidth += space_width;
+		}
+
+		wcscat_s(result, count, pwc);	// Concatenate the word anyway.
+		iCurLineWidth += iWordLength;
+
+		pwc = wcstok_s(nullptr, L" ", &pt);
+	}
+
+	memcpy(text, result, size);
+	free(result);
+}
+
+bool gFontFuncs::ClampTextWidthROW(std::wstring& string, int font, int iWidth)
+{
+	size_t size = string.length() * sizeof(wchar_t);
+	wchar_t* copy = (wchar_t*)malloc(size);
+
+	if (copy == nullptr)
+		return false;
+
+	memset(copy, L'\0', size);
+	memcpy(copy, string.c_str(), size);
+
+	ClampTextWidthROW(copy, size, font, iWidth);
+
+	string = copy;
+	return true;
+}
+
+void gFontFuncs::ClampTextWidthCJK(wchar_t* text, size_t size, int font, int iWidth)
+{
+	auto count = size / sizeof(wchar_t);
+
+	// clear all '\n'
+	for (unsigned i = 0; i < count; i++)
+	{
+		if (text[i] == L'\n')
+			memmove(&text[i], &text[i + 1], size - (i + 1) * sizeof(wchar_t));
+	}
+
+	int iCurLineWidth = 0, iCurCharacterWidth = 0;
+	for (unsigned i = 0; i < count; i++)
+	{
+		iCurCharacterWidth = GetCharacterWidth(font, text[i]);
+
+		if (iCurLineWidth + iCurCharacterWidth > iWidth)
+		{
+			memmove(&text[i + 1], &text[i], size - (i + 1) * sizeof(wchar_t));
+			text[i] = L'\n';
+			iCurLineWidth = 0;
+		}
+		else
+			iCurLineWidth += iCurCharacterWidth;
+	}
+}
+
+bool gFontFuncs::ClampTextWidthCJK(std::wstring& string, int font, int iWidth)
+{
+	size_t size = string.length() * sizeof(wchar_t);
+	wchar_t* copy = (wchar_t*)malloc(size);
+
+	if (copy == nullptr)
+		return false;
+
+	memset(copy, L'\0', size);
+	memcpy(copy, string.c_str(), size);
+
+	ClampTextWidthCJK(copy, size, font, iWidth);
+
+	string = copy;
+	return true;
 }

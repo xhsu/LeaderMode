@@ -18,9 +18,9 @@ namespace gFontFuncs
 	void	Init				( void );
 	void	Shutdown			( void );
 	void	DrawSetTextFont		( int font );
-	void	DrawSetTextColor	( int r, int g, int b, int a );	// Scale between 0 to 255.
+	void	DrawSetTextColor	( byte r, byte g, byte b, byte a );	// Scale between 0 to 255.
 	void	DrawSetTextColor	( const Vector& color, float a );	// Scale between 0 to 1.
-	void	DrawSetTextColor	( unsigned long ulRGB, int a );
+	void	DrawSetTextColor	( unsigned long ulRGB, byte a );
 	void	DrawSetTextPos		( int x, int y );
 	void	DrawSetTextPos		( const Vector2D& pos );
 	void	DrawGetTextPos		( int *x, int *y );
@@ -36,6 +36,10 @@ namespace gFontFuncs
 	void	GetTextSize			( int font, const wchar_t *text, int *wide, int *tall );
 	int		GetFontAscent		( int font, wchar_t wch );
 	int		GetFontFlags		( int font );
+	void	ClampTextWidthROW	( wchar_t* text, size_t size, int font, int iWidth );
+	bool	ClampTextWidthROW	( std::wstring& string, int font, int iWidth );
+	void	ClampTextWidthCJK	( wchar_t* text, size_t size, int font, int iWidth );
+	bool	ClampTextWidthCJK	( std::wstring& string, int font, int iWidth );
 
 	// extra: 3D UI
 	void	DrawSetText3DPos		( Vector vecSrc );

@@ -160,13 +160,13 @@ char *Q_strlcpy(char (&dest)[size], const char *src) {
 }
 
 // a safe variant of sprintf which formatting strings.
-//template <size_t size>
-//decltype(auto) Q_slprintf(char(&dest)[size], const char* format, ...)
-//{
-//	auto _return = _snprintf(dest, size - 1U, format, ...);
-//	dest[size - 1U] = '\0';
-//	return _return;
-//}
+template <size_t size, typename ... Args>
+decltype(auto) Q_slprintf(char(&dest)[size], const char* format, Args ... args)
+{
+	auto _return = _snprintf(dest, size - 1U, format, args ...);
+	dest[size - 1U] = '\0';
+	return _return;
+}
 
 // safely concatenate two strings.
 // a variant of strcat that truncates the result to fit in the destination buffer
