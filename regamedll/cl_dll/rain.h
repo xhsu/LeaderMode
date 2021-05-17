@@ -19,6 +19,8 @@
 #ifndef __RAIN_H__
 #define __RAIN_H__
 
+extern cvar_t* cl_weather;
+
 void ProcessRain(void);
 void ProcessFXObjects(void);
 void ResetRain(void);

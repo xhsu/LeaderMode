@@ -42,7 +42,6 @@ cvar_t* cl_min_t = NULL;
 cvar_t* cl_min_ct = NULL;
 cvar_t* cl_corpsestay = NULL;
 cvar_t* cl_corpsefade = NULL;
-cvar_t* cl_weather = nullptr;
 
 cvar_t* hud_saytext_time = nullptr;
 
@@ -219,7 +218,6 @@ void gHUD::Init(void)
 	cl_newradar_dark = gEngfuncs.pfnRegisterVariable("cl_newradar_dark", "0.8", FCVAR_ARCHIVE);
 	cl_newchat = gEngfuncs.pfnRegisterVariable("cl_newchat", "1", FCVAR_ARCHIVE);
 	cl_scoreboard = gEngfuncs.pfnRegisterVariable("cl_scoreboard", "1", FCVAR_ARCHIVE);
-	cl_weather = gEngfuncs.pfnRegisterVariable("cl_weather", "1", FCVAR_ARCHIVE);
 
 	cl_fog_density = gEngfuncs.pfnRegisterVariable("cl_fog_density", "0", 0);
 	cl_fog_r = gEngfuncs.pfnRegisterVariable("cl_fog_r", "0", 0);

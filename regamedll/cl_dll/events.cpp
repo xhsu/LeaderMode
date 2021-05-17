@@ -1727,7 +1727,6 @@ DECLARE_EVENT(FirePSG1)
 	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, CPSG1::EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_PSG1].m_iAmmoType, CPSG1::PENETRATION);
 }
 
-
 DECLARE_EVENT(FireSCARH)
 {
 	int idx = args->entindex;
