@@ -104,6 +104,9 @@ Created Date: 05 Mar 2020
 // For engine sound structs
 #include "../engine/sfx.h"
 
+// For gEngfuncs.Con_NXPrintf() param 1.
+#include "../common/con_nprint.h"
+
 // sync the weapon data between cl and sv.
 #include "../dlls/ammo.h"
 #include "../dlls/weapontype.h"
@@ -148,6 +151,7 @@ Created Date: 05 Mar 2020
 #include "weapons.h"
 #include "tri.h"
 #include "sound.h"
+#include "rain.h"
 
 // graphic stuff
 #include "Graph/dxt.h"

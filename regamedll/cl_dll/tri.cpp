@@ -115,6 +115,13 @@ void HUD_DrawTransparentTriangles2(void)
 
 	glPopAttrib();*/									// Restore depth range value
 
+	// Rain stuff.
+	ProcessFXObjects();
+	ProcessRain();
+	DrawRain();
+	DrawFXObjects();
+
+	// Fog can of course cover rain.
 	RenderFog();
 }
 

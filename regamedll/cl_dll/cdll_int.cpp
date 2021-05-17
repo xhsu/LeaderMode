@@ -136,6 +136,7 @@ void CL_DLLEXPORT HUD_Init(void)
 	KB_Init();
 	Msg_Init();
 	gHUD::Init();
+	InitRain();
 	Wpn_Init();
 }
 

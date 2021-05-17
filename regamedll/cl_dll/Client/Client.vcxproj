@@ -275,6 +275,7 @@
     <ClCompile Include="..\interpolation.cpp" />
     <ClCompile Include="..\in_camera.cpp" />
     <ClCompile Include="..\message.cpp" />
+    <ClCompile Include="..\rain.cpp" />
     <ClCompile Include="..\sound.cpp" />
     <ClCompile Include="..\StudioModelRenderer.cpp" />
     <ClCompile Include="..\StudioModelRenderer_CS.cpp" />
@@ -355,6 +356,7 @@
     <ClInclude Include="..\interpolation.h" />
     <ClInclude Include="..\in_camera.h" />
     <ClInclude Include="..\message.h" />
+    <ClInclude Include="..\rain.h" />
     <ClInclude Include="..\sound.h" />
     <ClInclude Include="..\StudioModelRenderer.h" />
     <ClInclude Include="..\tri.h" />

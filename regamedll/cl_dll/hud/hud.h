@@ -76,6 +76,7 @@ extern cvar_t* cl_min_t;
 extern cvar_t* cl_min_ct;
 extern cvar_t* cl_corpsestay;
 extern cvar_t* cl_corpsefade;
+extern cvar_t* cl_weather;
 
 extern Vector g_LocationColor;
 

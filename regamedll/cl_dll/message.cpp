@@ -192,8 +192,7 @@ MSG_FUNC(InitHUD)
 
 	Q_memset(g_PlayerExtraInfo, NULL, sizeof(g_PlayerExtraInfo));
 
-	// UNDONE: rain
-	//ResetRain();
+	ResetRain();
 
 	// reset round time
 	int iTime = 0;
@@ -810,7 +809,7 @@ MSG_FUNC(ReceiveW)
 {
 	BEGIN_READ(pbuf, iSize);
 
-	int iMode = READ_BYTE();
+	Rain_MsgFunc_ReceiveW(READ_BYTE());
 
 	return TRUE;
 }
