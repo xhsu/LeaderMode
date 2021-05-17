@@ -115,6 +115,9 @@ void HUD_DrawTransparentTriangles2(void)
 
 	glPopAttrib();*/									// Restore depth range value
 
+	if (g_pParticleMan)
+		g_pParticleMan->Update();
+
 	// Rain stuff.
 	ProcessFXObjects();
 	ProcessRain();

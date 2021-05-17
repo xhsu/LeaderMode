@@ -192,6 +192,9 @@ MSG_FUNC(InitHUD)
 
 	Q_memset(g_PlayerExtraInfo, NULL, sizeof(g_PlayerExtraInfo));
 
+	if (g_pParticleMan)
+		g_pParticleMan->ResetParticles();
+
 	ResetRain();
 
 	// reset round time

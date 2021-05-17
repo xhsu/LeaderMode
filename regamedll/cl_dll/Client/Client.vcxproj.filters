@@ -309,6 +309,9 @@
     <ClCompile Include="..\rain.cpp">
       <Filter>cl_dll</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\public\particleman.cpp">
+      <Filter>public</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\cdll_int.h">
@@ -544,6 +547,15 @@
     </ClInclude>
     <ClInclude Include="..\rain.h">
       <Filter>cl_dll</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\public\particleman.h">
+      <Filter>public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\public\pman_particlemem.h">
+      <Filter>public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\public\pman_triangleffect.h">
+      <Filter>public</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

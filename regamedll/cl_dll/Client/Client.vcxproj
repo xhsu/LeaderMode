@@ -206,6 +206,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\..\public\interface.cpp" />
+    <ClCompile Include="..\..\public\particleman.cpp" />
     <ClCompile Include="..\cdll_int.cpp" />
     <ClCompile Include="..\cl_base.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -308,6 +309,9 @@
     <ClInclude Include="..\..\pm_shared\pm_movevars.h" />
     <ClInclude Include="..\..\pm_shared\pm_shared.h" />
     <ClInclude Include="..\..\public\interface.h" />
+    <ClInclude Include="..\..\public\particleman.h" />
+    <ClInclude Include="..\..\public\pman_particlemem.h" />
+    <ClInclude Include="..\..\public\pman_triangleffect.h" />
     <ClInclude Include="..\cdll_int.h" />
     <ClInclude Include="..\cl_base.h" />
     <ClInclude Include="..\cl_util.h" />

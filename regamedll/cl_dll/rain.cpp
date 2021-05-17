@@ -304,6 +304,20 @@ void ProcessRain(void)
 				continue;
 			}
 
+			/*auto p = g_pParticleMan->CreateParticle(vecStart, Vector(0, 0, -1), (model_s*)gEngfuncs.GetSpritePointer(Rain.hsprSplash1), 10, 255, "rain_particle");
+			p->m_vVelocity = Vector(Delta, -900);
+			p->m_flGravity = 1.0;
+			p->m_flMass = 10;
+			p->SetCollisionFlags(0x36020);
+			p->SetCullFlag(CULL_PVS);
+			p->SetRenderFlag(RENDER_FACEPLAYER_ROTATEZ);
+			p->SetLightFlag(LIGHT_NONE);
+			//g_pParticleMan->SetRender(kRenderTransAdd);
+			p->m_iRendermode = kRenderTransAdd;
+			p->m_iFrame = 0;
+			p->m_iFramerate = 1.0;
+			p->m_iNumFrames = gEngfuncs.GetSpritePointer(Rain.hsprSplash1)->numframes;*/
+
 			cl_drip_t newClDrip;
 			vecStart.z -= gEngfuncs.pfnRandomFloat(0, maxDelta); // randomize a bit
 			newClDrip.alpha = gEngfuncs.pfnRandomFloat(0.12, 0.2);

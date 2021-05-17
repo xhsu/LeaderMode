@@ -277,6 +277,9 @@ void HUD_StudioEvent2(const mstudioevent_s* pEvent, const cl_entity_s* pEntity)
 double g_flEntUpdateAbsoluteTime = 0.0;
 double g_flEntUpdateFrameTime = 0.0;
 
+// view.cpp
+extern Vector v_angles, v_origin;
+
 /*
 =================
 CL_UpdateTEnts
@@ -300,6 +303,9 @@ void HUD_TempEntUpdate2 (
 
 	g_flEntUpdateAbsoluteTime = flClientTime;
 	g_flEntUpdateFrameTime = flFrameTime;
+
+	if (g_pParticleMan)
+		g_pParticleMan->SetVariables(flClientGravity, v_angles);
 
 	// Nothing to simulate
 	if (!*ppTempEntActive)

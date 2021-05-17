@@ -107,6 +107,9 @@ Created Date: 05 Mar 2020
 // For gEngfuncs.Con_NXPrintf() param 1.
 #include "../common/con_nprint.h"
 
+// Particleman.dll
+#include "../public/particleman.h"
+
 // sync the weapon data between cl and sv.
 #include "../dlls/ammo.h"
 #include "../dlls/weapontype.h"

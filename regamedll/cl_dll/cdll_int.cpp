@@ -185,6 +185,7 @@ void CL_DLLEXPORT HUD_Shutdown(void)
 	gHUD::Shutdown();
 	gFontFuncs::Shutdown();
 	Sound_Exit();
+	CL_UnloadParticleMan();
 }
 
 void CL_DLLEXPORT HUD_StudioEvent(const mstudioevent_s* event, const cl_entity_s* entity)
@@ -263,8 +264,7 @@ BOOL CL_DLLEXPORT Initialize_(cl_enginefunc_t* pEnginefuncs, int iVersion)	// LU
 	Events_Init();
 	Sound_Init();
 
-	// LUNA: UNDONE, crsky told me to do it later.
-	//CL_LoadParticleMan();
+	CL_LoadParticleMan();
 
 	// get tracker interface, if any
 	return TRUE;
