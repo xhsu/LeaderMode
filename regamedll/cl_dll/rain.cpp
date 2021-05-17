@@ -48,11 +48,12 @@ struct
 
 } Rain;
 
-enum ELandingType : BYTE
+enum class Landing : BYTE
 {
-	NO_LANDING = 0U,
-	DEFAULT_LANDING,
-	WATER_LANDING
+	NONE = 0U,
+	SPLASH,
+	RIPPLE,
+	SNOW,
 };
 
 struct cl_drip_t
@@ -62,21 +63,21 @@ struct cl_drip_t
 	float		minHeight;	// minimal height to kill raindrop
 	float		alpha;
 
-	Vector2D		Delta; // side speed
-	ELandingType	land;
+	Vector2D	Delta; // side speed
+	Landing		land;
 };
 
 std::list<cl_drip_t> g_lstDrips;
 
 struct cl_rainfx_t
 {
-	Vector		origin;
-	float		birthTime;
-	float		life;
-	float		alpha;
-	hSprite		hSPR;
+	Vector	origin;
+	float	birthTime;
+	float	life;
+	float	alpha;
+	hSprite	hSPR;
 
-	ELandingType	type;
+	Landing	type;
 };
 
 std::list<cl_rainfx_t> g_lstRainFx;
@@ -96,7 +97,7 @@ WaterLandingEffect
 */
 void LandingEffect(cl_drip_t& drip)
 {
-	if (drip.land == NO_LANDING)
+	if (drip.land == Landing::NONE)
 		return;
 
 	if (g_lstRainFx.size() >= MAXFX)
@@ -106,7 +107,6 @@ void LandingEffect(cl_drip_t& drip)
 	}
 
 	cl_rainfx_t newFX;
-	newFX.alpha = gEngfuncs.pfnRandomFloat(0.6, 0.9);
 	newFX.origin = drip.origin;
 	newFX.origin.z = drip.minHeight; // correct position
 	newFX.birthTime = Rain.curtime;
@@ -114,14 +114,22 @@ void LandingEffect(cl_drip_t& drip)
 
 	switch (newFX.type)
 	{
-	case WATER_LANDING:
+	case Landing::RIPPLE:
+		newFX.alpha = gEngfuncs.pfnRandomFloat(0.6, 0.9);
 		newFX.hSPR = Rain.hsprRipple;
 		newFX.life = gEngfuncs.pfnRandomFloat(0.7, 1);
 		break;
 
-	case DEFAULT_LANDING:
+	case Landing::SPLASH:
+		newFX.alpha = gEngfuncs.pfnRandomFloat(0.6, 0.9);
 		newFX.hSPR = RANDOM_LONG(0, 1) ? Rain.hsprSplash1 : Rain.hsprSplash2;
 		newFX.life = gEngfuncs.pfnRandomFloat(0.2, 0.4);
+		break;
+
+	case Landing::SNOW:
+		newFX.alpha = drip.alpha;	// Success the alpha.
+		newFX.hSPR = Rain.hsprSnow;
+		newFX.life = gEngfuncs.pfnRandomFloat(1, 1.5);
 		break;
 
 	default:
@@ -147,6 +155,8 @@ void ProcessRain(void)
 	Rain.curtime = g_flClientTime;
 	Rain.timedelta = g_flClientTimeDelta;
 
+	cl_weather->value = Q_atof(cl_weather->string);
+
 	if (cl_weather->value > 3.0f)
 		gEngfuncs.Cvar_Set("cl_weather", "3");
 
@@ -164,7 +174,7 @@ void ProcessRain(void)
 	if (!Rain.timedelta)
 		return; // not in pause
 
-	int spawnDrips = round(Rain.dripsPerSecond * cl_weather->value);
+	unsigned spawnDrips = (unsigned)round(Rain.dripsPerSecond * cl_weather->value);
 	double timeBetweenDrips = 1.0 / (double)(spawnDrips);
 
 #ifdef _DEBUG
@@ -223,14 +233,14 @@ void ProcessRain(void)
 			vecStart.z = gHUD::m_vecOrigin.z;
 
 			vecEnd = vecStart;
-			vecEnd.z = 9999;
+			vecEnd.z = g_lstDrips.size() < spawnDrips - 10 ? RANDOM_FLOAT(vecStart.z + PM_VEC_VIEW + SNOWFADEDIST, vecStart.z + 1500) : 9999;
 
 			gEngfuncs.pEventAPI->EV_SetTraceHull(2);
 			gEngfuncs.pEventAPI->EV_PlayerTrace(vecStart, vecEnd, PM_WORLD_ONLY, -1, &pmtrace);
 
 			// Second trace: Check that player have a real sky above him
 			const char* s = gEngfuncs.pEventAPI->EV_TraceTexture(pmtrace.ent, vecStart, vecEnd);
-			if (!s || strcmp(s, "sky"))
+			if ((!s || strcmp(s, "sky")) && pmtrace.fraction < 1)
 			{
 #ifdef _DEBUG
 				if (debug_rain->value)
@@ -304,15 +314,19 @@ void ProcessRain(void)
 
 			if (contents == CONTENTS_WATER)
 			{
-				newClDrip.land = WATER_LANDING;
+				newClDrip.land = Landing::RIPPLE;
 			}
 			else if (Rain.weatherMode == 0)	// Splash for rain only.
 			{
-				newClDrip.land = DEFAULT_LANDING;
+				newClDrip.land = Landing::SPLASH;
+			}
+			else if (Rain.weatherMode == 1)	// Snow would stay on ground for a little more.
+			{
+				newClDrip.land = Landing::SNOW;
 			}
 			else
 			{
-				newClDrip.land = NO_LANDING;
+				newClDrip.land = Landing::NONE;
 			}
 
 			// add to first place in chain
@@ -321,7 +335,7 @@ void ProcessRain(void)
 		else
 		{
 			//gEngfuncs.Con_Printf( "Rain error: Drip limit overflow!\n" );
-			return;
+			break;
 		}
 	}
 
@@ -421,10 +435,12 @@ void InitRain(void)
 
 	if (!rain_initialized)
 	{
+		rain_initialized = true;
+
 		cl_weather = CVAR_CREATE("cl_weather", "1", FCVAR_ARCHIVE);
 
 #ifdef _DEBUG
-		debug_rain = CVAR_CREATE("Rain.debug", "0", 0);
+		debug_rain = CVAR_CREATE("Rain.debug.InfoDisplay", "0", 0);
 		gEngfuncs.pfnAddCommand("Rain.debug.Set", []() { Rain_MsgFunc_ReceiveW(Q_atoi(gEngfuncs.Cmd_Argv(1))); });
 #endif // _DEBUG
 	}
@@ -565,7 +581,7 @@ void DrawFXObjects(void)
 	{
 		switch (curFX->type)
 		{
-		case WATER_LANDING:
+		case Landing::RIPPLE:
 		{
 			gEngfuncs.pTriAPI->SpriteTexture((struct model_s*)gEngfuncs.GetSpritePointer(curFX->hSPR), 0);
 			gEngfuncs.pTriAPI->RenderMode(kRenderTransAdd);
@@ -596,7 +612,7 @@ void DrawFXObjects(void)
 			break;
 		}
 
-		case DEFAULT_LANDING:
+		case Landing::SPLASH:
 		{
 			auto pModel = gEngfuncs.GetSpritePointer(curFX->hSPR);
 			auto lifePercentage = (curFX->birthTime + curFX->life - Rain.curtime) / curFX->life;
@@ -617,6 +633,40 @@ void DrawFXObjects(void)
 
 			gEngfuncs.pTriAPI->TexCoord2f(0, 0);
 			SetPoint(0, SNOW_SPRITE_HALFSIZE, 2 * SNOW_SPRITE_HALFSIZE, matrix);	// the splash effect must be entirely drew on-ground.
+
+			gEngfuncs.pTriAPI->TexCoord2f(0, 1);
+			SetPoint(0, SNOW_SPRITE_HALFSIZE, 0, matrix);
+
+			gEngfuncs.pTriAPI->TexCoord2f(1, 1);
+			SetPoint(0, -SNOW_SPRITE_HALFSIZE, 0, matrix);
+
+			gEngfuncs.pTriAPI->TexCoord2f(1, 0);
+			SetPoint(0, -SNOW_SPRITE_HALFSIZE, 2 * SNOW_SPRITE_HALFSIZE, matrix);
+
+			gEngfuncs.pTriAPI->End();
+			// --- draw quad end ----------------------
+			break;
+		}
+
+		case Landing::SNOW:
+		{
+			gEngfuncs.pTriAPI->SpriteTexture((struct model_s*)gEngfuncs.GetSpritePointer(curFX->hSPR), 0);
+			gEngfuncs.pTriAPI->RenderMode(kRenderTransAdd);
+			gEngfuncs.pTriAPI->CullFace(TRI_NONE);
+
+			matrix[0][3] = curFX->origin.x; // write origin to matrix
+			matrix[1][3] = curFX->origin.y;
+			matrix[2][3] = curFX->origin.z;
+
+			// fadeout
+			alpha = ((curFX->birthTime + curFX->life - Rain.curtime) / curFX->life) * curFX->alpha;
+
+			// --- draw quad --------------------------
+			gEngfuncs.pTriAPI->Color4f(1.0, 1.0, 1.0, alpha);
+			gEngfuncs.pTriAPI->Begin(TRI_QUADS);
+
+			gEngfuncs.pTriAPI->TexCoord2f(0, 0);
+			SetPoint(0, SNOW_SPRITE_HALFSIZE, 2 * SNOW_SPRITE_HALFSIZE, matrix);	// the snow effect must be entirely drew on-ground.
 
 			gEngfuncs.pTriAPI->TexCoord2f(0, 1);
 			SetPoint(0, SNOW_SPRITE_HALFSIZE, 0, matrix);

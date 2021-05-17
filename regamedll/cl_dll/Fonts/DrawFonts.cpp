@@ -461,6 +461,7 @@ bool gFontFuncs::ClampTextWidthROW(std::wstring& string, int font, int iWidth)
 	ClampTextWidthROW(copy, size, font, iWidth);
 
 	string = copy;
+	free(copy);
 	return true;
 }
 
@@ -505,5 +506,6 @@ bool gFontFuncs::ClampTextWidthCJK(std::wstring& string, int font, int iWidth)
 	ClampTextWidthCJK(copy, size, font, iWidth);
 
 	string = copy;
+	free(copy);
 	return true;
 }
