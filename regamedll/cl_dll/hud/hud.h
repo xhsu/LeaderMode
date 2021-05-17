@@ -437,6 +437,10 @@ extern hud_player_info_t g_PlayerInfoList[MAX_PLAYERS + 1];
 extern int g_PlayerScoreAttrib[MAX_PLAYERS + 1];
 extern TEMPENTITY* g_DeadPlayerModels[MAX_PLAYERS + 1];
 
+// LUNA: I think these two should move to weapons.cpp. Why are they here??
+extern EquipmentIdType FindNextEquipment(bool bLoopFromStart, EquipmentIdType iStartingFrom = gPseudoPlayer.m_iUsingGrenadeId);
+extern EquipmentIdType FindLastEquipment(bool bLoopFromEnd, EquipmentIdType iStartingFrom = gPseudoPlayer.m_iUsingGrenadeId);
+
 // HUD command funcs
 void CommandFunc_Slot1(void);
 void CommandFunc_Slot2(void);

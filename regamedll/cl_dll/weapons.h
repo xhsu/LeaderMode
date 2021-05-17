@@ -77,7 +77,6 @@ public:
 	int		m_iWeaponVolume;
 	int		m_iWeaponFlash;
 	int		random_seed;
-	int		m_rgAmmo[AMMO_MAXTYPE];
 	bool	m_bResumeZoom;
 	int		m_iLastZoom;
 	float	m_flEjectBrass;
@@ -95,6 +94,7 @@ public:
 	WeaponIdType m_iWpnSwitchingTo;	// use this instead of g_iSelectedWeapon.
 	RoleTypes m_iRoleType;
 	std::array<bool, EQP_COUNT> m_rgbHasEquipment;
+	std::array<int, AMMO_MAXTYPE> m_rgAmmo;
 
 public:
 	void	SetAnimation(PLAYER_ANIM playerAnim)	{}

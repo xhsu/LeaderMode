@@ -45,8 +45,8 @@ public:
 	constexpr Vector2D() : x(0), y(0) {}
 	constexpr Vector2D(float X, float Y) : x(X), y(Y) {}
 	constexpr Vector2D(float sideLength) : width(sideLength), height(sideLength) {}
-	Vector2D(const Vector2D &v) { *(int *)&x = *(int *)&v.x; *(int *)&y = *(int *)&v.y; }
-	explicit Vector2D(const float rgfl[2]) { *(int*)&x = *(int*)&rgfl[0]; *(int*)&y = *(int*)&rgfl[1]; }
+	constexpr Vector2D(const Vector2D &v) : x(v.x), y(v.y) {}
+	explicit constexpr Vector2D(const float rgfl[2]) : x(rgfl[0]), y(rgfl[1]) {}
 
 	// Operators
 	constexpr decltype(auto) operator-()         const { return Vector2D(-x, -y); }

@@ -160,6 +160,7 @@ void gHUD::Init(void)
 	AddElementsToList<CHudRadar, CHudClassIndicator, CHudBattery, CHudHealth,	// Bottom-left. Everything is depened on CRadar, like a motherboard.
 		CHudMatchStatus,	// Top.
 		CHudStatusIcons, CHudAccountBalance, CHudDeathNotice,	// Top-right, everything else depends on CHudStatusIcons.
+		CHudEquipments,	// Bottom-right. Everything is depend on CHudEquipments.
 		CHudCrosshair, CHudSpectator>();
 	//m_Health.Init();
 	//m_SayText.Init();	// m_SayText should place before m_Spectator, since m_Spectator.init() is calling some vars from m_SayText.Init().
@@ -1129,22 +1130,15 @@ LAB_LASTINV_END:
 	gEngfuncs.pfnServerCmd("lastinv\n");
 }
 
-void CommandFunc_NextEquipment(void)
+EquipmentIdType FindNextEquipment(bool bLoopFromStart, EquipmentIdType iStartingFrom)
 {
-	// the drawing sequence is the select sequence. and the drawing sequence is the index.
-
-	// you can't do this on the halfway.
-	if (g_pCurWeapon && g_pCurWeapon->m_bitsFlags & WPNSTATE_QUICK_THROWING)
-		return;
+	iStartingFrom = (EquipmentIdType)Q_clamp((int)iStartingFrom, EQP_NONE + 1, EQP_COUNT - 1);
 
 	AmmoIdType iAmmoId = AMMO_NONE;
 	EquipmentIdType iCandidate = EQP_NONE;
 
-	for (int i = gPseudoPlayer.m_iUsingGrenadeId; i < EQP_COUNT; i++)
+	for (int i = iStartingFrom + 1; i < EQP_COUNT; i++)
 	{
-		if (i == gPseudoPlayer.m_iUsingGrenadeId)
-			continue;
-
 		iAmmoId = GetAmmoIdOfEquipment((EquipmentIdType)i);
 
 		if ((!iAmmoId || gPseudoPlayer.m_rgAmmo[iAmmoId] <= 0) && !gPseudoPlayer.m_rgbHasEquipment[i])	// you can still selection some item even if it has no ammo. These items are not to be consumed.
@@ -1154,7 +1148,7 @@ void CommandFunc_NextEquipment(void)
 		break;
 	}
 
-	if (!iCandidate)
+	if (!iCandidate && bLoopFromStart)
 	{
 		for (int i = EQP_NONE; i < EQP_COUNT; i++)
 		{
@@ -1168,11 +1162,14 @@ void CommandFunc_NextEquipment(void)
 		}
 	}
 
-	gPseudoPlayer.m_iUsingGrenadeId = iCandidate;
-	gEngfuncs.pfnServerCmd(SharedVarArgs("eqpselect %d\n", iCandidate));
+	// Loop back to self: no found.
+	if (iCandidate == iStartingFrom)
+		iCandidate = EQP_NONE;
+
+	return iCandidate;
 }
 
-void CommandFunc_PrevEquipment(void)
+void CommandFunc_NextEquipment(void)
 {
 	// the drawing sequence is the select sequence. and the drawing sequence is the index.
 
@@ -1180,14 +1177,21 @@ void CommandFunc_PrevEquipment(void)
 	if (g_pCurWeapon && g_pCurWeapon->m_bitsFlags & WPNSTATE_QUICK_THROWING)
 		return;
 
+	gPseudoPlayer.m_iUsingGrenadeId = FindNextEquipment(true);
+	gEngfuncs.pfnServerCmd(SharedVarArgs("eqpselect %d\n", gPseudoPlayer.m_iUsingGrenadeId));
+
+	CHudEquipments::OnNext();
+}
+
+EquipmentIdType FindLastEquipment(bool bLoopFromEnd, EquipmentIdType iStartingFrom)
+{
+	iStartingFrom = (EquipmentIdType)Q_clamp((int)iStartingFrom, EQP_NONE + 1, EQP_COUNT - 1);
+
 	AmmoIdType iAmmoId = AMMO_NONE;
 	EquipmentIdType iCandidate = EQP_NONE;
 
-	for (int i = gPseudoPlayer.m_iUsingGrenadeId; i > EQP_NONE; i--)
+	for (int i = iStartingFrom - 1; i > EQP_NONE; i--)
 	{
-		if (i == gPseudoPlayer.m_iUsingGrenadeId)
-			continue;
-
 		iAmmoId = GetAmmoIdOfEquipment((EquipmentIdType)i);
 
 		if ((!iAmmoId || gPseudoPlayer.m_rgAmmo[iAmmoId] <= 0) && !gPseudoPlayer.m_rgbHasEquipment[i])	// you can still selection some item even if it has no ammo. These items are not to be consumed.
@@ -1197,7 +1201,7 @@ void CommandFunc_PrevEquipment(void)
 		break;
 	}
 
-	if (!iCandidate)
+	if (!iCandidate && bLoopFromEnd)
 	{
 		for (int i = EQP_COUNT - 1; i > EQP_NONE; i--)
 		{
@@ -1211,8 +1215,25 @@ void CommandFunc_PrevEquipment(void)
 		}
 	}
 
-	gPseudoPlayer.m_iUsingGrenadeId = iCandidate;
-	gEngfuncs.pfnServerCmd(SharedVarArgs("eqpselect %d\n", iCandidate));
+	// Loop back to self: no found.
+	if (iCandidate == iStartingFrom)
+		iCandidate = EQP_NONE;
+
+	return iCandidate;
+}
+
+void CommandFunc_PrevEquipment(void)
+{
+	// the drawing sequence is the select sequence. and the drawing sequence is the index.
+
+	// you can't do this on the halfway.
+	if (g_pCurWeapon && g_pCurWeapon->m_bitsFlags & WPNSTATE_QUICK_THROWING)
+		return;
+
+	gPseudoPlayer.m_iUsingGrenadeId = FindLastEquipment(true);
+	gEngfuncs.pfnServerCmd(SharedVarArgs("eqpselect %d\n", gPseudoPlayer.m_iUsingGrenadeId));
+
+	CHudEquipments::OnPrev();
 }
 
 void CommandFunc_AlterAct(void)

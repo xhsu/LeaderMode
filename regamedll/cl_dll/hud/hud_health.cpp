@@ -82,6 +82,14 @@ void CHudHealth::Draw(float flTime, bool bIntermission)
 	gFontFuncs::DrawSetTextPos(vecTextOrigin);
 	gFontFuncs::DrawSetTextColor(255, 255, 255, 255);	// Text do not fade with others.
 	gFontFuncs::DrawPrintText(m_wcsHPText.c_str());
+
+	/*static GLuint tex = LoadDDS("gfx/BlackGradient.dds");
+	if (tex)
+	{
+		DrawUtils::glRegularTexDrawingInit(0xFFFFFF, 0xFF);
+		DrawUtils::glSetTexture(tex);
+		DrawUtils::Draw2DQuad(ScreenWidth / 2-512, ScreenHeight/2, ScreenWidth/2 + 512, ScreenHeight/2 + 256);
+	}*/
 	/*
 	auto mx =
 

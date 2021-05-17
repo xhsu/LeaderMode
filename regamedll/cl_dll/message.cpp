@@ -462,6 +462,10 @@ MSG_FUNC(AmmoX)
 	int iAmmoId = READ_BYTE();
 	int iAmount = READ_BYTE();
 
+	// WTF??
+	if (iAmmoId <= AMMO_NONE || iAmmoId >= AMMO_MAXTYPE)
+		return TRUE;
+
 	gPseudoPlayer.m_rgAmmo[iAmmoId] = Q_abs(iAmount);
 	return TRUE;
 }
@@ -1174,6 +1178,8 @@ MSG_FUNC(EqpSelect)
 	EquipmentIdType iId = (EquipmentIdType)READ_BYTE();
 
 	gPseudoPlayer.m_iUsingGrenadeId = iId;
+
+	CHudEquipments::WakeUp();
 	return TRUE;
 }
 
@@ -1289,6 +1295,7 @@ MSG_FUNC(Equipment)
 
 	gPseudoPlayer.m_rgbHasEquipment[iEquipmentId] = bCanUse;
 
+	CHudEquipments::WakeUp();
 	return TRUE;
 }
 
