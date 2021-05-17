@@ -1,0 +1,25 @@
+resolution   1280   1024
+
+resource/background/1280_1_a_loading.tga      scaled      0   0
+resource/background/1280_1_b_loading.tga      scaled      256   0
+resource/background/1280_1_c_loading.tga      scaled      512   0
+resource/background/1280_1_d_loading.tga      scaled      768   0
+resource/background/1280_1_e_loading.tga      scaled      1024   0
+
+resource/background/1280_2_a_loading.tga      scaled      0   256
+resource/background/1280_2_b_loading.tga      scaled      256   256
+resource/background/1280_2_c_loading.tga      scaled      512   256
+resource/background/1280_2_d_loading.tga      scaled      768   256
+resource/background/1280_2_e_loading.tga      scaled      1024   256
+
+resource/background/1280_3_a_loading.tga      scaled      0   512
+resource/background/1280_3_b_loading.tga      scaled      256   512
+resource/background/1280_3_c_loading.tga      scaled      512   512
+resource/background/1280_3_d_loading.tga      scaled      768   512
+resource/background/1280_3_e_loading.tga      scaled      1024   512
+
+resource/background/1280_4_a_loading.tga      scaled      0   768
+resource/background/1280_4_b_loading.tga      scaled      256   768
+resource/background/1280_4_c_loading.tga      scaled      512   768
+resource/background/1280_4_d_loading.tga      scaled      768   768
+resource/background/1280_4_e_loading.tga      scaled      1024   768
