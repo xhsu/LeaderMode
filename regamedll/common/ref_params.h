@@ -40,13 +40,13 @@ typedef struct ref_params_s
 	Vector	simvel;
 	Vector	simorg;
 
-	float	viewheight[3];
+	Vector	viewheight;
 	float	idealpitch;
 
 	Vector	cl_viewangles;
 
 	int		health;
-	float	crosshairangle[3];
+	Vector	crosshairangle;
 	float	viewsize;
 
 	Vector	punchangle;

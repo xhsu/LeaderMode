@@ -95,7 +95,7 @@ Vector UTIL_VecToAngles(const Vector &vec)
 NOXREF void UTIL_MoveToOrigin(edict_t *pent, const Vector &vecGoal, float flDist, int iMoveType)
 {
 	float rgfl[3];
-	vecGoal.CopyToArray(rgfl);
+	vecGoal.CopyToIter(rgfl);
 	MOVE_TO_ORIGIN(pent, rgfl, flDist, iMoveType);
 }
 
@@ -341,7 +341,7 @@ void UTIL_MakeVectors(const Vector &vecAngles)
 void UTIL_MakeAimVectors(const Vector &vecAngles)
 {
 	float rgflVec[3];
-	vecAngles.CopyToArray(rgflVec);
+	vecAngles.CopyToIter(rgflVec);
 	rgflVec[0] = -rgflVec[0];
 	MAKE_VECTORS(rgflVec);
 }
@@ -360,7 +360,7 @@ void UTIL_MakeInvVectors(const Vector &vec, globalvars_t *pgv)
 void UTIL_EmitAmbientSound(edict_t *entity, const Vector &vecOrigin, const char *samp, float vol, float attenuation, int fFlags, int pitch)
 {
 	float rgfl[3];
-	vecOrigin.CopyToArray(rgfl);
+	vecOrigin.CopyToIter(rgfl);
 
 	if (samp && *samp == '!')
 	{
@@ -1484,8 +1484,8 @@ char UTIL_TextureHit(TraceResult *ptr, Vector vecSrc, Vector vecEnd)
 	if (pEntity && pEntity->Classify() != CLASS_NONE && pEntity->Classify() != CLASS_MACHINE && pEntity->Classify() != CLASS_VEHICLE)
 		return CHAR_TEX_FLESH;
 
-	vecSrc.CopyToArray(rgfl1);
-	vecEnd.CopyToArray(rgfl2);
+	vecSrc.CopyToIter(rgfl1);
+	vecEnd.CopyToIter(rgfl2);
 
 	if (pEntity)
 		pTextureName = TRACE_TEXTURE(ENT(pEntity->pev), rgfl1, rgfl2);

@@ -92,6 +92,8 @@ void CBasePlayer::SendItemStatus()
 	int itemStatus = 0;
 	if (m_bHasNightVision)
 		itemStatus |= ITEM_STATUS_NIGHTVISION;
+	if (m_rgbHasEquipment[EQP_FLASHLIGHT])
+		itemStatus |= ITEM_STATUS_FLASHLIGHT;
 	if (m_rgbHasEquipment[EQP_DETONATOR])
 		itemStatus |= ITEM_STATUS_DETONATOR;
 
@@ -3358,10 +3360,7 @@ void EXT_FUNC CBasePlayer::PreThink()
 		}
 	}
 
-	if (g_pGameRules && g_pGameRules->FAllowFlashlight())
-		m_iHideHUD &= ~HIDEHUD_FLASHLIGHT;
-	else
-		m_iHideHUD |= HIDEHUD_FLASHLIGHT;
+	m_iHideHUD &= ~HIDEHUD_FLASHLIGHT;
 
 	// JOHN: checks if new client data (for HUD and view control) needs to be sent to the client
 	UpdateClientData();
@@ -4357,7 +4356,9 @@ void EXT_FUNC CBasePlayer::Spawn()
 	m_flNextSkillTimerUpdate = 0.0f;
 	m_flNextClientCvarQuery = 0.0f;
 
+	m_rgbClientHasEquipment.fill(false);
 	m_rgbHasEquipment.fill(false);	// clear it.
+	m_rgbHasEquipment[EQP_FLASHLIGHT] = true;	// you always have a flashlight no matter what.
 
 	// everything that comes after this, this spawn of the player a the game.
 	if (m_bJustConnected)
@@ -4692,16 +4693,13 @@ CBaseEntity *FindEntityForward(CBaseEntity *pEntity)
 	return nullptr;
 }
 
-BOOL CBasePlayer::FlashlightIsOn()
+bool CBasePlayer::FlashlightIsOn()
 {
 	return pev->effects & EF_DIMLIGHT;
 }
 
 void CBasePlayer::FlashlightTurnOn()
 {
-	if (!g_pGameRules->FAllowFlashlight())
-		return;
-
 	if (pev->weapons & (1 << WEAPON_SUIT))
 	{
 		EMIT_SOUND(ENT(pev), CHAN_ITEM, SOUND_FLASHLIGHT_ON, VOL_NORM, ATTN_NORM);

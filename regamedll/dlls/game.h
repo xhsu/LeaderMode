@@ -52,7 +52,6 @@ extern cvar_t *g_footsteps;
 
 extern cvar_t displaysoundlist;
 extern cvar_t timelimit;
-extern cvar_t flashlight;
 extern cvar_t decalfrequency;
 extern cvar_t fadetoblack;
 extern cvar_t fragsleft;

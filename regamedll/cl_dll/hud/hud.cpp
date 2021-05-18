@@ -100,7 +100,7 @@ namespace gHUD
 	CHudGeiger m_Geiger;
 	//CHudBattery m_Battery;
 	CHudTrain m_Train;
-	CHudFlashlight m_Flash;
+	//CHudFlashlight m_Flash;
 	CHudMessage m_Message;
 	CHudStatusBar m_StatusBar;
 	//CHudDeathNotice m_DeathNotice;
@@ -119,7 +119,7 @@ namespace gHUD
 	CHudSniperScope m_SniperScope;
 	//CHudCrosshair m_Crosshair;
 	CHudWeaponList m_WeaponList;
-	CHudGrenade m_Grenade;
+	//CHudGrenade m_Grenade;
 	CHudScoreboard m_Scoreboard;
 	//CHudClassIndicator m_ClassIndicator;
 	CUIBuyMenu m_UI_BuyMenu;
@@ -160,7 +160,7 @@ void gHUD::Init(void)
 	AddElementsToList<CHudRadar, CHudClassIndicator, CHudBattery, CHudHealth,	// Bottom-left. Everything is depened on CRadar, like a motherboard.
 		CHudMatchStatus,	// Top.
 		CHudStatusIcons, CHudAccountBalance, CHudDeathNotice,	// Top-right, everything else depends on CHudStatusIcons.
-		CHudEquipments,	// Bottom-right. Everything is depend on CHudEquipments.
+		CHudEquipments,	CHudAmmo,// Bottom-right. Everything is depend on CHudEquipments.
 		CHudCrosshair, CHudSpectator>();
 	//m_Health.Init();
 	//m_SayText.Init();	// m_SayText should place before m_Spectator, since m_Spectator.init() is calling some vars from m_SayText.Init().
@@ -1220,6 +1220,24 @@ EquipmentIdType FindLastEquipment(bool bLoopFromEnd, EquipmentIdType iStartingFr
 		iCandidate = EQP_NONE;
 
 	return iCandidate;
+}
+
+int CountEquipments(void)
+{
+	AmmoIdType iAmmoId = AMMO_NONE;
+	int iCount = 0;
+
+	for (int i = EQP_NONE; i < EQP_COUNT; i++)
+	{
+		iAmmoId = GetAmmoIdOfEquipment((EquipmentIdType)i);
+
+		if ((!iAmmoId || gPseudoPlayer.m_rgAmmo[iAmmoId] <= 0) && !gPseudoPlayer.m_rgbHasEquipment[i])	// you can still selection some item even if it has no ammo. These items are not to be consumed.
+			continue;
+
+		iCount++;
+	}
+
+	return iCount;
 }
 
 void CommandFunc_PrevEquipment(void)

@@ -34,6 +34,29 @@
 
 #include <float.h>
 
+inline constexpr float rsqrt(float x)
+{
+#ifdef __SSE__
+	return _mm_rsqrt_ps(_mm_set1_ps(x))[0];
+#else
+	/*
+	* Reference:
+	* Walczyk, C.J.; Moroz, L.V.; Cie´sli ´nski, J.L. Improving the Accuracy of the Fast Inverse Square Root by Modifying Newton–Raphson
+	Corrections. Entropy 2021, 23, 86.
+	*/
+
+	float xhalf = 0.5f * x;
+	int i = *(int*)&x;
+	i = 0x5f376908 - (i >> 1);
+
+	float y = *(float*)&i;
+	y = y * (1.50087896f - xhalf * y * y);
+	y = y * (1.50000057f - xhalf * y * y);	// Second iteration.
+
+	return y;
+#endif
+}
+
 // Used for many pathfinding and many other operations that are treated as planar rather than 3D.
 class Vector2D
 {
@@ -46,7 +69,7 @@ public:
 	constexpr Vector2D(float X, float Y) : x(X), y(Y) {}
 	constexpr Vector2D(float sideLength) : width(sideLength), height(sideLength) {}
 	constexpr Vector2D(const Vector2D &v) : x(v.x), y(v.y) {}
-	explicit constexpr Vector2D(const float rgfl[2]) : x(rgfl[0]), y(rgfl[1]) {}
+	explicit constexpr Vector2D(const vec_t rgfl[2]) : x(rgfl[0]), y(rgfl[1]) {}
 
 	// Operators
 	constexpr decltype(auto) operator-()         const { return Vector2D(-x, -y); }
@@ -77,7 +100,7 @@ public:
 
 	// Methods
 	inline void Clear() { x = 0; y = 0; }
-	inline void CopyToArray(float *rgfl) const { *(int *)&rgfl[0] = *(int *)&x; *(int *)&rgfl[1] = *(int *)&y; }
+	template<class OutputIter> inline void CopyToIter(OutputIter arr) const { *arr++ = x; *arr++ = y; }
 	real_t Length() const { return Q_sqrt(X() * X() + Y() * Y()); }	// Get the vector's magnitude
 	constexpr real_t LengthSquared() const { return (X() * X() + Y() * Y()); }	// Get the vector's magnitude squared
 	inline constexpr real_t X() const { return static_cast<real_t>(x); }
@@ -515,28 +538,24 @@ public:
 	constexpr Vector() : x(0), y(0), z(0) {}
 	constexpr Vector(vec_t X, vec_t Y, vec_t Z) : x(X), y(Y), z(Z) {}
 	constexpr Vector(const Vector2D& v2d, vec_t Z) : x(v2d.x), y(v2d.y), z(Z) {}
-	Vector(const Vector &v) { *(int *)&x = *(int *)&v.x; *(int *)&y = *(int *)&v.y; *(int *)&z = *(int *)&v.z; }
-	Vector(const vec_t rgfl[3]) { *(int *)&x = *(int *)&rgfl[0]; *(int *)&y = *(int *)&rgfl[1]; *(int *)&z = *(int *)&rgfl[2]; }
+	constexpr Vector(const Vector &v) : x(v.x), y(v.y), z(v.z) {}
+	constexpr Vector(const vec_t rgfl[3]) : x(rgfl[0]), y(rgfl[1]), z(rgfl[2]) {}
+	explicit constexpr Vector(unsigned long ulRGB) : x(((ulRGB & 0xFF0000) >> 16) / 255.0), y(((ulRGB & 0xFF00) >> 8) / 255.0), z((ulRGB & 0xFF) / 255.0) {}
 
 	// Operators
 	constexpr decltype(auto) operator-()       const { return Vector(-x, -y, -z); }
 	constexpr bool operator==(const Vector &v) const { return Q_fabs2(x - v.x) <= FLT_EPSILON && Q_fabs2(y - v.y) <= FLT_EPSILON && Q_fabs2(z - v.z) <= FLT_EPSILON; }
 	constexpr bool operator!=(const Vector &v) const { return !(*this == v); }
 
+	constexpr decltype(auto) operator=(std::nullptr_t) { return Vector(0, 0, 0); }
+
 	constexpr decltype(auto) operator+(const Vector &v) const { return Vector(x + v.x, y + v.y, z + v.z); }
 	constexpr decltype(auto) operator-(const Vector &v) const { return Vector(x - v.x, y - v.y, z - v.z); }
-	constexpr decltype(auto) operator*(const Vector &v) const { return Vector(x * v.x, y * v.y, z * v.z); }
-	constexpr decltype(auto) operator/(const Vector &v) const { return Vector(x / v.x, y / v.y, z / v.z); }
-
 	constexpr decltype(auto) operator+=(const Vector &v) { return (*this = *this + v); }
 	constexpr decltype(auto) operator-=(const Vector &v) { return (*this = *this - v); }
-	constexpr decltype(auto) operator*=(const Vector &v) { return (*this = *this * v); }
-	constexpr decltype(auto) operator/=(const Vector &v) { return (*this = *this / v); }
 
 	constexpr decltype(auto) operator*(float fl) const { return Vector(vec_t(x * fl), vec_t(y * fl), vec_t(z * fl)); }
 	constexpr decltype(auto) operator/(float fl) const { return Vector(vec_t(x / fl), vec_t(y / fl), vec_t(z / fl)); }
-
-	constexpr decltype(auto) operator=(std::nullptr_t) { return Vector(0, 0, 0); }
 	constexpr decltype(auto) operator*=(float fl) { return (*this = *this * fl); }
 	constexpr decltype(auto) operator/=(float fl) { return (*this = *this / fl); }
 
@@ -558,11 +577,12 @@ public:
 		z = 0;
 	}
 
-	void CopyToArray(float *rgfl) const
+	template<class OutputIter>
+	void CopyToIter(OutputIter arr) const
 	{
-		*(int *)&rgfl[0] = *(int *)&x;
-		*(int *)&rgfl[1] = *(int *)&y;
-		*(int *)&rgfl[2] = *(int *)&z;
+		*arr++ = x;
+		*arr++ = y;
+		*arr++ = z;
 	}
 
 	real_t Length() const { return Q_sqrt(X() * X() + Y() * Y() + Z() * Z()); }	// Get the vector's magnitude
@@ -867,3 +887,67 @@ inline real_t operator^(const Vector& a, const Vector& b)
 
 	return (real_t)(Q_acos(DotProduct(a, b) / length_ab) * (180.0 / M_PI));
 }
+
+class Quaternion
+{
+	using qtn_t = double;
+
+public:
+	constexpr Quaternion(Quaternion&& s) = default;
+	Quaternion& operator=(const Quaternion& s) = default;
+	Quaternion& operator=(Quaternion&& s) = default;
+	constexpr Quaternion() : a(1), b(0), c(0), d(0) {}
+	constexpr Quaternion(qtn_t A, qtn_t B, qtn_t C, qtn_t D) : a(A), b(B), c(C), d(D) {}
+
+	// Static member
+	static inline constexpr decltype(auto) Zero() { return Quaternion(0, 0, 0, 0); }
+	static inline constexpr decltype(auto) Identity() { return Quaternion(1, 0, 0, 0); }
+	static inline decltype(auto) VA(const Vector& v, qtn_t angle_in_degree)
+	{
+		auto angle = angle_in_degree * M_PI / 180.0;
+		auto cosine = Q_cos(0.5 * angle);
+		auto sine = Q_sin(0.5 * angle);
+
+		return Quaternion(cosine, v.x * sine, v.y * sine, v.z * sine);
+	}
+
+	// Properties
+	inline constexpr decltype(auto) Norm() const { return 1.0 / rsqrt(a * a + b * b + c * c + d * d); }
+	inline constexpr decltype(auto) Conjugate() const { return Quaternion(a, -b, -c, -d); }
+	inline constexpr decltype(auto) Versor() const { return *this / Norm(); }
+	inline constexpr decltype(auto) Reciprocal() const { return Conjugate() / (Norm() * Norm()); }
+	inline constexpr decltype(auto) Real() const { return a; }
+	inline constexpr decltype(auto) Pure() const { return Vector(b, c, d); }
+
+	// Method
+	constexpr decltype(auto) operator*(const Quaternion& q) const { return Quaternion(a * q.a - b * q.b - c * q.c - d * q.d, a * q.a + b * q.b + c * q.c - d * q.d, a * q.a - b * q.b + c * q.c + d * q.d, a * q.a + b * q.b - c * q.c + d * q.d); }
+	constexpr decltype(auto) operator*=(const Quaternion& q) { return (*this = *this * q); }
+	template<typename NumType> constexpr decltype(auto) operator/(NumType x) const { return Quaternion(a / x, b / x, c / x, d / x); }
+	template<typename NumType> constexpr decltype(auto) operator/=(NumType x) { return (*this = *this / x); }
+
+	constexpr decltype(auto) operator*(const Vector& v) const { return v + ((CrossProduct(Pure(), v) * a) + CrossProduct(Pure(), CrossProduct(Pure(), v))) * 2.0f; }	// Rotate a vector by this quaternion.
+
+	Vector Euler() const
+	{
+		Vector vecAngles;
+
+		vecAngles.roll = Q_atan2(2.0 * (a * b + c * d), a * a - b * b - c * c + d * d);
+		vecAngles.pitch = -asin(2.0 * (b * d - a * c));
+		vecAngles.yaw = Q_atan2(2.0 * (a * d + b * c), a * a + b * b - c * c - d * d);
+
+		// Rad to Deg
+		vecAngles *= 180.0 / M_PI;
+
+		return vecAngles;
+	}
+
+	inline constexpr Matrix3x3 M3x3() const
+	{
+		return Matrix3x3	(a * a + b * b - c * c - d * d,	2.0 * (b * c - a * d),			2.0 * (b * d + a * c),
+							2.0 * (b * c + a * d),			a * a - b * b + c * c - d * d,	2.0 * (c * d - a * b),
+							2.0 * (b * d - a * c),			2.0 * (c * d + a * b),			a * a - b * b - c * c + d * d);
+	}
+
+public:	// Members
+	qtn_t a, b, c, d;	// w, x, y, z
+};

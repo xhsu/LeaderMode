@@ -28,8 +28,8 @@
 
 enum class Weather : BYTE
 {
-	SNOW = 0U,
-	RAIN,
+	RAIN = 0U,
+	SNOW,
 };
 
 struct

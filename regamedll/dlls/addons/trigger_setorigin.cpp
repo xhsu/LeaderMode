@@ -206,7 +206,14 @@ void CTriggerSetOrigin::SetupEntities()
 
 			Vector vecForward, vecRight, vecUp;
 			UTIL_MakeVectorsPrivate(m_hCopyPointer->pev->angles, vecForward, vecRight, vecUp);
-			m_vecEntities[m_entityNum++] *= vecForward + vecRight + vecUp;
+
+			// LUNA: this is a UNDEFINED behaviour of vector.
+			Vector vecSum = vecForward + vecRight + vecUp;
+			m_vecEntities[m_entityNum].x *= vecSum.x;
+			m_vecEntities[m_entityNum].y *= vecSum.y;
+			m_vecEntities[m_entityNum].z *= vecSum.z;
+
+			m_entityNum++;
 		}
 		else
 		{

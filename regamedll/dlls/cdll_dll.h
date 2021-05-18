@@ -64,8 +64,8 @@ constexpr int DEFAULT_FOV      = 90;	// the default field of view
 #define STATUS_NIGHTVISION_ON  1
 #define STATUS_NIGHTVISION_OFF 0
 
-#define ITEM_STATUS_NIGHTVISION BIT(0)
-#define ITEM_STATUS_DEFUSER     BIT(1)
+#define ITEM_STATUS_NIGHTVISION	BIT(0)
+#define ITEM_STATUS_FLASHLIGHT	BIT(1)
 #define ITEM_STATUS_DETONATOR	BIT(2)
 
 #define SCORE_STATUS_DEAD       BIT(0)

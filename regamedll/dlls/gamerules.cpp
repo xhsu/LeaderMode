@@ -3037,11 +3037,6 @@ int CHalfLifeMultiplay::PlayerRelationship(CBasePlayer *pPlayer, CBaseEntity *pT
 	return GR_TEAMMATE;
 }
 
-BOOL CHalfLifeMultiplay::FAllowFlashlight()
-{
-	return flashlight.value ? TRUE : FALSE;
-}
-
 BOOL CHalfLifeMultiplay::FAllowMonsters()
 {
 	return FALSE;

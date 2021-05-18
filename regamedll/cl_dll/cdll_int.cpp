@@ -312,6 +312,7 @@ void CL_DLLEXPORT CL_Disconnect(void)
 	gExtFuncs.pfnCL_Disconnect();
 
 	g_bInGameWorld = false;
+	g_pCurWeapon = nullptr;
 }
 
 bool CL_DLLEXPORT MH_LoadClient(unsigned short iVersion, const cl_extendedfunc_t* pfn)

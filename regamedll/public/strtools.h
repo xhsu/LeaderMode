@@ -168,6 +168,14 @@ decltype(auto) Q_slprintf(char(&dest)[size], const char* format, Args ... args)
 	return _return;
 }
 
+template <size_t size, typename ... Args>
+decltype(auto) Q_wslprintf(wchar_t(&dest)[size], const wchar_t* format, Args ... args)
+{
+	auto _return = _snwprintf(dest, size - 1U, format, args ...);
+	dest[size - 1U] = L'\0';
+	return _return;
+}
+
 // safely concatenate two strings.
 // a variant of strcat that truncates the result to fit in the destination buffer
 template <size_t size>

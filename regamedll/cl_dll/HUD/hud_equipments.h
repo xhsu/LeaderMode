@@ -12,22 +12,6 @@ Modern Warfare Dev Team
 
 #pragma once
 
-class CHudGrenade : public CBaseHudElement
-{
-public:
-	virtual int Init(void);
-	virtual int VidInit(void);
-	virtual int Draw(float flTime);
-	virtual void Think(void) {}
-	virtual void Reset(void) {}
-	virtual void InitHUDData(void) {}
-	virtual void Shutdown(void) {}
-
-public:
-	hSprite m_rghGrenadeIcons[EQP_COUNT];
-	wrect_t m_rgrcGrenadeIcons[EQP_COUNT];
-};
-
 typedef void (*FUNC_CustomDrawFunction)(Vector2D vecOrigin, EquipmentIdType iEqpId, BYTE iSlotPos);
 
 struct CHudEquipments
@@ -49,14 +33,22 @@ struct CHudEquipments
 	static void OnPrev(void);
 	static void OnNext(void);
 	static void WakeUp(void);
+	static void MsgFunc_Flashlight(bool bOn, int iBattery);
+	static void MsgFunc_FlashBat(int iBattery);
 
 	// Custom functions.
 	static void Reset(void);
 	static void DrawCount(Vector2D vecOrigin, EquipmentIdType iEqpId, BYTE iSlotPos);
+	static void Flashlight(Vector2D vecOrigin, EquipmentIdType iEqpId, BYTE iSlotPos);
 
 	// Game data.
+	static inline float m_flFLBatteryPercentage = 1;
+	static inline int m_iFLBattery = 100;
+	static inline bool m_bFLOn = false;
 
 	// Drawing data.
+	static constexpr auto COLOR_FL_BASE = 0xFFFFFF, COLOR_FL_BAT_LOW = RGB_REDISH, COLOR_FL_DELTA = COLOR_FL_BAT_LOW - COLOR_FL_BASE;
+	static constexpr auto FL_BORDER_THICKNESS = 2;
 	static constexpr std::array<float, 5> ALPHA_FOR_EACH_SLOT = { 64, 128, 255, 128, 64 };
 	static constexpr auto FONT_SIZE = 20;
 	static constexpr auto SIZE = Vector2D(96, 96);

@@ -6,7 +6,7 @@ Created Date: 08 Mar 2020
 
 #include "precompiled.h"
 
-bool g_bHasDefuser = false;
+bool g_bHasFlashlight = false;
 bool g_bHasNightvision = false;
 
 // client.cpp
@@ -27,7 +27,7 @@ MSG_FUNC(Flashlight)
 	BOOL FOn = READ_BYTE();
 	int iBattery = READ_BYTE();
 
-	gHUD::m_Flash.MsgFunc_Flashlight(FOn, iBattery);
+	CHudEquipments::MsgFunc_Flashlight(FOn, iBattery);
 	return TRUE;
 }
 
@@ -37,7 +37,7 @@ MSG_FUNC(FlashBat)
 
 	int iBattery = READ_BYTE();
 
-	gHUD::m_Flash.MsgFunc_FlashBat(iBattery);
+	CHudEquipments::MsgFunc_FlashBat(iBattery);
 	return TRUE;
 }
 
@@ -909,7 +909,7 @@ MSG_FUNC(ItemStatus)
 
 	int bitsItemStatus = READ_BYTE();
 
-	g_bHasDefuser = bitsItemStatus & ITEM_STATUS_DEFUSER;
+	g_bHasFlashlight = bitsItemStatus & ITEM_STATUS_FLASHLIGHT;
 	g_bHasNightvision = bitsItemStatus & ITEM_STATUS_NIGHTVISION;
 	return TRUE;
 }

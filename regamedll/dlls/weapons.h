@@ -1868,7 +1868,7 @@ public:	// Constants / Database
 	};
 
 	static constexpr pcchar	VIEW_MODEL			= "models/weapons/v_psg1.mdl";
-	static constexpr pcchar	WORLD_MODEL			= "models/weapons/w_awp.mdl";	// UNDONE
+	static constexpr pcchar	WORLD_MODEL			= "models/weapons/w_psg1.mdl";
 	static constexpr pcchar	FIRE_SFX			= "weapons/m14ebr/m14ebr_fire.wav";	// UNDONE
 	static constexpr float	MAX_SPEED			= 210.0f;
 	static constexpr float	MAX_SPEED_ZOOM		= 150.0f;

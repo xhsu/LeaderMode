@@ -32,10 +32,13 @@ void CHudEquipments::Initialize(void)
 
 	// Default
 	EQUIPMENT_ICONS[EQP_NONE] = LoadDDS("sprites/ClassesIcon/Doraemon.dds");
+	CUSTOM_DRAW_FUNCS[EQP_NONE] = nullptr;
 
 	// Armor
 	EQUIPMENT_ICONS[EQP_KEVLAR] = LoadDDS("sprites/Inventory/Kevlar.dds");
 	EQUIPMENT_ICONS[EQP_ASSAULT_SUIT] = LoadDDS("sprites/Inventory/AssaultSuit.dds");
+	CUSTOM_DRAW_FUNCS[EQP_KEVLAR] = nullptr;
+	CUSTOM_DRAW_FUNCS[EQP_ASSAULT_SUIT] = nullptr;
 
 	// Grenades
 	EQUIPMENT_ICONS[EQP_HEGRENADE] = LoadDDS("sprites/Inventory/HE.dds");
@@ -51,6 +54,9 @@ void CHudEquipments::Initialize(void)
 	EQUIPMENT_ICONS[EQP_DETONATOR] = LoadDDS("sprites/Inventory/Detonator.dds");
 	EQUIPMENT_ICONS[EQP_NVG] = LoadDDS("sprites/Inventory/NVG.dds");
 	EQUIPMENT_ICONS[EQP_FLASHLIGHT] = LoadDDS("sprites/Inventory/Flashlight.dds");
+	CUSTOM_DRAW_FUNCS[EQP_DETONATOR] = nullptr;
+	CUSTOM_DRAW_FUNCS[EQP_NVG] = nullptr;
+	CUSTOM_DRAW_FUNCS[EQP_FLASHLIGHT] = &Flashlight;
 }
 
 void CHudEquipments::Draw(float flTime, bool bIntermission)
@@ -62,6 +68,9 @@ void CHudEquipments::Draw(float flTime, bool bIntermission)
 		return;
 
 	if (gPseudoPlayer.m_iUsingGrenadeId == EQP_NONE)
+		return;
+
+	if (CL_IsDead())
 		return;
 
 	switch (m_iStage)
@@ -183,6 +192,9 @@ void CHudEquipments::Think(void)
 
 void CHudEquipments::OnPrev(void)
 {
+	if (CountEquipments() < 2)
+		return;
+
 	m_rgvSlotCurOrigin.pop_back();
 	m_rgvSlotCurOrigin.insert(m_rgvSlotCurOrigin.begin(), ANCHOR_FOR_EACH_SLOT[0] - SIZE_FOR_EACH_SLOT[0]);
 
@@ -197,6 +209,9 @@ void CHudEquipments::OnPrev(void)
 
 void CHudEquipments::OnNext(void)
 {
+	if (CountEquipments() < 2)
+		return;
+
 	m_rgvSlotCurOrigin.erase(m_rgvSlotCurOrigin.begin());
 	m_rgvSlotCurOrigin.push_back(ANCHOR_FOR_EACH_SLOT[4] + SIZE_FOR_EACH_SLOT[4]);
 
@@ -213,6 +228,20 @@ void CHudEquipments::WakeUp(void)
 {
 	m_flNextStageIncrease = gHUD::m_flTime + TIME_MOVING_OUT;
 	m_iStage = MOVING_OUT;
+}
+
+void CHudEquipments::MsgFunc_Flashlight(bool bOn, int iBattery)
+{
+	m_bFLOn = bOn;
+
+	m_iFLBattery = iBattery;
+	m_flFLBatteryPercentage = ((float)iBattery) / 100.0f;
+}
+
+void CHudEquipments::MsgFunc_FlashBat(int iBattery)
+{
+	m_iFLBattery = iBattery;
+	m_flFLBatteryPercentage = ((float)iBattery) / 100.0f;
 }
 
 void CHudEquipments::Reset(void)
@@ -261,86 +290,9 @@ void CHudEquipments::DrawCount(Vector2D vecOrigin, EquipmentIdType iEqpId, BYTE 
 	gFontFuncs::DrawPrintText(wsz.c_str());
 }
 
-int CHudGrenade::Init(void)
+void CHudEquipments::Flashlight(Vector2D vecOrigin, EquipmentIdType iEqpId, BYTE iSlotPos)
 {
-	gHUD::AddHudElem(this);
-
-	Q_memset(&m_rghGrenadeIcons, NULL, sizeof(m_rghGrenadeIcons));
-	Q_memset(&m_rgrcGrenadeIcons, NULL, sizeof(m_rgrcGrenadeIcons));
-
-	m_bitsFlags = HUD_ACTIVE;
-	return 1;
-}
-
-int CHudGrenade::VidInit(void)
-{
-	// this HUD is actually depent on gHUD::m_Ammo.
-	// therefore, this HUD must be loaded AFTER gHUD::m_Ammo.
-
-	// reset our database.
-	Q_memset(&m_rghGrenadeIcons, NULL, sizeof(m_rghGrenadeIcons));
-	Q_memset(&m_rgrcGrenadeIcons, NULL, sizeof(m_rgrcGrenadeIcons));
-
-	// find ammo id first, and we can get a SPR from gHUD::m_Ammo.
-	AmmoIdType iAmmoId = AMMO_NONE;
-	for (int i = EQP_NONE; i < EQP_COUNT; i++)
-	{
-		iAmmoId = GetAmmoIdOfEquipment((EquipmentIdType)i);
-
-		if (iAmmoId)
-		{
-			m_rghGrenadeIcons[i] = gHUD::m_rghAmmoSprite[iAmmoId];
-			m_rgrcGrenadeIcons[i] = gHUD::m_rgrcAmmoSprite[iAmmoId];
-		}
-		else
-		{
-			auto p = gHUD::GetSpriteFromList(gHUD::m_pAmmoTxtList, g_rgEquipmentInfo[i].m_pszInternalName, 640, gHUD::m_iAmmoTxtListCount);
-			gHUD::GetSprite(p, m_rghGrenadeIcons[i], m_rgrcGrenadeIcons[i]);
-		}
-	}
-
-	return 1;
-}
-
-int CHudGrenade::Draw(float flTime)
-{
-	int x = ScreenWidth / 2;
-	int y = ScreenHeight - 24;	// 24 is the normal height of a GR icon.
-
-	int r = 255, g = 255, b = 255;
-	int iAlpha = 255, iAlphaStep = 255;
-	int iIconWidth = 24;
-
-	AmmoIdType iAmmoId = AMMO_NONE;
-
-	for (int i = EQP_NONE; i < EQP_COUNT; i++)
-	{
-		// we can't draw voidness. TODO: maybe a default icon later??
-		if (!m_rghGrenadeIcons[i])
-			continue;
-
-		iAmmoId = GetAmmoIdOfEquipment((EquipmentIdType)i);	// no grenade, no drawing.
-		if ((!iAmmoId || gPseudoPlayer.m_rgAmmo[iAmmoId] <= 0) && !gPseudoPlayer.m_rgbHasEquipment[i])	// Alternatively, if this is a special usable item, you can take it on your hand.
-			continue;
-
-		y = ScreenHeight - (m_rgrcGrenadeIcons[i].bottom - m_rgrcGrenadeIcons[i].top);	// Y is not a constant, it depents on icon.
-		iIconWidth = m_rgrcGrenadeIcons[i].right - m_rgrcGrenadeIcons[i].left;
-
-		iAlphaStep = 255 / Q_max(gPseudoPlayer.m_rgAmmo[iAmmoId], 1);	// CAREFUL! don't divide it by naught!
-
-		for (iAlpha = 255; iAlpha > 0; iAlpha -= iAlphaStep)
-		{
-			UnpackRGB(r, g, b, gPseudoPlayer.m_iUsingGrenadeId == i ? 0xFFFFFF : RGB_YELLOWISH);
-			ScaleColors(r, g, b, iAlpha);
-
-			gEngfuncs.pfnSPR_Set(m_rghGrenadeIcons[i], r, g, b);
-			gEngfuncs.pfnSPR_DrawAdditive(0, x, y, &m_rgrcGrenadeIcons[i]);
-			x += iIconWidth / 2;
-		}
-
-		// for the last one, give some space for next set of icons.
-		x += iIconWidth;
-	}
-
-	return 1;
+	DrawUtils::glRegularPureColorDrawingInit(COLOR_FL_BASE + round(COLOR_FL_DELTA * (1.0 - m_flFLBatteryPercentage)), m_iStage == MOVING_OUT ? m_rgflSlotCurAlpha[iSlotPos] : m_flAlpha);
+	DrawUtils::Draw2DQuadProgressBar2(vecOrigin, m_rgvSlotCurSize[iSlotPos], FL_BORDER_THICKNESS, m_flFLBatteryPercentage);
+	DrawUtils::glRegularPureColorDrawingExit();
 }

@@ -192,13 +192,13 @@ struct CHudExample2
 */
 
 // dummy classes derived from CBaseHudElement.
-class CHudAmmo;
+//class CHudAmmo;
 //class CHudHealth;
 //class CHudSpectator;
 class CHudGeiger;
 //class CHudBattery;
 class CHudTrain;
-class CHudFlashlight;
+//class CHudFlashlight;
 class CHudMessage;
 class CHudStatusBar;
 //class CHudDeathNotice;
@@ -217,7 +217,7 @@ class CHudVGUI2Print;
 class CHudSniperScope;
 //class CHudCrosshair;
 class CHudWeaponList;
-class CHudGrenade;
+//class CHudGrenade;
 class CHudScoreboard;
 //class CHudClassIndicator;
 class CUIBuyMenu;
@@ -344,7 +344,7 @@ namespace gHUD
 	extern CHudGeiger m_Geiger;
 	//extern CHudBattery m_Battery;
 	extern CHudTrain m_Train;
-	extern CHudFlashlight m_Flash;
+	//extern CHudFlashlight m_Flash;
 	extern CHudMessage m_Message;
 	extern CHudStatusBar m_StatusBar;
 	//extern CHudDeathNotice m_DeathNotice;
@@ -363,7 +363,7 @@ namespace gHUD
 	extern CHudSniperScope m_SniperScope;
 	//extern CHudCrosshair m_Crosshair;
 	extern CHudWeaponList m_WeaponList;
-	extern CHudGrenade m_Grenade;
+	//extern CHudGrenade m_Grenade;
 	extern CHudScoreboard m_Scoreboard;
 	//extern CHudClassIndicator m_ClassIndicator;
 	extern CUIBuyMenu m_UI_BuyMenu;
@@ -440,6 +440,7 @@ extern TEMPENTITY* g_DeadPlayerModels[MAX_PLAYERS + 1];
 // LUNA: I think these two should move to weapons.cpp. Why are they here??
 extern EquipmentIdType FindNextEquipment(bool bLoopFromStart, EquipmentIdType iStartingFrom = gPseudoPlayer.m_iUsingGrenadeId);
 extern EquipmentIdType FindLastEquipment(bool bLoopFromEnd, EquipmentIdType iStartingFrom = gPseudoPlayer.m_iUsingGrenadeId);
+extern int CountEquipments(void);
 
 // HUD command funcs
 void CommandFunc_Slot1(void);

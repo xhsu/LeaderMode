@@ -389,7 +389,7 @@ bool CHudSpectator::DirectorMessage(int iSize, void* pbuf)
 {
 	float f1, f2;
 	char* string;
-	vec3_t v1, v2;
+	Vector v1, v2;
 	int i1, i2, i3;
 
 	BEGIN_READ(pbuf, iSize);

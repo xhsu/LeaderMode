@@ -86,7 +86,7 @@ void PM_DrawPhysEntBBox(int num, int pcolor, float life)
 	physent_t *pe;
 	vec3_t org;
 	int j;
-	vec3_t tmp;
+	Vector tmp;
 	vec3_t p[8];
 	float gap = BOX_GAP;
 	vec3_t modelmins, modelmaxs;
@@ -113,7 +113,7 @@ void PM_DrawPhysEntBBox(int num, int pcolor, float life)
 		// If the bbox should be rotated, do that
 		if (pe->angles[0] || pe->angles[1] || pe->angles[2])
 		{
-			vec3_t forward, right, up;
+			Vector forward, right, up;
 
 			AngleVectorsTranspose(pe->angles, forward, right, up);
 			for (j = 0; j < 8; j++)

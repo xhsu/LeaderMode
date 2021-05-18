@@ -65,6 +65,7 @@ const EquipmentInfo g_rgEquipmentInfo[EQP_COUNT] =
 	// misc
 	{EQP_DETONATOR,		"item_detonator",		"C4 Detonator",			0},
 	{EQP_NVG,			"item_nvg",				"Nightvision",			NVG_PRICE},
+	{EQP_FLASHLIGHT,	"item_flashlight",		"Flashlight",			0},
 };
 
 // Given an alias, return the associated weapon ID

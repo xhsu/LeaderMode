@@ -45,44 +45,44 @@
 #define SOUND_FLASHLIGHT_ON  "items/flashlight1.wav"
 #define SOUND_FLASHLIGHT_OFF "items/flashlight1.wav"
 
-const int MIN_BUY_TIME = 0;
+constexpr int MIN_BUY_TIME = 0;
 
-const int MAX_PLAYER_NAME_LENGTH    = 32;
-const int MAX_AUTOBUY_LENGTH        = 256;
-const int MAX_REBUY_LENGTH          = 256;
+constexpr int MAX_PLAYER_NAME_LENGTH    = 32;
+constexpr int MAX_AUTOBUY_LENGTH        = 256;
+constexpr int MAX_REBUY_LENGTH          = 256;
 
-const int MAX_RECENT_PATH           = 20;
-const int MAX_HOSTAGE_ICON          = 4;	// the maximum number of icons of the hostages in the HUD
+constexpr int MAX_RECENT_PATH           = 20;
+constexpr int MAX_HOSTAGE_ICON          = 4;	// the maximum number of icons of the hostages in the HUD
 
-const int MAX_SUIT_NOREPEAT         = 32;
-const int MAX_SUIT_PLAYLIST         = 4;	// max of 4 suit sentences queued up at any time
+constexpr int MAX_SUIT_NOREPEAT         = 32;
+constexpr int MAX_SUIT_PLAYLIST         = 4;	// max of 4 suit sentences queued up at any time
 
-const int MAX_BUFFER_MENU           = 175;
-const int MAX_BUFFER_MENU_BRIEFING  = 50;
+constexpr int MAX_BUFFER_MENU           = 175;
+constexpr int MAX_BUFFER_MENU_BRIEFING  = 50;
 
-const float SUIT_UPDATE_TIME        = 3.5f;
-const float SUIT_FIRST_UPDATE_TIME  = 0.1f;
+constexpr float SUIT_UPDATE_TIME        = 3.5f;
+constexpr float SUIT_FIRST_UPDATE_TIME  = 0.1f;
 
-const float MAX_PLAYER_FATAL_FALL_SPEED = 1100.0f;
-const float MAX_PLAYER_SAFE_FALL_SPEED  = 500.0f;
-const float MAX_PLAYER_USE_RADIUS       = 64.0f;
+constexpr float MAX_PLAYER_FATAL_FALL_SPEED = 1100.0f;
+constexpr float MAX_PLAYER_SAFE_FALL_SPEED  = 500.0f;
+constexpr float MAX_PLAYER_USE_RADIUS       = 64.0f;
 
-const float ARMOR_RATIO = 0.5f;			// Armor Takes 50% of the damage
-const float ARMOR_BONUS = 0.5f;			// Each Point of Armor is work 1/x points of health
+constexpr float ARMOR_RATIO = 0.5f;			// Armor Takes 50% of the damage
+constexpr float ARMOR_BONUS = 0.5f;			// Each Point of Armor is work 1/x points of health
 
-const float FLASH_DRAIN_TIME = 1.2f;	// 100 units/3 minutes
-const float FLASH_CHARGE_TIME = 0.2f;	// 100 units/20 seconds (seconds per unit)
+constexpr float FLASH_DRAIN_TIME = 1.2f;	// 100 units/3 minutes
+constexpr float FLASH_CHARGE_TIME = 0.2f;	// 100 units/20 seconds (seconds per unit)
 
 // damage per unit per second.
-const float DAMAGE_FOR_FALL_SPEED   = 100.0f / (MAX_PLAYER_FATAL_FALL_SPEED - MAX_PLAYER_SAFE_FALL_SPEED);
-const float PLAYER_MIN_BOUNCE_SPEED = 350.0f;
+constexpr float DAMAGE_FOR_FALL_SPEED   = 100.0f / (MAX_PLAYER_FATAL_FALL_SPEED - MAX_PLAYER_SAFE_FALL_SPEED);
+constexpr float PLAYER_MIN_BOUNCE_SPEED = 350.0f;
 
 // won't punch player's screen/make scrape noise unless player falling at least this fast.
-const float PLAYER_FALL_PUNCH_THRESHHOLD = 250.0f;
+constexpr float PLAYER_FALL_PUNCH_THRESHHOLD = 250.0f;
 
 // Money blinks few of times on the freeze period
 // NOTE: It works for CZ
-const int MONEY_BLINK_AMOUNT = 30;
+constexpr int MONEY_BLINK_AMOUNT = 30;
 
 // Player time based damage
 #define AIRTIME                 12		// lung full of air lasts this many seconds
@@ -131,23 +131,23 @@ const int MONEY_BLINK_AMOUNT = 30;
 #define TRAIN_ACTIVE            0x80
 #define TRAIN_NEW               0xc0
 
-const bool SUIT_GROUP           = true;
-const bool SUIT_SENTENCE        = false;
+constexpr bool SUIT_GROUP           = true;
+constexpr bool SUIT_SENTENCE        = false;
 
-const int  SUIT_REPEAT_OK       = 0;
-const int  SUIT_NEXT_IN_30SEC	= 30;
-const int  SUIT_NEXT_IN_1MIN    = 60;
-const int  SUIT_NEXT_IN_5MIN    = 300;
-const int  SUIT_NEXT_IN_10MIN   = 600;
-const int  SUIT_NEXT_IN_30MIN   = 1800;
-const int  SUIT_NEXT_IN_1HOUR   = 3600;
+constexpr int  SUIT_REPEAT_OK       = 0;
+constexpr int  SUIT_NEXT_IN_30SEC	= 30;
+constexpr int  SUIT_NEXT_IN_1MIN    = 60;
+constexpr int  SUIT_NEXT_IN_5MIN    = 300;
+constexpr int  SUIT_NEXT_IN_10MIN   = 600;
+constexpr int  SUIT_NEXT_IN_30MIN   = 1800;
+constexpr int  SUIT_NEXT_IN_1HOUR   = 3600;
 
-const int MAX_TEAM_NAME_LENGTH  = 16;
+constexpr int MAX_TEAM_NAME_LENGTH  = 16;
 
-const auto AUTOAIM_2DEGREES     = 0.0348994967025;
-const auto AUTOAIM_5DEGREES     = 0.08715574274766;
-const auto AUTOAIM_8DEGREES     = 0.1391731009601;
-const auto AUTOAIM_10DEGREES    = 0.1736481776669;
+constexpr auto AUTOAIM_2DEGREES     = 0.0348994967025;
+constexpr auto AUTOAIM_5DEGREES     = 0.08715574274766;
+constexpr auto AUTOAIM_8DEGREES     = 0.1391731009601;
+constexpr auto AUTOAIM_10DEGREES    = 0.1736481776669;
 
 // custom enum
 enum RewardType
@@ -269,13 +269,13 @@ enum ThrowDirection
 	THROW_HITVEL_MINUS_AIRVEL
 };
 
-const float MAX_ID_RANGE            = 2048.0f;
-const float MAX_SPEC_ID_RANGE       = 8192.0f;
-const int   MAX_SBAR_STRING         = 128;
+constexpr float MAX_ID_RANGE            = 2048.0f;
+constexpr float MAX_SPEC_ID_RANGE       = 8192.0f;
+constexpr int   MAX_SBAR_STRING         = 128;
 
-const int SBAR_TARGETTYPE_TEAMMATE  = 1;
-const int SBAR_TARGETTYPE_ENEMY     = 2;
-const int SBAR_TARGETTYPE_HOSTAGE   = 3;
+constexpr int SBAR_TARGETTYPE_TEAMMATE  = 1;
+constexpr int SBAR_TARGETTYPE_ENEMY     = 2;
+constexpr int SBAR_TARGETTYPE_HOSTAGE   = 3;
 
 enum sbar_data
 {
@@ -407,7 +407,7 @@ public:
 	void SetNewPlayerModel(const char *modelName);
 	void CheckPowerups();
 	BOOL IsOnLadder();
-	BOOL FlashlightIsOn();
+	bool FlashlightIsOn();
 	void FlashlightTurnOn();
 	void FlashlightTurnOff();
 	void DeathSound();

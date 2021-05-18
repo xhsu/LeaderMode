@@ -369,6 +369,7 @@ const char* CWeaponBox::GetCSModelName(WeaponIdType iId)
 	case WEAPON_M4A1:			modelName = M4A1_WORLD_MODEL; break;
 	case WEAPON_MP7A1:			modelName = MP7A1_WORLD_MODEL; break;
 	case WEAPON_SVD:			modelName = SVD_WORLD_MODEL; break;
+	case WEAPON_PSG1:			modelName = CPSG1::WORLD_MODEL; break;
 	case WEAPON_DEAGLE:			modelName = DEagle_WORLD_MODEL; break;
 	case WEAPON_SCARH:			modelName = SCARH_WORLD_MODEL; break;
 	case WEAPON_AK47:			modelName = AK47_WORLD_MODEL; break;

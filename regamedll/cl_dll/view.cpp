@@ -318,7 +318,7 @@ void V_GetDeathCam(cl_entity_t* ent1, cl_entity_t* ent2, float* angle, float* or
 		distance = v_lastDistance;
 
 	if (ent1->origin.x == 0 && ent1->origin.y == 0 && ent1->origin.z == 0)
-		nonDestructedOrigin.CopyToArray(newOrigin);
+		nonDestructedOrigin.CopyToIter(newOrigin);
 	else
 	{
 		nonDestructedOrigin = ent1->origin;

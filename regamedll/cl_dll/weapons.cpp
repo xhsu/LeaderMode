@@ -452,6 +452,7 @@ void CBaseWeapon::PostFrame()
 				flTime = C4_TIME_DET_ANIM - C4_TIME_DETONATE;
 				break;	// unlike SV, we can safely use the original line here.
 
+			case EQP_FLASHLIGHT:	// Flashlight should never get you here. But, anyway...
 			default:
 				return;	// how did he get here???
 			}
@@ -797,6 +798,13 @@ bool CBaseWeapon::QuickThrowStart(EquipmentIdType iId)
 		gSecViewModelMgr.SetAnim(C4_DETONATE);
 
 		goto TAG_C4_SKIPPING;
+	}
+
+	case EQP_FLASHLIGHT:
+	{
+		// Nothing to do at client side.
+		m_pPlayer->m_iUsingGrenadeId = iId;
+		return true;
 	}
 
 	default:

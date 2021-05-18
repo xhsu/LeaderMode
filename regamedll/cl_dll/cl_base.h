@@ -187,10 +187,13 @@ Created Date: 05 Mar 2020
 #include "HUD/hud_money.h"
 #include "HUD/hud_death_notice.h"
 
+// bottom-right
+#include "HUD/hud_equipments.h"
+#include "HUD/hud_ammo.h"
+
 #include "hud/hud_spectator.h"
 #include "hud/hud_geiger.h"
 #include "hud/hud_train.h"
-#include "hud/hud_flashlight.h"
 #include "hud/hud_message.h"
 #include "hud/hud_status_bar.h"
 #include "hud/hud_say_text.h"
@@ -204,7 +207,6 @@ Created Date: 05 Mar 2020
 #include "hud/hud_sniperscope.h"
 #include "hud/hud_crosshair.h"
 #include "hud/hud_weaponlist.h"
-#include "hud/hud_grenade.h"
 #include "HUD/hud_scoreboard.h"
 
 // UI Instance

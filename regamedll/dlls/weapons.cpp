@@ -512,6 +512,7 @@ void CBaseWeapon::PostFrame()
 				return;
 			}
 
+			case EQP_FLASHLIGHT:	// Flashlight should never get you here. But, anyway...
 			default:
 				return;	// how did he get here???
 			}
@@ -802,6 +803,21 @@ bool CBaseWeapon::QuickThrowStart(EquipmentIdType iId)
 		UTIL_SetSecondaryVMDL(m_pPlayer, SSZ_C4_VMDL, C4_DETONATE);
 
 		goto TAG_C4_SKIPPING;
+	}
+
+	case EQP_FLASHLIGHT:
+	{
+		// No bit flag to set.
+		m_pPlayer->m_iUsingGrenadeId = iId;
+
+		// Nothing to do but turn it on.
+		if (m_pPlayer->FlashlightIsOn())
+			m_pPlayer->FlashlightTurnOff();
+		else
+			m_pPlayer->FlashlightTurnOn();
+
+		// Nothing to set, or cooldown.
+		return true;
 	}
 
 	default:

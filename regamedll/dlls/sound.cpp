@@ -1638,8 +1638,8 @@ float TEXTURETYPE_PlaySound(TraceResult *ptr, Vector vecSrc, Vector vecEnd, int 
 		// find texture under strike, get material type
 		// copy trace vector into array for trace_texture
 
-		vecSrc.CopyToArray(rgfl1);
-		vecEnd.CopyToArray(rgfl2);
+		vecSrc.CopyToIter(rgfl1);
+		vecEnd.CopyToIter(rgfl2);
 
 		// get texture from entity or world (world is ent(0))
 

@@ -185,7 +185,6 @@ public:
 
 	virtual void Think();
 	virtual BOOL IsAllowedToSpawn(CBaseEntity *pEntity);
-	virtual BOOL FAllowFlashlight();
 
 	virtual BOOL FShouldSwitchWeapon(CBasePlayer *pPlayer, CBaseWeapon *pWeapon);
 	virtual BOOL GetNextBestWeapon(CBasePlayer *pPlayer, CBaseWeapon* pCurrentWeapon);
