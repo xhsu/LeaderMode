@@ -1,7 +1,7 @@
 /*
 
 Created Date: Mar 23 2020
-Remastered Date: May 12 2021
+Remastered Date: May 17 2021
 
 Modern Warfare Dev Team
 	Programmer	- Luna the Reborn
@@ -47,7 +47,7 @@ struct CHudEquipments
 	static inline bool m_bFLOn = false;
 
 	// Drawing data.
-	static constexpr auto COLOR_FL_BASE = 0xFFFFFF, COLOR_FL_BAT_LOW = RGB_REDISH, COLOR_FL_DELTA = COLOR_FL_BAT_LOW - COLOR_FL_BASE;
+	static constexpr auto COLOR_FLASHLIGHT = 0xFFC600, ALPHA_FL_CHARGE = 48;
 	static constexpr auto FL_BORDER_THICKNESS = 2;
 	static constexpr std::array<float, 5> ALPHA_FOR_EACH_SLOT = { 64, 128, 255, 128, 64 };
 	static constexpr auto FONT_SIZE = 20;

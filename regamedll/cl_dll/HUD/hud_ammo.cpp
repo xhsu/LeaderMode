@@ -85,6 +85,7 @@ void CHudAmmo::Think(void)
 	gFontFuncs::GetTextSize(m_hFont, m_wcsClip.c_str(), &iTextWidth, nullptr);
 	ANCHOR_CLIP_TEXT.x = ANCHOR.x + (SIZE.width - iTextWidth) / 2;
 	SIZE_INNERBLOCK.width = (g_pCurWeapon && (g_pCurWeapon->m_pItemInfo->m_iMaxClip > 0)) ? INNERBLOCK_MAX_WIDTH * ((float)g_pCurWeapon->m_iClip / (float)g_pCurWeapon->m_pItemInfo->m_iMaxClip) : 0;
+	SIZE_INNERBLOCK.width = Q_clamp<float>(SIZE_INNERBLOCK.width, 0, INNERBLOCK_MAX_WIDTH);
 }
 
 void CHudAmmo::Reset(void)

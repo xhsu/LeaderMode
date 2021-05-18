@@ -4359,6 +4359,7 @@ void EXT_FUNC CBasePlayer::Spawn()
 	m_rgbClientHasEquipment.fill(false);
 	m_rgbHasEquipment.fill(false);	// clear it.
 	m_rgbHasEquipment[EQP_FLASHLIGHT] = true;	// you always have a flashlight no matter what.
+	ResetUsingEquipment();
 
 	// everything that comes after this, this spawn of the player a the game.
 	if (m_bJustConnected)
@@ -4490,6 +4491,11 @@ void CBasePlayer::Reset()
 	m_vecOldvAngle = g_vecZero;
 	m_lstRebuy.clear();
 	m_iVotedTS = Scheme_UNASSIGNED;
+
+	m_rgbClientHasEquipment.fill(false);
+	m_rgbHasEquipment.fill(false);	// clear it.
+	m_rgbHasEquipment[EQP_FLASHLIGHT] = true;	// you always have a flashlight no matter what.
+	ResetUsingEquipment();
 }
 
 void CBasePlayer::SelectItem(const char *pstr)

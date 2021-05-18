@@ -1,7 +1,7 @@
 /*
 
 Created Date: Mar 23 2020
-Remastered Date: May 12 2021
+Remastered Date: May 17 2021
 
 Modern Warfare Dev Team
 	Programmer	- Luna the Reborn
@@ -235,13 +235,13 @@ void CHudEquipments::MsgFunc_Flashlight(bool bOn, int iBattery)
 	m_bFLOn = bOn;
 
 	m_iFLBattery = iBattery;
-	m_flFLBatteryPercentage = ((float)iBattery) / 100.0f;
+	m_flFLBatteryPercentage = Q_clamp<float>((float)iBattery / 100.0f, 0, 1);
 }
 
 void CHudEquipments::MsgFunc_FlashBat(int iBattery)
 {
 	m_iFLBattery = iBattery;
-	m_flFLBatteryPercentage = ((float)iBattery) / 100.0f;
+	m_flFLBatteryPercentage = Q_clamp<float>((float)iBattery / 100.0f, 0, 1);
 }
 
 void CHudEquipments::Reset(void)
@@ -292,7 +292,13 @@ void CHudEquipments::DrawCount(Vector2D vecOrigin, EquipmentIdType iEqpId, BYTE 
 
 void CHudEquipments::Flashlight(Vector2D vecOrigin, EquipmentIdType iEqpId, BYTE iSlotPos)
 {
-	DrawUtils::glRegularPureColorDrawingInit(COLOR_FL_BASE + round(COLOR_FL_DELTA * (1.0 - m_flFLBatteryPercentage)), m_iStage == MOVING_OUT ? m_rgflSlotCurAlpha[iSlotPos] : m_flAlpha);
-	DrawUtils::Draw2DQuadProgressBar2(vecOrigin, m_rgvSlotCurSize[iSlotPos], FL_BORDER_THICKNESS, m_flFLBatteryPercentage);
+	Vector2D vecBackgroundOrg = vecOrigin, vecBackgroundSize = m_rgvSlotCurSize[iSlotPos];
+	vecBackgroundOrg.y += m_rgvSlotCurSize[iSlotPos].height * (1.0f - m_flFLBatteryPercentage);
+	vecBackgroundSize.height *= m_flFLBatteryPercentage;
+
+	DrawUtils::glRegularPureColorDrawingInit(COLOR_FLASHLIGHT, ALPHA_FL_CHARGE);
+	DrawUtils::Draw2DQuadNoTex(vecBackgroundOrg, vecBackgroundOrg + vecBackgroundSize);
+	DrawUtils::glSetColor(0xFFFFFF, m_iStage == MOVING_OUT ? m_rgflSlotCurAlpha[iSlotPos] : m_flAlpha);
+	DrawUtils::Draw2DQuadProgressBar2(vecOrigin, m_rgvSlotCurSize[iSlotPos], FL_BORDER_THICKNESS, 1);
 	DrawUtils::glRegularPureColorDrawingExit();
 }
