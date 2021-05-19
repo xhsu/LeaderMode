@@ -27,31 +27,12 @@ cl_enginefunc_t *engine = NULL;
 static CBasePanel *staticPanel = NULL;
 IKeyValuesSystem* (*KeyValuesSystem)(void) = nullptr;
 
-CCDKeyEntryDialog *g_pCDKeyEntryDialog = NULL;
-
-vgui::DHANDLE<COptionsDialog> g_OptionsDialog;
-vgui::DHANDLE<CCreateMultiplayerGameDialog> g_CreateMultiplayerGameDialog;
-
 void DisplayOptionsDialog(void)
 {
-	if (!g_OptionsDialog.Get())
-	{
-		g_OptionsDialog = new COptionsDialog(staticPanel);
-	}
-
-	g_OptionsDialog->SetPos( 40, 40 );
-	g_OptionsDialog->Activate();
 }
 
 void DisplayCreateMultiplayerGameDialog(void)
 {
-	if (!g_CreateMultiplayerGameDialog.Get())
-	{
-		g_CreateMultiplayerGameDialog = new CCreateMultiplayerGameDialog(staticPanel);
-	}
-
-	g_CreateMultiplayerGameDialog->SetPos( 40, 40 );
-	g_CreateMultiplayerGameDialog->Activate();
 }
 
 IGameUI::IGameUI()
@@ -151,8 +132,8 @@ void IGameUI::Start(struct cl_enginefuncs_s *engineFuncs, int interfaceVersion, 
 
 	vgui::scheme()->LoadSchemeFromFile( "Resource/SourceScheme.res", "SourceScheme" );
 
-	char cdkey[256];
-
+	//char cdkey[256];
+	//
 	//vgui::system()->GetRegistryString("HKEY_CURRENT_USER\\Software\\Valve\\Half-Life\\Settings\\ValveKey", cdkey, sizeof(cdkey) - 1);
 	//
 	//if (!strlen(cdkey))
@@ -174,19 +155,10 @@ void IGameUI::Start(struct cl_enginefuncs_s *engineFuncs, int interfaceVersion, 
 	//		}
 	//	}
 	//}
-
-	g_ShopItemManager.Initialize();
-	g_User.Initialize();
-
-	gUI.Initialize( staticPanel );
-	gUI.Start();
 }
 
 void IGameUI::Shutdown(void)
 {
-	gUI.Shutdown();
-	g_User.Shutdown();
-	g_ShopItemManager.Shutdown();
 }
 
 int IGameUI::ActivateGameUI(void)
@@ -246,14 +218,6 @@ bool IGameUI::IsGameUIActive(void)
 void IGameUI::LoadingStarted(const char *resourceType, const char *resourceName)
 {
 	//gEngfuncs.Con_Printf("LoadingStarted: Type:%s Name:%s\n", resourceType, resourceName);
-
-	if (!Q_strcmp(resourceType, "level"))
-	{
-		if (gUI.GetLoading())
-		{
-			gUI.GetLoading()->SetMapBg( "tex/UI/Loading/LOADINGTD_CQB_GR.dtx" );
-		}
-	}
 }
 
 void IGameUI::LoadingFinished(const char *resourceType, const char *resourceName)
@@ -264,28 +228,6 @@ void IGameUI::LoadingFinished(const char *resourceType, const char *resourceName
 static bool g_skipfirstset = false;
 void IGameUI::StartProgressBar(const char *progressType, int progressSteps)
 {
-	//gEngfuncs.Con_Printf("StartProgressBar: Type:%s Step:%d\n", progressType, progressSteps);
-
-	if (!Q_strcmp(progressType, "Connecting"))
-	{
-		if (gUI.GetRoom())
-		{
-			gUI.GetRoom()->Close();
-		}
-
-		if (gUI.GetMsgWnd())
-		{
-			gUI.GetMsgWnd()->Close();
-		}
-
-		if (gUI.GetLoading())
-		{
-			gUI.GetLoading()->SetProgress( 1 );
-			gUI.GetLoading()->Activate();
-		}
-
-		g_skipfirstset = true;
-	}
 }
 
 int IGameUI::ContinueProgressBar(int progressPoint, float progressFraction)
@@ -298,22 +240,11 @@ int IGameUI::ContinueProgressBar(int progressPoint, float progressFraction)
 		return 1;
 	}
 
-	if (gUI.GetLoading())
-	{
-		gUI.GetLoading()->SetProgress( progressPoint / 11.0 * 100 );
-	}
-
 	return 1;
 }
 
 void IGameUI::StopProgressBar(bool bError, const char *failureReason, const char *extendedReason)
 {
-	//gEngfuncs.Con_Printf("StopProgressBar: Error:%d failureReason:%s extendedReason:%s\n", bError, failureReason, extendedReason);
-
-	if (gUI.GetLoading())
-	{
-		gUI.GetLoading()->Close();
-	}
 }
 
 int IGameUI::SetProgressBarStatusText(const char *statusText)

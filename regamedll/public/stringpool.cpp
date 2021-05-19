@@ -65,7 +65,7 @@ const char * CStringPool::Allocate( const char *pszValue )
 	if ( !bNew )
 		return m_Strings[i];
 
-	pszNew = strdup( pszValue );
+	pszNew = Q_strdup( pszValue );
 
 	if ( bNew )
 		m_Strings.Insert( pszNew );

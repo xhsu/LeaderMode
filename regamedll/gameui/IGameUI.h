@@ -43,6 +43,9 @@ class Panel;
 class IGameUI : public IBaseInterface
 {
 public:
+	IGameUI();
+	~IGameUI();
+
 	virtual void Initialize( CreateInterfaceFn *factories, int count );
 	virtual void Start(struct cl_enginefuncs_s *engineFuncs, int interfaceVersion, IBaseSystem *system);
 	virtual void Shutdown();

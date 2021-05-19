@@ -12,15 +12,15 @@
 #pragma once
 #endif
 
-#include "tier1/utlvector.h"
-#include "tier1/utlsymbol.h"
-#include <vgui/VGUI.h>
-#include <vgui/Dar.h>
-#include <vgui/Cursor.h>
-#include <vgui/IScheme.h>
+#include "utlvector.h"
+#include "utlsymbol.h"
+#include <cl_dll/Interface/VGUI/VGUI.h>
+#include <cl_dll/Interface/VGUI/Dar.h>
+#include <cl_dll/Interface/VGUI/Cursor.h>
+#include <cl_dll/Interface/VGUI/IScheme.h>
 #include <vgui_controls/Controls.h>
 #include <vgui_controls/PHandle.h>
-#include "tier1/utlhandletable.h"
+#include "utlhandletable.h"
 
 class KeyValues;
 

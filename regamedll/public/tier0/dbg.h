@@ -420,7 +420,7 @@ private:
 
 // Luna: these are marcos from another dbg.h
 //#define Assert assert
-//#define AssertOnce assert
+#define AssertOnce assert
 //#define AssertValidStringPtr(...) ((void)0)
 //#define AssertValidReadPtr(...) ((void)0)
 //#define AssertValidWritePtr(...) ((void)0)

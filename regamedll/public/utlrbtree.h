@@ -12,6 +12,7 @@
 #include "utlmemory.h"
 #include "utlfixedmemory.h"
 #include "utlblockmemory.h"
+#include "strtools.h"
 
 //-----------------------------------------------------------------------------
 // Tool to generate a default compare function for any type that implements
@@ -29,8 +30,8 @@ public:
 
 //-------------------------------------
 
-inline bool StringLessThan( const char * const &lhs, const char * const &rhs)			{ return ( strcmp( lhs, rhs) < 0 );  }
-inline bool CaselessStringLessThan( const char * const &lhs, const char * const &rhs )	{ return ( stricmp( lhs, rhs) < 0 ); }
+inline bool StringLessThan( const char * const &lhs, const char * const &rhs)			{ return ( Q_strcmp( lhs, rhs) < 0 );  }
+inline bool CaselessStringLessThan( const char * const &lhs, const char * const &rhs )	{ return ( Q_stricmp( lhs, rhs) < 0 ); }
 
 // Same as CaselessStringLessThan, but it ignores differences in / and \.
 inline bool CaselessStringLessThanIgnoreSlashes( const char * const &lhs, const char * const &rhs )	
@@ -306,13 +307,13 @@ public:
 
 	bool IsValidIndex( I i ) const
 	{
-		if ( !Elements().IsIdxValid( i ) )
+		if (!CUtlRBTree<T, I, L, CUtlFixedMemory<UtlRBTreeNode_t<T, I>>>::Elements().IsIdxValid(i))
 			return false;
 
 #ifdef _DEBUG // it's safe to skip this here, since the only way to get indices after m_LastAlloc is to use MaxElement()
-		if ( Elements().IsIdxAfter( i, this->m_LastAlloc ) )
+		if (CUtlRBTree<T, I, L, CUtlFixedMemory<UtlRBTreeNode_t<T, I>>>::Elements().IsIdxAfter(i, this->m_LastAlloc))
 		{
-			Assert( 0 );
+			Assert(0);
 			return false; // don't read values that have been allocated, but not constructed
 		}
 #endif

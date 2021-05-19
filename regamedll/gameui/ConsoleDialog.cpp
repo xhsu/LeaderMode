@@ -5,7 +5,6 @@
 // $NoKeywords: $
 //===========================================================================//
 
-#include "cvardef.h"
 #include <stdlib.h>
 
 #include "precompiled.h"
@@ -956,7 +955,7 @@ void CConsolePanel::AddToHistory( const char *commandText, const char *extraText
 		if ( !item )
 			continue;
 
-		if ( stricmp( item->GetText(), command ) )
+		if ( Q_stricmp( item->GetText(), command ) )
 			continue;
 
 		if ( extra || item->GetExtra() )
@@ -965,7 +964,7 @@ void CConsolePanel::AddToHistory( const char *commandText, const char *extraText
 				continue;
 
 			// stricmp so two commands with the same starting text get added
-			if ( stricmp( item->GetExtra(), extra ) )	
+			if ( Q_stricmp( item->GetExtra(), extra ) )	
 				continue;
 		}
 		m_CommandHistory.Remove( i );

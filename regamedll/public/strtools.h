@@ -124,6 +124,7 @@ inline char *_strlwr(char *start)
 	#define Q_strtok strtok
 	#define Q_strlwr _strlwr
 	#define Q_strupr _strupr
+	#define Q_strdup _strdup
 	#define Q_sprintf sprintf_s
 	#define Q_snprintf _snprintf
 	#define Q_vsnprintf _vsnprintf
@@ -299,4 +300,58 @@ inline const char* Q_strnchr(const char* pStr, char c, int n)
 		++pLetter;
 	}
 	return NULL;
+}
+
+//-----------------------------------------------------------------------------
+// Finds a string in another string with a case insensitive test
+//-----------------------------------------------------------------------------
+inline char const* Q_stristr(char const* pStr, char const* pSearch)
+{
+	AssertValidStringPtr(pStr);
+	AssertValidStringPtr(pSearch);
+
+	if (!pStr || !pSearch)
+		return 0;
+
+	char const* pLetter = pStr;
+
+	// Check the entire string
+	while (*pLetter != 0)
+	{
+		// Skip over non-matches
+		if (tolower((unsigned char)*pLetter) == tolower((unsigned char)*pSearch))
+		{
+			// Check for match
+			char const* pMatch = pLetter + 1;
+			char const* pTest = pSearch + 1;
+			while (*pTest != 0)
+			{
+				// We've run off the end; don't bother.
+				if (*pMatch == 0)
+					return 0;
+
+				if (tolower((unsigned char)*pMatch) != tolower((unsigned char)*pTest))
+					break;
+
+				++pMatch;
+				++pTest;
+			}
+
+			// Found a match!
+			if (*pTest == 0)
+				return pLetter;
+		}
+
+		++pLetter;
+	}
+
+	return 0;
+}
+
+inline char* Q_stristr(char* pStr, char const* pSearch)
+{
+	AssertValidStringPtr(pStr);
+	AssertValidStringPtr(pSearch);
+
+	return (char*)Q_stristr((char const*)pStr, pSearch);
 }

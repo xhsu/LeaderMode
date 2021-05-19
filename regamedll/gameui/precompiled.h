@@ -37,6 +37,9 @@ Modern Warfare Dev Team
 // Tier 3... Crsky, what's that?
 #include "../tier3/tier3.h"
 
+// Cvar
+#include "cvardef.h"
+
 // Don't we just use a lib and a dll??
 #include "cl_dll/Interface/IGameUIFuncs.h"
 #include "cl_dll/Interface/IEngineVGui.h"
@@ -63,12 +66,13 @@ Modern Warfare Dev Team
 #include "../public/utlbuffer.h"
 #include "../public/characterset.h"
 
+// Custom controls
+#include "BasePanel.h"
+#include "GameConsoleDialog.h"
+
 // The Key/Signiture of GameUI.dll
 #include "IGameConsole.h"
 #include "IGameUI.h"
-
-#include "BasePanel.h"
-#include "GameConsoleDialog.h"
 
 
 

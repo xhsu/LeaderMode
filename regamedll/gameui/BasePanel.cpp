@@ -1,6 +1,4 @@
-#include "BasePanel.h"
-#include "EngineInterface.h"
-#include <itextureapi.h>
+#include "precompiled.h"
 
 CBasePanel::CBasePanel() : vgui::Panel(NULL, "BaseGameUIPanel")
 {

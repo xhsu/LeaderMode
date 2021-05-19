@@ -98,7 +98,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(ProjectDir)..\..\lib\tier1.lib;$(ProjectDir)..\..\lib\tier3.lib;$(ProjectDir)..\..\lib\vgui_controls.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>tier1.lib;tier3.lib;vgui_controls.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -119,7 +120,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(ProjectDir)..\..\lib\tier1.lib;$(ProjectDir)..\..\lib\tier3.lib;$(ProjectDir)..\..\lib\vgui_controls.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>tier1.lib;tier3.lib;vgui_controls.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

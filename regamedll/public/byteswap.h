@@ -10,7 +10,7 @@
 #pragma once
 #endif
 
-#include "tier1/strtools.h"
+#include "strtools.h"
 
 class CByteswap
 {

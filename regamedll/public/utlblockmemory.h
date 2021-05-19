@@ -16,6 +16,7 @@
 
 #include "tier0/dbg.h"
 #include "tier0/platform.h"
+#include "mathlib.h"
 
 #pragma warning (disable:4100)
 #pragma warning (disable:4514)
@@ -339,7 +340,5 @@ void CUtlBlockMemory<T,I>::Purge( int numElements )
 
 	ChangeSize( nBlocks );
 }
-
-#include "tier0/memdbgoff.h"
 
 #endif // UTLBLOCKMEMORY_H

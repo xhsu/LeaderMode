@@ -1162,19 +1162,17 @@ const wchar_t *KeyValues::GetWString( const char *keyName, const wchar_t *defaul
 		switch ( dat->m_iDataType )
 		{
 		case TYPE_FLOAT:
-			swprintf(wbuf, L"%f", dat->m_flValue);
+			Q_wslprintf(wbuf, L"%f", dat->m_flValue);
 			SetWString( keyName, wbuf);
 			break;
 		case TYPE_INT:
 		case TYPE_PTR:
-			swprintf( wbuf, L"%d", dat->m_iValue );
+			Q_wslprintf( wbuf, L"%d", dat->m_iValue );
 			SetWString( keyName, wbuf );
 			break;
 		case TYPE_UINT64:
-			{
-				swprintf( wbuf, L"%I64i", *((uint64 *)(dat->m_sValue)) );
-				SetWString( keyName, wbuf );
-			}
+			Q_wslprintf(wbuf, L"%I64i", *((uint64*)(dat->m_sValue)));
+			SetWString(keyName, wbuf);
 			break;
 
 		case TYPE_WSTRING:
@@ -1722,7 +1720,7 @@ void KeyValues::ParseIncludedKeys( char const *resourceName, const char *filetoi
 	}
 
 	// Append included file
-	Q_strncat( fullpath, filetoinclude, sizeof( fullpath ), COPY_ALL_CHARACTERS );
+	Q_strncat( fullpath, filetoinclude, sizeof( fullpath ) );
 
 	KeyValues *newKV = new KeyValues( fullpath );
 
@@ -2318,8 +2316,6 @@ bool KeyValues::ReadAsBinary( CUtlBuffer &buffer )
 	return buffer.IsValid();
 }
 
-#include "tier0/memdbgoff.h"
-
 //-----------------------------------------------------------------------------
 // Purpose: memory allocator
 //-----------------------------------------------------------------------------
@@ -2370,10 +2366,10 @@ void KeyValues::UnpackIntoStructure( KeyValuesUnpackStructure const *pUnpackTabl
 				Vector *dest_v=(Vector *) dest_field;
 				char const *src_string=
 					GetString( pUnpackTable->m_pKeyName, pUnpackTable->m_pKeyDefault );
-				if ( (!src_string) ||
-					 ( sscanf(src_string,"%f %f %f",
-							  &(dest_v->x), &(dest_v->y), &(dest_v->z)) != 3))
-					dest_v->Init( 0, 0, 0 );
+				if ((!src_string) ||
+					(sscanf(src_string, "%f %f %f",
+						&(dest_v->x), &(dest_v->y), &(dest_v->z)) != 3))
+					dest_v->Clear();
 			}
 			break;
 
@@ -2433,11 +2429,11 @@ void KeyValues::UnpackIntoStructure( KeyValuesUnpackStructure const *pUnpackTabl
 				}
 				else
 				{
-					if ( pUnpackTable->m_pKeyDefault )
-						sscanf(pUnpackTable->m_pKeyDefault,"%f %f %f",
-							   &(dest_v->x), &(dest_v->y), &(dest_v->z));
+					if (pUnpackTable->m_pKeyDefault)
+						sscanf(pUnpackTable->m_pKeyDefault, "%f %f %f",
+							&(dest_v->x), &(dest_v->y), &(dest_v->z));
 					else
-						dest_v->Init( 0, 0, 0 );
+						dest_v->Clear();
 				}
 				*(dest_v) *= (1.0/255);
 			}
@@ -2476,7 +2472,7 @@ bool KeyValues::ProcessResolutionKeys( const char *pResString )
 		if ( Q_stristr( pSubKey->GetName(), pResString ) != NULL )
 		{
 			char normalKeyName[128];
-			V_strncpy( normalKeyName, pSubKey->GetName(), sizeof( normalKeyName ) );
+			Q_strncpy( normalKeyName, pSubKey->GetName(), sizeof( normalKeyName ) );
 
 			// substring must match exactly, otherwise keys like "_lodef" and "_lodef_wide" would clash.
 			char *pString = Q_stristr( normalKeyName, pResString );
