@@ -22,7 +22,6 @@ IBaseFileSystem* g_pFileSystem = nullptr;
 IGameUIFuncs *gameuifuncs = NULL;
 vgui::IEngineVGui *enginevguifuncs = NULL;
 vgui::ISurface *enginesurfacefuncs = NULL;
-cl_enginefunc_t *engine = NULL;
 
 static CBasePanel *staticPanel = NULL;
 IKeyValuesSystem* (*KeyValuesSystem)(void) = nullptr;
@@ -72,7 +71,7 @@ void IGameUI::Initialize(CreateInterfaceFn *factories, int count)
 
 	if (!KeyValuesSystem)
 	{
-		Sys_Error("lm_metahook_module.dll export function \"KeyValuesSystem\" no found!");
+		Sys_Error("lm_metahook_module.dll export function \"GetKeyValueSystem\" no found!");
 		return;
 	}
 
@@ -128,7 +127,6 @@ void IGameUI::Initialize(CreateInterfaceFn *factories, int count)
 void IGameUI::Start(struct cl_enginefuncs_s *engineFuncs, int interfaceVersion, IBaseSystem* system)
 {
 	memcpy(&gEngfuncs, engineFuncs, sizeof(gEngfuncs));
-	engine = &gEngfuncs;
 
 	vgui::scheme()->LoadSchemeFromFile( "Resource/SourceScheme.res", "SourceScheme" );
 
