@@ -1,0 +1,212 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{D2F9C58F-FA8A-42A6-BB1A-9E290F3F3FC6}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <SpectreMitigation>false</SpectreMitigation>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <SpectreMitigation>false</SpectreMitigation>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>15.0.27128.1</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\;..\common;..\public;..\tier1;..\vstdlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <AdditionalIncludeDirectories>..\;..\common;..\public;..\tier1;..\vstdlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="AnimatingImagePanel.cpp" />
+    <ClCompile Include="AnimationController.cpp" />
+    <ClCompile Include="BitmapImagePanel.cpp" />
+    <ClCompile Include="BuildFactoryHelper.cpp" />
+    <ClCompile Include="BuildGroup.cpp" />
+    <ClCompile Include="BuildModeDialog.cpp" />
+    <ClCompile Include="Button.cpp" />
+    <ClCompile Include="CheckButton.cpp" />
+    <ClCompile Include="CheckButtonList.cpp" />
+    <ClCompile Include="ComboBox.cpp" />
+    <ClCompile Include="controls.cpp" />
+    <ClCompile Include="Divider.cpp" />
+    <ClCompile Include="EditablePanel.cpp" />
+    <ClCompile Include="FocusNavGroup.cpp" />
+    <ClCompile Include="Frame.cpp" />
+    <ClCompile Include="GraphPanel.cpp" />
+    <ClCompile Include="HTML.cpp" />
+    <ClCompile Include="Image.cpp" />
+    <ClCompile Include="ImageList.cpp" />
+    <ClCompile Include="ImagePanel.cpp" />
+    <ClCompile Include="InputDialog.cpp" />
+    <ClCompile Include="Label.cpp" />
+    <ClCompile Include="ListPanel.cpp" />
+    <ClCompile Include="ListViewPanel.cpp" />
+    <ClCompile Include="Menu.cpp" />
+    <ClCompile Include="MenuBar.cpp" />
+    <ClCompile Include="MenuButton.cpp" />
+    <ClCompile Include="MenuItem.cpp" />
+    <ClCompile Include="MessageBox.cpp" />
+    <ClCompile Include="MessageDialog.cpp" />
+    <ClCompile Include="Panel.cpp" />
+    <ClCompile Include="PanelListPanel.cpp" />
+    <ClCompile Include="ProgressBar.cpp" />
+    <ClCompile Include="ProgressBox.cpp" />
+    <ClCompile Include="PropertyDialog.cpp" />
+    <ClCompile Include="PropertyPage.cpp" />
+    <ClCompile Include="PropertySheet.cpp" />
+    <ClCompile Include="QueryBox.cpp" />
+    <ClCompile Include="RadioButton.cpp" />
+    <ClCompile Include="RichText.cpp" />
+    <ClCompile Include="ScrollableEditablePanel.cpp" />
+    <ClCompile Include="ScrollBar.cpp" />
+    <ClCompile Include="ScrollBarSlider.cpp" />
+    <ClCompile Include="SectionedListPanel.cpp" />
+    <ClCompile Include="Slider.cpp" />
+    <ClCompile Include="Splitter.cpp" />
+    <ClCompile Include="TextEntry.cpp" />
+    <ClCompile Include="TextImage.cpp" />
+    <ClCompile Include="ToggleButton.cpp" />
+    <ClCompile Include="Tooltip.cpp" />
+    <ClCompile Include="ToolWindow.cpp" />
+    <ClCompile Include="TreeView.cpp" />
+    <ClCompile Include="TreeViewListControl.cpp" />
+    <ClCompile Include="URLLabel.cpp" />
+    <ClCompile Include="WizardPanel.cpp" />
+    <ClCompile Include="WizardSubPanel.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AnimatingImagePanel.h" />
+    <ClInclude Include="AnimationController.h" />
+    <ClInclude Include="BitmapImagePanel.h" />
+    <ClInclude Include="BuildGroup.h" />
+    <ClInclude Include="BuildModeDialog.h" />
+    <ClInclude Include="Button.h" />
+    <ClInclude Include="CheckButton.h" />
+    <ClInclude Include="CheckButtonList.h" />
+    <ClInclude Include="ComboBox.h" />
+    <ClInclude Include="Controls.h" />
+    <ClInclude Include="DialogManager.h" />
+    <ClInclude Include="Divider.h" />
+    <ClInclude Include="EditablePanel.h" />
+    <ClInclude Include="FocusNavGroup.h" />
+    <ClInclude Include="Frame.h" />
+    <ClInclude Include="GraphPanel.h" />
+    <ClInclude Include="HTML.h" />
+    <ClInclude Include="Image.h" />
+    <ClInclude Include="ImageList.h" />
+    <ClInclude Include="ImagePanel.h" />
+    <ClInclude Include="InputDialog.h" />
+    <ClInclude Include="KeyBindingMap.h" />
+    <ClInclude Include="Label.h" />
+    <ClInclude Include="ListPanel.h" />
+    <ClInclude Include="ListViewPanel.h" />
+    <ClInclude Include="Menu.h" />
+    <ClInclude Include="MenuBar.h" />
+    <ClInclude Include="MenuButton.h" />
+    <ClInclude Include="MenuItem.h" />
+    <ClInclude Include="MessageBox.h" />
+    <ClInclude Include="MessageDialog.h" />
+    <ClInclude Include="MessageMap.h" />
+    <ClInclude Include="Panel.h" />
+    <ClInclude Include="PanelAnimationVar.h" />
+    <ClInclude Include="PanelListPanel.h" />
+    <ClInclude Include="pch_vgui_controls.h" />
+    <ClInclude Include="PHandle.h" />
+    <ClInclude Include="ProgressBar.h" />
+    <ClInclude Include="ProgressBox.h" />
+    <ClInclude Include="PropertyDialog.h" />
+    <ClInclude Include="PropertyPage.h" />
+    <ClInclude Include="PropertySheet.h" />
+    <ClInclude Include="QueryBox.h" />
+    <ClInclude Include="RadioButton.h" />
+    <ClInclude Include="RichText.h" />
+    <ClInclude Include="ScrollableEditablePanel.h" />
+    <ClInclude Include="ScrollBar.h" />
+    <ClInclude Include="ScrollBarSlider.h" />
+    <ClInclude Include="SectionedListPanel.h" />
+    <ClInclude Include="Slider.h" />
+    <ClInclude Include="Splitter.h" />
+    <ClInclude Include="TextEntry.h" />
+    <ClInclude Include="TextImage.h" />
+    <ClInclude Include="ToggleButton.h" />
+    <ClInclude Include="Tooltip.h" />
+    <ClInclude Include="ToolWindow.h" />
+    <ClInclude Include="TreeView.h" />
+    <ClInclude Include="TreeViewListControl.h" />
+    <ClInclude Include="URLLabel.h" />
+    <ClInclude Include="WizardPanel.h" />
+    <ClInclude Include="WizardSubPanel.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\tier1\tier1.vcxproj">
+      <Project>{5fff4c62-87de-4d79-b7f0-995dc25feb1c}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\tier3\tier3.vcxproj">
+      <Project>{50ce2d41-7527-4ad5-a564-f507e9b70aca}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

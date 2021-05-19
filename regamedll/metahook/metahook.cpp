@@ -39,6 +39,7 @@ void IPlugins::LoadEngine(void)
 	LargerTexture_InstallHook();
 	FullBLight_InstallHook();
 	Sound_InstallHook();
+	KeyValuesSystem_InstallHook();
 
 	// Search engine function for client.dll
 	SearchEngineFunctions();

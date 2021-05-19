@@ -22,6 +22,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Client", "..\regamedll\cl_d
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Metahook Module", "..\regamedll\metahook\msvc\Metahook Module.vcxproj", "{13AFB6F4-3CB5-454D-B141-A4387E0E0994}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameUI", "..\regamedll\gameui\msvc\GameUI.vcxproj", "{A7FE1326-6A09-4F91-A880-F2311BD2F400}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug Play|Win32 = Debug Play|Win32
@@ -109,6 +111,26 @@ Global
 		{13AFB6F4-3CB5-454D-B141-A4387E0E0994}.Tests|Win32.Build.0 = Release|Win32
 		{13AFB6F4-3CB5-454D-B141-A4387E0E0994}.Tests|x64.ActiveCfg = Release|x64
 		{13AFB6F4-3CB5-454D-B141-A4387E0E0994}.Tests|x64.Build.0 = Release|x64
+		{A7FE1326-6A09-4F91-A880-F2311BD2F400}.Debug Play|Win32.ActiveCfg = Debug|Win32
+		{A7FE1326-6A09-4F91-A880-F2311BD2F400}.Debug Play|Win32.Build.0 = Debug|Win32
+		{A7FE1326-6A09-4F91-A880-F2311BD2F400}.Debug Play|x64.ActiveCfg = Debug|x64
+		{A7FE1326-6A09-4F91-A880-F2311BD2F400}.Debug Play|x64.Build.0 = Debug|x64
+		{A7FE1326-6A09-4F91-A880-F2311BD2F400}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A7FE1326-6A09-4F91-A880-F2311BD2F400}.Debug|Win32.Build.0 = Debug|Win32
+		{A7FE1326-6A09-4F91-A880-F2311BD2F400}.Debug|x64.ActiveCfg = Debug|x64
+		{A7FE1326-6A09-4F91-A880-F2311BD2F400}.Debug|x64.Build.0 = Debug|x64
+		{A7FE1326-6A09-4F91-A880-F2311BD2F400}.Release Play|Win32.ActiveCfg = Release|Win32
+		{A7FE1326-6A09-4F91-A880-F2311BD2F400}.Release Play|Win32.Build.0 = Release|Win32
+		{A7FE1326-6A09-4F91-A880-F2311BD2F400}.Release Play|x64.ActiveCfg = Release|x64
+		{A7FE1326-6A09-4F91-A880-F2311BD2F400}.Release Play|x64.Build.0 = Release|x64
+		{A7FE1326-6A09-4F91-A880-F2311BD2F400}.Release|Win32.ActiveCfg = Release|Win32
+		{A7FE1326-6A09-4F91-A880-F2311BD2F400}.Release|Win32.Build.0 = Release|Win32
+		{A7FE1326-6A09-4F91-A880-F2311BD2F400}.Release|x64.ActiveCfg = Release|x64
+		{A7FE1326-6A09-4F91-A880-F2311BD2F400}.Release|x64.Build.0 = Release|x64
+		{A7FE1326-6A09-4F91-A880-F2311BD2F400}.Tests|Win32.ActiveCfg = Debug|Win32
+		{A7FE1326-6A09-4F91-A880-F2311BD2F400}.Tests|Win32.Build.0 = Debug|Win32
+		{A7FE1326-6A09-4F91-A880-F2311BD2F400}.Tests|x64.ActiveCfg = Debug|x64
+		{A7FE1326-6A09-4F91-A880-F2311BD2F400}.Tests|x64.Build.0 = Debug|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

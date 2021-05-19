@@ -6,7 +6,7 @@
 #endif
 
 #include "interface.h"
-#include <vgui/VGUI.h>
+#include "VGUI.h"
 
 class KeyValues;
 

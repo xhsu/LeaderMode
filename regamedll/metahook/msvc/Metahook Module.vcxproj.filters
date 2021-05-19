@@ -55,6 +55,9 @@
     <ClCompile Include="..\sound.cpp">
       <Filter>metahook</Filter>
     </ClCompile>
+    <ClCompile Include="..\IKeyValuesSystem.cpp">
+      <Filter>metahook</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\precompiled.h">
@@ -91,6 +94,9 @@
       <Filter>game_shared</Filter>
     </ClInclude>
     <ClInclude Include="..\sound.h">
+      <Filter>metahook</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IKeyValuesSystem.h">
       <Filter>metahook</Filter>
     </ClInclude>
   </ItemGroup>

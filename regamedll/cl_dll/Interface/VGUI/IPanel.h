@@ -5,15 +5,11 @@
 #pragma once
 #endif
 
-#include <vgui/VGUI.h>
+#include "VGUI.h"
 #include "interface.h"
 
 #ifdef SendMessage
 #undef SendMessage
-#endif
-
-#ifdef GetClassName
-#undef GetClassName
 #endif
 
 class KeyValues;
@@ -92,5 +88,4 @@ public:
 }
 
 #define VGUI_PANEL_INTERFACE_VERSION "VGUI_Panel007"
-
 #endif

@@ -5,10 +5,10 @@
 #pragma once
 #endif
 
-#include <vgui/VGUI.h>
+#include "VGUI.h"
 #include "interface.h"
-#include "vgui/MouseCode.h"
-#include "vgui/KeyCode.h"
+#include "MouseCode.h"
+#include "KeyCode.h"
 
 namespace vgui
 {
@@ -44,5 +44,4 @@ public:
 }
 
 #define VGUI_INPUT_INTERFACE_VERSION "VGUI_Input004"
-
 #endif

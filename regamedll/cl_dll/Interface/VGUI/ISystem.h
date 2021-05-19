@@ -6,15 +6,15 @@
 #endif
 
 #include "interface.h"
-#include <vgui/VGUI.h>
-#include <vgui/KeyCode.h>
-
-#ifdef PlaySound
-#undef PlaySound
-#endif
+#include "VGUI.h"
+#include "KeyCode.h"
 
 #ifdef GetCurrentTime
 #undef GetCurrentTime
+#endif
+
+#ifdef PlaySound
+#undef PlaySound
 #endif
 
 class KeyValues;
@@ -60,5 +60,4 @@ public:
 }
 
 #define VGUI_SYSTEM_INTERFACE_VERSION "VGUI_System009"
-
 #endif

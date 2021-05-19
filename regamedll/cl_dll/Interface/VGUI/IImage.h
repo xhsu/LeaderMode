@@ -5,7 +5,7 @@
 #pragma once
 #endif
 
-#include <vgui/VGUI.h>
+#include "VGUI.h"
 
 class Color;
 

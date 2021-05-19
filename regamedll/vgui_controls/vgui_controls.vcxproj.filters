@@ -1,0 +1,368 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AnimatingImagePanel.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="AnimationController.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="BitmapImagePanel.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="BuildFactoryHelper.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="BuildGroup.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="BuildModeDialog.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Button.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="CheckButton.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="CheckButtonList.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="ComboBox.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="controls.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Divider.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="EditablePanel.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="FocusNavGroup.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Frame.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphPanel.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="HTML.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Image.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageList.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="ImagePanel.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="InputDialog.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Label.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="ListPanel.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="ListViewPanel.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Menu.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="MenuBar.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="MenuButton.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="MenuItem.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="MessageBox.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="MessageDialog.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Panel.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="PanelListPanel.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="ProgressBar.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="ProgressBox.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="PropertyDialog.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="PropertyPage.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="PropertySheet.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="QueryBox.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="RadioButton.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="RichText.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="ScrollableEditablePanel.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="ScrollBar.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="ScrollBarSlider.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="SectionedListPanel.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Slider.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Splitter.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="TextEntry.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="TextImage.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="ToggleButton.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Tooltip.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="ToolWindow.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="TreeView.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="TreeViewListControl.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="URLLabel.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="WizardPanel.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="WizardSubPanel.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AnimatingImagePanel.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="AnimationController.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="BitmapImagePanel.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="BuildGroup.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="BuildModeDialog.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Button.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="CheckButton.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="CheckButtonList.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="ComboBox.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Controls.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="DialogManager.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Divider.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="EditablePanel.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="FocusNavGroup.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Frame.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphPanel.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="HTML.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Image.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageList.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="ImagePanel.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="InputDialog.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="KeyBindingMap.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Label.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="ListPanel.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="ListViewPanel.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Menu.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="MenuBar.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="MenuButton.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="MenuItem.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="MessageBox.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="MessageDialog.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="MessageMap.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Panel.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="PanelAnimationVar.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="PanelListPanel.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="pch_vgui_controls.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="PHandle.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="ProgressBar.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="ProgressBox.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="PropertyDialog.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="PropertyPage.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="PropertySheet.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="QueryBox.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="RadioButton.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="RichText.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="ScrollableEditablePanel.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="ScrollBar.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="ScrollBarSlider.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="SectionedListPanel.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Slider.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Splitter.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="TextEntry.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="TextImage.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="ToggleButton.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Tooltip.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="ToolWindow.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="TreeView.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="TreeViewListControl.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="URLLabel.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="WizardPanel.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="WizardSubPanel.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

@@ -58,3 +58,6 @@ Modern Warfare Dev Team
 
 // client extended funcs
 #include "client.h"
+
+// bugfix.
+#include "IKeyValuesSystem.h"
