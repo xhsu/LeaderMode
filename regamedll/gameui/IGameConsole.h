@@ -49,8 +49,12 @@ public:
 	// LUNA: Can I add some members?
 public:
 	bool m_bInitialized{ false };
+	CGameConsoleDialog* m_pConsole{ nullptr };
 };
 
 #define GAMECONSOLE_INTERFACE_VERSION "GameConsole003"
+
+// You should instanclize it yourself.
+extern IGameConsole& GameConsole();
 
 #endif // IGAMECONSOLE_H

@@ -7,7 +7,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <vgui/VGUI.h>
+#include <../cl_dll/Interface/VGUI/VGUI.h>
 
 namespace vgui
 {
@@ -28,12 +28,12 @@ public:
 public:
 	void SetCount(int count)
 	{
-		EnsureCount(count);
+		BaseClass::EnsureCount(count);
 	}
 
 	int GetCount(void)
 	{
-		return Count();
+		return BaseClass::Count();
 	}
 
 	int AddElement(ELEMTYPE elem)
@@ -43,15 +43,15 @@ public:
 
 	void MoveElementToEnd(ELEMTYPE elem)
 	{
-		if (Count() == 0)
+		if (BaseClass::Count() == 0)
 			return;
 
-		if (Element(Count() - 1) == elem)
+		if (Element(BaseClass::Count() - 1) == elem)
 			return;
 
 		int idx = Find(elem);
 
-		if (idx == InvalidIndex())
+		if (idx == BaseClass::InvalidIndex())
 			return;
 
 		Remove(idx);
@@ -65,7 +65,7 @@ public:
 
 	bool HasElement(ELEMTYPE elem)
 	{
-		if (FindElement(elem) != InvalidIndex())
+		if (FindElement(elem) != BaseClass::InvalidIndex())
 			return true;
 
 		return false;
@@ -88,13 +88,13 @@ public:
 
 	void SetElementAt(ELEMTYPE elem, int index)
 	{
-		EnsureCount(index + 1);
-		Element(index) = elem;
+		BaseClass::EnsureCount(index + 1);
+		BaseClass::Element(index) = elem;
 	}
 
 	void RemoveElementAt(int index)
 	{
-		Remove(index);
+		BaseClass::Remove(index);
 	} 
 
 	void RemoveElementsBefore(int index)
@@ -102,7 +102,7 @@ public:
 		if (index <= 0)
 			return;
 
-		RemoveMultiple(0, index - 1);
+		BaseClass::RemoveMultiple(0, index - 1);
 	}
 
 	void RemoveElement(ELEMTYPE elem)
@@ -112,7 +112,7 @@ public:
 
 	void *GetBaseData(void)
 	{
-		return Base();
+		return BaseClass::Base();
 	}
 
 	void CopyFrom(Dar<ELEMTYPE> &dar)
@@ -121,7 +121,5 @@ public:
 	}
 };
 }
-
-#include "tier0/memdbgoff.h"
 
 #endif

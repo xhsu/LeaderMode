@@ -9,7 +9,7 @@ Modern Warfare Dev Team
 
 #include "precompiled.h"
 
-IKeyValuesSystem *g_pKeyValuesSystem = NULL;
+IKeyValuesSystem *g_pKeyValuesSystem = nullptr;
 
 void (__fastcall *g_pfnCKeyValuesSystem__RegisterSizeofKeyValues)(void *pthis, int edx, int size) = 0;
 void *(__fastcall *g_pfnCKeyValuesSystem__AllocKeyValuesMemory)(void *pthis, int edx, int size) = 0;
@@ -98,4 +98,9 @@ void KeyValuesSystem_InstallHook()
 	//g_pMetaHookAPI->VFTHook(g_pKeyValuesSystem, 0, 7, (void *)pVFTable[7], (void *&)g_pfnCKeyValuesSystem__GetANSIFromLocalized);
 	//g_pMetaHookAPI->VFTHook(g_pKeyValuesSystem, 0, 8, (void *)pVFTable[8], (void *&)g_pfnCKeyValuesSystem__AddKeyValuesToMemoryLeakList);
 	//g_pMetaHookAPI->VFTHook(g_pKeyValuesSystem, 0, 9, (void *)pVFTable[9], (void *&)g_pfnCKeyValuesSystem__RemoveKeyValuesFromMemoryLeakList);
+}
+
+IKeyValuesSystem* /* DLL_EXPORT for GameUI.dll */ GetKeyValueSystem(void)
+{
+	return g_pKeyValuesSystem;
 }

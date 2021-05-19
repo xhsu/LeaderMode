@@ -35,6 +35,16 @@
 
 #include "archtypes.h"
 
+#define ALIGN16
+#define FORCEINLINE __forceinline
+#define RESTRICT __restrict
+#define DECL_ALIGN(x) __declspec(align(x))
+#define FASTCALL __fastcall
+
+#define PLATFORM_INTERFACE
+
+#define abstract_class class
+
 // Defines MAX_PATH
 #ifndef MAX_PATH
 #define MAX_PATH 260
@@ -127,3 +137,7 @@ inline void Destruct(T *pMemory)
 	memset(pMemory, 0xDD, sizeof(T));
 #endif
 }
+
+inline bool IsPC(void) { return true; }
+inline bool IsX360(void) { return false; }
+inline bool IsXbox(void) { return false; }

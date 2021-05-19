@@ -6,11 +6,7 @@
 //===========================================================================//
 
 #include "precompiled.h"
-#include <string.h>
-#include <locale.h>
 
-// memdbgon must be the last include file in a .cpp file!!!
-#include "../public/tier0/dbg.h"
 
 extern int g_nYou_Must_Add_Public_Vgui_Controls_Vgui_ControlsCpp_To_Your_Project;
 

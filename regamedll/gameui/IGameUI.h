@@ -73,6 +73,9 @@ public:
 	virtual void ValidateCDKey(bool force, bool inConnect);
 
 	virtual void OnDisconnectFromServer( int eSteamLoginFailure, const char *username );
+
+private:
+	bool m_bActivatedUI;
 };
 
 // the interface version is the number to call GameUI_GetInterface(int interfaceNumber) with

@@ -72,9 +72,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>C:\Program Files (x86)\Steam\steamapps\common\Half-Life\leadermode\cl_dlls\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>C:\Program Files (x86)\Steam\steamapps\common\Half-Life\leadermode\cl_dlls\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -90,8 +92,8 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\common;$(ProjectDir)..\..\engine;$(ProjectDir)..\..\GameUI;$(ProjectDir)..\..\public;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\common;$(ProjectDir)..\..\engine;$(ProjectDir)..\..\GameUI;$(ProjectDir)..\..\public;$(ProjectDir)..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>Default</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -109,8 +111,8 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\common;$(ProjectDir)..\..\engine;$(ProjectDir)..\..\GameUI;$(ProjectDir)..\..\public;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\common;$(ProjectDir)..\..\engine;$(ProjectDir)..\..\GameUI;$(ProjectDir)..\..\public;$(ProjectDir)..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>Default</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -150,12 +152,30 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\game_shared\shared_util.cpp" />
+    <ClCompile Include="..\..\public\characterset.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\public\generichash.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\..\public\interface.cpp" />
+    <ClCompile Include="..\..\public\KeyValues.cpp" />
+    <ClCompile Include="..\..\public\stringpool.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\public\tier0\dbg.cpp" />
+    <ClCompile Include="..\..\public\utlbuffer.cpp" />
     <ClCompile Include="..\..\tier3\tier3.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\..\vgui_controls\Controls.cpp" />
+    <ClCompile Include="..\BasePanel.cpp" />
+    <ClCompile Include="..\ConsoleDialog.cpp" />
+    <ClCompile Include="..\GameConsoleDialog.cpp" />
     <ClCompile Include="..\IGameConsole.cpp" />
     <ClCompile Include="..\IGameUI.cpp" />
     <ClCompile Include="..\precompiled.cpp">
@@ -165,9 +185,19 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\game_shared\shared_util.h" />
+    <ClInclude Include="..\..\public\characterset.h" />
+    <ClInclude Include="..\..\public\generichash.h" />
     <ClInclude Include="..\..\public\interface.h" />
+    <ClInclude Include="..\..\public\KeyValues.h" />
+    <ClInclude Include="..\..\public\stringpool.h" />
+    <ClInclude Include="..\..\public\strtools.h" />
+    <ClInclude Include="..\..\public\tier0\dbg.h" />
+    <ClInclude Include="..\..\public\utlbuffer.h" />
     <ClInclude Include="..\..\tier3\tier3.h" />
     <ClInclude Include="..\..\vgui_controls\Controls.h" />
+    <ClInclude Include="..\BasePanel.h" />
+    <ClInclude Include="..\ConsoleDialog.h" />
+    <ClInclude Include="..\GameConsoleDialog.h" />
     <ClInclude Include="..\IGameConsole.h" />
     <ClInclude Include="..\IGameUI.h" />
     <ClInclude Include="..\precompiled.h" />

@@ -43,6 +43,7 @@ public:
 
 // Added by LUNA.
 extern void KeyValuesSystem_InstallHook();
+extern IKeyValuesSystem* g_pKeyValuesSystem;
 
 #define KEYVALUESSYSTEM_INTERFACE_VERSION "KeyValues003"
 #endif

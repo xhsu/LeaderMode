@@ -15,29 +15,6 @@
 
 #include "precompiled.h"
 
-#include "..\cl_dll\Interface\IGameUIFuncs.h"
-#include "..\cl_dll\Interface\IEngineVGui.h"
-#include "..\cl_dll\Interface\VGUI\ISurface.h"
-#include "..\cl_dll\Interface\IVGuiDLL.h"
-
-#include "EngineInterface.h"
-#include "IMTEngine_Internal.h"
-#include "GameUI_Interface.h"
-#include <IVGuiDLL.h>
-#include <IEngineVGui.h>
-#include <vgui/KeyCode.h>
-#include <IGameUIFuncs.h>
-#include <vgui_controls/Controls.h>
-#include <vgui_controls/Panel.h>
-
-#include "BasePanel.h"
-#include "CDKeyEntryDialog.h"
-#include "OptionsDialog.h"
-#include "CreateMultiplayerGameDialog.h"
-
-#include "UserSystem.h"
-#include "ShopItemManager.h"
-#include "UI_Globals.h"
 
 cl_enginefunc_t gEngfuncs;
 IBaseFileSystem* g_pFileSystem = nullptr;
@@ -48,6 +25,7 @@ vgui::ISurface *enginesurfacefuncs = NULL;
 cl_enginefunc_t *engine = NULL;
 
 static CBasePanel *staticPanel = NULL;
+IKeyValuesSystem* (*KeyValuesSystem)(void) = nullptr;
 
 CCDKeyEntryDialog *g_pCDKeyEntryDialog = NULL;
 
@@ -100,6 +78,22 @@ void IGameUI::Initialize(CreateInterfaceFn *factories, int count)
 	// load the VGUI library
 	g_pFileSystem->GetLocalPath("cl_dlls\\vgui_dll.dll", szDllName, sizeof(szDllName));
 	CreateInterfaceFn vguiDllFactory = Sys_GetFactory(Sys_LoadModule(szDllName));
+
+	// Access MH module.
+	HMODULE hMetahookDLL = GetModuleHandle("lm_metahook_module.dll");
+	if (!hMetahookDLL)
+	{
+		Sys_Error("lm_metahook_module.dll no found!");
+		return;
+	}
+
+	*(void**)&KeyValuesSystem = GetProcAddress(hMetahookDLL, "GetKeyValueSystem");
+
+	if (!KeyValuesSystem)
+	{
+		Sys_Error("lm_metahook_module.dll export function \"KeyValuesSystem\" no found!");
+		return;
+	}
 
 	// setup the factory list
 	CreateInterfaceFn factoryList[5] =
@@ -332,6 +326,10 @@ void IGameUI::SetSecondaryProgressBar(float progress)
 }
 
 void IGameUI::SetSecondaryProgressBarText(const char *statusText)
+{
+}
+
+void IGameUI::ValidateCDKey(bool force, bool inConnect)
 {
 }
 

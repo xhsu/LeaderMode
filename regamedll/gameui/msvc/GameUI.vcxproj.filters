@@ -17,6 +17,9 @@
     <Filter Include="vgui_controls">
       <UniqueIdentifier>{b9e3e30a-50f5-41c2-aadf-ec623968965e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="public\tier0">
+      <UniqueIdentifier>{fa425f32-003d-4f14-aa3c-b59d24224826}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\public\interface.cpp">
@@ -40,6 +43,33 @@
     <ClCompile Include="..\..\game_shared\shared_util.cpp">
       <Filter>game_shared</Filter>
     </ClCompile>
+    <ClCompile Include="..\BasePanel.cpp">
+      <Filter>gameui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GameConsoleDialog.cpp">
+      <Filter>gameui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ConsoleDialog.cpp">
+      <Filter>gameui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\public\KeyValues.cpp">
+      <Filter>public</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\public\utlbuffer.cpp">
+      <Filter>public</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\public\characterset.cpp">
+      <Filter>public</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\public\tier0\dbg.cpp">
+      <Filter>public\tier0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\public\stringpool.cpp">
+      <Filter>public</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\public\generichash.cpp">
+      <Filter>public</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\public\interface.h">
@@ -62,6 +92,36 @@
     </ClInclude>
     <ClInclude Include="..\..\game_shared\shared_util.h">
       <Filter>game_shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\BasePanel.h">
+      <Filter>gameui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GameConsoleDialog.h">
+      <Filter>gameui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ConsoleDialog.h">
+      <Filter>gameui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\public\KeyValues.h">
+      <Filter>public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\public\utlbuffer.h">
+      <Filter>public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\public\characterset.h">
+      <Filter>public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\public\strtools.h">
+      <Filter>public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\public\tier0\dbg.h">
+      <Filter>public\tier0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\public\stringpool.h">
+      <Filter>public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\public\generichash.h">
+      <Filter>public</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

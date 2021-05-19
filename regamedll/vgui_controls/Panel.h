@@ -12,22 +12,22 @@
 #pragma once
 #endif
 
-#include "tier1/utlflags.h"
-#include "vgui/VGUI.h"
-#include "vgui/Dar.h"
-#include "vgui_controls/MessageMap.h"
+#include "../public/utlflags.h"
+#include "../cl_dll/Interface/VGUI/VGUI.h"
+#include "../cl_dll/Interface/VGUI/Dar.h"
+#include "../vgui_controls/MessageMap.h"
 #if defined( VGUI_USEKEYBINDINGMAPS )
-#include "vgui_controls/KeyBindingMap.h"
+#include "../vgui_controls/KeyBindingMap.h"
 #endif
-#include "vgui/IClientPanel.h"
-#include "vgui/IScheme.h"
-#include "vgui_controls/Controls.h"
-#include "vgui_controls/PHandle.h"
-#include "vgui_controls/PanelAnimationVar.h"
-#include "Color.h"
-#include "vstdlib/IKeyValuesSystem.h"
-#include "tier1/utlsymbol.h"
-#include "vgui_controls/BuildGroup.h"
+#include "../cl_dll/Interface/VGUI/IClientPanel.h"
+#include "../cl_dll/Interface/VGUI/IScheme.h"
+#include "../vgui_controls/Controls.h"
+#include "../vgui_controls/PHandle.h"
+#include "../vgui_controls/PanelAnimationVar.h"
+#include "../public/Color.h"
+#include "../metahook/IKeyValuesSystem.h"
+#include "../public/utlsymbol.h"
+#include "../vgui_controls/BuildGroup.h"
 
 // undefine windows function macros that overlap 
 #ifdef PostMessage

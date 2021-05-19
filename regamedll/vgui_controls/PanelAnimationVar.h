@@ -10,7 +10,7 @@
 #pragma once
 #endif
 
-#include "tier1/utlvector.h"
+#include "utlvector.h"
 #include <vgui_controls/Panel.h>
 
 #define DECLARE_PANELANIMATION( className )												\
