@@ -7,8 +7,10 @@ Created Date: Mar 12 2020
 #include "precompiled.h"
 #include "VGUI/IEngineVGui.h"
 #include "Interface/IClientVGUI.h"
+#include "Interface/IBaseUI.h"
 
 IEngineVGui* enginevgui;
+IBaseUI* g_pBaseUI = nullptr;
 
 class CClientVGUI : public IClientVGUI
 {
@@ -73,6 +75,7 @@ void CClientVGUI::Initialize(CreateInterfaceFn* factoryList, int count)
 	g_pVGuiSchemeManager = (vgui::ISchemeManager*)factoryList[1](VGUI_SCHEME_INTERFACE_VERSION, NULL);
 	g_pVGuiLocalize = (vgui::ILocalize*)factoryList[1](VGUI_LOCALIZE_INTERFACE_VERSION, NULL);
 	g_pFileSystemInterface = (IFileSystem*)InitializeInterface(FILESYSTEM_INTERFACE_VERSION, factoryList, count);
+	g_pBaseUI = (IBaseUI*)InitializeInterface(BASEUI_INTERFACE_VERSION, factoryList, count);
 
 	if (FILE_SYSTEM)
 	{
