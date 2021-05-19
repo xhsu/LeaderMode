@@ -21,16 +21,16 @@
 void CPointBaseCommand::KeyValue(KeyValueData *pkvd)
 {
 	// add this field to the command list
-	if (m_vecCommands.Count() < MAX_POINT_CMDS)
+	if (m_vecCommands.size() < MAX_POINT_CMDS)
 	{
 		if (pkvd->szValue[0] != '\0' &&
 			Q_strcmp(pkvd->szValue, "-") != 0)
 		{
-			m_vecCommands.AddToTail({ pkvd->szKeyName, pkvd->szValue });
+			m_vecCommands.emplace_back(pkvd->szKeyName, pkvd->szValue);
 		}
 		else
 		{
-			m_vecCommands.AddToTail(pkvd->szKeyName);
+			m_vecCommands.emplace_back(pkvd->szKeyName);
 		}
 
 		pkvd->fHandled = TRUE;
@@ -129,7 +129,7 @@ void CPointServerCommand::Execute(edict_t *pEdict, const char *pszFmt, ...)
 	SERVER_COMMAND(command);
 }
 
-void CPointBaseCommand::OnDestroy()
+CPointBaseCommand::~CPointBaseCommand()
 {
 	if (!(pev->spawnflags & SF_POINT_CMD_NORESET))
 	{
@@ -149,5 +149,5 @@ void CPointBaseCommand::OnDestroy()
 		}
 	}
 
-	m_vecCommands.Purge();
+	m_vecCommands.clear();
 }

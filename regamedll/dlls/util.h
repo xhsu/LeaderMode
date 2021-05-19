@@ -229,7 +229,7 @@ char *UTIL_dtos1(int d);
 char *UTIL_dtos2(int d);
 char *UTIL_dtos3(int d);
 char *UTIL_dtos4(int d);
-void UTIL_ShowMessageArgs(const char *pString, CBaseEntity *pPlayer, CUtlVector<char*> *args, bool isHint = false);
+void UTIL_ShowMessageArgs(const char *pString, CBaseEntity *pPlayer, std::vector<const char*> *args, bool isHint = false);
 void UTIL_ShowMessage(const char *pString, CBaseEntity *pEntity, bool isHint = false);
 void UTIL_ShowMessageAll(const char *pString, bool isHint = false);
 void UTIL_TraceLine(const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTERS igmon, edict_t *pentIgnore, TraceResult *ptr);

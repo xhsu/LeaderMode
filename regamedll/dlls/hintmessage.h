@@ -57,7 +57,7 @@
 class CHintMessage
 {
 public:
-	CHintMessage(const char *hintString, bool isHint, CUtlVector<const char *> *args, float duration);
+	CHintMessage(const char *hintString, bool isHint, std::vector<const char *> *args, float duration);
 	~CHintMessage();
 
 public:
@@ -67,7 +67,7 @@ public:
 private:
 	char *m_hintString;
 	bool m_isHint;
-	CUtlVector<char *> m_args;
+	std::vector<const char*> m_args;
 	float m_duration;
 };
 
@@ -76,10 +76,10 @@ class CHintMessageQueue
 public:
 	void Reset();
 	void Update(CBaseEntity *client);
-	bool AddMessage(const char *message, float duration, bool isHint, CUtlVector<const char *> *args);
-	bool IsEmpty() const { return m_messages.Count() == 0; }
+	bool AddMessage(const char *message, float duration, bool isHint, std::vector<const char *> *args);
+	bool IsEmpty() const { return m_messages.empty(); }
 
 private:
 	float m_tmMessageEnd;
-	CUtlVector<CHintMessage *> m_messages;
+	std::vector<CHintMessage *> m_messages;
 };

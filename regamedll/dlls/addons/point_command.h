@@ -18,18 +18,20 @@
 
 #pragma once
 
-#include <utlvector.h>
+#include <stdexcept>
 
 const int MAX_POINT_CMDS = 16; // maximum number of commands a single point_[server/client]command entity may be assigned
 
 #define SF_POINT_CMD_NORESET BIT(0) // it is not allowed to be resetting to initial value on remove an entity or change level
 
-class CPointBaseCommand: public CPointEntity {
+class CPointBaseCommand: public CPointEntity
+{
 public:
-	virtual void OnDestroy();
+	virtual ~CPointBaseCommand() override;
+
 	virtual void KeyValue(KeyValueData *pkvd);
-	virtual void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value) = 0;
-	virtual void Execute(edict_t *pEdict, const char *pszFmt, ...) = 0;
+	virtual void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value) { throw std::logic_error("You should choose a command type."); }
+	virtual void Execute(edict_t* pEdict, const char* pszFmt, ...) { throw std::logic_error("You should choose a command type."); }
 
 protected:
 
@@ -52,7 +54,7 @@ protected:
 		char name[SIZE], value[SIZE], valueInitial[SIZE];
 	};
 
-	CUtlVector<command_t<64u>> m_vecCommands;
+	std::vector<command_t<64u>> m_vecCommands;
 };
 
 // It issues commands to the client console
