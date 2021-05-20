@@ -142,6 +142,9 @@ void CL_DLLEXPORT HUD_Init(void)
 
 BOOL CL_DLLEXPORT HUD_Key_Event(int down, int keynum, const char* pszCurrentBinding)
 {
+	if (keynum == 96)	// Console key. Make sure that engine handles it. LUNA: Why it does not listed in keydef.h???
+		return TRUE;
+
 	return HUD_Key_Event2(down, keynum, pszCurrentBinding);
 }
 

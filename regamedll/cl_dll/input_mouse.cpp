@@ -421,7 +421,7 @@ void IN_ActivateMouse2(void)
 			restore_spi = SystemParametersInfo (SPI_SETMOUSE, 0, newmouseparms, 0);
 
 		g_bMouseControlledByGame = 1;
-		g_iVisibleMouse = 1;
+		g_iVisibleMouse = 0;
 
 		// this reset prevents instant v_angle change due to cursor movement in intermission screen.
 		IN_ResetMouse();
@@ -441,7 +441,7 @@ void IN_DeactivateMouse2(void)
 			SystemParametersInfo (SPI_SETMOUSE, 0, originalmouseparms, 0);
 
 		g_bMouseControlledByGame = 0;
-		g_iVisibleMouse = 0;
+		g_iVisibleMouse = 1;
 	}
 }
 
