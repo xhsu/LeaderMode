@@ -587,6 +587,9 @@ void gHUD::CalcRefdef(ref_params_s* pparams)
 
 bool gHUD::KeyEvent(bool bDown, int iKeyIndex, const char* pszCurrentBinding)	// Return true to allow engine to process the key, otherwise, act on it as needed
 {
+	if (!g_bInGameWorld)
+		return true;
+
 	if (pszCurrentBinding && !Q_strcmp(pszCurrentBinding, "buy"))	// allow the exit from buy menu.
 		return true;
 
@@ -595,7 +598,7 @@ bool gHUD::KeyEvent(bool bDown, int iKeyIndex, const char* pszCurrentBinding)	//
 	if (!gHUD::m_UI_BuyMenu.m_Baseboard.KeyEvent(bDown, iKeyIndex, pszCurrentBinding))
 		bGoToEngine = false;
 
-	return (g_bMouseControlledByGame && bGoToEngine);	// if controlled by game, then okay. otherwise, no.
+	return (g_bInGameWorld && bGoToEngine);	// if it is not in the game world, of course it should be controlled by engine. otherwise, consider it.
 }
 
 int gHUD::GetSpriteIndex(const char* SpriteName)
