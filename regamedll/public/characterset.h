@@ -28,7 +28,24 @@ struct characterset_t
 // Input  : *pSetBuffer - pointer to the buffer for the group
 //			*pSetString - list of characters to flag
 //-----------------------------------------------------------------------------
-extern void CharacterSetBuild( characterset_t *pSetBuffer, const char *pSetString );
+// Luna: this characterset.cpp just keeps being corrupted. Hence I decided to merge it into header file.
+inline void CharacterSetBuild(characterset_t* pSetBuffer, const char* pszSetString)
+{
+	int i = 0;
+
+	// Test our pointers
+	if (!pSetBuffer || !pszSetString)
+		return;
+
+	memset(pSetBuffer->set, 0, sizeof(pSetBuffer->set));
+
+	while (pszSetString[i])
+	{
+		pSetBuffer->set[pszSetString[i]] = 1;
+		i++;
+	}
+
+}
 
 
 //-----------------------------------------------------------------------------

@@ -58,9 +58,6 @@
     <ClCompile Include="..\..\public\utlbuffer.cpp">
       <Filter>public</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\public\characterset.cpp">
-      <Filter>public</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\public\tier0\dbg.cpp">
       <Filter>public\tier0</Filter>
     </ClCompile>
