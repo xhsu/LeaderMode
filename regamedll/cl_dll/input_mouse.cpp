@@ -7,7 +7,7 @@ Created Date: 06 Mar 2020
 #include "precompiled.h"
 #include "../external/SDL2/SDL_mouse.h"
 
-int	g_iVisibleMouse = 0;
+bool	g_iVisibleMouse = 0;
 
 int			mouse_buttons;
 int			mouse_oldbuttonstate;
@@ -421,6 +421,7 @@ void IN_ActivateMouse2(void)
 			restore_spi = SystemParametersInfo (SPI_SETMOUSE, 0, newmouseparms, 0);
 
 		g_bMouseControlledByGame = 1;
+		g_iVisibleMouse = 1;
 
 		// this reset prevents instant v_angle change due to cursor movement in intermission screen.
 		IN_ResetMouse();
@@ -440,6 +441,7 @@ void IN_DeactivateMouse2(void)
 			SystemParametersInfo (SPI_SETMOUSE, 0, originalmouseparms, 0);
 
 		g_bMouseControlledByGame = 0;
+		g_iVisibleMouse = 0;
 	}
 }
 
