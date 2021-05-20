@@ -7,7 +7,7 @@ Created Date: 06 Mar 2020
 #include "precompiled.h"
 #include "../external/SDL2/SDL_mouse.h"
 
-char	g_iVisibleMouse = 0;
+bool	g_iVisibleMouse = 0;
 
 int			mouse_buttons;
 int			mouse_oldbuttonstate;

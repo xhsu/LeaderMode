@@ -191,7 +191,7 @@ void gHUD::Init(void)
 	//m_Scoreboard.Init();	// this is definately the last layer.
 
 	// UI is always above all other HUD elements.
-	//m_UI_BuyMenu.Init();
+	m_UI_BuyMenu.Init();
 
 	// UNDONE
 	//GetClientVoice()->Init(&g_VoiceStatusHelper);

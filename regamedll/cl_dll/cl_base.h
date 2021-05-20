@@ -80,7 +80,7 @@ Created Date: 05 Mar 2020
 #include "../common/r_studioint.h"
 
 // for keybinds
-#include "../public/keydefs.h"
+#include "../engine/keydefs.h"
 
 // for mstudioanim_t
 #include "../engine/studio.h"
