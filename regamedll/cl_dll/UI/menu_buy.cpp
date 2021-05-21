@@ -14,6 +14,12 @@ void CommandFunc_Buy(void)
 	if (gHUD::m_UI_BuyMenu.m_bitsFlags & IN_ACTIVE)
 	{
 		gHUD::m_UI_BuyMenu.m_bitsFlags &= ~IN_ACTIVE;
+
+		if (g_pViewport)
+		{
+			g_pViewport->SetVisible(true);
+		}
+
 		IN_ActivateMouse();
 		//gEngfuncs.pfnSetMouseEnable(true);
 		//VGUI_SURFACE->LockCursor();
@@ -22,6 +28,12 @@ void CommandFunc_Buy(void)
 	else
 	{
 		gHUD::m_UI_BuyMenu.m_bitsFlags |= IN_ACTIVE;
+
+		if (g_pViewport)
+		{
+			g_pViewport->SetVisible(false);
+		}
+
 		IN_DeactivateMouse();
 		//gEngfuncs.pfnSetMouseEnable(false);
 		//VGUI_SURFACE->UnlockCursor();

@@ -12,8 +12,8 @@
 #pragma once
 #endif
 
-#include <cl_dll/Interface/VGUI/VGUI.h>
-#include <cl_dll/Interface/VGUI/Dar.h>
+#include <VGUI/VGUI.h>
+#include <VGUI/Dar.h>
 #include <vgui_controls/Panel.h>
 #include <vgui_controls/EditablePanel.h>
 #include <vgui_controls/FocusNavGroup.h>

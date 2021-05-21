@@ -5,7 +5,7 @@
 #pragma once
 #endif
 
-#include "interface.h"
+#include "public/interface.h"
 
 // handle to a KeyValues key name symbol
 typedef int HKeySymbol;

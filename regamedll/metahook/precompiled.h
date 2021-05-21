@@ -29,8 +29,8 @@ Modern Warfare Dev Team
 #include <gl/GLU.h>
 
 // VGUI surface, for createNewTextureId().
-#include "../cl_dll/VGUI/VGUI.h"
-#include "../cl_dll/VGUI/ISurface.h"
+#include "VGUI/VGUI.h"
+#include "VGUI/ISurfaceV26.h"
 
 // dxt
 #define FILE_SYSTEM	g_pInterface->FileSystem

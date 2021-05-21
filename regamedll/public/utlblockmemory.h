@@ -16,7 +16,7 @@
 
 #include "tier0/dbg.h"
 #include "tier0/platform.h"
-#include "mathlib.h"
+#include "common/mathlib.h"
 
 #pragma warning (disable:4100)
 #pragma warning (disable:4514)

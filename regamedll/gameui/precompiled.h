@@ -29,7 +29,7 @@ Modern Warfare Dev Team
 #include "../public/interface.h"
 
 // File System
-#include "../public/FileSystem.h"
+#include <Interface/IFileSystem.h>
 
 // gEngfuncs
 #include "../engine/APIProxy.h"
@@ -41,22 +41,21 @@ Modern Warfare Dev Team
 #include "cvardef.h"
 
 // Don't we just use a lib and a dll??
-#include "cl_dll/Interface/IGameUIFuncs.h"
-#include "cl_dll/Interface/IEngineVGui.h"
-#include "cl_dll/Interface/IVGuiDLL.h"
-#include "cl_dll/Interface/VGUI/IInput.h"
-#include "cl_dll/Interface/VGUI/IScheme.h"
-#include "cl_dll/Interface/VGUI/IVGui.h"
-#include "cl_dll/Interface/VGUI/ISurface.h"
-#include "cl_dll/Interface/VGUI/ILocalize.h"
+#include "Interface/IGameUIFuncs.h"
+#include "Interface/IEngineVGui.h"
+#include "Interface/IVGuiDLL.h"
+#include "VGUI/IInput.h"
+#include "VGUI/IScheme.h"
+#include "VGUI/IVGui.h"
+#include "VGUI/ISurface.h"
+#include "VGUI/ILocalize.h"
 #include "public/KeyValues.h"
 
 #include "vgui_controls/Button.h"
-#include "cl_dll/Interface/VGUI/KeyCode.h"
+#include "VGUI/KeyCode.h"
 #include "vgui_controls/Menu.h"
 #include "vgui_controls/TextEntry.h"
 #include "vgui_controls/RichText.h"
-#include "FileSystem.h"
 #include "vgui_controls/MessageMap.h"
 #include "vgui_controls/Controls.h"
 

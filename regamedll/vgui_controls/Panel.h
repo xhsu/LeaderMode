@@ -13,14 +13,14 @@
 #endif
 
 #include "../public/utlflags.h"
-#include "../cl_dll/Interface/VGUI/VGUI.h"
-#include "../cl_dll/Interface/VGUI/Dar.h"
+#include "VGUI/VGUI.h"
+#include "VGUI/Dar.h"
 #include "../vgui_controls/MessageMap.h"
 #if defined( VGUI_USEKEYBINDINGMAPS )
 #include "../vgui_controls/KeyBindingMap.h"
 #endif
-#include "../cl_dll/Interface/VGUI/IClientPanel.h"
-#include "../cl_dll/Interface/VGUI/IScheme.h"
+#include "VGUI/IClientPanel.h"
+#include "VGUI/IScheme.h"
 #include "../vgui_controls/Controls.h"
 #include "../vgui_controls/PHandle.h"
 #include "../vgui_controls/PanelAnimationVar.h"

@@ -15,7 +15,7 @@
 #pragma once
 #endif
 
-#include <cl_dll/Interface/VGUI/VGUI.h>
+#include <VGUI/VGUI.h>
 #include <Color.h>
 #include <vgui_controls/Panel.h>
 #include <vgui_controls/Label.h>

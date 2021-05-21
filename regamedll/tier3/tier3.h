@@ -1,16 +1,16 @@
 #ifndef TIER3_H
 #define TIER3_H
 
-#include <filesystem.h>
-#include <../metahook/IKeyValuesSystem.h>
-#include <../cl_dll/Interface/VGUI/VGUI.h>
-#include <../cl_dll/Interface/VGUI/ISurface.h>
-#include <../cl_dll/Interface/VGUI/IInput.h>
-#include <../cl_dll/Interface/VGUI/IVGui.h>
-#include <../cl_dll/Interface/VGUI/IPanel.h>
-#include <../cl_dll/Interface/VGUI/ILocalize.h>
-#include <../cl_dll/Interface/VGUI/IScheme.h>
-#include <../cl_dll/Interface/VGUI/ISystem.h>
+#include <Interface/IFileSystem.h>
+#include <metahook/IKeyValuesSystem.h>
+#include <vgui/VGUI.h>
+#include <vgui/ISurface.h>
+#include <vgui/IInput.h>
+#include <vgui/IVGui.h>
+#include <vgui/IPanel.h>
+#include <vgui/ILocalize.h>
+#include <vgui/IScheme.h>
+#include <vgui/ISystem.h>
 
 //-----------------------------------------------------------------------------
 // These tier3 libraries must be set by any users of this library.

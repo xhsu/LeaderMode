@@ -15,7 +15,7 @@
 #include <utllinkedlist.h>
 #include <utlvector.h>
 #include <utlrbtree.h>
-#include <cl_dll/Interface/VGUI/VGUI.h>
+#include <VGUI/VGUI.h>
 #include <vgui_controls/Panel.h>
 
 class KeyValues;

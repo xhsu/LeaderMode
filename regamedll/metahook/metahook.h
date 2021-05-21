@@ -45,9 +45,9 @@ typedef struct mh_enginesave_s
 }
 mh_enginesave_t;
 
-#include <../cl_dll/Interface/IFileSystem.h>
-#include <../cl_dll/Interface/ICommandLine.h>
-#include <../cl_dll/Interface/IRegistry.h>
+#include <Interface/IFileSystem.h>
+#include <Interface/ICommandLine.h>
+#include <Interface/IRegistry.h>
 
 typedef struct mh_interface_s
 {
@@ -57,7 +57,7 @@ typedef struct mh_interface_s
 }
 mh_interface_t;
 
-#include <../cl_dll/Interface/IPlugins.h>
+#include <Interface/IPlugins.h>
 
 extern mh_interface_t *g_pInterface;
 extern cl_enginefunc_t gEngfuncs;

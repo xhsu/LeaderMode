@@ -13,7 +13,7 @@
 #endif
 
 #include "utlvector.h"
-#include "cl_dll/Interface/VGUI/VGUI.h"
+#include "VGUI/VGUI.h"
 #include "vgui_controls/Panel.h"
 #include "vgui_controls/PHandle.h"
 

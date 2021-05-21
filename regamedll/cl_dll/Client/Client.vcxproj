@@ -92,17 +92,18 @@
       <PreprocessorDefinitions>CLIENT_WEAPONS;CLIENT_DLL;_CLIENT_DLL;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\;$(ProjectDir)..\..\pm_shared;$(ProjectDir)..\..\engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\;$(ProjectDir)..\..\;$(ProjectDir)..\..\pm_shared;$(ProjectDir)..\..\engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
       <DisableSpecificWarnings>4244;26402;26429;26430;26433;26440;26446;26451;26461;26462;26481;26482;26485;26486;26489;26493;26496;26812;26814;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>export.def</ModuleDefinitionFile>
       <AdditionalLibraryDirectories>$(ProjectDir)..\..\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;opengl32.lib;Glu32.lib;fmod_vc.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;opengl32.lib;Glu32.lib;fmod_vc.lib;tier1.lib;tier3.lib;vgui_controls.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateMapFile>true</GenerateMapFile>
       <AdditionalOptions>/Zc:strictStrings- %(AdditionalOptions)</AdditionalOptions>
     </Link>
@@ -133,6 +134,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)..\;$(ProjectDir)..\..\pm_shared;$(ProjectDir)..\..\engine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -207,6 +209,9 @@
     </ClCompile>
     <ClCompile Include="..\..\public\interface.cpp" />
     <ClCompile Include="..\..\public\particleman.cpp" />
+    <ClCompile Include="..\..\public\tier0\dbg.cpp" />
+    <ClCompile Include="..\..\tier3\tier3.cpp" />
+    <ClCompile Include="..\..\vgui_controls\Controls.cpp" />
     <ClCompile Include="..\cdll_int.cpp" />
     <ClCompile Include="..\cl_base.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -286,6 +291,7 @@
     <ClCompile Include="..\UI\ui_panel.cpp" />
     <ClCompile Include="..\UI\ui_text.cpp" />
     <ClCompile Include="..\view.cpp" />
+    <ClCompile Include="..\Viewport.cpp" />
     <ClCompile Include="..\viewport_interface.cpp" />
     <ClCompile Include="..\weapons.cpp" />
   </ItemGroup>
@@ -312,6 +318,9 @@
     <ClInclude Include="..\..\public\particleman.h" />
     <ClInclude Include="..\..\public\pman_particlemem.h" />
     <ClInclude Include="..\..\public\pman_triangleffect.h" />
+    <ClInclude Include="..\..\public\tier0\dbg.h" />
+    <ClInclude Include="..\..\tier3\tier3.h" />
+    <ClInclude Include="..\..\vgui_controls\Controls.h" />
     <ClInclude Include="..\cdll_int.h" />
     <ClInclude Include="..\cl_base.h" />
     <ClInclude Include="..\cl_util.h" />
@@ -369,6 +378,7 @@
     <ClInclude Include="..\UI\ui_panel.h" />
     <ClInclude Include="..\UI\ui_text.h" />
     <ClInclude Include="..\view.h" />
+    <ClInclude Include="..\Viewport.h" />
     <ClInclude Include="..\viewport_interface.h" />
     <ClInclude Include="..\weapons.h" />
   </ItemGroup>

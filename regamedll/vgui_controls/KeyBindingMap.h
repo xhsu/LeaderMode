@@ -10,7 +10,7 @@
 #pragma once
 #endif
 
-#include "utlvector.h"
+#include "public/utlvector.h"
 
 // more flexible than default pointers to members code required for casting member function pointers
 #pragma pointers_to_members( full_generality, virtual_inheritance )

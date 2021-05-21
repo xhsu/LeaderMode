@@ -71,6 +71,9 @@
     <Filter Include="metahook\portable">
       <UniqueIdentifier>{27021908-dbd5-4445-bd34-258366f7efd4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Interface">
+      <UniqueIdentifier>{5914569f-d8e8-4e69-9d57-59ebb397f0e8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\version\version.cpp">
@@ -400,9 +403,6 @@
     <ClCompile Include="..\dlls\addons\point_command.cpp">
       <Filter>dlls\addons</Filter>
     </ClCompile>
-    <ClCompile Include="..\public\FileSystem.cpp">
-      <Filter>public</Filter>
-    </ClCompile>
     <ClCompile Include="..\dlls\player_classes.cpp">
       <Filter>dlls</Filter>
     </ClCompile>
@@ -472,15 +472,15 @@
     <ClCompile Include="..\public\tier0\dbg.cpp">
       <Filter>public\tier0</Filter>
     </ClCompile>
+    <ClCompile Include="..\Interface\IFileSystem.cpp">
+      <Filter>Interface</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\version\version.h">
       <Filter>version</Filter>
     </ClInclude>
     <ClInclude Include="..\public\archtypes.h">
-      <Filter>public</Filter>
-    </ClInclude>
-    <ClInclude Include="..\public\FileSystem.h">
       <Filter>public</Filter>
     </ClInclude>
     <ClInclude Include="..\public\basetypes.h">
@@ -929,6 +929,9 @@
     </ClInclude>
     <ClInclude Include="..\metahook\portable\metahook.h">
       <Filter>metahook\portable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Interface\IFileSystem.h">
+      <Filter>Interface</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
