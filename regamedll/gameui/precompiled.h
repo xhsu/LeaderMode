@@ -71,6 +71,10 @@ Modern Warfare Dev Team
 #include "vgui_controls/MenuItem.h"
 #include "vgui_controls/AnimationController.h"
 #include "vgui_controls/QueryBox.h"
+#include <vgui_controls/Frame.h>
+#include <vgui_controls/HTML.h>
+#include "vgui_controls/BitmapImagePanel.h"
+#include "vgui_controls/ProgressBar.h"
 
 // general utils.
 #include "../game_shared/shared_util.h"
@@ -90,6 +94,7 @@ Modern Warfare Dev Team
 #include "ModInfo.h"
 #include "BackgroundMenuButton.h"
 #include "GameMenu.h"
+#include "LoadingDialog.h"
 
 
 // General global vars declaration.

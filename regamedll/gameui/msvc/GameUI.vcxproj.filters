@@ -79,6 +79,9 @@
     <ClCompile Include="..\..\vgui_controls\KeyRepeat.cpp">
       <Filter>vgui_controls</Filter>
     </ClCompile>
+    <ClCompile Include="..\LoadingDialog.cpp">
+      <Filter>gameui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\public\interface.h">
@@ -143,6 +146,9 @@
     </ClInclude>
     <ClInclude Include="..\..\vgui_controls\KeyRepeat.h">
       <Filter>vgui_controls</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LoadingDialog.h">
+      <Filter>gameui</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

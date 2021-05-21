@@ -184,6 +184,7 @@
     <ClCompile Include="..\GameMenu.cpp" />
     <ClCompile Include="..\IGameConsole.cpp" />
     <ClCompile Include="..\IGameUI.cpp" />
+    <ClCompile Include="..\LoadingDialog.cpp" />
     <ClCompile Include="..\ModInfo.cpp" />
     <ClCompile Include="..\precompiled.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -210,6 +211,7 @@
     <ClInclude Include="..\GameMenu.h" />
     <ClInclude Include="..\IGameConsole.h" />
     <ClInclude Include="..\IGameUI.h" />
+    <ClInclude Include="..\LoadingDialog.h" />
     <ClInclude Include="..\ModInfo.h" />
     <ClInclude Include="..\precompiled.h" />
   </ItemGroup>

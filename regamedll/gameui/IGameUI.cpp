@@ -30,6 +30,8 @@ static CBasePanel *staticPanel = NULL;
 IKeyValuesSystem* (*KeyValuesSystem)(void) = nullptr;
 ICommandLine* (*CommandLine)(void) = nullptr;
 
+vgui::DHANDLE<CLoadingDialog> g_hLoadingDialog;
+
 void DisplayOptionsDialog(void)
 {
 }
@@ -179,12 +181,22 @@ void IGameUI::Shutdown(void)
 
 int IGameUI::ActivateGameUI(void)
 {
-	if (IsGameUIActive())
-		return 1;
+	if (!m_bLoadlingLevel && g_hLoadingDialog.Get() && IsInLevel())
+	{
+		g_hLoadingDialog->Close();
+		g_hLoadingDialog = NULL;
+	}
 
-	m_bActivatedUI = true;
+	if (!m_bLoadlingLevel)
+	{
+		if (IsGameUIActive())
+			return 1;
+	}
 
-	staticPanel->SetVisible( true );
+	staticPanel->OnGameUIActivated();
+	staticPanel->SetVisible(true);
+
+	gEngfuncs.pfnClientCmd("setpause");
 	return 1;
 }
 
@@ -219,11 +231,21 @@ void IGameUI::DisconnectFromServer(void)
 
 void IGameUI::HideGameUI(void)
 {
-	const char *level = gEngfuncs.pfnGetLevelName();
+	if (!IsGameUIActive())
+		return;
 
-	if (level && *level)
+	if (!IsInLevel())
+		return;
+
+	staticPanel->SetVisible(false);
+
+	gEngfuncs.pfnClientCmd("unpause");
+	gEngfuncs.pfnClientCmd("hideconsole");
+
+	if (!m_bLoadlingLevel && g_hLoadingDialog.Get())
 	{
-		staticPanel->SetVisible( false );
+		g_hLoadingDialog->Close();
+		g_hLoadingDialog = NULL;
 	}
 }
 
@@ -247,39 +269,81 @@ void IGameUI::LoadingFinished(const char *resourceType, const char *resourceName
 	//gEngfuncs.Con_Printf("LoadingFinished: Type:%s Name:%s\n", resourceType, resourceName);
 }
 
-static bool g_skipfirstset = false;
 void IGameUI::StartProgressBar(const char *progressType, int progressSteps)
 {
+	if (!g_hLoadingDialog.Get())
+		g_hLoadingDialog = new CLoadingDialog(staticPanel);
+
+	m_szPreviousStatusText[0] = 0;
+	g_hLoadingDialog->SetProgressRange(0, progressSteps);
+	g_hLoadingDialog->SetProgressPoint(0.0f);
+	g_hLoadingDialog->Open();
 }
 
 int IGameUI::ContinueProgressBar(int progressPoint, float progressFraction)
 {
-	//gEngfuncs.Con_Printf("ContinueProgressBar: Point:%d Fraction:%f\n", progressPoint, progressFraction);
-
-	if (g_skipfirstset && progressPoint == 11)
+	if (!g_hLoadingDialog.Get())
 	{
-		g_skipfirstset = false;
-		return 1;
+		g_hLoadingDialog = new CLoadingDialog(staticPanel);
+		g_hLoadingDialog->SetProgressRange(0, 24);
+		g_hLoadingDialog->SetProgressPoint(0.0f);
+		g_hLoadingDialog->Open();
 	}
 
+	g_hLoadingDialog->Activate();
+	g_hLoadingDialog->SetProgressPoint(progressPoint);
 	return 1;
 }
 
 void IGameUI::StopProgressBar(bool bError, const char *failureReason, const char *extendedReason)
 {
+	if (!g_hLoadingDialog.Get() && bError)
+		g_hLoadingDialog = new CLoadingDialog(staticPanel);
+
+	if (!g_hLoadingDialog.Get())
+		return;
+
+	if (bError)
+	{
+		g_hLoadingDialog->DisplayGenericError(failureReason, extendedReason);
+	}
+	else
+	{
+		g_hLoadingDialog->Close();
+		g_hLoadingDialog = NULL;
+	}
 }
 
 int IGameUI::SetProgressBarStatusText(const char *statusText)
 {
-	return 1;
+	if (!g_hLoadingDialog.Get())
+		return false;
+
+	if (!statusText)
+		return false;
+
+	if (!Q_stricmp(statusText, m_szPreviousStatusText))
+		return false;
+
+	g_hLoadingDialog->SetStatusText(statusText);
+	Q_strncpy(m_szPreviousStatusText, statusText, sizeof(m_szPreviousStatusText));
+	return true;
 }
 
 void IGameUI::SetSecondaryProgressBar(float progress)
 {
+	if (!g_hLoadingDialog.Get())
+		return;
+
+	g_hLoadingDialog->SetSecondaryProgress(progress);
 }
 
 void IGameUI::SetSecondaryProgressBarText(const char *statusText)
 {
+	if (!g_hLoadingDialog.Get())
+		return;
+
+	g_hLoadingDialog->SetSecondaryProgressText(statusText);
 }
 
 void IGameUI::ValidateCDKey(bool force, bool inConnect)

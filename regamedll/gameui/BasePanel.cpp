@@ -13,7 +13,7 @@ Modern Warfare Dev Team
 
 using namespace vgui;
 
-//extern vgui::DHANDLE<CLoadingDialog> g_hLoadingDialog;
+extern vgui::DHANDLE<CLoadingDialog> g_hLoadingDialog;
 extern CBasePanel* staticPanel;
 extern IServerBrowser* serverbrowser;
 
@@ -73,7 +73,7 @@ void CBasePanel::PaintBackground(void)
 	//	PositionDialog(m_hCreateMultiplayerGameDialog);
 	//}
 
-	if (!g_pGameUI->IsInLevel()/* || g_hLoadingDialog.Get()*/)
+	if (!g_pGameUI->IsInLevel() || g_hLoadingDialog.Get())
 	{
 		DrawBackgroundImage();
 	}
@@ -99,13 +99,13 @@ void CBasePanel::UpdateBackgroundState(void)
 	}
 	else if (!m_bLevelLoading)
 	{
-	/*	if (IsPC() || (IsX360() && !g_hLoadingDialog.Get()))
-			SetBackgroundRenderState(BACKGROUND_MAINMENU);*/
+		if (IsPC() || (IsX360() && !g_hLoadingDialog.Get()))
+			SetBackgroundRenderState(BACKGROUND_MAINMENU);
 	}
-	/*else if (m_bLevelLoading && g_hLoadingDialog.Get())
+	else if (m_bLevelLoading && g_hLoadingDialog.Get())
 	{
 		SetBackgroundRenderState(BACKGROUND_LOADING);
-	}*/
+	}
 	else if (m_bEverActivated)
 	{
 		SetBackgroundRenderState(BACKGROUND_DISCONNECTED);
@@ -247,8 +247,8 @@ void CBasePanel::OnLevelLoadingStarted(const char* levelName)
 {
 	m_bLevelLoading = true;
 
-	//if (!g_hLoadingDialog.Get())
-	//	g_hLoadingDialog = new CLoadingDialog(this);
+	if (!g_hLoadingDialog.Get())
+		g_hLoadingDialog = new CLoadingDialog(this);
 }
 
 void CBasePanel::OnLevelLoadingFinished(void)
