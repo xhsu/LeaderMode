@@ -162,6 +162,7 @@
     <ClCompile Include="..\..\game_shared\shared_util.cpp" />
     <ClCompile Include="..\..\public\interface.cpp" />
     <ClCompile Include="..\client.cpp" />
+    <ClCompile Include="..\commandline.cpp" />
     <ClCompile Include="..\engine.cpp" />
     <ClCompile Include="..\exportfuncs.cpp" />
     <ClCompile Include="..\fullbright_textures.cpp" />
@@ -180,6 +181,7 @@
     <ClInclude Include="..\..\public\interface.h" />
     <ClInclude Include="..\cdll_export.h" />
     <ClInclude Include="..\client.h" />
+    <ClInclude Include="..\commandline.h" />
     <ClInclude Include="..\engine.h" />
     <ClInclude Include="..\exportfuncs.h" />
     <ClInclude Include="..\fullbright_textures.h" />

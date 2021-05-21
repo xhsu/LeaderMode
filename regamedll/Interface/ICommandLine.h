@@ -17,6 +17,4 @@ public:
 	virtual void SetParm(const char *pszParm, int iValue) = 0;
 };
 
-ICommandLine *CommandLine(void);
-
 #endif

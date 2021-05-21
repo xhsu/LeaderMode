@@ -50,4 +50,4 @@
 #include "dlls.h"
 #include "public/interface.h"
 #include "regamedll.h"
-#include "FileSystem.h"
+#include "Interface/IFileSystem.h"

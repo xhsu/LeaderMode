@@ -40,10 +40,15 @@ Modern Warfare Dev Team
 // Cvar
 #include "cvardef.h"
 
+// Keys
+#include "keydefs.h"
+
 // Don't we just use a lib and a dll??
 #include "Interface/IGameUIFuncs.h"
 #include "Interface/IEngineVGui.h"
 #include "Interface/IVGuiDLL.h"
+#include "Interface/IServerBrowser.h"
+#include "Interface/ICommandLine.h"
 #include "VGUI/IInput.h"
 #include "VGUI/IScheme.h"
 #include "VGUI/IVGui.h"
@@ -58,6 +63,7 @@ Modern Warfare Dev Team
 #include "vgui_controls/RichText.h"
 #include "vgui_controls/MessageMap.h"
 #include "vgui_controls/Controls.h"
+#include "vgui_controls/MenuItem.h"
 
 // general utils.
 #include "../game_shared/shared_util.h"
@@ -65,7 +71,7 @@ Modern Warfare Dev Team
 #include "../public/utlbuffer.h"
 #include "../public/characterset.h"
 
-// Custom controls
+// Basical elements: a panel on the back, a console to show something.
 #include "BasePanel.h"
 #include "GameConsoleDialog.h"
 
@@ -73,8 +79,14 @@ Modern Warfare Dev Team
 #include "IGameConsole.h"
 #include "IGameUI.h"
 
+// Main menu
+#include "ModInfo.h"
+#include "BackgroundMenuButton.h"
+#include "GameMenu.h"
 
 
 // General global vars declaration.
 extern cl_enginefunc_t gEngfuncs;
 extern IKeyValuesSystem* (*KeyValuesSystem)(void);
+extern IGameUIFuncs* gameuifuncs;
+extern ICommandLine* (*CommandLine)(void);

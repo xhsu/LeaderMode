@@ -67,6 +67,18 @@
     <ClCompile Include="..\..\public\generichash.cpp">
       <Filter>public</Filter>
     </ClCompile>
+    <ClCompile Include="..\BackgroundMenuButton.cpp">
+      <Filter>gameui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ModInfo.cpp">
+      <Filter>gameui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GameMenu.cpp">
+      <Filter>gameui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\vgui_controls\KeyRepeat.cpp">
+      <Filter>vgui_controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\public\interface.h">
@@ -119,6 +131,18 @@
     </ClInclude>
     <ClInclude Include="..\..\public\generichash.h">
       <Filter>public</Filter>
+    </ClInclude>
+    <ClInclude Include="..\BackgroundMenuButton.h">
+      <Filter>gameui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ModInfo.h">
+      <Filter>gameui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GameMenu.h">
+      <Filter>gameui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vgui_controls\KeyRepeat.h">
+      <Filter>vgui_controls</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

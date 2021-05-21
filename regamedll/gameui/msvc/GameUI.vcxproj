@@ -173,11 +173,18 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\..\vgui_controls\Controls.cpp" />
+    <ClCompile Include="..\..\vgui_controls\KeyRepeat.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\BackgroundMenuButton.cpp" />
     <ClCompile Include="..\BasePanel.cpp" />
     <ClCompile Include="..\ConsoleDialog.cpp" />
     <ClCompile Include="..\GameConsoleDialog.cpp" />
+    <ClCompile Include="..\GameMenu.cpp" />
     <ClCompile Include="..\IGameConsole.cpp" />
     <ClCompile Include="..\IGameUI.cpp" />
+    <ClCompile Include="..\ModInfo.cpp" />
     <ClCompile Include="..\precompiled.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -195,11 +202,15 @@
     <ClInclude Include="..\..\public\utlbuffer.h" />
     <ClInclude Include="..\..\tier3\tier3.h" />
     <ClInclude Include="..\..\vgui_controls\Controls.h" />
+    <ClInclude Include="..\..\vgui_controls\KeyRepeat.h" />
+    <ClInclude Include="..\BackgroundMenuButton.h" />
     <ClInclude Include="..\BasePanel.h" />
     <ClInclude Include="..\ConsoleDialog.h" />
     <ClInclude Include="..\GameConsoleDialog.h" />
+    <ClInclude Include="..\GameMenu.h" />
     <ClInclude Include="..\IGameConsole.h" />
     <ClInclude Include="..\IGameUI.h" />
+    <ClInclude Include="..\ModInfo.h" />
     <ClInclude Include="..\precompiled.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

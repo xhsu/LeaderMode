@@ -16,12 +16,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include "tier0/dbg.h"
-#include "tier0/valve_off.h"
-#include "tier1/KeyValues.h"
-
-#include "tier0/valve_on.h"
-#include "tier0/memdbgon.h"
-
+#include "public/KeyValues.h"
 
 // vgui includes
 #include "vgui/IBorder.h"

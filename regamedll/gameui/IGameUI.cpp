@@ -16,15 +16,18 @@
 #include "precompiled.h"
 
 
+char g_szLanguage[64] = "\0";
 cl_enginefunc_t gEngfuncs;
 IBaseFileSystem* g_pFileSystem = nullptr;
 
 IGameUIFuncs *gameuifuncs = NULL;
 vgui::IEngineVGui *enginevguifuncs = NULL;
 vgui::ISurface *enginesurfacefuncs = NULL;
+IServerBrowser* serverbrowser = NULL;
 
 static CBasePanel *staticPanel = NULL;
 IKeyValuesSystem* (*KeyValuesSystem)(void) = nullptr;
+ICommandLine* (*CommandLine)(void) = nullptr;
 
 void DisplayOptionsDialog(void)
 {
@@ -45,6 +48,9 @@ IGameUI::~IGameUI()
 
 void IGameUI::Initialize(CreateInterfaceFn *factories, int count)
 {
+	// Get the system language.
+	Sys_GetRegKeyValueUnderRoot("Software\\Valve\\Steam", "Language", g_szLanguage, charsmax(g_szLanguage), "english");
+
 	char szDllName[512];
 
 	// load and initialize vgui
@@ -72,6 +78,14 @@ void IGameUI::Initialize(CreateInterfaceFn *factories, int count)
 	if (!KeyValuesSystem)
 	{
 		Sys_Error("lm_metahook_module.dll export function \"GetKeyValueSystem\" no found!");
+		return;
+	}
+
+	*(void**)&CommandLine = GetProcAddress(hMetahookDLL, "CommandLine");
+
+	if (!KeyValuesSystem)
+	{
+		Sys_Error("lm_metahook_module.dll export function \"CommandLine\" no found!");
 		return;
 	}
 
@@ -107,6 +121,11 @@ void IGameUI::Initialize(CreateInterfaceFn *factories, int count)
 		Sys_Error("IGameUI::Initialize() failed to get necessary interfaces\n");
 	}
 
+	serverbrowser = (IServerBrowser*)CreateInterface(SERVERBROWSER_INTERFACE_VERSION, NULL);
+
+	if (serverbrowser)
+		serverbrowser->Initialize(factories, count);
+
 	int swide, stall;
 	g_pVGuiSurface->GetScreenSize(swide, stall);
 
@@ -122,6 +141,11 @@ void IGameUI::Initialize(CreateInterfaceFn *factories, int count)
 
 	vgui::VPANEL rootpanel = enginevguifuncs->GetPanel(vgui::PANEL_GAMEUIDLL);
 	staticPanel->SetParent(rootpanel);
+
+	if (serverbrowser)
+		serverbrowser->SetParent(staticPanel->GetVPanel());
+
+	vgui::surface()->SetAllowHTMLJavaScript(true);
 }
 
 void IGameUI::Start(struct cl_enginefuncs_s *engineFuncs, int interfaceVersion, IBaseSystem* system)
@@ -130,38 +154,29 @@ void IGameUI::Start(struct cl_enginefuncs_s *engineFuncs, int interfaceVersion, 
 
 	vgui::scheme()->LoadSchemeFromFile( "Resource/SourceScheme.res", "SourceScheme" );
 
-	//char cdkey[256];
-	//
-	//vgui::system()->GetRegistryString("HKEY_CURRENT_USER\\Software\\Valve\\Half-Life\\Settings\\ValveKey", cdkey, sizeof(cdkey) - 1);
-	//
-	//if (!strlen(cdkey))
-	//{
-	//	vgui::system()->GetRegistryString("HKEY_CURRENT_USER\\Software\\Valve\\Half-Life\\Settings\\yeK1", cdkey, sizeof(cdkey) - 1);
-	//
-	//	if (!strlen(cdkey))
-	//	{
-	//		vgui::system()->GetRegistryString("HKEY_CURRENT_USER\\Software\\Valve\\Half-Life\\Settings\\yeK2", cdkey, sizeof(cdkey) - 1);
-	//
-	//		if (!strlen(cdkey))
-	//		{
-	//			if (!g_pCDKeyEntryDialog)
-	//			{
-	//				g_pCDKeyEntryDialog = new CCDKeyEntryDialog(staticPanel, false);
-	//			}
-	//
-	//			g_pCDKeyEntryDialog->Activate();
-	//		}
-	//	}
-	//}
+	gEngfuncs.pfnClientCmd("mp3 loop media/gamestartup.mp3\n");
+
+	ModInfo().LoadCurrentGameInfo();
+
+	if (serverbrowser)
+	{
+		serverbrowser->ActiveGameName("Leader Mode", gEngfuncs.pfnGetGameDirectory());	// If I change the game dir, this has to be change as well. FIXME
+		serverbrowser->Reactivate();
+	}
 }
 
 void IGameUI::Shutdown(void)
 {
+	if (serverbrowser)
+	{
+		serverbrowser->Deactivate();
+		serverbrowser->Shutdown();
+	}
 }
 
 int IGameUI::ActivateGameUI(void)
 {
-	if ( IsGameUIActive() )
+	if (IsGameUIActive())
 		return 1;
 
 	m_bActivatedUI = true;
@@ -187,10 +202,16 @@ void IGameUI::RunFrame(void)
 
 void IGameUI::ConnectToServer(const char *game, int IP, int port)
 {
+	if (serverbrowser)
+		serverbrowser->ConnectToGame(IP, port);
+
+	gEngfuncs.pfnClientCmd("mp3 stop\n");
 }
 
 void IGameUI::DisconnectFromServer(void)
 {
+	if (serverbrowser)
+		serverbrowser->DisconnectFromGame();
 }
 
 void IGameUI::HideGameUI(void)

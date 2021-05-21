@@ -1,3 +1,4 @@
 LIBRARY
 EXPORTS
 	GetKeyValueSystem						@1
+	CommandLine								@2

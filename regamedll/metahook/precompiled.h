@@ -61,3 +61,6 @@ Modern Warfare Dev Team
 
 // bugfix.
 #include "IKeyValuesSystem.h"
+
+// Export CommandLine() for GameUI.dll
+#include "commandline.h"
