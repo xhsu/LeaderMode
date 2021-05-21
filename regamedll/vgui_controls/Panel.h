@@ -12,6 +12,11 @@
 #pragma once
 #endif
 
+// Fuck these stupit windows pre-define.
+#ifdef PostMessage
+#undef PostMessage
+#endif
+
 #include "../public/utlflags.h"
 #include "VGUI/VGUI.h"
 #include "VGUI/Dar.h"

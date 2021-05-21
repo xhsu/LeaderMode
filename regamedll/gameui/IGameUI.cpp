@@ -24,6 +24,7 @@ IGameUIFuncs *gameuifuncs = NULL;
 vgui::IEngineVGui *enginevguifuncs = NULL;
 vgui::ISurface *enginesurfacefuncs = NULL;
 IServerBrowser* serverbrowser = NULL;
+IGameUI* g_pGameUI = nullptr;
 
 static CBasePanel *staticPanel = NULL;
 IKeyValuesSystem* (*KeyValuesSystem)(void) = nullptr;
@@ -48,6 +49,8 @@ IGameUI::~IGameUI()
 
 void IGameUI::Initialize(CreateInterfaceFn *factories, int count)
 {
+	g_pGameUI = this;
+
 	// Get the system language.
 	Sys_GetRegKeyValueUnderRoot("Software\\Valve\\Steam", "Language", g_szLanguage, charsmax(g_szLanguage), "english");
 
@@ -285,6 +288,18 @@ void IGameUI::ValidateCDKey(bool force, bool inConnect)
 
 void IGameUI::OnDisconnectFromServer(int eSteamLoginFailure, const char *username)
 {
+}
+
+bool IGameUI::IsInLevel(void)
+{
+	const char* levelName = gEngfuncs.pfnGetLevelName();
+
+	return (levelName && strlen(levelName) > 0);
+}
+
+bool IGameUI::IsInMultiplayer(void)
+{
+	return (IsInLevel() && gEngfuncs.GetMaxClients() > 1);
 }
 
 EXPOSE_SINGLE_INTERFACE(IGameUI, IGameUI, GAMEUI_INTERFACE_VERSION);

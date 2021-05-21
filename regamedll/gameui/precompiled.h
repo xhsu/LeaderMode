@@ -43,6 +43,11 @@ Modern Warfare Dev Team
 // Keys
 #include "keydefs.h"
 
+// Fuck these stupit windows pre-define.
+#ifdef PostMessage
+#undef PostMessage
+#endif
+
 // Don't we just use a lib and a dll??
 #include "Interface/IGameUIFuncs.h"
 #include "Interface/IEngineVGui.h"
@@ -64,6 +69,8 @@ Modern Warfare Dev Team
 #include "vgui_controls/MessageMap.h"
 #include "vgui_controls/Controls.h"
 #include "vgui_controls/MenuItem.h"
+#include "vgui_controls/AnimationController.h"
+#include "vgui_controls/QueryBox.h"
 
 // general utils.
 #include "../game_shared/shared_util.h"

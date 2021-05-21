@@ -77,11 +77,27 @@ public:
 
 	virtual void OnDisconnectFromServer( int eSteamLoginFailure, const char *username );
 
+	// From here are NOT what original IGameUI offers!
+public:
+	virtual void PaddingFunction1(int param1, int param2) {}
+	virtual void PaddingFunction2(int param1, int param2) {}
+	virtual void PaddingFunction3(int param1, int param2) {}
+	virtual void PaddingFunction4(int param1, int param2) {}
+	virtual void PaddingFunction5(int param1, int param2) {}
+
+public:
+	bool IsInLevel(void);
+	bool IsInMultiplayer(void);
+
 private:
+	bool m_bLoadlingLevel;
+	char m_szPreviousStatusText[128];
 	bool m_bActivatedUI;
 };
 
 // the interface version is the number to call GameUI_GetInterface(int interfaceNumber) with
 #define GAMEUI_INTERFACE_VERSION "GameUI007"
+
+extern IGameUI* g_pGameUI;
 
 #endif // IGAMEUI_H
