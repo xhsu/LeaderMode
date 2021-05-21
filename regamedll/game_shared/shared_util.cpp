@@ -375,7 +375,7 @@ void NORETURN Sys_Error(const char* fmt, ...)
 	}
 
 	HWND hwnd = GetActiveWindow();
-	MessageBox(hwnd, output, "Fatal Error", MB_OK | MB_ICONERROR | MB_TOPMOST);
+	MessageBoxA(hwnd, output, "Fatal Error", MB_OK | MB_ICONERROR | MB_TOPMOST);
 #else
 	// However, in debug mode, you can trace the error via access violation.
 	//TerminateProcess(GetCurrentProcess(), 1);
