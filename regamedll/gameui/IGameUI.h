@@ -92,7 +92,6 @@ public:
 private:
 	bool m_bLoadlingLevel;
 	char m_szPreviousStatusText[128];
-	bool m_bActivatedUI;
 };
 
 // the interface version is the number to call GameUI_GetInterface(int interfaceNumber) with

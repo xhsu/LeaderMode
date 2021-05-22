@@ -453,6 +453,7 @@ void CommandFunc_Slot7(void);
 void CommandFunc_Slot8(void);
 void CommandFunc_Slot9(void);
 void CommandFunc_Slot10(void);
+void CommandFunc_CancelSelect(void);
 void CommandFunc_NextWeapon(void);
 void CommandFunc_PrevWeapon(void);
 void CommandFunc_SelectLastItem(void);

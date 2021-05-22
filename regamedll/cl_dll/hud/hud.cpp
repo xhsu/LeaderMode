@@ -243,6 +243,7 @@ void gHUD::Init(void)
 	gEngfuncs.pfnAddCommand("slot8", CommandFunc_Slot8);
 	gEngfuncs.pfnAddCommand("slot9", CommandFunc_Slot9);
 	gEngfuncs.pfnAddCommand("slot10", CommandFunc_Slot10);
+	gEngfuncs.pfnAddCommand("cancelselect", CommandFunc_CancelSelect); 
 	gEngfuncs.pfnAddCommand("invnext", CommandFunc_NextWeapon);
 	gEngfuncs.pfnAddCommand("invprev", CommandFunc_PrevWeapon);
 	gEngfuncs.pfnAddCommand("lastinv", CommandFunc_SelectLastItem);
@@ -992,6 +993,11 @@ void CommandFunc_Slot7(void) { gHUD::SlotInput(7); }
 void CommandFunc_Slot8(void) { gHUD::SlotInput(8); }
 void CommandFunc_Slot9(void) { gHUD::SlotInput(9); }
 void CommandFunc_Slot10(void) { gHUD::SlotInput(10); }
+
+void CommandFunc_CancelSelect(void)
+{
+	gEngfuncs.pfnClientCmd("escape\n");	// Just forword this.
+}
 
 void CommandFunc_NextWeapon(void)
 {

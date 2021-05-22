@@ -25,6 +25,7 @@ vgui::IEngineVGui *enginevguifuncs = NULL;
 vgui::ISurface *enginesurfacefuncs = NULL;
 IServerBrowser* serverbrowser = NULL;
 IGameUI* g_pGameUI = nullptr;
+IBaseUI* baseuifuncs = NULL;
 
 static CBasePanel *staticPanel = NULL;
 IKeyValuesSystem* (*KeyValuesSystem)(void) = nullptr;
@@ -43,17 +44,18 @@ void DisplayCreateMultiplayerGameDialog(void)
 
 IGameUI::IGameUI()
 {
-	m_bActivatedUI = false;
+	g_pGameUI = this;
+	m_szPreviousStatusText[0] = 0;
+	m_bLoadlingLevel = false;
 }
 
 IGameUI::~IGameUI()
 {
+	g_pGameUI = nullptr;
 }
 
 void IGameUI::Initialize(CreateInterfaceFn *factories, int count)
 {
-	g_pGameUI = this;
-
 	// Get the system language.
 	Sys_GetRegKeyValueUnderRoot("Software\\Valve\\Steam", "Language", g_szLanguage, charsmax(g_szLanguage), "english");
 
@@ -126,8 +128,9 @@ void IGameUI::Initialize(CreateInterfaceFn *factories, int count)
 	enginevguifuncs = (vgui::IEngineVGui *)engineFactory(VENGINE_VGUI_VERSION, NULL);
 	enginesurfacefuncs = (vgui::ISurface *)vguiDllFactory(VGUI_SURFACE_INTERFACE_VERSION, NULL);
 	gameuifuncs = (IGameUIFuncs *)engineFactory(VENGINE_GAMEUIFUNCS_VERSION, NULL);
+	baseuifuncs = (IBaseUI*)engineFactory(BASEUI_INTERFACE_VERSION, NULL);
 
-	if (!enginesurfacefuncs || !gameuifuncs || !enginevguifuncs)
+	if (!enginesurfacefuncs || !gameuifuncs || !enginevguifuncs || !baseuifuncs)
 	{
 		Sys_Error("IGameUI::Initialize() failed to get necessary interfaces\n");
 	}
@@ -168,10 +171,9 @@ void IGameUI::Start(struct cl_enginefuncs_s *engineFuncs, int interfaceVersion, 
 
 	ModInfo().LoadCurrentGameInfo();
 
-	auto v = gEngfuncs.pfnGetGameDirectory();
 	if (serverbrowser)
 	{
-		serverbrowser->ActiveGameName("Leader Mode", v);	// If I change the game dir, this has to be change as well. FIXME
+		serverbrowser->ActiveGameName("Leader Mode", gEngfuncs.pfnGetGameDirectory());	// If I change the game dir, this has to be change as well. FIXME
 		serverbrowser->Reactivate();
 	}
 }
@@ -208,6 +210,7 @@ int IGameUI::ActivateGameUI(void)
 
 int IGameUI::ActivateDemoUI(void)
 {
+	staticPanel->OnOpenDemoDialog();
 	return 1;
 }
 
@@ -218,7 +221,11 @@ int IGameUI::HasExclusiveInput(void)
 
 void IGameUI::RunFrame(void)
 {
-	staticPanel->RunFrame();
+	int wide, tall;
+	vgui::surface()->GetScreenSize(wide, tall);
+	staticPanel->SetSize(wide, tall);
+
+	BasePanel()->RunFrame();
 }
 
 void IGameUI::ConnectToServer(const char *game, int IP, int port)
@@ -257,22 +264,22 @@ void IGameUI::HideGameUI(void)
 
 bool IGameUI::IsGameUIActive(void)
 {
-	if ( m_bActivatedUI )
-	{
-		return staticPanel->IsVisible();
-	}
-
-	return false;
+	return staticPanel->IsVisible();
 }
 
 void IGameUI::LoadingStarted(const char *resourceType, const char *resourceName)
 {
-	//gEngfuncs.Con_Printf("LoadingStarted: Type:%s Name:%s\n", resourceType, resourceName);
+	m_bLoadlingLevel = true;
+
+	staticPanel->OnLevelLoadingStarted(resourceName);
 }
 
 void IGameUI::LoadingFinished(const char *resourceType, const char *resourceName)
 {
-	//gEngfuncs.Con_Printf("LoadingFinished: Type:%s Name:%s\n", resourceType, resourceName);
+	m_bLoadlingLevel = false;
+
+	staticPanel->OnLevelLoadingFinished();
+	baseuifuncs->HideGameUI();
 }
 
 void IGameUI::StartProgressBar(const char *progressType, int progressSteps)

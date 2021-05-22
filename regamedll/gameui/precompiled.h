@@ -57,6 +57,7 @@ Modern Warfare Dev Team
 #include "Interface/IVGuiDLL.h"
 #include "Interface/IServerBrowser.h"
 #include "Interface/ICommandLine.h"
+#include "Interface/IBaseUI.h"
 #include "VGUI/IInput.h"
 #include "VGUI/IScheme.h"
 #include "VGUI/IVGui.h"
