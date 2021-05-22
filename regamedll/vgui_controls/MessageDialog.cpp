@@ -7,7 +7,7 @@
 #include "vgui_controls/MessageDialog.h"
 #include "vgui/ILocalize.h"
 #include "vgui/ISurface.h"
-#include <KeyValues.h>
+#include <tier1/KeyValues.h>
 
 //-----------------------------------------------------------------------------
 // CMessageDialog

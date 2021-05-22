@@ -1,6 +1,12 @@
 #ifndef IFILESYSTEM_H
 #define IFILESYSTEM_H
 
+#include <public/basetypes.h>
+#include <engine/maintypes.h>
+#include <engine/archtypes.h>
+
+#include <public/interface.h>
+
 #ifdef _WIN32
 #pragma once
 #endif

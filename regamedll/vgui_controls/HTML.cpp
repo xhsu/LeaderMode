@@ -14,22 +14,20 @@
 #include "vgui/ISurface.h"
 #include "vgui/IVGUI.h"
 #include "vgui/IBorder.h"
-#include "filesystem.h"
+#include "Interface/IFileSystem.h"
 
 #include "vgui_controls/HTML.h"
 #include "vgui_controls/Controls.h"
 #include "vgui_controls/Label.h"
 #include "vgui_controls/Image.h"
 #include "vgui_controls/ScrollBar.h"
-#include "KeyValues.h"
+#include "tier1/KeyValues.h"
 
 #include <stdio.h>
 
 #if defined( _X360 )
 #include "xbox/xbox_win32stubs.h"
 #endif
-
-#include "tier0/memdbgon.h"
 
 using namespace vgui;
 

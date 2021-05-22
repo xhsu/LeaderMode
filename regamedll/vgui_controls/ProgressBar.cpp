@@ -15,10 +15,8 @@
 #include <vgui/ILocalize.h>
 #include <vgui/IScheme.h>
 #include <vgui/ISurface.h>
-#include <KeyValues.h>
+#include <tier1/KeyValues.h>
 
-// memdbgon must be the last include file in a .cpp file!!!
-#include <tier0/memdbgon.h>
 
 using namespace vgui;
 
@@ -262,7 +260,7 @@ bool ProgressBar::ConstructTimeRemainingString(wchar_t *output, int outputBuffer
 		Q_strncpy(unlocString, unlocalizedString,sizeof( unlocString ));
 		if (addRemainingSuffix)
 		{
-			Q_strncat(unlocString, "Remaining", sizeof(unlocString ), COPY_ALL_CHARACTERS);
+			Q_strncat(unlocString, "Remaining", sizeof(unlocString));
 		}
 		g_pVGuiLocalize->ConstructString(output, outputBufferSizeInBytes, g_pVGuiLocalize->Find(unlocString), 2, unicodeMinutes, unicodeSeconds);
 
@@ -278,10 +276,10 @@ bool ProgressBar::ConstructTimeRemainingString(wchar_t *output, int outputBuffer
 			unlocalizedString = "#vgui_TimeLeftSecond";
 		}
 		char unlocString[64];
-		Q_strncpy(unlocString, unlocalizedString,sizeof(unlocString));
+		Q_strncpy(unlocString, unlocalizedString, sizeof(unlocString));
 		if (addRemainingSuffix)
 		{
-			Q_strncat(unlocString, "Remaining",sizeof(unlocString), COPY_ALL_CHARACTERS);
+			Q_strncat(unlocString, "Remaining", sizeof(unlocString));
 		}
 		g_pVGuiLocalize->ConstructString(output, outputBufferSizeInBytes, g_pVGuiLocalize->Find(unlocString), 1, unicodeSeconds);
 	}

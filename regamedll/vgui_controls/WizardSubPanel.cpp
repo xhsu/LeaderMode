@@ -9,10 +9,7 @@
 #include "vgui_controls/WizardSubPanel.h"
 #include "vgui_controls/BuildGroup.h"
 
-#include "KeyValues.h"
-
-// memdbgon must be the last include file in a .cpp file!!!
-#include <tier0/memdbgon.h>
+#include "tier1/KeyValues.h"
 
 #include <stdio.h>
 using namespace vgui;

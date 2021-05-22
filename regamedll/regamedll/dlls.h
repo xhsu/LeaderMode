@@ -39,7 +39,6 @@
 #include "enginecallback.h"
 #include "../common/entity_state.h"
 #include "../common/screenfade.h"
-#include "utlvector.h"
 
 // SDK
 #include "../common/usercmd.h"

@@ -8,8 +8,8 @@
 
 #include <stdio.h>
 #include <assert.h>
-#include <UtlVector.h>
-#include <vstdlib/IKeyValuesSystem.h>
+#include <tier1/UtlVector.h>
+#include <metahook/IKeyValuesSystem.h>
 
 #include <vgui/IBorder.h>
 #include <vgui/IInput.h>
@@ -19,7 +19,7 @@
 #include <vgui/ISystem.h>
 #include <vgui/ILocalize.h>
 #include <vgui/IVGui.h>
-#include <KeyValues.h>
+#include <tier1/KeyValues.h>
 #include <vgui/MouseCode.h>
 
 #include <vgui_controls/Panel.h>
@@ -30,14 +30,12 @@
 #include "vgui_controls/Menu.h"
 #include "vgui_controls/MenuItem.h"
 
-#include "UtlDict.h"
-#include "UtlBuffer.h"
-#include "MemPool.h"
-#include "FileSystem.h"
+#include "tier1/UtlDict.h"
+#include "tier1/UtlBuffer.h"
+#include "tier1/MemPool.h"
+#include "Interface/IFileSystem.h"
+#include "tier3/tier3.h"
 
-
-// memdbgon must be the last include file in a .cpp file!!!
-#include <tier0/memdbgon.h>
 
 using namespace vgui;
 
@@ -2150,7 +2148,7 @@ static void AddModifierToString( char const *modifiername, char *buf, size_t buf
 		Q_strncpy( add, modifiername, sizeof( add ) );
 	}
 
-	Q_strncat( buf, add, bufsize, COPY_ALL_CHARACTERS );
+	Q_strncat( buf, add, bufsize );
 		
 }
 
@@ -2174,7 +2172,7 @@ wchar_t const *Panel::KeyCodeModifiersToDisplayString( KeyCode code, int modifie
 
 	if ( Q_strlen( sz ) > 0 )
 	{
-		Q_strncat( sz, "+", sizeof( sz ), COPY_ALL_CHARACTERS );
+		Q_strncat( sz, "+", sizeof( sz ) );
 	}
 
 	static wchar_t unicode[ 256 ];
@@ -4114,7 +4112,7 @@ void PreparePanelMessageMap(PanelMessageMap *panelMap)
 
 			if (item->name)
 			{
-				item->nameSymbol = KeyValuesSystem()->GetSymbolForString(item->name);
+				item->nameSymbol = g_pKeyValuesSystem->GetSymbolForString(item->name);
 			}
 			else
 			{
@@ -4122,7 +4120,7 @@ void PreparePanelMessageMap(PanelMessageMap *panelMap)
 			}
 			if (item->firstParamName)
 			{
-				item->firstParamSymbol = KeyValuesSystem()->GetSymbolForString(item->firstParamName);
+				item->firstParamSymbol = g_pKeyValuesSystem->GetSymbolForString(item->firstParamName);
 			}
 			else
 			{
@@ -4130,7 +4128,7 @@ void PreparePanelMessageMap(PanelMessageMap *panelMap)
 			}
 			if (item->secondParamName)
 			{
-				item->secondParamSymbol = KeyValuesSystem()->GetSymbolForString(item->secondParamName);
+				item->secondParamSymbol = g_pKeyValuesSystem->GetSymbolForString(item->secondParamName);
 			}
 			else
 			{
@@ -4572,7 +4570,7 @@ void Panel::PreparePanelMap( PanelMap_t *panelMap )
 
 			if (item->name)
 			{
-				item->nameSymbol = KeyValuesSystem()->GetSymbolForString(item->name);
+				item->nameSymbol = g_pKeyValuesSystem->GetSymbolForString(item->name);
 			}
 			else
 			{
@@ -4580,7 +4578,7 @@ void Panel::PreparePanelMap( PanelMap_t *panelMap )
 			}
 			if (item->firstParamName)
 			{
-				item->firstParamSymbol = KeyValuesSystem()->GetSymbolForString(item->firstParamName);
+				item->firstParamSymbol = g_pKeyValuesSystem->GetSymbolForString(item->firstParamName);
 			}
 			else
 			{
@@ -4588,7 +4586,7 @@ void Panel::PreparePanelMap( PanelMap_t *panelMap )
 			}
 			if (item->secondParamName)
 			{
-				item->secondParamSymbol = KeyValuesSystem()->GetSymbolForString(item->secondParamName);
+				item->secondParamSymbol = g_pKeyValuesSystem->GetSymbolForString(item->secondParamName);
 			}
 			else
 			{
@@ -6567,7 +6565,6 @@ PanelMessageMap *CPanelMessageMapDictionary::FindPanelMessageMap( char const *cl
 	return NULL;
 }
 
-#include <tier0/memdbgoff.h>
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -6584,7 +6581,6 @@ PanelMessageMap *CPanelMessageMapDictionary::FindOrAddPanelMessageMap( char cons
 	m_MessageMaps.Insert( StripNamespace( className ), entry );
 	return entry.map;
 }
-#include <tier0/memdbgon.h>
 
 #if defined( VGUI_USEKEYBINDINGMAPS )
 //-----------------------------------------------------------------------------
@@ -6636,7 +6632,6 @@ PanelKeyBindingMap *CPanelKeyBindingMapDictionary::FindPanelKeyBindingMap( char 
 	return NULL;
 }
 
-#include <tier0/memdbgoff.h>
 //-----------------------------------------------------------------------------
 // Purpose: 
 //-----------------------------------------------------------------------------
@@ -6653,8 +6648,6 @@ PanelKeyBindingMap *CPanelKeyBindingMapDictionary::FindOrAddPanelKeyBindingMap( 
 	m_MessageMaps.Insert( StripNamespace( className ), entry );
 	return entry.map;
 }
-
-#include <tier0/memdbgon.h>
 
 CPanelKeyBindingMapDictionary& GetPanelKeyBindingMapDictionary()
 {

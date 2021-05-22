@@ -11,19 +11,18 @@
 #include <assert.h>
 #include <malloc.h>
 
+#include <Interface/IFileSystem.h>
 #include <vgui/IPanel.h>
 #include <vgui/ISurface.h>
 #include <vgui/IScheme.h>
 #include <vgui/IInput.h>
 #include <vgui/ILocalize.h>
-#include <KeyValues.h>
+#include <tier1/KeyValues.h>
 
 #include <vgui_controls/TextImage.h>
 #include <vgui_controls/Controls.h>
 
 #include "tier0/dbg.h"
-// memdbgon must be the last include file in a .cpp file!!!
-#include <tier0/memdbgon.h>
 
 // enable this define if you want unlocalized strings logged to files unfound.txt and unlocalized.txt
 // #define LOG_UNLOCALIZED_STRINGS

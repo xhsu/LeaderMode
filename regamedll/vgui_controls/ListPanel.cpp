@@ -18,7 +18,7 @@
 #include <vgui/ISurface.h>
 #include <vgui/IVGui.h>
 #include <vgui/KeyCode.h>
-#include <KeyValues.h>
+#include <tier1/KeyValues.h>
 #include <vgui/MouseCode.h>
 
 #include <vgui_controls/Button.h>
@@ -31,9 +31,6 @@
 #include <vgui_controls/TextImage.h>
 #include <vgui_controls/Menu.h>
 #include <vgui_controls/Tooltip.h>
-
-// memdbgon must be the last include file in a .cpp file
-#include "tier0/memdbgon.h"
 
 using namespace vgui;
 

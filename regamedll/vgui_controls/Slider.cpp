@@ -9,7 +9,7 @@
 #define PROTECTED_THINGS_DISABLE
 
 #include <vgui/MouseCode.h>
-#include <KeyValues.h>
+#include <tier1/KeyValues.h>
 #include <vgui/IBorder.h>
 #include <vgui/IInput.h>
 #include <vgui/ISystem.h>
@@ -21,12 +21,17 @@
 #include <vgui_controls/Controls.h>
 #include <vgui_controls/TextImage.h>
 
-// memdbgon must be the last include file in a .cpp file!!!
-#include <tier0/memdbgon.h>
-
 using namespace vgui;
 
-static const float NOB_SIZE = 8.0f;
+static constexpr float NOB_SIZE = 8.0f;
+
+inline float RemapVal(float val, float A, float B, float C, float D)
+{
+	if (A == B)
+		return val >= B ? D : C;
+
+	return C + (D - C) * (val - A) / (B - A);
+}
 
 //-----------------------------------------------------------------------------
 // Purpose: Create a slider bar with ticks underneath it

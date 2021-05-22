@@ -8,8 +8,6 @@
 #include "vgui_controls/pch_vgui_controls.h"
 #include "vgui/ilocalize.h"
 
-// memdbgon must be the last include file in a .cpp file
-#include "tier0/memdbgon.h"
 
 enum
 {

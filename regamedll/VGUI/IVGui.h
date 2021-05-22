@@ -1,10 +1,6 @@
 #ifndef IVGUI_H
 #define IVGUI_H
 
-#ifdef PostMessage
-#undef PostMessage
-#endif
-
 #ifdef _WIN32
 #pragma once
 #endif
@@ -26,6 +22,11 @@ enum
 };
 
 typedef unsigned long HPanel;
+
+// Fucking stupit windef.
+#ifdef PostMessage
+#undef PostMessage
+#endif
 
 class IVGui : public IBaseInterface
 {

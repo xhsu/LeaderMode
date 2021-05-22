@@ -28,12 +28,9 @@
 #include "vgui_controls/MenuButton.h"
 #include "vgui_controls/TextImage.h"
 
-#include "KeyValues.h"
+#include "tier1/KeyValues.h"
 
 #include <stdio.h>
-
-// memdbgon must be the last include file in a .cpp file!!!
-#include "tier0/memdbgon.h"
 
 using namespace vgui;
 

@@ -10,7 +10,7 @@
 #include <vgui/ISurface.h>
 #include <vgui/ISystem.h>
 #include <vgui/IVGui.h>
-#include <KeyValues.h>
+#include <tier1/KeyValues.h>
 
 #include <vgui_controls/Button.h>
 #include <vgui_controls/Controls.h>
@@ -20,8 +20,6 @@
 
 #include <stdio.h>
 
-// memdbgon must be the last include file in a .cpp file!!!
-#include <tier0/memdbgon.h>
 
 using namespace vgui;
 

@@ -13,15 +13,13 @@
 #include <vgui/IScheme.h>
 #include <vgui/ISurface.h>
 #include <vgui/MouseCode.h>
-#include <KeyValues.h>
+#include <tier1/KeyValues.h>
 
 #include <vgui_controls/ScrollBarSlider.h>
 #include <vgui_controls/Controls.h>
 
 #include <math.h>
 
-// memdbgon must be the last include file in a .cpp file!!!
-#include <tier0/memdbgon.h>
 
 using namespace vgui;
 

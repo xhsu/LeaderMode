@@ -209,8 +209,10 @@
     </ClCompile>
     <ClCompile Include="..\..\public\interface.cpp" />
     <ClCompile Include="..\..\public\particleman.cpp" />
-    <ClCompile Include="..\..\tier0\dbg.cpp" />
-    <ClCompile Include="..\..\tier3\tier3.cpp" />
+    <ClCompile Include="..\..\tier0\dbg.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\..\vgui_controls\Controls.cpp" />
     <ClCompile Include="..\cdll_int.cpp" />
     <ClCompile Include="..\cl_base.cpp">
@@ -384,6 +386,14 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="export.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\tier1\tier1.vcxproj">
+      <Project>{5fff4c62-87de-4d79-b7f0-995dc25feb1c}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\vgui_controls\vgui_controls.vcxproj">
+      <Project>{d2f9c58f-fa8a-42a6-bb1a-9e290f3f3fc6}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

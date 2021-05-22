@@ -28,8 +28,6 @@
 
 #pragma once
 
-#include "utlvector.h"
-
 #define DHF_ROUND_STARTED     BIT(1)
 #define DHF_HOSTAGE_SEEN_FAR  BIT(2)
 #define DHF_HOSTAGE_SEEN_NEAR BIT(3)

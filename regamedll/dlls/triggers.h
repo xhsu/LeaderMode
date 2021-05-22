@@ -28,7 +28,7 @@
 
 #pragma once
 
-#include "utlmap.h"
+#include <unordered_map>
 
 class CFrictionModifier: public CBaseEntity
 {

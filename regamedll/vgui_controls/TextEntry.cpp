@@ -12,7 +12,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include <stdio.h>
-#include <UtlVector.h>
+#include <tier1/UtlVector.h>
 
 #include <vgui/Cursor.h>
 #include <vgui/IInput.h>
@@ -21,7 +21,7 @@
 #include <vgui/ISurface.h>
 #include <vgui/ILocalize.h>
 #include <vgui/IPanel.h>
-#include <KeyValues.h>
+#include <tier1/KeyValues.h>
 #include <vgui/MouseCode.h>
 
 #include <vgui_controls/Menu.h>
@@ -29,8 +29,6 @@
 #include <vgui_controls/TextEntry.h>
 #include <vgui_controls/Controls.h>
 #include <vgui_controls/MenuItem.h>
-// memdbgon must be the last include file in a .cpp file!!!
-#include <tier0/memdbgon.h>
 
 enum
 {

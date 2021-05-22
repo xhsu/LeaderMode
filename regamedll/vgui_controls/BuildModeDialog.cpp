@@ -7,14 +7,13 @@
 
 #include <ctype.h>
 #include <stdio.h>
-#include <UtlVector.h>
 
 #include <vgui/IInput.h>
 #include <vgui/ILocalize.h>
 #include <vgui/ISurface.h>
 #include <vgui/ISystem.h>
 #include <vgui/KeyCode.h>
-#include <KeyValues.h>
+#include <tier1/KeyValues.h>
 #include <vgui/MouseCode.h>
 
 #include <vgui_controls/BuildModeDialog.h>
@@ -30,9 +29,6 @@
 #include <vgui_controls/Menu.h>
 #include <vgui_controls/Divider.h>
 #include <vgui_controls/PanelListPanel.h>
-
-// memdbgon must be the last include file in a .cpp file!!!
-#include <tier0/memdbgon.h>
 
 using namespace vgui;
 

@@ -52,9 +52,6 @@
     <ClCompile Include="..\IGameUI.cpp">
       <Filter>gameui</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\tier3\tier3.cpp">
-      <Filter>tier3</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\vgui_controls\Controls.cpp">
       <Filter>vgui_controls</Filter>
     </ClCompile>

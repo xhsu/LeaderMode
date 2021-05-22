@@ -26,7 +26,11 @@
 *
 */
 
-#include "precompiled.h"
+#include <public/basetypes.h>
+#include <engine/maintypes.h>
+#include <engine/archtypes.h>
+#include <tier1/strtools.h>
+#include <tier0/dbg.h>
 
 // Internal structures
 enum
@@ -73,7 +77,7 @@ void _AssertValidReadWritePtr(void *ptr, int count)
 void AssertValidStringPtr(const char *ptr, int maxchar)
 {
 #ifdef _WIN32
-	Assert(!IsBadStringPtr(ptr, maxchar));
+	Assert(!IsBadStringPtrA(ptr, maxchar));
 #else
 	Assert(ptr);
 #endif

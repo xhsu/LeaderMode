@@ -430,17 +430,17 @@ private:
 //#define Msg(...) ((void)0)
 //#define DevMsg(...) ((void)0)
 //
-//#define VPROF(...) ((void)0)
+#define VPROF(...) ((void)0)
 #define VerifyEquals(...) ((void)0)
 //
-//#define assert_cast static_cast
+#define assert_cast static_cast
 //
-//#define stackalloc _alloca
+#define stackalloc _alloca
 //
 #define MEM_ALLOC_CREDIT_CLASS() ((void)0)
 #define MEM_ALLOC_CREDIT() ((void)0)
 #define MEM_ALLOC_CREDIT_(...) ((void)0)
-//#define MEM_ALLOC_CLASSNAME(type) NULL
+#define MEM_ALLOC_CLASSNAME(type) NULL
 //#define COMPILE_TIME_ASSERT(...) ((void)0)
 //
 //#define DebuggerBreak() assert(0);

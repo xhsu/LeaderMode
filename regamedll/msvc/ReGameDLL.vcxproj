@@ -296,7 +296,10 @@
     <ClCompile Include="..\regamedll\public_amalgamation.cpp" />
     <ClCompile Include="..\regamedll\regamedll.cpp" />
     <ClCompile Include="..\regamedll\sse_mathfun.cpp" />
-    <ClCompile Include="..\tier0\dbg.cpp" />
+    <ClCompile Include="..\tier0\dbg.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\unittests\animation_tests.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -501,6 +504,9 @@
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
       <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
     </ProjectReference>
+    <ProjectReference Include="..\tier1\tier1.vcxproj">
+      <Project>{5fff4c62-87de-4d79-b7f0-995dc25feb1c}</Project>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{70A2B904-B7DB-4C48-8DE0-AF567360D572}</ProjectGuid>
@@ -560,7 +566,7 @@
       <Message>Setup version from Git revision</Message>
     </PreBuildEvent>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(ProjectDir)\..\;$(ProjectDir)\..\hookers\;$(ProjectDir)\..\tier1;$(ProjectDir)\..\common;$(ProjectDir)\..\dlls;$(ProjectDir)\..\engine;$(ProjectDir)\..\public;$(ProjectDir)\..\public\regamedll;$(ProjectDir)\..\pm_shared;$(ProjectDir)\..\regamedll\;$(ProjectDir)\..\testsuite\;$(VCInstallDir)UnitTest\include;$(SolutionDir)..\dep\cppunitlite\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\;$(ProjectDir)\..\hookers\;$(ProjectDir)\..\common;$(ProjectDir)\..\dlls;$(ProjectDir)\..\engine;$(ProjectDir)\..\public;$(ProjectDir)\..\public\regamedll;$(ProjectDir)\..\pm_shared;$(ProjectDir)\..\regamedll\;$(ProjectDir)\..\testsuite\;$(VCInstallDir)UnitTest\include;$(SolutionDir)..\dep\cppunitlite\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
@@ -597,7 +603,7 @@
       <Message>Setup version from Git revision</Message>
     </PreBuildEvent>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(ProjectDir)\..\;$(ProjectDir)\..\hookers\;$(ProjectDir)\..\tier1;$(ProjectDir)\..\common;$(ProjectDir)\..\dlls;$(ProjectDir)\..\engine;$(ProjectDir)\..\public;$(ProjectDir)\..\public\regamedll;$(ProjectDir)\..\pm_shared;$(ProjectDir)\..\regamedll\;$(ProjectDir)\..\testsuite\;$(VCInstallDir)UnitTest\include;$(SolutionDir)..\dep\cppunitlite\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\;$(ProjectDir)\..\hookers\;$(ProjectDir)\..\common;$(ProjectDir)\..\dlls;$(ProjectDir)\..\engine;$(ProjectDir)\..\public;$(ProjectDir)\..\public\regamedll;$(ProjectDir)\..\pm_shared;$(ProjectDir)\..\regamedll\;$(ProjectDir)\..\testsuite\;$(VCInstallDir)UnitTest\include;$(SolutionDir)..\dep\cppunitlite\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Full</Optimization>
       <SDLCheck>true</SDLCheck>

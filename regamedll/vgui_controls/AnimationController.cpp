@@ -5,29 +5,46 @@
 //=============================================================================//
 #pragma warning( disable : 4244 ) // conversion from 'double' to 'float', possible loss of data
 
+#include <random>
+
 #include <vgui/IScheme.h>
 #include <vgui/ISurface.h>
 #include <vgui/ISystem.h>
 #include <vgui/IVGui.h>
-#include <KeyValues.h>
+#include <tier1/KeyValues.h>
 #include <vgui_controls/AnimationController.h>
-#include "FileSystem.h"
+#include "Interface/IFileSystem.h"
 
 #include <stdio.h>
 #include <math.h>
-#include "mempool.h"
-#include "UtlDict.h"
-#include "mathlib/mathlib.h"
-#include "characterset.h"
+#include "tier1/mempool.h"
+#include "tier1/UtlDict.h"
+#include "tier1/characterset.h"
 
 // memdbgon must be the last include file in a .cpp file!!!
 #include <tier0/dbg.h>
-// for SRC
-#include <tier0/memdbgon.h>
 
 using namespace vgui;
 
 static CUtlSymbolTable g_ScriptSymbols(0, 128, true);
+
+// new random function via std lib.
+inline float RandomFloat(float LO, float HI)
+{
+	std::srand(std::time(nullptr));
+	return LO + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (HI - LO)));
+}
+
+// hermite basis function for smooth interpolation
+// Similar to Gain() above, but very cheap to call
+// value should be between 0 & 1 inclusive
+inline float SimpleSpline(float value)
+{
+	float valueSquared = value * value;
+
+	// Nice little ease-in, ease-out spline-like curve
+	return (3 * valueSquared - 2 * valueSquared * value);
+}
 
 // singleton accessor for animation controller for use by the vgui controls
 namespace vgui

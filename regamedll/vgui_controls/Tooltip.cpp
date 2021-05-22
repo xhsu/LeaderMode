@@ -20,9 +20,6 @@
 #include <vgui_controls/TextEntry.h>
 #include <vgui_controls/Controls.h>
 
-// memdbgon must be the last include file in a .cpp file!!!
-#include <tier0/memdbgon.h>
-
 using namespace vgui;
 
 static vgui::DHANDLE< TextEntry > s_TooltipWindow;

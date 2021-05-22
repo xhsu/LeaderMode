@@ -9,12 +9,10 @@
 #include <vgui/Cursor.h>
 #include <vgui/iinput.h>
 #include <vgui_controls/Splitter.h>
-#include "tier1/keyvalues.h"
+#include <tier1/keyvalues.h>
 #include <stdio.h>
 #include <limits.h>
-
-// memdbgon must be the last include file in a .cpp file!!!
-#include "tier0/memdbgon.h"
+#include <tier0/dbg.h>
 
 using namespace vgui;
 

@@ -31,7 +31,6 @@
 #include "shake.h"
 #include "activity.h"
 #include "enginecallback.h"
-#include "utlvector.h"
 
 #define GROUP_OP_AND	0
 #define GROUP_OP_NAND	1

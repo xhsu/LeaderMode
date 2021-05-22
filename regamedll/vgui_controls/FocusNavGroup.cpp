@@ -11,15 +11,13 @@
 #include <vgui/IVGui.h>
 #include <vgui/IPanel.h>
 #include <vgui/VGUI.h>
-#include <KeyValues.h>
+#include <tier1/KeyValues.h>
 #include <tier0/dbg.h>
 
 #include <vgui_controls/Controls.h>
 #include <vgui_controls/FocusNavGroup.h>
 #include <vgui_controls/Panel.h>
 
-// memdbgon must be the last include file in a .cpp file!!!
-#include <tier0/memdbgon.h>
 
 using namespace vgui;
 

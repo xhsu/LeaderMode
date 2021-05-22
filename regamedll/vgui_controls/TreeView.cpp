@@ -17,7 +17,7 @@
 #include <vgui/ISystem.h>
 #include <vgui/IVgui.h>
 #include <vgui/KeyCode.h>
-#include <KeyValues.h>
+#include <tier1/KeyValues.h>
 #include <vgui/MouseCode.h>
 
 #include <vgui_controls/TreeView.h>
@@ -30,9 +30,6 @@
 #include <vgui_controls/ImagePanel.h>
 
 #include "tier1/UtlString.h"
-
-// memdbgon must be the last include file in a .cpp file!!!
-#include <tier0/memdbgon.h>
 
 #ifndef max
 #define max(a,b)            (((a) > (b)) ? (a) : (b))

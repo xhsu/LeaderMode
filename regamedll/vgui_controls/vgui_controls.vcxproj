@@ -40,17 +40,17 @@
     <_ProjectFileVersion>15.0.27128.1</_ProjectFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <OutDir>$(ProjectDir)..\lib\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <OutDir>$(ProjectDir)..\lib\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\;..\common;..\public;..\tier1;..\vstdlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;..\common;..\engine;..\public;..\vstdlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_DEBUG;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -65,7 +65,7 @@
     <ClCompile>
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\;..\common;..\public;..\tier1;..\vstdlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;..\common;..\engine;..\public;..\vstdlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <BufferSecurityCheck>false</BufferSecurityCheck>
@@ -76,6 +76,7 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\tier0\dbg.cpp" />
     <ClCompile Include="AnimatingImagePanel.cpp" />
     <ClCompile Include="AnimationController.cpp" />
     <ClCompile Include="BitmapImagePanel.cpp" />
@@ -97,6 +98,7 @@
     <ClCompile Include="ImageList.cpp" />
     <ClCompile Include="ImagePanel.cpp" />
     <ClCompile Include="InputDialog.cpp" />
+    <ClCompile Include="KeyRepeat.cpp" />
     <ClCompile Include="Label.cpp" />
     <ClCompile Include="ListPanel.cpp" />
     <ClCompile Include="ListViewPanel.cpp" />
@@ -134,6 +136,13 @@
     <ClCompile Include="WizardSubPanel.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\tier1\tier1.vcxproj">
+      <Project>{5fff4c62-87de-4d79-b7f0-995dc25feb1c}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\tier0\dbg.h" />
     <ClInclude Include="AnimatingImagePanel.h" />
     <ClInclude Include="AnimationController.h" />
     <ClInclude Include="BitmapImagePanel.h" />
@@ -156,6 +165,7 @@
     <ClInclude Include="ImagePanel.h" />
     <ClInclude Include="InputDialog.h" />
     <ClInclude Include="KeyBindingMap.h" />
+    <ClInclude Include="KeyRepeat.h" />
     <ClInclude Include="Label.h" />
     <ClInclude Include="ListPanel.h" />
     <ClInclude Include="ListViewPanel.h" />
@@ -171,6 +181,7 @@
     <ClInclude Include="PanelListPanel.h" />
     <ClInclude Include="pch_vgui_controls.h" />
     <ClInclude Include="PHandle.h" />
+    <ClInclude Include="precompiled.h" />
     <ClInclude Include="ProgressBar.h" />
     <ClInclude Include="ProgressBox.h" />
     <ClInclude Include="PropertyDialog.h" />
@@ -195,16 +206,6 @@
     <ClInclude Include="URLLabel.h" />
     <ClInclude Include="WizardPanel.h" />
     <ClInclude Include="WizardSubPanel.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\tier1\tier1.vcxproj">
-      <Project>{5fff4c62-87de-4d79-b7f0-995dc25feb1c}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\tier3\tier3.vcxproj">
-      <Project>{50ce2d41-7527-4ad5-a564-f507e9b70aca}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
