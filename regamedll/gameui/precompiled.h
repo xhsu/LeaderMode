@@ -13,6 +13,9 @@ Modern Warfare Dev Team
 #undef UNICODE
 #endif // UNICODE
 
+// default game dir.
+#define LM_DEF_GAMEDIR	"leadermode"
+
 #pragma once
 
 #include "../public/basetypes.h"
@@ -75,6 +78,11 @@ Modern Warfare Dev Team
 #include <vgui_controls/HTML.h>
 #include "vgui_controls/BitmapImagePanel.h"
 #include "vgui_controls/ProgressBar.h"
+#include <vgui_controls/ImageList.h>
+#include "vgui_controls/ToggleButton.h"
+#include "vgui_controls/RadioButton.h"
+#include "vgui_controls/ComboBox.h"
+#include "vgui_controls/CheckButton.h"
 
 // general utils.
 #include "../game_shared/shared_util.h"
@@ -95,6 +103,28 @@ Modern Warfare Dev Team
 #include "BackgroundMenuButton.h"
 #include "GameMenu.h"
 #include "LoadingDialog.h"
+
+// Multiplayer net
+#include "common/netapi.h"
+#include "common/netadr.h"
+
+// Server Browser
+#include "OfflineMode.h"	// Are we online?
+#include "ServerBrowser/BaseGamesPage.h"
+#include "ServerBrowser/DialogAddServer.h"
+#include "ServerBrowser/DialogGameInfo.h"
+#include "ServerBrowser/DialogServerPassword.h"
+#include "ServerBrowser/FavoriteGames.h"
+#include "ServerBrowser/FriendsGames.h"
+#include "ServerBrowser/HistoryGames.h"
+#include "ServerBrowser/InternetGames.h"
+#include "ServerBrowser/LanGames.h"
+#include "ServerBrowser/ServerBrowser.h"
+#include "ServerBrowser/ServerBrowserDialog.h"
+#include "ServerBrowser/ServerContextMenu.h"
+#include "ServerBrowser/ServerListCompare.h"
+#include "ServerBrowser/SpectateGames.h"
+#include "ServerBrowser/VACBannedConnRefusedDialog.h"
 
 
 // General global vars declaration.

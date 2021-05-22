@@ -6,11 +6,15 @@ Created Date: 26 Dec 2020
 
 #include "precompiled.h"
 
-vgui::ISurfaceV26* VGUI_SURFACE = nullptr;
+vgui::ISurfaceV26* VGUI_SURFACE = nullptr;	// Have to use V26 on MH, or it will never be created successfully.
+cl_enginefuncs_s gEngfuncs;
 
 
 int Initialize(struct cl_enginefuncs_s* pEnginefuncs, int iVersion)
 {
+	// Copy for ourselves first.
+	memcpy(&gEngfuncs, pEnginefuncs, sizeof(cl_enginefuncs_s));
+
 	bool result = !!gExportfuncs.Initialize(pEnginefuncs, iVersion);
 
 	// only doing this if the client loaded successfully.

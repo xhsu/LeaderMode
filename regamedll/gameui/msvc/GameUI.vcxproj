@@ -99,7 +99,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>tier1.lib;tier3.lib;vgui_controls.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>tier1.lib;tier3.lib;vgui_controls.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)..\..\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -122,7 +122,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>tier1.lib;tier3.lib;vgui_controls.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>tier1.lib;tier3.lib;vgui_controls.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)..\..\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -155,6 +155,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\common\netadr.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\common\netapi.cpp" />
     <ClCompile Include="..\..\game_shared\shared_util.cpp" />
     <ClCompile Include="..\..\public\generichash.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
@@ -168,6 +173,10 @@
     </ClCompile>
     <ClCompile Include="..\..\public\tier0\dbg.cpp" />
     <ClCompile Include="..\..\public\utlbuffer.cpp" />
+    <ClCompile Include="..\..\Steam\steam_api.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\..\tier3\tier3.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
@@ -190,8 +199,28 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\ServerBrowser\BaseGamesPage.cpp" />
+    <ClCompile Include="..\ServerBrowser\DialogAddServer.cpp" />
+    <ClCompile Include="..\ServerBrowser\DialogGameInfo.cpp" />
+    <ClCompile Include="..\ServerBrowser\DialogServerPassword.cpp" />
+    <ClCompile Include="..\ServerBrowser\FavoriteGames.cpp" />
+    <ClCompile Include="..\ServerBrowser\FriendsGames.cpp" />
+    <ClCompile Include="..\ServerBrowser\HistoryGames.cpp" />
+    <ClCompile Include="..\ServerBrowser\InternetGames.cpp" />
+    <ClCompile Include="..\ServerBrowser\LanGames.cpp" />
+    <ClCompile Include="..\ServerBrowser\ServerBrowser.cpp" />
+    <ClCompile Include="..\ServerBrowser\ServerBrowserDialog.cpp" />
+    <ClCompile Include="..\ServerBrowser\ServerContextMenu.cpp" />
+    <ClCompile Include="..\ServerBrowser\ServerListCompare.cpp" />
+    <ClCompile Include="..\ServerBrowser\SpectateGames.cpp" />
+    <ClCompile Include="..\ServerBrowser\VACBannedConnRefusedDialog.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\common\netadr.h" />
+    <ClInclude Include="..\..\common\netapi.h" />
     <ClInclude Include="..\..\game_shared\shared_util.h" />
     <ClInclude Include="..\..\public\characterset.h" />
     <ClInclude Include="..\..\public\generichash.h" />
@@ -200,7 +229,9 @@
     <ClInclude Include="..\..\public\stringpool.h" />
     <ClInclude Include="..\..\public\strtools.h" />
     <ClInclude Include="..\..\public\tier0\dbg.h" />
+    <ClInclude Include="..\..\public\tier0\platform.h" />
     <ClInclude Include="..\..\public\utlbuffer.h" />
+    <ClInclude Include="..\..\Steam\steam_api.h" />
     <ClInclude Include="..\..\tier3\tier3.h" />
     <ClInclude Include="..\..\vgui_controls\Controls.h" />
     <ClInclude Include="..\..\vgui_controls\KeyRepeat.h" />
@@ -213,7 +244,23 @@
     <ClInclude Include="..\IGameUI.h" />
     <ClInclude Include="..\LoadingDialog.h" />
     <ClInclude Include="..\ModInfo.h" />
+    <ClInclude Include="..\OfflineMode.h" />
     <ClInclude Include="..\precompiled.h" />
+    <ClInclude Include="..\ServerBrowser\BaseGamesPage.h" />
+    <ClInclude Include="..\ServerBrowser\DialogAddServer.h" />
+    <ClInclude Include="..\ServerBrowser\DialogGameInfo.h" />
+    <ClInclude Include="..\ServerBrowser\DialogServerPassword.h" />
+    <ClInclude Include="..\ServerBrowser\FavoriteGames.h" />
+    <ClInclude Include="..\ServerBrowser\FriendsGames.h" />
+    <ClInclude Include="..\ServerBrowser\HistoryGames.h" />
+    <ClInclude Include="..\ServerBrowser\InternetGames.h" />
+    <ClInclude Include="..\ServerBrowser\LanGames.h" />
+    <ClInclude Include="..\ServerBrowser\ServerBrowser.h" />
+    <ClInclude Include="..\ServerBrowser\ServerBrowserDialog.h" />
+    <ClInclude Include="..\ServerBrowser\ServerContextMenu.h" />
+    <ClInclude Include="..\ServerBrowser\ServerListCompare.h" />
+    <ClInclude Include="..\ServerBrowser\SpectateGames.h" />
+    <ClInclude Include="..\ServerBrowser\VACBannedConnRefusedDialog.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

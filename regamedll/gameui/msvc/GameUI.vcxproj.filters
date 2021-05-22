@@ -20,6 +20,21 @@
     <Filter Include="public\tier0">
       <UniqueIdentifier>{fa425f32-003d-4f14-aa3c-b59d24224826}</UniqueIdentifier>
     </Filter>
+    <Filter Include="gameui\ServerBrowser">
+      <UniqueIdentifier>{d61ebc15-27e5-4f01-8eb0-5245b1cbb095}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gameui\ServerBrowser\Dialogs">
+      <UniqueIdentifier>{7705605a-bbcd-46e0-82b4-4c651efb50b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gameui\ServerBrowser\Game Page">
+      <UniqueIdentifier>{c7020431-1a19-4232-95aa-1cc917d035c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{9f262fa4-5c88-4692-847a-ca9f32a046e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Steam">
+      <UniqueIdentifier>{bb0b3baa-60ef-46af-b9a1-7dabb0824380}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\public\interface.cpp">
@@ -81,6 +96,60 @@
     </ClCompile>
     <ClCompile Include="..\LoadingDialog.cpp">
       <Filter>gameui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ServerBrowser\ServerBrowser.cpp">
+      <Filter>gameui\ServerBrowser</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ServerBrowser\ServerBrowserDialog.cpp">
+      <Filter>gameui\ServerBrowser</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ServerBrowser\ServerListCompare.cpp">
+      <Filter>gameui\ServerBrowser</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ServerBrowser\BaseGamesPage.cpp">
+      <Filter>gameui\ServerBrowser\Game Page</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ServerBrowser\DialogAddServer.cpp">
+      <Filter>gameui\ServerBrowser\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ServerBrowser\DialogGameInfo.cpp">
+      <Filter>gameui\ServerBrowser\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ServerBrowser\DialogServerPassword.cpp">
+      <Filter>gameui\ServerBrowser\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ServerBrowser\FavoriteGames.cpp">
+      <Filter>gameui\ServerBrowser\Game Page</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ServerBrowser\FriendsGames.cpp">
+      <Filter>gameui\ServerBrowser\Game Page</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ServerBrowser\HistoryGames.cpp">
+      <Filter>gameui\ServerBrowser\Game Page</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ServerBrowser\InternetGames.cpp">
+      <Filter>gameui\ServerBrowser\Game Page</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ServerBrowser\LanGames.cpp">
+      <Filter>gameui\ServerBrowser\Game Page</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ServerBrowser\ServerContextMenu.cpp">
+      <Filter>gameui\ServerBrowser\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ServerBrowser\VACBannedConnRefusedDialog.cpp">
+      <Filter>gameui\ServerBrowser\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ServerBrowser\SpectateGames.cpp">
+      <Filter>gameui\ServerBrowser\Game Page</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\netadr.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\common\netapi.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Steam\steam_api.cpp">
+      <Filter>Steam</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -149,6 +218,66 @@
     </ClInclude>
     <ClInclude Include="..\LoadingDialog.h">
       <Filter>gameui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ServerBrowser\ServerBrowser.h">
+      <Filter>gameui\ServerBrowser</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ServerBrowser\ServerBrowserDialog.h">
+      <Filter>gameui\ServerBrowser</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ServerBrowser\ServerListCompare.h">
+      <Filter>gameui\ServerBrowser</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ServerBrowser\BaseGamesPage.h">
+      <Filter>gameui\ServerBrowser\Game Page</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ServerBrowser\DialogAddServer.h">
+      <Filter>gameui\ServerBrowser\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ServerBrowser\DialogGameInfo.h">
+      <Filter>gameui\ServerBrowser\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ServerBrowser\DialogServerPassword.h">
+      <Filter>gameui\ServerBrowser\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ServerBrowser\FavoriteGames.h">
+      <Filter>gameui\ServerBrowser\Game Page</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ServerBrowser\FriendsGames.h">
+      <Filter>gameui\ServerBrowser\Game Page</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ServerBrowser\HistoryGames.h">
+      <Filter>gameui\ServerBrowser\Game Page</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ServerBrowser\InternetGames.h">
+      <Filter>gameui\ServerBrowser\Game Page</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ServerBrowser\LanGames.h">
+      <Filter>gameui\ServerBrowser\Game Page</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ServerBrowser\ServerContextMenu.h">
+      <Filter>gameui\ServerBrowser\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ServerBrowser\VACBannedConnRefusedDialog.h">
+      <Filter>gameui\ServerBrowser\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ServerBrowser\SpectateGames.h">
+      <Filter>gameui\ServerBrowser\Game Page</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\netadr.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\public\tier0\platform.h">
+      <Filter>public\tier0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\common\netapi.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\OfflineMode.h">
+      <Filter>gameui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Steam\steam_api.h">
+      <Filter>Steam</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

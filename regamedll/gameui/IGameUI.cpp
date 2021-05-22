@@ -29,6 +29,7 @@ IGameUI* g_pGameUI = nullptr;
 static CBasePanel *staticPanel = NULL;
 IKeyValuesSystem* (*KeyValuesSystem)(void) = nullptr;
 ICommandLine* (*CommandLine)(void) = nullptr;
+cl_enginefunc_t* (*GetEngineFuncs)() = nullptr;
 
 vgui::DHANDLE<CLoadingDialog> g_hLoadingDialog;
 
@@ -78,20 +79,21 @@ void IGameUI::Initialize(CreateInterfaceFn *factories, int count)
 		return;
 	}
 
-	*(void**)&KeyValuesSystem = GetProcAddress(hMetahookDLL, "GetKeyValueSystem");
-
-	if (!KeyValuesSystem)
+	if (!(*(void**)&KeyValuesSystem = GetProcAddress(hMetahookDLL, "GetKeyValueSystem")) )
 	{
 		Sys_Error("lm_metahook_module.dll export function \"GetKeyValueSystem\" no found!");
 		return;
 	}
 
-	*(void**)&CommandLine = GetProcAddress(hMetahookDLL, "CommandLine");
-
-	if (!KeyValuesSystem)
+	if (!(*(void**)&CommandLine = GetProcAddress(hMetahookDLL, "CommandLine")) )
 	{
 		Sys_Error("lm_metahook_module.dll export function \"CommandLine\" no found!");
 		return;
+	}
+
+	if ((*(void**)&GetEngineFuncs = GetProcAddress(hMetahookDLL, "GetEngineFuncs")) != nullptr)
+	{
+		memcpy(&gEngfuncs, GetEngineFuncs(), sizeof(cl_enginefunc_t));
 	}
 
 	// setup the factory list
@@ -111,7 +113,11 @@ void IGameUI::Initialize(CreateInterfaceFn *factories, int count)
 	ConnectTier3Libraries(factoryList, _countof(factoryList));
 
 	// setup vgui controls
-	vgui::VGui_InitInterfacesList("GameUI", factories, count);
+	if (!vgui::VGui_InitInterfacesList("GameUI", factories, count))
+	{
+		Sys_Error("Failed to setup VGUI controls!");
+		return;
+	}
 
 	// load localization file
 	g_pVGuiLocalize->AddFile(g_pFullFileSystem, "Resource/vgui_%language%.txt");
@@ -126,6 +132,7 @@ void IGameUI::Initialize(CreateInterfaceFn *factories, int count)
 		Sys_Error("IGameUI::Initialize() failed to get necessary interfaces\n");
 	}
 
+	vgui::scheme()->LoadSchemeFromFile("Resource/SourceScheme.res", "SourceScheme");
 	serverbrowser = (IServerBrowser*)CreateInterface(SERVERBROWSER_INTERFACE_VERSION, NULL);
 
 	if (serverbrowser)
@@ -157,15 +164,14 @@ void IGameUI::Start(struct cl_enginefuncs_s *engineFuncs, int interfaceVersion, 
 {
 	memcpy(&gEngfuncs, engineFuncs, sizeof(gEngfuncs));
 
-	vgui::scheme()->LoadSchemeFromFile( "Resource/SourceScheme.res", "SourceScheme" );
-
 	gEngfuncs.pfnClientCmd("mp3 loop media/gamestartup.mp3\n");
 
 	ModInfo().LoadCurrentGameInfo();
 
+	auto v = gEngfuncs.pfnGetGameDirectory();
 	if (serverbrowser)
 	{
-		serverbrowser->ActiveGameName("Leader Mode", gEngfuncs.pfnGetGameDirectory());	// If I change the game dir, this has to be change as well. FIXME
+		serverbrowser->ActiveGameName("Leader Mode", v);	// If I change the game dir, this has to be change as well. FIXME
 		serverbrowser->Reactivate();
 	}
 }
