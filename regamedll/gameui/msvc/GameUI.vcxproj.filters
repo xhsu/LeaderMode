@@ -17,9 +17,6 @@
     <Filter Include="vgui_controls">
       <UniqueIdentifier>{b9e3e30a-50f5-41c2-aadf-ec623968965e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="public\tier0">
-      <UniqueIdentifier>{fa425f32-003d-4f14-aa3c-b59d24224826}</UniqueIdentifier>
-    </Filter>
     <Filter Include="gameui\ServerBrowser">
       <UniqueIdentifier>{d61ebc15-27e5-4f01-8eb0-5245b1cbb095}</UniqueIdentifier>
     </Filter>
@@ -34,6 +31,12 @@
     </Filter>
     <Filter Include="Steam">
       <UniqueIdentifier>{bb0b3baa-60ef-46af-b9a1-7dabb0824380}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gameui\CreateMultiplayerGame">
+      <UniqueIdentifier>{1a8d158e-22be-4b18-8155-f447c446968e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tier0">
+      <UniqueIdentifier>{c1fc8050-5a00-41f2-8609-b95e0926a509}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -66,21 +69,6 @@
     </ClCompile>
     <ClCompile Include="..\ConsoleDialog.cpp">
       <Filter>gameui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\public\KeyValues.cpp">
-      <Filter>public</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\public\utlbuffer.cpp">
-      <Filter>public</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\public\tier0\dbg.cpp">
-      <Filter>public\tier0</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\public\stringpool.cpp">
-      <Filter>public</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\public\generichash.cpp">
-      <Filter>public</Filter>
     </ClCompile>
     <ClCompile Include="..\BackgroundMenuButton.cpp">
       <Filter>gameui</Filter>
@@ -151,6 +139,9 @@
     <ClCompile Include="..\..\Steam\steam_api.cpp">
       <Filter>Steam</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\tier0\dbg.cpp">
+      <Filter>tier0</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\public\interface.h">
@@ -182,27 +173,6 @@
     </ClInclude>
     <ClInclude Include="..\ConsoleDialog.h">
       <Filter>gameui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\public\KeyValues.h">
-      <Filter>public</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\public\utlbuffer.h">
-      <Filter>public</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\public\characterset.h">
-      <Filter>public</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\public\strtools.h">
-      <Filter>public</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\public\tier0\dbg.h">
-      <Filter>public\tier0</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\public\stringpool.h">
-      <Filter>public</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\public\generichash.h">
-      <Filter>public</Filter>
     </ClInclude>
     <ClInclude Include="..\BackgroundMenuButton.h">
       <Filter>gameui</Filter>
@@ -267,9 +237,6 @@
     <ClInclude Include="..\..\common\netadr.h">
       <Filter>common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\public\tier0\platform.h">
-      <Filter>public\tier0</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\common\netapi.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -278,6 +245,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Steam\steam_api.h">
       <Filter>Steam</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\tier0\dbg.h">
+      <Filter>tier0</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

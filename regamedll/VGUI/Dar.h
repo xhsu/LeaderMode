@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <VGUI/VGUI.h>
-#include <public/utlvector.h>
+#include <tier1/utlvector.h>
 
 namespace vgui
 {

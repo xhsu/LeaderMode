@@ -13,8 +13,8 @@
 #include <vgui_controls/Panel.h>
 #include <vgui_controls/PHandle.h>
 
-#include "public/utlsymbol.h"
-#include "public/utlvector.h"
+#include "tier1/utlsymbol.h"
+#include "tier1/utlvector.h"
 
 namespace vgui
 {

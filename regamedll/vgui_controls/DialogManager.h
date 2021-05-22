@@ -12,8 +12,8 @@
 #pragma once
 #endif
 
-#include <UtlLinkedList.h>
-#include <KeyValues.h>
+#include <tier1/UtlLinkedList.h>
+#include <tier1/KeyValues.h>
 #include <vgui_controls/PHandle.h>
 
 namespace vgui

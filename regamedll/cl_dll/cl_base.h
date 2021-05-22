@@ -9,7 +9,7 @@ Created Date: 05 Mar 2020
 #include "../public/basetypes.h"
 #include "../engine/maintypes.h"
 #include "../engine/archtypes.h"
-#include "../public/strtools.h"
+#include "../tier1/strtools.h"
 #include "../dlls/vector.h"
 
 // std stuff. some commonly used vectors.

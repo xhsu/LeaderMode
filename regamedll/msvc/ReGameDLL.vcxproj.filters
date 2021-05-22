@@ -53,9 +53,6 @@
     <Filter Include="dlls\bot\states">
       <UniqueIdentifier>{638174c7-80d2-415c-a335-54a8149d6add}</UniqueIdentifier>
     </Filter>
-    <Filter Include="public\tier0">
-      <UniqueIdentifier>{00d15c50-66d7-4210-9239-e8cd8fb9f052}</UniqueIdentifier>
-    </Filter>
     <Filter Include="dlls\addons">
       <UniqueIdentifier>{cc40695f-5d17-4ee9-b410-1be65c49c099}</UniqueIdentifier>
     </Filter>
@@ -73,6 +70,9 @@
     </Filter>
     <Filter Include="Interface">
       <UniqueIdentifier>{5914569f-d8e8-4e69-9d57-59ebb397f0e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tier0">
+      <UniqueIdentifier>{dcc64111-4b58-485e-9705-ff4db6997b59}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -111,9 +111,6 @@
     </ClCompile>
     <ClCompile Include="..\dlls\world.cpp">
       <Filter>dlls</Filter>
-    </ClCompile>
-    <ClCompile Include="..\public\MemPool.cpp">
-      <Filter>public</Filter>
     </ClCompile>
     <ClCompile Include="..\dlls\sound.cpp">
       <Filter>dlls</Filter>
@@ -198,9 +195,6 @@
     </ClCompile>
     <ClCompile Include="..\unittests\TestRunner.cpp">
       <Filter>unittests</Filter>
-    </ClCompile>
-    <ClCompile Include="..\public\utlsymbol.cpp">
-      <Filter>public</Filter>
     </ClCompile>
     <ClCompile Include="..\dlls\h_cycler.cpp">
       <Filter>dlls</Filter>
@@ -469,11 +463,11 @@
     <ClCompile Include="..\metahook\portable\metahook.cpp">
       <Filter>metahook\portable</Filter>
     </ClCompile>
-    <ClCompile Include="..\public\tier0\dbg.cpp">
-      <Filter>public\tier0</Filter>
-    </ClCompile>
     <ClCompile Include="..\Interface\IFileSystem.cpp">
       <Filter>Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\tier0\dbg.cpp">
+      <Filter>tier0</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -487,9 +481,6 @@
       <Filter>public</Filter>
     </ClInclude>
     <ClInclude Include="..\public\commonmacros.h">
-      <Filter>public</Filter>
-    </ClInclude>
-    <ClInclude Include="..\public\utlrbtree.h">
       <Filter>public</Filter>
     </ClInclude>
     <ClInclude Include="..\regamedll\precompiled.h">
@@ -572,9 +563,6 @@
     </ClInclude>
     <ClInclude Include="..\dlls\subs.h">
       <Filter>dlls</Filter>
-    </ClInclude>
-    <ClInclude Include="..\public\MemPool.h">
-      <Filter>public</Filter>
     </ClInclude>
     <ClInclude Include="..\game_shared\GameEvent.h">
       <Filter>game_shared</Filter>
@@ -675,9 +663,6 @@
     <ClInclude Include="..\game_shared\shared_util.h">
       <Filter>game_shared</Filter>
     </ClInclude>
-    <ClInclude Include="..\public\utlsymbol.h">
-      <Filter>public</Filter>
-    </ClInclude>
     <ClInclude Include="..\dlls\h_cycler.h">
       <Filter>dlls</Filter>
     </ClInclude>
@@ -694,9 +679,6 @@
       <Filter>engine</Filter>
     </ClInclude>
     <ClInclude Include="..\public\interface.h">
-      <Filter>public</Filter>
-    </ClInclude>
-    <ClInclude Include="..\public\utlmemory.h">
       <Filter>public</Filter>
     </ClInclude>
     <ClInclude Include="..\dlls\airtank.h">
@@ -728,9 +710,6 @@
     </ClInclude>
     <ClInclude Include="..\game_shared\bot\bot.h">
       <Filter>game_shared\bot</Filter>
-    </ClInclude>
-    <ClInclude Include="..\public\utlvector.h">
-      <Filter>public</Filter>
     </ClInclude>
     <ClInclude Include="..\dlls\ammo.h">
       <Filter>dlls</Filter>
@@ -849,12 +828,6 @@
     <ClInclude Include="..\dlls\scriptevent.h">
       <Filter>dlls</Filter>
     </ClInclude>
-    <ClInclude Include="..\public\tier0\dbg.h">
-      <Filter>public\tier0</Filter>
-    </ClInclude>
-    <ClInclude Include="..\public\tier0\platform.h">
-      <Filter>public\tier0</Filter>
-    </ClInclude>
     <ClInclude Include="..\game_shared\bot\bot_constants.h">
       <Filter>game_shared\bot</Filter>
     </ClInclude>
@@ -932,6 +905,12 @@
     </ClInclude>
     <ClInclude Include="..\Interface\IFileSystem.h">
       <Filter>Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\tier0\dbg.h">
+      <Filter>tier0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\tier0\platform.h">
+      <Filter>tier0</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

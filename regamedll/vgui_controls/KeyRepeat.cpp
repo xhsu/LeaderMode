@@ -8,7 +8,7 @@
 #include "../public/basetypes.h"
 #include "../engine/maintypes.h"
 #include "../engine/archtypes.h"
-#include "../public/strtools.h"
+#include "../tier1/strtools.h"
 #include "../dlls/vector.h"
 
 #include "public/interface.h"

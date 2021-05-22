@@ -19,8 +19,8 @@ Modern Warfare Dev Team
 #include "vgui_controls/Panel.h"
 #include "vgui_controls/PHandle.h"
 #include "vgui_controls/MenuItem.h"
-#include "KeyValues.h"
-#include "UtlVector.h"
+#include "tier1/KeyValues.h"
+#include "tier1/UtlVector.h"
 
 
 class CGameMenu;

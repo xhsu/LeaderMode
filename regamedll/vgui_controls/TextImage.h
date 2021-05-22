@@ -16,7 +16,7 @@
 #include <vgui/ILocalize.h>
 #include <vgui_controls/Image.h>
 
-#include <utlvector.h>
+#include <tier1/utlvector.h>
 
 class KeyValues;
 

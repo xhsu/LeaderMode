@@ -11,8 +11,8 @@
 #endif
 
 #include <vgui_controls/Panel.h>
-#include "UtlLinkedList.h"
-#include "UtlVector.h"
+#include "tier1/UtlLinkedList.h"
+#include "tier1/UtlVector.h"
 
 namespace vgui
 {

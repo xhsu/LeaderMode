@@ -16,7 +16,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include "tier0/dbg.h"
-#include "public/KeyValues.h"
+#include "tier1/KeyValues.h"
 
 // vgui includes
 #include "vgui/IBorder.h"

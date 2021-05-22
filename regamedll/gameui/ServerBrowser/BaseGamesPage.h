@@ -8,7 +8,7 @@
 #include <vgui_controls/ListPanel.h>
 #include <vgui_controls/PropertyPage.h>
 #include "Interface/IGameList.h"
-#include <public/utlmap.h>
+#include <tier1/utlmap.h>
 #include "netadr.h"
 #include "Steam/isteammatchmaking.h"
 #include "Steam/steam_api.h"

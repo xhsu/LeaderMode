@@ -11,7 +11,7 @@
 #endif
 
 #include <vgui_controls/EditablePanel.h>
-#include "UtlVector.h"
+#include "tier1/UtlVector.h"
 
 namespace vgui
 {

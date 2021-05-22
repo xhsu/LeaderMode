@@ -22,7 +22,7 @@ Modern Warfare Dev Team
 #include <vgui_controls/PropertySheet.h>
 #include <vgui_controls/PHandle.h>
 
-#include "UtlVector.h"
+#include "tier1/UtlVector.h"
 #include "netadr.h"
 #include "Steam/isteammatchmaking.h"
 #include "Interface/IGameList.h"

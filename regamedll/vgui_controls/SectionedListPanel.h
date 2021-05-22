@@ -12,8 +12,8 @@
 #pragma once
 #endif
 
-#include <UtlVector.h>
-#include <UtlLinkedList.h>
+#include <tier1/UtlVector.h>
+#include <tier1/UtlLinkedList.h>
 #include <vgui/VGUI.h>
 #include <vgui_controls/Panel.h>
 #include <vgui_controls/PHandle.h>

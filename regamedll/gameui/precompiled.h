@@ -21,8 +21,8 @@ Modern Warfare Dev Team
 #include "../public/basetypes.h"
 #include "../engine/maintypes.h"
 #include "../engine/archtypes.h"
-#include "../public/tier0/dbg.h"	// Keep it at last forever. LUNA: But why?
-#include "../public/strtools.h"
+#include "../tier0/dbg.h"	// Keep it at last forever. LUNA: But why?
+#include "../tier1/strtools.h"
 #include "../dlls/vector.h"
 
 #include <string.h>
@@ -63,7 +63,7 @@ Modern Warfare Dev Team
 #include "VGUI/IVGui.h"
 #include "VGUI/ISurface.h"
 #include "VGUI/ILocalize.h"
-#include "public/KeyValues.h"
+#include "tier1/KeyValues.h"
 
 #include "vgui_controls/Button.h"
 #include "VGUI/KeyCode.h"
@@ -84,12 +84,13 @@ Modern Warfare Dev Team
 #include "vgui_controls/RadioButton.h"
 #include "vgui_controls/ComboBox.h"
 #include "vgui_controls/CheckButton.h"
+//#include "vgui_controls/cvar"
 
 // general utils.
 #include "../game_shared/shared_util.h"
-#include "../public/utlmemory.h"
-#include "../public/utlbuffer.h"
-#include "../public/characterset.h"
+#include "../tier1/utlmemory.h"
+#include "../tier1/utlbuffer.h"
+#include "../tier1/characterset.h"
 
 // Basical elements: a panel on the back, a console to show something.
 #include "BasePanel.h"
@@ -104,6 +105,10 @@ Modern Warfare Dev Team
 #include "BackgroundMenuButton.h"
 #include "GameMenu.h"
 #include "LoadingDialog.h"
+
+// Create Multiplayer Game
+//#include "CreateMultiplayerGameDialog/CreateMultiplayerGameBotPage.h"
+//#include "CreateMultiplayerGameDialog/CreateMultiplayerGameDialog.h"
 
 // Multiplayer net
 #include "common/netapi.h"

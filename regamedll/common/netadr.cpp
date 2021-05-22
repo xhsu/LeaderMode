@@ -4,8 +4,8 @@
 
 #include "tier0/dbg.h"
 #include "netadr.h"
-#include "public/strtools.h"
-#include "public/tier0/platform.h"
+#include "tier1/strtools.h"
+#include "tier0/platform.h"
 
 #if defined (_WIN32) && !defined(_X360)
 #define WIN32_LEAN_AND_MEAN

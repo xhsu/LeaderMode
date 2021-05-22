@@ -17,7 +17,7 @@
 #undef PostMessage
 #endif
 
-#include "../public/utlflags.h"
+#include "tier1/utlflags.h"
 #include "VGUI/VGUI.h"
 #include "VGUI/Dar.h"
 #include "../vgui_controls/MessageMap.h"
@@ -31,7 +31,7 @@
 #include "../vgui_controls/PanelAnimationVar.h"
 #include "../public/Color.h"
 #include "../metahook/IKeyValuesSystem.h"
-#include "../public/utlsymbol.h"
+#include "../tier1/utlsymbol.h"
 #include "../vgui_controls/BuildGroup.h"
 
 // undefine windows function macros that overlap 

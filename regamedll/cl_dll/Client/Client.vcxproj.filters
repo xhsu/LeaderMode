@@ -49,8 +49,8 @@
     <Filter Include="vgui_controls">
       <UniqueIdentifier>{856e2d5d-6581-4476-8eec-7c3ce44a9bb3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="public\tier0">
-      <UniqueIdentifier>{ab4d4a44-7d75-47a8-b97f-ea730361f84c}</UniqueIdentifier>
+    <Filter Include="tier0">
+      <UniqueIdentifier>{2566c911-0920-4f8a-9fb3-fe42f9f59968}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -330,8 +330,8 @@
     <ClCompile Include="..\Viewport.cpp">
       <Filter>cl_dll</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\public\tier0\dbg.cpp">
-      <Filter>public\tier0</Filter>
+    <ClCompile Include="..\..\tier0\dbg.cpp">
+      <Filter>tier0</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -587,8 +587,8 @@
     <ClInclude Include="..\Viewport.h">
       <Filter>cl_dll</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\public\tier0\dbg.h">
-      <Filter>public\tier0</Filter>
+    <ClInclude Include="..\..\tier0\dbg.h">
+      <Filter>tier0</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

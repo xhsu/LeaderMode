@@ -209,7 +209,7 @@
     </ClCompile>
     <ClCompile Include="..\..\public\interface.cpp" />
     <ClCompile Include="..\..\public\particleman.cpp" />
-    <ClCompile Include="..\..\public\tier0\dbg.cpp" />
+    <ClCompile Include="..\..\tier0\dbg.cpp" />
     <ClCompile Include="..\..\tier3\tier3.cpp" />
     <ClCompile Include="..\..\vgui_controls\Controls.cpp" />
     <ClCompile Include="..\cdll_int.cpp" />
@@ -318,7 +318,7 @@
     <ClInclude Include="..\..\public\particleman.h" />
     <ClInclude Include="..\..\public\pman_particlemem.h" />
     <ClInclude Include="..\..\public\pman_triangleffect.h" />
-    <ClInclude Include="..\..\public\tier0\dbg.h" />
+    <ClInclude Include="..\..\tier0\dbg.h" />
     <ClInclude Include="..\..\tier3\tier3.h" />
     <ClInclude Include="..\..\vgui_controls\Controls.h" />
     <ClInclude Include="..\cdll_int.h" />
