@@ -281,8 +281,8 @@ void CBasePanel::DrawBackgroundImage(void)
 
 	if (IsPC() && (m_bRenderingBackgroundTransition || (m_eBackgroundState == BACKGROUND_LOADING || m_eBackgroundState == BACKGROUND_MAINMENU)))
 	{
-		float xScale = swide / 800.0f;
-		float yScale = stall / 600.0f;
+		float xScale = swide / 1280.0f;
+		float yScale = stall / 960.0f;
 
 		int ypos = 0;
 
@@ -453,7 +453,7 @@ void CBasePanel::ApplySchemeSettings(IScheme* pScheme)
 			bimage.imageID = surface()->CreateNewTextureID();
 
 			char filename[MAX_PATH];
-			sprintf(filename, "resource/background/800_%d_%c_loading", y + 1, 'a' + x);
+			Q_slprintf(filename, "resource/background/1280_%d_%c_loading", y + 1, 'a' + x);
 			surface()->DrawSetTextureFile(bimage.imageID, filename, false, false);
 			surface()->DrawGetTextureSize(bimage.imageID, bimage.width, bimage.height);
 		}

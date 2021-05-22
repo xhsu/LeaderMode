@@ -82,7 +82,7 @@ private:
 		int width, height;
 	};
 
-	enum { BACKGROUND_ROWS = 3, BACKGROUND_COLUMNS = 4 };
+	enum { BACKGROUND_ROWS = 4, BACKGROUND_COLUMNS = 5 };	// 1280 * 960
 
 public:
 	void SetBackgroundRenderState(EBackgroundState state);
