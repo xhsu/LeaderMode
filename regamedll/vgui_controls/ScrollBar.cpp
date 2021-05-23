@@ -5,17 +5,7 @@
 // $NoKeywords: $
 //=============================================================================//
 
-#include <assert.h>
-
-#include <vgui/IScheme.h>
-#include <vgui/ISystem.h>
-#include <vgui/IInput.h>
-#include <tier1/KeyValues.h>
-
-#include <vgui_controls/ScrollBar.h>
-#include <vgui_controls/ScrollBarSlider.h>
-#include <vgui_controls/Button.h>
-#include <vgui_controls/Controls.h>
+#include "precompiled.h"
 
 
 using namespace vgui;

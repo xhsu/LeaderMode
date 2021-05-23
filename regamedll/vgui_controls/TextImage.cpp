@@ -5,24 +5,7 @@
 // $NoKeywords: $
 //=============================================================================//
 
-#include <string.h>
-#include <stdio.h>
-#include <ctype.h>
-#include <assert.h>
-#include <malloc.h>
-
-#include <Interface/IFileSystem.h>
-#include <vgui/IPanel.h>
-#include <vgui/ISurface.h>
-#include <vgui/IScheme.h>
-#include <vgui/IInput.h>
-#include <vgui/ILocalize.h>
-#include <tier1/KeyValues.h>
-
-#include <vgui_controls/TextImage.h>
-#include <vgui_controls/Controls.h>
-
-#include "tier0/dbg.h"
+#include "precompiled.h"
 
 // enable this define if you want unlocalized strings logged to files unfound.txt and unlocalized.txt
 // #define LOG_UNLOCALIZED_STRINGS

@@ -5,14 +5,8 @@
 // $NoKeywords: $
 //=============================================================================//
 
-#include <vgui/IVGui.h>
-#include <tier1/KeyValues.h>
+#include "precompiled.h"
 
-#include <vgui_controls/BuildGroup.h>
-#include <vgui_controls/Button.h>
-#include <vgui_controls/Controls.h>
-#include <vgui_controls/WizardPanel.h>
-#include <vgui_controls/WizardSubPanel.h>
 
 using namespace vgui;
 

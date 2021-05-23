@@ -29,8 +29,8 @@
 #include <public/interface.h>
 #include <Interface/IFileSystem.h>
 
-#include "utlvector.h"
-#include "Color.h"
+#include "tier1/utlvector.h"
+#include "public/Color.h"
 
 class CUtlBuffer;
 class Color;

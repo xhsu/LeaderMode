@@ -5,22 +5,7 @@
 // $NoKeywords: $
 //=============================================================================//
 
-#include <stdarg.h>
-#include <stdio.h>
-
-#include <vgui/IInput.h>
-#include <vgui/IPanel.h>
-#include <vgui/IScheme.h>
-#include <vgui/ISystem.h>
-#include <vgui/IVGui.h>
-#include <vgui/KeyCode.h>
-#include <tier1/KeyValues.h>
-
-#include <vgui_controls/FocusNavGroup.h>
-#include <vgui_controls/Image.h>
-#include <vgui_controls/RadioButton.h>
-#include <vgui_controls/TextImage.h>
-#include <vgui_controls/Controls.h>
+#include "precompiled.h"
 
 
 using namespace vgui;

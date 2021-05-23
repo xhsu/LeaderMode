@@ -8,10 +8,7 @@
 // $NoKeywords: $
 //=============================================================================//
 
-#include <vgui/KeyCode.h>
-
-#include <vgui_controls/QueryBox.h>
-#include <vgui_controls/TextImage.h>
+#include "precompiled.h"
 
 
 #ifndef max

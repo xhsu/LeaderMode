@@ -18,6 +18,7 @@
 #pragma once
 #endif
 
+#include <chrono>
 #include "tier0/platform.h"
 #include "tier1/utlvector.h"
 #include "tier1/utlrbtree.h"
@@ -26,6 +27,15 @@ inline bool IsPowerOfTwo(int value)
 {
 	return (value & (value - 1)) == 0;
 }
+
+inline double Plat_FloatTime(void)
+{
+	static auto start = std::chrono::steady_clock::now();
+	auto cur = std::chrono::steady_clock::now();
+
+	return double(std::chrono::duration_cast<std::chrono::nanoseconds>(cur - start).count()) / 1.0e9;
+}
+
 
 //-----------------------------------------------------------------------------
 // Purpose: Optimized pool memory allocator

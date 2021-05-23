@@ -5,13 +5,8 @@
 // $NoKeywords: $
 //=============================================================================//
 
-#include <vgui/KeyCode.h>
-#include "vgui/iinput.h"
-#include "vgui/MouseCode.h"
-#include "vgui/ISurface.h"
+#include "precompiled.h"
 
-#include <vgui_controls/ToolWindow.h>
-#include <vgui_controls/PropertySheet.h>
 
 using namespace vgui;
 

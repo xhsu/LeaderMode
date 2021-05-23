@@ -5,7 +5,7 @@
 // $NoKeywords: $
 //=============================================================================//
 
-#include "vgui_controls/pch_vgui_controls.h"
+#include "precompiled.h"
 
 #define MENU_SEPARATOR_HEIGHT 3
 

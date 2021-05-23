@@ -5,38 +5,15 @@
 // $NoKeywords: $
 //===========================================================================//
 
-#include <assert.h>
-#include <math.h> // for ceil()
+#include "precompiled.h"
 #define PROTECTED_THINGS_DISABLE
 
-#include "tier1/utlstring.h"
-#include "vgui/Cursor.h"
-#include "vgui/MouseCode.h"
-#include "vgui/IBorder.h"
-#include "vgui/IInput.h"
-#include "vgui/ILocalize.h"
-#include "vgui/IPanel.h"
-#include "vgui/ISurface.h"
-#include "vgui/IScheme.h"
-#include "vgui/KeyCode.h"
-
-#include "vgui_controls/AnimationController.h"
-#include "vgui_controls/Controls.h"
-#include "vgui_controls/Frame.h"
-#include "vgui_controls/Button.h"
-#include "vgui_controls/Menu.h"
-#include "vgui_controls/MenuButton.h"
-#include "vgui_controls/TextImage.h"
-
-#include "tier1/KeyValues.h"
-
-#include <stdio.h>
 
 using namespace vgui;
 
-static const int DEFAULT_SNAP_RANGE = 10; // number of pixels distance before the frame will snap to an edge
-static const int CAPTION_TITLE_BORDER = 7;
-static const int CAPTION_TITLE_BORDER_SMALL = 0;
+static constexpr int DEFAULT_SNAP_RANGE = 10; // number of pixels distance before the frame will snap to an edge
+static constexpr int CAPTION_TITLE_BORDER = 7;
+static constexpr int CAPTION_TITLE_BORDER_SMALL = 0;
 
 namespace
 {

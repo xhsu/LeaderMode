@@ -5,13 +5,8 @@
 // $NoKeywords: $
 //=============================================================================//
 
-#include <stdio.h>
+#include "precompiled.h"
 
-#include "vgui_controls/BitmapImagePanel.h"
-#include "vgui/ISurface.h"
-#include "vgui/IScheme.h"
-#include "vgui/IBorder.h"
-#include "tier1/KeyValues.h"
 
 #ifndef min
 #define min(a, b)  (((a) < (b)) ? (a) : (b))

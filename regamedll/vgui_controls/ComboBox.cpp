@@ -5,23 +5,9 @@
 // $NoKeywords: $
 //=============================================================================//
 
+#include "precompiled.h"
 #define PROTECTED_THINGS_DISABLE
 
-#include "vgui/Cursor.h"
-#include "vgui/IInput.h"
-#include "vgui/ILocalize.h"
-#include "vgui/IScheme.h"
-#include "vgui/ISurface.h"
-#include "vgui/IPanel.h"
-#include "tier1/KeyValues.h"
-
-#include "vgui_controls/Button.h"
-#include "vgui_controls/ComboBox.h"
-#include "vgui_controls/Menu.h"
-#include "vgui_controls/MenuItem.h"
-#include "vgui_controls/TextImage.h"
-
-#include <ctype.h>
 
 using namespace vgui;
 

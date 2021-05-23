@@ -115,24 +115,8 @@ Created Date: 05 Mar 2020
 #include "../dlls/weapontype.h"
 #include "../dlls/player_classes.h"
 
-// Key-Value system, basis of VGUI.
-#include "../metahook/IKeyValuesSystem.h"
-
-// Tier 3 static lib.
-#include "../tier3/tier3.h"
-
-// Ahh.. we are finally here, VGUI.
-#include <VGUI/VGUI.h>
-#include <VGUI/ISurface.h>
-#include <VGUI/IPanel.h>
-#include <VGUI/IVGui.h>
-#include <VGUI/IInput.h>
-#include <VGUI/IScheme.h>
-#include <VGUI/ISystem.h>
-#include <VGUI/ILocalize.h>
-
-// VGUI Controls
-#include <vgui_controls/Controls.h>
+// VGUI2
+#include "vgui_controls/pch_vgui_controls.h"
 
 // Client Viewport
 #include "Viewport.h"

@@ -5,31 +5,9 @@
 // $NoKeywords: $
 //=============================================================================//
 
-#include <assert.h>
-
+#include "precompiled.h"
 #define PROTECTED_THINGS_DISABLE
 
-#include <vgui/Cursor.h>
-#include <vgui/IScheme.h>
-#include <vgui/IInput.h>
-#include <vgui/IPanel.h>
-#include <vgui/ISurface.h>
-#include <vgui/ISystem.h>
-#include <vgui/IVgui.h>
-#include <vgui/KeyCode.h>
-#include <tier1/KeyValues.h>
-#include <vgui/MouseCode.h>
-
-#include <vgui_controls/TreeView.h>
-#include <vgui_controls/ScrollBar.h>
-#include <vgui_controls/TextEntry.h>
-#include <vgui_controls/Label.h>
-#include <vgui_controls/Button.h>
-#include <vgui_controls/TextImage.h>
-#include <vgui_controls/ImageList.h>
-#include <vgui_controls/ImagePanel.h>
-
-#include "tier1/UtlString.h"
 
 #ifndef max
 #define max(a,b)            (((a) > (b)) ? (a) : (b))

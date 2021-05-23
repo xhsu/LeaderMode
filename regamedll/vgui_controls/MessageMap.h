@@ -310,6 +310,11 @@ struct PanelMap_t
 
 typedef vgui::Panel *( *PANELCREATEFUNC )( void );
 
+// Fuck Microsoft.
+#ifdef GetClassName
+#undef GetClassName
+#endif
+
 //-----------------------------------------------------------------------------
 // Purpose: Used by DECLARE_BUILD_FACTORY macro to create a linked list of
 //  instancing functions

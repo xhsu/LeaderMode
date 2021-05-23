@@ -5,9 +5,8 @@
 // $NoKeywords: $
 //=============================================================================//
 
-#include <vgui/KeyCode.h>
-#include <vgui_controls/ToggleButton.h>
-#include <tier1/KeyValues.h>
+#include "precompiled.h"
+
 
 using namespace vgui;
 

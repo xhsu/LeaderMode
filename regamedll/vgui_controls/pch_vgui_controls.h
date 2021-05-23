@@ -1,9 +1,15 @@
-//========= Copyright © 1996-2005, Valve Corporation, All rights reserved. ============//
-//
-// Purpose: 
-//
-// $NoKeywords: $
-//=============================================================================//
+/*
+
+Created Date: May 23 2021
+
+Modern Warfare Dev Team
+	Programmer	- Luna the Reborn
+	Advisor		- Crsky
+
+Purpose:
+	General include for outsiders.
+
+*/
 
 #ifndef PCH_VGUI_CONTROLS_H
 #define PCH_VGUI_CONTROLS_H
@@ -11,12 +17,6 @@
 #ifdef _WIN32
 #pragma once
 #endif
-
-// general includes
-#include <ctype.h>
-#include <stdlib.h>
-#include "tier0/dbg.h"
-#include "tier1/KeyValues.h"
 
 // vgui includes
 #include "vgui/IBorder.h"
@@ -54,6 +54,11 @@
 #include "vgui_controls/Image.h"
 #include "vgui_controls/ImageList.h"
 #include "vgui_controls/ImagePanel.h"
+#ifndef HL1
+#include "vgui_controls/InputDialog.h"
+#endif
+#include "vgui_controls/KeyBindingMap.h"
+#include "vgui_controls/KeyRepeat.h"
 #include "vgui_controls/Label.h"
 #include "vgui_controls/ListPanel.h"
 #include "vgui_controls/ListViewPanel.h"
@@ -62,6 +67,8 @@
 #include "vgui_controls/MenuButton.h"
 #include "vgui_controls/MenuItem.h"
 #include "vgui_controls/MessageBox.h"
+#include "vgui_controls/MessageDialog.h"
+#include "vgui_controls/MessageMap.h"
 #include "vgui_controls/Panel.h"
 #ifndef HL1
 #include "vgui_controls/PanelAnimationVar.h"
@@ -76,6 +83,7 @@
 #include "vgui_controls/QueryBox.h"
 #include "vgui_controls/RadioButton.h"
 #include "vgui_controls/RichText.h"
+#include "vgui_controls/ScrollableEditablePanel.h"
 #include "vgui_controls/ScrollBar.h"
 #include "vgui_controls/ScrollBarSlider.h"
 #include "vgui_controls/SectionedListPanel.h"
@@ -97,9 +105,5 @@
 #include "vgui_controls/URLLabel.h"
 #include "vgui_controls/WizardPanel.h"
 #include "vgui_controls/WizardSubPanel.h"
-
-#ifndef HL1
-#include "vgui_controls/InputDialog.h"
-#endif
 
 #endif // PCH_VGUI_CONTROLS_H

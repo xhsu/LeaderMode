@@ -6,19 +6,9 @@
 // and implement another button here.
 //=============================================================================//
 
-#include <math.h>
+#include "precompiled.h"
 #define PROTECTED_THINGS_DISABLE
 
-#include <vgui/IInput.h>
-#include <vgui/ISystem.h>
-#include <vgui/ISurface.h>
-#include <vgui/IScheme.h>
-#include <vgui/IVGui.h>
-#include <vgui/IPanel.h>
-
-#include <vgui_controls/Tooltip.h>
-#include <vgui_controls/TextEntry.h>
-#include <vgui_controls/Controls.h>
 
 using namespace vgui;
 

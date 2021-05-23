@@ -5,14 +5,7 @@
 // $NoKeywords: $
 //=============================================================================//
 
-#include <vgui/ISurface.h>
-#include <tier1/KeyValues.h>
-#include <vgui/IInput.h>
-
-#include <vgui_controls/Button.h>
-#include <vgui_controls/Controls.h>
-#include <vgui_controls/Label.h>
-#include <vgui_controls/MessageBox.h>
+#include "precompiled.h"
 
 using namespace vgui;
 

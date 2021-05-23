@@ -5,26 +5,7 @@
 // $NoKeywords: $
 //=============================================================================//
 
-#include <stdio.h>
-
-#include <Interface/IFileSystem.h>
-#include <vgui/IInput.h>
-#include <vgui/IPanel.h>
-#include <vgui/ILocalize.h>
-#include <vgui/IScheme.h>
-#include <vgui/ISurface.h>
-#include <tier1/KeyValues.h>
-#include <vgui/MouseCode.h>
-
-#include <vgui_controls/SectionedListPanel.h>
-#include <vgui_controls/Button.h>
-#include <vgui_controls/Controls.h>
-#include <vgui_controls/Label.h>
-#include <vgui_controls/ScrollBar.h>
-#include <vgui_controls/TextImage.h>
-#include <vgui_controls/ImageList.h>
-
-#include <tier1/utlvector.h>
+#include "precompiled.h"
 
 using namespace vgui;
 

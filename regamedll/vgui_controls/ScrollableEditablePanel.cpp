@@ -5,8 +5,7 @@
 // $NoKeywords: $
 //=============================================================================
 
-#include "vgui_controls/scrollableeditablepanel.h"
-#include "vgui_controls/scrollbar.h"
+#include "precompiled.h"
 
 using namespace vgui;
 

@@ -5,25 +5,7 @@
 // $NoKeywords: $
 //=============================================================================//
 
-#include <assert.h>
-#include <ctype.h>
-
-#include <vgui/MouseCode.h>
-#include <vgui/KeyCode.h>
-#include <tier1/KeyValues.h>
-#include <vgui/ISurface.h>
-#include <vgui/IVGui.h>
-#include <vgui/IInput.h>
-#include <vgui/IPanel.h>
-#include <vgui/ILocalize.h>
-
-#include <vgui_controls/Controls.h>
-#include <vgui_controls/ScrollBar.h>
-#include <vgui_controls/ImageList.h>
-#include <vgui_controls/ImagePanel.h>
-#include <vgui_controls/Label.h>
-#include <vgui_controls/TextImage.h>
-#include <vgui_controls/ListViewPanel.h>
+#include "precompiled.h"
 
 using namespace vgui;
 	

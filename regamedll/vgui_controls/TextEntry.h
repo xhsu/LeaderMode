@@ -16,7 +16,7 @@
 #endif
 
 #include <VGUI/VGUI.h>
-#include <Color.h>
+#include <public/Color.h>
 #include <vgui_controls/Panel.h>
 #include <vgui_controls/Label.h>
 #include <vgui_controls/ListPanel.h>

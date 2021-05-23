@@ -5,35 +5,13 @@
 // $NoKeywords: $
 //=============================================================================//
 
-#if defined( _WIN32 ) && !defined( _X360 )
-#include <windows.h>		// for WideCharToMultiByte and MultiByteToWideChar
-#endif
+#include "precompiled.h"
 
-#include <assert.h>
-#include <ctype.h>
-#include <stdio.h>
-#include <tier1/UtlVector.h>
-
-#include <vgui/Cursor.h>
-#include <vgui/IInput.h>
-#include <vgui/IScheme.h>
-#include <vgui/ISystem.h>
-#include <vgui/ISurface.h>
-#include <vgui/ILocalize.h>
-#include <vgui/IPanel.h>
-#include <tier1/KeyValues.h>
-#include <vgui/MouseCode.h>
-
-#include <vgui_controls/Menu.h>
-#include <vgui_controls/ScrollBar.h>
-#include <vgui_controls/TextEntry.h>
-#include <vgui_controls/Controls.h>
-#include <vgui_controls/MenuItem.h>
 
 enum
 {
 	// maximum size of text buffer
-	BUFFER_SIZE=999999,
+	BUFFER_SIZE = 999999,
 };
 
 using namespace vgui;

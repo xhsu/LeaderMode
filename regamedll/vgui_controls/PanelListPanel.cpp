@@ -5,19 +5,7 @@
 // $NoKeywords: $
 //=============================================================================//
 
-#include "vgui/MouseCode.h"
-#include "vgui/IInput.h"
-#include "vgui/IScheme.h"
-#include "vgui/ISurface.h"
-
-#include "vgui_controls/EditablePanel.h"
-#include "vgui_controls/ScrollBar.h"
-#include "vgui_controls/Label.h"
-#include "vgui_controls/Button.h"
-#include "vgui_controls/Controls.h"
-#include "vgui_controls/PanelListPanel.h"
-
-#include "tier1/KeyValues.h"
+#include "precompiled.h"
 
 
 using namespace vgui;

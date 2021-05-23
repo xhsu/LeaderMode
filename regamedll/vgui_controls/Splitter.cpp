@@ -5,14 +5,7 @@
 // $NoKeywords: $
 //===========================================================================//
 
-#include <vgui/IScheme.h>
-#include <vgui/Cursor.h>
-#include <vgui/iinput.h>
-#include <vgui_controls/Splitter.h>
-#include <tier1/keyvalues.h>
-#include <stdio.h>
-#include <limits.h>
-#include <tier0/dbg.h>
+#include "precompiled.h"
 
 using namespace vgui;
 

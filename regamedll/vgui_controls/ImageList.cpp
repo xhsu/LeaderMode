@@ -5,10 +5,7 @@
 // $NoKeywords: $
 //=============================================================================//
 
-#include <vgui/VGUI.h>
-#include <Color.h>
-
-#include <vgui_controls/ImageList.h>
+#include "precompiled.h"
 
 using namespace vgui;
 

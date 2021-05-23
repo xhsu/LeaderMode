@@ -4,8 +4,8 @@
 //
 // $NoKeywords: $
 //=============================================================================//
-#include "vgui/IVGui.h"
-#include "vgui_controls/MessageMap.h"
+
+#include "precompiled.h"
 
 using namespace vgui;
 

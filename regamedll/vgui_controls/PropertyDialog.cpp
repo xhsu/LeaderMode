@@ -5,12 +5,7 @@
 // $NoKeywords: $
 //=============================================================================//
 
-#include <vgui/KeyCode.h>
-#include <tier1/KeyValues.h>
-
-#include <vgui_controls/Button.h>
-#include <vgui_controls/PropertyDialog.h>
-#include <vgui_controls/PropertySheet.h>
+#include "precompiled.h"
 
 
 using namespace vgui;

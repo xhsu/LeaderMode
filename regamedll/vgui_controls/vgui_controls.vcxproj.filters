@@ -184,6 +184,9 @@
     <ClCompile Include="..\tier0\dbg.cpp">
       <Filter>tier0</Filter>
     </ClCompile>
+    <ClCompile Include="precompiled.cpp">
+      <Filter>vgui_controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AnimatingImagePanel.h">

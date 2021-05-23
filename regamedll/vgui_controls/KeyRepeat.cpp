@@ -5,17 +5,7 @@
 // $NoKeywords: $
 //=============================================================================//
 
-#include "../public/basetypes.h"
-#include "../engine/maintypes.h"
-#include "../engine/archtypes.h"
-#include "../tier1/strtools.h"
-#include "../dlls/vector.h"
-
-#include "public/interface.h"
-#include "vgui_controls/pch_vgui_controls.h"
-#include <vgui_controls/keyrepeat.h>
-
-// memdbgon must be the last include file in a .cpp file
+#include "precompiled.h"
 
 using namespace vgui;
 

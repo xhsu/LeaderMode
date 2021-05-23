@@ -4,10 +4,7 @@
 //
 //=============================================================================//
 
-#include <vgui_controls/CheckButtonList.h>
-#include <vgui_controls/CheckButton.h>
-#include <vgui_controls/ScrollBar.h>
-#include <tier1/KeyValues.h>
+#include "precompiled.h"
 
 using namespace vgui;
 

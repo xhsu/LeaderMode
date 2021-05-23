@@ -5,8 +5,7 @@
 // $NoKeywords: $
 //=============================================================================//
 
-#include "vgui_controls/pch_vgui_controls.h"
-#include "vgui/ilocalize.h"
+#include "precompiled.h"
 
 
 enum

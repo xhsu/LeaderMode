@@ -18,24 +18,9 @@
 //=============================================================================
 
 
-#include <stdio.h>
+#include "precompiled.h"
 #define PROTECTED_THINGS_DISABLE
 
-#include <vgui/KeyCode.h>
-#include <vgui/Cursor.h>
-#include <vgui/MouseCode.h>
-#include <tier1/KeyValues.h>
-#include <vgui/IInput.h>
-#include <vgui/ISystem.h>
-#include <vgui/IVGui.h>
-#include <vgui/ISurface.h>
-
-#include <vgui_controls/BuildGroup.h>
-#include <vgui_controls/Panel.h>
-#include <vgui_controls/PHandle.h>
-#include <vgui_controls/Label.h>
-#include <vgui_controls/EditablePanel.h>
-#include <vgui_controls/MessageBox.h>
 
 #if defined( _X360 )
 #include "xbox/xbox_win32stubs.h"

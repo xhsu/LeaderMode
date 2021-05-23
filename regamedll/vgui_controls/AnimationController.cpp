@@ -5,24 +5,8 @@
 //=============================================================================//
 #pragma warning( disable : 4244 ) // conversion from 'double' to 'float', possible loss of data
 
-#include <random>
+#include "precompiled.h"
 
-#include <vgui/IScheme.h>
-#include <vgui/ISurface.h>
-#include <vgui/ISystem.h>
-#include <vgui/IVGui.h>
-#include <tier1/KeyValues.h>
-#include <vgui_controls/AnimationController.h>
-#include "Interface/IFileSystem.h"
-
-#include <stdio.h>
-#include <math.h>
-#include "tier1/mempool.h"
-#include "tier1/UtlDict.h"
-#include "tier1/characterset.h"
-
-// memdbgon must be the last include file in a .cpp file!!!
-#include <tier0/dbg.h>
 
 using namespace vgui;
 
