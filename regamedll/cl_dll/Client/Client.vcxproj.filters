@@ -46,9 +46,6 @@
     <Filter Include="tier3">
       <UniqueIdentifier>{0d1b3aa4-07f1-4e0c-b445-df3de7f0454e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="vgui_controls">
-      <UniqueIdentifier>{856e2d5d-6581-4476-8eec-7c3ce44a9bb3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="tier0">
       <UniqueIdentifier>{2566c911-0920-4f8a-9fb3-fe42f9f59968}</UniqueIdentifier>
     </Filter>
@@ -321,9 +318,6 @@
     <ClCompile Include="..\HUD\hud_ammo.cpp">
       <Filter>cl_dll\HUD</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\vgui_controls\Controls.cpp">
-      <Filter>vgui_controls</Filter>
-    </ClCompile>
     <ClCompile Include="..\Viewport.cpp">
       <Filter>cl_dll</Filter>
     </ClCompile>
@@ -577,9 +571,6 @@
     </ClInclude>
     <ClInclude Include="..\..\tier3\tier3.h">
       <Filter>tier3</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\vgui_controls\Controls.h">
-      <Filter>vgui_controls</Filter>
     </ClInclude>
     <ClInclude Include="..\Viewport.h">
       <Filter>cl_dll</Filter>

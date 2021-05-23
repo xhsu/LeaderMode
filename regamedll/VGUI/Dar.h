@@ -39,7 +39,7 @@ public:
 
 	int AddElement(ELEMTYPE elem)
 	{
-		return AddToTail(elem);
+		return BaseClass::AddToTail(elem);
 	}
 
 	void MoveElementToEnd(ELEMTYPE elem)
@@ -61,7 +61,7 @@ public:
 
 	int FindElement(ELEMTYPE elem)
 	{
-		return Find(elem);
+		return BaseClass::Find(elem);
 	}
 
 	bool HasElement(ELEMTYPE elem)

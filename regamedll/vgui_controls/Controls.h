@@ -20,10 +20,18 @@
 #include "VGUI/MouseCode.h"
 #include "VGUI/KeyCode.h"
 #include "tier3/tier3.h"
+#include "engine/APIProxy.h"
 
+#ifdef MessageBox
+#undef MessageBox
+#endif
+
+// For this lib, you have to offer an engfunc table for it.
+extern cl_enginefunc_t gEngfuncs;
 
 namespace vgui
 {
+
 
 // handles the initialization of the vgui interfaces
 // interfaces (listed below) are first attempted to be loaded from primaryProvider, then secondaryProvider

@@ -95,6 +95,10 @@
     <ClCompile Include="CheckButtonList.cpp" />
     <ClCompile Include="ComboBox.cpp" />
     <ClCompile Include="controls.cpp" />
+    <ClCompile Include="CvarNegateCheckButton.cpp" />
+    <ClCompile Include="CvarSlider.cpp" />
+    <ClCompile Include="CvarTextEntry.cpp" />
+    <ClCompile Include="CvarToggleCheckButton.cpp" />
     <ClCompile Include="Divider.cpp" />
     <ClCompile Include="EditablePanel.cpp" />
     <ClCompile Include="FocusNavGroup.cpp" />
@@ -164,6 +168,10 @@
     <ClInclude Include="CheckButtonList.h" />
     <ClInclude Include="ComboBox.h" />
     <ClInclude Include="Controls.h" />
+    <ClInclude Include="CvarNegateCheckButton.h" />
+    <ClInclude Include="CvarSlider.h" />
+    <ClInclude Include="CvarTextEntry.h" />
+    <ClInclude Include="CvarToggleCheckButton.h" />
     <ClInclude Include="DialogManager.h" />
     <ClInclude Include="Divider.h" />
     <ClInclude Include="EditablePanel.h" />

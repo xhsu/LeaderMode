@@ -14,21 +14,10 @@ using namespace vgui;
 
 CCreateMultiplayerGameDialog::CCreateMultiplayerGameDialog(vgui::Panel* parent) : PropertyDialog(parent, "CreateMultiplayerGameDialog")
 {
-	m_bBotsEnabled = false;
 	SetSize(348, 460);
 
 	SetTitle("#GameUI_CreateServer", true);
 	SetOKButtonText("#GameUI_Start");
-
-	m_bBotsEnabled = true;
-
-	m_pServerPage = new CCreateMultiplayerGameServerPage(this, "ServerPage");
-	m_pGameplayPage = new CCreateMultiplayerGameGameplayPage(this, "GameplayPage");
-	m_pBotPage = new CCreateMultiplayerGameBotPage(this, "BotPage", m_pSavedData);
-
-	AddPage(m_pServerPage, "#GameUI_Server");
-	AddPage(m_pGameplayPage, "#GameUI_Game");
-	AddPage(m_pBotPage, "#GameUI_CPUPlayerOptions");
 
 	m_pSavedData = new KeyValues("ServerConfig");
 
@@ -41,6 +30,14 @@ CCreateMultiplayerGameDialog::CCreateMultiplayerGameDialog(vgui::Panel* parent) 
 		if (startMap[0])
 			m_pServerPage->SetMap(startMap);
 	}
+
+	m_pServerPage = new CCreateMultiplayerGameServerPage(this, "ServerPage");
+	m_pGameplayPage = new CCreateMultiplayerGameGameplayPage(this, "GameplayPage");
+	m_pBotPage = new CCreateMultiplayerGameBotPage(this, "BotPage", m_pSavedData);
+
+	AddPage(m_pServerPage, "#GameUI_Server");
+	AddPage(m_pGameplayPage, "#GameUI_Game");
+	AddPage(m_pBotPage, "#GameUI_CPUPlayerOptions");
 
 	m_pServerPage->EnableBots(m_pSavedData);
 }
@@ -90,7 +87,7 @@ bool CCreateMultiplayerGameDialog::OnOK(bool applyOnly)
 		gEngfuncs.pfnClientCmd(botCmdBuf);
 
 	if (m_pBotPage)
-		gEngfuncs.pfnClientCmd(gEngfuncs.GetBOTCommandBuffer());
+		gEngfuncs.pfnClientCmd(m_pBotPage->GetBOTCommandBuffer());
 
 	m_pGameplayPage->SaveValues();
 	return true;

@@ -14,9 +14,6 @@
     <Filter Include="game_shared">
       <UniqueIdentifier>{a6724e52-70f0-4074-83ea-6bc90761d921}</UniqueIdentifier>
     </Filter>
-    <Filter Include="vgui_controls">
-      <UniqueIdentifier>{b9e3e30a-50f5-41c2-aadf-ec623968965e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="gameui\ServerBrowser">
       <UniqueIdentifier>{d61ebc15-27e5-4f01-8eb0-5245b1cbb095}</UniqueIdentifier>
     </Filter>
@@ -52,9 +49,6 @@
     <ClCompile Include="..\IGameUI.cpp">
       <Filter>gameui</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\vgui_controls\Controls.cpp">
-      <Filter>vgui_controls</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\game_shared\shared_util.cpp">
       <Filter>game_shared</Filter>
     </ClCompile>
@@ -75,9 +69,6 @@
     </ClCompile>
     <ClCompile Include="..\GameMenu.cpp">
       <Filter>gameui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\vgui_controls\KeyRepeat.cpp">
-      <Filter>vgui_controls</Filter>
     </ClCompile>
     <ClCompile Include="..\LoadingDialog.cpp">
       <Filter>gameui</Filter>
@@ -139,6 +130,24 @@
     <ClCompile Include="..\..\tier0\dbg.cpp">
       <Filter>tier0</Filter>
     </ClCompile>
+    <ClCompile Include="..\CreateMultiplayerGameDialog\CreateMultiplayerGameBotPage.cpp">
+      <Filter>gameui\CreateMultiplayerGame</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CreateMultiplayerGameDialog\CreateMultiplayerGameDialog.cpp">
+      <Filter>gameui\CreateMultiplayerGame</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CreateMultiplayerGameDialog\CreateMultiplayerGameGameplayPage.cpp">
+      <Filter>gameui\CreateMultiplayerGame</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ScriptObject.cpp">
+      <Filter>gameui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CreateMultiplayerGameDialog\CreateMultiplayerGameServerPage.cpp">
+      <Filter>gameui\CreateMultiplayerGame</Filter>
+    </ClCompile>
+    <ClCompile Include="..\PanelListPanel.cpp">
+      <Filter>gameui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\public\interface.h">
@@ -155,9 +164,6 @@
     </ClInclude>
     <ClInclude Include="..\..\tier3\tier3.h">
       <Filter>tier3</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\vgui_controls\Controls.h">
-      <Filter>vgui_controls</Filter>
     </ClInclude>
     <ClInclude Include="..\..\game_shared\shared_util.h">
       <Filter>game_shared</Filter>
@@ -179,9 +185,6 @@
     </ClInclude>
     <ClInclude Include="..\GameMenu.h">
       <Filter>gameui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\vgui_controls\KeyRepeat.h">
-      <Filter>vgui_controls</Filter>
     </ClInclude>
     <ClInclude Include="..\LoadingDialog.h">
       <Filter>gameui</Filter>
@@ -245,6 +248,24 @@
     </ClInclude>
     <ClInclude Include="..\..\tier0\dbg.h">
       <Filter>tier0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CreateMultiplayerGameDialog\CreateMultiplayerGameBotPage.h">
+      <Filter>gameui\CreateMultiplayerGame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CreateMultiplayerGameDialog\CreateMultiplayerGameDialog.h">
+      <Filter>gameui\CreateMultiplayerGame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CreateMultiplayerGameDialog\CreateMultiplayerGameGameplayPage.h">
+      <Filter>gameui\CreateMultiplayerGame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ScriptObject.h">
+      <Filter>gameui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CreateMultiplayerGameDialog\CreateMultiplayerGameServerPage.h">
+      <Filter>gameui\CreateMultiplayerGame</Filter>
+    </ClInclude>
+    <ClInclude Include="..\PanelListPanel.h">
+      <Filter>gameui</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

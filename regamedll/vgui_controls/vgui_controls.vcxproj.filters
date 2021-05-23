@@ -187,6 +187,18 @@
     <ClCompile Include="precompiled.cpp">
       <Filter>vgui_controls</Filter>
     </ClCompile>
+    <ClCompile Include="CvarNegateCheckButton.cpp">
+      <Filter>vgui_controls</Filter>
+    </ClCompile>
+    <ClCompile Include="CvarSlider.cpp">
+      <Filter>vgui_controls</Filter>
+    </ClCompile>
+    <ClCompile Include="CvarTextEntry.cpp">
+      <Filter>vgui_controls</Filter>
+    </ClCompile>
+    <ClCompile Include="CvarToggleCheckButton.cpp">
+      <Filter>vgui_controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AnimatingImagePanel.h">
@@ -379,6 +391,18 @@
       <Filter>tier0</Filter>
     </ClInclude>
     <ClInclude Include="precompiled.h">
+      <Filter>vgui_controls</Filter>
+    </ClInclude>
+    <ClInclude Include="CvarNegateCheckButton.h">
+      <Filter>vgui_controls</Filter>
+    </ClInclude>
+    <ClInclude Include="CvarSlider.h">
+      <Filter>vgui_controls</Filter>
+    </ClInclude>
+    <ClInclude Include="CvarTextEntry.h">
+      <Filter>vgui_controls</Filter>
+    </ClInclude>
+    <ClInclude Include="CvarToggleCheckButton.h">
       <Filter>vgui_controls</Filter>
     </ClInclude>
   </ItemGroup>

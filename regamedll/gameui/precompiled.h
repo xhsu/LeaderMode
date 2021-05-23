@@ -51,40 +51,16 @@ Modern Warfare Dev Team
 #undef PostMessage
 #endif
 
-// Don't we just use a lib and a dll??
-#include "Interface/IGameUIFuncs.h"
-#include "Interface/IEngineVGui.h"
-#include "Interface/IVGuiDLL.h"
-#include "Interface/IServerBrowser.h"
-#include "Interface/ICommandLine.h"
-#include "Interface/IBaseUI.h"
-#include "VGUI/IInput.h"
-#include "VGUI/IScheme.h"
-#include "VGUI/IVGui.h"
-#include "VGUI/ISurface.h"
-#include "VGUI/ILocalize.h"
-#include "tier1/KeyValues.h"
+// VGUI 2
+#include "vgui_controls/pch_vgui_controls.h"
+#include "PanelListPanel.h"	// Another type of PanelListPanel, different from VGUI2 one. Don't mixed them up!
 
-#include "vgui_controls/Button.h"
-#include "VGUI/KeyCode.h"
-#include "vgui_controls/Menu.h"
-#include "vgui_controls/TextEntry.h"
-#include "vgui_controls/RichText.h"
-#include "vgui_controls/MessageMap.h"
-#include "vgui_controls/Controls.h"
-#include "vgui_controls/MenuItem.h"
-#include "vgui_controls/AnimationController.h"
-#include "vgui_controls/QueryBox.h"
-#include <vgui_controls/Frame.h>
-#include <vgui_controls/HTML.h>
-#include "vgui_controls/BitmapImagePanel.h"
-#include "vgui_controls/ProgressBar.h"
-#include <vgui_controls/ImageList.h>
-#include "vgui_controls/ToggleButton.h"
-#include "vgui_controls/RadioButton.h"
-#include "vgui_controls/ComboBox.h"
-#include "vgui_controls/CheckButton.h"
-//#include "vgui_controls/cvar"
+// Interfaces
+#include "Interface/IGameUIFuncs.h"
+#include "Interface/ICommandLine.h"
+#include "Interface/IEngineVGui.h"
+#include "Interface/IBaseUI.h"
+#include "Interface/IVGuiDLL.h"
 
 // general utils.
 #include "../game_shared/shared_util.h"
@@ -106,9 +82,14 @@ Modern Warfare Dev Team
 #include "GameMenu.h"
 #include "LoadingDialog.h"
 
+// Save manu status
+#include "ScriptObject.h"
+
 // Create Multiplayer Game
-//#include "CreateMultiplayerGameDialog/CreateMultiplayerGameBotPage.h"
-//#include "CreateMultiplayerGameDialog/CreateMultiplayerGameDialog.h"
+#include "CreateMultiplayerGameDialog/CreateMultiplayerGameBotPage.h"
+#include "CreateMultiplayerGameDialog/CreateMultiplayerGameDialog.h"
+#include "CreateMultiplayerGameDialog/CreateMultiplayerGameGameplayPage.h"
+#include "CreateMultiplayerGameDialog/CreateMultiplayerGameServerPage.h"
 
 // Multiplayer net
 #include "common/netapi.h"

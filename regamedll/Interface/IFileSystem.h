@@ -110,19 +110,19 @@ public:
 
 	virtual int				Read(void* pOutput, int size, FileHandle_t file) = 0;
 	virtual int				Write(void const* pInput, int size, FileHandle_t file) = 0;
-	virtual char* ReadLine(char* pOutput, int maxChars, FileHandle_t file) = 0;
-	virtual int				FPrintf(FileHandle_t file, char* pFormat, ...) = 0;
+	virtual char*			ReadLine(char* pOutput, int maxChars, FileHandle_t file) = 0;
+	virtual int				FPrintf(FileHandle_t file, const char* pFormat, ...) = 0;
 
 	// direct filesystem buffer access
 	// returns a handle to a buffer containing the file data
 	// this is the optimal way to access the complete data for a file,
 	// since the file preloader has probably already got it in memory
-	virtual void* GetReadBuffer(FileHandle_t file, int* outBufferSize, bool failIfNotInCache) = 0;
+	virtual void*			GetReadBuffer(FileHandle_t file, int* outBufferSize, bool failIfNotInCache) = 0;
 	virtual void			ReleaseReadBuffer(FileHandle_t file, void* readBuffer) = 0;
 
 	// FindFirst/FindNext
-	virtual const char* FindFirst(const char* pWildCard, FileFindHandle_t* pHandle, const char* pathID = 0L) = 0;
-	virtual const char* FindNext(FileFindHandle_t handle) = 0;
+	virtual const char*		FindFirst(const char* pWildCard, FileFindHandle_t* pHandle, const char* pathID = 0L) = 0;
+	virtual const char*		FindNext(FileFindHandle_t handle) = 0;
 	virtual bool			FindIsDirectory(FileFindHandle_t handle) = 0;
 	virtual void			FindClose(FileFindHandle_t handle) = 0;
 

@@ -33,6 +33,7 @@ Purpose:
 #include <vgui/VGUI.h>
 
 #include <public/Color.h>
+#include <common/cvardef.h>
 
 #include <tier0/dbg.h>
 #include <tier1/byteswap.h>

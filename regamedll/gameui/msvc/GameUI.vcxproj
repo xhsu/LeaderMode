@@ -170,24 +170,28 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\..\vgui_controls\Controls.cpp" />
-    <ClCompile Include="..\..\vgui_controls\KeyRepeat.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="..\BackgroundMenuButton.cpp" />
     <ClCompile Include="..\BasePanel.cpp" />
     <ClCompile Include="..\ConsoleDialog.cpp" />
+    <ClCompile Include="..\CreateMultiplayerGameDialog\CreateMultiplayerGameBotPage.cpp" />
+    <ClCompile Include="..\CreateMultiplayerGameDialog\CreateMultiplayerGameDialog.cpp" />
+    <ClCompile Include="..\CreateMultiplayerGameDialog\CreateMultiplayerGameGameplayPage.cpp" />
+    <ClCompile Include="..\CreateMultiplayerGameDialog\CreateMultiplayerGameServerPage.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\GameConsoleDialog.cpp" />
     <ClCompile Include="..\GameMenu.cpp" />
     <ClCompile Include="..\IGameConsole.cpp" />
     <ClCompile Include="..\IGameUI.cpp" />
     <ClCompile Include="..\LoadingDialog.cpp" />
     <ClCompile Include="..\ModInfo.cpp" />
+    <ClCompile Include="..\PanelListPanel.cpp" />
     <ClCompile Include="..\precompiled.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\ScriptObject.cpp" />
     <ClCompile Include="..\ServerBrowser\BaseGamesPage.cpp" />
     <ClCompile Include="..\ServerBrowser\DialogAddServer.cpp" />
     <ClCompile Include="..\ServerBrowser\DialogGameInfo.cpp" />
@@ -215,11 +219,13 @@
     <ClInclude Include="..\..\Steam\steam_api.h" />
     <ClInclude Include="..\..\tier0\dbg.h" />
     <ClInclude Include="..\..\tier3\tier3.h" />
-    <ClInclude Include="..\..\vgui_controls\Controls.h" />
-    <ClInclude Include="..\..\vgui_controls\KeyRepeat.h" />
     <ClInclude Include="..\BackgroundMenuButton.h" />
     <ClInclude Include="..\BasePanel.h" />
     <ClInclude Include="..\ConsoleDialog.h" />
+    <ClInclude Include="..\CreateMultiplayerGameDialog\CreateMultiplayerGameBotPage.h" />
+    <ClInclude Include="..\CreateMultiplayerGameDialog\CreateMultiplayerGameDialog.h" />
+    <ClInclude Include="..\CreateMultiplayerGameDialog\CreateMultiplayerGameGameplayPage.h" />
+    <ClInclude Include="..\CreateMultiplayerGameDialog\CreateMultiplayerGameServerPage.h" />
     <ClInclude Include="..\GameConsoleDialog.h" />
     <ClInclude Include="..\GameMenu.h" />
     <ClInclude Include="..\IGameConsole.h" />
@@ -227,7 +233,9 @@
     <ClInclude Include="..\LoadingDialog.h" />
     <ClInclude Include="..\ModInfo.h" />
     <ClInclude Include="..\OfflineMode.h" />
+    <ClInclude Include="..\PanelListPanel.h" />
     <ClInclude Include="..\precompiled.h" />
+    <ClInclude Include="..\ScriptObject.h" />
     <ClInclude Include="..\ServerBrowser\BaseGamesPage.h" />
     <ClInclude Include="..\ServerBrowser\DialogAddServer.h" />
     <ClInclude Include="..\ServerBrowser\DialogGameInfo.h" />

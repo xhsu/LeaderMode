@@ -64,14 +64,14 @@ CBasePanel::~CBasePanel(void)
 
 void CBasePanel::PaintBackground(void)
 {
-	//if (!m_hOptionsDialog.Get())
-	//{
-	//	m_hOptionsDialog = new COptionsDialog(this);
-	//	m_hCreateMultiplayerGameDialog = new CCreateMultiplayerGameDialog(this);
+	if (!/*m_hOptionsDialog.Get()*/m_hCreateMultiplayerGameDialog.Get())
+	{
+		//m_hOptionsDialog = new COptionsDialog(this);
+		m_hCreateMultiplayerGameDialog = new CCreateMultiplayerGameDialog(this);
 
-	//	PositionDialog(m_hOptionsDialog);
-	//	PositionDialog(m_hCreateMultiplayerGameDialog);
-	//}
+		//PositionDialog(m_hOptionsDialog);
+		PositionDialog(m_hCreateMultiplayerGameDialog);
+	}
 
 	if (!g_pGameUI->IsInLevel() || g_hLoadingDialog.Get())
 	{
@@ -569,13 +569,13 @@ void CBasePanel::OnOpenOptionsDialog(void)
 
 void CBasePanel::OnOpenCreateMultiplayerGameDialog(void)
 {
-	/*if (!m_hCreateMultiplayerGameDialog.Get())
+	if (!m_hCreateMultiplayerGameDialog.Get())
 	{
 		m_hCreateMultiplayerGameDialog = new CCreateMultiplayerGameDialog(this);
 		PositionDialog(m_hCreateMultiplayerGameDialog);
 	}
 
-	m_hCreateMultiplayerGameDialog->Activate();*/
+	m_hCreateMultiplayerGameDialog->Activate();
 }
 
 void CBasePanel::OnOpenDemoDialog(void)

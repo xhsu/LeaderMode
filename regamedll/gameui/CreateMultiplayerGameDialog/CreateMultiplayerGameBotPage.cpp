@@ -39,7 +39,7 @@ void CCreateMultiplayerGameBotPage::SetJoinTeamCombo(const char* team)
 	{
 		for (int i = 0; joinTeamArg[i]; ++i)
 		{
-			if (!stricmp(team, joinTeamArg[i]))
+			if (!Q_stricmp(team, joinTeamArg[i]))
 			{
 				m_joinTeamCombo->ActivateItemByRow(i);
 				return;
@@ -56,7 +56,7 @@ void CCreateMultiplayerGameBotPage::SetChatterCombo(const char* chatter)
 	{
 		for (int i = 0; chatterArg[i]; ++i)
 		{
-			if (!stricmp(chatter, chatterArg[i]))
+			if (!Q_stricmp(chatter, chatterArg[i]))
 			{
 				m_chatterCombo->ActivateItemByRow(i);
 				return;
