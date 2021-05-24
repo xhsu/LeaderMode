@@ -147,9 +147,6 @@ void gHUD::Init(void)
 	m_flUCDOldTime = 0;
 	m_flUCDTimeDelta = 1;
 
-	// Initialize fonts before elements.
-	gFontFuncs::AddCustomFontFile("resource/fonts/716.TTF");
-
 	// we can't use this in init() since all these elements are adding themselves into std::list in init().
 	/*for (auto pHudElement : m_lstHudElements)
 	{
@@ -251,6 +248,7 @@ void gHUD::Init(void)
 	gEngfuncs.pfnAddCommand("eqpprev", CommandFunc_PrevEquipment);
 	gEngfuncs.pfnAddCommand("changemode", CommandFunc_AlterAct);
 	gEngfuncs.pfnAddCommand("updateoverview", &OverviewMgr::OnHUDReset);
+	gEngfuncs.pfnAddCommand("showteam", []() {g_pViewport->m_pTeamMenu->Show(!g_pViewport->m_pTeamMenu->IsVisible()); });
 }
 
 void gHUD::Shutdown(void)
@@ -947,6 +945,11 @@ float gHUD::GetOscillation(float omega)
 float gHUD::GetOscillationUnfreezable(float omega)
 {
 	return (Q_sin(gHUD::m_flUCDTime * omega) + 1.0f) / 2.0f;
+}
+
+void gHUD::AddFontFiles(void)
+{
+	gFontFuncs::AddCustomFontFile("resource/fonts/716.TTF");
 }
 
 void gHUD::SlotInput(int iSlot)

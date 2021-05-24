@@ -275,6 +275,7 @@ namespace gHUD
 	bool GetSprite(const char* szSpriteName, hSprite* phSPR, const wrect_t** pprcSPR);
 	float GetOscillation(float omega = 2);
 	float GetOscillationUnfreezable(float omega = 2);
+	void AddFontFiles(void);	// Have to do this extremely early.
 
 	// HUD bridges
 	void SlotInput(int iSlot);

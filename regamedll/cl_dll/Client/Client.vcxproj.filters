@@ -324,6 +324,12 @@
     <ClCompile Include="..\..\tier0\dbg.cpp">
       <Filter>tier0</Filter>
     </ClCompile>
+    <ClCompile Include="..\UI\TeamSelection.cpp">
+      <Filter>cl_dll\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\UI\LMUI_TeamButton.cpp">
+      <Filter>cl_dll\UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\cdll_int.h">
@@ -577,6 +583,12 @@
     </ClInclude>
     <ClInclude Include="..\..\tier0\dbg.h">
       <Filter>tier0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\UI\TeamSelection.h">
+      <Filter>cl_dll\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\UI\LMUI_TeamButton.h">
+      <Filter>cl_dll\UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

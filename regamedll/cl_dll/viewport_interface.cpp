@@ -86,6 +86,9 @@ void CClientVGUI::Initialize(CreateInterfaceFn* factoryList, int count)
 
 	vgui::VGui_InitInterfacesList("ClientUI", factoryList, count);
 
+	// Do it as soon as we get IFileSystem.
+	gHUD::AddFontFiles();
+
 	if (FILE_SYSTEM)
 	{
 		// LUNA: add CZero and consequently, CStrike into resource lib.
@@ -171,12 +174,13 @@ void CClientVGUI::ActivateClientUI(void)
 	g_pViewPort->ActivateClientUI();
 	g_pClientVGUI->HideClientUI();
 	*/
+
+	// Mouse activation code moved into viewport.
+
 	if (g_pViewport)
 	{
-		g_pViewport->SetVisible(true);
+		g_pViewport->OnActivateClientUI();
 	}
-
-	IN_ActivateMouse();
 }
 
 void CClientVGUI::HideClientUI(void)
@@ -185,10 +189,9 @@ void CClientVGUI::HideClientUI(void)
 	g_pViewPort->HideClientUI();
 	g_pClientVGUI->HideClientUI();
 	*/
+
 	if (g_pViewport)
 	{
-		g_pViewport->SetVisible(false);
+		g_pViewport->OnHideClientUI();
 	}
-
-	IN_DeactivateMouse();
 }

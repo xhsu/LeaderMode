@@ -118,15 +118,15 @@ Created Date: 05 Mar 2020
 // VGUI2
 #include "vgui_controls/pch_vgui_controls.h"
 
-// Client Viewport
-#include "Viewport.h"
-
 // file system. for the file override and usage of other mods' res.
 #include <Interface/IFileSystem.h>
 
 // OpenGL
 #include <gl/GL.h>
 #include <gl/GLU.h>
+
+// Client Viewport
+#include "Viewport.h"
 
 // functions loaded(or extended) from metahook module.
 #include "../metahook/engine.h"
