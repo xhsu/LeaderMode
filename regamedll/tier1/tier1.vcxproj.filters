@@ -10,9 +10,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="characterset.cpp">
-      <Filter>tier1</Filter>
-    </ClCompile>
     <ClCompile Include="generichash.cpp">
       <Filter>tier1</Filter>
     </ClCompile>
@@ -39,6 +36,9 @@
     </ClCompile>
     <ClCompile Include="..\tier3\tier3.cpp">
       <Filter>tier3</Filter>
+    </ClCompile>
+    <ClCompile Include="characterset.cpp">
+      <Filter>tier1</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

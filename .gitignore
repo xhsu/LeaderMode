@@ -5,8 +5,8 @@
 *.bat
 *.log
 *.lnk
-**/Debug*
-**/Release*
+**/msvc/Debug*
+**/msvc/Release*
 **/msvc/*.sdf
 **/msvc/*.opensdf
 **/msvc/*.user
@@ -17,6 +17,13 @@
 **/msvc/*.amplxeproj
 **/msvc/.vs
 **/msvc/ipch
+
+**/Client/Debug*
+**/Client/Release*
+**/vgui_controls/Debug*
+**/vgui_controls/Release*
+**/tier1/Debug*
+**/tier1/Release*
 
 regamedll/lib/tier*
 regamedll/lib/vgui_controls*

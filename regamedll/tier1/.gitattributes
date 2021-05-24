@@ -1,0 +1,26 @@
+###############################################################################
+# Set default behavior to automatically normalize line endings.
+###############################################################################
+* text=auto
+
+# Compiled Object files
+*.o               binary
+*.a               binary
+*.obj             binary
+*.lib             binary
+*.jar             binary
+
+# Resources files
+*.spr             binary
+*.zip             binary
+*.wad             binary
+*.bsp             binary
+*.rmf             binary
+*.mdl             binary
+*.wav             binary
+*.mp3             binary
+
+# Project files
+*.sln             text eol=crlf
+*.vcxproj         text eol=crlf
+*.vcxproj.filters text eol=crlf
