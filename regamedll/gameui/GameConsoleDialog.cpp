@@ -49,22 +49,19 @@ void CGameConsoleDialog::OnKeyCodeTyped(KeyCode code)
 	}
 }
 
-void DisplayOptionsDialog(void);
-void DisplayCreateMultiplayerGameDialog(void);
-
 //-----------------------------------------------------------------------------
 // Submits a command
 //-----------------------------------------------------------------------------
 void CGameConsoleDialog::OnCommandSubmitted( const char *pCommand )
 {
-	if ( !strncmp( pCommand, "options", 7 ) )
+	if (!Q_strncmp(pCommand, "options", 7))
 	{
-		DisplayOptionsDialog();
+		BasePanel()->OnOpenOptionsDialog();
 		return;
 	}
-	else if ( !strncmp( pCommand, "server", 6 ) )
+	else if (!Q_strncmp(pCommand, "server", 6))
 	{
-		DisplayCreateMultiplayerGameDialog();
+		BasePanel()->OnOpenCreateMultiplayerGameDialog();
 		return;
 	}
 

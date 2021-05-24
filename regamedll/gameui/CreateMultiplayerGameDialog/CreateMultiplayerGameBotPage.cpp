@@ -12,7 +12,7 @@ Modern Warfare Dev Team
 
 using namespace vgui;
 
-enum BotGUITeamType
+enum BotGUITeamType : BYTE
 {
 	BOT_GUI_TEAM_RANDOM = 0,
 	BOT_GUI_TEAM_CT = 1,
@@ -21,7 +21,7 @@ enum BotGUITeamType
 
 static const char* joinTeamArg[] = { "any", "ct", "t", NULL };
 
-enum BotGUIChatterType
+enum BotGUIChatterType : BYTE
 {
 	BOT_GUI_CHATTER_NORMAL = 0,
 	BOT_GUI_CHATTER_MINIMAL = 1,
@@ -99,6 +99,8 @@ CCreateMultiplayerGameBotPage::CCreateMultiplayerGameBotPage(vgui::Panel* parent
 	m_profileEntry = new TextEntry(this, "BotProfileEntry");
 
 	LoadControlSettings("Resource/CreateMultiplayerGameBotPage.res");
+	//m_profileEntry->SetBounds(132, 20, 128, 24);
+	//m_profileEntry->SetAutoResize(PIN_TOPLEFT, AUTORESIZE_NO, 132, 20, 0, 0);
 
 	m_joinAfterPlayer->SetSelected(botKeys->GetInt("bot_join_after_player", 1));
 	m_allowRogues->SetSelected(botKeys->GetInt("bot_allow_rogues", 1));
@@ -172,14 +174,50 @@ char* CCreateMultiplayerGameBotPage::GetBOTCommandBuffer(void)
 	char entryBuffer[256], profile[256];
 	m_profileEntry->GetText(entryBuffer, sizeof(entryBuffer));
 
-	if (strlen(entryBuffer))
-		sprintf(profile, "BotProfile_%s.db", entryBuffer);
+	if (Q_strlen(entryBuffer))
+		Q_slprintf(profile, "BotProfile_%s.db", entryBuffer);
 	else
-		sprintf(profile, "BotProfile.db");
+		Q_slprintf(profile, "BotProfile.db");
 
 	m_prefixEntry->GetText(entryBuffer, sizeof(entryBuffer));
 
 	static char buffer[1024];
-	sprintf(buffer, "bot_join_after_player %d\nbot_allow_rogues %d\nbot_allow_pistols %d\nbot_allow_shotguns %d\nbot_allow_sub_machine_guns %d\nbot_allow_machine_guns %d\nbot_allow_rifles %d\nbot_allow_snipers %d\nbot_allow_grenades %d\nbot_allow_shield 0\nbot_defer_to_human %d\nbot_join_team \"%s\"\nbot_prefix \"%s\"\nbot_chatter \"%s\"\nbot_profile_db \"%s\"\n", m_joinAfterPlayer->IsSelected(), m_allowRogues->IsSelected(), m_allowPistols->IsSelected(), m_allowShotguns->IsSelected(), m_allowSubmachineGuns->IsSelected(), m_allowMachineGuns->IsSelected(), m_allowRifles->IsSelected(), m_allowSnipers->IsSelected(), m_allowGrenades->IsSelected(), m_deferToHuman->IsSelected(), joinTeamArg[m_joinTeamCombo->GetActiveItem()], entryBuffer, chatterArg[m_chatterCombo->GetActiveItem()], profile);
+	Q_slprintf(buffer,
+
+		"bot_join_after_player %d\n"
+		"bot_allow_rogues %d\n"
+
+		"bot_allow_pistols %d\n"
+		"bot_allow_shotguns %d\n"
+		"bot_allow_sub_machine_guns %d\n"
+		"bot_allow_machine_guns %d\n"
+		"bot_allow_rifles %d\n"
+		"bot_allow_snipers %d\n"
+		"bot_allow_grenades %d\n"
+		"bot_allow_shield 0\n"
+
+		"bot_defer_to_human %d\n"
+		"bot_join_team \"%s\"\n"
+		"bot_prefix \"%s\"\n"
+		"bot_chatter \"%s\"\n"
+		"bot_profile_db \"%s\"\n",
+
+		m_joinAfterPlayer->IsSelected(),
+		m_allowRogues->IsSelected(),
+
+		m_allowPistols->IsSelected(),
+		m_allowShotguns->IsSelected(),
+		m_allowSubmachineGuns->IsSelected(),
+		m_allowMachineGuns->IsSelected(),
+		m_allowRifles->IsSelected(),
+		m_allowSnipers->IsSelected(),
+		m_allowGrenades->IsSelected(),
+
+		m_deferToHuman->IsSelected(),
+		joinTeamArg[m_joinTeamCombo->GetActiveItem()],
+		entryBuffer,	// bot_prefix
+		chatterArg[m_chatterCombo->GetActiveItem()],
+		profile);	// bot_profile_db
+
 	return buffer;
 }

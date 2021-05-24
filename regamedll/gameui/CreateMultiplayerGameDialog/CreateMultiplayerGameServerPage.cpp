@@ -61,9 +61,7 @@ void CCreateMultiplayerGameServerPage::EnableBots(KeyValues* data)
 	SetControlInt("BotQuotaCombo", quota);
 	m_pEnableBotsCheck->SetSelected(quota > 0);
 
-	int difficulty = data->GetInt("bot_difficulty", 0);
-	difficulty = Q_max(difficulty, 0);
-	difficulty = Q_min(3, difficulty);
+	int difficulty = Q_clamp(data->GetInt("bot_difficulty", 0), 0, 3);
 
 	char buttonName[64];
 	Q_snprintf(buttonName, sizeof(buttonName), "SkillLevel%d", difficulty);
@@ -75,9 +73,9 @@ void CCreateMultiplayerGameServerPage::EnableBots(KeyValues* data)
 
 void CCreateMultiplayerGameServerPage::OnApplyChanges(void)
 {
-	Q_strncpy(m_szHostName, GetControlString("ServerNameEdit", "Half-Life"), DATA_STR_LENGTH);
+	Q_strncpy(m_szHostName, GetControlString("ServerNameEdit", "Leader Mode"), DATA_STR_LENGTH);
 	Q_strncpy(m_szPassword, GetControlString("PasswordEdit", ""), DATA_STR_LENGTH);
-	m_iMaxPlayers = atoi(GetControlString("MaxPlayersEdit", "8"));
+	m_iMaxPlayers = atoi(GetControlString("MaxPlayersEdit", "9"));
 
 	KeyValues* kv = m_pMapList->GetActiveItemUserData();
 	Q_strncpy(m_szMapName, kv->GetString("mapname", ""), DATA_STR_LENGTH);

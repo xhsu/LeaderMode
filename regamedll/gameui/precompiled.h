@@ -27,6 +27,8 @@ Modern Warfare Dev Team
 
 #include <string.h>
 #include <locale.h>
+#include <string>
+#include <array>
 
 // Basic of Basics.
 #include "../public/interface.h"
@@ -119,3 +121,4 @@ extern cl_enginefunc_t gEngfuncs;
 extern IKeyValuesSystem* (*KeyValuesSystem)(void);
 extern IGameUIFuncs* gameuifuncs;
 extern ICommandLine* (*CommandLine)(void);
+extern unsigned int (*LoadDDS)(const char* szFile, int* iWidth, int* iHeight);

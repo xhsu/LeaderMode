@@ -27,19 +27,47 @@ IServerBrowser* serverbrowser = NULL;
 IGameUI* g_pGameUI = nullptr;
 IBaseUI* baseuifuncs = NULL;
 
-static CBasePanel *staticPanel = NULL;
+// Metahook API
 IKeyValuesSystem* (*KeyValuesSystem)(void) = nullptr;
 ICommandLine* (*CommandLine)(void) = nullptr;
 cl_enginefunc_t* (*GetEngineFuncs)() = nullptr;
+unsigned int (*LoadDDS)(const char* szFile, int* iWidth, int* iHeight) = nullptr;
 
+static CBasePanel* staticPanel = NULL;
 vgui::DHANDLE<CLoadingDialog> g_hLoadingDialog;
 
-void DisplayOptionsDialog(void)
+inline void LoadMetahookAPI(void)
 {
-}
+	HMODULE hMetahookDLL = GetModuleHandle("lm_metahook_module.dll");
 
-void DisplayCreateMultiplayerGameDialog(void)
-{
+	if (!hMetahookDLL)
+	{
+		Sys_Error("lm_metahook_module.dll no found!");
+		return;
+	}
+
+	if (!(*(void**)&KeyValuesSystem = GetProcAddress(hMetahookDLL, "GetKeyValueSystem")))
+	{
+		Sys_Error("lm_metahook_module.dll export function \"GetKeyValueSystem\" no found!");
+		return;
+	}
+
+	if (!(*(void**)&CommandLine = GetProcAddress(hMetahookDLL, "CommandLine")))
+	{
+		Sys_Error("lm_metahook_module.dll export function \"CommandLine\" no found!");
+		return;
+	}
+
+	if ((*(void**)&GetEngineFuncs = GetProcAddress(hMetahookDLL, "GetEngineFuncs")) != nullptr)
+	{
+		memcpy(&gEngfuncs, GetEngineFuncs(), sizeof(cl_enginefunc_t));
+	}
+
+	if (!(*(void**)&LoadDDS = GetProcAddress(hMetahookDLL, "LoadDDS")))
+	{
+		Sys_Error("lm_metahook_module.dll export function \"LoadDDS\" no found!");
+		return;
+	}
 }
 
 IGameUI::IGameUI()
@@ -74,29 +102,7 @@ void IGameUI::Initialize(CreateInterfaceFn *factories, int count)
 	CreateInterfaceFn vguiDllFactory = Sys_GetFactory(Sys_LoadModule(szDllName));
 
 	// Access MH module.
-	HMODULE hMetahookDLL = GetModuleHandle("lm_metahook_module.dll");
-	if (!hMetahookDLL)
-	{
-		Sys_Error("lm_metahook_module.dll no found!");
-		return;
-	}
-
-	if (!(*(void**)&KeyValuesSystem = GetProcAddress(hMetahookDLL, "GetKeyValueSystem")) )
-	{
-		Sys_Error("lm_metahook_module.dll export function \"GetKeyValueSystem\" no found!");
-		return;
-	}
-
-	if (!(*(void**)&CommandLine = GetProcAddress(hMetahookDLL, "CommandLine")) )
-	{
-		Sys_Error("lm_metahook_module.dll export function \"CommandLine\" no found!");
-		return;
-	}
-
-	if ((*(void**)&GetEngineFuncs = GetProcAddress(hMetahookDLL, "GetEngineFuncs")) != nullptr)
-	{
-		memcpy(&gEngfuncs, GetEngineFuncs(), sizeof(cl_enginefunc_t));
-	}
+	LoadMetahookAPI();
 
 	// setup the factory list
 	CreateInterfaceFn factoryList[5] =
