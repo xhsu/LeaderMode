@@ -1,2 +1,6 @@
 LIBRARY
 EXPORTS
+	GetKeyValueSystem						@1
+	CommandLine								@2
+	GetEngineFuncs=GameUI_GetEngfuncsEarly	@3
+	LoadDDS									@4

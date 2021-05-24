@@ -338,11 +338,6 @@ void CRenderFxManager::Spawn()
 	pev->solid = SOLID_NOT;
 }
 
-void CRenderFxManager::OnDestroy()
-{
-	m_RenderGroups.Purge();
-}
-
 void CRenderFxManager::Restart()
 {
 	if (FStringNull(pev->target))
@@ -357,13 +352,14 @@ void CRenderFxManager::Restart()
 		entvars_t *pevTarget = VARS(pentTarget);
 
 		// find render groups in our list of backup
-		int index = m_RenderGroups.Find(ENTINDEX(pevTarget));
-		if (index == m_RenderGroups.InvalidIndex()) {
+		auto iter = m_RenderGroups.find(ENTINDEX(pevTarget));
+		if (iter == m_RenderGroups.end())
+		{
 			// not found
 			continue;
 		}
 
-		RenderGroup_t *pGroup = &m_RenderGroups[index];
+		RenderGroup_t *pGroup = &iter->second;
 		if (!(pev->spawnflags & SF_RENDER_MASKFX))
 			pevTarget->renderfx = pGroup->renderfx;
 
@@ -398,10 +394,8 @@ void CRenderFxManager::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 		group.rendercolor = pevTarget->rendercolor;
 
 		int entityIndex = ENTINDEX(pevTarget);
-		if (m_RenderGroups.Find(entityIndex) == m_RenderGroups.InvalidIndex())
-		{
-			m_RenderGroups.Insert(entityIndex, group);
-		}
+		if (m_RenderGroups.find(entityIndex) == m_RenderGroups.end())
+			m_RenderGroups[entityIndex] = group;
 
 		if (!(pev->spawnflags & SF_RENDER_MASKFX))
 			pevTarget->renderfx = pev->renderfx;

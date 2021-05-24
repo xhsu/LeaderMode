@@ -5,12 +5,8 @@ Created Date: Mar 12 2020
 */
 
 #include "precompiled.h"
-#include "VGUI/IEngineVGui.h"
-#include "Interface/IClientVGUI.h"
-#include "Interface/IBaseUI.h"
+#include "Interface/IVGuiDLL.h"
 
-IEngineVGui* enginevgui;
-IBaseUI* g_pBaseUI = nullptr;
 
 class CClientVGUI : public IClientVGUI
 {
@@ -25,19 +21,11 @@ public:
 	virtual void HideClientUI(void);
 };
 
-IClientVGUI* g_pClientVGUI;
+CClientVGUI* g_pClientVGUI = nullptr;
+vgui::CViewPort* g_pViewport = nullptr;
 
 EXPOSE_SINGLE_INTERFACE(CClientVGUI, IClientVGUI, CLIENTVGUI_INTERFACE_VERSION);
 
-// LUNA: all these vars are temperory. the true one is on the way, VGUI/Controls.cpp.
-vgui::ISurface* g_pVGuiSurface;
-vgui::IPanel* g_pVGuiPanel;
-vgui::IInput* g_pVGuiInput;
-vgui::IVGui* g_pVGui;
-vgui::ISystem* g_pVGuiSystem;
-vgui::ISchemeManager* g_pVGuiSchemeManager;
-vgui::ILocalize* g_pVGuiLocalize;
-IFileSystem* g_pFileSystemInterface;
 
 //-----------------------------------------------------------------------------
 // Purpose: finds a particular interface in the factory set
@@ -65,17 +53,38 @@ static void* InitializeInterface(char const* interfaceName, CreateInterfaceFn* f
 
 void CClientVGUI::Initialize(CreateInterfaceFn* factoryList, int count)
 {
-	//CreateInterfaceFn vguiFactory = factories[1];
+	g_pClientVGUI = this;
 
-	g_pVGuiSurface = (vgui::ISurface*)factoryList[0](VGUI_SURFACE_INTERFACE_VERSION, NULL);
-	g_pVGuiPanel = (vgui::IPanel*)factoryList[1](VGUI_PANEL_INTERFACE_VERSION, NULL);
-	g_pVGuiInput = (vgui::IInput*)factoryList[1](VGUI_INPUT_INTERFACE_VERSION, NULL);
-	g_pVGui = (vgui::IVGui*)factoryList[1](VGUI_IVGUI_INTERFACE_VERSION, NULL);
-	g_pVGuiSystem = (vgui::ISystem*)factoryList[1](VGUI_SYSTEM_INTERFACE_VERSION, NULL);
-	g_pVGuiSchemeManager = (vgui::ISchemeManager*)factoryList[1](VGUI_SCHEME_INTERFACE_VERSION, NULL);
-	g_pVGuiLocalize = (vgui::ILocalize*)factoryList[1](VGUI_LOCALIZE_INTERFACE_VERSION, NULL);
-	g_pFileSystemInterface = (IFileSystem*)InitializeInterface(FILESYSTEM_INTERFACE_VERSION, factoryList, count);
-	g_pBaseUI = (IBaseUI*)InitializeInterface(BASEUI_INTERFACE_VERSION, factoryList, count);
+	// load and initialize vgui
+	CreateInterfaceFn thisFactory = Sys_GetFactoryThis();
+	CreateInterfaceFn engineFactory = factoryList[0];
+	CreateInterfaceFn vguiFactory = factoryList[1];
+	CreateInterfaceFn fileSystemFactory = factoryList[2];
+
+	IFileSystem* fs = (IFileSystem*)fileSystemFactory(FILESYSTEM_INTERFACE_VERSION, NULL);
+
+	// load the VGUI library
+	char szDllName[512];
+	fs->GetLocalPath("cl_dlls\\vgui_dll.dll", szDllName, charsmax(szDllName));
+	CreateInterfaceFn vguiDllFactory = Sys_GetFactory(Sys_LoadModule(szDllName));
+
+	// setup the factory list
+	CreateInterfaceFn myFactoryList[5] =
+	{
+		thisFactory,
+		engineFactory,
+		vguiFactory,
+		fileSystemFactory,
+		vguiDllFactory,
+	};
+
+	ConnectTier3Libraries(myFactoryList, _countof(myFactoryList));
+
+	// setup VGUI library
+	IVGuiDLL* staticVGuiDllFuncs = (IVGuiDLL*)vguiDllFactory(VGUI_IVGUIDLL_INTERFACE_VERSION, NULL);
+	staticVGuiDllFuncs->Init(factoryList, count);
+
+	vgui::VGui_InitInterfacesList("ClientUI", factoryList, count);
 
 	if (FILE_SYSTEM)
 	{
@@ -104,6 +113,20 @@ void CClientVGUI::Start(void)
 	g_pViewPort = new CViewport();
 	g_pViewPort->Start();
 	*/
+
+	vgui::scheme()->LoadSchemeFromFile("Resource/SourceScheme.res", "SourceScheme");
+
+	int swide, stall;
+	g_pVGuiSurface->GetScreenSize(swide, stall);
+
+	g_pViewport = new vgui::CViewPort();
+	g_pViewport->SetBounds(0, 0, swide, stall);
+	g_pViewport->SetPaintBorderEnabled(false);
+	g_pViewport->SetPaintBackgroundEnabled(true);
+	g_pViewport->SetPaintEnabled(false);
+	g_pViewport->SetVisible(false);
+	g_pViewport->SetMouseInputEnabled(false);
+	g_pViewport->SetKeyBoardInputEnabled(false);
 }
 
 void CClientVGUI::SetParent(vgui::VPANEL parent)
@@ -112,6 +135,10 @@ void CClientVGUI::SetParent(vgui::VPANEL parent)
 	g_pClientVGUI->SetParent(parent);
 	g_pViewPort->SetParent(parent);
 	*/
+	if (g_pViewport)
+	{
+		g_pViewport->SetParent(parent);
+	}
 }
 
 bool CClientVGUI::UseVGUI1(void)
@@ -144,6 +171,11 @@ void CClientVGUI::ActivateClientUI(void)
 	g_pViewPort->ActivateClientUI();
 	g_pClientVGUI->HideClientUI();
 	*/
+	if (g_pViewport)
+	{
+		g_pViewport->SetVisible(true);
+	}
+
 	IN_ActivateMouse();
 }
 
@@ -153,5 +185,10 @@ void CClientVGUI::HideClientUI(void)
 	g_pViewPort->HideClientUI();
 	g_pClientVGUI->HideClientUI();
 	*/
+	if (g_pViewport)
+	{
+		g_pViewport->SetVisible(false);
+	}
+
 	IN_DeactivateMouse();
 }

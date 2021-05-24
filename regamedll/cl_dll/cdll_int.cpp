@@ -9,6 +9,7 @@ Created Date: 05 Mar 2020
 cl_enginefunc_t gEngfuncs;
 cl_extendedfunc_t gExtFuncs;
 bool g_bInGameWorld = false;
+char g_szLanguage[64] = "\0";
 
 void CL_DLLEXPORT CAM_Think(void)
 {
@@ -268,6 +269,9 @@ BOOL CL_DLLEXPORT Initialize_(cl_enginefunc_t* pEnginefuncs, int iVersion)	// LU
 	Sound_Init();
 
 	CL_LoadParticleMan();
+
+	// Get the system language.
+	Sys_GetRegKeyValueUnderRoot("Software\\Valve\\Steam", "Language", g_szLanguage, charsmax(g_szLanguage), "english");
 
 	// get tracker interface, if any
 	return TRUE;

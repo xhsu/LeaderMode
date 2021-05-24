@@ -70,3 +70,8 @@ const char* Safe_Key_NameForBinding(const char* pszCommand)
 
 	return psz;
 }
+
+cl_enginefunc_t* GameUI_GetEngfuncsEarly(void)
+{
+	return &gEngfuncs;
+}

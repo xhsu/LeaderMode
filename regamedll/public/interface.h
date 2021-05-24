@@ -27,6 +27,10 @@
 
 #endif // _WIN32
 
+#include <public/basetypes.h>
+#include <engine/maintypes.h>
+#include <engine/archtypes.h>
+
 void *Sys_GetProcAddress(const char *pModuleName, const char *pName);
 void *Sys_GetProcAddress(void *pModuleHandle, const char *pName);
 

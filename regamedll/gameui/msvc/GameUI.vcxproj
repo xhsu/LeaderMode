@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{a7fe1326-6a09-4f91-a880-f2311bd2f400}</ProjectGuid>
+    <RootNamespace>GameUI</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>C:\Program Files (x86)\Steam\steamapps\common\Half-Life\leadermode\cl_dlls\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>C:\Program Files (x86)\Steam\steamapps\common\Half-Life\leadermode\cl_dlls\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\common;$(ProjectDir)..\..\engine;$(ProjectDir)..\..\GameUI;$(ProjectDir)..\..\public;$(ProjectDir)..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>Default</LanguageStandard>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>tier1.lib;vgui_controls.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\common;$(ProjectDir)..\..\engine;$(ProjectDir)..\..\GameUI;$(ProjectDir)..\..\public;$(ProjectDir)..\..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>Default</LanguageStandard>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>tier1.lib;tier3.lib;vgui_controls.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\common\netadr.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\common\netapi.cpp" />
+    <ClCompile Include="..\..\game_shared\shared_util.cpp" />
+    <ClCompile Include="..\..\public\interface.cpp" />
+    <ClCompile Include="..\..\Steam\steam_api.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\..\tier0\dbg.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\BackgroundMenuButton.cpp" />
+    <ClCompile Include="..\BasePanel.cpp" />
+    <ClCompile Include="..\ConsoleDialog.cpp" />
+    <ClCompile Include="..\CreateMultiplayerGameDialog\CreateMultiplayerGameBotPage.cpp" />
+    <ClCompile Include="..\CreateMultiplayerGameDialog\CreateMultiplayerGameDialog.cpp" />
+    <ClCompile Include="..\CreateMultiplayerGameDialog\CreateMultiplayerGameGameplayPage.cpp" />
+    <ClCompile Include="..\CreateMultiplayerGameDialog\CreateMultiplayerGameServerPage.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Use</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\GameConsoleDialog.cpp" />
+    <ClCompile Include="..\GameMenu.cpp" />
+    <ClCompile Include="..\IGameConsole.cpp" />
+    <ClCompile Include="..\IGameUI.cpp" />
+    <ClCompile Include="..\LoadingDialog.cpp" />
+    <ClCompile Include="..\ModInfo.cpp" />
+    <ClCompile Include="..\PanelListPanel.cpp" />
+    <ClCompile Include="..\precompiled.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\ScriptObject.cpp" />
+    <ClCompile Include="..\ServerBrowser\BaseGamesPage.cpp" />
+    <ClCompile Include="..\ServerBrowser\DialogAddServer.cpp" />
+    <ClCompile Include="..\ServerBrowser\DialogGameInfo.cpp" />
+    <ClCompile Include="..\ServerBrowser\DialogServerPassword.cpp" />
+    <ClCompile Include="..\ServerBrowser\FavoriteGames.cpp" />
+    <ClCompile Include="..\ServerBrowser\FriendsGames.cpp" />
+    <ClCompile Include="..\ServerBrowser\HistoryGames.cpp" />
+    <ClCompile Include="..\ServerBrowser\InternetGames.cpp" />
+    <ClCompile Include="..\ServerBrowser\LanGames.cpp" />
+    <ClCompile Include="..\ServerBrowser\ServerBrowser.cpp" />
+    <ClCompile Include="..\ServerBrowser\ServerBrowserDialog.cpp" />
+    <ClCompile Include="..\ServerBrowser\ServerContextMenu.cpp" />
+    <ClCompile Include="..\ServerBrowser\ServerListCompare.cpp" />
+    <ClCompile Include="..\ServerBrowser\SpectateGames.cpp" />
+    <ClCompile Include="..\ServerBrowser\VACBannedConnRefusedDialog.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\common\netadr.h" />
+    <ClInclude Include="..\..\common\netapi.h" />
+    <ClInclude Include="..\..\game_shared\shared_util.h" />
+    <ClInclude Include="..\..\public\interface.h" />
+    <ClInclude Include="..\..\Steam\steam_api.h" />
+    <ClInclude Include="..\..\tier0\dbg.h" />
+    <ClInclude Include="..\..\tier3\tier3.h" />
+    <ClInclude Include="..\BackgroundMenuButton.h" />
+    <ClInclude Include="..\BasePanel.h" />
+    <ClInclude Include="..\ConsoleDialog.h" />
+    <ClInclude Include="..\CreateMultiplayerGameDialog\CreateMultiplayerGameBotPage.h" />
+    <ClInclude Include="..\CreateMultiplayerGameDialog\CreateMultiplayerGameDialog.h" />
+    <ClInclude Include="..\CreateMultiplayerGameDialog\CreateMultiplayerGameGameplayPage.h" />
+    <ClInclude Include="..\CreateMultiplayerGameDialog\CreateMultiplayerGameServerPage.h" />
+    <ClInclude Include="..\GameConsoleDialog.h" />
+    <ClInclude Include="..\GameMenu.h" />
+    <ClInclude Include="..\IGameConsole.h" />
+    <ClInclude Include="..\IGameUI.h" />
+    <ClInclude Include="..\LoadingDialog.h" />
+    <ClInclude Include="..\ModInfo.h" />
+    <ClInclude Include="..\OfflineMode.h" />
+    <ClInclude Include="..\PanelListPanel.h" />
+    <ClInclude Include="..\precompiled.h" />
+    <ClInclude Include="..\ScriptObject.h" />
+    <ClInclude Include="..\ServerBrowser\BaseGamesPage.h" />
+    <ClInclude Include="..\ServerBrowser\DialogAddServer.h" />
+    <ClInclude Include="..\ServerBrowser\DialogGameInfo.h" />
+    <ClInclude Include="..\ServerBrowser\DialogServerPassword.h" />
+    <ClInclude Include="..\ServerBrowser\FavoriteGames.h" />
+    <ClInclude Include="..\ServerBrowser\FriendsGames.h" />
+    <ClInclude Include="..\ServerBrowser\HistoryGames.h" />
+    <ClInclude Include="..\ServerBrowser\InternetGames.h" />
+    <ClInclude Include="..\ServerBrowser\LanGames.h" />
+    <ClInclude Include="..\ServerBrowser\ServerBrowser.h" />
+    <ClInclude Include="..\ServerBrowser\ServerBrowserDialog.h" />
+    <ClInclude Include="..\ServerBrowser\ServerContextMenu.h" />
+    <ClInclude Include="..\ServerBrowser\ServerListCompare.h" />
+    <ClInclude Include="..\ServerBrowser\SpectateGames.h" />
+    <ClInclude Include="..\ServerBrowser\VACBannedConnRefusedDialog.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\tier1\tier1.vcxproj">
+      <Project>{5fff4c62-87de-4d79-b7f0-995dc25feb1c}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\vgui_controls\vgui_controls.vcxproj">
+      <Project>{d2f9c58f-fa8a-42a6-bb1a-9e290f3f3fc6}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

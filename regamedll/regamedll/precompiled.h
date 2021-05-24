@@ -39,7 +39,7 @@
 #endif
 #include "asmlib.h"
 
-#include "MemPool.h"
+#include "tier1/MemPool.h"
 
 #include "engine.h"
 
@@ -50,4 +50,4 @@
 #include "dlls.h"
 #include "public/interface.h"
 #include "regamedll.h"
-#include "FileSystem.h"
+#include "Interface/IFileSystem.h"

@@ -9,7 +9,7 @@ Created Date: 05 Mar 2020
 #include "../public/basetypes.h"
 #include "../engine/maintypes.h"
 #include "../engine/archtypes.h"
-#include "../public/strtools.h"
+#include "../tier1/strtools.h"
 #include "../dlls/vector.h"
 
 // std stuff. some commonly used vectors.
@@ -115,15 +115,11 @@ Created Date: 05 Mar 2020
 #include "../dlls/weapontype.h"
 #include "../dlls/player_classes.h"
 
-// Ahh.. we are finally here, VGUI.
-#include <VGUI/VGUI.h>
-#include <VGUI/ISurface.h>
-#include <VGUI/IPanel.h>
-#include <VGUI/IVGui.h>
-#include <VGUI/IInput.h>
-#include <VGUI/IScheme.h>
-#include <VGUI/ISystem.h>
-#include <VGUI/ILocalize.h>
+// VGUI2
+#include "vgui_controls/pch_vgui_controls.h"
+
+// Client Viewport
+#include "Viewport.h"
 
 // file system. for the file override and usage of other mods' res.
 #include <Interface/IFileSystem.h>

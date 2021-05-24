@@ -1,0 +1,118 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="tier1">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="tier3">
+      <UniqueIdentifier>{be23a43f-caa5-4902-b514-aec816212c02}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="generichash.cpp">
+      <Filter>tier1</Filter>
+    </ClCompile>
+    <ClCompile Include="KeyValues.cpp">
+      <Filter>tier1</Filter>
+    </ClCompile>
+    <ClCompile Include="mempool.cpp">
+      <Filter>tier1</Filter>
+    </ClCompile>
+    <ClCompile Include="stringpool.cpp">
+      <Filter>tier1</Filter>
+    </ClCompile>
+    <ClCompile Include="strtools.cpp">
+      <Filter>tier1</Filter>
+    </ClCompile>
+    <ClCompile Include="utlbuffer.cpp">
+      <Filter>tier1</Filter>
+    </ClCompile>
+    <ClCompile Include="utlstring.cpp">
+      <Filter>tier1</Filter>
+    </ClCompile>
+    <ClCompile Include="utlsymbol.cpp">
+      <Filter>tier1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\tier3\tier3.cpp">
+      <Filter>tier3</Filter>
+    </ClCompile>
+    <ClCompile Include="characterset.cpp">
+      <Filter>tier1</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="byteswap.h">
+      <Filter>tier1</Filter>
+    </ClInclude>
+    <ClInclude Include="characterset.h">
+      <Filter>tier1</Filter>
+    </ClInclude>
+    <ClInclude Include="generichash.h">
+      <Filter>tier1</Filter>
+    </ClInclude>
+    <ClInclude Include="KeyValues.h">
+      <Filter>tier1</Filter>
+    </ClInclude>
+    <ClInclude Include="mempool.h">
+      <Filter>tier1</Filter>
+    </ClInclude>
+    <ClInclude Include="stringpool.h">
+      <Filter>tier1</Filter>
+    </ClInclude>
+    <ClInclude Include="strtools.h">
+      <Filter>tier1</Filter>
+    </ClInclude>
+    <ClInclude Include="utlblockmemory.h">
+      <Filter>tier1</Filter>
+    </ClInclude>
+    <ClInclude Include="utlbuffer.h">
+      <Filter>tier1</Filter>
+    </ClInclude>
+    <ClInclude Include="utldict.h">
+      <Filter>tier1</Filter>
+    </ClInclude>
+    <ClInclude Include="utlfixedmemory.h">
+      <Filter>tier1</Filter>
+    </ClInclude>
+    <ClInclude Include="utlflags.h">
+      <Filter>tier1</Filter>
+    </ClInclude>
+    <ClInclude Include="utlhandletable.h">
+      <Filter>tier1</Filter>
+    </ClInclude>
+    <ClInclude Include="utllinkedlist.h">
+      <Filter>tier1</Filter>
+    </ClInclude>
+    <ClInclude Include="utlmap.h">
+      <Filter>tier1</Filter>
+    </ClInclude>
+    <ClInclude Include="utlmemory.h">
+      <Filter>tier1</Filter>
+    </ClInclude>
+    <ClInclude Include="utlqueue.h">
+      <Filter>tier1</Filter>
+    </ClInclude>
+    <ClInclude Include="utlrbtree.h">
+      <Filter>tier1</Filter>
+    </ClInclude>
+    <ClInclude Include="utlstring.h">
+      <Filter>tier1</Filter>
+    </ClInclude>
+    <ClInclude Include="utlsymbol.h">
+      <Filter>tier1</Filter>
+    </ClInclude>
+    <ClInclude Include="utlvector.h">
+      <Filter>tier1</Filter>
+    </ClInclude>
+    <ClInclude Include="UtlPriorityQueue.h">
+      <Filter>tier1</Filter>
+    </ClInclude>
+    <ClInclude Include="..\tier3\tier3.h">
+      <Filter>tier3</Filter>
+    </ClInclude>
+    <ClInclude Include="precompiled.h">
+      <Filter>tier1</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

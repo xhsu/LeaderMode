@@ -739,7 +739,7 @@ NOXREF char *UTIL_dtos4(int d)
 	return buf;
 }
 
-void UTIL_ShowMessageArgs(const char *pString, CBaseEntity *pPlayer, CUtlVector<char *> *args, bool isHint)
+void UTIL_ShowMessageArgs(const char *pString, CBaseEntity *pPlayer, std::vector<const char *> *args, bool isHint)
 {
 	if (!pPlayer)
 		return;
@@ -752,9 +752,9 @@ void UTIL_ShowMessageArgs(const char *pString, CBaseEntity *pPlayer, CUtlVector<
 		MESSAGE_BEGIN(MSG_ONE, gmsgHudTextArgs, nullptr, pPlayer->pev);
 			WRITE_STRING(pString);
 			WRITE_BYTE(isHint);
-			WRITE_BYTE(args->Count());
+			WRITE_BYTE(args->size());
 
-		for (int i = 0; i < args->Count(); i++)
+		for (unsigned short i = 0; i < args->size(); i++)
 			WRITE_STRING((*args)[i]);
 
 		MESSAGE_END();

@@ -17,6 +17,7 @@ Created Date: 05 Mar 2020
 extern cl_enginefunc_t gEngfuncs;
 extern cl_extendedfunc_t gExtFuncs;
 extern bool g_bInGameWorld;
+extern char g_szLanguage[64];
 
 // function list.
 BOOL CL_DLLEXPORT CL_IsThirdPerson(void);

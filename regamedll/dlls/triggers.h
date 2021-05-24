@@ -28,7 +28,7 @@
 
 #pragma once
 
-#include "utlmap.h"
+#include <unordered_map>
 
 class CFrictionModifier: public CBaseEntity
 {
@@ -163,7 +163,6 @@ public:
 	virtual void Spawn();
 	virtual void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
 	virtual void Restart();
-	virtual void OnDestroy();
 
 public:
 	struct RenderGroup_t
@@ -173,7 +172,8 @@ public:
 		Vector rendercolor;
 		int renderfx;
 	};
-	CUtlMap<int, RenderGroup_t> m_RenderGroups;
+
+	std::unordered_map<int, RenderGroup_t> m_RenderGroups;
 };
 
 #define SF_TRIGGER_ALLOWMONSTERS BIT(0) // monsters allowed to fire this trigger

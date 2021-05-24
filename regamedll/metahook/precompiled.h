@@ -15,7 +15,7 @@ Modern Warfare Dev Team
 #include "../public/basetypes.h"
 #include "../engine/maintypes.h"
 #include "../engine/archtypes.h"
-#include "../public/strtools.h"
+#include "../tier1/strtools.h"
 #include "../dlls/vector.h"
 
 // interface
@@ -29,8 +29,8 @@ Modern Warfare Dev Team
 #include <gl/GLU.h>
 
 // VGUI surface, for createNewTextureId().
-#include "../cl_dll/VGUI/VGUI.h"
-#include "../cl_dll/VGUI/ISurface.h"
+#include "VGUI/VGUI.h"
+#include "VGUI/ISurfaceV26.h"
 
 // dxt
 #define FILE_SYSTEM	g_pInterface->FileSystem
@@ -58,3 +58,9 @@ Modern Warfare Dev Team
 
 // client extended funcs
 #include "client.h"
+
+// bugfix.
+#include "IKeyValuesSystem.h"
+
+// Export CommandLine() for GameUI.dll
+#include "commandline.h"
