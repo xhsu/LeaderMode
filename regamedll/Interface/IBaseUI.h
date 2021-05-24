@@ -5,8 +5,6 @@
 #pragma once
 #endif
 
-#include "interface.h"
-
 struct cl_enginefuncs_s;
 class IBaseSystem;
 
