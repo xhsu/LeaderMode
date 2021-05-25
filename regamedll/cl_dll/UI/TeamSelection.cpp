@@ -183,6 +183,7 @@ void CTeamMenu::Paint(void)
 	if (!pButton)
 		return;
 
+	// Purpose: Paint an additional frame outside the button.
 	int x = 0, y = 0, w = 0, h = 0;
 	pButton->GetPos(x, y);
 	pButton->GetSize(w, h);
@@ -213,13 +214,23 @@ void CTeamMenu::Show(bool bShow)
 	if (bShow)
 	{
 		Activate();
-		SetMouseInputEnabled(true);
-		IN_DeactivateMouse();
+
+		if (GetParent()->IsVisible())
+		{
+			SetMouseInputEnabled(true);
+			IN_DeactivateMouse();
+		}
 	}
 	else
 	{
 		SetVisible(false);
-		SetMouseInputEnabled(false);
-		IN_ActivateMouse();
+
+		// Only do this when IClientVGUI is visible.
+		// Or this line will break the pause screen.
+		if (GetParent()->IsVisible())
+		{
+			SetMouseInputEnabled(false);
+			IN_ActivateMouse();
+		}
 	}
 }
