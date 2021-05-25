@@ -35,6 +35,9 @@
     <Filter Include="tier0">
       <UniqueIdentifier>{c1fc8050-5a00-41f2-8609-b95e0926a509}</UniqueIdentifier>
     </Filter>
+    <Filter Include="gameui\Options">
+      <UniqueIdentifier>{ab0b62f1-93f6-4c57-a25a-f4fa05df5461}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\public\interface.cpp">
@@ -147,6 +150,21 @@
     </ClCompile>
     <ClCompile Include="..\PanelListPanel.cpp">
       <Filter>gameui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Options\OptionsDialog.cpp">
+      <Filter>gameui\Options</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Options\OptionsSubAudio.cpp">
+      <Filter>gameui\Options</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Options\OptionsSubKeyboard.cpp">
+      <Filter>gameui\Options</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Options\OptionsSubMouse.cpp">
+      <Filter>gameui\Options</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Options\OptionsSubVideo.cpp">
+      <Filter>gameui\Options</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -266,6 +284,21 @@
     </ClInclude>
     <ClInclude Include="..\PanelListPanel.h">
       <Filter>gameui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Options\OptionsDialog.h">
+      <Filter>gameui\Options</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Options\OptionsSubAudio.h">
+      <Filter>gameui\Options</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Options\OptionsSubKeyboard.h">
+      <Filter>gameui\Options</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Options\OptionsSubMouse.h">
+      <Filter>gameui\Options</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Options\OptionsSubVideo.h">
+      <Filter>gameui\Options</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

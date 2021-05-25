@@ -91,18 +91,22 @@ CTeamMenu::CTeamMenu(void) : Frame(nullptr, "TeamMenu")
 	// Hence this calling is gurenteed safe.
 	int iScreenWidth = 0, iScreenTall = 0;
 	VGUI_SURFACE->GetScreenSize(iScreenWidth, iScreenTall);
-	SetBounds(MARGIN, MARGIN, iScreenWidth - MARGIN * 2, iScreenTall - MARGIN * 2 - 12);
+	SetBounds(MARGIN, MARGIN, iScreenWidth - MARGIN * 2, iScreenTall - MARGIN * 2);
+
+	int iPanelWidth = 0, iPanelTall = 0;
+	GetSize(iPanelWidth, iPanelTall);
 
 	SetTitleBarVisible(false);
 	SetProportional(true);
-
+	g_szLanguage;
 	SetVisible(false);
 
 	if (!m_sPlayerCountIcon)
 		m_sPlayerCountIcon.Load("sprites/Miscellaneous/SchemeNumber.dds");
 
-	Vector2D vecTButtonPos = Vector2D(iScreenWidth, iScreenTall) / 2 - Vector2D(MARGIN_BUTTON, BUTTON_SIZE) / 2 - Vector2D(BUTTON_SIZE, 0);
-	Vector2D vecCTButtonPos = Vector2D(iScreenWidth, iScreenTall) / 2 + Vector2D(MARGIN_BUTTON, -BUTTON_SIZE) / 2;
+	Vector2D vecTButtonPos = Vector2D(iPanelWidth, iPanelTall) / 2 - Vector2D(MARGIN_BUTTON, BUTTON_SIZE) / 2 - Vector2D(BUTTON_SIZE, 0);
+	Vector2D vecCTButtonPos = Vector2D(iPanelWidth, iPanelTall) / 2 + Vector2D(MARGIN_BUTTON, -BUTTON_SIZE) / 2;
+	Vector2D vecSpecButtonPos = Vector2D(iPanelWidth - BUTTON_SIZE / 2 - 16, 16);
 
 	m_pButtonT = new CTeamButton(this, "SelectT", "#LeaderMod_SB_Ter_Short", TEAM_TERRORIST, this, "jointeam 1");
 	m_pButtonT->SetBounds(vecTButtonPos.x, vecTButtonPos.y, BUTTON_SIZE, BUTTON_SIZE + FONT_SIZE);
@@ -126,13 +130,18 @@ CTeamMenu::CTeamMenu(void) : Frame(nullptr, "TeamMenu")
 	m_pButtonCT->AddGlyphSetToFont("I.MingCP", FONT_SIZE, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x2E80, 0xFFFF);
 	m_pButtonCT->InvalidateLayout(true);
 
-	/*m_pButtonObserver = new LMImageButton(this, "SelectS", L"SelectS", this, "jointeam 3");
-	m_pButtonObserver->SetBounds(64, 64 + BUTTON_SIZE * 2, BUTTON_SIZE, BUTTON_SIZE);
+	m_pButtonObserver = new CTeamButton(this, "SelectSpec", "#LeaderMod_SB_Spec_Short", TEAM_CT, this, "jointeam 6");
+	//m_pButtonObserver->SetAutoResize(PIN_TOPRIGHT, AUTORESIZE_NO, 16, 16, 0, 0);
+	//m_pButtonObserver->SetSize(BUTTON_SIZE / 2, BUTTON_SIZE / 2 + FONT_SIZE);
+	m_pButtonObserver->SetBounds(vecSpecButtonPos.x, vecSpecButtonPos.y, BUTTON_SIZE, BUTTON_SIZE + FONT_SIZE);
 	m_pButtonObserver->SetVisible(true);
 	m_pButtonObserver->SetUpImage("sprites/Inventory/NVG.dds");
 	m_pButtonObserver->SetFocusImage("sprites/Inventory/NVG.dds");
 	m_pButtonObserver->SetDownImage("sprites/Inventory/NVG.dds");
-	m_pButtonObserver->SetDisableImage("sprites/Inventory/NVG.dds");*/
+	m_pButtonObserver->SetDisableImage("sprites/Inventory/NVG.dds");
+	m_pButtonObserver->AddGlyphSetToFont("Trajan Pro", FONT_SIZE, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0x2E7F);
+	m_pButtonObserver->AddGlyphSetToFont("I.MingCP", FONT_SIZE, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x2E80, 0xFFFF);
+	m_pButtonObserver->InvalidateLayout(true);
 }
 
 CTeamMenu::~CTeamMenu(void)

@@ -109,7 +109,7 @@ private:
 	CBackgroundMenuButton* m_pGameMenuButton;
 	CGameMenu* m_pGameMenu;
 	int m_iGameMenuInset;
-	//vgui::DHANDLE<vgui::PropertyDialog> m_hOptionsDialog;
+	vgui::DHANDLE<vgui::PropertyDialog> m_hOptionsDialog;
 	vgui::DHANDLE<vgui::Frame> m_hCreateMultiplayerGameDialog;
 	//vgui::DHANDLE<vgui::QueryBox> m_hQuitQueryBox;
 	EBackgroundState m_eBackgroundState;

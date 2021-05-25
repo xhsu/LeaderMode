@@ -199,6 +199,12 @@
     <ClCompile Include="CvarToggleCheckButton.cpp">
       <Filter>vgui_controls</Filter>
     </ClCompile>
+    <ClCompile Include="VControlsListPanel.cpp">
+      <Filter>vgui_controls</Filter>
+    </ClCompile>
+    <ClCompile Include="URLButton.cpp">
+      <Filter>vgui_controls</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AnimatingImagePanel.h">
@@ -403,6 +409,12 @@
       <Filter>vgui_controls</Filter>
     </ClInclude>
     <ClInclude Include="CvarToggleCheckButton.h">
+      <Filter>vgui_controls</Filter>
+    </ClInclude>
+    <ClInclude Include="VControlsListPanel.h">
+      <Filter>vgui_controls</Filter>
+    </ClInclude>
+    <ClInclude Include="URLButton.h">
       <Filter>vgui_controls</Filter>
     </ClInclude>
   </ItemGroup>

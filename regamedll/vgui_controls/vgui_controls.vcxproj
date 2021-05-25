@@ -146,7 +146,9 @@
     <ClCompile Include="ToolWindow.cpp" />
     <ClCompile Include="TreeView.cpp" />
     <ClCompile Include="TreeViewListControl.cpp" />
+    <ClCompile Include="URLButton.cpp" />
     <ClCompile Include="URLLabel.cpp" />
+    <ClCompile Include="VControlsListPanel.cpp" />
     <ClCompile Include="WizardPanel.cpp" />
     <ClCompile Include="WizardSubPanel.cpp" />
   </ItemGroup>
@@ -222,7 +224,9 @@
     <ClInclude Include="ToolWindow.h" />
     <ClInclude Include="TreeView.h" />
     <ClInclude Include="TreeViewListControl.h" />
+    <ClInclude Include="URLButton.h" />
     <ClInclude Include="URLLabel.h" />
+    <ClInclude Include="VControlsListPanel.h" />
     <ClInclude Include="WizardPanel.h" />
     <ClInclude Include="WizardSubPanel.h" />
   </ItemGroup>

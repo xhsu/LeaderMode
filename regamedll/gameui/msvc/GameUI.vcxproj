@@ -186,6 +186,11 @@
     <ClCompile Include="..\IGameUI.cpp" />
     <ClCompile Include="..\LoadingDialog.cpp" />
     <ClCompile Include="..\ModInfo.cpp" />
+    <ClCompile Include="..\Options\OptionsDialog.cpp" />
+    <ClCompile Include="..\Options\OptionsSubAudio.cpp" />
+    <ClCompile Include="..\Options\OptionsSubKeyboard.cpp" />
+    <ClCompile Include="..\Options\OptionsSubMouse.cpp" />
+    <ClCompile Include="..\Options\OptionsSubVideo.cpp" />
     <ClCompile Include="..\PanelListPanel.cpp" />
     <ClCompile Include="..\precompiled.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -233,6 +238,11 @@
     <ClInclude Include="..\LoadingDialog.h" />
     <ClInclude Include="..\ModInfo.h" />
     <ClInclude Include="..\OfflineMode.h" />
+    <ClInclude Include="..\Options\OptionsDialog.h" />
+    <ClInclude Include="..\Options\OptionsSubAudio.h" />
+    <ClInclude Include="..\Options\OptionsSubKeyboard.h" />
+    <ClInclude Include="..\Options\OptionsSubMouse.h" />
+    <ClInclude Include="..\Options\OptionsSubVideo.h" />
     <ClInclude Include="..\PanelListPanel.h" />
     <ClInclude Include="..\precompiled.h" />
     <ClInclude Include="..\ScriptObject.h" />

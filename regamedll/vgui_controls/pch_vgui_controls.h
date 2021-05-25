@@ -106,7 +106,9 @@ Purpose:
 #ifndef HL1
 #include "vgui_controls/TreeViewListControl.h"
 #endif
+#include "vgui_controls/URLButton.h"
 #include "vgui_controls/URLLabel.h"
+#include "vgui_controls/VControlsListPanel.h"
 #include "vgui_controls/WizardPanel.h"
 #include "vgui_controls/WizardSubPanel.h"
 

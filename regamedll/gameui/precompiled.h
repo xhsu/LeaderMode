@@ -93,6 +93,13 @@ Modern Warfare Dev Team
 #include "CreateMultiplayerGameDialog/CreateMultiplayerGameGameplayPage.h"
 #include "CreateMultiplayerGameDialog/CreateMultiplayerGameServerPage.h"
 
+// Options
+#include "Options/OptionsDialog.h"
+#include "Options/OptionsSubAudio.h"
+#include "Options/OptionsSubKeyboard.h"
+#include "Options/OptionsSubMouse.h"
+#include "Options/OptionsSubVideo.h"
+
 // Multiplayer net
 #include "common/netapi.h"
 #include "common/netadr.h"

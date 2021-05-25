@@ -64,12 +64,12 @@ CBasePanel::~CBasePanel(void)
 
 void CBasePanel::PaintBackground(void)
 {
-	if (!/*m_hOptionsDialog.Get()*/m_hCreateMultiplayerGameDialog.Get())
+	if (!m_hOptionsDialog.Get())
 	{
-		//m_hOptionsDialog = new COptionsDialog(this);
+		m_hOptionsDialog = new COptionsDialog(this);
 		m_hCreateMultiplayerGameDialog = new CCreateMultiplayerGameDialog(this);
 
-		//PositionDialog(m_hOptionsDialog);
+		PositionDialog(m_hOptionsDialog);
 		PositionDialog(m_hCreateMultiplayerGameDialog);
 	}
 
@@ -558,13 +558,13 @@ void CBasePanel::OnOpenServerBrowser(void)
 
 void CBasePanel::OnOpenOptionsDialog(void)
 {
-	/*if (!m_hOptionsDialog.Get())
+	if (!m_hOptionsDialog.Get())
 	{
 		m_hOptionsDialog = new COptionsDialog(this);
 		PositionDialog(m_hOptionsDialog);
 	}
 
-	m_hOptionsDialog->Activate();*/
+	m_hOptionsDialog->Activate();
 }
 
 void CBasePanel::OnOpenCreateMultiplayerGameDialog(void)
@@ -595,8 +595,8 @@ void CBasePanel::PositionDialog(vgui::PHandle dlg)
 
 void CBasePanel::OnGameUIHidden(void)
 {
-	//if (m_hOptionsDialog.Get())
-	//	PostMessage(m_hOptionsDialog.Get(), new KeyValues("GameUIHidden"));
+	if (m_hOptionsDialog.Get())
+		PostMessage(m_hOptionsDialog.Get(), new KeyValues("GameUIHidden"));
 }
 
 void CBasePanel::SetMenuAlpha(int alpha)
