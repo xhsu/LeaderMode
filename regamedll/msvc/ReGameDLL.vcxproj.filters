@@ -17,9 +17,6 @@
     <Filter Include="public">
       <UniqueIdentifier>{d74cb79e-afd5-4215-af0e-029e38925be0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="unittests">
-      <UniqueIdentifier>{10ba586f-5f90-4a4b-940c-287810a7e9bc}</UniqueIdentifier>
-    </Filter>
     <Filter Include="regamedll">
       <UniqueIdentifier>{a54a9aa9-f95b-4199-bdf0-9640fdb5590b}</UniqueIdentifier>
     </Filter>
@@ -76,9 +73,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\version\version.cpp">
-      <Filter>version</Filter>
-    </ClCompile>
     <ClCompile Include="..\regamedll\precompiled.cpp">
       <Filter>regamedll</Filter>
     </ClCompile>
@@ -190,12 +184,6 @@
     <ClCompile Include="..\pm_shared\pm_shared.cpp">
       <Filter>pm_shared</Filter>
     </ClCompile>
-    <ClCompile Include="..\unittests\struct_offsets_tests.cpp">
-      <Filter>unittests</Filter>
-    </ClCompile>
-    <ClCompile Include="..\unittests\TestRunner.cpp">
-      <Filter>unittests</Filter>
-    </ClCompile>
     <ClCompile Include="..\dlls\h_cycler.cpp">
       <Filter>dlls</Filter>
     </ClCompile>
@@ -294,12 +282,6 @@
     </ClCompile>
     <ClCompile Include="..\regamedll\sse_mathfun.cpp">
       <Filter>regamedll</Filter>
-    </ClCompile>
-    <ClCompile Include="..\unittests\animation_tests.cpp">
-      <Filter>unittests</Filter>
-    </ClCompile>
-    <ClCompile Include="..\unittests\mathfun_tests.cpp">
-      <Filter>unittests</Filter>
     </ClCompile>
     <ClCompile Include="..\dlls\bot\cs_bot_update.cpp">
       <Filter>dlls\bot</Filter>

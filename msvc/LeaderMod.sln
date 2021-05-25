@@ -4,19 +4,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ReGameDLL", "..\regamedll\msvc\ReGameDLL.vcxproj", "{70A2B904-B7DB-4C48-8DE0-AF567360D572}"
-	ProjectSection(ProjectDependencies) = postProject
-		{CEB94F7C-E459-4673-AABB-36E2074396C0} = {CEB94F7C-E459-4673-AABB-36E2074396C0}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cppunitlite", "..\dep\cppunitlite\msvc\cppunitlite.vcxproj", "{CEB94F7C-E459-4673-AABB-36E2074396C0}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "gradle", "gradle", "{DB570330-2FEE-4C39-971B-340019B6E661}"
-	ProjectSection(SolutionItems) = preProject
-		..\build.gradle = ..\build.gradle
-		..\gradle.properties = ..\gradle.properties
-		..\settings.gradle = ..\settings.gradle
-		..\shared.gradle = ..\shared.gradle
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Client", "..\regamedll\cl_dll\Client\Client.vcxproj", "{8DAB2081-91EF-4A84-BCF2-E5726DB3A4E6}"
 EndProject
@@ -42,12 +29,6 @@ Global
 		{70A2B904-B7DB-4C48-8DE0-AF567360D572}.Release|Win32.ActiveCfg = Release|Win32
 		{70A2B904-B7DB-4C48-8DE0-AF567360D572}.Release|Win32.Build.0 = Release|Win32
 		{70A2B904-B7DB-4C48-8DE0-AF567360D572}.Release|x64.ActiveCfg = Release|Win32
-		{CEB94F7C-E459-4673-AABB-36E2074396C0}.Debug|Win32.ActiveCfg = Debug|Win32
-		{CEB94F7C-E459-4673-AABB-36E2074396C0}.Debug|Win32.Build.0 = Debug|Win32
-		{CEB94F7C-E459-4673-AABB-36E2074396C0}.Debug|x64.ActiveCfg = Debug|Win32
-		{CEB94F7C-E459-4673-AABB-36E2074396C0}.Release|Win32.ActiveCfg = Release|Win32
-		{CEB94F7C-E459-4673-AABB-36E2074396C0}.Release|Win32.Build.0 = Release|Win32
-		{CEB94F7C-E459-4673-AABB-36E2074396C0}.Release|x64.ActiveCfg = Release|Win32
 		{8DAB2081-91EF-4A84-BCF2-E5726DB3A4E6}.Debug|Win32.ActiveCfg = Debug|Win32
 		{8DAB2081-91EF-4A84-BCF2-E5726DB3A4E6}.Debug|Win32.Build.0 = Debug|Win32
 		{8DAB2081-91EF-4A84-BCF2-E5726DB3A4E6}.Debug|x64.ActiveCfg = Debug|x64
