@@ -287,7 +287,7 @@
     <ClCompile Include="..\StudioModelRenderer.cpp" />
     <ClCompile Include="..\StudioModelRenderer_CS.cpp" />
     <ClCompile Include="..\tri.cpp" />
-    <ClCompile Include="..\UI\LMUI_TeamButton.cpp" />
+    <ClCompile Include="..\UI\LM_ImageButton.cpp" />
     <ClCompile Include="..\UI\menu_buy.cpp" />
     <ClCompile Include="..\UI\TeamSelection.cpp" />
     <ClCompile Include="..\UI\ui_button.cpp" />
@@ -375,7 +375,7 @@
     <ClInclude Include="..\sound.h" />
     <ClInclude Include="..\StudioModelRenderer.h" />
     <ClInclude Include="..\tri.h" />
-    <ClInclude Include="..\UI\LMUI_TeamButton.h" />
+    <ClInclude Include="..\UI\LM_ImageButton.h" />
     <ClInclude Include="..\UI\menu_buy.h" />
     <ClInclude Include="..\UI\TeamSelection.h" />
     <ClInclude Include="..\UI\ui_button.h" />

@@ -17,9 +17,9 @@ enum
 
 struct extra_player_info_t
 {
-	short		m_iKills;
-	short		m_iDeaths;
-	short		m_iTeam;
+	unsigned short		m_iKills;
+	unsigned short		m_iDeaths;
+	unsigned short		m_iTeam;
 	Vector		m_vecOrigin;
 	RoleTypes	m_iRoleType;
 	int			m_iHealth;

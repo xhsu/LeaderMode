@@ -14,7 +14,7 @@ Modern Warfare Dev Team
 #include <vgui_controls/Panel.h>
 
 // UI Control
-#include "UI/LMUI_TeamButton.h"
+#include "UI/LM_ImageButton.h"
 
 // My own elements.
 #include "UI/TeamSelection.h"

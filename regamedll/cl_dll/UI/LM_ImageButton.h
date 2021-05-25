@@ -1,0 +1,67 @@
+/*
+
+Created Date: May 24 2021
+
+Modern Warfare Dev Team
+	Programmer	- Luna the Reborn
+	Advisor		- Crsky
+	Artist		- HL&CL
+
+*/
+
+#pragma once
+
+#include <string>
+
+namespace vgui
+{
+	typedef struct image_s
+	{
+		GLuint m_iId{ 0U };
+		int m_iWidth{ 0 }, m_iHeight{ 0 };
+		float m_flW2HRatio{ 0.0f };
+
+		inline constexpr explicit operator GLuint() const { return m_iId; }
+		inline constexpr operator Vector2D() const { return Vector2D(m_iWidth, m_iHeight); }
+		inline constexpr explicit operator bool() const { return m_iId != 0U; }
+
+		inline void Load(const char* fileName);
+
+	} image_t;
+
+	class LMImageButton : public Button
+	{
+		DECLARE_CLASS_SIMPLE(LMImageButton, Button);
+
+	public:
+		LMImageButton(Panel* parent, const char* panelName, const char* text, Panel* pActionSignalTarget = nullptr, const char* pCmd = nullptr);
+		LMImageButton(Panel* parent, const char* panelName, const wchar_t* text, Panel* pActionSignalTarget = nullptr, const char* pCmd = nullptr);
+
+		void SetUpImage(const char* fileName);
+		void SetFocusImage(const char* fileName);
+		void SetDownImage(const char* fileName);
+		void SetDisableImage(const char* fileName);
+		bool AddGlyphSetToFont(const char* windowsFontName, int tall, int weight, int blur, int scanlines, int flags, int lowRange, int highRange);
+		bool IsPendingSelected(void) { return IsEnabled() && (IsDepressed() || IsArmed()); }
+
+	public:	// Overrides
+		void PaintBackground(void) final { /* Draw no background*/ }
+		void Paint(void) override;
+		void PaintBorder(void) final { /* Draw no border*/ }
+		void ApplySettings(KeyValues* inResourceData) final;
+		void ApplySchemeSettings(IScheme* pScheme) final;
+		void InvalidateLayout(bool layoutNow = false, bool reloadScheme = false) override;
+
+	public:
+		static constexpr auto MARGIN_TEXT = 2;
+
+	protected:
+		image_t _upImage;
+		image_t _focusImage;
+		image_t _downImage;
+		image_t _disableImage;
+		std::wstring _string{ L"\0" };
+		int _font{ 0 };
+		float m_flSparedBlankHeight{ 0.0f };
+	};
+}

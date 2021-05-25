@@ -191,7 +191,7 @@ int CHudScoreboard::Draw(float flTime)
 
 		// 6. KDA
 		x2 += m_flChunkOffset;
-		_snwprintf(wszText, wcharsmax(wszText), L"%.2f", float(g_PlayerExtraInfo[i].m_iKills) / float(Q_max(short(1), g_PlayerExtraInfo[i].m_iDeaths)));
+		_snwprintf(wszText, wcharsmax(wszText), L"%.2f", float(g_PlayerExtraInfo[i].m_iKills) / float(Q_max<unsigned short>(1U, g_PlayerExtraInfo[i].m_iDeaths)));
 		gFontFuncs::DrawSetTextPos(x2, y);
 		gFontFuncs::DrawPrintText(wszText);
 
@@ -299,7 +299,7 @@ int CHudScoreboard::Draw(float flTime)
 
 		// 6. KDA
 		x2 += m_flChunkOffset;
-		_snwprintf(wszText, wcharsmax(wszText), L"%.2f", float(g_PlayerExtraInfo[i].m_iKills) / float(Q_max(short(1), g_PlayerExtraInfo[i].m_iDeaths)));
+		_snwprintf(wszText, wcharsmax(wszText), L"%.2f", float(g_PlayerExtraInfo[i].m_iKills) / float(Q_max<unsigned short>(1U, g_PlayerExtraInfo[i].m_iDeaths)));
 		gFontFuncs::DrawSetTextPos(x2, y);
 		gFontFuncs::DrawPrintText(wszText);
 
