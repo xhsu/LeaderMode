@@ -26,6 +26,8 @@ namespace vgui
 		inline constexpr explicit operator bool() const { return m_iId != 0U; }
 
 		inline void Load(const char* fileName);
+		inline constexpr float CalculateHeightByDefinedWidth(float flWidth) const { return m_flW2HRatio != 0.0f ? flWidth / m_flW2HRatio : 0.0f; }
+		inline constexpr float CalculateWidthByDefinedHeight(float flHeight) const { return flHeight * m_flW2HRatio; }
 
 	} image_t;
 
@@ -37,11 +39,16 @@ namespace vgui
 		LMImageButton(Panel* parent, const char* panelName, const char* text, Panel* pActionSignalTarget = nullptr, const char* pCmd = nullptr);
 		LMImageButton(Panel* parent, const char* panelName, const wchar_t* text, Panel* pActionSignalTarget = nullptr, const char* pCmd = nullptr);
 
-		void SetUpImage(const char* fileName);
-		void SetFocusImage(const char* fileName);
-		void SetDownImage(const char* fileName);
-		void SetDisableImage(const char* fileName);
+		inline void SetUpImage(const char* fileName) { _upImage.Load(fileName); }
+		inline void SetFocusImage(const char* fileName) { _focusImage.Load(fileName); }
+		inline void SetDownImage(const char* fileName) { _downImage.Load(fileName); }
+		inline void SetDisableImage(const char* fileName) { _disableImage.Load(fileName); }
+		inline void SetUpImage(const image_t* image) { Q_memcpy(&_upImage, image, sizeof(image_t)); }
+		inline void SetFocusImage(const image_t* image) { Q_memcpy(&_focusImage, image, sizeof(image_t)); }
+		inline void SetDownImage(const image_t* image) { Q_memcpy(&_downImage, image, sizeof(image_t)); }
+		inline void SetDisableImage(const image_t* image) { Q_memcpy(&_disableImage, image, sizeof(image_t)); }
 		bool AddGlyphSetToFont(const char* windowsFontName, int tall, int weight, int blur, int scanlines, int flags, int lowRange, int highRange);
+		void SetCommand(const char* command, ...);
 		bool IsPendingSelected(void) { return IsEnabled() && (IsDepressed() || IsArmed()); }
 
 	public:	// Overrides

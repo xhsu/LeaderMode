@@ -38,32 +38,24 @@ vgui::LMImageButton::LMImageButton(Panel* parent, const char* panelName, const w
 	_string = text;
 }
 
-void vgui::LMImageButton::SetUpImage(const char* fileName)
-{
-	_upImage.Load(fileName);
-}
-
-void vgui::LMImageButton::SetFocusImage(const char* fileName)
-{
-	_focusImage.Load(fileName);
-}
-
-void vgui::LMImageButton::SetDownImage(const char* fileName)
-{
-	_downImage.Load(fileName);
-}
-
-void vgui::LMImageButton::SetDisableImage(const char* fileName)
-{
-	_disableImage.Load(fileName);
-}
-
 bool vgui::LMImageButton::AddGlyphSetToFont(const char* windowsFontName, int tall, int weight, int blur, int scanlines, int flags, int lowRange, int highRange)
 {
 	if (!_font)
 		_font = gFontFuncs::CreateFont();
 
 	return gFontFuncs::AddGlyphSetToFont(_font, windowsFontName, tall, weight, blur, scanlines, flags, lowRange, highRange);
+}
+
+void LMImageButton::SetCommand(const char *command, ...)
+{
+	va_list arg;
+	static char string[256];
+
+	va_start(arg, command);
+	Q_vsnprintf(string, charsmax(string), command, arg);
+	va_end(arg);
+
+	BaseClass::SetCommand(string);
 }
 
 void vgui::LMImageButton::Paint(void)
@@ -102,7 +94,7 @@ void vgui::LMImageButton::Paint(void)
 	// Get size for draw.
 	// However, this is a picture with able beneath. Have to spare some room.
 	int iWidth = GetWide();
-	int iHeight = round(float(iWidth) / iImageToDraw->m_flW2HRatio);
+	int iHeight = round(iImageToDraw->CalculateHeightByDefinedWidth(iWidth));
 
 	DrawUtils::glSetTexture(iImageToDraw->m_iId);
 	DrawUtils::Draw2DQuad(0, 0, iWidth, iHeight);	// When drawing, the origin of canvas shifted to the boundary of current control.

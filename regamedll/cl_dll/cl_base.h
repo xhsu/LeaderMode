@@ -125,9 +125,6 @@ Created Date: 05 Mar 2020
 #include <gl/GL.h>
 #include <gl/GLU.h>
 
-// Client Viewport
-#include "Viewport.h"
-
 // functions loaded(or extended) from metahook module.
 #include "../metahook/engine.h"
 #include "../metahook/sound.h"
@@ -207,3 +204,6 @@ Created Date: 05 Mar 2020
 
 // UI Instance
 #include "UI/menu_buy.h"
+
+// Client Viewport (All UIs are in here.)
+#include "Viewport.h"

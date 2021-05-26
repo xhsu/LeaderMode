@@ -27,14 +27,32 @@ public:
 
 		Vector2D vecPos = m_vecExistingPlayerTrackerStartingPos;
 
-		for (unsigned short i = 0; i < m_iPlayerCounts; i++)
+		if (m_iPlayerCounts <= 5)	//  Designed max player per team. But sometimes...
 		{
+			for (unsigned short i = 0; i < m_iPlayerCounts; i++)
+			{
+				DrawUtils::glRegularTexDrawingInit(0xFFFFFF, 0xFF);
+				DrawUtils::glSetTexture(CTeamMenu::m_sPlayerCountIcon.m_iId);
+				DrawUtils::Draw2DQuad(vecPos, vecPos + m_vecPawnIconScaledSize);
+
+				vecPos.x -= MARGIN_BETWEEN_PAWN_ICONS;
+				vecPos.x -= m_vecPawnIconScaledSize.width;	// Moving left.
+			}
+		}
+		else
+		{
+			// Draw a pawn icon first.
 			DrawUtils::glRegularTexDrawingInit(0xFFFFFF, 0xFF);
 			DrawUtils::glSetTexture(CTeamMenu::m_sPlayerCountIcon.m_iId);
 			DrawUtils::Draw2DQuad(vecPos, vecPos + m_vecPawnIconScaledSize);
 
-			vecPos.x -= MARGIN_BETWEEN_PAWN_ICONS;
-			vecPos.x -= m_vecPawnIconScaledSize.width;	// Moving left.
+			vecPos.x -= m_iRomanNumberWidth;
+
+			// Display roman number indicator.
+			gFontFuncs::DrawSetTextFont(_font);
+			gFontFuncs::DrawSetTextColor(0xFFFFFF, 0xFF);
+			gFontFuncs::DrawSetTextPos(vecPos);
+			gFontFuncs::DrawPrintText(m_wcsRomanNumber.c_str());
 		}
 	}
 
@@ -42,6 +60,7 @@ public:
 	{
 		BaseClass::OnThink();
 
+		auto iLastPlayerCounts = m_iPlayerCounts;
 		m_iPlayerCounts = 0;
 		for (int i = 0; i <= gEngfuncs.GetMaxClients(); i++)
 		{
@@ -52,6 +71,12 @@ public:
 				continue;
 
 			m_iPlayerCounts++;
+		}
+
+		if (m_iPlayerCounts > 5 && iLastPlayerCounts != m_iPlayerCounts)	// Only updates text when needed.
+		{
+			m_wcsRomanNumber = UTIL_ArabicToRoman(m_iPlayerCounts) + L" × ";
+			gFontFuncs::GetTextSize(_font, m_wcsRomanNumber.c_str(), &m_iRomanNumberWidth, nullptr);
 		}
 	}
 
@@ -72,12 +97,15 @@ public:
 public:
 	static constexpr auto MARGIN_BETWEEN_PAWN_ICONS = 2;
 	static constexpr auto MARGIN_PAWN_ICON = Vector2D(2);
+	static constexpr auto MARGIN_BETWEEN_ROMAN_NUM_PAWN_ICON = MARGIN_BETWEEN_PAWN_ICONS;
 
 private:
 	unsigned short m_iPlayerCounts{ 0 };
 	unsigned short m_iTeamTracking{ TEAM_UNASSIGNED };
 	Vector2D m_vecExistingPlayerTrackerStartingPos{ Vector2D() };
 	Vector2D m_vecPawnIconScaledSize{ Vector2D() };
+	std::wstring m_wcsRomanNumber{ L"\0" };
+	int m_iRomanNumberWidth{ 0 };
 };
 
 CTeamMenu::CTeamMenu(void) : Frame(nullptr, "TeamMenu")
@@ -98,7 +126,7 @@ CTeamMenu::CTeamMenu(void) : Frame(nullptr, "TeamMenu")
 
 	SetTitleBarVisible(false);
 	SetProportional(true);
-	g_szLanguage;
+
 	SetVisible(false);
 
 	if (!m_sPlayerCountIcon)
@@ -131,8 +159,6 @@ CTeamMenu::CTeamMenu(void) : Frame(nullptr, "TeamMenu")
 	m_pButtonCT->InvalidateLayout(true);
 
 	m_pButtonObserver = new CTeamButton(this, "SelectSpec", "#LeaderMod_SB_Spec_Short", TEAM_CT, this, "jointeam 6");
-	//m_pButtonObserver->SetAutoResize(PIN_TOPRIGHT, AUTORESIZE_NO, 16, 16, 0, 0);
-	//m_pButtonObserver->SetSize(BUTTON_SIZE / 2, BUTTON_SIZE / 2 + FONT_SIZE);
 	m_pButtonObserver->SetBounds(vecSpecButtonPos.x, vecSpecButtonPos.y, BUTTON_SIZE, BUTTON_SIZE + FONT_SIZE);
 	m_pButtonObserver->SetVisible(true);
 	m_pButtonObserver->SetUpImage("sprites/Inventory/NVG.dds");

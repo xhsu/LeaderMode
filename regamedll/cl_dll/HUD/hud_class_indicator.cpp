@@ -23,21 +23,21 @@ void CHudClassIndicator::Initialize(void)
 		Reset,
 		});
 
-	CLASS_PORTRAIT[Role_UNASSIGNED] = LoadDDS("sprites/ClassesIcon/Doraemon.dds");
+	CLASS_PORTRAITS[Role_UNASSIGNED] = LoadDDS("sprites/ClassesIcon/Doraemon.dds");
 
 	// CT
-	CLASS_PORTRAIT[Role_Breacher] = LoadDDS("sprites/ClassesIcon/CT/Breacher.dds");
-	CLASS_PORTRAIT[Role_Commander] = LoadDDS("sprites/ClassesIcon/CT/Commander.dds");
-	CLASS_PORTRAIT[Role_Medic] = LoadDDS("sprites/ClassesIcon/CT/Medic.dds");
-	CLASS_PORTRAIT[Role_Sharpshooter] = LoadDDS("sprites/ClassesIcon/CT/Sharpshooter.dds");
-	CLASS_PORTRAIT[Role_SWAT] = LoadDDS("sprites/ClassesIcon/CT/SWAT.dds");
+	CLASS_PORTRAITS[Role_Breacher] = LoadDDS("sprites/ClassesIcon/CT/Breacher.dds");
+	CLASS_PORTRAITS[Role_Commander] = LoadDDS("sprites/ClassesIcon/CT/Commander.dds");
+	CLASS_PORTRAITS[Role_Medic] = LoadDDS("sprites/ClassesIcon/CT/Medic.dds");
+	CLASS_PORTRAITS[Role_Sharpshooter] = LoadDDS("sprites/ClassesIcon/CT/Sharpshooter.dds");
+	CLASS_PORTRAITS[Role_SWAT] = LoadDDS("sprites/ClassesIcon/CT/SWAT.dds");
 
 	// T
-	CLASS_PORTRAIT[Role_Arsonist] = LoadDDS("sprites/ClassesIcon/T/Arsonist.dds");
-	CLASS_PORTRAIT[Role_Assassin] = LoadDDS("sprites/ClassesIcon/T/Assassin.dds");
-	CLASS_PORTRAIT[Role_Godfather] = LoadDDS("sprites/ClassesIcon/T/Godfather.dds");
-	CLASS_PORTRAIT[Role_LeadEnforcer] = LoadDDS("sprites/ClassesIcon/T/LeadEnforcer.dds");
-	CLASS_PORTRAIT[Role_MadScientist] = LoadDDS("sprites/ClassesIcon/T/MadScientist.dds");
+	CLASS_PORTRAITS[Role_Arsonist] = LoadDDS("sprites/ClassesIcon/T/Arsonist.dds");
+	CLASS_PORTRAITS[Role_Assassin] = LoadDDS("sprites/ClassesIcon/T/Assassin.dds");
+	CLASS_PORTRAITS[Role_Godfather] = LoadDDS("sprites/ClassesIcon/T/Godfather.dds");
+	CLASS_PORTRAITS[Role_LeadEnforcer] = LoadDDS("sprites/ClassesIcon/T/LeadEnforcer.dds");
+	CLASS_PORTRAITS[Role_MadScientist] = LoadDDS("sprites/ClassesIcon/T/MadScientist.dds");
 }
 
 void CHudClassIndicator::Draw(float flTime, bool bIntermission)
@@ -49,7 +49,7 @@ void CHudClassIndicator::Draw(float flTime, bool bIntermission)
 		return;
 
 	DrawUtils::glRegularTexDrawingInit(0xFFFFFF, m_flAlpha);	// Pure white.
-	DrawUtils::glSetTexture(CLASS_PORTRAIT[g_iRoleType]);
+	DrawUtils::glSetTexture(CLASS_PORTRAITS[g_iRoleType]);
 	DrawUtils::Draw2DQuad(PORTRAIT_ANCHOR, PORTRAIT_ANCHOR + PORTRAIT_SIZE);
 
 	if (GetPrimarySkill() == SkillIndex_ERROR)

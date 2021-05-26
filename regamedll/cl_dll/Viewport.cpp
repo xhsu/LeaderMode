@@ -16,6 +16,9 @@ CViewPort::CViewPort(void)
 {
 	m_pTeamMenu = new CTeamMenu();
 	m_pTeamMenu->SetParent(this);
+
+	m_pRoleMenu = new CRoleMenu();
+	m_pRoleMenu->SetParent(this);
 }
 
 CViewPort::~CViewPort(void)
@@ -45,7 +48,7 @@ void vgui::CViewPort::OnHideClientUI(void)
 
 bool vgui::CViewPort::IsAnyClientUIUsingMouse(void)
 {
-	return (m_pTeamMenu->IsVisible() /*||*/);
+	return (m_pTeamMenu->IsVisible() || m_pRoleMenu->IsVisible());
 }
 
 void CViewPort::PaintBackground(void)

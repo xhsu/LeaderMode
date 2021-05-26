@@ -249,6 +249,7 @@ void gHUD::Init(void)
 	gEngfuncs.pfnAddCommand("changemode", CommandFunc_AlterAct);
 	gEngfuncs.pfnAddCommand("updateoverview", &OverviewMgr::OnHUDReset);
 	gEngfuncs.pfnAddCommand("showteam", []() {g_pViewport->m_pTeamMenu->Show(!g_pViewport->m_pTeamMenu->IsVisible()); });
+	gEngfuncs.pfnAddCommand("declarerole", []() {g_pViewport->m_pRoleMenu->Show(!g_pViewport->m_pRoleMenu->IsVisible()); });
 }
 
 void gHUD::Shutdown(void)
@@ -1379,13 +1380,13 @@ void OverviewMgr::OnHUDReset(void)
 	char szPath[128], szMap[64];
 
 	// remove "maps/" words.
-	Q_strcpy(szMap, gEngfuncs.pfnGetLevelName() + 5U);
+	Q_strlcpy(szMap, gEngfuncs.pfnGetLevelName() + 5U);
 
 	// truncate ".bmp" words.
 	szMap[Q_strlen(szMap) - 4U] = 0;
 
 	// and we can have the txt file read.
-	Q_sprintf(szPath, "overviews/%s.txt", szMap);
+	Q_slprintf(szPath, "overviews/%s.txt", szMap);
 
 	if (!LoadOverviewInfo(szPath))
 		return;

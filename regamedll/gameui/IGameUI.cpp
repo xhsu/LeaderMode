@@ -130,6 +130,7 @@ void IGameUI::Initialize(CreateInterfaceFn *factories, int count)
 	// load localization file
 	g_pVGuiLocalize->AddFile(g_pFullFileSystem, "Resource/vgui_%language%.txt");
 	g_pVGuiLocalize->AddFile(g_pFullFileSystem, "Resource/gameui_%language%.txt");
+	g_pVGuiLocalize->AddFile(g_pFullFileSystem, "Resource/leadermode_%language%.txt");
 
 	enginevguifuncs = (vgui::IEngineVGui *)engineFactory(VENGINE_VGUI_VERSION, NULL);
 	enginesurfacefuncs = (vgui::ISurface *)vguiDllFactory(VGUI_SURFACE_INTERFACE_VERSION, NULL);
@@ -173,7 +174,7 @@ void IGameUI::Start(struct cl_enginefuncs_s *engineFuncs, int interfaceVersion, 
 {
 	memcpy(&gEngfuncs, engineFuncs, sizeof(gEngfuncs));
 
-	gEngfuncs.pfnClientCmd("mp3 loop media/gamestartup.mp3\n");
+	gEngfuncs.pfnClientCmd("mp3 loop music/Mountains_Of_Home.mp3\n");
 
 	ModInfo().LoadCurrentGameInfo();
 

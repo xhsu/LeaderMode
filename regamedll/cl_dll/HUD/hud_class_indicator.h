@@ -47,7 +47,7 @@ struct CHudClassIndicator
 	static constexpr decltype(auto) PORTRAIT_SIZE = Vector2D(96);
 	static constexpr decltype(auto) MARGIN = 8;	// Between this and radar above.
 	static inline Vector2D PORTRAIT_ANCHOR = Vector2D();
-	static inline std::array<GLuint, ROLE_COUNT> CLASS_PORTRAIT;
+	static inline std::array<GLuint, ROLE_COUNT> CLASS_PORTRAITS;
 	static inline float m_flAlpha = 255;
 	static inline Vector m_vecCurColor = COLOR_REGULAR;
 };
