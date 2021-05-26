@@ -449,7 +449,7 @@ void gFontFuncs::ClampTextWidthROW(wchar_t* text, size_t size, int font, int iWi
 
 bool gFontFuncs::ClampTextWidthROW(std::wstring& string, int font, int iWidth)
 {
-	size_t size = string.length() * sizeof(wchar_t);
+	size_t size = string.length() * sizeof(wchar_t) * 2U;	// Additional space should be reserved.
 	wchar_t* copy = (wchar_t*)malloc(size);
 
 	if (copy == nullptr)
@@ -494,7 +494,7 @@ void gFontFuncs::ClampTextWidthCJK(wchar_t* text, size_t size, int font, int iWi
 
 bool gFontFuncs::ClampTextWidthCJK(std::wstring& string, int font, int iWidth)
 {
-	size_t size = string.length() * sizeof(wchar_t);
+	size_t size = string.length() * sizeof(wchar_t) * 2U;	// Additional space should be reserved.
 	wchar_t* copy = (wchar_t*)malloc(size);
 
 	if (copy == nullptr)

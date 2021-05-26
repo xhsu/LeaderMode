@@ -27,6 +27,9 @@
 		"LeaderMod_SB_Ter_Short"	"恐怖份子"
 		"LeaderMod_SB_Spec"			"觀察者"
 		"LeaderMod_SB_Spec_Short"	"觀察者"
+		
+		// 角色選取介面
+		"LeaderMod_RoleSel_CastBy"	"由%s1出任"
 
 		// 回合起始的任務簡報
 		"LeaderMod_CT_ProtectCommander"	"$[CT]%s1$[Yellowish]是本次行動的$[CT]%s2$[Yellowish]。$[Greenish]保護好他！"
@@ -98,6 +101,21 @@
 		"LeaderMod_Role_MadScientist"	"瘋狂科學家"
 		"LeaderMod_Role_Assassin"		"殺手"
 		"LeaderMod_Role_Arsonist"		"縱火犯"
+
+		// 角色簡介
+		"LeaderMod_Role_UNASSIGNED_Intro"	"可以使用任何武器。然而，這只不過給予麻瓜一點公平而已。"
+
+		"LeaderMod_Role_Commander_Intro"	"反恐部隊的總指揮。裝備防彈護盾。阻滯型角色。"
+		"LeaderMod_Role_SWAT_Intro"			"重塡他和其他隊友的護甲和彈藥。重甲單位。"
+		"LeaderMod_Role_Breacher_Intro"		"爆炸物與霰彈槍專家。"
+		"LeaderMod_Role_Sharpshooter_Intro"	"除狙殺教父外別無他求。裝配的寒冰手榴彈有助於這一任務。"
+		"LeaderMod_Role_Medic_Intro"		"可以治療隊友。甚至可以讓他們…迴光返照。"
+
+		"LeaderMod_Role_Godfather_Intro"	"黑幫首腦。可以治療附近的同夥。可將自己的活力值均分予眾敎子。"
+		"LeaderMod_Role_LeadEnforcer_Intro"	"廉價的武器供應、不屈於死、忠義。"
+		"LeaderMod_Role_MadScientist_Intro"	"你認為一個可以操縱電磁力量、擁有毒理學學位的人會在這裡做什麼？"
+		"LeaderMod_Role_Assassin_Intro"		"以玄妙的藝術刺殺指揮官。"
+		"LeaderMod_Role_Arsonist_Intro"		"使用黏質汽油彈。阻滯型角色。"
 
 		// 計畫
 		"LeaderMod_Scheme_UNASSIGNED"			"舉棋不定"

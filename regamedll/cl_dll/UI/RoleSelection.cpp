@@ -13,47 +13,7 @@ Modern Warfare Dev Team
 
 using namespace vgui;
 
-class CRoleButton : public LMImageButton
-{
-	DECLARE_CLASS_SIMPLE(CRoleButton, LMImageButton);
-
-public:
-	CRoleButton(Panel* parent, const char* panelName, const char* text, RoleTypes iRoleTracking, Panel* pActionSignalTarget = nullptr, const char* pCmd = nullptr) : LMImageButton(parent, panelName, text, pActionSignalTarget, pCmd), m_iRoleTracking(iRoleTracking) {}
-	CRoleButton(Panel* parent, const char* panelName, const wchar_t* text, RoleTypes iRoleTracking, Panel* pActionSignalTarget = nullptr, const char* pCmd = nullptr) : LMImageButton(parent, panelName, text, pActionSignalTarget, pCmd), m_iRoleTracking(iRoleTracking) {}
-
-	void OnThink(void) final
-	{
-		BaseClass::OnThink();
-
-		if (m_iRoleTracking == Role_UNASSIGNED)	// This role is unlimited.
-			return;
-
-		for (unsigned i = 0; i < _countof(g_PlayerExtraInfo); i++)
-		{
-			if (g_PlayerInfoList[i].name == nullptr)	// existence of a player.
-				continue;
-
-			if (g_PlayerExtraInfo[i].m_iTeam != g_iTeam)	// Same team?
-				continue;
-
-			if (g_PlayerExtraInfo[i].m_iRoleType == m_iRoleTracking)
-			{
-				SetEnabled(false);
-				return;
-			}
-		}
-
-		// No found: avaliable to choose.
-		if (!IsEnabled())
-			SetEnabled(true);
-	}
-
-private:
-	float m_flAlpha{ 255.0f };	// byte
-	RoleTypes m_iRoleTracking{ Role_UNASSIGNED };
-};
-
-static const char* s_pszRoleButtonInternalNames[ROLE_COUNT] =
+static const char* s_rgpszRoleButtonInternalNames[ROLE_COUNT] =
 {
 	"SelectUnassigned",
 
@@ -70,7 +30,7 @@ static const char* s_pszRoleButtonInternalNames[ROLE_COUNT] =
 	"SelectArsonist",
 };
 
-static const char* s_pszRoleLocalisationKeys[ROLE_COUNT] =
+static const char* s_rgpszRoleLocalisationKeys[ROLE_COUNT] =
 {
 	"#LeaderMod_Role_UNASSIGNED",
 
@@ -87,7 +47,24 @@ static const char* s_pszRoleLocalisationKeys[ROLE_COUNT] =
 	"#LeaderMod_Role_Arsonist",
 };
 
-static const char* s_pszRolePortraitFile[ROLE_COUNT] =
+static const char* s_rgpszRoleIntroLocalisationKeys[ROLE_COUNT] =
+{
+	"#LeaderMod_Role_UNASSIGNED_Intro",
+
+	"#LeaderMod_Role_Commander_Intro",
+	"#LeaderMod_Role_SWAT_Intro",
+	"#LeaderMod_Role_Breacher_Intro",
+	"#LeaderMod_Role_Sharpshooter_Intro",
+	"#LeaderMod_Role_Medic_Intro",
+
+	"#LeaderMod_Role_Godfather_Intro",
+	"#LeaderMod_Role_LeadEnforcer_Intro",
+	"#LeaderMod_Role_MadScientist_Intro",
+	"#LeaderMod_Role_Assassin_Intro",
+	"#LeaderMod_Role_Arsonist_Intro",
+};
+
+static const char* s_rgpszRolePortraitFile[ROLE_COUNT] =
 {
 	"sprites/ClassesIcon/Doraemon.dds",
 
@@ -102,6 +79,151 @@ static const char* s_pszRolePortraitFile[ROLE_COUNT] =
 	"sprites/ClassesIcon/T/MadScientist.dds",
 	"sprites/ClassesIcon/T/Assassin.dds",
 	"sprites/ClassesIcon/T/Arsonist.dds",
+};
+
+class CRoleButton : public LMImageButton
+{
+	DECLARE_CLASS_SIMPLE(CRoleButton, LMImageButton);
+
+public:
+	CRoleButton(Panel* parent, const char* panelName, const char* text, RoleTypes iRoleTracking, Panel* pActionSignalTarget = nullptr, const char* pCmd = nullptr) : LMImageButton(parent, panelName, text, pActionSignalTarget, pCmd), m_iRoleTracking(iRoleTracking) { Q_wcslcpy(m_wcsText, _string.c_str()); _string = L"\0"; UpdateRoleIntroText(); }
+	CRoleButton(Panel* parent, const char* panelName, const wchar_t* text, RoleTypes iRoleTracking, Panel* pActionSignalTarget = nullptr, const char* pCmd = nullptr) : LMImageButton(parent, panelName, text, pActionSignalTarget, pCmd), m_iRoleTracking(iRoleTracking) { Q_wcslcpy(m_wcsText, _string.c_str()); _string = L"\0"; UpdateRoleIntroText(); }
+
+	void OnThink(void) final
+	{
+		BaseClass::OnThink();
+
+		m_flAlpha += (m_flAlphaGoal - m_flAlpha) * g_flClientTimeDelta * 20;
+		m_flAlpha = Q_clamp<float>(m_flAlpha, 0, 255);
+
+		SetAlpha(m_flAlpha);	// Sync constantly.
+
+		if (m_iRoleTracking == Role_UNASSIGNED)	// This role is unlimited.
+			return;
+
+		for (unsigned i = 0; i < _countof(g_PlayerExtraInfo); i++)
+		{
+			if (g_PlayerInfoList[i].name == nullptr)	// existence of a player.
+				continue;
+
+			if (g_PlayerExtraInfo[i].m_iTeam != g_iTeam)	// Same team?
+				continue;
+
+			if (g_PlayerExtraInfo[i].m_iRoleType == m_iRoleTracking)
+			{
+				// Update info only if it is not previously turned off.
+				if (IsEnabled())
+				{
+					SetEnabled(false);
+					m_flAlphaGoal = 128;
+					//GetAnimationController()->RunAnimationCommand(this, "m_flAlpha", 96, 0.0f, 0.7, AnimationController::INTERPOLATOR_LINEAR);
+
+					auto msg = VGUI_LOCALISE->Find("#LeaderMod_RoleSel_CastBy");
+					if (msg)
+						VGUI_LOCALISE->ConstructString(m_wcsText, sizeof(m_wcsText), msg, 1, UTF8ToUnicode(g_PlayerInfoList[i].name));	// Have to be unicode to be able to construct string.
+				}
+				
+				return;
+			}
+		}
+
+		// No found: avaliable to choose.
+		if (!IsEnabled())
+		{
+			m_flAlphaGoal = 255;
+			//GetAnimationController()->RunAnimationCommand(this, "m_flAlpha", 255, 0.0f, 0.7, AnimationController::INTERPOLATOR_LINEAR);
+			SetEnabled(true);
+
+			// Restoration.
+			Q_wcslcpy(m_wcsText, UTIL_GetLocalisation(s_rgpszRoleLocalisationKeys[m_iRoleTracking]));
+		}
+	}
+
+	void Paint(void) final
+	{
+		BaseClass::Paint();
+
+		if (!ShouldPaint())
+			return;
+
+		auto iWidth = GetImageWidth(), iHeight = (int)_upImage.CalculateHeightByDefinedWidth(iWidth);
+		auto iButtonTall = GetTall(), iButtonWide = GetWide();
+		auto iAlpha = GetAlpha();
+
+		auto vPos = Vector2D(iWidth, iHeight);
+		DrawUtils::glRegularPureColorDrawingInit(0xFFFFFF, iAlpha);
+
+		// Second part of white block.
+		DrawUtils::Draw2DQuadNoTex(vPos, Vector2D(iButtonWide, iButtonTall));
+
+		// Black board at the top-right.
+		vPos = Vector2D(iWidth, 0);
+		DrawUtils::glSetColor(0x0, iAlpha / 2);
+		DrawUtils::Draw2DQuadNoTex(vPos, Vector2D(iButtonWide, iButtonTall - m_flSparedBlankHeight));
+
+		DrawUtils::glRegularPureColorDrawingExit();
+
+		// Draw text. This is the reason why the original _string was abolished.
+		gFontFuncs::DrawSetTextFont(_font);
+		gFontFuncs::DrawSetTextColor(0x0, iAlpha);
+		gFontFuncs::DrawSetTextPos(BaseClass::MARGIN_TEXT, iHeight);
+		gFontFuncs::DrawPrintText(m_wcsText);
+
+		// Draw introduction text.
+		gFontFuncs::DrawSetTextFont(m_iIntroFont);
+		gFontFuncs::DrawSetTextColor(0xFFFFFF, iAlpha);
+		gFontFuncs::DrawSetTextPos(iWidth + BaseClass::MARGIN_TEXT, 0);
+		gFontFuncs::DrawPrintText(m_wcsIntroText.c_str());
+	}
+
+	int GetImageWidth(void) final
+	{
+		return CRoleMenu::BUTTON_SIZE;
+	}
+
+	inline void UpdateRoleIntroText(void)
+	{
+		if (!m_iIntroFont)
+		{
+			m_iIntroFont = gFontFuncs::CreateFont();
+			gFontFuncs::AddGlyphSetToFont(m_iIntroFont, "Cambria", FONT_INTRO_SIZE, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0x2E7F);
+			gFontFuncs::AddGlyphSetToFont(m_iIntroFont, "TW-Kai", FONT_INTRO_SIZE, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x2E80, 0xFFFF);
+		}
+
+		m_wcsIntroText = UTIL_GetLocalisation(s_rgpszRoleIntroLocalisationKeys[m_iRoleTracking]);
+
+		// We need to clamp text.
+		// However, different language have to treat differently.
+		if (Q_stristr(g_szLanguage, "chinese") ||
+			!Q_stricmp(g_szLanguage, "korean") ||
+			!Q_stricmp(g_szLanguage, "japanese"))
+		{
+			gFontFuncs::ClampTextWidthCJK(m_wcsIntroText, m_iIntroFont, CRoleMenu::INTRO_REGION_WIDTH - BaseClass::MARGIN_TEXT);
+		}
+		else
+		{
+			gFontFuncs::ClampTextWidthROW(m_wcsIntroText, m_iIntroFont, CRoleMenu::INTRO_REGION_WIDTH - BaseClass::MARGIN_TEXT);
+		}
+	}
+
+	// UNDONE
+	// GetAnimationController() doesn't work at all. Why?
+	//void OnTick(void) final
+	//{
+	//	BaseClass::OnTick();
+	//	GetAnimationController()->UpdateAnimations(system()->GetCurrentTime());	// Should this being called in every animated class?
+	//}
+
+public:
+	static constexpr auto FONT_INTRO_SIZE = 24;
+
+private:
+	float m_flAlpha{ 255 }, m_flAlphaGoal{ 255 };	// byte
+	//CPanelAnimationVar(float, m_flAlpha, "m_flAlpha", "255");
+	RoleTypes m_iRoleTracking{ Role_UNASSIGNED };
+	wchar_t m_wcsText[256]{ L"\0" };	// Why abolish origin _string from base class? We have to draw this after second part of white block.
+	int m_iIntroFont{ 0 };
+	std::wstring m_wcsIntroText{ L"\0" };
 };
 
 CRoleMenu::CRoleMenu(void) : Frame(nullptr, "RoleMenu")
@@ -124,12 +246,13 @@ CRoleMenu::CRoleMenu(void) : Frame(nullptr, "RoleMenu")
 	SetProportional(true);
 
 	SetVisible(false);
+	SetKeyBoardInputEnabled(false);
 
 	std::array<Vector2D, ROLE_COUNT> rgvPos;
 	constexpr auto MARGIN_PERCENTAGE_MIDDLE_PORTRAITS_H = 1.0 / 3.0;
 	constexpr auto MARGIN_PERCENTAGE_MIDDLE_PORTRAITS_V = 1.0 / 5.0;
-	int iMarginBetweenMiddlePortraitsH = round((iPanelWidth * MARGIN_PERCENTAGE_MIDDLE_PORTRAITS_H) / 3.0);	// 3 interspaces
-	int iMarginBetweenMiddlePortraitsV = round((iPanelTall * MARGIN_PERCENTAGE_MIDDLE_PORTRAITS_V) / 2.0);	// only 2 interspaces this time.
+	int iMarginBetweenMiddlePortraitsH = Q_max<double>(round((iPanelWidth * MARGIN_PERCENTAGE_MIDDLE_PORTRAITS_H) / 3.0), 36);	// 3 interspaces
+	int iMarginBetweenMiddlePortraitsV = Q_max<double>(round((iPanelTall * MARGIN_PERCENTAGE_MIDDLE_PORTRAITS_V) / 2.0), 36);	// only 2 interspaces this time.
 
 	rgvPos[Role_Commander] = rgvPos[Role_Godfather] = Vector2D(
 		iPanelWidth / 2 - BUTTON_SIZE / 2,
@@ -149,11 +272,11 @@ CRoleMenu::CRoleMenu(void) : Frame(nullptr, "RoleMenu")
 
 	for (unsigned i = 0; i < ROLE_COUNT; i++)
 	{
-		CLASS_PORTRAITS[i].Load(s_pszRolePortraitFile[i]);
+		CLASS_PORTRAITS[i].Load(s_rgpszRolePortraitFile[i]);
 
-		m_rgpButtons[i] = new LMImageButton(this, s_pszRoleButtonInternalNames[i], s_pszRoleLocalisationKeys[i], this);
+		m_rgpButtons[i] = new CRoleButton(this, s_rgpszRoleButtonInternalNames[i], s_rgpszRoleLocalisationKeys[i], (RoleTypes)i, this);
 		m_rgpButtons[i]->SetCommand("role %d", i);
-		m_rgpButtons[i]->SetBounds(rgvPos[i].x, rgvPos[i].y, BUTTON_SIZE, BUTTON_SIZE + FONT_SIZE);
+		m_rgpButtons[i]->SetBounds(rgvPos[i].x, rgvPos[i].y, BUTTON_SIZE + INTRO_REGION_WIDTH, BUTTON_SIZE + FONT_SIZE);
 		m_rgpButtons[i]->SetVisible(false);
 		m_rgpButtons[i]->SetUpImage(&CLASS_PORTRAITS[i]);
 		m_rgpButtons[i]->AddGlyphSetToFont("Trajan Pro", FONT_SIZE, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0x2E7F);
@@ -222,4 +345,10 @@ void CRoleMenu::OnCommand(const char* command)
 		gEngfuncs.pfnServerCmd(command);
 	else
 		BaseClass::OnCommand(command);
+}
+
+void CRoleMenu::OnKeyCodeTyped(KeyCode code)
+{
+	BaseClass::OnKeyCodeTyped(code);
+	Show(false);	// Hide on any typing.
 }

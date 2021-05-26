@@ -76,6 +76,7 @@ void CHudBattery::Think(void)
 	m_flAlpha = Q_clamp<float>(m_flAlpha - gHUD::m_flUCDTimeDelta * 20.0f, MIN_ALPHA, 255);
 
 	INNERBLOCK_SIZE.width = (BAR_SIZE.width - BORDER_THICKNESS * 2 - PROGRESS_BAR_MARGIN * 2) * float(m_iAP) / GetMaxArmour()/*float(m_iMaxAP)*/;
+	INNERBLOCK_SIZE.width = Q_clamp<float>(INNERBLOCK_SIZE.width, 0, (BAR_SIZE.width - BORDER_THICKNESS * 2 - PROGRESS_BAR_MARGIN * 2));
 }
 
 void CHudBattery::Reset(void)

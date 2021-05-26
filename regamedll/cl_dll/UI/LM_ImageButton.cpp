@@ -64,7 +64,7 @@ void vgui::LMImageButton::Paint(void)
 		return;
 
 	// Setup render
-	DrawUtils::glRegularTexDrawingInit(0xFFFFFF, 0xFF);
+	DrawUtils::glRegularTexDrawingInit(0xFFFFFF, GetAlpha());
 
 	// Draw button image
 	auto iImageToDraw = &_upImage;	// Default status.
@@ -93,20 +93,20 @@ void vgui::LMImageButton::Paint(void)
 
 	// Get size for draw.
 	// However, this is a picture with able beneath. Have to spare some room.
-	int iWidth = GetWide();
+	int iWidth = GetImageWidth();
 	int iHeight = round(iImageToDraw->CalculateHeightByDefinedWidth(iWidth));
 
 	DrawUtils::glSetTexture(iImageToDraw->m_iId);
 	DrawUtils::Draw2DQuad(0, 0, iWidth, iHeight);	// When drawing, the origin of canvas shifted to the boundary of current control.
 
-	DrawUtils::glRegularPureColorDrawingInit(0xFFFFFF, 0xFF);
+	DrawUtils::glRegularPureColorDrawingInit(0xFFFFFF, GetAlpha());
 	DrawUtils::Draw2DQuadNoTex(0, iHeight, iWidth, GetTall());	// The bottom-right conor of the box.
 	DrawUtils::glRegularPureColorDrawingExit();
 
 	if (!_string.empty())
 	{
 		gFontFuncs::DrawSetTextFont(_font ? _font : gHUD::m_hTrajanProFont);
-		gFontFuncs::DrawSetTextColor(0x0, 0xFF);
+		gFontFuncs::DrawSetTextColor(0x0, GetAlpha());
 		gFontFuncs::DrawSetTextPos(MARGIN_TEXT, iHeight);	// Just below the image.
 		gFontFuncs::DrawPrintText(_string.c_str());
 	}
@@ -161,5 +161,5 @@ void vgui::LMImageButton::InvalidateLayout(bool layoutNow, bool reloadScheme)
 {
 	BaseClass::InvalidateLayout(layoutNow, reloadScheme);
 
-	m_flSparedBlankHeight = GetTall() - round(GetWide() / _upImage.m_flW2HRatio);	// Use the default size as the 
+	m_flSparedBlankHeight = GetTall() - round(GetImageWidth() / _upImage.m_flW2HRatio);	// Use the default size as the 
 }

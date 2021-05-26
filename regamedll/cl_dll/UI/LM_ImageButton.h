@@ -50,6 +50,7 @@ namespace vgui
 		bool AddGlyphSetToFont(const char* windowsFontName, int tall, int weight, int blur, int scanlines, int flags, int lowRange, int highRange);
 		void SetCommand(const char* command, ...);
 		bool IsPendingSelected(void) { return IsEnabled() && (IsDepressed() || IsArmed()); }
+		virtual int GetImageWidth(void) { return GetWide(); }
 
 	public:	// Overrides
 		void PaintBackground(void) final { /* Draw no background*/ }

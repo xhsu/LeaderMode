@@ -167,6 +167,19 @@ char *Q_strlcpy(char (&dest)[size], const char *src) {
 	return Q_strlcpy(dest, src, size);
 }
 
+inline wchar_t* Q_wcslcpy(wchar_t* dest, const wchar_t* src, size_t count)
+{
+	Q_wcsncpy(dest, src, count - 1U);
+	dest[count - 1] = L'\0';
+	return dest;
+}
+
+template <size_t count>
+wchar_t* Q_wcslcpy(wchar_t(&dest)[count], const wchar_t* src)
+{
+	return Q_wcslcpy(dest, src, count);
+}
+
 // a safe variant of sprintf which formatting strings.
 template <size_t size, typename ... Args>
 decltype(auto) Q_slprintf(char(&dest)[size], const char* format, Args ... args)
