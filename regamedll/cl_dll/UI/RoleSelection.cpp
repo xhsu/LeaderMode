@@ -13,6 +13,46 @@ Modern Warfare Dev Team
 
 using namespace vgui;
 
+class CRoleButton : public LMImageButton
+{
+	DECLARE_CLASS_SIMPLE(CRoleButton, LMImageButton);
+
+public:
+	CRoleButton(Panel* parent, const char* panelName, const char* text, RoleTypes iRoleTracking, Panel* pActionSignalTarget = nullptr, const char* pCmd = nullptr) : LMImageButton(parent, panelName, text, pActionSignalTarget, pCmd), m_iRoleTracking(iRoleTracking) {}
+	CRoleButton(Panel* parent, const char* panelName, const wchar_t* text, RoleTypes iRoleTracking, Panel* pActionSignalTarget = nullptr, const char* pCmd = nullptr) : LMImageButton(parent, panelName, text, pActionSignalTarget, pCmd), m_iRoleTracking(iRoleTracking) {}
+
+	void OnThink(void) final
+	{
+		BaseClass::OnThink();
+
+		if (m_iRoleTracking == Role_UNASSIGNED)	// This role is unlimited.
+			return;
+
+		for (unsigned i = 0; i < _countof(g_PlayerExtraInfo); i++)
+		{
+			if (g_PlayerInfoList[i].name == nullptr)	// existence of a player.
+				continue;
+
+			if (g_PlayerExtraInfo[i].m_iTeam != g_iTeam)	// Same team?
+				continue;
+
+			if (g_PlayerExtraInfo[i].m_iRoleType == m_iRoleTracking)
+			{
+				SetEnabled(false);
+				return;
+			}
+		}
+
+		// No found: avaliable to choose.
+		if (!IsEnabled())
+			SetEnabled(true);
+	}
+
+private:
+	float m_flAlpha{ 255.0f };	// byte
+	RoleTypes m_iRoleTracking{ Role_UNASSIGNED };
+};
+
 static const char* s_pszRoleButtonInternalNames[ROLE_COUNT] =
 {
 	"SelectUnassigned",
