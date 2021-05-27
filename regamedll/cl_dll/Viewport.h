@@ -102,6 +102,7 @@ public:
 	void OnActivateClientUI(void);
 	void OnHideClientUI(void);
 	bool IsAnyClientUIUsingMouse(void);
+	void HideAllVGUIMenus(void);
 
 protected:
 	void PaintBackground(void) final;

@@ -669,17 +669,26 @@ MSG_FUNC(VGUIMenu)
 {
 	BEGIN_READ(pbuf, iSize);
 
-	int iMenuType = READ_BYTE();
-	int bitsMask = READ_SHORT();
-	int iTime = READ_BYTE();	// unsure, unused(BTE & MoE), according to HL enging Wiki.
-	BOOL FMultipart = READ_BYTE();	// unsure, unused(BTE & MoE), according to HL enging Wiki.
-	char* pszMenuName = READ_STRING();		// unsure, unused(BTE & MoE), according to HL enging Wiki.
+	VGUIMenu iMenu = (VGUIMenu)READ_BYTE();
 
-	// UNDONE
-	/*if (gConfigs.bEnableClientUI)
+	g_pViewport->HideAllVGUIMenus();
+
+	switch (iMenu)
 	{
-		g_pViewPort->ShowVGUIMenu(iMenuType);
-	}*/
+	case VGUIMenu::ROLE:
+		g_pViewport->m_pRoleMenu->Show(true);
+		break;
+
+	case VGUIMenu::TEAM:
+	case VGUIMenu::TEAM_IG:
+	case VGUIMenu::TEAM_NO_SPEC:
+	case VGUIMenu::TEAM_NO_SPEC_IG:
+		g_pViewport->m_pTeamMenu->Show(true);
+		break;
+
+	default:
+		break;
+	}
 
 	return TRUE;
 }

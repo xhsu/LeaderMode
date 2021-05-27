@@ -51,6 +51,12 @@ bool vgui::CViewPort::IsAnyClientUIUsingMouse(void)
 	return (m_pTeamMenu->IsVisible() || m_pRoleMenu->IsVisible());
 }
 
+void vgui::CViewPort::HideAllVGUIMenus(void)
+{
+	m_pRoleMenu->Show(false);
+	m_pTeamMenu->Show(false);
+}
+
 void CViewPort::PaintBackground(void)
 {
 	//int swide, stall;

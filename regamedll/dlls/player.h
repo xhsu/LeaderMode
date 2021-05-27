@@ -188,7 +188,6 @@ enum _Menu
 	Menu_OFF,
 	Menu_ChooseTeam,
 	Menu_IGChooseTeam,
-	Menu_ChooseAppearance,
 	Menu_Radio1,
 	Menu_Radio2,
 	Menu_Radio3,
@@ -571,7 +570,6 @@ public:
 	IgnoreChatMsg m_iIgnoreGlobalChat;
 	bool m_bHasNightVision;
 	bool m_bNightVisionOn;
-	Vector m_vRecentPath[MAX_RECENT_PATH];
 	float m_flIdleCheckTime;
 	float m_flRadioTime;
 	int m_iRadioMessages;
@@ -634,8 +632,6 @@ public:
 	float m_flgeigerDelay;
 	int m_igeigerRangePrev;
 	int m_iStepLeft;
-	char m_szTextureName[MAX_TEXTURENAME_LENGHT];
-	char m_chTextureType;
 	int m_idrowndmg;
 	int m_idrownrestored;
 	int m_bitsHUDDamage;

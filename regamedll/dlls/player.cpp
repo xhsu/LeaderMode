@@ -170,11 +170,8 @@ void CBasePlayer::SetPlayerModel()
 			model = "vip";
 			break;
 		case MODEL_SPETSNAZ:
-			if (AreRunningCZero())
-			{
-				model = "spetsnaz";
-				break;
-			}
+			model = "spetsnaz";
+			break;
 		default:
 		{
 			if (IsBot())
@@ -207,11 +204,8 @@ void CBasePlayer::SetPlayerModel()
 			model = "guerilla";
 			break;
 		case MODEL_MILITIA:
-			if (AreRunningCZero())
-			{
-				model = "militia";
-				break;
-			}
+			model = "militia";
+			break;
 		default:
 		{
 			if (IsBot())
@@ -343,7 +337,7 @@ void EXT_FUNC CBasePlayer::Radio(const char *msg_id, const char *msg_verbose, sh
 			{
 				// search the place name where is located the player
 				const char *placeName = nullptr;
-				if (AreRunningCZero() && TheBotPhrases)
+				if (TheBotPhrases)
 				{
 					Place playerPlace = TheNavAreaGrid.GetPlace(&pev->origin);
 					const BotPhraseList *placeList = TheBotPhrases->GetPlaceList();
@@ -2872,7 +2866,7 @@ void EXT_FUNC CBasePlayer::RoundRespawn()
 		m_bJustKilledTeammate = false;
 	}
 
-	if (m_iMenu != Menu_ChooseAppearance)
+	if (m_iMenu != Menu_DeclareRole)
 	{
 		respawn(pev);
 
@@ -4189,9 +4183,6 @@ void EXT_FUNC CBasePlayer::Spawn()
 
 	m_iNumSpawns++;
 	InitStatusBar();
-
-	for (i = 0; i < MAX_RECENT_PATH; i++)
-		m_vRecentPath[i] = Vector(0, 0, 0);
 
 	pev->fov = DEFAULT_FOV;
 	m_flNextDecalTime = 0;
@@ -6076,12 +6067,9 @@ void CBasePlayer::SwitchTeam()
 			szNewModel = "arctic";
 			break;
 		case MODEL_SPETSNAZ:
-			if (AreRunningCZero())
-			{
-				m_iModelName = MODEL_MILITIA;
-				szNewModel = "militia";
-				break;
-			}
+			m_iModelName = MODEL_MILITIA;
+			szNewModel = "militia";
+			break;
 		default:
 			if (m_iModelName == MODEL_GSG9 || !IsBot() || !TheBotProfiles->GetCustomSkinModelname(m_iModelName))
 			{
@@ -6113,12 +6101,9 @@ void CBasePlayer::SwitchTeam()
 			break;
 
 		case MODEL_MILITIA:
-			if (AreRunningCZero())
-			{
-				m_iModelName = MODEL_SPETSNAZ;
-				szNewModel = "spetsnaz";
-				break;
-			}
+			m_iModelName = MODEL_SPETSNAZ;
+			szNewModel = "spetsnaz";
+			break;
 		default:
 			if (m_iModelName == MODEL_LEET || !IsBot() || !TheBotProfiles->GetCustomSkinModelname(m_iModelName))
 			{
@@ -6895,7 +6880,7 @@ void CBasePlayer::UpdateLocation(bool forceUpdate)
 
 	const char *placeName = "";
 
-	if (pev->deadflag == DEAD_NO && AreRunningCZero())
+	if (pev->deadflag == DEAD_NO)
 	{
 		// search the place name where is located the player
 		Place playerPlace = TheNavAreaGrid.GetPlace(&pev->origin);
@@ -7148,7 +7133,7 @@ void CBasePlayer::PlayerRespawnThink()
 		return;
 
 	// Player cannot respawn while in the Choose Appearance menu
-	if (m_iMenu == Menu_ChooseAppearance || m_iJoiningState == SHOWTEAMSELECT)
+	if (m_iMenu == Menu_ChooseTeam || m_iJoiningState == SHOWTEAMSELECT)
 		return;
 
 	if (pev->deadflag < DEAD_DYING)

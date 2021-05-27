@@ -35,5 +35,4 @@ extern Vector g_vecAttackDir;
 
 extern BOOL gDisplayTitle;
 extern bool g_bIsBeta;
-extern bool g_bIsCzeroGame;
 extern bool g_bAllowedCSBot;

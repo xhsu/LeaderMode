@@ -37,7 +37,6 @@ enum ChooseTeamMenuSlot
 
 	MENU_SLOT_TEAM_TERRORIST = 1,
 	MENU_SLOT_TEAM_CT,
-	MENU_SLOT_TEAM_VIP,
 
 	MENU_SLOT_TEAM_RANDOM = 5,
 	MENU_SLOT_TEAM_SPECT
@@ -108,7 +107,7 @@ void ClientDisconnect(edict_t *pEntity);
 void respawn(entvars_t *pev, BOOL fCopyCorpse = FALSE);
 void ClientKill(edict_t *pEntity);
 void ShowMenu(CBasePlayer* pPlayer, int bitsValidSlots, int nDisplayTime, const std::string& szText);
-void ShowVGUIMenu(CBasePlayer *pPlayer, int MenuType, int BitMask, char *szOldMenu);
+void ShowVGUIMenu(CBasePlayer* pPlayer, VGUIMenu MenuType);
 void ListPlayers(CBasePlayer *current);
 void ProcessKickVote(CBasePlayer *pVotingPlayer, CBasePlayer *pKickPlayer);
 void CheckStartMoney();

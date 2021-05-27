@@ -30,11 +30,6 @@
 
 void Regamedll_Game_Init();
 
-inline bool AreRunningCZero()
-{
-	return g_bIsCzeroGame;
-}
-
 inline bool AreRunningBeta()
 {
 	return g_bIsBeta;

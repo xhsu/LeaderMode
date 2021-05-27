@@ -1567,18 +1567,15 @@ bool UTIL_AreBotsAllowed()
 	if (g_engfuncs.pfnEngCheckParm == nullptr)
 		return false;
 
-	if (AreRunningCZero())
+	// If they pass in -nobots, don't allow bots.  This is for people who host servers, to
+	// allow them to disallow bots to enforce CPU limits.
+	int nobots = ENG_CHECK_PARM("-nobots", nullptr);
+	if (nobots)
 	{
-		// If they pass in -nobots, don't allow bots.  This is for people who host servers, to
-		// allow them to disallow bots to enforce CPU limits.
-		int nobots = ENG_CHECK_PARM("-nobots", nullptr);
-		if (nobots)
-		{
-			return false;
-		}
-
-		return true;
+		return false;
 	}
+
+	return true;
 
 	// let enables zBot by default from listen server?
 	if (!IS_DEDICATED_SERVER())

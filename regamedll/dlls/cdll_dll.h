@@ -102,20 +102,14 @@ constexpr int DEFAULT_FOV      = 90;	// the default field of view
 #define HEADNAME_ALL		3
 
 // custom enum
-enum VGUIMenu
+enum class VGUIMenu : BYTE
 {
-	VGUI_Menu_Team = 2,
-	VGUI_Menu_MapBriefing = 4,
-
-	VGUI_Menu_Class_T = 26,
-	VGUI_Menu_Class_CT,
-	VGUI_Menu_Buy,
-	VGUI_Menu_Buy_Pistol,
-	VGUI_Menu_Buy_ShotGun,
-	VGUI_Menu_Buy_Rifle,
-	VGUI_Menu_Buy_SubMachineGun,
-	VGUI_Menu_Buy_MachineGun,
-	VGUI_Menu_Buy_Item,
+	OFF,
+	TEAM,
+	TEAM_NO_SPEC,
+	TEAM_IG,
+	TEAM_NO_SPEC_IG,
+	ROLE,
 };
 
 // custom enum

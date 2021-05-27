@@ -557,7 +557,7 @@ void CHalfLifeMultiplay::InitializePlayerCounts(int &NumAliveTerrorist, int &Num
 		{
 			m_iNumCT++;
 
-			if (pPlayer->m_iMenu != Menu_ChooseAppearance)
+			if (m_rgiManpowers[CT])
 			{
 				m_iNumSpawnableCT++;
 			}
@@ -573,7 +573,7 @@ void CHalfLifeMultiplay::InitializePlayerCounts(int &NumAliveTerrorist, int &Num
 		{
 			m_iNumTerrorist++;
 
-			if (pPlayer->m_iMenu != Menu_ChooseAppearance)
+			if (m_rgiManpowers[TERRORIST])
 			{
 				m_iNumSpawnableTerrorist++;
 			}
@@ -2374,9 +2374,9 @@ void CHalfLifeMultiplay::PlayerThink(CBasePlayer *pPlayer)
 		else
 		{
 			if (allow_spectators.value == 0.0f)
-				ShowVGUIMenu(pPlayer, VGUI_Menu_Team, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_5), "#Team_Select");
+				ShowVGUIMenu(pPlayer, VGUIMenu::TEAM_NO_SPEC);
 			else
-				ShowVGUIMenu(pPlayer, VGUI_Menu_Team, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_5 | MENU_KEY_6), "#Team_Select_Spect");
+				ShowVGUIMenu(pPlayer, VGUIMenu::TEAM);
 		}
 
 		pPlayer->m_iMenu = Menu_ChooseTeam;
@@ -2398,9 +2398,9 @@ void CHalfLifeMultiplay::PlayerThink(CBasePlayer *pPlayer)
 			{
 				m_bSkipShowMenu = false;
 				if (allow_spectators.value == 0.0f)
-					ShowVGUIMenu(pPlayer, VGUI_Menu_Team, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_5), "#Team_Select");
+					ShowVGUIMenu(pPlayer, VGUIMenu::TEAM_NO_SPEC);
 				else
-					ShowVGUIMenu(pPlayer, VGUI_Menu_Team, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_5 | MENU_KEY_6), "#Team_Select_Spect");
+					ShowVGUIMenu(pPlayer, VGUIMenu::TEAM);
 			}
 
 			m_bSkipShowMenu = false;
@@ -2431,7 +2431,7 @@ void EXT_FUNC CHalfLifeMultiplay::PlayerSpawn(CBasePlayer *pPlayer)
 BOOL EXT_FUNC CHalfLifeMultiplay::FPlayerCanRespawn(CBasePlayer *pPlayer)
 {
 	// Player cannot respawn while in the starting menu.
-	if (pPlayer->m_iMenu == Menu_ChooseAppearance || pPlayer->m_iJoiningState != JOINED)
+	if (pPlayer->m_iMenu == Menu_ChooseTeam || pPlayer->m_iJoiningState != JOINED)
 	{
 		return FALSE;
 	}

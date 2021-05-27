@@ -242,7 +242,7 @@ void RadiusDamage(Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacker
 			bool useLOS = false;
 			float damageRatio = 1.0f;
 
-			if ((bitsDamageType & DMG_EXPLOSION) && AreRunningCZero())
+			if (bitsDamageType & DMG_EXPLOSION)
 			{
 				useLOS = true;
 				damageRatio = GetAmountOfPlayerVisible(vecSrc, pEntity);

@@ -185,7 +185,7 @@ void LinkUserMessages()
 	gmsgNVGToggle     = REG_USER_MSG("NVGToggle", 1);
 	gmsgRadar         = REG_USER_MSG("Radar", 7);
 	gmsgSpectator     = REG_USER_MSG("Spectator", 2);
-	gmsgVGUIMenu      = REG_USER_MSG("VGUIMenu", -1);
+	gmsgVGUIMenu      = REG_USER_MSG("VGUIMenu", 1);
 	gmsgAllowSpec     = REG_USER_MSG("AllowSpec", 1);
 	gmsgSendCorpse    = REG_USER_MSG("ClCorpse", -1);
 	gmsgHLTV          = REG_USER_MSG("HLTV", 2);
@@ -343,7 +343,7 @@ void EXT_FUNC ClientKill(edict_t *pEntity)
 
 void ShowMenu(CBasePlayer *pPlayer, int bitsValidSlots, int nDisplayTime, const std::string& szText)
 {
-	const int iLimit = 192 - sizeof(short) - sizeof(char) - sizeof(byte) - 1;	// include '\0' at the end of a string.
+	constexpr int iLimit = 192U - sizeof(short) - sizeof(char) - sizeof(byte) - 1U;	// include '\0' at the end of a string.
 
 	int len = (int)szText.length();
 
@@ -374,20 +374,11 @@ void ShowMenu(CBasePlayer *pPlayer, int bitsValidSlots, int nDisplayTime, const 
 	}
 }
 
-void EXT_FUNC ShowVGUIMenu(CBasePlayer *pPlayer, int MenuType, int BitMask, char *szOldMenu)
+void EXT_FUNC ShowVGUIMenu(CBasePlayer* pPlayer, VGUIMenu MenuType)
 {
-	if (pPlayer->m_bVGUIMenus || MenuType > VGUI_Menu_Buy_Item)
-	{
-		MESSAGE_BEGIN(MSG_ONE, gmsgVGUIMenu, nullptr, pPlayer->pev);
-			WRITE_BYTE(MenuType);
-			WRITE_SHORT(BitMask);
-			WRITE_CHAR(-1);
-			WRITE_BYTE(0);
-			WRITE_STRING(" ");
-		MESSAGE_END();
-	}
-	else
-		ShowMenu(pPlayer, BitMask, -1, szOldMenu);
+	MESSAGE_BEGIN(MSG_ONE, gmsgVGUIMenu, nullptr, pPlayer->pev);
+	WRITE_BYTE((int)MenuType);
+	MESSAGE_END();
 }
 
 NOXREF int CountTeams()
@@ -738,7 +729,7 @@ void Host_Say(edict_t *pEntity, BOOL teamonly)
 	// team only
 	if (teamonly)
 	{
-		if (AreRunningCZero() && (pPlayer->m_iTeam == CT || pPlayer->m_iTeam == TERRORIST))
+		if (pPlayer->m_iTeam == CT || pPlayer->m_iTeam == TERRORIST)
 		{
 			// search the place name where is located the player
 			Place playerPlace = TheNavAreaGrid.GetPlace(&pPlayer->pev->origin);
@@ -1206,8 +1197,6 @@ CBaseWeapon*BuyWeapon(CBasePlayer *pPlayer, WeaponIdType weaponID)
 
 void EXT_FUNC HandleMenu_ChooseAppearance(CBasePlayer *pPlayer, int slot)
 {
-	int numSkins = AreRunningCZero() ? CZ_NUM_SKIN : CS_NUM_SKIN;
-
 	struct
 	{
 		ModelName model_id;
@@ -1220,9 +1209,9 @@ void EXT_FUNC HandleMenu_ChooseAppearance(CBasePlayer *pPlayer, int slot)
 
 	if (pPlayer->m_iTeam == TERRORIST)
 	{
-		if ((slot > numSkins || slot < 1) && (!TheBotProfiles->GetCustomSkin(slot) || !pPlayer->IsBot()))
+		if ((slot > CZ_NUM_SKIN || slot < 1) && (!TheBotProfiles->GetCustomSkin(slot) || !pPlayer->IsBot()))
 		{
-			slot = RANDOM_LONG(1, numSkins);
+			slot = RANDOM_LONG(1, CZ_NUM_SKIN);
 		}
 
 		switch (slot)
@@ -1244,16 +1233,13 @@ void EXT_FUNC HandleMenu_ChooseAppearance(CBasePlayer *pPlayer, int slot)
 			appearance.model_name = "guerilla";
 			break;
 		case 5:
-			if (AreRunningCZero())
-			{
-				appearance.model_id = MODEL_MILITIA;
-				appearance.model_name = "militia";
-				break;
-			}
+			appearance.model_id = MODEL_MILITIA;
+			appearance.model_name = "militia";
+			break;
 		default:
 			if (TheBotProfiles->GetCustomSkinModelname(slot) && pPlayer->IsBot())
 			{
-				appearance.model_name = (char *)TheBotProfiles->GetCustomSkinModelname(slot);
+				appearance.model_name = (char*)TheBotProfiles->GetCustomSkinModelname(slot);
 			}
 			else
 			{
@@ -1269,9 +1255,9 @@ void EXT_FUNC HandleMenu_ChooseAppearance(CBasePlayer *pPlayer, int slot)
 	}
 	else if (pPlayer->m_iTeam == CT)
 	{
-		if ((slot > numSkins || slot < 1) && (!TheBotProfiles->GetCustomSkin(slot) || !pPlayer->IsBot()))
+		if ((slot > CZ_NUM_SKIN || slot < 1) && (!TheBotProfiles->GetCustomSkin(slot) || !pPlayer->IsBot()))
 		{
-			slot = RANDOM_LONG(1, numSkins);
+			slot = RANDOM_LONG(1, CZ_NUM_SKIN);
 		}
 
 		switch (slot)
@@ -1293,16 +1279,13 @@ void EXT_FUNC HandleMenu_ChooseAppearance(CBasePlayer *pPlayer, int slot)
 			appearance.model_name = "gign";
 			break;
 		case 5:
-			if (AreRunningCZero())
-			{
-				appearance.model_id = MODEL_SPETSNAZ;
-				appearance.model_name = "spetsnaz";
-				break;
-			}
+			appearance.model_id = MODEL_SPETSNAZ;
+			appearance.model_name = "spetsnaz";
+			break;
 		default:
 			if (TheBotProfiles->GetCustomSkinModelname(slot) && pPlayer->IsBot())
 			{
-				appearance.model_name = (char *)TheBotProfiles->GetCustomSkinModelname(slot);
+				appearance.model_name = (char*)TheBotProfiles->GetCustomSkinModelname(slot);
 			}
 			else
 			{
@@ -1343,10 +1326,6 @@ void EXT_FUNC HandleMenu_ChooseAppearance(CBasePlayer *pPlayer, int slot)
 // can be closed...false if the menu should be displayed again
 BOOL EXT_FUNC HandleMenu_ChooseTeam(CBasePlayer *pPlayer, int slot)
 {
-	// If this player is a VIP, don't allow him to switch teams/appearances unless the following conditions are met :
-	// a) There is another TEAM_CT player who is in the queue to be a VIP
-	// b) This player is dead
-
 	TeamName team = UNASSIGNED;
 
 	switch (slot)
@@ -1357,11 +1336,6 @@ BOOL EXT_FUNC HandleMenu_ChooseTeam(CBasePlayer *pPlayer, int slot)
 	case MENU_SLOT_TEAM_CT:
 		team = CT;
 		break;
-	case MENU_SLOT_TEAM_VIP:
-	{
-		return FALSE;
-		break;
-	}
 	case MENU_SLOT_TEAM_RANDOM:
 	{
 		// Attempt to auto-select a team
@@ -1577,34 +1551,8 @@ BOOL EXT_FUNC HandleMenu_ChooseTeam(CBasePlayer *pPlayer, int slot)
 		SET_MODEL(ENT(pPlayer->pev), "models/player.mdl");
 	}
 
-	if (!CSGameRules()->ShouldSkipShowMenu())
-	{
-		switch (team)
-		{
-		case CT:
-			if (AreRunningCZero())
-				ShowVGUIMenu(pPlayer, VGUI_Menu_Class_CT, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5 | MENU_KEY_6), "#CT_Select");
-			else
-				ShowVGUIMenu(pPlayer, VGUI_Menu_Class_CT, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5), "#CT_Select");
-			break;
-
-		case TERRORIST:
-			if (AreRunningCZero())
-				ShowVGUIMenu(pPlayer, VGUI_Menu_Class_T, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5 | MENU_KEY_6), "#Terrorist_Select");
-			else
-				ShowVGUIMenu(pPlayer, VGUI_Menu_Class_T, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_3 | MENU_KEY_4 | MENU_KEY_5), "#Terrorist_Select");
-			break;
-		}
-
-		pPlayer->m_iMenu = Menu_ChooseAppearance;
-
-		// Show the appropriate Choose Appearance menu
-		// This must come before ClientKill() for CheckWinConditions() to function properly
-		if (pPlayer->pev->deadflag == DEAD_NO)
-		{
-			ClientKill(pPlayer->edict());
-		}
-	}
+	// Just select a model randomly. We are making a new set of model.
+	HandleMenu_ChooseAppearance(pPlayer, 6);
 
 	TeamName oldTeam;
 	char *szOldTeam, *szNewTeam;
@@ -2165,7 +2113,7 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 	else if (FStrEq(pcmd, "menuselect"))
 	{
 		int slot = Q_atoi(parg1);
-		if (pPlayer->m_iJoiningState == JOINED || (pPlayer->m_iMenu != Menu_ChooseAppearance && pPlayer->m_iMenu != Menu_ChooseTeam))
+		if (pPlayer->m_iJoiningState == JOINED || pPlayer->m_iMenu != Menu_ChooseTeam)
 		{
 			if (slot == 10)
 			{
@@ -2188,24 +2136,17 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 				{
 					pPlayer->m_iMenu = Menu_ChooseTeam;
 					if (pPlayer->m_iJoiningState == JOINED)
-						ShowVGUIMenu(pPlayer, VGUI_Menu_Team, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_5 | MENU_KEY_0), "#IG_Team_Select");
+						ShowVGUIMenu(pPlayer, VGUIMenu::TEAM_IG);
 					else
-						ShowVGUIMenu(pPlayer, VGUI_Menu_Team, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_5), "#Team_Select");
+						ShowVGUIMenu(pPlayer, VGUIMenu::TEAM);
 				}
 				break;
 			}
 			case Menu_IGChooseTeam:
 			{
-				if (canOpenOldMenu()) {
+				if (canOpenOldMenu())
 					HandleMenu_ChooseTeam(pPlayer, slot);
-				}
-				break;
-			}
-			case Menu_ChooseAppearance:
-			{
-				if (canOpenOldMenu()) {
-					HandleMenu_ChooseAppearance(pPlayer, slot);
-				}
+
 				break;
 			}
 			case Menu_Radio1:
@@ -2291,9 +2232,6 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 	}
 	else if (FStrEq(pcmd, "chooseteam"))
 	{
-		if (pPlayer->m_iMenu == Menu_ChooseAppearance)
-			return;
-
 		if (pPlayer->m_bTeamChanged)
 		{
 			if (pPlayer->pev->deadflag != DEAD_NO)
@@ -2302,12 +2240,13 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 				return;
 			}
 		}
+
 		pPlayer->m_iMenu = Menu_ChooseTeam;
 
 		if (CSGameRules()->IsFreezePeriod() || pPlayer->pev->deadflag != DEAD_NO)
-			ShowVGUIMenu(pPlayer, VGUI_Menu_Team, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_5 | MENU_KEY_6 | MENU_KEY_0), "#IG_Team_Select_Spect");
+			ShowVGUIMenu(pPlayer, VGUIMenu::TEAM_IG);
 		else
-			ShowVGUIMenu(pPlayer, VGUI_Menu_Team, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_5 | MENU_KEY_0), "#IG_Team_Select");
+			ShowVGUIMenu(pPlayer, VGUIMenu::TEAM_NO_SPEC_IG);
 	}
 	else if (FStrEq(pcmd, "showbriefing"))
 	{
@@ -2408,41 +2347,27 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 		}
 		else if (FStrEq(pcmd, "jointeam"))
 		{
-			if (pPlayer->m_iMenu == Menu_ChooseAppearance)
-			{
-				ClientPrint(pPlayer->pev, HUD_PRINTCENTER, "#Command_Not_Available");
-				return;
-			}
-
 			int slot = Q_atoi(parg1);
 			if (HandleMenu_ChooseTeam(pPlayer, slot))
 			{
-				if (slot == MENU_SLOT_TEAM_VIP || slot == MENU_SLOT_TEAM_SPECT)
+				if (slot == MENU_SLOT_TEAM_SPECT)
 				{
 					pPlayer->ResetMenu();
 				}
-				else
-					pPlayer->m_iMenu = Menu_ChooseAppearance;
 			}
 			else
 			{
 				pPlayer->m_iMenu = Menu_ChooseTeam;
 				if (pPlayer->m_iJoiningState == JOINED)
-					ShowVGUIMenu(pPlayer, VGUI_Menu_Team, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_5 | MENU_KEY_0), "#IG_Team_Select");
+					ShowVGUIMenu(pPlayer, VGUIMenu::TEAM_NO_SPEC_IG);
 				else
-					ShowVGUIMenu(pPlayer, VGUI_Menu_Team, (MENU_KEY_1 | MENU_KEY_2 | MENU_KEY_5), "#Team_Select");
+					ShowVGUIMenu(pPlayer, VGUIMenu::TEAM_NO_SPEC);
 			}
 		}
-		else if (FStrEq(pcmd, "joinclass"))
+		else if (FStrEq(pcmd, "joinclass"))	// Command abolished.
 		{
-			int slot = Q_atoi(parg1);
-			if (pPlayer->m_iMenu != Menu_ChooseAppearance)
-			{
-				ClientPrint(pPlayer->pev, HUD_PRINTCENTER, "#Command_Not_Available");
-				return;
-			}
-
-			HandleMenu_ChooseAppearance(pPlayer, slot);
+			ClientPrint(pPlayer->pev, HUD_PRINTCENTER, "#Command_Not_Available");
+			return;
 		}
 		else if (pPlayer->pev->deadflag == DEAD_NO)
 		{
@@ -3108,26 +3033,17 @@ void ClientPrecache()
 	PRECACHE_SOUND("player/pl_pain6.wav");
 	PRECACHE_SOUND("player/pl_pain7.wav");
 
-	int numPlayerModels;
-	if (AreRunningCZero())
-		numPlayerModels = ARRAYSIZE(sPlayerModelFiles);
-	else
-		numPlayerModels = ARRAYSIZE(sPlayerModelFiles) - 2;
-
-	for (i = 0; i < numPlayerModels; i++)
+	for (unsigned i = 0; i < _countof(sPlayerModelFiles); i++)
 		PRECACHE_MODEL(sPlayerModelFiles[i]);
 
-	if (AreRunningCZero())
+	for (i = FirstCustomSkin; i <= LastCustomSkin; i++)
 	{
-		for (i = FirstCustomSkin; i <= LastCustomSkin; i++)
-		{
-			const char *fname = TheBotProfiles->GetCustomSkinFname(i);
+		const char* fname = TheBotProfiles->GetCustomSkinFname(i);
 
-			if (!fname)
-				break;
+		if (!fname)
+			break;
 
-			PRECACHE_MODEL((char *)fname);
-		}
+		PRECACHE_MODEL((char*)fname);
 	}
 
 	PRECACHE_SOUND("common/wpn_hudoff.wav");
@@ -3175,12 +3091,7 @@ const char *EXT_FUNC GetGameDescription()
 		return CSGameRules()->GetGameDescription();
 	}
 
-	if (AreRunningCZero())
-	{
-		return "Condition Zero";
-	}
-
-	return "Counter-Strike";
+	return "Leader Mode";
 }
 
 void EXT_FUNC SysEngine_Error(const char *error_string)

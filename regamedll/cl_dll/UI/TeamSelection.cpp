@@ -263,6 +263,8 @@ void CTeamMenu::Paint(void)
 
 void CTeamMenu::PaintBackground(void)
 {
+	SetBgColor(Color(0, 0, 0, 96));
+
 	BaseClass::PaintBackground();
 
 	int iFrameTall = GetTall(), iFrameWide = GetWide();
