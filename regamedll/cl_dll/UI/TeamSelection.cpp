@@ -31,7 +31,7 @@ public:
 		{
 			for (unsigned short i = 0; i < m_iPlayerCounts; i++)
 			{
-				DrawUtils::glRegularTexDrawingInit(0xFFFFFF, 0xFF);
+				DrawUtils::glRegularTexDrawingInit(0xFFFFFF, GetAlpha());
 				DrawUtils::glSetTexture(CTeamMenu::m_sPlayerCountIcon.m_iId);
 				DrawUtils::Draw2DQuad(vecPos, vecPos + m_vecPawnIconScaledSize);
 
@@ -42,7 +42,7 @@ public:
 		else
 		{
 			// Draw a pawn icon first.
-			DrawUtils::glRegularTexDrawingInit(0xFFFFFF, 0xFF);
+			DrawUtils::glRegularTexDrawingInit(0xFFFFFF, GetAlpha());
 			DrawUtils::glSetTexture(CTeamMenu::m_sPlayerCountIcon.m_iId);
 			DrawUtils::Draw2DQuad(vecPos, vecPos + m_vecPawnIconScaledSize);
 
@@ -50,7 +50,7 @@ public:
 
 			// Display roman number indicator.
 			gFontFuncs::DrawSetTextFont(_font);
-			gFontFuncs::DrawSetTextColor(0xFFFFFF, 0xFF);
+			gFontFuncs::DrawSetTextColor(0x0, GetAlpha());
 			gFontFuncs::DrawSetTextPos(vecPos);
 			gFontFuncs::DrawPrintText(m_wcsRomanNumber.c_str());
 		}
@@ -132,42 +132,40 @@ CTeamMenu::CTeamMenu(void) : Frame(nullptr, "TeamMenu")
 	if (!m_sPlayerCountIcon)
 		m_sPlayerCountIcon.Load("sprites/Miscellaneous/SchemeNumber.dds");
 
+	m_CTBackgrounds[0].Load("sprites/ClassesIcon/Portraits/CommanderMonochrome.dds");
+	m_CTBackgrounds[1].Load("sprites/ClassesIcon/Portraits/CommanderColored.dds");
+	m_TERBackgrounds[0].Load("sprites/ClassesIcon/Portraits/GodfatherMonochrome.dds");
+	m_TERBackgrounds[1].Load("sprites/ClassesIcon/Portraits/GodfatherColored.dds");
+
+#pragma region Team Buttons Setup
 	Vector2D vecTButtonPos = Vector2D(iPanelWidth, iPanelTall) / 2 - Vector2D(MARGIN_BUTTON, BUTTON_SIZE) / 2 - Vector2D(BUTTON_SIZE, 0);
 	Vector2D vecCTButtonPos = Vector2D(iPanelWidth, iPanelTall) / 2 + Vector2D(MARGIN_BUTTON, -BUTTON_SIZE) / 2;
 	Vector2D vecSpecButtonPos = Vector2D(iPanelWidth - BUTTON_SIZE / 2 - 16, 16);
 
-	m_pButtonT = new CTeamButton(this, "SelectT", "#LeaderMod_SB_Ter_Short", TEAM_TERRORIST, this, "jointeam 1");
+	m_pButtonT = new CTeamButton(this, "SelectT", "#LeaderMod_SB_Ter_Short", TEAM_TERRORIST, this, "jointeam 1\njoinclass 6\n");
 	m_pButtonT->SetBounds(vecTButtonPos.x, vecTButtonPos.y, BUTTON_SIZE, BUTTON_SIZE + FONT_SIZE);
 	m_pButtonT->SetVisible(true);
 	m_pButtonT->SetUpImage("sprites/ClassesIcon/T/Godfather.dds");
-	m_pButtonT->SetFocusImage("sprites/ClassesIcon/T/Godfather.dds");
-	m_pButtonT->SetDownImage("sprites/ClassesIcon/T/Godfather.dds");
-	m_pButtonT->SetDisableImage("sprites/ClassesIcon/T/Godfather.dds");
 	m_pButtonT->AddGlyphSetToFont("Trajan Pro", FONT_SIZE, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0x2E7F);
 	m_pButtonT->AddGlyphSetToFont("I.MingCP", FONT_SIZE, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x2E80, 0xFFFF);
 	m_pButtonT->InvalidateLayout(true);
 
-	m_pButtonCT = new CTeamButton(this, "SelectCT", "#LeaderMod_SB_CT_Short", TEAM_CT, this, "jointeam 2");
+	m_pButtonCT = new CTeamButton(this, "SelectCT", "#LeaderMod_SB_CT_Short", TEAM_CT, this, "jointeam 2\njoinclass 6\n");
 	m_pButtonCT->SetBounds(vecCTButtonPos.x, vecCTButtonPos.y, BUTTON_SIZE, BUTTON_SIZE + FONT_SIZE);
 	m_pButtonCT->SetVisible(true);
 	m_pButtonCT->SetUpImage("sprites/ClassesIcon/CT/Commander.dds");
-	m_pButtonCT->SetFocusImage("sprites/ClassesIcon/CT/Commander.dds");
-	m_pButtonCT->SetDownImage("sprites/ClassesIcon/CT/Commander.dds");
-	m_pButtonCT->SetDisableImage("sprites/ClassesIcon/CT/Commander.dds");
 	m_pButtonCT->AddGlyphSetToFont("Trajan Pro", FONT_SIZE, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0x2E7F);
 	m_pButtonCT->AddGlyphSetToFont("I.MingCP", FONT_SIZE, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x2E80, 0xFFFF);
 	m_pButtonCT->InvalidateLayout(true);
 
 	m_pButtonObserver = new CTeamButton(this, "SelectSpec", "#LeaderMod_SB_Spec_Short", TEAM_CT, this, "jointeam 6");
-	m_pButtonObserver->SetBounds(vecSpecButtonPos.x, vecSpecButtonPos.y, BUTTON_SIZE, BUTTON_SIZE + FONT_SIZE);
+	m_pButtonObserver->SetBounds(vecSpecButtonPos.x, vecSpecButtonPos.y, BUTTON_SIZE / 2, BUTTON_SIZE / 2 + FONT_SIZE);
 	m_pButtonObserver->SetVisible(true);
 	m_pButtonObserver->SetUpImage("sprites/Inventory/NVG.dds");
-	m_pButtonObserver->SetFocusImage("sprites/Inventory/NVG.dds");
-	m_pButtonObserver->SetDownImage("sprites/Inventory/NVG.dds");
-	m_pButtonObserver->SetDisableImage("sprites/Inventory/NVG.dds");
 	m_pButtonObserver->AddGlyphSetToFont("Trajan Pro", FONT_SIZE, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0x2E7F);
 	m_pButtonObserver->AddGlyphSetToFont("I.MingCP", FONT_SIZE, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x2E80, 0xFFFF);
 	m_pButtonObserver->InvalidateLayout(true);
+#pragma endregion
 }
 
 CTeamMenu::~CTeamMenu(void)
@@ -188,12 +186,34 @@ void CTeamMenu::OnThink(void)
 {
 	BaseClass::OnThink();
 
+	// Why I have to do this? Kind of buggy...
+	if (IsVisible())
+		SetMouseInputEnabled(true);
+
+	m_flBackgroundAlphaGoals.fill(128);
+	m_vecBackgroundColorGoals.fill(Vector(1, 1, 1));
+
 	if (m_pButtonCT->IsPendingSelected())
+	{
 		m_iHighlightedButton = TEAM_CT;
+		m_vecBackgroundColorGoals[TEAM_CT] = VEC_CT_COLOUR;
+	}
 	else if (m_pButtonT->IsPendingSelected())
+	{
 		m_iHighlightedButton = TEAM_TERRORIST;
+		m_vecBackgroundColorGoals[TEAM_TERRORIST] = VEC_T_COLOUR;
+	}
 	else
 		m_iHighlightedButton = TEAM_UNASSIGNED;
+
+	m_flBackgroundAlphaGoals[m_iHighlightedButton] = 255;
+
+	// Since the size of these arrays are the same, we can place them in a same loop.
+	for (unsigned i = 0; i < m_flBackgroundAlphas.size(); i++)
+	{
+		m_flBackgroundAlphas[i] += (m_flBackgroundAlphaGoals[i] - m_flBackgroundAlphas[i]) * g_flClientTimeDelta * 10;
+		m_vecBackgroundColors[i] += (m_vecBackgroundColorGoals[i] - m_vecBackgroundColors[i]) * g_flClientTimeDelta * 10.0;
+	}
 }
 
 void CTeamMenu::Paint(void)
@@ -239,6 +259,26 @@ void CTeamMenu::Paint(void)
 	DrawUtils::Draw2DQuadNoTex(x, y, x - WIDTH_FRAME, y + LENGTH_FRAME);
 
 	DrawUtils::glRegularPureColorDrawingExit();
+}
+
+void CTeamMenu::PaintBackground(void)
+{
+	BaseClass::PaintBackground();
+
+	int iFrameTall = GetTall(), iFrameWide = GetWide();
+	image_t* pTerTex = &m_TERBackgrounds[0];//&m_TERBackgrounds[m_iHighlightedButton == TEAM_TERRORIST ? 1 : 0];
+	image_t* pCTTex = &m_CTBackgrounds[0];//&m_CTBackgrounds[m_iHighlightedButton == TEAM_CT ? 1 : 0];
+	int iDrawTall = round(iFrameTall * 0.65);
+
+	// T
+	DrawUtils::glRegularTexDrawingInit(m_vecBackgroundColors[TEAM_TERRORIST], m_flBackgroundAlphas[TEAM_TERRORIST] / 255.0);
+	DrawUtils::glSetTexture(pTerTex->m_iId);
+	DrawUtils::Draw2DQuad(0, iFrameTall - iDrawTall, pTerTex->CalculateWidthByDefinedHeight(iDrawTall), iFrameTall);
+
+	// CT
+	DrawUtils::glSetColor(m_vecBackgroundColors[TEAM_CT], m_flBackgroundAlphas[TEAM_CT] / 255.0);
+	DrawUtils::glSetTexture(pCTTex->m_iId);
+	DrawUtils::Draw2DQuad(iFrameWide - pCTTex->CalculateWidthByDefinedHeight(iDrawTall), iFrameTall - iDrawTall, iFrameWide, iFrameTall);
 }
 
 void CTeamMenu::Show(bool bShow)

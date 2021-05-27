@@ -451,7 +451,7 @@ int gHUD::Redraw(float flTime, int intermission)
 	*/
 	m_bIntermission = intermission;
 
-	if (m_pCvarDraw->value)
+	if (m_pCvarDraw->value && !g_pViewport->IsAnyClientUIUsingMouse())	// Hide hud in any interactive screen.
 	{
 		for (auto& pHudElements : m_lstHudElements)
 		{
