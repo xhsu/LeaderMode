@@ -139,6 +139,7 @@ public:
 		}
 	}
 
+
 	void Paint(void) final
 	{
 		BaseClass::Paint();
@@ -351,4 +352,11 @@ void CRoleMenu::OnKeyCodeTyped(KeyCode code)
 {
 	BaseClass::OnKeyCodeTyped(code);
 	Show(false);	// Hide on any typing.
+}
+
+void CRoleMenu::PaintBackground(void)
+{
+	SetBgColor(Color(0, 0, 0, 96));
+
+	BaseClass::PaintBackground();
 }

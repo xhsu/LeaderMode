@@ -21,6 +21,7 @@ class CRoleMenu : public vgui::Frame, public CViewportPanelHelper<CRoleMenu>
 public:
 	CRoleMenu(void);
 	virtual ~CRoleMenu(void);
+	void PaintBackground(void) final;
 
 public:
 	void OnThink(void) final;
