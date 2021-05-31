@@ -61,7 +61,7 @@ namespace vgui
 		void ApplySettings(KeyValues* inResourceData) final;
 		void ApplySchemeSettings(IScheme* pScheme) final;
 		void InvalidateLayout(bool layoutNow = false, bool reloadScheme = false) override;
-		//void SetFont(vgui::HFont iFont) final;
+		void SetFont(int hFont);
 
 	private:
 		static inline void InitializeDefaultFont(void);
@@ -69,7 +69,7 @@ namespace vgui
 	public:
 		static constexpr auto MARGIN_TEXT = 2;
 		static constexpr auto DEFAULT_FONT_SIZE = 22;
-		static inline int s_iDefaultFont = 0;
+		static inline int s_hDefaultFont = 0;
 
 	protected:
 		image_t _upImage;

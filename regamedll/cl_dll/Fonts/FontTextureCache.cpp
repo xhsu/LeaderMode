@@ -13,17 +13,6 @@ CFontTextureCache &FontTextureCache(void)
 	return s_FontTextureCache;
 }
 
-template <class T>
-inline T clamp(T const &val, T const &minVal, T const &maxVal)
-{
-	if (val < minVal)
-		return minVal;
-	else if (val > maxVal)
-		return maxVal;
-	else
-		return val;
-}
-
 int CFontTextureCache::s_pFontPageSize[FONT_PAGE_SIZE_COUNT] =
 {
 	16,
@@ -34,8 +23,10 @@ int CFontTextureCache::s_pFontPageSize[FONT_PAGE_SIZE_COUNT] =
 
 CFontTextureCache::CFontTextureCache()
 {
-	CacheEntry_t listHead = { 0, 0 };
-	m_CharCache.emplace_back(listHead);
+	CacheEntry_t listHead;
+	CacheContent_t nilContent;
+
+	m_CharCache[listHead] = nilContent;
 
 	for (int i = 0; i < FONT_PAGE_SIZE_COUNT; ++i)
 	{
@@ -50,7 +41,7 @@ CFontTextureCache::~CFontTextureCache()
 
 bool CFontTextureCache::GetTextureForChar(int font, int type, wchar_t wch, int *textureID, float **texCoords)
 {
-	static CacheEntry_t cacheitem;
+	static CacheEntry_t cacheEntry;
 
 	if (type == FONT_DRAW_DEFAULT)
 	{
@@ -58,30 +49,19 @@ bool CFontTextureCache::GetTextureForChar(int font, int type, wchar_t wch, int *
 	}
 
 	int typePage = (int)type - 1;
-	typePage = clamp(typePage, 0, (int)FONT_DRAW_TYPE_COUNT - 1);
+	typePage = std::clamp(typePage, 0, (int)FONT_DRAW_TYPE_COUNT - 1);
 
+	cacheEntry.font = font;
+	cacheEntry.wch = wch;
 
-	cacheitem.font = font;
-	cacheitem.wch = wch;
-
-	*texCoords = cacheitem.texCoords;
-
-	auto it = m_CharCache.begin();
-	// Iterate through the vector
-	while (it != m_CharCache.end())
+	auto iter = m_CharCache.find(cacheEntry);
+	if (iter != m_CharCache.end())
 	{
-		// Check if value of this entry matches with given value
-		if (it->font == cacheitem.font && it->wch == cacheitem.wch)
-		{
-			// we found it, let's leave.
-			int page = it->page;
-			*textureID = m_PageList[page].textureID[typePage];
-			*texCoords = it->texCoords;
-			return true;
-		}
+		auto page = iter->second.page;
+		*textureID = m_PageList[page].textureID[typePage];
+		*texCoords = iter->second.texCoords;
 
-		// Go to next entry in vector
-		it++;
+		return true;
 	}
 
 	CWin32Font *winFont = FontManager().GetFontForChar(font, wch);
@@ -106,17 +86,17 @@ bool CFontTextureCache::GetTextureForChar(int font, int type, wchar_t wch, int *
 	glTexSubImage2D(GL_TEXTURE_2D, 0, drawX, drawY, fontWide, fontTall, GL_RGBA, GL_UNSIGNED_BYTE, rgba);
 	_freea(rgba);
 
-	cacheitem.page = page;
+	m_CharCache[cacheEntry].page = page;
 
 	double adjust = 0.0f;
 
-	cacheitem.texCoords[0] = (float)((double)drawX / ((double)twide + adjust));
-	cacheitem.texCoords[1] = (float)((double)drawY / ((double)ttall + adjust));
-	cacheitem.texCoords[2] = (float)((double)(drawX + fontWide) / (double)twide);
-	cacheitem.texCoords[3] = (float)((double)(drawY + fontTall) / (double)ttall);
-	m_CharCache.emplace_back(cacheitem);
+	m_CharCache[cacheEntry].texCoords[0] = (float)((double)drawX / ((double)twide + adjust));
+	m_CharCache[cacheEntry].texCoords[1] = (float)((double)drawY / ((double)ttall + adjust));
+	m_CharCache[cacheEntry].texCoords[2] = (float)((double)(drawX + fontWide) / (double)twide);
+	m_CharCache[cacheEntry].texCoords[3] = (float)((double)(drawY + fontTall) / (double)ttall);
 
 	*textureID = m_PageList[page].textureID[typePage];
+	*texCoords = m_CharCache[cacheEntry].texCoords;
 	return true;
 }
 

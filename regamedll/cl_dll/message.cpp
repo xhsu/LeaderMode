@@ -434,7 +434,6 @@ MSG_FUNC(SetFOV)
 
 MSG_FUNC(ShowMenu)
 {
-	//g_pViewport->m_pTeamMenu->Show(true);
 	gHUD::m_Menu.MsgFunc_ShowMenu(iSize, pbuf);
 	return TRUE;
 }

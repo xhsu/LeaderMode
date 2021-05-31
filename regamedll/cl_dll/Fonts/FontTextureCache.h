@@ -5,7 +5,9 @@
 
 #include "FontManager.h"
 #include <vector>
-#include <map>
+#include <unordered_map>
+#include <functional>
+#include <algorithm>
 
 enum FontDrawType
 {
@@ -36,10 +38,14 @@ public:
 
 	struct CacheEntry_t
 	{
-		int font;
-		wchar_t wch;
-		unsigned char page;
-		float texCoords[4];
+		int font{ 0 };
+		wchar_t wch{ 0 };
+	};
+
+	struct CacheContent_t
+	{
+		unsigned char page{ 0U };
+		float texCoords[4]{ 0.0f, 0.0f, 0.0f, 0.0f };
 	};
 
 	struct Page_t
@@ -51,16 +57,22 @@ public:
 		short nextX, nextY;
 	};
 
-	struct CacheEntryLessFunc
+	struct CacheEntryHashFunc	// HACKHACK: assume the font and wchar_t won't bypass unsigned short.
 	{
-		bool operator()(CFontTextureCache::CacheEntry_t const& lhs, CFontTextureCache::CacheEntry_t const& rhs) const
+		unsigned long operator()(CFontTextureCache::CacheEntry_t const& lhs) const
 		{
-			if (lhs.font < rhs.font)
-				return true;
-			else if (lhs.font > rhs.font)
-				return false;
+			unsigned short a = (unsigned short)std::clamp<int>(lhs.font, 0, 65535);
+			unsigned short b = *(unsigned short*)&lhs.wch;
 
-			return (lhs.wch < rhs.wch);
+			return (a << 16) + b;
+		}
+	};
+
+	struct CacheEntryKeyEqual
+	{
+		bool operator()(const CacheEntry_t& lhs, const CacheEntry_t& rhs) const
+		{
+			return (lhs.font == rhs.font && lhs.wch == rhs.wch);
 		}
 	};
 
@@ -70,11 +82,15 @@ private:
 
 	typedef std::vector<Page_t> FontPageList_t;
 
-	//std::map<HCacheEntry, CacheEntry_t, CacheEntryLessFunc> m_CharCache;
-	std::vector<CacheEntry_t> m_CharCache;
+	std::unordered_map<
+		CacheEntry_t,
+		CacheContent_t,
+		CacheEntryHashFunc,
+		CacheEntryKeyEqual
+	> m_CharCache;
+
 	FontPageList_t m_PageList;
 	int m_pCurrPage[FONT_PAGE_SIZE_COUNT];
-	//HCacheEntry m_LRUListHeadIndex;
 
 	static int s_pFontPageSize[FONT_PAGE_SIZE_COUNT];
 };
