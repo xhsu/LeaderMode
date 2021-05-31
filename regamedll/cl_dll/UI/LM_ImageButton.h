@@ -69,7 +69,7 @@ namespace vgui
 	public:
 		static constexpr auto MARGIN_TEXT = 2;
 		static constexpr auto DEFAULT_FONT_SIZE = 22;
-		static inline vgui::HFont s_iDefaultFont = INVALID_FONT;
+		static inline int s_iDefaultFont = 0;
 
 	protected:
 		image_t _upImage;
@@ -77,7 +77,7 @@ namespace vgui
 		image_t _downImage;
 		image_t _disableImage;
 		std::wstring _string{ L"\0" };
-		vgui::HFont _font{ INVALID_FONT };
+		int _font{ 0 };
 		float m_flSparedBlankHeight{ 0.0f };
 	};
 }

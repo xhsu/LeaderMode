@@ -159,17 +159,16 @@ public:
 		DrawUtils::glRegularPureColorDrawingExit();
 
 		// Draw text. This is the reason why the original _string was abolished.
-		surface()->DrawSetTextFont(_font);
-		surface()->DrawSetTextColor(Color(0x0, iAlpha));
-		surface()->DrawSetTextPos(BaseClass::MARGIN_TEXT, iHeight);
-		surface()->DrawPrintText(m_wcsText, wcslen(m_wcsText));
+		gFontFuncs::DrawSetTextFont(_font);
+		gFontFuncs::DrawSetTextColor(0x0, iAlpha);
+		gFontFuncs::DrawSetTextPos(BaseClass::MARGIN_TEXT, iHeight);
+		gFontFuncs::DrawPrintText(m_wcsText);
 
 		// Draw introduction text.
-		surface()->DrawSetTextFont(m_iIntroFont);
-		surface()->DrawSetTextColor(Color(0xFFFFFF, iAlpha));
-		surface()->DrawSetTextPos(iWidth + BaseClass::MARGIN_TEXT, 0);
-		//surface()->DrawPrintText(m_wcsIntroText.c_str(), m_wcsIntroText.length());
-		DrawPrintText(m_wcsIntroText.c_str());
+		gFontFuncs::DrawSetTextFont(m_iIntroFont);
+		gFontFuncs::DrawSetTextColor(0xFFFFFF, iAlpha);
+		gFontFuncs::DrawSetTextPos(iWidth + BaseClass::MARGIN_TEXT, 0);
+		gFontFuncs::DrawPrintText(m_wcsIntroText.c_str());
 	}
 
 	int GetImageWidth(void) final
@@ -181,9 +180,9 @@ public:
 	{
 		if (!m_iIntroFont)
 		{
-			m_iIntroFont = surface()->CreateFont();
-			surface()->SetFontGlyphSet(m_iIntroFont, "Cambria", FONT_INTRO_SIZE, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS/*, 0x0, 0x2E7F*/);
-			surface()->SetFontGlyphSet(m_iIntroFont, "TW-Kai", FONT_INTRO_SIZE, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS/*, 0x2E80, 0xFFFF*/);
+			m_iIntroFont = gFontFuncs::CreateFont();
+			gFontFuncs::AddGlyphSetToFont(m_iIntroFont, "Cambria", FONT_INTRO_SIZE, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0x2E7F);
+			gFontFuncs::AddGlyphSetToFont(m_iIntroFont, "TW-Kai", FONT_INTRO_SIZE, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x2E80, 0xFFFF);
 		}
 
 		m_wcsIntroText = UTIL_GetLocalisation(s_rgpszRoleIntroLocalisationKeys[m_iRoleTracking]);
@@ -194,34 +193,11 @@ public:
 			!Q_stricmp(g_szLanguage, "korean") ||
 			!Q_stricmp(g_szLanguage, "japanese"))
 		{
-			ISurface_ClampTextWidthCJK(m_wcsIntroText, m_iIntroFont, CRoleMenu::INTRO_REGION_WIDTH - BaseClass::MARGIN_TEXT);
+			gFontFuncs::ClampTextWidthCJK(m_wcsIntroText, m_iIntroFont, CRoleMenu::INTRO_REGION_WIDTH - BaseClass::MARGIN_TEXT);
 		}
 		else
 		{
-			ISurface_ClampTextWidthROW(m_wcsIntroText, m_iIntroFont, CRoleMenu::INTRO_REGION_WIDTH - BaseClass::MARGIN_TEXT);
-		}
-	}
-
-	void DrawPrintText(const wchar_t* text)
-	{
-		int x, y;
-		surface()->DrawGetTextPos(x, y);
-
-		int fontTall = surface()->GetFontTall(m_iIntroFont);
-
-		for (size_t i = 0; i < wcslen(text); ++i)
-		{
-			if (text[i] == '\n')
-			{
-				y = y + fontTall;
-				surface()->DrawSetTextPos(x, y);
-				continue;
-			}
-
-			if (text[i] == '\t')
-				continue;
-
-			surface()->DrawUnicodeChar(text[i]);
+			gFontFuncs::ClampTextWidthROW(m_wcsIntroText, m_iIntroFont, CRoleMenu::INTRO_REGION_WIDTH - BaseClass::MARGIN_TEXT);
 		}
 	}
 
@@ -232,7 +208,7 @@ private:
 	CPanelAnimationVar(float, m_flAlpha, "m_flAlpha", "255");
 	RoleTypes m_iRoleTracking{ Role_UNASSIGNED };
 	wchar_t m_wcsText[256]{ L"\0" };	// Why abolish origin _string from base class? We have to draw this after second part of white block.
-	vgui::HFont m_iIntroFont{ INVALID_FONT };
+	int m_iIntroFont{ 0 };
 	std::wstring m_wcsIntroText{ L"\0" };
 };
 
