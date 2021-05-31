@@ -12,6 +12,8 @@
 #pragma once
 #endif
 
+#include <stdexcept>
+
 //-----------------------------------------------------------------------------
 // Purpose: Basic handler for an rgb set of colors
 //			This class is fully inline
@@ -20,25 +22,18 @@ class Color
 {
 public:
 	// constructors
-	Color()
-	{
-		*((int *)this) = 0;
-	}
-	Color(int r,int g,int b)
-	{
-		SetColor(r, g, b, 0);
-	}
-	Color(int r,int g,int b,int a)
-	{
-		SetColor(r, g, b, a);
-	}
+	constexpr Color() : _color() { *((int*)this) = 0; }
+	constexpr Color(BYTE r, BYTE g, BYTE b) : _color() { _color[0] = r; _color[1] = g; _color[2] = b; _color[3] = 0; }
+	constexpr Color(BYTE r, BYTE g, BYTE b, BYTE a) : _color() { _color[0] = r; _color[1] = g; _color[2] = b; _color[3] = a; }
+	constexpr Color(uint32 ulRGB, BYTE a) : _color() { _color[0] = (ulRGB & 0xFF0000) >> 16; _color[1] = (ulRGB & 0xFF00) >> 8; _color[2] = ulRGB & 0xFF; _color[3] = a; }
+	constexpr Color(uint32 color32) : _color() { SetRawColor(color32); }
 	
 	// set the color
 	// r - red component (0-255)
 	// g - green component (0-255)
 	// b - blue component (0-255)
 	// a - alpha component, controls transparency (0 - transparent, 255 - opaque);
-	void SetColor(int r, int g, int b, int a = 0)
+	constexpr void SetColor(int r, int g, int b, int a = 0)
 	{
 		_color[0] = (unsigned char)r;
 		_color[1] = (unsigned char)g;
@@ -46,7 +41,7 @@ public:
 		_color[3] = (unsigned char)a;
 	}
 
-	void GetColor(int &r, int &g, int &b, int &a) const
+	constexpr void GetColor(int &r, int &g, int &b, int &a) const
 	{
 		r = _color[0];
 		g = _color[1];
@@ -54,44 +49,58 @@ public:
 		a = _color[3];
 	}
 
-	void SetRawColor( int color32 )
+	constexpr void SetRawColor(uint32 color32)
 	{
-		*((int *)this) = color32;
+		*((int*)this) = color32;
 	}
 
-	int GetRawColor() const
+	constexpr void SetRawColor(uint32 ulRGB, BYTE a)
+	{
+		_color[0] = (ulRGB & 0xFF0000) >> 16;	// r
+		_color[1] = (ulRGB & 0xFF00) >> 8;		// g
+		_color[2] = ulRGB & 0xFF;				// b
+		_color[3] = a;
+	}
+
+	constexpr int GetRawColor() const
 	{
 		return *((int *)this);
 	}
 
-	inline int r() const	{ return _color[0]; }
-	inline int g() const	{ return _color[1]; }
-	inline int b() const	{ return _color[2]; }
-	inline int a() const	{ return _color[3]; }
+	inline constexpr int r() const	{ return _color[0]; }
+	inline constexpr int g() const	{ return _color[1]; }
+	inline constexpr int b() const	{ return _color[2]; }
+	inline constexpr int a() const	{ return _color[3]; }
 	
-	unsigned char &operator[](int index)
+	constexpr unsigned char &operator[](int index)
 	{
+		if (index >= _countof(_color))
+			throw;
+
 		return _color[index];
 	}
 
-	const unsigned char &operator[](int index) const
+	constexpr const unsigned char &operator[](int index) const
 	{
+		if (index >= _countof(_color))
+			throw;
+
 		return _color[index];
 	}
 
-	bool operator == (const Color &rhs) const
+	constexpr bool operator == (const Color &rhs) const
 	{
 		return ( *((int *)this) == *((int *)&rhs) );
 	}
 
-	bool operator != (const Color &rhs) const
+	constexpr bool operator != (const Color &rhs) const
 	{
 		return !(operator==(rhs));
 	}
 
-	Color &operator=( const Color &rhs )
+	constexpr Color& operator=(const Color& rhs)
 	{
-		SetRawColor( rhs.GetRawColor() );
+		SetRawColor(rhs.GetRawColor());
 		return *this;
 	}
 

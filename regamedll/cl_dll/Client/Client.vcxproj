@@ -288,6 +288,7 @@
     <ClCompile Include="..\StudioModelRenderer_CS.cpp" />
     <ClCompile Include="..\tri.cpp" />
     <ClCompile Include="..\UI\LM_ImageButton.cpp" />
+    <ClCompile Include="..\UI\Market.cpp" />
     <ClCompile Include="..\UI\menu_buy.cpp" />
     <ClCompile Include="..\UI\RoleSelection.cpp" />
     <ClCompile Include="..\UI\TeamSelection.cpp" />
@@ -377,6 +378,7 @@
     <ClInclude Include="..\StudioModelRenderer.h" />
     <ClInclude Include="..\tri.h" />
     <ClInclude Include="..\UI\LM_ImageButton.h" />
+    <ClInclude Include="..\UI\Market.h" />
     <ClInclude Include="..\UI\menu_buy.h" />
     <ClInclude Include="..\UI\RoleSelection.h" />
     <ClInclude Include="..\UI\TeamSelection.h" />

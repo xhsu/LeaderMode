@@ -18,8 +18,8 @@ class CTeamButton : public LMImageButton
 	DECLARE_CLASS_SIMPLE(CTeamButton, LMImageButton);
 
 public:
-	CTeamButton(Panel* parent, const char* panelName, const char* text, unsigned short iTeamTracking, Panel* pActionSignalTarget = nullptr, const char* pCmd = nullptr) : LMImageButton(parent, panelName, text, pActionSignalTarget, pCmd), m_iTeamTracking(iTeamTracking) {}
-	CTeamButton(Panel* parent, const char* panelName, const wchar_t* text, unsigned short iTeamTracking, Panel* pActionSignalTarget = nullptr, const char* pCmd = nullptr) : LMImageButton(parent, panelName, text, pActionSignalTarget, pCmd), m_iTeamTracking(iTeamTracking) {}
+	CTeamButton(Panel* parent, const char* panelName, const char* text, unsigned short iTeamTracking, Panel* pActionSignalTarget = nullptr, const char* pCmd = nullptr) : BaseClass(parent, panelName, text, pActionSignalTarget, pCmd), m_iTeamTracking(iTeamTracking) {}
+	CTeamButton(Panel* parent, const char* panelName, const wchar_t* text, unsigned short iTeamTracking, Panel* pActionSignalTarget = nullptr, const char* pCmd = nullptr) : BaseClass(parent, panelName, text, pActionSignalTarget, pCmd), m_iTeamTracking(iTeamTracking) {}
 
 	void Paint(void) final
 	{
@@ -108,7 +108,7 @@ private:
 	int m_iRomanNumberWidth{ 0 };
 };
 
-CTeamMenu::CTeamMenu(void) : Frame(nullptr, "TeamMenu")
+CTeamMenu::CTeamMenu(void) : BaseClass(nullptr, "TeamMenu")
 {
 	SetTitle("", true);
 	SetScheme("ClientScheme");

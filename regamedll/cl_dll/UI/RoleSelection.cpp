@@ -86,17 +86,14 @@ class CRoleButton : public LMImageButton
 	DECLARE_CLASS_SIMPLE(CRoleButton, LMImageButton);
 
 public:
-	CRoleButton(Panel* parent, const char* panelName, const char* text, RoleTypes iRoleTracking, Panel* pActionSignalTarget = nullptr, const char* pCmd = nullptr) : LMImageButton(parent, panelName, text, pActionSignalTarget, pCmd), m_iRoleTracking(iRoleTracking) { Q_wcslcpy(m_wcsText, _string.c_str()); _string = L"\0"; UpdateRoleIntroText(); }
-	CRoleButton(Panel* parent, const char* panelName, const wchar_t* text, RoleTypes iRoleTracking, Panel* pActionSignalTarget = nullptr, const char* pCmd = nullptr) : LMImageButton(parent, panelName, text, pActionSignalTarget, pCmd), m_iRoleTracking(iRoleTracking) { Q_wcslcpy(m_wcsText, _string.c_str()); _string = L"\0"; UpdateRoleIntroText(); }
+	CRoleButton(Panel* parent, const char* panelName, const char* text, RoleTypes iRoleTracking, Panel* pActionSignalTarget = nullptr, const char* pCmd = nullptr) : BaseClass(parent, panelName, text, pActionSignalTarget, pCmd), m_iRoleTracking(iRoleTracking) { Q_wcslcpy(m_wcsText, _string.c_str()); _string = L"\0"; UpdateRoleIntroText(); }
+	CRoleButton(Panel* parent, const char* panelName, const wchar_t* text, RoleTypes iRoleTracking, Panel* pActionSignalTarget = nullptr, const char* pCmd = nullptr) : BaseClass(parent, panelName, text, pActionSignalTarget, pCmd), m_iRoleTracking(iRoleTracking) { Q_wcslcpy(m_wcsText, _string.c_str()); _string = L"\0"; UpdateRoleIntroText(); }
 
 	void OnThink(void) final
 	{
 		BaseClass::OnThink();
 
-		m_flAlpha += (m_flAlphaGoal - m_flAlpha) * g_flClientTimeDelta * 20;
-		m_flAlpha = Q_clamp<float>(m_flAlpha, 0, 255);
-
-		SetAlpha(m_flAlpha);	// Sync constantly.
+		SetAlpha(m_flAlpha);	// Sync constantly. This var is handled by vgui::AnimationController.
 
 		if (m_iRoleTracking == Role_UNASSIGNED)	// This role is unlimited.
 			return;
@@ -115,8 +112,7 @@ public:
 				if (IsEnabled())
 				{
 					SetEnabled(false);
-					m_flAlphaGoal = 128;
-					//GetAnimationController()->RunAnimationCommand(this, "m_flAlpha", 96, 0.0f, 0.7, AnimationController::INTERPOLATOR_LINEAR);
+					GetAnimationController()->RunAnimationCommand(this, "m_flAlpha", 128, 0.0f, 0.7, AnimationController::INTERPOLATOR_DEACCEL);
 
 					auto msg = VGUI_LOCALISE->Find("#LeaderMod_RoleSel_CastBy");
 					if (msg)
@@ -130,15 +126,13 @@ public:
 		// No found: avaliable to choose.
 		if (!IsEnabled())
 		{
-			m_flAlphaGoal = 255;
-			//GetAnimationController()->RunAnimationCommand(this, "m_flAlpha", 255, 0.0f, 0.7, AnimationController::INTERPOLATOR_LINEAR);
+			GetAnimationController()->RunAnimationCommand(this, "m_flAlpha", 255, 0.0f, 0.7, AnimationController::INTERPOLATOR_DEACCEL);
 			SetEnabled(true);
 
 			// Restoration.
 			Q_wcslcpy(m_wcsText, UTIL_GetLocalisation(s_rgpszRoleLocalisationKeys[m_iRoleTracking]));
 		}
 	}
-
 
 	void Paint(void) final
 	{
@@ -207,27 +201,18 @@ public:
 		}
 	}
 
-	// UNDONE
-	// GetAnimationController() doesn't work at all. Why?
-	//void OnTick(void) final
-	//{
-	//	BaseClass::OnTick();
-	//	GetAnimationController()->UpdateAnimations(system()->GetCurrentTime());	// Should this being called in every animated class?
-	//}
-
 public:
 	static constexpr auto FONT_INTRO_SIZE = 24;
 
 private:
-	float m_flAlpha{ 255 }, m_flAlphaGoal{ 255 };	// byte
-	//CPanelAnimationVar(float, m_flAlpha, "m_flAlpha", "255");
+	CPanelAnimationVar(float, m_flAlpha, "m_flAlpha", "255");
 	RoleTypes m_iRoleTracking{ Role_UNASSIGNED };
 	wchar_t m_wcsText[256]{ L"\0" };	// Why abolish origin _string from base class? We have to draw this after second part of white block.
 	int m_iIntroFont{ 0 };
 	std::wstring m_wcsIntroText{ L"\0" };
 };
 
-CRoleMenu::CRoleMenu(void) : Frame(nullptr, "RoleMenu")
+CRoleMenu::CRoleMenu(void) : BaseClass(nullptr, "RoleMenu")
 {
 	SetTitle("", true);
 	SetScheme("ClientScheme");
@@ -340,7 +325,7 @@ void CRoleMenu::Paint(void)
 
 void CRoleMenu::OnCommand(const char* command)
 {
-	Show(false);
+	//Show(false);
 
 	if (Q_strstr(command, "role"))
 		gEngfuncs.pfnServerCmd(command);

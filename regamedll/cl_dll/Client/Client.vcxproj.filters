@@ -333,6 +333,9 @@
     <ClCompile Include="..\UI\RoleSelection.cpp">
       <Filter>cl_dll\UI</Filter>
     </ClCompile>
+    <ClCompile Include="..\UI\Market.cpp">
+      <Filter>cl_dll\UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\cdll_int.h">
@@ -594,6 +597,9 @@
       <Filter>cl_dll\UI</Filter>
     </ClInclude>
     <ClInclude Include="..\UI\RoleSelection.h">
+      <Filter>cl_dll\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\UI\Market.h">
       <Filter>cl_dll\UI</Filter>
     </ClInclude>
   </ItemGroup>

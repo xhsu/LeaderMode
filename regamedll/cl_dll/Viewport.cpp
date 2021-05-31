@@ -14,11 +14,17 @@ using namespace vgui;
 
 CViewPort::CViewPort(void)
 {
+	// You have to add this for all animations.
+	ivgui()->AddTickSignal(GetVPanel());
+
 	m_pTeamMenu = new CTeamMenu();
 	m_pTeamMenu->SetParent(this);
 
 	m_pRoleMenu = new CRoleMenu();
 	m_pRoleMenu->SetParent(this);
+
+	m_pMarketMenu = new CMarket();
+	m_pMarketMenu->SetParent(this);
 }
 
 CViewPort::~CViewPort(void)
@@ -48,13 +54,14 @@ void vgui::CViewPort::OnHideClientUI(void)
 
 bool vgui::CViewPort::IsAnyClientUIUsingMouse(void)
 {
-	return (m_pTeamMenu->IsVisible() || m_pRoleMenu->IsVisible());
+	return (m_pTeamMenu->IsVisible() || m_pRoleMenu->IsVisible() || m_pMarketMenu->IsVisible());
 }
 
 void vgui::CViewPort::HideAllVGUIMenus(void)
 {
 	m_pRoleMenu->Show(false);
 	m_pTeamMenu->Show(false);
+	m_pMarketMenu->Show(false);
 }
 
 void CViewPort::PaintBackground(void)
@@ -69,4 +76,12 @@ void CViewPort::OnCommand(const char* szCommand)
 {
 	//if (!Q_strcmp(szCommand, "showteam"))
 	//	m_pTeamMenu->Show(!m_pTeamMenu->IsVisible());
+}
+
+void CViewPort::OnTick(void)
+{
+	BaseClass::OnTick();
+
+	// Update all animations.
+	GetAnimationController()->UpdateAnimations(system()->GetCurrentTime());
 }

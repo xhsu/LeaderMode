@@ -87,6 +87,7 @@ private:
 // My own elements.
 #include "UI/TeamSelection.h"
 #include "UI/RoleSelection.h"
+#include "UI/Market.h"
 
 namespace vgui
 {
@@ -107,10 +108,12 @@ public:
 protected:
 	void PaintBackground(void) final;
 	void OnCommand(const char* szCommand) final;
+	void OnTick(void) final;
 
 public:
 	CTeamMenu* m_pTeamMenu{ nullptr };
 	CRoleMenu* m_pRoleMenu{ nullptr };
+	CMarket* m_pMarketMenu{ nullptr };
 };
 
 }

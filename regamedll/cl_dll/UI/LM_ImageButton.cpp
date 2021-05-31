@@ -26,21 +26,27 @@ inline void vgui::image_s::Load(const char* fileName)
 		m_flW2HRatio = float(m_iWidth) / float(m_iHeight);
 }
 
-vgui::LMImageButton::LMImageButton(Panel* parent, const char* panelName, const char* text, Panel* pActionSignalTarget, const char* pCmd) : Button(parent, panelName, text, pActionSignalTarget, pCmd)
+vgui::LMImageButton::LMImageButton(Panel* parent, const char* panelName, const char* text, Panel* pActionSignalTarget, const char* pCmd) : BaseClass(parent, panelName, text, pActionSignalTarget, pCmd)
 {
+	InitializeDefaultFont();
+
 	static wchar_t string[128];
 	GetText(string, sizeof(string));
 	_string = string;
+	_font = s_iDefaultFont;
 }
 
-vgui::LMImageButton::LMImageButton(Panel* parent, const char* panelName, const wchar_t* text, Panel* pActionSignalTarget, const char* pCmd) : Button(parent, panelName, text, pActionSignalTarget, pCmd)
+vgui::LMImageButton::LMImageButton(Panel* parent, const char* panelName, const wchar_t* text, Panel* pActionSignalTarget, const char* pCmd) : BaseClass(parent, panelName, text, pActionSignalTarget, pCmd)
 {
+	InitializeDefaultFont();
+
 	_string = text;
+	_font = s_iDefaultFont;
 }
 
 bool vgui::LMImageButton::AddGlyphSetToFont(const char* windowsFontName, int tall, int weight, int blur, int scanlines, int flags, int lowRange, int highRange)
 {
-	if (!_font)
+	if (!_font || _font == s_iDefaultFont)	// You shouldn't add glyphset to default font.
 		_font = gFontFuncs::CreateFont();
 
 	return gFontFuncs::AddGlyphSetToFont(_font, windowsFontName, tall, weight, blur, scanlines, flags, lowRange, highRange);
@@ -56,6 +62,25 @@ void LMImageButton::SetCommand(const char *command, ...)
 	va_end(arg);
 
 	BaseClass::SetCommand(string);
+}
+
+bool vgui::LMImageButton::SetSizeByImageWidth(int iImageWidth)
+{
+	// No image? What are you doing here?
+	if (!_upImage)
+		return false;
+
+	SetSize(iImageWidth, _upImage.CalculateHeightByDefinedWidth(iImageWidth) + _string.empty() ? 0 : gFontFuncs::GetFontTall(_font));
+	return true;
+}
+
+bool vgui::LMImageButton::SetSizeByImageHeight(int iImageHeight)
+{
+	if (!_upImage)
+		return false;
+
+	SetSize(_upImage.CalculateWidthByDefinedHeight(iImageHeight), iImageHeight + _string.empty() ? 0 : gFontFuncs::GetFontTall(_font));
+	return true;
 }
 
 void vgui::LMImageButton::Paint(void)
@@ -90,6 +115,10 @@ void vgui::LMImageButton::Paint(void)
 
 		// If disable image is not set, we draw the _upImage.
 	}
+
+	// Fail to draw any image.
+	if (!*iImageToDraw || iImageToDraw->m_flW2HRatio < FLT_EPSILON)
+		return;
 
 	// Get size for draw.
 	// However, this is a picture with able beneath. Have to spare some room.
@@ -162,4 +191,14 @@ void vgui::LMImageButton::InvalidateLayout(bool layoutNow, bool reloadScheme)
 	BaseClass::InvalidateLayout(layoutNow, reloadScheme);
 
 	m_flSparedBlankHeight = GetTall() - round(GetImageWidth() / _upImage.m_flW2HRatio);	// Use the default size as the 
+}
+
+inline void vgui::LMImageButton::InitializeDefaultFont(void)
+{
+	if (!s_iDefaultFont)
+	{
+		s_iDefaultFont = gFontFuncs::CreateFont();
+		gFontFuncs::AddGlyphSetToFont(s_iDefaultFont, "Trajan Pro", DEFAULT_FONT_SIZE, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0x2E7F);	// These two numbers are unicode range. Don't touch them unless you know what you are doing.
+		gFontFuncs::AddGlyphSetToFont(s_iDefaultFont, "I.MingCP", DEFAULT_FONT_SIZE, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x2E80, 0xFFFF);
+	}
 }

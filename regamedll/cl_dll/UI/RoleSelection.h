@@ -20,14 +20,14 @@ class CRoleMenu : public vgui::Frame, public CViewportPanelHelper<CRoleMenu>
 
 public:
 	CRoleMenu(void);
-	virtual ~CRoleMenu(void);
-	void PaintBackground(void) final;
+	~CRoleMenu(void) override;
 
 public:
 	void OnThink(void) final;
 	void Paint(void) final;
 	void OnCommand(const char* command) final;
 	void OnKeyCodeTyped(vgui::KeyCode code) final;
+	void PaintBackground(void) final;
 
 private:
 	std::array<vgui::LMImageButton*, ROLE_COUNT> m_rgpButtons;

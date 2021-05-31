@@ -51,6 +51,8 @@ namespace vgui
 		void SetCommand(const char* command, ...);
 		bool IsPendingSelected(void) { return IsEnabled() && (IsDepressed() || IsArmed()); }
 		virtual int GetImageWidth(void) { return GetWide(); }
+		virtual bool SetSizeByImageWidth(int iImageWidth);	// Font size will also be considered.
+		virtual bool SetSizeByImageHeight(int iImageHeight);	// Font size will also be added automatically. DO NOT manually add it in here.
 
 	public:	// Overrides
 		void PaintBackground(void) final { /* Draw no background*/ }
@@ -59,9 +61,15 @@ namespace vgui
 		void ApplySettings(KeyValues* inResourceData) final;
 		void ApplySchemeSettings(IScheme* pScheme) final;
 		void InvalidateLayout(bool layoutNow = false, bool reloadScheme = false) override;
+		//void SetFont(vgui::HFont iFont) final;
+
+	private:
+		static inline void InitializeDefaultFont(void);
 
 	public:
 		static constexpr auto MARGIN_TEXT = 2;
+		static constexpr auto DEFAULT_FONT_SIZE = 22;
+		static inline int s_iDefaultFont = 0;
 
 	protected:
 		image_t _upImage;
