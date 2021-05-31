@@ -36,14 +36,21 @@ CMarket::CMarket() : BaseClass(nullptr, "Market")
 	SetVisible(false);
 
 	// We need to scroll.
-	//m_pPurchasablePanel = new ScrollableEditablePanel(this, new EditablePanel(nullptr, "PurchasablePanel_EP"), "PurchasablePanel_SEP");
-	//m_pPurchasablePanel->SetBounds(0, 0, iPanelWidth, iPanelTall);
+	m_pPurchasablePanel = new ScrollableEditablePanel(this, new EditablePanel(nullptr, "PurchasablePanel_EP"), "PurchasablePanel_SEP");
+	m_pPurchasablePanel->SetBounds(0, 0, iPanelWidth, iPanelTall);
+	m_pPurchasablePanel->PerformLayout();
 
-	auto pButton1 = new LMImageButton(this, "AR15", L"Colt AR-15", this, "buyweapon weapon_ar15");
+	if (!s_hFont)
+	{
+		s_hFont = gFontFuncs::CreateFont();
+		gFontFuncs::AddGlyphSetToFont(s_hFont, "Trajan Pro", FONT_SIZE, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0x2E7F);
+		gFontFuncs::AddGlyphSetToFont(s_hFont, "I.MingCP", FONT_SIZE, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x2E80, 0xFFFF);
+	}
+
+	auto pButton1 = new LMImageButton(m_pPurchasablePanel, "AR15", L"Colt AR-15", this, "buyweapon weapon_ar15");
 	pButton1->SetVisible(true);
 	pButton1->SetUpImage("sprites/Weapons/AR15.dds");
-	pButton1->AddGlyphSetToFont("Trajan Pro", FONT_SIZE, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0x2E7F);
-	pButton1->AddGlyphSetToFont("I.MingCP", FONT_SIZE, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x2E80, 0xFFFF);
+	pButton1->SetFont(s_hFont);
 	pButton1->SetPos(0, 0);
 	pButton1->SetSizeByImageHeight(WPN_SPRITE_HEIGHT);
 	pButton1->InvalidateLayout(true);

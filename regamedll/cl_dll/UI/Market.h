@@ -26,6 +26,7 @@ public:
 	static constexpr auto LENGTH_FRAME = 18, WIDTH_FRAME = 2, MARGIN_BETWEEN_FRAME_AND_BUTTON = 12;
 	static constexpr auto MARGIN = 2;
 	static constexpr auto WPN_SPRITE_HEIGHT = 96, FONT_SIZE = 24;
+	static inline int s_hFont = 0;
 
 private:
 	vgui::ScrollableEditablePanel* m_pPurchasablePanel{ nullptr };
