@@ -126,3 +126,8 @@ Iter select_randomly(Iter start, Iter end)
 
 void UTIL_Split(const std::string& s, std::vector<std::string>& tokens, const std::string& delimiters = " ");
 bool UTIL_EntityValid(const cl_entity_t* pEntity);	// Incomplete.
+
+void ISurface_ClampTextWidthROW(wchar_t* text, size_t size, vgui::HFont font, int iWidth);
+bool ISurface_ClampTextWidthROW(std::wstring& string, vgui::HFont font, int iWidth);
+void ISurface_ClampTextWidthCJK(wchar_t* text, size_t size, vgui::HFont font, int iWidth);
+bool ISurface_ClampTextWidthCJK(std::wstring& string, vgui::HFont font, int iWidth);

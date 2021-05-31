@@ -459,3 +459,111 @@ bool UTIL_EntityValid(const cl_entity_t* pEntity)	// Incomplete.
 
 	return false;
 }
+
+static int iDummy = 0;
+
+void ISurface_ClampTextWidthROW(wchar_t* text, size_t size, vgui::HFont font, int iWidth)
+{
+	const auto count = size / sizeof(wchar_t);
+	const auto space_width = VGUI_SURFACE->GetCharacterWidth(font, L' ');
+	wchar_t* result = (wchar_t*)malloc(size);
+	memset(result, L'\0', size);
+
+	// replace all '\n' with ' '
+	for (unsigned i = 0; i < count; i++)
+	{
+		if (text[i] == L'\n')
+			text[i] = L' ';
+	}
+
+	int iCurLineWidth = 0, iWordLength = 0;
+	wchar_t* pwc = nullptr, * pt = nullptr;
+
+	pwc = wcstok_s(text, L" ", &pt);
+	while (pwc != nullptr)
+	{
+		VGUI_SURFACE->GetTextSize(font, pwc, iWordLength, iDummy);
+
+		if (iCurLineWidth + iWordLength > iWidth)
+		{
+			wcscat_s(result, count, L"\n");
+			iCurLineWidth = 0;
+		}
+		else if (wcslen(result))	// only place a new line if something already in it.
+		{
+			wcscat_s(result, count, L" ");
+			iCurLineWidth += space_width;
+		}
+
+		wcscat_s(result, count, pwc);	// Concatenate the word anyway.
+		iCurLineWidth += iWordLength;
+
+		pwc = wcstok_s(nullptr, L" ", &pt);
+	}
+
+	memcpy(text, result, size);
+	free(result);
+}
+
+bool ISurface_ClampTextWidthROW(std::wstring& string, vgui::HFont font, int iWidth)
+{
+	size_t size = string.length() * sizeof(wchar_t) * 2U;	// Additional space should be reserved.
+	wchar_t* copy = (wchar_t*)malloc(size);
+
+	if (copy == nullptr)
+		return false;
+
+	memset(copy, L'\0', size);
+	memcpy(copy, string.c_str(), size);
+
+	ISurface_ClampTextWidthROW(copy, size, font, iWidth);
+
+	string = copy;
+	free(copy);
+	return true;
+}
+
+void ISurface_ClampTextWidthCJK(wchar_t* text, size_t size, vgui::HFont font, int iWidth)
+{
+	auto count = size / sizeof(wchar_t);
+
+	// clear all '\n'
+	for (unsigned i = 0; i < count; i++)
+	{
+		if (text[i] == L'\n')
+			memmove(&text[i], &text[i + 1], size - (i + 1) * sizeof(wchar_t));
+	}
+
+	int iCurLineWidth = 0, iCurCharacterWidth = 0;
+	for (unsigned i = 0; i < count; i++)
+	{
+		iCurCharacterWidth = VGUI_SURFACE->GetCharacterWidth(font, text[i]);
+
+		if (iCurLineWidth + iCurCharacterWidth > iWidth)
+		{
+			memmove(&text[i + 1], &text[i], size - (i + 1) * sizeof(wchar_t));
+			text[i] = L'\n';
+			iCurLineWidth = 0;
+		}
+		else
+			iCurLineWidth += iCurCharacterWidth;
+	}
+}
+
+bool ISurface_ClampTextWidthCJK(std::wstring& string, vgui::HFont font, int iWidth)
+{
+	size_t size = string.length() * sizeof(wchar_t) * 2U;	// Additional space should be reserved.
+	wchar_t* copy = (wchar_t*)malloc(size);
+
+	if (copy == nullptr)
+		return false;
+
+	memset(copy, L'\0', size);
+	memcpy(copy, string.c_str(), size);
+
+	ISurface_ClampTextWidthCJK(copy, size, font, iWidth);
+
+	string = copy;
+	free(copy);
+	return true;
+}

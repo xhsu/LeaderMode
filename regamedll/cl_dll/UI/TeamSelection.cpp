@@ -13,6 +13,9 @@ Modern Warfare Dev Team
 
 using namespace vgui;
 
+static int iDummy = 0;
+
+
 class CTeamButton : public LMImageButton
 {
 	DECLARE_CLASS_SIMPLE(CTeamButton, LMImageButton);
@@ -49,10 +52,10 @@ public:
 			vecPos.x -= m_iRomanNumberWidth;
 
 			// Display roman number indicator.
-			gFontFuncs::DrawSetTextFont(_font);
-			gFontFuncs::DrawSetTextColor(0x0, GetAlpha());
-			gFontFuncs::DrawSetTextPos(vecPos);
-			gFontFuncs::DrawPrintText(m_wcsRomanNumber.c_str());
+			surface()->DrawSetTextFont(_font);
+			surface()->DrawSetTextColor(Color(0x0, GetAlpha()));
+			surface()->DrawSetTextPos(vecPos.x, vecPos.y);
+			surface()->DrawPrintText(m_wcsRomanNumber.c_str(), m_wcsRomanNumber.length());
 		}
 	}
 
@@ -76,7 +79,7 @@ public:
 		if (m_iPlayerCounts > 5 && iLastPlayerCounts != m_iPlayerCounts)	// Only updates text when needed.
 		{
 			m_wcsRomanNumber = UTIL_ArabicToRoman(m_iPlayerCounts) + L" × ";
-			gFontFuncs::GetTextSize(_font, m_wcsRomanNumber.c_str(), &m_iRomanNumberWidth, nullptr);
+			surface()->GetTextSize(_font, m_wcsRomanNumber.c_str(), m_iRomanNumberWidth, iDummy);
 		}
 	}
 

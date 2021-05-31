@@ -46,10 +46,10 @@ vgui::LMImageButton::LMImageButton(Panel* parent, const char* panelName, const w
 
 bool vgui::LMImageButton::AddGlyphSetToFont(const char* windowsFontName, int tall, int weight, int blur, int scanlines, int flags, int lowRange, int highRange)
 {
-	if (!_font || _font == s_iDefaultFont)	// You shouldn't add glyphset to default font.
-		_font = gFontFuncs::CreateFont();
+	if (_font == INVALID_FONT || _font == s_iDefaultFont)	// You shouldn't add glyphset to default font.
+		_font = surface()->CreateFont();
 
-	return gFontFuncs::AddGlyphSetToFont(_font, windowsFontName, tall, weight, blur, scanlines, flags, lowRange, highRange);
+	return surface()->SetFontGlyphSet(_font, windowsFontName, tall, weight, blur, scanlines, flags/*, lowRange, highRange*/);
 }
 
 void LMImageButton::SetCommand(const char *command, ...)
@@ -70,7 +70,7 @@ bool vgui::LMImageButton::SetSizeByImageWidth(int iImageWidth)
 	if (!_upImage)
 		return false;
 
-	SetSize(iImageWidth, _upImage.CalculateHeightByDefinedWidth(iImageWidth) + _string.empty() ? 0 : gFontFuncs::GetFontTall(_font));
+	SetSize(iImageWidth, _upImage.CalculateHeightByDefinedWidth(iImageWidth) + (_string.empty() ? 0 : surface()->GetFontTall(_font)));	// The conditional operator has the second lowest priority. (lv. 15) Careful dealing with it.
 	return true;
 }
 
@@ -79,7 +79,7 @@ bool vgui::LMImageButton::SetSizeByImageHeight(int iImageHeight)
 	if (!_upImage)
 		return false;
 
-	SetSize(_upImage.CalculateWidthByDefinedHeight(iImageHeight), iImageHeight + _string.empty() ? 0 : gFontFuncs::GetFontTall(_font));
+	SetSize(_upImage.CalculateWidthByDefinedHeight(iImageHeight), iImageHeight + (_string.empty() ? 0 : surface()->GetFontTall(_font)));
 	return true;
 }
 
@@ -134,10 +134,10 @@ void vgui::LMImageButton::Paint(void)
 
 	if (!_string.empty())
 	{
-		gFontFuncs::DrawSetTextFont(_font ? _font : gHUD::m_hTrajanProFont);
-		gFontFuncs::DrawSetTextColor(0x0, GetAlpha());
-		gFontFuncs::DrawSetTextPos(MARGIN_TEXT, iHeight);	// Just below the image.
-		gFontFuncs::DrawPrintText(_string.c_str());
+		surface()->DrawSetTextFont(_font ? _font : gHUD::m_hTrajanProFont);
+		surface()->DrawSetTextColor(Color(0x0, GetAlpha()));
+		surface()->DrawSetTextPos(MARGIN_TEXT, iHeight);	// Just below the image.
+		surface()->DrawPrintText(_string.c_str(), _string.length());
 	}
 }
 
@@ -197,8 +197,8 @@ inline void vgui::LMImageButton::InitializeDefaultFont(void)
 {
 	if (!s_iDefaultFont)
 	{
-		s_iDefaultFont = gFontFuncs::CreateFont();
-		gFontFuncs::AddGlyphSetToFont(s_iDefaultFont, "Trajan Pro", DEFAULT_FONT_SIZE, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0x2E7F);	// These two numbers are unicode range. Don't touch them unless you know what you are doing.
-		gFontFuncs::AddGlyphSetToFont(s_iDefaultFont, "I.MingCP", DEFAULT_FONT_SIZE, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x2E80, 0xFFFF);
+		s_iDefaultFont = surface()->CreateFont();
+		surface()->SetFontGlyphSet(s_iDefaultFont, "Trajan Pro", DEFAULT_FONT_SIZE, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS/*, 0x0, 0x2E7F*/);	// These two numbers are unicode range. Don't touch them unless you know what you are doing.
+		surface()->SetFontGlyphSet(s_iDefaultFont, "I.MingCP", DEFAULT_FONT_SIZE, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS/*, 0x2E80, 0xFFFF*/);
 	}
 }
