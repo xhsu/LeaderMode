@@ -2636,7 +2636,7 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 			}
 			else if (FStrEq(pcmd, "buyweapon"))
 			{
-				WeaponIdType iId = (WeaponIdType)Q_atoi(parg1);
+				WeaponIdType iId = WeaponClassnameToID(parg1);
 
 				if (iId <= WEAPON_NONE || iId >= LAST_WEAPON)
 					return;

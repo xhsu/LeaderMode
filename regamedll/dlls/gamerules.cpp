@@ -287,8 +287,6 @@ CHalfLifeMultiplay::CHalfLifeMultiplay()
 	m_iNumTerroristWins = 0;
 	m_iNumCT = 0;
 	m_iNumTerrorist = 0;
-	m_iNumSpawnableCT = 0;
-	m_iNumSpawnableTerrorist = 0;
 	m_bMapHasCameras = FALSE;
 
 	m_iLoserBonus = m_rgRewardAccountRules[RR_LOSER_BONUS_DEFAULT];
@@ -536,7 +534,7 @@ void EXT_FUNC CHalfLifeMultiplay::CheckWinConditions()
 void CHalfLifeMultiplay::InitializePlayerCounts(int &NumAliveTerrorist, int &NumAliveCT, int &NumDeadTerrorist, int &NumDeadCT)
 {
 	NumAliveTerrorist = NumAliveCT = NumDeadCT = NumDeadTerrorist = 0;
-	m_iNumTerrorist = m_iNumCT = m_iNumSpawnableTerrorist = m_iNumSpawnableCT = 0;
+	m_iNumTerrorist = m_iNumCT = 0;
 
 	// initialize count dead/alive players
 
@@ -557,11 +555,6 @@ void CHalfLifeMultiplay::InitializePlayerCounts(int &NumAliveTerrorist, int &Num
 		{
 			m_iNumCT++;
 
-			if (m_rgiManpowers[CT])
-			{
-				m_iNumSpawnableCT++;
-			}
-
 			if (pPlayer->pev->deadflag != DEAD_NO)
 				NumDeadCT++;
 			else
@@ -572,11 +565,6 @@ void CHalfLifeMultiplay::InitializePlayerCounts(int &NumAliveTerrorist, int &Num
 		case TERRORIST:
 		{
 			m_iNumTerrorist++;
-
-			if (m_rgiManpowers[TERRORIST])
-			{
-				m_iNumSpawnableTerrorist++;
-			}
 
 			if (pPlayer->pev->deadflag != DEAD_NO)
 				NumDeadTerrorist++;
@@ -635,14 +623,14 @@ bool EXT_FUNC CHalfLifeMultiplay::NeededPlayersCheck()
 	// We needed players to start scoring
 	// Do we have them now?
 	// start the game, after the players entered in game
-	if (!m_iNumSpawnableTerrorist || !m_iNumSpawnableCT)
+	if (!m_iNumCT || !m_iNumTerrorist)
 	{
 		UTIL_ClientPrintAll(HUD_PRINTCONSOLE, "#Game_scoring");
 		m_bNeededPlayers = true;
 		m_bGameStarted = false;
 	}
 
-	if (!m_bGameStarted && m_iNumSpawnableTerrorist != 0 && m_iNumSpawnableCT != 0)
+	if (!m_bGameStarted && m_iNumCT != 0 && m_iNumTerrorist != 0)
 	{
 		return OnRoundEnd(WINSTATUS_DRAW, ROUND_GAME_COMMENCE, 3);
 	}
@@ -696,7 +684,7 @@ bool CHalfLifeMultiplay::Round_Draw(float tmDelay)
 
 bool CHalfLifeMultiplay::TeamExterminationCheck(int NumAliveTerrorist, int NumAliveCT, int NumDeadTerrorist, int NumDeadCT)
 {
-	if ((m_iNumCT > 0 && m_iNumSpawnableCT > 0) && (m_iNumTerrorist > 0 && m_iNumSpawnableTerrorist > 0))
+	if (m_iNumCT > 0 && m_iNumTerrorist > 0)
 	{
 		if (NumAliveTerrorist == 0 && NumDeadTerrorist != 0 && NumAliveCT > 0)
 		{

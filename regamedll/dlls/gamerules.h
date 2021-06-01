@@ -405,8 +405,6 @@ public:
 	int m_iAccountCT;
 	int m_iNumTerrorist;				// The number of terrorists on the team (this is generated at the end of a round)
 	int m_iNumCT;						// The number of CTs on the team (this is generated at the end of a round)
-	int m_iNumSpawnableTerrorist;
-	int m_iNumSpawnableCT;
 	int m_iSpawnPointCount_Terrorist;	// Number of Terrorist spawn points
 	int m_iSpawnPointCount_CT;			// Number of CT spawn points
 	int m_iRoundWinStatus;				// 1 == CT's won last round, 2 == Terrorists did, 3 == Draw, no winner

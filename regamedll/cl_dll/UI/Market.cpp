@@ -200,8 +200,7 @@ CMarket::CMarket() : BaseClass(nullptr, "Market")
 			continue;
 		}
 
-		m_rgpButtons[i] = new LMImageButton(m_pPurchasablePanel, g_rgWpnInfo[i].m_pszInternalName, g_rgWpnInfo[i].m_pszExternalName, this);
-		m_rgpButtons[i]->SetCommand("buy %s", g_rgWpnInfo[i].m_pszInternalName);
+		m_rgpButtons[i] = new LMImageButton(m_pPurchasablePanel, g_rgWpnInfo[i].m_pszInternalName, g_rgWpnInfo[i].m_pszExternalName, this, SharedVarArgs("buyweapon %s", g_rgWpnInfo[i].m_pszInternalName));
 		m_rgpButtons[i]->SetVisible(true);
 		m_rgpButtons[i]->SetUpImage(g_rgpszWeaponSprites[i]);
 		m_rgpButtons[i]->SetFont(s_hFont);
