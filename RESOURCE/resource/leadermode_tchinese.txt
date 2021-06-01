@@ -131,6 +131,14 @@
 		"LeaderMod_Doctrine_MobileWarfare_Intro"		"$[Greenish]機動作戰學說$[Yellowish]: $[Cyan]重新部署區域$[Yellowish]將會集中在$[Team]小隊長$[Yellowish]的旁邊。此外，小隊所有成員可以在地圖的$[Cyan]任意位置$[Yellowish]購買物品。"
 		"LeaderMod_Doctrine_SuperiorFirepower_Intro"	"$[Greenish]火力優勢學說$[Yellowish]: $[Cyan]每秒鐘$[Yellowish]恢復當前武器最大彈容的$[Cyan]4%%$[Yellowish]。"
 
+		// 購買菜單
+		"LeaderMode_Pistols"	"手槍"
+		"LeaderMode_Shotguns"	"霰彈槍"
+		"LeaderMode_SMGs"		"衝鋒槍"
+		"LeaderMode_ARs"		"突擊步槍"
+		"LeaderMode_SRs"		"精確射手步槍"
+		"LeaderMode_LMGs"		"輕機槍"
+
 		// 菜單
 		"Team_Select"			"\y選擇隊伍\w
 

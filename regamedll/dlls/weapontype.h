@@ -83,9 +83,19 @@ enum WeaponIdType
 	WEAPON_MK46,
 	WEAPON_RPD,
 
+	// Utils
 	LAST_WEAPON,
-	WEAPON_SHIELDGUN = 99
+	LAST_PISTOL = WEAPON_M45A1,
+	LAST_SHOTGUN = WEAPON_AA12,
+	LAST_SMG = WEAPON_VECTOR,
+	LAST_AR = WEAPON_XM8,
+	LAST_SR = WEAPON_PSG1,
+	LAST_LMG = WEAPON_RPD,
+
+	WEAPON_SHIELDGUN = 99,
 };
+
+constexpr auto g_bitsLastWeaponInCategory = (1 << LAST_PISTOL) | (1 << LAST_SHOTGUN) | (1 << LAST_SMG) | (1 << LAST_AR) | (1 << LAST_SR) | (1 << LAST_LMG);
 
 enum ItemCostType
 {

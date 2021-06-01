@@ -39,7 +39,7 @@ public:
 
 	MESSAGE_FUNC( OnScrollBarSliderMoved, "ScrollBarSliderMoved" );
 
-private:
+public:
 	vgui::ScrollBar *m_pScrollBar;
 	vgui::EditablePanel *m_pChild;
 };

@@ -13,7 +13,7 @@ Modern Warfare Dev Team
 
 using namespace vgui;
 
-static const char* s_rgpszRoleButtonInternalNames[ROLE_COUNT] =
+static constexpr const char* s_rgpszRoleButtonInternalNames[ROLE_COUNT] =
 {
 	"SelectUnassigned",
 
@@ -30,7 +30,7 @@ static const char* s_rgpszRoleButtonInternalNames[ROLE_COUNT] =
 	"SelectArsonist",
 };
 
-static const char* s_rgpszRoleLocalisationKeys[ROLE_COUNT] =
+static constexpr const char* s_rgpszRoleLocalisationKeys[ROLE_COUNT] =
 {
 	"#LeaderMod_Role_UNASSIGNED",
 
@@ -47,7 +47,7 @@ static const char* s_rgpszRoleLocalisationKeys[ROLE_COUNT] =
 	"#LeaderMod_Role_Arsonist",
 };
 
-static const char* s_rgpszRoleIntroLocalisationKeys[ROLE_COUNT] =
+static constexpr const char* s_rgpszRoleIntroLocalisationKeys[ROLE_COUNT] =
 {
 	"#LeaderMod_Role_UNASSIGNED_Intro",
 
@@ -64,7 +64,7 @@ static const char* s_rgpszRoleIntroLocalisationKeys[ROLE_COUNT] =
 	"#LeaderMod_Role_Arsonist_Intro",
 };
 
-static const char* s_rgpszRolePortraitFile[ROLE_COUNT] =
+static constexpr const char* s_rgpszRolePortraitFile[ROLE_COUNT] =
 {
 	"sprites/ClassesIcon/Doraemon.dds",
 
