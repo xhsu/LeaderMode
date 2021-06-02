@@ -42,7 +42,7 @@
 #define WPN_A	1	// allowed: price * 1
 #define WPN_D	2	// discounted: price * 0.5
 
-enum WeaponIdType
+enum WeaponIdType : BYTE
 {
 	WEAPON_NONE,
 
@@ -157,7 +157,7 @@ enum WeaponClassWeight
 	SNIPER_RIFLE_BASIC_WEIGHT,
 };
 
-enum WeaponClassType
+enum WeaponClassType : BYTE
 {
 	WEAPONCLASS_NONE,
 	WEAPONCLASS_KNIFE,
@@ -172,7 +172,7 @@ enum WeaponClassType
 };
 
 // dummy.
-enum AmmoIdType;
+enum AmmoIdType : BYTE;
 
 // one of the core data structure.
 struct WeaponInfo
@@ -181,12 +181,12 @@ struct WeaponInfo
 	const char*		m_pszInternalName;
 	const char*		m_pszExternalName;
 	AmmoIdType		m_iAmmoType;
-	int				m_iMaxClip;
-	int				m_iSlot;
+	int				m_iMaxClip : 8;
+	int				m_iSlot : 4;
 	int				m_bitsFlags;
-	int				m_iWeight;
+	int				m_iWeight : 8;
 	WeaponClassType	m_iClassType;
-	int				m_iCost;
+	int				m_iCost : 16;
 };
 
 extern const WeaponInfo g_rgWpnInfo[LAST_WEAPON];

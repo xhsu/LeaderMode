@@ -42,8 +42,8 @@ class CBaseMonster;
 class CBaseWeapon;	// LUNA: this is NOT a derived class of CBaseEntity anymore!
 class CSquadMonster;
 
-enum AmmoIdType;
-enum WeaponIdType;
+enum AmmoIdType : BYTE;
+enum WeaponIdType : BYTE;
 
 #undef CREATE_NAMED_ENTITY
 #undef REMOVE_ENTITY

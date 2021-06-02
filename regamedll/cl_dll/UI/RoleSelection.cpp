@@ -112,7 +112,7 @@ public:
 				if (IsEnabled())
 				{
 					SetEnabled(false);
-					GetAnimationController()->RunAnimationCommand(this, "m_flAlpha", 128, 0.0f, 0.7, AnimationController::INTERPOLATOR_DEACCEL);
+					GetAnimationController()->RunAnimationCommand(this, "m_flAlpha", 128, 0.0f, 0.5, AnimationController::INTERPOLATOR_DEACCEL);
 
 					auto msg = VGUI_LOCALISE->Find("#LeaderMod_RoleSel_CastBy");
 					if (msg)
@@ -126,7 +126,7 @@ public:
 		// No found: avaliable to choose.
 		if (!IsEnabled())
 		{
-			GetAnimationController()->RunAnimationCommand(this, "m_flAlpha", 255, 0.0f, 0.7, AnimationController::INTERPOLATOR_DEACCEL);
+			GetAnimationController()->RunAnimationCommand(this, "m_flAlpha", 255, 0.0f, 0.5, AnimationController::INTERPOLATOR_DEACCEL);
 			SetEnabled(true);
 
 			// Restoration.

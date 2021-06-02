@@ -57,7 +57,7 @@ constexpr const char* g_rgpszWeaponSprites[LAST_WEAPON] =
 	"",
 };
 
-constexpr const char* g_rgpszWeaponCategoryNames[] =
+constexpr const char* g_rgpszMarketCategoryNames[] =
 {
 	"#LeaderMode_Pistols",
 	"#LeaderMode_Shotguns",
@@ -65,9 +65,38 @@ constexpr const char* g_rgpszWeaponCategoryNames[] =
 	"#LeaderMode_ARs",
 	"#LeaderMode_SRs",
 	"#LeaderMode_LMGs",
+
+	"Armour",
+	"Throwables",
+	"Equipments",
 };
 
-extern std::array<std::wstring, _countof(g_rgpszWeaponCategoryNames)> g_rgwcsLocalisedWpnCtgyNames;
+constexpr const char* g_rgpszEquipmentSprites[EQP_COUNT] =
+{
+	// Placeholder
+	"sprites/ClassesIcon/Doraemon.dds",
+
+	// armour
+	"sprites/Inventory/Kevlar.dds",
+	"sprites/Inventory/AssaultSuit.dds",
+
+	// grenades
+	"sprites/Inventory/HE.dds",
+	"sprites/Inventory/Flashbang.dds",
+	"sprites/Inventory/SmokeGrenade.dds",
+	"sprites/Inventory/Cryo.dds",
+	"sprites/Inventory/Molotov.dds",
+	"sprites/Inventory/HealingGrenade.dds",
+	"sprites/Inventory/NerveGas.dds",
+	"sprites/Inventory/C4.dds",
+
+	// misc
+	"sprites/Inventory/Detonator.dds",
+	"sprites/Inventory/NVG.dds",
+	"sprites/Inventory/Flashlight.dds",
+};
+
+extern std::array<std::wstring, _countof(g_rgpszMarketCategoryNames)> g_rgwcsLocalisedCtgyNames;
 
 
 class CMarket : public vgui::Frame, public CViewportPanelHelper<CMarket>
@@ -83,17 +112,21 @@ public:
 public:
 	void Paint(void) final;
 	void OnCommand(const char* szCommand) final;
+	void InvalidateLayout(bool layoutNow = false, bool reloadScheme = false) final;
+
+public:
+	void UpdateMarket(void);
 
 public:
 	static constexpr auto LENGTH_FRAME = 18, WIDTH_FRAME = 2, MARGIN_BETWEEN_FRAME_AND_BUTTON = 12;
 	static constexpr auto MARGIN = 2, MARGIN_BETWEEN_BUTTONS = 36, MARGIN_BETWEEN_BUTTON_AND_TEXT = MARGIN_BETWEEN_BUTTONS;
 	static constexpr auto WPN_SPRITE_HEIGHT = 96, FONT_SIZE = 24;
-	static constexpr auto SIZE_SCROLL_BAR = 16;
 	static inline int s_hFont = 0;
 
 public:
-	std::array<vgui::LMImageButton*, LAST_WEAPON> m_rgpButtons;
+	std::array<vgui::LMImageButton*, LAST_WEAPON + EQP_COUNT> m_rgpButtons;
 	std::vector<vgui::Button*> m_rgpCategoryButtons;
 	vgui::ScrollableEditablePanel* m_pScrollablePanel{ nullptr };
 	vgui::EditablePanel* m_pPurchasablePanel{ nullptr };
+	int m_iTextMaxiumWidth{ 0 }, m_iExhibitionTableWidth{ 0 };
 };

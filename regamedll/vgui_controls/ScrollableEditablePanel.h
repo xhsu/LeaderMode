@@ -42,6 +42,9 @@ public:
 public:
 	vgui::ScrollBar *m_pScrollBar;
 	vgui::EditablePanel *m_pChild;
+
+public:
+	static constexpr auto WIDTH_SCROLLBAR = 16;
 };
 
 

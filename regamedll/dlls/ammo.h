@@ -28,7 +28,7 @@
 
 #pragma once
 
-enum AmmoIdType
+enum AmmoIdType : BYTE
 {
 	AMMO_NONE = 0,
 
@@ -76,10 +76,10 @@ struct AmmoInfo
 {
 	AmmoIdType m_iId;
 	const char* m_pszName;
-	int m_iMax;
-	int m_iCountPerBox;
-	int m_iCostPerBox;
-	int m_iPenetrationPower;
+	int m_iMax : 16;
+	int m_iCountPerBox : 16;
+	int m_iCostPerBox : 16;
+	int m_iPenetrationPower : 16;
 	float m_flPenetrationDistance;
 };
 
