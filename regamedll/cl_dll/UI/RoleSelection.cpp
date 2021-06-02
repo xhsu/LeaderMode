@@ -277,6 +277,10 @@ CRoleMenu::~CRoleMenu(void)
 
 void CRoleMenu::OnThink(void)
 {
+	// Why I have to do this? Kind of buggy...
+	if (IsVisible())
+		SetMouseInputEnabled(true);
+
 	if (g_iTeam != m_iLastTeam)	// Update team status.
 	{
 		for (auto pButton : m_rgpButtons)

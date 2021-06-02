@@ -40,27 +40,18 @@ public:
 		GetText(string, sizeof(string));
 		m_wstring = string;
 
-		if (!s_hFont)
-		{
-			s_hFont = gFontFuncs::CreateFont();
-			gFontFuncs::AddGlyphSetToFont(s_hFont, "Trajan Pro", FONT_SIZE, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0x2E7F);
-			gFontFuncs::AddGlyphSetToFont(s_hFont, "I.MingCP", FONT_SIZE, FW_NORMAL, 1, 0, FONTFLAG_ANTIALIAS, 0x2E80, 0xFFFF);
-		}
+		// Theoretically it is already initialized. But who knows...
+		InitializeFont();
 
 		// Automatically initialize XPos here.
-		int iLength = 0, iTall = 0, xPos = 0;
-		gFontFuncs::GetTextSize(s_hFont, string, &iLength, &iTall);	// Actually the tall is just the font tall. With consideration of \n symbol.
-		xPos = 0 + (m_pParent->GetWide() - m_pParent->m_iExhibitionTableWidth - iLength) / 2;	// Centered.
+		int iTall = 0, xPos = 0;
+		gFontFuncs::GetTextSize(s_hFont, string, &m_iTextLength, &iTall);	// Actually the tall is just the font tall. With consideration of \n symbol.
+		xPos = 0 + (m_pParent->GetWide() - m_pParent->m_iExhibitionTableWidth - m_iTextLength) / 2;	// Centered.
 
 		// Move upward a bit in favor of text printing.
 		m_YposTracking -= iTall + CMarket::MARGIN_BETWEEN_BUTTONS;
 
-		SetBounds(xPos, m_YposTracking, iLength, iTall);
-
-		// Separator length setup.
-		m_iSeparatorLength = m_pParent->GetWide() - ScrollableEditablePanel::WIDTH_SCROLLBAR;	// Don't forget the scroll bar!
-		m_pParent->LocalToScreen(m_iSeparatorLength, iDummy);
-		this->ScreenToLocal(m_iSeparatorLength, iDummy);
+		SetBounds(xPos, m_YposTracking, m_iTextLength, iTall);
 	}
 
 	void OnThink(void) final
@@ -75,8 +66,8 @@ public:
 		m_pParent->ScreenToLocal(iDummy, ey);	// Recentered to parent's origin.
 
 		// Clamp Y.
-		int yMin = m_iIndexInArray * FONT_SIZE;
-		int yMax = m_pParent->GetTall() - (m_pParent->m_rgpCategoryButtons.size() - m_iIndexInArray) * FONT_SIZE;
+		int yMin = m_iIndexInArray * (FONT_SIZE + HEIGHT_SEPARATOR);
+		int yMax = m_pParent->GetTall() - (m_pParent->m_rgpCategoryButtons.size() - m_iIndexInArray) * (FONT_SIZE + HEIGHT_SEPARATOR);
 
 		SetPos(x, std::clamp(ey, yMin, yMax));
 
@@ -112,7 +103,19 @@ public:
 			}
 		}
 
-		SetAlpha(flAlpha);
+		SetAlpha(flAlpha * m_pParent->m_flAlpha);	// Don't forget the global alpha factor!
+
+		// Hovering effect.
+		if (m_bShowingShortSprtr && !IsArmed())
+		{
+			GetAnimationController()->RunAnimationCommand(this, "m_iShortSeparatorLength", 0, 0, 0.2, AnimationController::INTERPOLATOR_DEACCEL);
+			m_bShowingShortSprtr = false;
+		}
+		else if (!m_bShowingShortSprtr && IsArmed())
+		{
+			GetAnimationController()->RunAnimationCommand(this, "m_iShortSeparatorLength", m_iTextLength, 0, 0.2, AnimationController::INTERPOLATOR_DEACCEL);
+			m_bShowingShortSprtr = true;
+		}
 	}
 
 	void PaintBackground(void) final { /* Draw no background*/ }
@@ -125,14 +128,33 @@ public:
 		if (m_wstring.empty())
 			return;
 
+		auto flTextAlpha = GetAlpha();
+
+		if (m_iShortSeparatorLength >= 1)	// At least 1 pixel.
+		{
+			DrawUtils::glRegularPureColorDrawingInit(0xFFFFFF, m_pParent->GetAlpha());	// Have to highlight.
+			DrawUtils::Draw2DQuadNoTex(0, FONT_SIZE, m_iShortSeparatorLength, FONT_SIZE + HEIGHT_SEPARATOR);
+			DrawUtils::glRegularPureColorDrawingExit();
+
+			// Highlight myself if mouse is hovering around.
+			auto flDelta = 255.0f - flTextAlpha;
+			flTextAlpha = std::clamp<float>(flTextAlpha + m_iShortSeparatorLength / (float)m_iTextLength * flDelta, 0, 255);
+		}
+
 		gFontFuncs::DrawSetTextFont(s_hFont);
 		gFontFuncs::DrawSetTextPos(0, 0);	// Drawing always centered at (0, 0)
-		gFontFuncs::DrawSetTextColor(0xFFFFFF, GetAlpha());
+		gFontFuncs::DrawSetTextColor(0xFFFFFF, flTextAlpha * m_pParent->m_flAlpha);
 		gFontFuncs::DrawPrintText(m_wstring.c_str());
 
 		if (m_iSeparatorAlpha > FLT_EPSILON)	// Can't use the m_bShowingSeparator to determind. It would cause sudden disappear of separator.
 		{
-			DrawUtils::glRegularPureColorDrawingInit(0xFFFFFF, m_iSeparatorAlpha);
+			// Don't know why, but this have to kept update. Can't place it in Constructor.
+			// Not work even in ApplySchemeSettings().
+			m_iSeparatorLength = m_pParent->GetWide() - ScrollableEditablePanel::WIDTH_SCROLLBAR;	// Don't forget the scroll bar!
+			m_pParent->LocalToScreen(m_iSeparatorLength, iDummy);
+			this->ScreenToLocal(m_iSeparatorLength, iDummy);
+
+			DrawUtils::glRegularPureColorDrawingInit(0xFFFFFF, m_iSeparatorAlpha * m_pParent->m_flAlpha);
 			DrawUtils::Draw2DQuadNoTex(0, FONT_SIZE, m_iSeparatorLength, FONT_SIZE + HEIGHT_SEPARATOR);
 			DrawUtils::glRegularPureColorDrawingExit();
 		}
@@ -155,13 +177,43 @@ public:
 		BaseClass::DoClick();
 
 		// Scroll to the designated location.
-		m_pParent->m_pScrollablePanel->m_pScrollBar->SetValue(m_YposTracking);
+		//m_pParent->m_pScrollablePanel->m_pScrollBar->SetValue(m_YposTracking);
+		int iPos = 0;
+
+		if (m_iIndexInArray != 0)
+		{
+			// Why?
+			// Because the separator appears along with the last row of this category.
+			// What if this category has multiple rows?
+			// Hence the fast-est way to do it is to locate it by the previous lable.
+			auto pLableButton = dynamic_cast<CCategoryLable*>(m_pParent->m_rgpCategoryButtons[m_iIndexInArray - 1U]);
+			iPos = pLableButton->m_YposTracking + FONT_SIZE;
+		}
+		else
+			iPos = 0;	// The top.
+
+		auto iMax = m_pParent->m_pScrollablePanel->m_pScrollBar->GetRangeWindow();	// The regular GetRange() is all possible value. But this one added the window size into consideration.
+		iPos = std::clamp(iPos, 0, iMax);	// Although the silder will clamp by itself, but the scroll animation will waste time on the calculation of these invalid numbers.
+
+		GetAnimationController()->RunAnimationCommand(m_pParent, "m_iScrollPanelPos", iPos, 0, 0.25, AnimationController::INTERPOLATOR_DEACCEL);
+	}
+
+	static inline int InitializeFont()
+	{
+		if (!s_hFont)
+		{
+			s_hFont = gFontFuncs::CreateFont();
+			gFontFuncs::AddGlyphSetToFont(s_hFont, "Trajan Pro", FONT_SIZE, FW_BOLD, 1, 0, FONTFLAG_ANTIALIAS, 0x0, 0x2E7F);
+			gFontFuncs::AddGlyphSetToFont(s_hFont, "I.MingCP", FONT_SIZE, FW_BOLD, 1, 0, FONTFLAG_ANTIALIAS, 0x2E80, 0xFFFF);
+		}
+
+		return s_hFont;
 	}
 
 
 public:
 //	static constexpr auto SIZE_HEIGHT = 36;
-	static constexpr auto FONT_SIZE = CMarket::FONT_SIZE;	// UNDONE
+	static constexpr auto FONT_SIZE = 32;
 	static constexpr auto HEIGHT_SEPARATOR = 2;
 	static inline int s_hFont = 0;
 
@@ -170,8 +222,11 @@ private:
 	unsigned m_iIndexInArray{ 0U };
 	CMarket* m_pParent{ nullptr };
 	std::wstring m_wstring;
+	int m_iTextLength{ 0U };
 	bool m_bShowingSeparator : 1;
 	CPanelAnimationVar(float, m_iSeparatorAlpha, "m_iSeparatorAlpha", "0");
+	bool m_bShowingShortSprtr : 1;
+	CPanelAnimationVar(float, m_iShortSeparatorLength, "m_iShortSeparatorLength", "0");	// This one is for hover effect.
 	int m_iSeparatorLength{ 0 };
 };
 
@@ -210,10 +265,12 @@ CMarket::CMarket() : BaseClass(nullptr, "Market")
 
 	// Find maxium text length in order to determind how many buttons can we place on one row.
 	m_iTextMaxiumWidth = 0;
+	auto hLableFont = CCategoryLable::InitializeFont();
+
 	for (auto& wcs : g_rgwcsLocalisedCtgyNames)
 	{
 		int iCurLength = 0;
-		gFontFuncs::GetTextSize(s_hFont, wcs.c_str(), &iCurLength, nullptr);
+		gFontFuncs::GetTextSize(hLableFont, wcs.c_str(), &iCurLength, nullptr);	// We should use lable class font.
 
 		if (iCurLength > m_iTextMaxiumWidth)
 			m_iTextMaxiumWidth = iCurLength;
@@ -228,7 +285,7 @@ CMarket::CMarket() : BaseClass(nullptr, "Market")
 	m_rgpButtons.fill(nullptr);
 	m_rgpCategoryButtons.reserve(16);	// Just... a guess...
 
-	int x = 0, y = 0, iHorizontalShift = 0;
+	int x = 0, y = WIDTH_FRAME + MARGIN_BETWEEN_FRAME_AND_BUTTON, iHorizontalShift = 0;	// Spare some space for hovour effect.
 	for (unsigned i = 0; i < LAST_WEAPON; i++)
 	{
 		if (!Q_strlen(g_rgpszWeaponSprites[i]))
@@ -286,8 +343,9 @@ CMarket::CMarket() : BaseClass(nullptr, "Market")
 		}
 	}
 
+	x = 0;
 	bool bShouldAddCategory = false;
-	for (unsigned i = LAST_WEAPON+1, j=0; i < LAST_WEAPON + EQP_COUNT; i++,j++)
+	for (unsigned i = LAST_WEAPON+1, j=1; i < LAST_WEAPON + EQP_COUNT; i++,j++)
 	{
 		bShouldAddCategory = j == EQP_ASSAULT_SUIT || j == EQP_C4 || j == EQP_FLASHLIGHT;
 
@@ -337,6 +395,7 @@ CMarket::CMarket() : BaseClass(nullptr, "Market")
 
 	m_pScrollablePanel = new ScrollableEditablePanel(this, m_pPurchasablePanel, "ScrollablePanel");
 	m_pScrollablePanel->SetBounds(iPanelWidth - m_iExhibitionTableWidth, 0, m_iExhibitionTableWidth, iPanelTall);
+	m_pScrollablePanel->m_pScrollBar->SetVisible(false);
 }
 
 void CMarket::Paint(void)
@@ -353,6 +412,33 @@ void CMarket::Paint(void)
 	}
 }
 
+void CMarket::OnThink(void)
+{
+	BaseClass::OnThink();
+
+	// Why I have to do this? Kind of buggy...
+	//if (IsVisible() && m_flTimeShouldTurnInvisible <= 0)
+	//	SetMouseInputEnabled(true);
+
+	if (m_flTimeShouldTurnInvisible > 0 && m_flTimeShouldTurnInvisible < g_flClientTime)
+	{
+		BaseClass::SetVisible(false);	// Bypass the override one.
+		m_flTimeShouldTurnInvisible = -1;
+	}
+
+	m_pScrollablePanel->m_pScrollBar->SetValue(m_iScrollPanelPos);
+	SetAlpha(m_flAlpha * 255.0f);
+
+	// UNDONE, temporary method.
+	for (auto& pButton : m_rgpButtons)
+	{
+		if (pButton)
+			pButton->SetAlpha(m_flAlpha * 255.0f);
+	}
+
+	SetBgColor(Color(0, 0, 0, m_flAlpha * 96.0f));
+}
+
 void CMarket::OnCommand(const char* szCommand)
 {
 	Show(false);
@@ -366,6 +452,31 @@ void CMarket::InvalidateLayout(bool layoutNow, bool reloadScheme)
 	BaseClass::InvalidateLayout(layoutNow, reloadScheme);
 
 	UpdateMarket();
+}
+
+bool CMarket::IsVisible(void)
+{
+	return BaseClass::IsVisible() && m_flTimeShouldTurnInvisible <= DBL_EPSILON;
+}
+
+void CMarket::SetVisible(bool bVisible)
+{
+	if (bVisible)
+	{
+		BaseClass::SetVisible(true);
+		GetAnimationController()->RunAnimationCommand(this, "m_flAlpha", 1, 0, TIME_FADING, AnimationController::INTERPOLATOR_DEACCEL);
+	}
+	else
+	{
+		m_flTimeShouldTurnInvisible = g_flClientTime + TIME_FADING;
+		GetAnimationController()->RunAnimationCommand(this, "m_flAlpha", 0, 0, TIME_FADING, AnimationController::INTERPOLATOR_DEACCEL);
+	}
+}
+
+void CMarket::OnKeyCodeTyped(KeyCode code)
+{
+	BaseClass::OnKeyCodeTyped(code);
+	Show(false);	// Hide on any typing.
 }
 
 void CMarket::UpdateMarket(void)

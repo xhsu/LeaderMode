@@ -13,6 +13,7 @@ Modern Warfare Dev Team
 
 #include <array>
 #include <string>
+#include <VGUI/KeyCode.h>
 
 constexpr const char* g_rgpszWeaponSprites[LAST_WEAPON] =
 {
@@ -59,16 +60,16 @@ constexpr const char* g_rgpszWeaponSprites[LAST_WEAPON] =
 
 constexpr const char* g_rgpszMarketCategoryNames[] =
 {
-	"#LeaderMode_Pistols",
-	"#LeaderMode_Shotguns",
-	"#LeaderMode_SMGs",
-	"#LeaderMode_ARs",
-	"#LeaderMode_SRs",
-	"#LeaderMode_LMGs",
+	"#LeaderMode_Ctgy_Pistols",
+	"#LeaderMode_Ctgy_Shotguns",
+	"#LeaderMode_Ctgy_SMGs",
+	"#LeaderMode_Ctgy_ARs",
+	"#LeaderMode_Ctgy_SRs",
+	"#LeaderMode_Ctgy_LMGs",
 
-	"Armour",
-	"Throwables",
-	"Equipments",
+	"#LeaderMode_Ctgy_Armour",
+	"#LeaderMode_Ctgy_Explosivos",
+	"#LeaderMode_Ctgy_Equipments",
 };
 
 constexpr const char* g_rgpszEquipmentSprites[EQP_COUNT] =
@@ -111,8 +112,12 @@ public:
 
 public:
 	void Paint(void) final;
+	void OnThink(void) final;
 	void OnCommand(const char* szCommand) final;
 	void InvalidateLayout(bool layoutNow = false, bool reloadScheme = false) final;
+	bool IsVisible(void) final;
+	void SetVisible(bool bVisible) final;
+	void OnKeyCodeTyped(vgui::KeyCode code) final;
 
 public:
 	void UpdateMarket(void);
@@ -121,6 +126,7 @@ public:
 	static constexpr auto LENGTH_FRAME = 18, WIDTH_FRAME = 2, MARGIN_BETWEEN_FRAME_AND_BUTTON = 12;
 	static constexpr auto MARGIN = 2, MARGIN_BETWEEN_BUTTONS = 36, MARGIN_BETWEEN_BUTTON_AND_TEXT = MARGIN_BETWEEN_BUTTONS;
 	static constexpr auto WPN_SPRITE_HEIGHT = 96, FONT_SIZE = 24;
+	static constexpr auto TIME_FADING = 0.25;
 	static inline int s_hFont = 0;
 
 public:
@@ -129,4 +135,7 @@ public:
 	vgui::ScrollableEditablePanel* m_pScrollablePanel{ nullptr };
 	vgui::EditablePanel* m_pPurchasablePanel{ nullptr };
 	int m_iTextMaxiumWidth{ 0 }, m_iExhibitionTableWidth{ 0 };
+	CPanelAnimationVar(float, m_iScrollPanelPos, "m_iScrollPanelPos", "0");	// You can't use regular slider anymore.
+	CPanelAnimationVar(float, m_flAlpha, "m_flAlpha", "0");	// GLfloat
+	double m_flTimeShouldTurnInvisible{ 0.0 };
 };
