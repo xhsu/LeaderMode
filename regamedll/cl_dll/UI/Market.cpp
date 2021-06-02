@@ -230,6 +230,20 @@ private:
 	int m_iSeparatorLength{ 0 };
 };
 
+class CBuyMenuButton : public LMImageButton
+{
+	DECLARE_CLASS_SIMPLE(CBuyMenuButton, LMImageButton);
+
+public:
+
+	/*
+	* What to do here?
+	* 1. Make buttons calculate alpha by it position.
+	* 2. Store its item index. Hide itself for wrong role.
+	*	a. Maybe I can create a separator at the beginning of next category instead of the end of current category?
+	*/
+};
+
 
 CMarket::CMarket() : BaseClass(nullptr, "Market")
 {
@@ -481,4 +495,18 @@ void CMarket::OnKeyCodeTyped(KeyCode code)
 
 void CMarket::UpdateMarket(void)
 {
+	// Weapons loop.
+	for (unsigned i = 0; i < m_rgpButtons.size(); i++)
+	{
+		auto pButton = dynamic_cast<CBuyMenuButton*>(m_rgpButtons[i]);
+
+		if (!pButton)
+			continue;
+	}
+
+	// Equipments loop.
+	for (unsigned i = LAST_WEAPON + 1, j = 1; i < m_rgpButtons.size(); i++, j++)
+	{
+		auto pButton = dynamic_cast<CBuyMenuButton*>(m_rgpButtons[i]);
+	}
 }
