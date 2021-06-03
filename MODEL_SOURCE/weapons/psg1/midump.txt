@@ -1,0 +1,882 @@
+ID Tag: IDST
+Version: 10
+Name: "v_psg1.mdl"
+Length: 1935656
+
+Eye Position: -0.000000 0.000000 0.000000
+Min: 0.000000 0.000000 0.000000
+Max: 0.000000 0.000000 0.000000
+Bounding Box Min: 0.000000 0.000000 0.000000
+Bounding Box Max: 0.000000 0.000000 0.000000
+Flags: 0
+
+Number of Bones: 52
+
+Bone 1 Name: "arm_controller_02"
+Bone 1 Parent: -1
+Bone 1 Flags: 0
+Bone 1 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 1 Value: -5.881196 15.152644 -9.312474 2.414257 0.005114 -1.625761
+Bone 1 Scale: 0.003906 0.003906 0.003906 0.000096 0.000096 0.000048
+
+Bone 2 Name: "r_upperarm"
+Bone 2 Parent: 0
+Bone 2 Flags: 0
+Bone 2 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 2 Value: 0.000000 0.000000 0.000002 0.101564 -0.753728 -0.023050
+Bone 2 Scale: 0.003906 0.003906 0.003906 0.000022 0.000047 0.000021
+
+Bone 3 Name: "r_forearm"
+Bone 3 Parent: 1
+Bone 3 Flags: 0
+Bone 3 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 3 Value: 24.358173 0.000000 0.000012 -3.140269 1.152058 -2.587908
+Bone 3 Scale: 0.003906 0.003906 0.003906 0.000096 0.000042 0.000096
+
+Bone 4 Name: "r_wrist"
+Bone 4 Parent: 2
+Bone 4 Flags: 0
+Bone 4 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 4 Value: 16.608759 0.000050 -0.000022 0.294515 -1.010478 -1.102027
+Bone 4 Scale: 0.003906 0.003906 0.003906 0.000041 0.000012 0.000054
+
+Bone 5 Name: "r_middle_low"
+Bone 5 Parent: 3
+Bone 5 Flags: 0
+Bone 5 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 5 Value: 7.174582 0.550158 -0.169714 -0.623422 1.459365 -0.572532
+Bone 5 Scale: 0.003906 0.003906 0.003906 0.000012 0.000012 0.000012
+
+Bone 6 Name: "r_middle_mid"
+Bone 6 Parent: 4
+Bone 6 Flags: 0
+Bone 6 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 6 Value: 2.467980 -0.000010 -0.000010 0.021255 1.020970 -0.041620
+Bone 6 Scale: 0.003906 0.003906 0.003906 0.000012 0.000012 0.000012
+
+Bone 7 Name: "r_middle_tip"
+Bone 7 Parent: 5
+Bone 7 Flags: 0
+Bone 7 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 7 Value: 1.751582 0.000002 0.000000 -0.011175 0.695992 -0.004526
+Bone 7 Scale: 0.003906 0.003906 0.003906 0.000012 0.000012 0.000012
+
+Bone 8 Name: "r_ring_low"
+Bone 8 Parent: 3
+Bone 8 Flags: 0
+Bone 8 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 8 Value: 6.850812 -0.911032 -0.129678 -1.051818 1.487064 -1.126430
+Bone 8 Scale: 0.003906 0.003906 0.003906 0.000012 0.000012 0.000012
+
+Bone 9 Name: "r_ring_mid"
+Bone 9 Parent: 7
+Bone 9 Flags: 0
+Bone 9 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 9 Value: 2.441704 -0.000006 0.000004 -0.014483 0.936905 -0.061711
+Bone 9 Scale: 0.003906 0.003906 0.003906 0.000012 0.000012 0.000012
+
+Bone 10 Name: "r_ring_tip"
+Bone 10 Parent: 8
+Bone 10 Flags: 0
+Bone 10 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 10 Value: 1.635884 0.000004 -0.000008 -0.001995 0.562682 -0.069721
+Bone 10 Scale: 0.003906 0.003906 0.003906 0.000012 0.000012 0.000012
+
+Bone 11 Name: "r_thumb_low"
+Bone 11 Parent: 3
+Bone 11 Flags: 0
+Bone 11 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 11 Value: 2.471262 2.469532 -1.710842 -0.618971 0.580812 0.369580
+Bone 11 Scale: 0.003906 0.003906 0.003906 0.000012 0.000012 0.000012
+
+Bone 12 Name: "r_thumb_mid"
+Bone 12 Parent: 10
+Bone 12 Flags: 0
+Bone 12 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 12 Value: 2.628210 0.000004 0.000004 0.020553 -0.015971 -0.449262
+Bone 12 Scale: 0.003906 0.003906 0.003906 0.000012 0.000012 0.000012
+
+Bone 13 Name: "r_thumb_tip"
+Bone 13 Parent: 11
+Bone 13 Flags: 0
+Bone 13 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 13 Value: 2.199822 0.000004 -0.000006 -0.009207 -0.004355 -0.042214
+Bone 13 Scale: 0.003906 0.003906 0.003906 0.000012 0.000012 0.000012
+
+Bone 14 Name: "r_index_low"
+Bone 14 Parent: 3
+Bone 14 Flags: 0
+Bone 14 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 14 Value: 7.111884 2.124288 -0.352588 -0.178643 0.242429 0.029664
+Bone 14 Scale: 0.003906 0.003906 0.003906 0.000012 0.000012 0.000012
+
+Bone 15 Name: "r_index_mid"
+Bone 15 Parent: 13
+Bone 15 Flags: 0
+Bone 15 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 15 Value: 2.444238 0.000014 0.000004 0.009208 0.334866 -0.036437
+Bone 15 Scale: 0.003906 0.003906 0.003906 0.000012 0.000012 0.000012
+
+Bone 16 Name: "r_index_tip"
+Bone 16 Parent: 14
+Bone 16 Flags: 0
+Bone 16 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 16 Value: 1.398752 -0.000004 0.000000 -0.009223 0.034906 -0.009671
+Bone 16 Scale: 0.003906 0.003906 0.003906 0.000012 0.000012 0.000012
+
+Bone 17 Name: "r_pinky_low"
+Bone 17 Parent: 3
+Bone 17 Flags: 0
+Bone 17 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 17 Value: 6.430072 -2.261140 -0.263728 -0.029474 1.160474 -0.152478
+Bone 17 Scale: 0.003906 0.003906 0.003906 0.000012 0.000012 0.000012
+
+Bone 18 Name: "r_pinky_mid"
+Bone 18 Parent: 16
+Bone 18 Flags: 0
+Bone 18 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 18 Value: 1.727744 0.000002 0.000002 -0.013631 0.610694 -0.047770
+Bone 18 Scale: 0.003906 0.003906 0.003906 0.000012 0.000012 0.000012
+
+Bone 19 Name: "r_pinky_tip"
+Bone 19 Parent: 17
+Bone 19 Flags: 0
+Bone 19 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 19 Value: 1.285240 -0.000020 0.000004 0.001257 0.749352 -0.059258
+Bone 19 Scale: 0.003906 0.003906 0.003906 0.000012 0.000012 0.000012
+
+Bone 20 Name: "r_armtwist_1"
+Bone 20 Parent: 2
+Bone 20 Flags: 0
+Bone 20 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 20 Value: 0.000000 -0.000004 -0.000006 -0.184301 -0.000000 0.000000
+Bone 20 Scale: 0.003906 0.003906 0.003906 0.000012 0.000012 0.000012
+
+Bone 21 Name: "r_armtwist_2"
+Bone 21 Parent: 19
+Bone 21 Flags: 0
+Bone 21 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 21 Value: 4.615280 0.000018 0.000002 -0.169557 -0.000000 0.000000
+Bone 21 Scale: 0.003906 0.003906 0.003906 0.000012 0.000012 0.000012
+
+Bone 22 Name: "r_armtwist_3"
+Bone 22 Parent: 20
+Bone 22 Flags: 0
+Bone 22 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 22 Value: 4.276556 0.000010 0.000002 -0.154816 0.000001 -0.000002
+Bone 22 Scale: 0.003906 0.003906 0.003906 0.000012 0.000012 0.000012
+
+Bone 23 Name: "r_armtwist_4"
+Bone 23 Parent: 21
+Bone 23 Flags: 0
+Bone 23 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 23 Value: 3.793740 0.000016 0.000000 -0.140075 0.000001 -0.000003
+Bone 23 Scale: 0.003906 0.003906 0.003906 0.000012 0.000012 0.000012
+
+Bone 24 Name: "arm_controller_01"
+Bone 24 Parent: -1
+Bone 24 Flags: 0
+Bone 24 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 24 Value: 7.977950 0.506974 -13.947968 -2.213409 0.015679 -1.517866
+Bone 24 Scale: 0.003906 0.003906 0.003906 0.000023 0.000012 0.000048
+
+Bone 25 Name: "l_upperarm"
+Bone 25 Parent: 23
+Bone 25 Flags: 0
+Bone 25 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 25 Value: 0.000000 0.000002 -0.000002 0.028969 -0.132883 0.212494
+Bone 25 Scale: 0.003906 0.003906 0.003906 0.000041 0.000062 0.000059
+
+Bone 26 Name: "l_forearm"
+Bone 26 Parent: 24
+Bone 26 Flags: 0
+Bone 26 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 26 Value: 24.358171 -0.000006 0.000004 -0.001337 1.112681 -0.540375
+Bone 26 Scale: 0.003906 0.003906 0.003906 0.000012 0.000039 0.000012
+
+Bone 27 Name: "l_wrist"
+Bone 27 Parent: 25
+Bone 27 Flags: 0
+Bone 27 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 27 Value: 16.608759 -0.000030 -0.000028 -1.469130 0.054855 0.521715
+Bone 27 Scale: 0.003906 0.003906 0.003906 0.000095 0.000038 0.000032
+
+Bone 28 Name: "l_index_low"
+Bone 28 Parent: 26
+Bone 28 Flags: 0
+Bone 28 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 28 Value: 7.111874 -2.124292 -0.352590 0.267292 0.859122 0.131493
+Bone 28 Scale: 0.003906 0.003906 0.003906 0.000012 0.000026 0.000012
+
+Bone 29 Name: "l_index_mid"
+Bone 29 Parent: 27
+Bone 29 Flags: 0
+Bone 29 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 29 Value: 2.444242 -0.000008 0.000004 -0.014702 0.937842 0.027609
+Bone 29 Scale: 0.003906 0.003906 0.003906 0.000012 0.000028 0.000012
+
+Bone 30 Name: "l_index_tip"
+Bone 30 Parent: 28
+Bone 30 Flags: 0
+Bone 30 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 30 Value: 1.398746 0.000000 0.000004 0.010352 0.472476 0.014060
+Bone 30 Scale: 0.003906 0.003906 0.003906 0.000012 0.000012 0.000012
+
+Bone 31 Name: "l_middle_low"
+Bone 31 Parent: 26
+Bone 31 Flags: 0
+Bone 31 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 31 Value: 7.174572 -0.550160 -0.169718 0.217184 1.167126 0.116641
+Bone 31 Scale: 0.003906 0.003906 0.003906 0.000012 0.000034 0.000012
+
+Bone 32 Name: "l_middle_mid"
+Bone 32 Parent: 30
+Bone 32 Flags: 0
+Bone 32 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 32 Value: 2.467974 0.000010 -0.000012 -0.015884 0.796524 0.048387
+Bone 32 Scale: 0.003906 0.003906 0.003906 0.000012 0.000020 0.000012
+
+Bone 33 Name: "l_middle_tip"
+Bone 33 Parent: 31
+Bone 33 Flags: 0
+Bone 33 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 33 Value: 1.751586 -0.000012 -0.000002 0.010345 0.593478 0.003147
+Bone 33 Scale: 0.003906 0.003906 0.003906 0.000012 0.000013 0.000012
+
+Bone 34 Name: "l_pinky_low"
+Bone 34 Parent: 26
+Bone 34 Flags: 0
+Bone 34 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 34 Value: 6.430064 2.261142 -0.263730 -0.070729 1.562318 0.000000
+Bone 34 Scale: 0.003906 0.003906 0.003906 0.000022 0.000036 0.000022
+
+Bone 35 Name: "l_pinky_mid"
+Bone 35 Parent: 33
+Bone 35 Flags: 0
+Bone 35 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 35 Value: 1.727746 -0.000008 -0.000002 0.012726 0.500317 0.046058
+Bone 35 Scale: 0.003906 0.003906 0.003906 0.000012 0.000015 0.000012
+
+Bone 36 Name: "l_pinky_tip"
+Bone 36 Parent: 34
+Bone 36 Flags: 0
+Bone 36 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 36 Value: 1.285240 0.000012 0.000000 -0.001030 0.466117 0.059651
+Bone 36 Scale: 0.003906 0.003906 0.003906 0.000012 0.000022 0.000012
+
+Bone 37 Name: "l_thumb_low"
+Bone 37 Parent: 26
+Bone 37 Flags: 0
+Bone 37 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 37 Value: 2.471260 -2.469532 -1.710842 -0.060912 0.464366 -0.680981
+Bone 37 Scale: 0.003906 0.003906 0.003906 0.000018 0.000013 0.000024
+
+Bone 38 Name: "l_thumb_mid"
+Bone 38 Parent: 36
+Bone 38 Flags: 0
+Bone 38 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 38 Value: 2.628212 -0.000012 0.000002 -0.014568 -0.021570 0.133064
+Bone 38 Scale: 0.003906 0.003906 0.003906 0.000012 0.000012 0.000012
+
+Bone 39 Name: "l_thumb_tip"
+Bone 39 Parent: 37
+Bone 39 Flags: 0
+Bone 39 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 39 Value: 2.199828 -0.000004 -0.000002 0.009207 -0.004355 0.042214
+Bone 39 Scale: 0.003906 0.003906 0.003906 0.000012 0.000012 0.000012
+
+Bone 40 Name: "l_ring_low"
+Bone 40 Parent: 26
+Bone 40 Flags: 0
+Bone 40 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 40 Value: 6.850802 0.911026 -0.129680 -0.046389 1.421488 -0.041790
+Bone 40 Scale: 0.003906 0.003906 0.003906 0.000012 0.000034 0.000012
+
+Bone 41 Name: "l_ring_mid"
+Bone 41 Parent: 39
+Bone 41 Flags: 0
+Bone 41 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 41 Value: 2.441698 -0.000002 0.000006 0.009617 0.469032 0.054388
+Bone 41 Scale: 0.003906 0.003906 0.003906 0.000012 0.000023 0.000012
+
+Bone 42 Name: "l_ring_tip"
+Bone 42 Parent: 40
+Bone 42 Flags: 0
+Bone 42 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 42 Value: 1.635892 0.000012 -0.000004 0.001977 0.548250 0.069687
+Bone 42 Scale: 0.003906 0.003906 0.003906 0.000012 0.000018 0.000012
+
+Bone 43 Name: "l_armtwist_1"
+Bone 43 Parent: 25
+Bone 43 Flags: 0
+Bone 43 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 43 Value: -0.000004 -0.000002 -0.000006 -0.375050 -0.000000 0.000000
+Bone 43 Scale: 0.003906 0.003906 0.003906 0.000031 0.000012 0.000012
+
+Bone 44 Name: "l_armtwist_2"
+Bone 44 Parent: 42
+Bone 44 Flags: 0
+Bone 44 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 44 Value: 4.615286 -0.000006 -0.000004 -0.345046 -0.000000 0.000000
+Bone 44 Scale: 0.003906 0.003906 0.003906 0.000028 0.000012 0.000012
+
+Bone 45 Name: "l_armtwist_3"
+Bone 45 Parent: 43
+Bone 45 Flags: 0
+Bone 45 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 45 Value: 4.276556 -0.000012 0.000000 -0.315039 0.000001 0.000001
+Bone 45 Scale: 0.003906 0.003906 0.003906 0.000026 0.000012 0.000012
+
+Bone 46 Name: "l_armtwist_4"
+Bone 46 Parent: 44
+Bone 46 Flags: 0
+Bone 46 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 46 Value: 3.793746 -0.000014 0.000004 -0.285033 0.000001 0.000002
+Bone 46 Scale: 0.003906 0.003906 0.003906 0.000023 0.000012 0.000012
+
+Bone 47 Name: "bone_weapon"
+Bone 47 Parent: -1
+Bone 47 Flags: 0
+Bone 47 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 47 Value: -4.791120 -14.565460 -12.546594 1.570796 0.000000 1.570796
+Bone 47 Scale: 0.003906 0.003906 0.003906 0.000096 0.000096 0.000049
+
+Bone 48 Name: "bone_bolt"
+Bone 48 Parent: 46
+Bone 48 Flags: 0
+Bone 48 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 48 Value: -32.149757 8.195122 0.000000 0.000000 -0.000000 0.000000
+Bone 48 Scale: 0.003906 0.003906 0.003906 0.000012 0.000012 0.000012
+
+Bone 49 Name: "bone_trigger"
+Bone 49 Parent: 46
+Bone 49 Flags: 0
+Bone 49 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 49 Value: -4.495776 2.118316 0.000000 0.000000 -0.000000 0.000000
+Bone 49 Scale: 0.003906 0.003906 0.003906 0.000012 0.000012 0.000012
+
+Bone 50 Name: "bone_magRelease"
+Bone 50 Parent: 46
+Bone 50 Flags: 0
+Bone 50 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 50 Value: -8.872896 3.592468 0.000000 0.000000 -0.000000 0.000000
+Bone 50 Scale: 0.003906 0.003906 0.003906 0.000012 0.000012 0.000012
+
+Bone 51 Name: "bone_mag001"
+Bone 51 Parent: 46
+Bone 51 Flags: 0
+Bone 51 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 51 Value: 46.819870 -20.612307 0.000004 0.000000 -0.000000 0.000000
+Bone 51 Scale: 0.003906 0.003906 0.003906 0.000053 0.000012 0.000046
+
+Bone 52 Name: "bone_mag"
+Bone 52 Parent: 46
+Bone 52 Flags: 0
+Bone 52 Bonecontroller: -1 -1 -1 -1 -1 -1
+Bone 52 Value: -12.277956 3.288024 0.000000 0.000000 -0.000000 0.000000
+Bone 52 Scale: 0.004901 0.003906 0.003906 0.000053 0.000012 0.000044
+
+Number of Bone Controllers: 0
+
+Number of Hitboxes: 43
+
+Hitbox 1 Bone: 1
+Hitbox 1 Group: 0
+Hitbox 1 Bounding Box Min: 0.000000 -6.665811 -5.215891
+Hitbox 1 Bounding Box Max: 25.318256 5.841427 5.170917
+
+Hitbox 2 Bone: 3
+Hitbox 2 Group: 0
+Hitbox 2 Bounding Box Min: -0.922829 -3.131436 -2.630854
+Hitbox 2 Bounding Box Max: 7.919658 3.470099 1.382409
+
+Hitbox 3 Bone: 4
+Hitbox 3 Group: 0
+Hitbox 3 Bounding Box Min: -0.576325 -0.720084 -0.670266
+Hitbox 3 Bounding Box Max: 2.813233 0.840778 0.988526
+
+Hitbox 4 Bone: 5
+Hitbox 4 Group: 0
+Hitbox 4 Bounding Box Min: 0.000000 -0.627113 -0.594522
+Hitbox 4 Bounding Box Max: 2.087268 0.594654 0.651004
+
+Hitbox 5 Bone: 6
+Hitbox 5 Group: 0
+Hitbox 5 Bounding Box Min: 0.000000 -0.575463 -0.540882
+Hitbox 5 Bounding Box Max: 1.636644 0.505882 0.545527
+
+Hitbox 6 Bone: 7
+Hitbox 6 Group: 0
+Hitbox 6 Bounding Box Min: -0.050090 -0.687719 -0.688006
+Hitbox 6 Bounding Box Max: 2.802063 0.806788 0.888928
+
+Hitbox 7 Bone: 8
+Hitbox 7 Group: 0
+Hitbox 7 Bounding Box Min: 0.000000 -0.683691 -0.600112
+Hitbox 7 Bounding Box Max: 1.635884 0.613625 0.657713
+
+Hitbox 8 Bone: 9
+Hitbox 8 Group: 0
+Hitbox 8 Bounding Box Min: 0.000000 -0.633340 -0.537894
+Hitbox 8 Bounding Box Max: 1.749203 0.514494 0.597429
+
+Hitbox 9 Bone: 10
+Hitbox 9 Group: 0
+Hitbox 9 Bounding Box Min: -1.176770 -1.507038 -1.364859
+Hitbox 9 Bounding Box Max: 2.921606 1.156772 1.573818
+
+Hitbox 10 Bone: 11
+Hitbox 10 Group: 0
+Hitbox 10 Bounding Box Min: 0.000000 -0.973159 -0.875507
+Hitbox 10 Bounding Box Max: 2.226421 0.699512 0.962743
+
+Hitbox 11 Bone: 12
+Hitbox 11 Group: 0
+Hitbox 11 Bounding Box Min: 0.000000 -0.802690 -0.865056
+Hitbox 11 Bounding Box Max: 2.014382 0.650212 0.785552
+
+Hitbox 12 Bone: 13
+Hitbox 12 Group: 0
+Hitbox 12 Bounding Box Min: 0.000000 -0.819090 -0.864302
+Hitbox 12 Bounding Box Max: 2.576735 0.760251 1.071899
+
+Hitbox 13 Bone: 14
+Hitbox 13 Group: 0
+Hitbox 13 Bounding Box Min: -0.063065 -0.676086 -0.746814
+Hitbox 13 Bounding Box Max: 1.513682 0.659644 0.634782
+
+Hitbox 14 Bone: 15
+Hitbox 14 Group: 0
+Hitbox 14 Bounding Box Min: 0.000000 -0.590831 -0.518050
+Hitbox 14 Bounding Box Max: 1.629539 0.578643 0.496702
+
+Hitbox 15 Bone: 16
+Hitbox 15 Group: 0
+Hitbox 15 Bounding Box Min: -0.530434 -0.764640 -0.644820
+Hitbox 15 Bounding Box Max: 1.967022 0.742921 0.810492
+
+Hitbox 16 Bone: 17
+Hitbox 16 Group: 0
+Hitbox 16 Bounding Box Min: 0.000000 -0.576759 -0.448183
+Hitbox 16 Bounding Box Max: 1.581888 0.522986 0.565125
+
+Hitbox 17 Bone: 19
+Hitbox 17 Group: 0
+Hitbox 17 Bounding Box Min: -0.712877 -4.275140 -3.292575
+Hitbox 17 Bounding Box Max: 5.442874 3.813517 3.346306
+
+Hitbox 18 Bone: 20
+Hitbox 18 Group: 0
+Hitbox 18 Bounding Box Min: 0.000000 -3.134367 -2.142862
+Hitbox 18 Bounding Box Max: 4.840208 2.698456 2.245620
+
+Hitbox 19 Bone: 21
+Hitbox 19 Group: 0
+Hitbox 19 Bounding Box Min: 0.000000 -2.660829 -1.633030
+Hitbox 19 Bounding Box Max: 4.276377 2.144827 1.971981
+
+Hitbox 20 Bone: 22
+Hitbox 20 Group: 0
+Hitbox 20 Bounding Box Min: 0.000000 -2.529926 -1.858108
+Hitbox 20 Bounding Box Max: 4.592448 2.236637 1.817521
+
+Hitbox 21 Bone: 24
+Hitbox 21 Group: 0
+Hitbox 21 Bounding Box Min: 0.000000 -5.842733 -5.216926
+Hitbox 21 Bounding Box Max: 24.942839 6.663046 5.167627
+
+Hitbox 22 Bone: 26
+Hitbox 22 Group: 0
+Hitbox 22 Bounding Box Min: -0.092100 -3.331984 -2.927677
+Hitbox 22 Bounding Box Max: 7.959647 3.120631 1.381250
+
+Hitbox 23 Bone: 27
+Hitbox 23 Group: 0
+Hitbox 23 Bounding Box Min: -0.201277 -0.773519 -0.802894
+Hitbox 23 Bounding Box Max: 2.747991 0.813406 0.972204
+
+Hitbox 24 Bone: 28
+Hitbox 24 Group: 0
+Hitbox 24 Bounding Box Min: -0.171783 -0.673544 -0.651591
+Hitbox 24 Bounding Box Max: 1.617496 0.662264 0.633041
+
+Hitbox 25 Bone: 29
+Hitbox 25 Group: 0
+Hitbox 25 Bounding Box Min: 0.000000 -0.593169 -0.506321
+Hitbox 25 Bounding Box Max: 1.633814 0.576328 0.510554
+
+Hitbox 26 Bone: 30
+Hitbox 26 Group: 0
+Hitbox 26 Bounding Box Min: -0.515634 -0.807425 -0.704308
+Hitbox 26 Bounding Box Max: 2.764623 0.665187 1.038390
+
+Hitbox 27 Bone: 31
+Hitbox 27 Group: 0
+Hitbox 27 Bounding Box Min: -0.026115 -0.607776 -0.664298
+Hitbox 27 Bounding Box Max: 2.074142 0.613993 0.650616
+
+Hitbox 28 Bone: 32
+Hitbox 28 Group: 0
+Hitbox 28 Bounding Box Min: 0.000000 -0.519633 -0.550529
+Hitbox 28 Bounding Box Max: 1.643428 0.561700 0.535145
+
+Hitbox 29 Bone: 33
+Hitbox 29 Group: 0
+Hitbox 29 Bounding Box Min: -0.526066 -0.753318 -0.652519
+Hitbox 29 Bounding Box Max: 1.945711 0.754939 0.852898
+
+Hitbox 30 Bone: 34
+Hitbox 30 Group: 0
+Hitbox 30 Bounding Box Min: 0.000000 -0.544309 -0.473725
+Hitbox 30 Bounding Box Max: 1.539849 0.556185 0.543606
+
+Hitbox 31 Bone: 36
+Hitbox 31 Group: 0
+Hitbox 31 Bounding Box Min: -0.447319 -0.853683 -1.374946
+Hitbox 31 Bounding Box Max: 2.927271 1.692683 1.627609
+
+Hitbox 32 Bone: 37
+Hitbox 32 Group: 0
+Hitbox 32 Bounding Box Min: 0.000000 -0.713190 -0.882641
+Hitbox 32 Bounding Box Max: 2.230751 1.007888 0.955705
+
+Hitbox 33 Bone: 38
+Hitbox 33 Group: 0
+Hitbox 33 Bounding Box Min: 0.000000 -0.664332 -0.872151
+Hitbox 33 Bounding Box Max: 2.018039 0.788470 0.778476
+
+Hitbox 34 Bone: 39
+Hitbox 34 Group: 0
+Hitbox 34 Bounding Box Min: -0.027779 -0.757929 -0.749006
+Hitbox 34 Bounding Box Max: 2.700705 0.677927 0.890621
+
+Hitbox 35 Bone: 40
+Hitbox 35 Group: 0
+Hitbox 35 Bounding Box Min: 0.000000 -0.624798 -0.622169
+Hitbox 35 Bounding Box Max: 1.635892 0.672469 0.636135
+
+Hitbox 36 Bone: 41
+Hitbox 36 Group: 0
+Hitbox 36 Bounding Box Min: 0.000000 -0.526610 -0.549330
+Hitbox 36 Bounding Box Max: 1.757499 0.621206 0.588017
+
+Hitbox 37 Bone: 42
+Hitbox 37 Group: 0
+Hitbox 37 Bounding Box Min: -0.837851 -3.859763 -3.307127
+Hitbox 37 Bounding Box Max: 5.443591 4.288918 3.212489
+
+Hitbox 38 Bone: 43
+Hitbox 38 Group: 0
+Hitbox 38 Bounding Box Min: 0.000000 -2.677040 -2.215162
+Hitbox 38 Bounding Box Max: 4.841499 3.040474 2.333526
+
+Hitbox 39 Bone: 44
+Hitbox 39 Group: 0
+Hitbox 39 Bounding Box Min: 0.000000 -2.137825 -1.647728
+Hitbox 39 Bounding Box Max: 4.277021 2.609252 1.963527
+
+Hitbox 40 Bone: 45
+Hitbox 40 Group: 0
+Hitbox 40 Bounding Box Min: 0.000000 -2.394214 -1.975508
+Hitbox 40 Bounding Box Max: 4.108832 2.431109 1.924980
+
+Hitbox 41 Bone: 46
+Hitbox 41 Group: 0
+Hitbox 41 Bounding Box Min: -63.755661 -20.612307 -2.059491
+Hitbox 41 Bounding Box Max: 46.819870 13.062710 2.580510
+
+Hitbox 42 Bone: 50
+Hitbox 42 Group: 0
+Hitbox 42 Bounding Box Min: -2.897167 -3.243096 -1.179322
+Hitbox 42 Bounding Box Max: 2.816017 2.353474 1.096546
+
+Hitbox 43 Bone: 51
+Hitbox 43 Group: 0
+Hitbox 43 Bounding Box Min: -2.897166 -3.243097 -1.179292
+Hitbox 43 Bounding Box Max: 2.816019 2.353474 1.096576
+
+Number of Sequences: 5
+
+Sequence 1 Label: "idle"
+Sequence 1 Frames per sec: 30.000000
+Sequence 1 Flags: 0
+Sequence 1 Events: 0
+
+Sequence 2 Label: "fire"
+Sequence 2 Frames per sec: 30.000000
+Sequence 2 Flags: 0
+Sequence 2 Events: 0
+
+Sequence 3 Label: "reload"
+Sequence 3 Frames per sec: 30.000000
+Sequence 3 Flags: 0
+Sequence 3 Events: 0
+
+Sequence 4 Label: "reload_empty"
+Sequence 4 Frames per sec: 30.000000
+Sequence 4 Flags: 0
+Sequence 4 Events: 0
+
+Sequence 5 Label: "select"
+Sequence 5 Frames per sec: 30.000000
+Sequence 5 Flags: 0
+Sequence 5 Events: 0
+
+Number of Sequence Groups: 1
+
+Sequence Group 1 Label: "default"
+
+Sequence Group 1 Name: ""
+
+Sequence Group 1 Data: 0
+
+Number of Textures: 7
+Texture Index: 437428
+Texture Data Index: 438004
+
+Texture 1 Name: "v_hands.bmp"
+Texture 1 Flags: 0
+Texture 1 Width: 512
+Texture 1 Height: 503
+Texture 1 Index: 438004
+
+Texture 2 Name: "sleeve_diffuse_ts.bmp"
+Texture 2 Flags: 0
+Texture 2 Width: 508
+Texture 2 Height: 504
+Texture 2 Index: 696308
+
+Texture 3 Name: "receiver.bmp"
+Texture 3 Flags: 0
+Texture 3 Width: 512
+Texture 3 Height: 511
+Texture 3 Index: 953108
+
+Texture 4 Name: "grip.bmp"
+Texture 4 Flags: 0
+Texture 4 Width: 512
+Texture 4 Height: 511
+Texture 4 Index: 1215508
+
+Texture 5 Name: "mag.bmp"
+Texture 5 Flags: 0
+Texture 5 Width: 508
+Texture 5 Height: 508
+Texture 5 Index: 1477908
+
+Texture 6 Name: "hend.bmp"
+Texture 6 Flags: 0
+Texture 6 Width: 512
+Texture 6 Height: 255
+Texture 6 Index: 1736740
+
+Texture 7 Name: "lens.bmp"
+Texture 7 Flags: 0
+Texture 7 Width: 260
+Texture 7 Height: 257
+Texture 7 Index: 1868068
+
+Number of Skin References: 7
+Number of Skin Families: 1
+
+Number of Body Parts: 9
+
+Body Part 1 Name: "hands"
+Body Part 1 Number of Models: 1
+Body Part 1 Base: 1
+Body Part 1 Model Index: 33484
+
+	Sub Model 1 Name: "rhand"
+	Sub Model 1 Type: 0
+	Sub Model 1 Meshes: 1
+	Sub Model 1 Vertices: 1837
+	Sub Model 1 Normals: 1965
+	Sub Model 1 Deformation Groups: 0
+
+		Sub Model 1, Mesh 1 Total Triangles: 3654
+		Sub Model 1, Mesh 1 Triangle Index: 84392
+		Sub Model 1, Mesh 1 Skin Reference: 0
+		Sub Model 1, Mesh 1 Total Normals: 1965
+		Sub Model 1, Mesh 1 Normals Index: 0
+
+Body Part 2 Name: "leftHand"
+Body Part 2 Number of Models: 2
+Body Part 2 Base: 1
+Body Part 2 Model Index: 33596
+
+	Sub Model 1 Name: "lhand"
+	Sub Model 1 Type: 0
+	Sub Model 1 Meshes: 1
+	Sub Model 1 Vertices: 1837
+	Sub Model 1 Normals: 1946
+	Sub Model 1 Deformation Groups: 0
+
+		Sub Model 1, Mesh 1 Total Triangles: 3654
+		Sub Model 1, Mesh 1 Triangle Index: 169852
+		Sub Model 1, Mesh 1 Skin Reference: 0
+		Sub Model 1, Mesh 1 Total Normals: 1946
+		Sub Model 1, Mesh 1 Normals Index: 0
+
+	Sub Model 2 Name: "blank"
+	Sub Model 2 Type: 0
+	Sub Model 2 Meshes: 0
+	Sub Model 2 Vertices: 0
+	Sub Model 2 Normals: 0
+	Sub Model 2 Deformation Groups: 0
+
+Body Part 3 Name: "hands"
+Body Part 3 Number of Models: 1
+Body Part 3 Base: 2
+Body Part 3 Model Index: 33820
+
+	Sub Model 1 Name: "rsleeve"
+	Sub Model 1 Type: 0
+	Sub Model 1 Meshes: 1
+	Sub Model 1 Vertices: 324
+	Sub Model 1 Normals: 332
+	Sub Model 1 Deformation Groups: 0
+
+		Sub Model 1, Mesh 1 Total Triangles: 627
+		Sub Model 1, Mesh 1 Triangle Index: 214728
+		Sub Model 1, Mesh 1 Skin Reference: 1
+		Sub Model 1, Mesh 1 Total Normals: 332
+		Sub Model 1, Mesh 1 Normals Index: 0
+
+Body Part 4 Name: "lsleeve"
+Body Part 4 Number of Models: 2
+Body Part 4 Base: 2
+Body Part 4 Model Index: 33932
+
+	Sub Model 1 Name: "lsleeve"
+	Sub Model 1 Type: 0
+	Sub Model 1 Meshes: 1
+	Sub Model 1 Vertices: 324
+	Sub Model 1 Normals: 330
+	Sub Model 1 Deformation Groups: 0
+
+		Sub Model 1, Mesh 1 Total Triangles: 627
+		Sub Model 1, Mesh 1 Triangle Index: 229224
+		Sub Model 1, Mesh 1 Skin Reference: 1
+		Sub Model 1, Mesh 1 Total Normals: 330
+		Sub Model 1, Mesh 1 Normals Index: 0
+
+	Sub Model 2 Name: "blank"
+	Sub Model 2 Type: 0
+	Sub Model 2 Meshes: 0
+	Sub Model 2 Vertices: 0
+	Sub Model 2 Normals: 0
+	Sub Model 2 Deformation Groups: 0
+
+Body Part 5 Name: "weapon"
+Body Part 5 Number of Models: 1
+Body Part 5 Base: 4
+Body Part 5 Model Index: 34156
+
+	Sub Model 1 Name: "psg_1"
+	Sub Model 1 Type: 0
+	Sub Model 1 Meshes: 1
+	Sub Model 1 Vertices: 1714
+	Sub Model 1 Normals: 876
+	Sub Model 1 Deformation Groups: 0
+
+		Sub Model 1, Mesh 1 Total Triangles: 2775
+		Sub Model 1, Mesh 1 Triangle Index: 268960
+		Sub Model 1, Mesh 1 Skin Reference: 2
+		Sub Model 1, Mesh 1 Total Normals: 876
+		Sub Model 1, Mesh 1 Normals Index: 0
+
+Body Part 6 Name: "weapon"
+Body Part 6 Number of Models: 1
+Body Part 6 Base: 4
+Body Part 6 Model Index: 34268
+
+	Sub Model 1 Name: "psg_2"
+	Sub Model 1 Type: 0
+	Sub Model 1 Meshes: 1
+	Sub Model 1 Vertices: 1018
+	Sub Model 1 Normals: 585
+	Sub Model 1 Deformation Groups: 0
+
+		Sub Model 1, Mesh 1 Total Triangles: 1847
+		Sub Model 1, Mesh 1 Triangle Index: 322448
+		Sub Model 1, Mesh 1 Skin Reference: 3
+		Sub Model 1, Mesh 1 Total Normals: 585
+		Sub Model 1, Mesh 1 Normals Index: 0
+
+Body Part 7 Name: "weapon"
+Body Part 7 Number of Models: 1
+Body Part 7 Base: 4
+Body Part 7 Model Index: 34380
+
+	Sub Model 1 Name: "psg_newMag"
+	Sub Model 1 Type: 0
+	Sub Model 1 Meshes: 1
+	Sub Model 1 Vertices: 296
+	Sub Model 1 Normals: 157
+	Sub Model 1 Deformation Groups: 0
+
+		Sub Model 1, Mesh 1 Total Triangles: 532
+		Sub Model 1, Mesh 1 Triangle Index: 349080
+		Sub Model 1, Mesh 1 Skin Reference: 4
+		Sub Model 1, Mesh 1 Total Normals: 157
+		Sub Model 1, Mesh 1 Normals Index: 0
+
+Body Part 8 Name: "scope"
+Body Part 8 Number of Models: 2
+Body Part 8 Base: 4
+Body Part 8 Model Index: 34492
+
+	Sub Model 1 Name: "scope"
+	Sub Model 1 Type: 0
+	Sub Model 1 Meshes: 2
+	Sub Model 1 Vertices: 1787
+	Sub Model 1 Normals: 883
+	Sub Model 1 Deformation Groups: 0
+
+		Sub Model 1, Mesh 1 Total Triangles: 3146
+		Sub Model 1, Mesh 1 Triangle Index: 391008
+		Sub Model 1, Mesh 1 Skin Reference: 5
+		Sub Model 1, Mesh 1 Total Normals: 882
+		Sub Model 1, Mesh 1 Normals Index: 0
+
+		Sub Model 1, Mesh 2 Total Triangles: 12
+		Sub Model 1, Mesh 2 Triangle Index: 424224
+		Sub Model 1, Mesh 2 Skin Reference: 6
+		Sub Model 1, Mesh 2 Total Normals: 1
+		Sub Model 1, Mesh 2 Normals Index: 0
+
+	Sub Model 2 Name: "blank"
+	Sub Model 2 Type: 0
+	Sub Model 2 Meshes: 0
+	Sub Model 2 Vertices: 0
+	Sub Model 2 Normals: 0
+	Sub Model 2 Deformation Groups: 0
+
+Body Part 9 Name: "psg_mag"
+Body Part 9 Number of Models: 2
+Body Part 9 Base: 8
+Body Part 9 Model Index: 34716
+
+	Sub Model 1 Name: "psg_magfull"
+	Sub Model 1 Type: 0
+	Sub Model 1 Meshes: 1
+	Sub Model 1 Vertices: 296
+	Sub Model 1 Normals: 157
+	Sub Model 1 Deformation Groups: 0
+
+		Sub Model 1, Mesh 1 Total Triangles: 532
+		Sub Model 1, Mesh 1 Triangle Index: 430252
+		Sub Model 1, Mesh 1 Skin Reference: 4
+		Sub Model 1, Mesh 1 Total Normals: 157
+		Sub Model 1, Mesh 1 Normals Index: 0
+
+	Sub Model 2 Name: "blank"
+	Sub Model 2 Type: 0
+	Sub Model 2 Meshes: 0
+	Sub Model 2 Vertices: 0
+	Sub Model 2 Normals: 0
+	Sub Model 2 Deformation Groups: 0
+
+Number of Attatchments: 2
+Attachment 1 Name: ""
+Attachment 2 Name: ""
