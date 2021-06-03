@@ -41,15 +41,16 @@ void CFontAmalgam::AddFont(CWin32Font *font, int lowRange, int highRange)
 
 CWin32Font *CFontAmalgam::GetFontForChar(int ch)
 {
-	for (unsigned i = 0; i < m_Fonts.size(); i++)
+	//for (unsigned i = 0; i < m_Fonts.size(); i++)
+	for (auto& hFont : m_Fonts)
 	{
-		if (ch >= m_Fonts[i].lowRange && ch <= m_Fonts[i].highRange)
+		if (ch >= hFont.lowRange && ch <= hFont.highRange)
 		{
-			return m_Fonts[i].font;
+			return hFont.font;
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 int CFontAmalgam::GetFontHeight()

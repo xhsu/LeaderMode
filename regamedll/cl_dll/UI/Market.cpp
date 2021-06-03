@@ -299,7 +299,7 @@ CMarket::CMarket() : BaseClass(nullptr, "Market")
 	m_rgpButtons.fill(nullptr);
 	m_rgpCategoryButtons.reserve(16);	// Just... a guess...
 
-	int x = 0, y = WIDTH_FRAME + MARGIN_BETWEEN_FRAME_AND_BUTTON, iHorizontalShift = 0;	// Spare some space for hovour effect.
+	int x = 0, y = WIDTH_FRAME + MARGIN_BETWEEN_FRAME_AND_BUTTON, iHorizontalShift = 0;	// Spare some space for hover effect.
 	for (unsigned i = 0; i < LAST_WEAPON; i++)
 	{
 		if (!Q_strlen(g_rgpszWeaponSprites[i]))
@@ -495,6 +495,9 @@ void CMarket::OnKeyCodeTyped(KeyCode code)
 
 void CMarket::UpdateMarket(void)
 {
+	// Find the "fallbacked" last item in category.
+
+
 	// Weapons loop.
 	for (unsigned i = 0; i < m_rgpButtons.size(); i++)
 	{
