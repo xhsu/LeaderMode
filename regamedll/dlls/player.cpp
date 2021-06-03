@@ -1398,7 +1398,7 @@ void BuyZoneIcon_Set(CBasePlayer *pPlayer)
 	WRITE_BYTE(160);	// a
 	WRITE_BYTE(255);	// oscli a
 	WRITE_BYTE(50);		// oscli period in 0.1's
-	WRITE_STRING("buy3");	// keybind
+	WRITE_STRING("buy");	// keybind
 	WRITE_BYTE(255);	// text a
 	MESSAGE_END();
 }

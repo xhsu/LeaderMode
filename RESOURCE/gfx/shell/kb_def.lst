@@ -1,6 +1,6 @@
 "h"				"+commandmenu"
 "k"				"+voicerecord"
-"b"				"buy3"
+"b"				"buy"
 ","				"buyammo1"
 "."				"buyammo2"
 "o"				"buyequip"

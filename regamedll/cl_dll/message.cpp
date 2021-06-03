@@ -1098,6 +1098,11 @@ MSG_FUNC(Role)
 			if (pWeapon)
 				pWeapon->SetVariation(g_iRoleType);
 		}
+
+		// Update buymenu.
+		g_pViewport->m_pMarketMenu->DeletePanel();
+		g_pViewport->m_pMarketMenu = new CMarket();
+		g_pViewport->m_pMarketMenu->SetParent(g_pViewport);
 	}
 
 	return TRUE;

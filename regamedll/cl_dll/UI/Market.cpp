@@ -29,8 +29,8 @@ class CCategoryLable : public Button	// Inherit from vgui::Button instead of LMI
 	DECLARE_CLASS_SIMPLE(CCategoryLable, Button);
 
 public:
-	CCategoryLable(Panel* parent, const char* panelName, const char* text, int YposTracking, unsigned indexInArray) :
-		BaseClass(parent, panelName, text, parent),
+	CCategoryLable(Panel* parent, const char* text, int YposTracking, unsigned indexInArray) :
+		BaseClass(parent, SharedVarArgs("CategoryLable%d", s_iInstanceCount++), text, parent),
 		m_YposTracking(YposTracking),
 		m_pParent(dynamic_cast<CMarket*>(parent)),
 		m_iIndexInArray(indexInArray),
@@ -52,6 +52,9 @@ public:
 		m_YposTracking -= iTall + CMarket::MARGIN_BETWEEN_BUTTONS;
 
 		SetBounds(xPos, m_YposTracking, m_iTextLength, iTall);
+
+		SetVisible(true);
+		SetEnabled(true);
 	}
 
 	void OnThink(void) final
@@ -172,7 +175,7 @@ public:
 		SetKeyFocusBorder(nullptr);
 	}
 
-	void DoClick(void) final
+	void DoClick(void) final	// TODO: change to void OnMousePressed(MouseCode code)?
 	{
 		BaseClass::DoClick();
 
@@ -192,8 +195,10 @@ public:
 		else
 			iPos = 0;	// The top.
 
-		auto iMax = m_pParent->m_pScrollablePanel->m_pScrollBar->GetRangeWindow();	// The regular GetRange() is all possible value. But this one added the window size into consideration.
-		iPos = std::clamp(iPos, 0, iMax);	// Although the silder will clamp by itself, but the scroll animation will waste time on the calculation of these invalid numbers.
+		auto iRangeWindow = m_pParent->m_pScrollablePanel->m_pScrollBar->GetRangeWindow();	// Range window: after set the the pos, the windows range below is actual visible.
+		int iMax = 0; m_pParent->m_pScrollablePanel->m_pScrollBar->GetRange(iDummy, iMax);	// Hence the real valid scroll bar pos is smaller then its total range[a, b]
+
+		iPos = std::clamp(iPos, 0, Q_max(0, iMax - iRangeWindow));	// Although the silder will clamp by itself, but the scroll animation will waste time on the calculation of these invalid numbers.
 
 		GetAnimationController()->RunAnimationCommand(m_pParent, "m_iScrollPanelPos", iPos, 0, 0.25, AnimationController::INTERPOLATOR_DEACCEL);
 	}
@@ -216,6 +221,7 @@ public:
 	static constexpr auto FONT_SIZE = 32;
 	static constexpr auto HEIGHT_SEPARATOR = 2;
 	static inline int s_hFont = 0;
+	static inline int s_iInstanceCount = 0;
 
 private:
 	int m_YposTracking{ 0U };
@@ -234,7 +240,37 @@ class CBuyMenuButton : public LMImageButton
 {
 	DECLARE_CLASS_SIMPLE(CBuyMenuButton, LMImageButton);
 
+	using BaseClass::BaseClass;
+
 public:
+	void OnThink(void) final
+	{
+		BaseClass::OnThink();
+
+		if (!m_pGrandpa)
+			m_pGrandpa = dynamic_cast<ScrollableEditablePanel*>(GetParent()->GetParent());	// CBuyMenuButton => m_pPurchasablePanel => m_pScrollablePanel
+
+		if (!m_pMarket)
+			m_pMarket = dynamic_cast<CMarket*>(m_pGrandpa->GetParent());	// CBuyMenuButton => m_pPurchasablePanel => m_pScrollablePanel => CMarket
+
+		// Calculate alpha.
+		float flAlpha = 255;
+
+		int x = 0, y = 0;
+		GetPos(x, y);
+		GetParent()->LocalToScreen(x, y);
+		m_pGrandpa->ScreenToLocal(x, y);
+
+		auto flTall = (float)GetTall();
+		auto yMax = (float)m_pGrandpa->GetTall() - flTall;
+
+		if (y < 0)
+			flAlpha = std::clamp<float>(1.0f - float(0 - y) / flTall, 0, 1) * 255.0;
+		else if (y > yMax)
+			flAlpha = std::clamp<float>(1.0f - float(y - yMax) / flTall, 0, 1) * 255.0;
+
+		SetAlpha(flAlpha * m_pMarket->m_flAlpha);	// Don't forget the global alpha factor!
+	}
 
 	/*
 	* What to do here?
@@ -242,6 +278,10 @@ public:
 	* 2. Store its item index. Hide itself for wrong role.
 	*	a. Maybe I can create a separator at the beginning of next category instead of the end of current category?
 	*/
+
+private:
+	ScrollableEditablePanel* m_pGrandpa{ nullptr };
+	CMarket* m_pMarket{ nullptr };
 };
 
 
@@ -300,12 +340,14 @@ CMarket::CMarket() : BaseClass(nullptr, "Market")
 	m_rgpCategoryButtons.reserve(16);	// Just... a guess...
 
 	int x = 0, y = WIDTH_FRAME + MARGIN_BETWEEN_FRAME_AND_BUTTON, iHorizontalShift = 0;	// Spare some space for hover effect.
+	unsigned iCurCtgyLable = 0, iItemAddedInCurCtgy = 0;
 	for (unsigned i = 0; i < LAST_WEAPON; i++)
 	{
-		if (!Q_strlen(g_rgpszWeaponSprites[i]))
+		if (!Q_strlen(g_rgpszWeaponSprites[i]) || g_rgRoleWeaponsAccessibility[g_iRoleType][i] == WPN_F)
 		{
 			// Even though the sprite does not exist yet, you still have to skip the line.
-			if ((1 << i) & g_bitsLastWeaponInCategory)
+			// Only if there were no item added in this category.
+			if ((1 << i) & g_bitsLastWeaponInCategory && iItemAddedInCurCtgy)
 			{
 				x = 0;
 				y += WPN_SPRITE_HEIGHT + FONT_SIZE + MARGIN_BETWEEN_BUTTONS;
@@ -314,7 +356,7 @@ CMarket::CMarket() : BaseClass(nullptr, "Market")
 			goto LAB_ADD_LABLE_BUTTON;
 		}
 
-		m_rgpButtons[i] = new LMImageButton(
+		m_rgpButtons[i] = new CBuyMenuButton(
 			m_pPurchasablePanel,
 			g_rgWpnInfo[i].m_pszInternalName,
 			g_rgWpnInfo[i].m_pszExternalName,
@@ -330,6 +372,7 @@ CMarket::CMarket() : BaseClass(nullptr, "Market")
 		m_rgpButtons[i]->InvalidateLayout(true);
 
 		iHorizontalShift = (m_rgpButtons[i]->GetWide() + MARGIN_BETWEEN_BUTTONS);
+		iItemAddedInCurCtgy++;
 
 		// Have to use negative since negative means left shift.
 		if ((x + iHorizontalShift) > m_iExhibitionTableWidth || ((1 << i) & g_bitsLastWeaponInCategory))
@@ -345,25 +388,43 @@ CMarket::CMarket() : BaseClass(nullptr, "Market")
 	LAB_ADD_LABLE_BUTTON:;
 		if ((1 << i) & g_bitsLastWeaponInCategory)
 		{
-			const auto index = m_rgpCategoryButtons.size();
+			if (iItemAddedInCurCtgy)	// Skip the lable if none of its item is enlisted.
+			{
+				m_rgpCategoryButtons.push_back(new CCategoryLable(
+					this,
+					g_rgpszMarketCategoryNames[iCurCtgyLable],
+					y,
+					m_rgpCategoryButtons.size()
+				));
+			}
 
-			m_rgpCategoryButtons.push_back(new CCategoryLable(
-				this,
-				SharedVarArgs("CategoryLable%d", index),
-				g_rgpszMarketCategoryNames[index],
-				y,
-				index
-			));
+			iCurCtgyLable++;
+			iItemAddedInCurCtgy = 0;	// Re-zero after each category lable is added.
 		}
 	}
 
 	x = 0;
+	iItemAddedInCurCtgy = 0;
 	bool bShouldAddCategory = false;
-	for (unsigned i = LAST_WEAPON+1, j=1; i < LAST_WEAPON + EQP_COUNT; i++,j++)
+
+	for (unsigned i = LAST_WEAPON + 1, j = 1; i < LAST_WEAPON + EQP_COUNT; i++, j++)
 	{
 		bShouldAddCategory = j == EQP_ASSAULT_SUIT || j == EQP_C4 || j == EQP_FLASHLIGHT;
 
-		m_rgpButtons[i] = new LMImageButton(
+		if (g_rgRoleEquipmentsAccessibility[g_iRoleType][j] == WPN_F)
+		{
+			// Even though the sprite does not exist yet, you still have to skip the line.
+			// Only if there were no item added in this category.
+			if (bShouldAddCategory && iItemAddedInCurCtgy)
+			{
+				x = 0;
+				y += WPN_SPRITE_HEIGHT + FONT_SIZE + MARGIN_BETWEEN_BUTTONS;
+			}
+
+			goto LAB_ADD_LABLE_BUTTON2;
+		}
+
+		m_rgpButtons[i] = new CBuyMenuButton(
 			m_pPurchasablePanel,
 			g_rgEquipmentInfo[j].m_pszInternalName,
 			g_rgEquipmentInfo[j].m_pszExternalName,
@@ -379,6 +440,7 @@ CMarket::CMarket() : BaseClass(nullptr, "Market")
 		m_rgpButtons[i]->InvalidateLayout(true);
 
 		iHorizontalShift = (m_rgpButtons[i]->GetWide() + MARGIN_BETWEEN_BUTTONS);
+		iItemAddedInCurCtgy++;
 
 		// Have to use negative since negative means left shift.
 		if ((x + iHorizontalShift) > m_iExhibitionTableWidth || bShouldAddCategory)
@@ -391,17 +453,21 @@ CMarket::CMarket() : BaseClass(nullptr, "Market")
 			x += iHorizontalShift;
 		}
 
+	LAB_ADD_LABLE_BUTTON2:;
 		if (bShouldAddCategory)
 		{
-			const auto index = m_rgpCategoryButtons.size();
+			if (iItemAddedInCurCtgy)
+			{
+				m_rgpCategoryButtons.push_back(new CCategoryLable(
+					this,
+					g_rgpszMarketCategoryNames[iCurCtgyLable],
+					y,
+					m_rgpCategoryButtons.size()
+				));
+			}
 
-			m_rgpCategoryButtons.push_back(new CCategoryLable(
-				this,
-				SharedVarArgs("CategoryLable%d", index),
-				g_rgpszMarketCategoryNames[index],
-				y,
-				index
-			));
+			iCurCtgyLable++;
+			iItemAddedInCurCtgy = 0;
 		}
 	}
 
@@ -443,13 +509,6 @@ void CMarket::OnThink(void)
 	m_pScrollablePanel->m_pScrollBar->SetValue(m_iScrollPanelPos);
 	SetAlpha(m_flAlpha * 255.0f);
 
-	// UNDONE, temporary method.
-	for (auto& pButton : m_rgpButtons)
-	{
-		if (pButton)
-			pButton->SetAlpha(m_flAlpha * 255.0f);
-	}
-
 	SetBgColor(Color(0, 0, 0, m_flAlpha * 96.0f));
 }
 
@@ -464,8 +523,6 @@ void CMarket::OnCommand(const char* szCommand)
 void CMarket::InvalidateLayout(bool layoutNow, bool reloadScheme)
 {
 	BaseClass::InvalidateLayout(layoutNow, reloadScheme);
-
-	UpdateMarket();
 }
 
 bool CMarket::IsVisible(void)
@@ -495,21 +552,180 @@ void CMarket::OnKeyCodeTyped(KeyCode code)
 
 void CMarket::UpdateMarket(void)
 {
-	// Find the "fallbacked" last item in category.
+	// Purge the original lable array.
+	for (auto& p : m_rgpCategoryButtons)
+	{
+		//p->MarkForDeletion();
+		p->DeletePanel();
+	}
 
+	m_rgpCategoryButtons.clear();
+
+	for (auto& p : m_rgpButtons)
+	{
+		if (!p)
+			continue;
+
+		p->SetVisible(false);
+		p->SetPinCorner(PIN_TOPLEFT, 0, 0);
+	}
+
+	// Find the "fallbacked" last item in category.
+	constexpr std::array<std::array<BYTE, 2>, 9> rgiWeapon =
+	{ {	// Fuck C++14, we needs double brackets now.
+		{FIRST_PISTOL, LAST_PISTOL},
+		{FIRST_SHOTGUN, LAST_SHOTGUN},
+		{FIRST_SMG, LAST_SMG},
+		{FIRST_AR, LAST_AR},
+		{FIRST_SR, LAST_SR},
+		{FIRST_LMG, LAST_LMG},
+
+		{FIRST_ARMOUR, LAST_ARMOUR},
+		{FIRST_GR, LAST_GR},
+		{FIRST_MISC, LAST_MISC},
+	} };
+
+	std::array<int, 9> rgiFallbackedLastItem{};
+	rgiFallbackedLastItem.fill(-1);
+
+	for (unsigned i = 0; i < rgiWeapon.size(); i++)
+	{
+		if (i < 6)
+		{
+			for (unsigned j = rgiWeapon[i][1]; j >= rgiWeapon[i][0]; j--)
+			{
+				if (m_rgpButtons[j] && g_rgRoleWeaponsAccessibility[g_iRoleType][j] != WPN_F)
+				{
+					rgiFallbackedLastItem[i] = j;
+					break;
+				}
+			}
+		}
+
+		// Equipments need special treatment.
+		else
+		{
+			for (unsigned j = rgiWeapon[i][1]; j >= rgiWeapon[i][0]; j--)
+			{
+				if (m_rgpButtons[j + LAST_WEAPON] && g_rgRoleEquipmentsAccessibility[g_iRoleType][j] != WPN_F)
+				{
+					// Kept the offseted status.
+					rgiFallbackedLastItem[i] = j + LAST_WEAPON;
+					break;
+				}
+			}
+		}
+	}
 
 	// Weapons loop.
-	for (unsigned i = 0; i < m_rgpButtons.size(); i++)
+	int x = 0, y = WIDTH_FRAME + MARGIN_BETWEEN_FRAME_AND_BUTTON, iHorizontalShift = 0;	// Spare some space for hover effect.
+	for (unsigned i = 0; i < LAST_WEAPON; i++)
 	{
-		auto pButton = dynamic_cast<CBuyMenuButton*>(m_rgpButtons[i]);
+		auto pButton = m_rgpButtons[i];//dynamic_cast<CBuyMenuButton*>(m_rgpButtons[i]);
+		auto iter = std::find(rgiFallbackedLastItem.begin(), rgiFallbackedLastItem.end(), i);
+		auto bIsLastItem = iter != rgiFallbackedLastItem.end();
 
-		if (!pButton)
-			continue;
+		if (!pButton || g_rgRoleWeaponsAccessibility[g_iRoleType][i] == WPN_F)
+		{
+			// Even though the sprite does not exist yet, you still have to skip the line.
+			if (bIsLastItem)
+			{
+				x = 0;
+				y += WPN_SPRITE_HEIGHT + FONT_SIZE + MARGIN_BETWEEN_BUTTONS;
+			}
+
+			if (pButton)
+				pButton->SetVisible(false);	// Hide unavailable weapons.
+
+			goto LAB_ADD_LABLE_BUTTON2;
+		}
+
+		pButton->SetVisible(true);
+		pButton->SetPinCorner(PIN_TOPLEFT, x, y);	// In scrollable page, you cannot use regular SetPos().
+		pButton->SetPos(x, y);
+
+		iHorizontalShift = (pButton->GetWide() + MARGIN_BETWEEN_BUTTONS);
+
+		// Have to use negative since negative means left shift.
+		if ((x + iHorizontalShift) > m_iExhibitionTableWidth || bIsLastItem)
+		{
+			x = 0;
+			y += WPN_SPRITE_HEIGHT + FONT_SIZE + MARGIN_BETWEEN_BUTTONS;
+		}
+		else
+		{
+			x += iHorizontalShift;
+		}
+
+	LAB_ADD_LABLE_BUTTON2:;
+		if (bIsLastItem)
+		{
+			const auto index = iter - rgiFallbackedLastItem.begin();	// From iterator to index.
+
+			m_rgpCategoryButtons.push_back(new CCategoryLable(
+				this,
+				g_rgpszMarketCategoryNames[index],
+				y,
+				m_rgpCategoryButtons.size()
+			));
+		}
 	}
 
 	// Equipments loop.
+	x = 0;
 	for (unsigned i = LAST_WEAPON + 1, j = 1; i < m_rgpButtons.size(); i++, j++)
 	{
-		auto pButton = dynamic_cast<CBuyMenuButton*>(m_rgpButtons[i]);
+		auto pButton = m_rgpButtons[i];//dynamic_cast<CBuyMenuButton*>(m_rgpButtons[i]);
+		auto iter = std::find(rgiFallbackedLastItem.begin(), rgiFallbackedLastItem.end(), i);
+		auto bIsLastItem = iter != rgiFallbackedLastItem.end();
+
+		if (!pButton || g_rgRoleEquipmentsAccessibility[g_iRoleType][j] == WPN_F)
+		{
+			// Even though the sprite does not exist yet, you still have to skip the line.
+			if (bIsLastItem)
+			{
+				x = 0;
+				y += WPN_SPRITE_HEIGHT + FONT_SIZE + MARGIN_BETWEEN_BUTTONS;
+			}
+
+			if (pButton)
+				pButton->SetVisible(false);	// Hide unavailable weapons.
+
+			goto LAB_ADD_LABLE_BUTTON3;
+		}
+
+		pButton->SetVisible(true);
+		pButton->SetPinCorner(PIN_TOPLEFT, x, y);	// In scrollable page, you cannot use regular SetPos().
+		pButton->SetPos(x, y);
+
+		iHorizontalShift = (m_rgpButtons[i]->GetWide() + MARGIN_BETWEEN_BUTTONS);
+
+		// Have to use negative since negative means left shift.
+		if ((x + iHorizontalShift) > m_iExhibitionTableWidth || bIsLastItem)
+		{
+			x = 0;
+			y += WPN_SPRITE_HEIGHT + FONT_SIZE + MARGIN_BETWEEN_BUTTONS;
+		}
+		else
+		{
+			x += iHorizontalShift;
+		}
+
+	LAB_ADD_LABLE_BUTTON3:;
+		if (bIsLastItem)
+		{
+			const auto index = iter - rgiFallbackedLastItem.begin();	// From iterator to index.
+
+			m_rgpCategoryButtons.push_back(new CCategoryLable(
+				this,
+				g_rgpszMarketCategoryNames[index],
+				y,
+				m_rgpCategoryButtons.size()
+			));
+		}
 	}
+
+	m_pPurchasablePanel->SetTall(y);	// Update tall for the elements we added.
+
+	InvalidateLayout(true);
 }

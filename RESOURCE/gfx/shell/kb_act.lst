@@ -30,7 +30,7 @@
 "blank"			"=========================="
 "blank"			"#Cstrike_Menu_Title"
 "blank"			"=========================="
-"buy3" 			"#Cstrike_Buy_Menu"
+"buy" 			"#Cstrike_Buy_Menu"
 "buyammo1"   	"#Cstrike_Buy_Primary_Ammo"
 "buyammo2" 		"#Cstrike_Buy_Secondary_Ammo"
 "buyequip"		"#Cstrike_Buy_Equip_Menu"

@@ -120,7 +120,7 @@ public:
 	void OnKeyCodeTyped(vgui::KeyCode code) final;
 
 public:
-	void UpdateMarket(void);
+	void UpdateMarket(void);	// UNDONE, unusable.
 
 public:
 	static constexpr auto LENGTH_FRAME = 18, WIDTH_FRAME = 2, MARGIN_BETWEEN_FRAME_AND_BUTTON = 12;
