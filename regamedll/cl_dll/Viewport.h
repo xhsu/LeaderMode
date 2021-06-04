@@ -14,13 +14,10 @@ Modern Warfare Dev Team
 #include <vgui_controls/Panel.h>
 #include "tri.h"
 
-// Helper template class
+// Helper template class. Use it with classes inherit from vgui::Panel.
 template <class CControl>
 struct CViewportPanelHelper
 {
-	// As long as this class has no VFT, you can use static_cast. Otherwise, use dynamic_cast.
-	CViewportPanelHelper() : m_pAnotherSelf(static_cast<CControl*>(this)) {}
-
 	//-----------------------------------------------------------------------------
 	// Purpose: Paint an additional frame outside the button.
 	//-----------------------------------------------------------------------------
@@ -28,7 +25,7 @@ struct CViewportPanelHelper
 	{
 		int x = 0, y = 0, w = 0, h = 0;
 		pButton->LocalToScreen(x, y);
-		m_pAnotherSelf->ScreenToLocal(x, y);
+		Panel()->ScreenToLocal(x, y);
 		pButton->GetSize(w, h);
 		x -= CControl::MARGIN_BETWEEN_FRAME_AND_BUTTON + CControl::WIDTH_FRAME;
 		y -= CControl::MARGIN_BETWEEN_FRAME_AND_BUTTON + CControl::WIDTH_FRAME;
@@ -42,7 +39,7 @@ struct CViewportPanelHelper
 		// Top-right
 		x = y = 0;	// Parameters of LocalToScreen() are both inputs and outputs. Rezero here means we wants the top-left point.
 		pButton->LocalToScreen(x, y);
-		m_pAnotherSelf->ScreenToLocal(x, y);	// Why doing this? It is because sometimes the panel you drawing this effect is not the button's parent.
+		Panel()->ScreenToLocal(x, y);	// Why doing this? It is because sometimes the panel you drawing this effect is not the button's parent.
 		x += w + CControl::MARGIN_BETWEEN_FRAME_AND_BUTTON + CControl::WIDTH_FRAME;
 		y -= CControl::MARGIN_BETWEEN_FRAME_AND_BUTTON + CControl::WIDTH_FRAME;
 		DrawUtils::Draw2DQuadNoTex(x, y, x - CControl::LENGTH_FRAME, y + CControl::WIDTH_FRAME);
@@ -54,37 +51,46 @@ struct CViewportPanelHelper
 	//-----------------------------------------------------------------------------
 	// Purpose: Unlock mouse and display the panel.
 	//-----------------------------------------------------------------------------
-	void Show(bool bShow)
+	virtual void Show(bool bShow)
 	{
-		if (m_pAnotherSelf->IsVisible() == bShow)	// The 'BaseClass' should be defined by the class on which this template applies.
+		if (Panel()->IsVisible() == bShow)	// The 'BaseClass' should be defined by the class on which this template applies.
 			return;
 
 		if (bShow)
 		{
-			m_pAnotherSelf->Activate();
+			Panel()->Activate();
 
-			if (m_pAnotherSelf->GetParent()->IsVisible())
+			if (Panel()->GetParent()->IsVisible())
 			{
-				m_pAnotherSelf->SetMouseInputEnabled(true);
+				Panel()->SetMouseInputEnabled(true);
 				IN_DeactivateMouse();
 			}
 		}
 		else
 		{
-			m_pAnotherSelf->SetVisible(false);
+			Panel()->SetVisible(false);
 
 			// Only do this when IClientVGUI is visible.
 			// Or this line will break the pause screen.
-			if (m_pAnotherSelf->GetParent()->IsVisible())
+			if (Panel()->GetParent()->IsVisible())
 			{
-				m_pAnotherSelf->SetMouseInputEnabled(false);
+				Panel()->SetMouseInputEnabled(false);
 				IN_ActivateMouse();
 			}
 		}
 	}
 
 private:
-	CControl* m_pAnotherSelf{ nullptr };
+	inline CControl* Panel() const
+	{
+		static CControl* p = nullptr;
+
+		if (!p)
+			// As long as this class has no VFT, you can use static_cast. Otherwise, use dynamic_cast.
+			p = const_cast<CControl*>(dynamic_cast<const CControl*>(this));
+
+		return p;
+	}
 };
 
 // UI Control

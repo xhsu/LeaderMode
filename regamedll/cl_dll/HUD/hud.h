@@ -382,7 +382,7 @@ public:	// avoid the complex memset();
 		free(ptr);
 	}
 
-	enum SF_PHASE
+	enum SF_PHASE : BYTE
 	{
 		SF_FADEIN = 1,
 		SF_STAY,

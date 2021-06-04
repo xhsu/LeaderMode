@@ -500,6 +500,10 @@ void CMarket::OnThink(void)
 	//if (IsVisible() && m_flTimeShouldTurnInvisible <= 0)
 	//	SetMouseInputEnabled(true);
 
+	// Out of buyzone? No more.
+	if (IsVisible() && !CHudStatusIcons::IconExists("buy"))
+		Show(false);
+
 	if (m_flTimeShouldTurnInvisible > 0 && m_flTimeShouldTurnInvisible < g_flClientTime)
 	{
 		BaseClass::SetVisible(false);	// Bypass the override one.
@@ -509,7 +513,7 @@ void CMarket::OnThink(void)
 	m_pScrollablePanel->m_pScrollBar->SetValue(m_iScrollPanelPos);
 	SetAlpha(m_flAlpha * 255.0f);
 
-	SetBgColor(Color(0, 0, 0, m_flAlpha * 96.0f));
+	SetBgColor(Color(0, 0, 0, m_flAlpha * ALPHA_BACKGROUND));
 }
 
 void CMarket::OnCommand(const char* szCommand)
@@ -520,27 +524,35 @@ void CMarket::OnCommand(const char* szCommand)
 		gEngfuncs.pfnClientCmd(szCommand);
 }
 
-void CMarket::InvalidateLayout(bool layoutNow, bool reloadScheme)
+void CMarket::Show(bool bShow)
 {
-	BaseClass::InvalidateLayout(layoutNow, reloadScheme);
-}
+	if (IsVisible() == bShow)
+		return;
 
-bool CMarket::IsVisible(void)
-{
-	return BaseClass::IsVisible() && m_flTimeShouldTurnInvisible <= DBL_EPSILON;
-}
-
-void CMarket::SetVisible(bool bVisible)
-{
-	if (bVisible)
+	if (bShow)
 	{
-		BaseClass::SetVisible(true);
+		Activate();
 		GetAnimationController()->RunAnimationCommand(this, "m_flAlpha", 1, 0, TIME_FADING, AnimationController::INTERPOLATOR_DEACCEL);
+
+		if (GetParent()->IsVisible())
+		{
+			SetMouseInputEnabled(true);
+			IN_DeactivateMouse();
+		}
 	}
 	else
 	{
+		// Fade out.
 		m_flTimeShouldTurnInvisible = g_flClientTime + TIME_FADING;
 		GetAnimationController()->RunAnimationCommand(this, "m_flAlpha", 0, 0, TIME_FADING, AnimationController::INTERPOLATOR_DEACCEL);
+
+		// Only do this when IClientVGUI is visible.
+		// Or this line will break the pause screen.
+		if (GetParent()->IsVisible())
+		{
+			SetMouseInputEnabled(false);
+			IN_ActivateMouse();
+		}
 	}
 }
 

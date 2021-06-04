@@ -415,8 +415,8 @@ IN_ActivateMouse
 */
 void IN_ActivateMouse2(void)
 {
-	if (g_pViewport->IsAnyClientUIUsingMouse())
-		return;
+//	if (g_pViewport->IsAnyClientUIUsingMouse())
+//		return;
 
 	if (mouseinitialized)
 	{

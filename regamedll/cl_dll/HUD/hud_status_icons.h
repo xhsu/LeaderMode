@@ -51,6 +51,7 @@ struct CHudStatusIcons
 
 	// Custom functions.
 	static void Reset(void);
+	static inline bool IconExists(const std::string& str) { return m_mapShowing.find(str) != m_mapShowing.end(); }
 
 	// Game data.
 	static inline std::unordered_map<std::string, status_icon_t> m_mapShowing;

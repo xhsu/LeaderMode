@@ -66,7 +66,7 @@ void CHudMatchStatus::Draw(float flTime, bool bIntermission)
 	Vector2D vecLT, vecRB;
 	float flAlpha = MIN_ALPHA + (255 - MIN_ALPHA) * gHUD::GetOscillation(2.0 * M_PI / BOP_HIGHLIGHT_PERIOD);
 
-	DrawUtils::glRegularPureColorDrawingInit(RGB_YELLOWISH, BOP_DEFAULT_ALPHA);
+	DrawUtils::glRegularPureColorDrawingInit(0xFFFFFF, BOP_DEFAULT_ALPHA);
 	DrawUtils::Draw2DQuadProgressBar2(BOP_ANCHOR, BOP_SIZE, BOP_BORDER_THICKNESS, 1);	// Outter border.
 
 	vecLT = BOP_INNERBLOCK_ANCHOR;

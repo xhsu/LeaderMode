@@ -250,7 +250,7 @@ void gHUD::Init(void)
 	gEngfuncs.pfnAddCommand("updateoverview", &OverviewMgr::OnHUDReset);
 	gEngfuncs.pfnAddCommand("showteam", []() {g_pViewport->m_pTeamMenu->Show(!g_pViewport->m_pTeamMenu->IsVisible()); });
 	gEngfuncs.pfnAddCommand("declarerole", []() {g_pViewport->m_pRoleMenu->Show(!g_pViewport->m_pRoleMenu->IsVisible()); });
-	gEngfuncs.pfnAddCommand("buy", []() {g_pViewport->m_pMarketMenu->Show(!g_pViewport->m_pMarketMenu->IsVisible()); });
+	gEngfuncs.pfnAddCommand("buy", []() { if (CHudStatusIcons::IconExists("buy")) g_pViewport->m_pMarketMenu->Show(!g_pViewport->m_pMarketMenu->IsVisible()); });
 }
 
 void gHUD::Shutdown(void)

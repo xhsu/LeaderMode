@@ -114,9 +114,7 @@ public:
 	void Paint(void) final;
 	void OnThink(void) final;
 	void OnCommand(const char* szCommand) final;
-	void InvalidateLayout(bool layoutNow = false, bool reloadScheme = false) final;
-	bool IsVisible(void) final;
-	void SetVisible(bool bVisible) final;
+	void Show(bool bShow) final;
 	void OnKeyCodeTyped(vgui::KeyCode code) final;
 
 public:
@@ -127,6 +125,7 @@ public:
 	static constexpr auto MARGIN = 2, MARGIN_BETWEEN_BUTTONS = 36, MARGIN_BETWEEN_BUTTON_AND_TEXT = MARGIN_BETWEEN_BUTTONS;
 	static constexpr auto WPN_SPRITE_HEIGHT = 96, FONT_SIZE = 24;
 	static constexpr auto TIME_FADING = 0.25;
+	static constexpr auto ALPHA_BACKGROUND = 96.0f;
 	static inline int s_hFont = 0;
 
 public:
