@@ -1099,7 +1099,10 @@ MSG_FUNC(Role)
 				pWeapon->SetVariation(g_iRoleType);
 		}
 
-		// Update buymenu.
+		// Update buymenu. FIXME: Why these code cause 0xDDDDDDDD bug?
+//		if (g_pViewport->m_pMarketMenu->IsVisible())
+//			g_pViewport->m_pMarketMenu->Show(false);	// Hide it first, avoid bug.
+
 		g_pViewport->m_pMarketMenu->DeletePanel();
 		g_pViewport->m_pMarketMenu = new CMarket();
 		g_pViewport->m_pMarketMenu->SetParent(g_pViewport);

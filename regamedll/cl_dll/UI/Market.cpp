@@ -153,7 +153,7 @@ public:
 		{
 			// Don't know why, but this have to kept update. Can't place it in Constructor.
 			// Not work even in ApplySchemeSettings().
-			m_iSeparatorLength = m_pParent->GetWide() - ScrollableEditablePanel::WIDTH_SCROLLBAR;	// Don't forget the scroll bar!
+			m_iSeparatorLength = m_pParent->GetWide();
 			m_pParent->LocalToScreen(m_iSeparatorLength, iDummy);
 			this->ScreenToLocal(m_iSeparatorLength, iDummy);
 
@@ -195,13 +195,10 @@ public:
 		else
 			iPos = 0;	// The top.
 
-		auto iRangeWindow = m_pParent->m_pScrollablePanel->m_pScrollBar->GetRangeWindow();	// Range window: after set the the pos, the windows range below is actual visible.
-		int iMax = 0; m_pParent->m_pScrollablePanel->m_pScrollBar->GetRange(iDummy, iMax);	// Hence the real valid scroll bar pos is smaller then its total range[a, b]
-
-		iPos = std::clamp(iPos, 0, Q_max(0, iMax - iRangeWindow));	// Although the silder will clamp by itself, but the scroll animation will waste time on the calculation of these invalid numbers.
-
-		GetAnimationController()->RunAnimationCommand(m_pParent, "m_iScrollPanelPos", iPos, 0, 0.25, AnimationController::INTERPOLATOR_DEACCEL);
+		m_pParent->ScrollTo(iPos, 0.25);
 	}
+
+	inline bool IsCategoryOnScreen(void) { return m_bShowingSeparator; }
 
 	static inline int InitializeFont()
 	{
@@ -562,6 +559,13 @@ void CMarket::OnKeyCodeTyped(KeyCode code)
 	Show(false);	// Hide on any typing.
 }
 
+void CMarket::OnMouseWheeled(int delta)
+{
+	BaseClass::OnMouseWheeled(delta);
+
+	ScrollTo(m_iScrollPanelPos - delta * SCROLL_SPEED, 0.2);
+}
+
 void CMarket::UpdateMarket(void)
 {
 	// Purge the original lable array.
@@ -740,4 +744,29 @@ void CMarket::UpdateMarket(void)
 	m_pPurchasablePanel->SetTall(y);	// Update tall for the elements we added.
 
 	InvalidateLayout(true);
+}
+
+void CMarket::ScrollTo(float flPos, float flTime)
+{
+	GetAnimationController()->RunAnimationCommand(
+		this,
+		"m_iScrollPanelPos",
+		ValidateScrollValue(flPos),
+		0,
+		flTime,
+		AnimationController::INTERPOLATOR_DEACCEL
+	);
+}
+
+float CMarket::ValidateScrollValue(float flIn)
+{
+	static int iRangeWindow = 0, iMax = 0;
+
+	if (!iRangeWindow)
+		iRangeWindow = m_pScrollablePanel->m_pScrollBar->GetRangeWindow();	// Range window: after set the the pos, the windows range below is actual visible.
+
+	if (!iMax)
+		m_pScrollablePanel->m_pScrollBar->GetRange(iDummy, iMax);	// Hence the real valid scroll bar pos is smaller then its total range[a, b]
+
+	return std::clamp<float>(flIn, 0, Q_max(0, iMax - iRangeWindow));	// Although the silder will clamp by itself, but the scroll animation will waste time on the calculation of these invalid numbers.
 }

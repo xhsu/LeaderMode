@@ -54,7 +54,10 @@ void vgui::CViewPort::OnHideClientUI(void)
 
 bool vgui::CViewPort::IsAnyClientUIUsingMouse(void)
 {
-	return (m_pTeamMenu->IsVisible() || m_pRoleMenu->IsVisible() || m_pMarketMenu->IsVisible());
+	return (m_pTeamMenu->IsVisible() ||
+			m_pRoleMenu->IsVisible() ||
+			(m_pMarketMenu->IsVisible() && m_pMarketMenu->m_flTimeShouldTurnInvisible < DBL_EPSILON)
+	);
 }
 
 void vgui::CViewPort::HideAllVGUIMenus(void)

@@ -116,9 +116,12 @@ public:
 	void OnCommand(const char* szCommand) final;
 	void Show(bool bShow) final;
 	void OnKeyCodeTyped(vgui::KeyCode code) final;
+	void OnMouseWheeled(int delta) final;
 
 public:
 	void UpdateMarket(void);	// UNDONE, unusable.
+	void ScrollTo(float flPos, float flTime);
+	float ValidateScrollValue(float flIn);
 
 public:
 	static constexpr auto LENGTH_FRAME = 18, WIDTH_FRAME = 2, MARGIN_BETWEEN_FRAME_AND_BUTTON = 12;
@@ -126,6 +129,7 @@ public:
 	static constexpr auto WPN_SPRITE_HEIGHT = 96, FONT_SIZE = 24;
 	static constexpr auto TIME_FADING = 0.25;
 	static constexpr auto ALPHA_BACKGROUND = 96.0f;
+	static constexpr auto SCROLL_SPEED = 35.0f;
 	static inline int s_hFont = 0;
 
 public:
