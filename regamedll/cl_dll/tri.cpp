@@ -14,8 +14,7 @@ std::list<RegionalFog> g_lstRegionalFog;
 
 void RegionalFogThink(void)
 {
-	auto iter = g_lstRegionalFog.begin();
-	while (iter != g_lstRegionalFog.end())
+	for (auto iter = g_lstRegionalFog.begin(); iter != g_lstRegionalFog.end(); /*empty here.*/)
 	{
 		if (iter->m_flTimeRemoval < g_flClientTime)
 		{

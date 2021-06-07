@@ -1444,7 +1444,7 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	int buttonsChanged;
 	static int lasthealth;
 	int flags;
-	static auto last_hr_clock = hr_clock::now();	// init only.
+//	static auto last_hr_clock = hr_clock::now();	// init only.
 
 	// initiation
 	HUD_InitClientWeapons();
@@ -1453,9 +1453,10 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	gpGlobals->time = g_flClientTime;
 	gpGlobals->frametime = g_flClientTimeDelta;
 
-	auto dur = hr_clock::now() - last_hr_clock;
-	last_hr_clock = hr_clock::now();
-	gpGlobals->frametime = std::chrono::duration_cast<std::chrono::microseconds>(dur).count() / 1000000.0;	// Method offered by Crsky.
+	//auto dur = hr_clock::now() - last_hr_clock;
+	//last_hr_clock = hr_clock::now();
+	//gpGlobals->time = std::chrono::time_point_cast<std::chrono::microseconds>(last_hr_clock).count() / 1000000.0;
+	//gpGlobals->frametime = std::chrono::duration_cast<std::chrono::microseconds>(dur).count() / 1000000.0;	// Method offered by Crsky.
 
 	// Fill in data based on selected weapon
 	if (from->client.m_iId > WEAPON_NONE && from->client.m_iId < LAST_WEAPON)
@@ -1481,27 +1482,27 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		lasthealth = to->client.health;
 	}
 
-	for (i = 0; i < LAST_WEAPON; i++)
-	{
-		if (!g_rgpClientWeapons[i] || g_rgpClientWeapons[i]->m_iId != i)	// something wrong with this pointer..?
-			continue;
+	//for (i = 0; i < LAST_WEAPON; i++)
+	//{
+	//	if (!g_rgpClientWeapons[i] || g_rgpClientWeapons[i]->m_iId != i)	// something wrong with this pointer..?
+	//		continue;
 
-		auto pCurrent = g_rgpClientWeapons[i];
-		weapon_data_t* pfrom = from->weapondata + i;
+	//	auto pCurrent = g_rgpClientWeapons[i];
+	//	weapon_data_t* pfrom = from->weapondata + i;
 
-		pCurrent->m_bInReload = pfrom->m_fInReload;
-		pCurrent->m_bInZoom = pfrom->m_fInSpecialReload;	// not directly used.
-		pCurrent->m_iClip = pfrom->m_iClip;
-		pCurrent->m_flNextPrimaryAttack = pfrom->m_flNextPrimaryAttack;
-		pCurrent->m_flNextSecondaryAttack = pfrom->m_flNextSecondaryAttack;
-		pCurrent->m_flTimeWeaponIdle = pfrom->m_flTimeWeaponIdle;
-		//pCurrent->m_flStartThrow = time_point_t (duration_t (pfrom->fuser2));
-		//pCurrent->m_flReleaseThrow = time_point_t (duration_t (pfrom->fuser3));
-		//pCurrent->m_iSwing = pfrom->iuser1;
-		pCurrent->m_bitsFlags = pfrom->m_iWeaponState;
-		pCurrent->m_flLastFire = pfrom->m_fAimedDamage;
-		pCurrent->m_iShotsFired = pfrom->m_fInZoom;	// not directly used.
-	}
+	//	pCurrent->m_bInReload = pfrom->m_fInReload;
+	//	pCurrent->m_bInZoom = pfrom->m_fInSpecialReload;	// not directly used.
+	//	pCurrent->m_iClip = pfrom->m_iClip;
+	//	pCurrent->m_flNextPrimaryAttack = pfrom->m_flNextPrimaryAttack;
+	//	pCurrent->m_flNextSecondaryAttack = pfrom->m_flNextSecondaryAttack;
+	//	pCurrent->m_flTimeWeaponIdle = pfrom->m_flTimeWeaponIdle;
+	//	//pCurrent->m_flStartThrow = time_point_t (duration_t (pfrom->fuser2));
+	//	//pCurrent->m_flReleaseThrow = time_point_t (duration_t (pfrom->fuser3));
+	//	//pCurrent->m_iSwing = pfrom->iuser1;
+	//	pCurrent->m_bitsFlags = pfrom->m_iWeaponState;
+	//	pCurrent->m_flLastFire = pfrom->m_fAimedDamage;
+	//	pCurrent->m_iShotsFired = pfrom->m_fInZoom;	// not directly used.
+	//}
 
 	if (from->client.vuser4.x < AMMO_NONE || from->client.vuser4.x > AMMO_MAXTYPE)
 		g_pCurWeapon->m_iPrimaryAmmoType = AMMO_NONE;
@@ -1629,9 +1630,9 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	// FIXME: this was working fine until the push-pop anim comes out. Why my predict code being override right on next frame?
 	// Make sure that weapon animation matches what the game .dll is telling us
 	//  over the wire ( fixes some animation glitches )
-	if (g_runfuncs && (g_iCurViewModelAnim != to->client.weaponanim))
+//	if (g_runfuncs && (g_iCurViewModelAnim != to->client.weaponanim))
 		// Force a fixed anim down to viewmodel. LUNA: FIXME: wired, how did that happens? it seems impossible.
-		g_pCurWeapon->SendWeaponAnim(to->client.weaponanim);
+//		g_pCurWeapon->SendWeaponAnim(to->client.weaponanim);
 
 	if (g_pCurWeapon->m_iPrimaryAmmoType < AMMO_MAXTYPE)
 	{
