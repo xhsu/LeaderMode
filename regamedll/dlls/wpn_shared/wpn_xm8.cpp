@@ -381,5 +381,3 @@ bool CXM8::AlterAct(void)
 
 	return true;
 }
-
-DECLARE_STANDARD_RESET_MODEL_FUNC(XM8)

@@ -238,9 +238,9 @@ public:	// basic API and behaviour for weapons.
 	bool	DefaultHolster	(int iHolsterAnim, float flHolsterDelay);
 	void	DefaultSteelSight(const Vector& vecOfs, int iFOV, float flDriftingSpeed = 10.0f, float flNextSecondaryAttack = 0.3f);
 	void	DefaultScopeSight(const Vector& vecOfs, int iFOV, float flEnterScopeDelay = 0.25f, float flFadeFromBlack = 5.0f, float flDriftingSpeed = 10.0f, float flNextSecondaryAttack = 0.3f);
-	template<class CWpn> void	DefaultDashStart	(void);
-	template<class CWpn> void	DefaultDashEnd		(void);
-	template<class CWpn> bool	DefaultSetLHand		(bool bAppear);
+	void	DefaultDashStart(int iEnterAnim, float flEnterTime);
+	void	DefaultDashEnd	(int iEnterAnim, float flEnterTime, int iExitAnim, float flExitTime);
+	bool	DefaultSetLHand	(bool bAppear, int iLHandUpAnim, float flLHandUpTime, int iLHandDownAnim, float flLHandDownTime);
 	void	DefaultBlock	(int iEnterAnim, float flEnterTime, int iExitAnim, float flExitTime);
 	float	DefaultSpread	(float flBaseline, float flAimingMul, float flDuckingMul, float flWalkingMul, float flJumpingMul);
 
@@ -268,17 +268,25 @@ template <class CWpn>
 class CBaseWeaponTemplate : public CBaseWeapon
 {
 public:	// basic logic funcs
-	//virtual bool	Deploy		(void) override;
-	//virtual void	WeaponIdle	(void) override;
-	//virtual bool	HolsterStart(void) override;
-	virtual	void	DashStart	(void) override { return DefaultDashStart<CWpn>(); }
-	virtual void	DashEnd		(void) override { return DefaultDashEnd<CWpn>(); }
+	bool	Deploy		(void) override	{ m_iShotsFired = 0; return DefaultDeploy(CWpn::VIEW_MODEL, CWpn::WORLD_MODEL, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? CWpn::DRAW_FIRST : CWpn::DEPLOY, CWpn::POSTURE, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? CWpn::DRAW_FIRST_TIME : CWpn::DEPLOY_TIME); }
+	void	WeaponIdle	(void) override { return DefaultIdle(CWpn::DASHING); }
+	bool	HolsterStart(void) override	{ return DefaultHolster(CWpn::HOLSTER, CWpn::HOLSTER_TIME); }
+	void	DashStart	(void) override { return DefaultDashStart(CWpn::DASH_ENTER, CWpn::DASH_ENTER_TIME); }
+	void	DashEnd		(void) override { return DefaultDashEnd(CWpn::DASH_ENTER, CWpn::DASH_ENTER_TIME, CWpn::DASH_EXIT, CWpn::DASH_EXIT_TIME); }
 
 public:
-	virtual	float	GetMaxSpeed		(void) override { return CWpn::MAX_SPEED; }
-	//virtual void	ResetModel		(void) override;
-	virtual bool	SetLeftHand		(bool bAppear) override { return DefaultSetLHand<CWpn>(bAppear); }
-	//virtual void	PlayBlockAnim	(void) override { return DefaultBlock(BLOCK_UP, BLOCK_UP_TIME, BLOCK_DOWN, BLOCK_DOWN_TIME); }
+	float	GetMaxSpeed		(void) override { return CWpn::MAX_SPEED; }
+	void	ResetModel		(void) override
+	{
+#ifndef CLIENT_DLL
+													m_pPlayer->pev->viewmodel = MAKE_STRING(CWpn::VIEW_MODEL);
+													m_pPlayer->pev->weaponmodel = MAKE_STRING(CWpn::WORLD_MODEL);
+#else
+													g_pViewEnt->model = gEngfuncs.CL_LoadModel(CWpn::VIEW_MODEL, &m_pPlayer->pev->viewmodel);
+#endif
+	}
+	bool	SetLeftHand		(bool bAppear) override { return DefaultSetLHand(bAppear, CWpn::LHAND_UP, CWpn::LHAND_UP_TIME, CWpn::LHAND_DOWN, CWpn::LHAND_DOWN_TIME); }
+	void	PlayBlockAnim	(void) override { return DefaultBlock(CWpn::BLOCK_UP, CWpn::BLOCK_UP_TIME, CWpn::BLOCK_DOWN, CWpn::BLOCK_DOWN_TIME); }
 };
 
 
@@ -398,6 +406,7 @@ public:	// Constants / Database
 	static constexpr pcchar	VIEW_MODEL			= "models/weapons/v_scarh.mdl";
 	static constexpr pcchar	WORLD_MODEL			= "models/weapons/w_scarl.mdl";
 	static constexpr pcchar	FIRE_SFX			= "weapons/SCARH/mk17_shoot.wav";
+	static constexpr pcchar POSTURE				= "mp5";
 	static constexpr float	MAX_SPEED			= 235.0f;
 	static constexpr float	DAMAGE				= 54;
 	static constexpr float	RANGE_MODIFER		= 1.057371263;	// 80% damage @2000 inches.
@@ -436,13 +445,9 @@ public:	// basic logic funcs
 	virtual bool	Deploy			(void);
 	virtual void	PrimaryAttack	(void) { return SCARHFire(GetSpread()); }
 	virtual void	SecondaryAttack	(void);
-	virtual void	WeaponIdle		(void) { return DefaultIdle(DASHING); }
 	virtual bool	Reload			(void);
-	virtual bool	HolsterStart	(void) { return DefaultHolster(HOLSTER, HOLSTER_TIME); }
 
 public:	// util funcs
-	virtual void	ResetModel		(void);
-	virtual void	PlayBlockAnim	(void) { return DefaultBlock(BLOCK_UP, BLOCK_UP_TIME, BLOCK_DOWN, BLOCK_DOWN_TIME); }
 	virtual float	GetSpread		(void);
 
 public:	// new functions
@@ -503,7 +508,7 @@ public:	// new functions
 #define XM8_WORLD_MODEL	"models/weapons/w_xm8.mdl"
 #define XM8_FIRE_SFX	"weapons/xm8/xm8_shoot.wav"
 
-class CXM8 : public CBaseWeapon
+class CXM8 : public CBaseWeaponTemplate<CXM8>
 {
 public:	// Constants / Database
 	enum xm8_anim_e
@@ -535,6 +540,7 @@ public:	// Constants / Database
 	static constexpr pcchar	VIEW_MODEL				= "models/weapons/v_xm8.mdl";
 	static constexpr pcchar	WORLD_MODEL				= "models/weapons/w_xm8.mdl";
 	static constexpr pcchar	FIRE_SFX				= "weapons/xm8/xm8_shoot.wav";
+	static constexpr pcchar POSTURE					= "carbine";
 	static constexpr float	MAX_SPEED				= 240.0f;
 	static constexpr float	DAMAGE					= 32.0f;
 	static constexpr float	RANGE_MODIFER			= 1.057371263;	// 80% damage @2000 inches
@@ -577,19 +583,12 @@ public:	// basic logic funcs
 	virtual void	PostFrame		(void);
 	virtual void	PrimaryAttack	(void);
 	virtual void	SecondaryAttack	(void);
-	virtual void	WeaponIdle		(void)	{ return DefaultIdle(DASHING); }
 	virtual bool	Reload			(void);
 	virtual bool	AlterAct		(void);
-	virtual bool	HolsterStart	(void)	{ return DefaultHolster(HOLSTER, HOLSTER_TIME); }
-	virtual	void	DashStart		(void)	{ return DefaultDashStart<CXM8>(); }
-	virtual void	DashEnd			(void)	{ return DefaultDashEnd<CXM8>(); }
 
 public:	// util funcs
-	virtual	float	GetMaxSpeed		(void)	{ return MAX_SPEED; }
-	virtual void	ResetModel		(void);
-	virtual bool	SetLeftHand		(bool bAppear) { return DefaultSetLHand<CXM8>(bAppear); }
-	virtual void	PlayBlockAnim	(void)	{ return DefaultBlock(BLOCK_UP, BLOCK_UP_TIME, BLOCK_DOWN, BLOCK_DOWN_TIME); }
 	virtual float	GetSpread		(void);
+	// TODO: Scope speed for XM8.
 
 public:	// new functions
 	void XM8Fire(float flSpread, float flCycleTime = (60.0f / RPM));
@@ -599,7 +598,7 @@ public:	// new functions
 #define AWP_WORLD_MODEL	"models/weapons/w_awp.mdl"
 #define AWP_FIRE_SFX	"weapons/l115a3/l115a3_fire.wav"
 
-class CAWP : public CBaseWeapon
+class CAWP : public CBaseWeaponTemplate<CAWP>
 {
 public:	// Constants / Database
 	enum awp_anim_e
@@ -626,6 +625,7 @@ public:	// Constants / Database
 	static constexpr pcchar	VIEW_MODEL			= "models/weapons/v_awp.mdl";
 	static constexpr pcchar	WORLD_MODEL			= "models/weapons/w_awp.mdl";
 	static constexpr pcchar	FIRE_SFX			= "weapons/l115a3/l115a3_fire.wav";
+	static constexpr pcchar POSTURE				= "rifle";
 	static constexpr float	MAX_SPEED			= 210.0f;
 	static constexpr float	MAX_SPEED_ZOOM		= 150.0f;
 	static constexpr float	DAMAGE				= 125.0f;
@@ -684,20 +684,13 @@ public: // shared new vars.
 
 public:	// basic logic funcs
 	virtual void	Think			(void);
-	virtual bool	Deploy			(void)	{ return DefaultDeploy(VIEW_MODEL, WORLD_MODEL, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DRAW_FIRST : DRAW, "rifle", (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DRAW_FIRST_TIME : DEPLOY_TIME); }
 	virtual void	PrimaryAttack	(void);
 	virtual void	SecondaryAttack	(void)	{ return DefaultScopeSight(Vector(-6.2f, -2, 1.1f), 25); }
-	virtual void	WeaponIdle		(void)	{ return DefaultIdle(DASHING); }
 	virtual bool	Reload			(void);
 	virtual bool	HolsterStart	(void);
-	virtual	void	DashStart		(void)	{ return DefaultDashStart<CAWP>(); }
-	virtual void	DashEnd			(void)	{ return DefaultDashEnd<CAWP>(); }
 
 public:	// util funcs
 	virtual float	GetMaxSpeed		(void);
-	virtual void	ResetModel		(void);
-	virtual bool	SetLeftHand		(bool bAppear)	{ return DefaultSetLHand<CAWP>(bAppear); }
-	virtual void	PlayBlockAnim	(void)	{ return DefaultBlock(BLOCK_UP, BLOCK_UP_TIME, BLOCK_DOWN, BLOCK_DOWN_TIME); }
 	virtual float	GetSpread		(void);
 
 public:	// new funcs

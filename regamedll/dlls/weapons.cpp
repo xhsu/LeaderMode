@@ -1223,8 +1223,7 @@ void CBaseWeapon::DefaultScopeSight(const Vector& vecOfs, int iFOV, float flEnte
 	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flNextSecondaryAttack;
 }
 
-template<class CWpn>
-void CBaseWeapon::DefaultDashStart(void)
+void CBaseWeapon::DefaultDashStart(int iEnterAnim, float flEnterTime)
 {
 	if (m_bInReload)
 		m_bInReload = false;
@@ -1240,28 +1239,27 @@ void CBaseWeapon::DefaultDashStart(void)
 #endif
 	}
 
-	SendWeaponAnim(CWpn::DASH_ENTER);
-	m_pPlayer->m_flNextAttack = CWpn::DASH_ENTER_TIME;
-	m_flTimeWeaponIdle = CWpn::DASH_ENTER_TIME;
+	SendWeaponAnim(iEnterAnim);
+	m_pPlayer->m_flNextAttack = flEnterTime;
+	m_flTimeWeaponIdle = flEnterTime;
 	m_bitsFlags |= WPNSTATE_DASHING;
 }
 
-template<class CWpn>
-void CBaseWeapon::DefaultDashEnd(void)
+void CBaseWeapon::DefaultDashEnd(int iEnterAnim, float flEnterTime, int iExitAnim, float flExitTime)
 {
-	if (m_pPlayer->m_flNextAttack > 0.0f && m_pPlayer->pev->weaponanim == CWpn::DASH_ENTER)
+	if (m_pPlayer->m_flNextAttack > 0.0f && m_pPlayer->pev->weaponanim == iEnterAnim)
 	{
 		// this is how much you procees to the dashing phase.
 		// for example, assuming the whole length is 1.0s, you start 0.7s and decide to cancel.
 		// although there's only 0.3s to the dashing phase, but turning back still requires another equally 0.7s.
 		// "m_pPlayer->m_flNextAttack" is the 0.3s of full length. you need to get the rest part, i.e. the 70%.
-		float flRunStartUnplayedRatio = 1.0f - m_pPlayer->m_flNextAttack / CWpn::DASH_ENTER_TIME;
+		float flRunStartUnplayedRatio = 1.0f - m_pPlayer->m_flNextAttack / flEnterTime;
 
 		// stick on the last instance in the comment: 70% * 1.0s(full length) = 0.7s, this is the time we need to turning back.
-		float flRunStopTimeLeft = CWpn::DASH_EXIT_TIME * flRunStartUnplayedRatio;
+		float flRunStopTimeLeft = flExitTime * flRunStartUnplayedRatio;
 
 		// play the anim.
-		SendWeaponAnim(CWpn::DASH_EXIT);
+		SendWeaponAnim(iExitAnim);
 
 #ifdef CLIENT_DLL
 		// why we are using the "0.3s" here?
@@ -1277,9 +1275,9 @@ void CBaseWeapon::DefaultDashEnd(void)
 	// if RUN_START is normally played and finished, go normal.
 	else
 	{
-		SendWeaponAnim(CWpn::DASH_EXIT);
-		m_pPlayer->m_flNextAttack = CWpn::DASH_EXIT_TIME;
-		m_flTimeWeaponIdle = CWpn::DASH_EXIT_TIME;
+		SendWeaponAnim(iExitAnim);
+		m_pPlayer->m_flNextAttack = flExitTime;
+		m_flTimeWeaponIdle = flExitTime;
 	}
 
 	// either way, we have to remove this flag.
@@ -1291,23 +1289,22 @@ void CBaseWeapon::DefaultDashEnd(void)
 #endif
 }
 
-template<class CWpn>
-bool CBaseWeapon::DefaultSetLHand(bool bAppear)
+bool CBaseWeapon::DefaultSetLHand(bool bAppear, int iLHandUpAnim, float flLHandUpTime, int iLHandDownAnim, float flLHandDownTime)
 {
 	if (bAppear && m_bitsFlags & WPNSTATE_NO_LHAND)
 	{
-		SendWeaponAnim(CWpn::LHAND_UP);
-		m_pPlayer->m_flNextAttack = CWpn::LHAND_UP_TIME;
-		m_flTimeWeaponIdle = CWpn::LHAND_UP_TIME;
+		SendWeaponAnim(iLHandUpAnim);
+		m_pPlayer->m_flNextAttack = flLHandUpTime;
+		m_flTimeWeaponIdle = flLHandUpTime;
 		m_bitsFlags &= ~WPNSTATE_NO_LHAND;
 
 		return true;
 	}
 	else if (!(m_bitsFlags & WPNSTATE_NO_LHAND))
 	{
-		SendWeaponAnim(CWpn::LHAND_DOWN);
-		m_pPlayer->m_flNextAttack = CWpn::LHAND_DOWN_TIME;
-		m_flTimeWeaponIdle = CWpn::LHAND_DOWN_TIME;
+		SendWeaponAnim(iLHandDownAnim);
+		m_pPlayer->m_flNextAttack = flLHandDownTime;
+		m_flTimeWeaponIdle = flLHandDownTime;
 		m_bitsFlags |= WPNSTATE_NO_LHAND;
 
 		return true;
