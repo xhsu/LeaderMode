@@ -255,4 +255,12 @@ void CKSG12::PopAnim(void)
 	m_flNextInsertAnim	= gpGlobals->time - m_Stack2.m_flNextInsertAnim;
 }
 
-DECLARE_STANDARD_RESET_MODEL_FUNC(KSG12)
+void CKSG12::ResetModel(void)
+{
+#ifndef CLIENT_DLL
+	m_pPlayer->pev->viewmodel = MAKE_STRING(KSG12_VIEW_MODEL);
+	m_pPlayer->pev->weaponmodel = MAKE_STRING(KSG12_WORLD_MODEL);
+#else
+	g_pViewEnt->model = gEngfuncs.CL_LoadModel(KSG12_VIEW_MODEL, &m_pPlayer->pev->viewmodel);
+#endif
+}

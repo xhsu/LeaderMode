@@ -1331,6 +1331,23 @@ void CBaseWeapon::DefaultBlock(int iEnterAnim, float flEnterTime, int iExitAnim,
 	}
 }
 
+float CBaseWeapon::DefaultSpread(float flBaseline, float flAimingMul, float flDuckingMul, float flWalkingMul, float flJumpingMul)
+{
+	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
+		flBaseline *= flJumpingMul;
+
+	if (m_pPlayer->pev->velocity.Length2D() > 0)	// z speed does not included.
+		flBaseline *= flWalkingMul;
+
+	if (m_pPlayer->pev->flags & FL_DUCKING)
+		flBaseline *= flDuckingMul;
+
+	if (m_bInZoom || m_pPlayer->pev->fov < DEFAULT_FOV)
+		flBaseline *= flAimingMul;
+
+	return flBaseline;	// it's already be modified.
+}
+
 void CBaseWeapon::SendWeaponAnim(int iAnim, bool bSkipLocal)
 {
 	m_pPlayer->pev->weaponanim = iAnim;
@@ -1483,19 +1500,13 @@ void CBaseWeapon::KickBack(float up_base, float lateral_base, float up_modifier,
 		m_pPlayer->m_vecVAngleShift *= 0.5f;
 }
 
-float CBaseWeapon::DefaultSpread(float flBaseline, float flAimingMul, float flDuckingMul, float flWalkingMul, float flJumpingMul)
+template<class CWpn>
+void CBaseWeaponTemplate<CWpn>::ResetModel(void)
 {
-	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
-		flBaseline *= flJumpingMul;
-
-	if (m_pPlayer->pev->velocity.Length2D() > 0)	// z speed does not included.
-		flBaseline *= flWalkingMul;
-
-	if (m_pPlayer->pev->flags & FL_DUCKING)
-		flBaseline *= flDuckingMul;
-
-	if (m_bInZoom || m_pPlayer->pev->fov < DEFAULT_FOV)
-		flBaseline *= flAimingMul;
-
-	return flBaseline;	// it's already be modified.
+#ifndef CLIENT_DLL
+	m_pPlayer->pev->viewmodel = MAKE_STRING(CWpn::VIEW_MODEL);
+	m_pPlayer->pev->weaponmodel = MAKE_STRING(CWpn::WORLD_MODEL);
+#else
+	g_pViewEnt->model = gEngfuncs.CL_LoadModel(CWpn::VIEW_MODEL, &m_pPlayer->pev->viewmodel);
+#endif
 }

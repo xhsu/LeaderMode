@@ -316,5 +316,3 @@ float CAWP::GetSpread(void)
 
 	return flSpread;
 }
-
-DECLARE_STANDARD_RESET_MODEL_FUNC(AWP)

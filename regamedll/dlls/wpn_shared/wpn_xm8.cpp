@@ -165,14 +165,6 @@ void CXM8::Think(void)
 
 #endif
 
-bool CXM8::Deploy()
-{
-	m_flAccuracy = 0.25f;
-	m_iShotsFired = 0;
-
-	return DefaultDeploy(VIEW_MODEL, WORLD_MODEL, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DRAW_FIRST : DRAW, "carbine", (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DRAW_FIRST_TIME : DRAW_TIME);
-}
-
 void CXM8::PostFrame(void)
 {
 	if (m_bitsFlags & WPNSTATE_XM8_CHANGING)
@@ -231,9 +223,18 @@ void CXM8::PrimaryAttack()
 	XM8Fire(GetSpread(), flInterval);
 }
 
+float CXM8::GetMaxSpeed(void)
+{
+	if (int(m_pPlayer->pev->fov) == DEFAULT_FOV)
+		return MAX_SPEED;
+
+	// Slower speed when zoomed in.
+	return MAX_SPEED_ZOOM;
+}
+
 float CXM8::GetSpread(void)
 {
-	m_flAccuracy = (float(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 215.0f) + 0.25f;
+	m_flAccuracy = (float(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 215.0f) + ACCURACY_BASELINE;
 
 	if (m_flAccuracy > 1.0f)
 		m_flAccuracy = 1.0f;
@@ -349,7 +350,7 @@ bool CXM8::Reload()
 		m_iClip ? RELOAD_TIME : RELOAD_EMPTY_TIME,
 		m_iClip ? 0.7f : 0.7f))
 	{
-		m_flAccuracy = 0.25f;
+		m_flAccuracy = ACCURACY_BASELINE;
 		return true;
 	}
 

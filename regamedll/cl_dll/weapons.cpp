@@ -194,6 +194,30 @@ bool CBasePlayer::StartSwitchingWeapon(WeaponIdType iId)
 	}
 }
 
+bool CBasePlayer::SwitchWeapon(CBaseWeapon* pSwitchingTo)
+{
+	if (!pSwitchingTo)
+		return false;
+
+	// TODO
+	if ((m_pActiveItem && !m_pActiveItem->CanHolster()) /*|| !pSwitchingTo->CanDeploy()*/)
+		return false;
+
+	if (m_pActiveItem)
+	{
+		m_pActiveItem->Holstered();
+	}
+
+	m_pLastItem = m_pActiveItem;
+	m_pActiveItem = pSwitchingTo;
+
+	m_pActiveItem->Deploy();
+
+	ResetMaxSpeed();
+
+	return true;
+}
+
 //
 // PSEUDO-WEAPON
 //
@@ -353,10 +377,7 @@ void CBaseWeapon::PostFrame()
 	// if we should be holster, then just do it. stop everything else.
 	if (m_bitsFlags & WPNSTATE_HOLSTERING)
 	{
-		// only assign g_iSelectedWeapon is not quick enough. it has to wait another frame to work.
-		// therefore, we must directly set cmd->weaponselect.
-		g_iSelectedWeapon = m_pPlayer->m_iWpnSwitchingTo;
-		g_sWpnCmd.weaponselect = m_pPlayer->m_iWpnSwitchingTo;
+		m_pPlayer->SwitchWeapon(g_rgpClientWeapons[m_pPlayer->m_iWpnSwitchingTo]);
 		return;
 	}
 
@@ -1237,6 +1258,23 @@ void CBaseWeapon::DefaultBlock(int iEnterAnim, float flEnterTime, int iExitAnim,
 	}
 }
 
+float CBaseWeapon::DefaultSpread(float flBaseline, float flAimingMul, float flDuckingMul, float flWalkingMul, float flJumpingMul)
+{
+	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
+		flBaseline *= flJumpingMul;
+
+	if (m_pPlayer->pev->velocity.Length2D() > 0)	// z speed does not included.
+		flBaseline *= flWalkingMul;
+
+	if (m_pPlayer->pev->flags & FL_DUCKING)
+		flBaseline *= flDuckingMul;
+
+	if (m_bInZoom || m_pPlayer->pev->fov < DEFAULT_FOV)
+		flBaseline *= flAimingMul;
+
+	return flBaseline;	// it's already be modified.
+}
+
 void CBaseWeapon::SendWeaponAnim(int iAnim, bool bSkipLocal)
 {
 	g_iCurViewModelAnim = iAnim;
@@ -1361,21 +1399,15 @@ void CBaseWeapon::KickBack(float up_base, float lateral_base, float up_modifier,
 		m_pPlayer->m_vecVAngleShift *= 0.5f;
 }
 
-float CBaseWeapon::DefaultSpread(float flBaseline, float flAimingMul, float flDuckingMul, float flWalkingMul, float flJumpingMul)
+template<class CWpn>
+void CBaseWeaponTemplate<CWpn>::ResetModel(void)
 {
-	if (!(m_pPlayer->pev->flags & FL_ONGROUND))
-		flBaseline *= flJumpingMul;
-
-	if (m_pPlayer->pev->velocity.Length2D() > 0)	// z speed does not included.
-		flBaseline *= flWalkingMul;
-
-	if (m_pPlayer->pev->flags & FL_DUCKING)
-		flBaseline *= flDuckingMul;
-
-	if (m_bInZoom || m_pPlayer->pev->fov < DEFAULT_FOV)
-		flBaseline *= flAimingMul;
-
-	return flBaseline;	// it's already be modified.
+#ifndef CLIENT_DLL
+	m_pPlayer->pev->viewmodel = MAKE_STRING(CWpn::VIEW_MODEL);
+	m_pPlayer->pev->weaponmodel = MAKE_STRING(CWpn::WORLD_MODEL);
+#else
+	g_pViewEnt->model = gEngfuncs.CL_LoadModel(CWpn::VIEW_MODEL, &m_pPlayer->pev->viewmodel);
+#endif
 }
 
 //

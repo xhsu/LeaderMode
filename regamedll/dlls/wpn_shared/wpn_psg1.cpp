@@ -102,17 +102,6 @@ int CPSG1::CalcBodyParam(void)
 
 #endif
 
-bool CPSG1::Deploy()
-{
-	m_flAccuracy = 0.2f;
-	m_iShotsFired = 0;
-
-	return DefaultDeploy(PSG1_VIEW_MODEL, PSG1_WORLD_MODEL,
-		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DRAW_FIRST : DRAW,
-		"rifle",
-		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DRAW_FIRST_TIME : DEPLOY_TIME);
-}
-
 float CPSG1::GetSpread()
 {
 	if (m_flLastFire != 0.0f)
@@ -214,7 +203,7 @@ bool CPSG1::Reload()
 		m_iClip ? RELOAD_TIME : RELOAD_EMPTY_TIME,
 		m_iClip ? 0.9667F : 0.6333F))
 	{
-		m_flAccuracy = 0.2f;
+		m_flAccuracy = ACCURACY_BASELINE;
 		return true;
 	}
 
@@ -245,5 +234,3 @@ float CPSG1::GetMaxSpeed()
 {
 	return (m_pPlayer->pev->fov >= DEFAULT_FOV) ? MAX_SPEED : MAX_SPEED_ZOOM;
 }
-
-DECLARE_STANDARD_RESET_MODEL_FUNC(PSG1)

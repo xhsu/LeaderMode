@@ -141,14 +141,6 @@ void CMK46::Think(void)
 
 #endif
 
-bool CMK46::Deploy()
-{
-	m_flAccuracy = 0.35f;
-	m_iShotsFired = 0;
-
-	return DefaultDeploy(VIEW_MODEL, WORLD_MODEL, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DRAW_FIRST : DRAW, "m249", (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DRAW_FIRST_TIME : DEPLOY_TIME);
-}
-
 void CMK46::SecondaryAttack(void)
 {
 	switch (m_iVariation)
@@ -180,7 +172,7 @@ void CMK46::SecondaryAttack(void)
 
 float CMK46::GetSpread(void)
 {
-	m_flAccuracy = (float(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 175.0f) + 0.35f;
+	m_flAccuracy = (float(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 175.0f) + ACCURACY_BASELINE;
 
 	if (m_flAccuracy > 0.9f)
 		m_flAccuracy = 0.9f;
@@ -287,7 +279,7 @@ bool CMK46::Reload()
 		m_iClip ? RELOAD_TIME : RELOAD_EMPTY_TIME,
 		1.16f))
 	{
-		m_flAccuracy = 0.35f;
+		m_flAccuracy = ACCURACY_BASELINE;
 		return true;
 	}
 
@@ -303,5 +295,3 @@ bool CMK46::Reload()
 
 	return false;
 }
-
-DECLARE_STANDARD_RESET_MODEL_FUNC(MK46)

@@ -26,6 +26,8 @@
 *
 */
 
+#include "game_shared/shared_util.h"
+
 #pragma once
 
 // debug macro
@@ -264,11 +266,18 @@ public:	// util funcs
 	virtual float	GetSpread		(void) { return 0.0f; }
 };
 
+// Declare detectors
+GENERATE_HAS_MEMBER(ACCURACY_BASELINE);
+
+// General template.
 template <class CWpn>
 class CBaseWeaponTemplate : public CBaseWeapon
 {
+protected:
+	using BaseClass = CBaseWeaponTemplate<CWpn>;
+
 public:	// basic logic funcs
-	bool	Deploy		(void) override	{ m_iShotsFired = 0; return DefaultDeploy(CWpn::VIEW_MODEL, CWpn::WORLD_MODEL, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? CWpn::DRAW_FIRST : CWpn::DEPLOY, CWpn::POSTURE, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? CWpn::DRAW_FIRST_TIME : CWpn::DEPLOY_TIME); }
+	bool	Deploy		(void) override	{ m_flAccuracy = CWpn::ACCURACY_BASELINE; m_iShotsFired = 0; return DefaultDeploy(CWpn::VIEW_MODEL, CWpn::WORLD_MODEL, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? CWpn::DRAW_FIRST : CWpn::DEPLOY, CWpn::POSTURE, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? CWpn::DRAW_FIRST_TIME : CWpn::DEPLOY_TIME); }
 	void	WeaponIdle	(void) override { return DefaultIdle(CWpn::DASHING); }
 	bool	HolsterStart(void) override	{ return DefaultHolster(CWpn::HOLSTER, CWpn::HOLSTER_TIME); }
 	void	DashStart	(void) override { return DefaultDashStart(CWpn::DASH_ENTER, CWpn::DASH_ENTER_TIME); }
@@ -276,15 +285,7 @@ public:	// basic logic funcs
 
 public:
 	float	GetMaxSpeed		(void) override { return CWpn::MAX_SPEED; }
-	void	ResetModel		(void) override
-	{
-#ifndef CLIENT_DLL
-													m_pPlayer->pev->viewmodel = MAKE_STRING(CWpn::VIEW_MODEL);
-													m_pPlayer->pev->weaponmodel = MAKE_STRING(CWpn::WORLD_MODEL);
-#else
-													g_pViewEnt->model = gEngfuncs.CL_LoadModel(CWpn::VIEW_MODEL, &m_pPlayer->pev->viewmodel);
-#endif
-	}
+	void	ResetModel		(void) override;
 	bool	SetLeftHand		(bool bAppear) override { return DefaultSetLHand(bAppear, CWpn::LHAND_UP, CWpn::LHAND_UP_TIME, CWpn::LHAND_DOWN, CWpn::LHAND_DOWN_TIME); }
 	void	PlayBlockAnim	(void) override { return DefaultBlock(CWpn::BLOCK_UP, CWpn::BLOCK_UP_TIME, CWpn::BLOCK_DOWN, CWpn::BLOCK_DOWN_TIME); }
 };
@@ -427,6 +428,7 @@ public:	// Constants / Database
 	static constexpr float	EFFECTIVE_RANGE		= 8192.0f;
 	static constexpr int	GUN_VOLUME			= NORMAL_GUN_VOLUME;
 	static constexpr float	SPREAD_BASELINE		= 0.15f;
+	static constexpr float	ACCURACY_BASELINE	= 0.25f;
 
 #ifndef CLIENT_DLL
 public:	// SV exclusive variables.
@@ -442,7 +444,6 @@ public:	// CL exclusive functions.
 #endif
 
 public:	// basic logic funcs
-	virtual bool	Deploy			(void);
 	virtual void	PrimaryAttack	(void) { return SCARHFire(GetSpread()); }
 	virtual void	SecondaryAttack	(void);
 	virtual bool	Reload			(void);
@@ -521,7 +522,7 @@ public:	// Constants / Database
 		RELOAD,
 		RELOAD_EMPTY,
 		DRAW_FIRST,
-		DRAW,
+		DEPLOY,
 		HOLSTER,
 		CHECK_MAGAZINE,
 		SELECTOR_SEMI,
@@ -542,12 +543,13 @@ public:	// Constants / Database
 	static constexpr pcchar	FIRE_SFX				= "weapons/xm8/xm8_shoot.wav";
 	static constexpr pcchar POSTURE					= "carbine";
 	static constexpr float	MAX_SPEED				= 240.0f;
+	static constexpr float	MAX_SPEED_ZOOM			= 150.0f;
 	static constexpr float	DAMAGE					= 32.0f;
 	static constexpr float	RANGE_MODIFER			= 1.057371263;	// 80% damage @2000 inches
 	static constexpr float	RELOAD_TIME				= 2.33f;
 	static constexpr float	RELOAD_EMPTY_TIME		= 3.03f;
 	static constexpr float	DRAW_FIRST_TIME			= 1.3F;
-	static constexpr float	DRAW_TIME				= 0.7F;
+	static constexpr float	DEPLOY_TIME				= 0.7F;
 	static constexpr float	HOLSTER_TIME			= 0.7F;
 	static constexpr float	CHECKMAG_TIME			= 2.2667F;
 	static constexpr float	DASH_ENTER_TIME			= 0.8F;
@@ -563,6 +565,7 @@ public:	// Constants / Database
 	static constexpr float	EFFECTIVE_RANGE			= 8192.0f;
 	static constexpr int	GUN_VOLUME				= NORMAL_GUN_VOLUME;
 	static constexpr float	SPREAD_BASELINE			= 0.1f;
+	static constexpr float	ACCURACY_BASELINE		= 0.25f;
 
 #ifndef CLIENT_DLL
 public:	// SV exclusive variables.
@@ -579,7 +582,6 @@ public:	// CL exclusive functions.
 #endif
 
 public:	// basic logic funcs
-	virtual bool	Deploy			(void);
 	virtual void	PostFrame		(void);
 	virtual void	PrimaryAttack	(void);
 	virtual void	SecondaryAttack	(void);
@@ -587,8 +589,8 @@ public:	// basic logic funcs
 	virtual bool	AlterAct		(void);
 
 public:	// util funcs
+	virtual float	GetMaxSpeed		(void);
 	virtual float	GetSpread		(void);
-	// TODO: Scope speed for XM8.
 
 public:	// new functions
 	void XM8Fire(float flSpread, float flCycleTime = (60.0f / RPM));
@@ -609,7 +611,7 @@ public:	// Constants / Database
 		SHOOT_LAST,
 		RELOAD,
 		RELOAD_EMPTY,
-		DRAW,
+		DEPLOY,
 		DRAW_FIRST,
 		HOLSTER,
 		CHECK_MAGAZINE,
@@ -652,6 +654,7 @@ public:	// Constants / Database
 	static constexpr float	EFFECTIVE_RANGE		= 8192.0f;
 	static constexpr int	GUN_VOLUME			= BIG_EXPLOSION_VOLUME;
 	static constexpr float	SPREAD_BASELINE		= 0.001f;
+	static constexpr float	ACCURACY_BASELINE	= 0;	// Dummy, unused.
 
 #ifndef CLIENT_DLL
 public:	// SV exclusive variables.
@@ -668,7 +671,7 @@ public:	// CL exclusive functions.
 
 	// Pin static anims.
 	static constexpr int BITS_PIN_UNINVOLVED_ANIM = (1 << IDLE) |
-													(1 << DRAW) |
+													(1 << DEPLOY) |
 													(1 << RELOAD) |	// normal reload could not bypass this rechamber flag.
 													(1 << HOLSTER) |
 													(1 << CHECK_MAGAZINE) |
@@ -701,7 +704,7 @@ public:	// new funcs
 #define DEagle_WORLD_MODEL	"models/weapons/w_deagle.mdl"
 #define DEagle_FIRE_SFX		"weapons/deagle/deagle_fire.wav"
 
-class CDEagle : public CBaseWeapon
+class CDEagle : public CBaseWeaponTemplate<CDEagle>
 {
 public:	// Constants / Database
 	enum deagle_anim_e
@@ -711,7 +714,7 @@ public:	// Constants / Database
 		SHOOT_EMPTY,
 		RELOAD,
 		RELOAD_EMPTY,
-		DRAW,
+		DEPLOY,
 		DRAW_FIRST,
 		HOLSTER,
 		CHECK_MAGAZINE,
@@ -732,12 +735,13 @@ public:	// Constants / Database
 	static constexpr pcchar	VIEW_MODEL			= "models/weapons/v_deagle.mdl";
 	static constexpr pcchar	WORLD_MODEL			= "models/weapons/w_deagle.mdl";
 	static constexpr pcchar	FIRE_SFX			= "weapons/deagle/deagle_fire.wav";
+	static constexpr pcchar	POSTURE				= "onehanded";
 	static constexpr float	MAX_SPEED			= 245.0f;
 	static constexpr float	DAMAGE				= 60;
 	static constexpr float	RANGE_MODIFER		= 1.106751211;	// 80% damage @1100 inches.
 	static constexpr float	RELOAD_TIME			= 1.97f;
 	static constexpr float	RELOAD_EMPTY_TIME	= 2.02f;
-	static constexpr float	DRAW_TIME			= 0.7f;
+	static constexpr float	DEPLOY_TIME			= 0.7f;
 	static constexpr float	DRAW_FIRST_TIME		= 1.8f;
 	static constexpr float	HOLSTER_TIME		= 0.7f;
 	static constexpr float	CHECKMAG_TIME		= 2.32f;
@@ -756,6 +760,7 @@ public:	// Constants / Database
 	static constexpr float	EFFECTIVE_RANGE		= 4096.0f;
 	static constexpr int	GUN_VOLUME			= BIG_EXPLOSION_VOLUME;
 	static constexpr float	SPREAD_BASELINE		= 4;
+	static constexpr float	ACCURACY_BASELINE	= 0.9f;
 
 #ifndef CLIENT_DLL
 public:	// SV exclusive variables.
@@ -773,7 +778,7 @@ public:	// CL exclusive functions.
 
 	// Slide stop available anims.
 	static constexpr int BITS_SLIDE_STOP_ANIM =	(1 << IDLE) |
-												(1 << DRAW) |
+												(1 << DEPLOY) |
 												(1 << HOLSTER) |
 												(1 << CHECK_MAGAZINE) |
 												(1 << LHAND_DOWN) | (1 << LHAND_UP) |
@@ -786,16 +791,8 @@ public:	// basic logic funcs
 	virtual void	PrimaryAttack	(void)	{ return DEagleFire(GetSpread()); }
 	virtual void	SecondaryAttack	(void)	{ return DefaultSteelSight(Vector(-1.905f, -2, 1.1f), 85); }
 	virtual bool	Reload			(void);
-	virtual void	WeaponIdle		(void)	{ return DefaultIdle(DASHING); }
-	virtual bool	HolsterStart	(void)	{ return DefaultHolster(HOLSTER, HOLSTER_TIME); }
-	virtual	void	DashStart		(void)	{ return DefaultDashStart<CDEagle>(); }
-	virtual void	DashEnd			(void)	{ return DefaultDashEnd<CDEagle>(); }
 
 public:	// util funcs
-	virtual	float	GetMaxSpeed		(void)	{ return MAX_SPEED; }
-	virtual void	ResetModel		(void);	// declare by marco.
-	virtual bool	SetLeftHand		(bool bAppear)	{ return DefaultSetLHand<CDEagle>(bAppear); }
-	virtual void	PlayBlockAnim	(void)	{ return DefaultBlock(BLOCK_UP, BLOCK_UP_TIME, BLOCK_DOWN, BLOCK_DOWN_TIME); }
 	virtual float	GetSpread		(void);
 
 public:	// new functions
@@ -985,7 +982,7 @@ namespace BasicKnife
 #define MK46_WORLD_MODEL	"models/weapons/w_mk46.mdl"
 #define MK46_FIRE_SFX		"weapons/mk46/mk46_fire.wav"
 
-class CMK46 : public CBaseWeapon
+class CMK46 : public CBaseWeaponTemplate<CMK46>
 {
 public:	// Constants / Database
 	enum mk46_anim_e
@@ -998,7 +995,7 @@ public:	// Constants / Database
 		RELOAD_EMPTY,
 		RELOAD,
 		DRAW_FIRST,
-		DRAW,
+		DEPLOY,
 		JUMP,
 		HOLSTER,
 		INSPECTION,
@@ -1014,6 +1011,7 @@ public:	// Constants / Database
 	static constexpr pcchar	VIEW_MODEL		= "models/weapons/v_mk46.mdl";
 	static constexpr pcchar	WORLD_MODEL		= "models/weapons/w_mk46.mdl";
 	static constexpr pcchar	FIRE_SFX		= "weapons/mk46/mk46_fire.wav";
+	static constexpr pcchar	POSTURE			= "m249";
 	static constexpr float	MAX_SPEED		= 210.0f;
 	static constexpr float	DAMAGE			= 32.0f;
 	static constexpr float	RANGE_MODIFER	= 1.077217345;	// 80% damage @1500 inches.
@@ -1034,6 +1032,7 @@ public:	// Constants / Database
 	static constexpr float	EFFECTIVE_RANGE	= 8192.0f;
 	static constexpr int	GUN_VOLUME		= NORMAL_GUN_VOLUME;
 	static constexpr float	SPREAD_BASELINE	= 0.3f;
+	static constexpr float	ACCURACY_BASELINE= 0.35f;
 
 #ifndef CLIENT_DLL
 public:	// SV exclusive variables.
@@ -1049,20 +1048,11 @@ public:	// CL exclusive functions.
 #endif
 
 public:	// basic logic funcs
-	virtual bool	Deploy			(void);
 	virtual void	PrimaryAttack	(void)	{ return MK46Fire(GetSpread()); }
 	virtual void	SecondaryAttack	(void);
-	virtual void	WeaponIdle		(void)	{ return DefaultIdle(DASHING); }
 	virtual bool	Reload			(void);
-	virtual bool	HolsterStart	(void)	{ return DefaultHolster(HOLSTER, HOLSTER_TIME); }
-	virtual	void	DashStart		(void)	{ return DefaultDashStart<CMK46>(); }
-	virtual void	DashEnd			(void)	{ return DefaultDashEnd<CMK46>(); }
 
 public:	// util funcs
-	virtual	float	GetMaxSpeed		(void)	{ return MAX_SPEED; }
-	virtual void	ResetModel		(void);
-	virtual bool	SetLeftHand		(bool bAppear)	{ return DefaultSetLHand<CMK46>(bAppear); }
-	virtual void	PlayBlockAnim	(void)	{ return DefaultBlock(BLOCK_UP, BLOCK_UP_TIME, BLOCK_DOWN, BLOCK_DOWN_TIME); }
 	virtual float	GetSpread		(void);
 
 public:	// new functions
@@ -1144,7 +1134,7 @@ public:	// util funcs
 #define M4A1_WORLD_MODEL	"models/weapons/w_m4a1.mdl"
 #define M4A1_FIRE_SFX		"weapons/AR15/ar15_shoot.wav"
 
-class CM4A1 : public CBaseWeapon
+class CM4A1 : public CBaseWeaponTemplate<CM4A1>
 {
 public:	// Constants / Database
 	enum m4a1_anim_e
@@ -1166,7 +1156,7 @@ public:	// Constants / Database
 		M870MCS_RELOAD_END,
 		M870MCS_RELOAD_END_EMPTY,
 		DRAW_FIRST,
-		DRAW,
+		DEPLOY,
 		JUMP,
 		CHECK_MAGAZINE,
 		SWITCH_SELECTOR,
@@ -1183,10 +1173,11 @@ public:	// Constants / Database
 	static constexpr pcchar	VIEW_MODEL			= "models/weapons/v_m4a1.mdl";
 	static constexpr pcchar	WORLD_MODEL			= "models/weapons/w_m4a1.mdl";
 	static constexpr pcchar	FIRE_SFX			= "weapons/AR15/ar15_shoot.wav";
+	static constexpr pcchar	POSTURE				= "rifle";
 	static constexpr float	MAX_SPEED			= 230.0f;
 	static constexpr float	DAMAGE				= 32.0f;
 	static constexpr float	RANGE_MODIFER		= 1.072221173;	// 80% damage @1600 inches.
-	static constexpr float	DRAW_TIME			= 0.743f;
+	static constexpr float	DEPLOY_TIME			= 0.743f;
 	static constexpr float	DRAW_FIRST_TIME		= 2.45f;
 	static constexpr float	RELOAD_TIME			= 2.033f;
 	static constexpr float	RELOAD_EMPTY_TIME	= 2.6f;
@@ -1203,6 +1194,7 @@ public:	// Constants / Database
 	static constexpr float	EFFECTIVE_RANGE		= 8192.0f;
 	static constexpr int	GUN_VOLUME			= NORMAL_GUN_VOLUME;
 	static constexpr float	SPREAD_BASELINE		= 0.14f;
+	static constexpr float	ACCURACY_BASELINE	= 0.25f;
 
 #ifndef CLIENT_DLL
 public:	// SV exclusive variables.
@@ -1218,20 +1210,11 @@ public:	// CL exclusive functions.
 #endif
 
 public:	// basic logic funcs
-	virtual bool	Deploy			(void);
 	virtual void	PrimaryAttack	(void)	{ return M4A1Fire(GetSpread()); }
 	virtual void	SecondaryAttack	(void);
-	virtual void	WeaponIdle		(void)	{ return DefaultIdle(DASHING); }
 	virtual bool	Reload			(void);
-	virtual bool	HolsterStart	(void)	{ return DefaultHolster(HOLSTER, HOLSTER_TIME); }
-	virtual	void	DashStart		(void)	{ return DefaultDashStart<CM4A1>(); }
-	virtual void	DashEnd			(void)	{ return DefaultDashEnd<CM4A1>(); }
 
 public:	// util funcs
-	virtual	float	GetMaxSpeed		(void)	{ return MAX_SPEED; }
-	virtual void	ResetModel		(void);
-	virtual bool	SetLeftHand		(bool bAppear)	{ return DefaultSetLHand<CM4A1>(bAppear); }
-	virtual void	PlayBlockAnim	(void)	{ return DefaultBlock(BLOCK_UP, BLOCK_UP_TIME, BLOCK_DOWN, BLOCK_DOWN_TIME); }
 	virtual float	GetSpread		(void);
 
 public:	// new functions
@@ -1418,7 +1401,7 @@ public:	// new funcs
 #define M1014_WORLD_MODEL	"models/weapons/w_m1014.mdl"
 #define M1014_FIRE_SFX		"weapons/m1014/m1014_fire.wav"
 
-class CM1014 : public CBaseWeapon
+class CM1014 : public CBaseWeaponTemplate<CM1014>
 {
 public:	// Constants / Database
 	enum m1014_anim_e
@@ -1433,7 +1416,7 @@ public:	// Constants / Database
 		INSERT,
 		AFTER_RELOAD,
 		DRAW_FIRST,
-		DRAW,
+		DEPLOY,
 		HOLSTER,
 		CHECKMAG,
 		INSPECTION,
@@ -1449,6 +1432,7 @@ public:	// Constants / Database
 	static constexpr pcchar	VIEW_MODEL				= "models/weapons/v_m1014.mdl";
 	static constexpr pcchar	WORLD_MODEL				= "models/weapons/w_m1014.mdl";
 	static constexpr pcchar	FIRE_SFX				= "weapons/m1014/m1014_fire.wav";
+	static constexpr pcchar	POSTURE					= "mp5";
 	static constexpr float	MAX_SPEED				= 240.0f;
 	static constexpr float	DAMAGE					= 20.0f;
 	static constexpr int	PROJECTILE_COUNT		= 6;
@@ -1463,7 +1447,7 @@ public:	// Constants / Database
 	static constexpr float	TIME_SIDELOAD_SFX		= 1.0f;
 	static constexpr float	TIME_AFTER_RELOAD		= 0.7667f;
 	static constexpr float	DRAW_FIRST_TIME			= 1.9f;
-	static constexpr float	DRAW_TIME				= 0.833f;
+	static constexpr float	DEPLOY_TIME				= 0.833f;
 	static constexpr float	HOLSTER_TIME			= 0.833f;
 	static constexpr float	CHECKMAG_TIME			= 2.3f;
 	static constexpr float	INSPECTION_TIME			= 1.8f;
@@ -1476,6 +1460,7 @@ public:	// Constants / Database
 	static constexpr Vector	CONE_VECTOR				= Vector(0.0725, 0.0725, 0.0); // special shotgun spreads
 	static constexpr int	GUN_VOLUME				= LOUD_GUN_VOLUME;
 	static constexpr float	RANGE_MODIFIER			= 1.172793196;	// 80% damage @700 inches.
+	static constexpr float	ACCURACY_BASELINE = 0;	// Dummy, unused.
 
 #ifndef CLIENT_DLL
 public:	// SV exclusive variables.
@@ -1493,7 +1478,7 @@ public:	// CL exclusive functions.
 public:
 	// Bolt stop available anims.
 	static constexpr int BITS_BOLT_STOP_ANIM =	(1 << IDLE) |
-												(1 << DRAW) |
+												(1 << DEPLOY) |
 												(1 << HOLSTER) |
 												(1 << INSPECTION) |
 												(1 << BLOCK_UP) | (1 << BLOCK_DOWN) |
@@ -1523,20 +1508,12 @@ public:	// basic logic funcs
 	virtual void	PostFrame		(void);
 	virtual void	PrimaryAttack	(void);
 	virtual void	SecondaryAttack	(void);
-	virtual void	WeaponIdle		(void)	{ return DefaultIdle(DASHING); }
 	virtual	bool	Reload			(void);
-	virtual bool	HolsterStart	(void)	{ return DefaultHolster(HOLSTER, HOLSTER_TIME); }
-	virtual	void	DashStart		(void)	{ return DefaultDashStart<CM1014>(); }
-	virtual void	DashEnd			(void)	{ return DefaultDashEnd<CM1014>(); }
 
 public:	// util funcs
-	virtual	float	GetMaxSpeed		(void)	{ return MAX_SPEED; }
 	virtual	void	PlayEmptySound	(void);
 	virtual void	PushAnim		(void);
 	virtual void	PopAnim			(void);
-	virtual void	ResetModel		(void);
-	virtual bool	SetLeftHand		(bool bAppear) { return DefaultSetLHand<CM1014>(bAppear); }
-	virtual void	PlayBlockAnim	(void)	{ return DefaultBlock(BLOCK_UP, BLOCK_UP_TIME, BLOCK_DOWN, BLOCK_DOWN_TIME); }
 	virtual float	GetSpread		(void)	{ return CONE_VECTOR.x; }
 };
 
@@ -1545,7 +1522,7 @@ public:	// util funcs
 #define M45A1_FIRE_SFX		"weapons/m45a1/m45a1_fire.wav"
 #define M45A1_FIRE_SFX_SIL	"weapons/m45a1/m45a1_fire_sil.wav"
 
-class CM45A1 : public CBaseWeapon
+class CM45A1 : public CBaseWeaponTemplate<CM45A1>
 {
 public:	// Constants / Database
 	enum m45a1_anim_e
@@ -1559,7 +1536,7 @@ public:	// Constants / Database
 		RELOAD_EMPTY,
 		RELOAD,
 		DRAW_FIRST,
-		DRAW,
+		DEPLOY,
 		JUMP,
 		HOLSTER,
 		BLOCK_UP,
@@ -1581,11 +1558,12 @@ public:	// Constants / Database
 	static constexpr pcchar	WORLD_MODEL			= "models/w_elite.mdl";	// FIXME, BUGBUG
 	static constexpr pcchar	FIRE_SFX			= "weapons/m45a1/m45a1_fire.wav";
 	static constexpr pcchar	FIRE_SFX_SIL		= "weapons/m45a1/m45a1_fire_sil.wav";
+	static constexpr pcchar	POSTURE				= "onehanded";
 	static constexpr float	MAX_SPEED			= 250.0f;
 	static constexpr float	RELOAD_EMPYT_TIME	= 2.6f;
 	static constexpr float	RELOAD_TIME			= 2.166f;
 	static constexpr float	DRAW_FIRST_TIME		= 1.067F;
-	static constexpr float	DRAW_TIME			= 0.7F;
+	static constexpr float	DEPLOY_TIME			= 0.7F;
 	static constexpr float	HOLSTER_TIME		= 0.5F;
 	static constexpr float	DASH_ENTER_TIME		= 0.5333F;
 	static constexpr float	DASH_EXIT_TIME		= 0.5333F;
@@ -1605,6 +1583,7 @@ public:	// Constants / Database
 	static constexpr float	EFFECTIVE_RANGE		= 4096.0f;
 	static constexpr int	GUN_VOLUME			= NORMAL_GUN_VOLUME;
 	static constexpr float	SPREAD_BASELINE		= 0.9f;
+	static constexpr float	ACCURACY_BASELINE	= 0.88f;
 
 #ifndef CLIENT_DLL
 public:	// SV exclusive variables.
@@ -1620,7 +1599,7 @@ public:	// CL exclusive functions.
 
 	// Slide stop available anims.
 	static constexpr int BITS_SLIDE_STOP_ANIM = (1 << IDLE) |
-												(1 << DRAW) |
+												(1 << DEPLOY) |
 												(1 << HOLSTER) |
 												(1 << CHECK_MAGAZINE) |
 												(1 << LHAND_DOWN) | (1 << LHAND_UP) |
@@ -1633,16 +1612,8 @@ public:	// basic logic funcs
 	virtual void	PrimaryAttack	(void)	{ return M45A1Fire(GetSpread()); }
 	virtual void	SecondaryAttack	(void);
 	virtual bool	Reload			(void);
-	virtual void	WeaponIdle		(void)	{ return DefaultIdle(DASHING); }
-	virtual bool	HolsterStart	(void)	{ return DefaultHolster(HOLSTER, HOLSTER_TIME); }
-	virtual	void	DashStart		(void)	{ return DefaultDashStart<CM45A1>(); }
-	virtual void	DashEnd			(void)	{ return DefaultDashEnd<CM45A1>(); }
 
 public:	// util funcs
-	virtual	float	GetMaxSpeed		(void)	{ return MAX_SPEED; }
-	virtual void	ResetModel		(void);	// declare by marco.
-	virtual bool	SetLeftHand		(bool bAppear)	{ return DefaultSetLHand<CM45A1>(bAppear); }
-	virtual void	PlayBlockAnim	(void)	{ return DefaultBlock(BLOCK_UP, BLOCK_UP_TIME, BLOCK_DOWN, BLOCK_DOWN_TIME); }
 	virtual float	GetSpread		(void);
 
 public:	// new functions
@@ -1654,7 +1625,7 @@ public:	// new functions
 #define FN57_FIRE_SFX		"weapons/fiveseven/fiveseven_fire.wav"
 #define FN57_FIRE_SIL_SFX	"weapons/fiveseven/fiveseven_fire-sil.wav"
 
-class CFN57 : public CBaseWeapon
+class CFN57 : public CBaseWeaponTemplate<CFN57>
 {
 public:	// Constants / Database
 	enum fiveseven_anim_e
@@ -1666,7 +1637,7 @@ public:	// Constants / Database
 		AIM_SHOOT_LAST,
 		RELOAD,
 		RELOAD_EMPTY,
-		DRAW,
+		DEPLOY,
 		DRAW_FIRST,
 		HOLSTER,
 		CHECK_MAGAZINE,
@@ -1684,13 +1655,18 @@ public:	// Constants / Database
 		SH_DASH_EXIT,
 	};
 
+	static constexpr pcchar	VIEW_MODEL			= "models/weapons/v_fiveseven.mdl";
+	static constexpr pcchar	WORLD_MODEL			= "models/weapons/w_fiveseven.mdl";
+	static constexpr pcchar	FIRE_SFX			= "weapons/fiveseven/fiveseven_fire.wav";
+	static constexpr pcchar	FIRE_SFX_SIL		= "weapons/fiveseven/fiveseven_fire-sil.wav";
+	static constexpr pcchar	POSTURE				= "onehanded";
 	static constexpr float	MAX_SPEED			= 250.0f;
 	static constexpr float	DAMAGE				= 24;
 	static constexpr float	RANGE_MODIFER		= 1.149658245;	// 80% damage @800 inches.
 	static constexpr float	RELOAD_TIME			= 1.94F;
 	static constexpr float	RELOAD_EMPTY_TIME	= 1.86F;
 	static constexpr float	DRAW_FIRST_TIME		= 1.56F;
-	static constexpr float	DRAW_TIME			= 0.7F;
+	static constexpr float	DEPLOY_TIME			= 0.7F;
 	static constexpr float	HOLSTER_TIME		= 0.7F;
 	static constexpr float	CHECKMAG_TIME		= 2.033F;
 	static constexpr float	DASH_ENTER_TIME		= 0.8F;
@@ -1704,6 +1680,7 @@ public:	// Constants / Database
 	static constexpr int	PENETRATION			= 1;
 	static constexpr int	GUN_VOLUME			= NORMAL_GUN_VOLUME;
 	static constexpr float	SPREAD_BASELINE		= 0.4f;
+	static constexpr float	ACCURACY_BASELINE	= 0.92f;
 
 #ifndef CLIENT_DLL
 public:	// SV exclusive variables.
@@ -1720,7 +1697,7 @@ public:	// CL exclusive functions.
 
 	// Slide stop available anims.
 	static constexpr int BITS_SLIDE_STOP_ANIM = (1 << IDLE) |
-												(1 << DRAW) |
+												(1 << DEPLOY) |
 												(1 << HOLSTER) |
 												(1 << CHECK_MAGAZINE) |
 												(1 << LHAND_DOWN) | (1 << LHAND_UP) |
@@ -1733,16 +1710,8 @@ public:	// basic logic funcs
 	virtual void	PrimaryAttack	(void) { return FiveSevenFire(GetSpread()); }
 	virtual void	SecondaryAttack	(void);
 	virtual bool	Reload			(void);
-	virtual void	WeaponIdle		(void) { return DefaultIdle(DASHING); }
-	virtual bool	HolsterStart	(void) { return DefaultHolster(HOLSTER, HOLSTER_TIME); }
-	virtual	void	DashStart		(void) { return DefaultDashStart<CFN57>(); }
-	virtual void	DashEnd			(void) { return DefaultDashEnd<CFN57>(); }
 
 public:	// util funcs
-	virtual	float	GetMaxSpeed		(void) { return MAX_SPEED; }
-	virtual void	ResetModel		(void);	// declare by marco.
-	virtual bool	SetLeftHand		(bool bAppear)	{ return DefaultSetLHand<CFN57>(bAppear); }
-	virtual void	PlayBlockAnim	(void)	{ return DefaultBlock(BLOCK_UP, BLOCK_UP_TIME, BLOCK_DOWN, BLOCK_DOWN_TIME); }
 	virtual float	GetSpread		(void);
 
 public:	// new functions
@@ -1754,7 +1723,7 @@ public:	// new functions
 #define UMP45_FIRE_SFX		"weapons/ump45/ump45_fire.wav"
 #define UMP45_FIRE_SIL_SFX	"weapons/ump45/ump45_fire.wav"	// FIXME
 
-class CUMP45 : public CBaseWeapon
+class CUMP45 : public CBaseWeaponTemplate<CUMP45>
 {
 public:	// Constants / Database
 	enum ump45_anim_e
@@ -1764,7 +1733,7 @@ public:	// Constants / Database
 		SHOOT_AIM,
 		RELOAD,
 		RELOAD_EMPTY,
-		DRAW,
+		DEPLOY,
 		DRAW_FIRST,
 		HOLSTER,
 		CHECKMAG,
@@ -1779,12 +1748,17 @@ public:	// Constants / Database
 		DASH_EXIT
 	};
 
+	static constexpr auto	VIEW_MODEL		= "models/weapons/v_ump45.mdl";
+	static constexpr auto	WORLD_MODEL		= "models/weapons/w_ump45.mdl";
+	static constexpr auto	FIRE_SFX		= "weapons/ump45/ump45_fire.wav";
+	static constexpr auto	FIRE_SIL_SFX	= "weapons/ump45/ump45_fire.wav";	// FIXME
+	static constexpr auto	POSTURE			= "m249";
 	static constexpr float	MAX_SPEED		= 250.0f;
 	static constexpr float	DAMAGE			= 32;
 	static constexpr float	RANGE_MODIFER	= 1.149658245;	// 80% damage @800 inches.
 	static constexpr float	RELOAD_TIME		= 2.8667F;
 	static constexpr float	RELOAD_EMPTY_TIME = 3.0667F;
-	static constexpr float	DRAW_TIME		= 0.6333F;
+	static constexpr float	DEPLOY_TIME		= 0.6333F;
 	static constexpr float	DRAW_FIRST_TIME	= 1.2F;
 	static constexpr float	HOLSTER_TIME	= 0.6333F;
 	static constexpr float	CHECKMAG_TIME	= 3.6F;
@@ -1799,6 +1773,7 @@ public:	// Constants / Database
 	static constexpr int	PENETRATION		= 1;
 	static constexpr float	SPREAD_BASELINE	= 0.15f;
 	static constexpr int	GUN_VOLUME		= NORMAL_GUN_VOLUME;
+	static constexpr float	ACCURACY_BASELINE= 0.4f;
 
 #ifndef CLIENT_DLL
 public:	// SV exclusive variables.
@@ -1814,20 +1789,11 @@ public:	// CL exclusive functions.
 #endif
 
 public:	// basic logic funcs
-	virtual bool	Deploy			(void);
 	virtual void	PrimaryAttack	(void)	{ return UMP45Fire(GetSpread()); }
 	virtual void	SecondaryAttack	(void);
 	virtual	bool	Reload			(void);
-	virtual void	WeaponIdle		(void)	{ return DefaultIdle(DASHING); }
-	virtual bool	HolsterStart	(void)	{ return DefaultHolster(HOLSTER, HOLSTER_TIME); }
-	virtual	void	DashStart		(void)	{ return DefaultDashStart<CUMP45>(); }
-	virtual void	DashEnd			(void)	{ return DefaultDashEnd<CUMP45>(); }
 
 public:	// util funcs
-	virtual	float	GetMaxSpeed		(void)	{ return MAX_SPEED; }
-	virtual void	ResetModel		(void);
-	virtual bool	SetLeftHand		(bool bAppear)	{ return DefaultSetLHand<CUMP45>(bAppear); }
-	virtual void	PlayBlockAnim	(void)	{ return DefaultBlock(BLOCK_UP, BLOCK_UP_TIME, BLOCK_DOWN, BLOCK_DOWN_TIME); }
 	virtual float	GetSpread		(void);
 
 public:	// new functions
@@ -1860,9 +1826,10 @@ public:	// Constants / Database
 		LHAND_UP,
 	};
 
-	static constexpr pcchar	VIEW_MODEL			= "models/weapons/v_psg1.mdl";
-	static constexpr pcchar	WORLD_MODEL			= "models/weapons/w_psg1.mdl";
-	static constexpr pcchar	FIRE_SFX			= "weapons/m14ebr/m14ebr_fire.wav";	// UNDONE
+	static constexpr auto	VIEW_MODEL			= "models/weapons/v_psg1.mdl";
+	static constexpr auto	WORLD_MODEL			= "models/weapons/w_psg1.mdl";
+	static constexpr auto	FIRE_SFX			= "weapons/m14ebr/m14ebr_fire.wav";	// UNDONE
+	static constexpr auto	POSTURE				= "rifle";
 	static constexpr float	MAX_SPEED			= 210.0f;
 	static constexpr float	MAX_SPEED_ZOOM		= 150.0f;
 	static constexpr float	DAMAGE				= 90.0f;
@@ -1885,6 +1852,7 @@ public:	// Constants / Database
 	static constexpr float	EFFECTIVE_RANGE		= 8192.0f;
 	static constexpr int	GUN_VOLUME			= BIG_EXPLOSION_VOLUME;
 	static constexpr float	SPREAD_BASELINE		= 0.0025f;
+	static constexpr float	ACCURACY_BASELINE	= 0.2f;
 
 #ifndef CLIENT_DLL
 public:	// SV exclusive variables.
@@ -1900,21 +1868,14 @@ public:	// CL exclusive functions.
 #endif
 
 public:	// basic logic funcs
-	virtual bool	Deploy			(void) final;
-	virtual void	PrimaryAttack	(void) final { return PSG1Fire(GetSpread()); }
-	virtual void	SecondaryAttack	(void) final { return DefaultScopeSight(Vector(-4.9f, 5, 0.5f), 25); }
-	virtual void	WeaponIdle		(void) final { return DefaultIdle(DASHING); }
-	virtual bool	Reload			(void) final;
-	virtual bool	HolsterStart	(void) final;
-	virtual	void	DashStart		(void) final { return DefaultDashStart<CPSG1>(); }
-	virtual void	DashEnd			(void) final { return DefaultDashEnd<CPSG1>(); }
+	void	PrimaryAttack	(void) final { return PSG1Fire(GetSpread()); }
+	void	SecondaryAttack	(void) final { return DefaultScopeSight(Vector(-4.9f, 5, 0.5f), 25); }
+	bool	Reload			(void) final;
+	bool	HolsterStart	(void) final;
 
 public:	// util funcs
-	virtual float	GetMaxSpeed		(void) final;
-	virtual void	ResetModel		(void) final;
-	virtual bool	SetLeftHand		(bool bAppear) final { return DefaultSetLHand<CPSG1>(bAppear); }
-	virtual void	PlayBlockAnim	(void) final { return DefaultBlock(BLOCK_UP, BLOCK_UP_TIME, BLOCK_DOWN, BLOCK_DOWN_TIME); }
-	virtual float	GetSpread		(void) final;
+	float	GetMaxSpeed		(void) final;
+	float	GetSpread		(void) final;
 
 public:	// new funcs
 	void PSG1Fire(float flSpread, float flCycleTime = FIRE_INTERVAL);

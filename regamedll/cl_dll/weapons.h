@@ -108,6 +108,7 @@ public:
 	void	Radio(const char* psz1, const char* psz2) {}
 	bool	StartSwitchingWeapon(CBaseWeapon* pSwitchingTo);	// play normal holster anim.
 	bool	StartSwitchingWeapon(WeaponIdType iId);	// play normal holster anim.
+	bool	SwitchWeapon(CBaseWeapon* pSwitchingTo);	// skip holster anim.
 };
 
 extern int g_runfuncs;

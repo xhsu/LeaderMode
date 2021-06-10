@@ -115,17 +115,11 @@ void CDEagle::Think(void)
 
 bool CDEagle::Deploy()
 {
-	m_flAccuracy = 0.9f;
-
 	// this anim is slide-moving.
 	if (m_iClip <= 0)
 		m_bitsFlags &= ~WPNSTATE_DRAW_FIRST;
 
-	return DefaultDeploy(
-		VIEW_MODEL, WORLD_MODEL,
-		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DRAW_FIRST : DRAW,
-		"onehanded",
-		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DRAW_FIRST_TIME : DRAW_TIME);
+	return BaseClass::Deploy();
 }
 
 float CDEagle::GetSpread(void)
@@ -229,7 +223,7 @@ bool CDEagle::Reload()
 		m_iClip ? RELOAD_TIME : RELOAD_EMPTY_TIME,
 		m_iClip ? 0.628f : 0.571f))
 	{
-		m_flAccuracy = 0.9f;
+		m_flAccuracy = ACCURACY_BASELINE;
 		return true;
 	}
 
@@ -245,5 +239,3 @@ bool CDEagle::Reload()
 
 	return false;
 }
-
-DECLARE_STANDARD_RESET_MODEL_FUNC(DEagle)

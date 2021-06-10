@@ -99,13 +99,6 @@ void CSCARH::Think(void)
 
 #endif
 
-bool CSCARH::Deploy()
-{
-	m_flAccuracy = 0.25f;
-	m_iShotsFired = 0;
-	return DefaultDeploy(VIEW_MODEL, WORLD_MODEL, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DRAW_FIRST : DEPLOY, "mp5", (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DRAW_FIRST_TIME : DEPLOY_TIME);
-}
-
 void CSCARH::SecondaryAttack()
 {
 	switch (m_iVariation)
@@ -124,7 +117,7 @@ void CSCARH::SecondaryAttack()
 
 float CSCARH::GetSpread(void)
 {
-	m_flAccuracy = (float(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 220.0f) + 0.25f;
+	m_flAccuracy = (float(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 220.0f) + ACCURACY_BASELINE;
 
 	if (m_flAccuracy > 1.0f)
 		m_flAccuracy = 1.0f;
@@ -226,7 +219,7 @@ bool CSCARH::Reload()
 		m_iClip ? RELOAD_TIME : RELOAD_EMPTY_TIME,
 		m_iClip ? 0.69f : 0.54f))
 	{
-		m_flAccuracy = 0.25f;
+		m_flAccuracy = ACCURACY_BASELINE;
 		return true;
 	}
 
@@ -242,5 +235,3 @@ bool CSCARH::Reload()
 
 	return false;
 }
-
-DECLARE_STANDARD_RESET_MODEL_FUNC(SCARH)

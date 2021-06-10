@@ -95,10 +95,7 @@ bool CM1014::Deploy()
 {
 	m_bAllowNextEmptySound = true;
 
-	return DefaultDeploy(VIEW_MODEL, WORLD_MODEL,
-		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DRAW_FIRST : DRAW,
-		"mp5",
-		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DRAW_FIRST_TIME : DRAW_TIME);
+	return BaseClass::Deploy();
 }
 
 void CM1014::PostFrame(void)
@@ -339,5 +336,3 @@ void CM1014::PopAnim(void)
 	m_flNextInsertAnim = gpGlobals->time - m_Stack2.m_flNextInsertAnim;
 	m_flNextInsertionSFX = gpGlobals->time - m_Stack2.m_flNextInsertionSFX;
 }
-
-DECLARE_STANDARD_RESET_MODEL_FUNC(M1014)

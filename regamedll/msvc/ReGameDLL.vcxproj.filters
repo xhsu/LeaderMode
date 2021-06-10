@@ -133,12 +133,6 @@
     <ClCompile Include="..\dlls\wpn_shared\wpn_scout.cpp">
       <Filter>dlls\wpn_shared</Filter>
     </ClCompile>
-    <ClCompile Include="..\dlls\wpn_shared\wpn_psg1.cpp">
-      <Filter>dlls\wpn_shared</Filter>
-    </ClCompile>
-    <ClCompile Include="..\dlls\wpn_shared\wpn_ump45.cpp">
-      <Filter>dlls\wpn_shared</Filter>
-    </ClCompile>
     <ClCompile Include="..\dlls\wpn_shared\wpn_usp.cpp">
       <Filter>dlls\wpn_shared</Filter>
     </ClCompile>
@@ -450,6 +444,12 @@
     </ClCompile>
     <ClCompile Include="..\tier0\dbg.cpp">
       <Filter>tier0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dlls\wpn_shared\wpn_psg1.cpp">
+      <Filter>dlls\wpn_shared\Sanctioned</Filter>
+    </ClCompile>
+    <ClCompile Include="..\dlls\wpn_shared\wpn_ump45.cpp">
+      <Filter>dlls\wpn_shared\Sanctioned</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

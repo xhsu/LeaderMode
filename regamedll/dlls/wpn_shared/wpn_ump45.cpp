@@ -98,13 +98,6 @@ int CUMP45::CalcBodyParam(void)
 
 #endif
 
-bool CUMP45::Deploy()
-{
-	m_flAccuracy = 0.4f;
-
-	return DefaultDeploy(UMP45_VIEW_MODEL, UMP45_WORLD_MODEL, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DRAW_FIRST : DRAW, "m249", (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DRAW_FIRST_TIME : DRAW_TIME);
-}
-
 void CUMP45::SecondaryAttack(void)
 {
 	switch (m_iVariation)
@@ -127,7 +120,7 @@ void CUMP45::SecondaryAttack(void)
 
 float CUMP45::GetSpread(void)
 {
-	m_flAccuracy = ((m_iShotsFired * m_iShotsFired) / 210) + 0.4f;
+	m_flAccuracy = ((m_iShotsFired * m_iShotsFired) / 210) + ACCURACY_BASELINE;
 
 	if (m_flAccuracy > 1.0f)
 		m_flAccuracy = 1.0f;
@@ -226,7 +219,7 @@ bool CUMP45::Reload()
 		m_iClip ? RELOAD_TIME : RELOAD_EMPTY_TIME,
 		m_iClip ? 0.7667f : 0.4667f))
 	{
-		m_flAccuracy = 0.4f;
+		m_flAccuracy = ACCURACY_BASELINE;
 		return true;
 	}
 
@@ -242,5 +235,3 @@ bool CUMP45::Reload()
 
 	return false;
 }
-
-DECLARE_STANDARD_RESET_MODEL_FUNC(UMP45)

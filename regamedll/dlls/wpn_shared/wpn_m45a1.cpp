@@ -117,17 +117,11 @@ int CM45A1::CalcBodyParam(void)
 
 bool CM45A1::Deploy()
 {
-	m_flAccuracy = 0.88f;
-
 	// this anim is slide-moving.
 	if (m_iClip <= 0)
 		m_bitsFlags &= ~WPNSTATE_DRAW_FIRST;
 
-	return DefaultDeploy(
-		VIEW_MODEL, WORLD_MODEL,
-		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DRAW_FIRST : DRAW,
-		"onehanded",
-		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? DRAW_FIRST_TIME : DRAW_TIME);
+	return BaseClass::Deploy();
 }
 
 void CM45A1::SecondaryAttack()
@@ -265,7 +259,7 @@ bool CM45A1::Reload()
 		m_iClip ? RELOAD_TIME : RELOAD_EMPYT_TIME,
 		m_iClip ? 0.566f : 0.5f))
 	{
-		m_flAccuracy = 0.88f;
+		m_flAccuracy = ACCURACY_BASELINE;
 		return true;
 	}
 
@@ -281,5 +275,3 @@ bool CM45A1::Reload()
 
 	return false;
 }
-
-DECLARE_STANDARD_RESET_MODEL_FUNC(M45A1)
