@@ -194,7 +194,10 @@ int CHudWeaponList::Draw(float flTime)
 		if (m_rgvecDestCoord[i].y < m_flLastY)
 			m_flLastY = m_rgvecDestCoord[i].y;
 
-		pWeapon = g_rgpClientWeapons[m_rgiWeapons[i]];
+		pWeapon = gPseudoPlayer.HasWeapons(m_rgiWeapons[i]);
+
+		if (!pWeapon)
+			continue;
 
 		// make the current coord move to dest coord step by step.
 		vecDiff = m_rgvecDestCoord[i] - m_rgvecCurCoord[i];

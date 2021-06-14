@@ -1092,7 +1092,7 @@ MSG_FUNC(Role)
 		}
 
 		// we have to update the m_iVariation of all weapons, since their behaviour would change sometimes.
-		for (auto pWeapon : g_rgpClientWeapons)
+		for (auto& pWeapon : CBaseWeapon::m_lstWeapons)
 		{
 			// non-nullptr members only.
 			if (pWeapon)

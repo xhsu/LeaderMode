@@ -18,7 +18,7 @@ int CM1014::m_iShell = 0;
 
 void CM1014::Precache()
 {
-	PRECACHE_NECESSARY_FILES(M1014);
+	BaseClass::Precache();
 
 	m_usEvent = PRECACHE_EVENT(1, "events/m1014.sc");
 	m_iShell = PRECACHE_MODEL("models/shotgunshell.mdl");

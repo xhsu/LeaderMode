@@ -19,8 +19,8 @@ int CFN57::m_iShell = 0;
 
 void CFN57::Precache()
 {
-	PRECACHE_NECESSARY_FILES(FN57);
-	PRECACHE_SOUND(FN57_FIRE_SIL_SFX);
+	BaseClass::Precache();
+	PRECACHE_SOUND(FIRE_SFX_SIL);
 
 	m_iShell = PRECACHE_MODEL("models/pshell.mdl");
 	m_usEvent = PRECACHE_EVENT(1, "events/fiveseven.sc");

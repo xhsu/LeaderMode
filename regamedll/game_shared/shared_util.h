@@ -124,3 +124,5 @@ struct HAS_MEMBER_##member                                                      
 : public std::integral_constant<bool, HasMember_##member<T>::RESULT>              \
 {                                                                                 \
 }
+
+#define ENABLE_IF_MEMBER_PRESENT(classname, member)	template <typename = typename std::enable_if<HAS_MEMBER_##member<classname>::value>::type>

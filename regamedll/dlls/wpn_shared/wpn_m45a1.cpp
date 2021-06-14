@@ -18,7 +18,7 @@ int CM45A1::m_iShell = 0;
 
 void CM45A1::Precache()
 {
-	PRECACHE_NECESSARY_FILES(M45A1);
+	BaseClass::Precache();
 
 	m_iShell = PRECACHE_MODEL("models/pshell.mdl");
 	m_usEvent = PRECACHE_EVENT(1, "events/m45a1.sc");

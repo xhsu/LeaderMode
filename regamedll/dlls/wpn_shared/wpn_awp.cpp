@@ -19,7 +19,7 @@ int CAWP::m_iShell = 0;
 
 void CAWP::Precache()
 {
-	PRECACHE_NECESSARY_FILES(AWP);
+	BaseClass::Precache();
 
 	m_iShell = PRECACHE_MODEL("models/rshell_big.mdl");
 	m_usEvent = PRECACHE_EVENT(1, "events/awp.sc");

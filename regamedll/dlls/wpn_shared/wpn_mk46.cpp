@@ -20,7 +20,7 @@ int CMK46::m_iShell = 0;
 
 void CMK46::Precache()
 {
-	PRECACHE_NECESSARY_FILES(MK46);
+	BaseClass::Precache();
 
 	m_iShell = PRECACHE_MODEL("models/rshell.mdl");
 	m_usEvent = PRECACHE_EVENT(1, "events/mk46.sc");

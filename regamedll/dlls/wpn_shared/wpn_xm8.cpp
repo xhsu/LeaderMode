@@ -17,7 +17,7 @@ int CXM8::m_iShell = 0;
 
 void CXM8::Precache()
 {
-	PRECACHE_NECESSARY_FILES(XM8);
+	BaseClass::Precache();
 
 	m_iShell = PRECACHE_MODEL("models/rshell.mdl");
 	m_usEvent = PRECACHE_EVENT(1, "events/xm8.sc");

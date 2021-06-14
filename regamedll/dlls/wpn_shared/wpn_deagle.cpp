@@ -19,7 +19,7 @@ int CDEagle::m_iShell = 0;
 
 void CDEagle::Precache()
 {
-	PRECACHE_NECESSARY_FILES(DEagle);
+	BaseClass::Precache();
 
 	m_iShell = PRECACHE_MODEL("models/pshell.mdl");
 	m_usEvent = PRECACHE_EVENT(1, "events/deagle.sc");

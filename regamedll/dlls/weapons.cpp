@@ -133,6 +133,7 @@ void WeaponsPrecache()
 	PRECACHE_MODEL(THROWABLE_VIEW_MODEL);
 	PRECACHE_MODEL(C4_WORLD_MODEL);
 	PRECACHE_SOUND(C4_PLACED_SFX);
+	PRECACHE_MODEL(DUMMY_VIEW_MODEL);
 
 	PRECACHE_SOUND("items/ammopickup1.wav");	// grenade purchasing SFX.
 
@@ -199,8 +200,6 @@ BOOL CanAttack(float attack_time, float curtime, BOOL isPredicted)
 		return (attack_time <= 0.0f) ? TRUE : FALSE;
 	}
 }
-
-std::list<CBaseWeapon*>	CBaseWeapon::m_lstWeapons;
 
 void CBaseWeapon::TheWeaponsThink(void)
 {
@@ -1346,6 +1345,14 @@ float CBaseWeapon::DefaultSpread(float flBaseline, float flAimingMul, float flDu
 		flBaseline *= flAimingMul;
 
 	return flBaseline;	// it's already be modified.
+}
+
+template<class CWpn>
+void CBaseWeaponTemplate<CWpn>::Precache(void)
+{
+	PRECACHE_MODEL(CWpn::VIEW_MODEL);
+	PRECACHE_MODEL(CWpn::WORLD_MODEL);
+	PRECACHE_SOUND(CWpn::FIRE_SFX);
 }
 
 void CBaseWeapon::SendWeaponAnim(int iAnim, bool bSkipLocal)

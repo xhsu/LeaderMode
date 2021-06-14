@@ -460,7 +460,6 @@ void CommandFunc_PrevWeapon(void);
 void CommandFunc_SelectLastItem(void);
 void CommandFunc_NextEquipment(void);
 void CommandFunc_PrevEquipment(void);
-void CommandFunc_AlterAct(void);
 
 #define ScreenHeight (gHUD::m_scrinfo.iHeight)
 #define ScreenWidth (gHUD::m_scrinfo.iWidth)

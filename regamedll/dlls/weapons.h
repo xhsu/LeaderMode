@@ -54,6 +54,8 @@
 												}
 #endif
 
+#define DUMMY_VIEW_MODEL	"models/weapons/v_nothing.mdl"
+
 class CBaseEntity;
 class CBasePlayer;
 class CWeaponBox;
@@ -137,7 +139,7 @@ public:
 	static	CBaseWeapon*	Give(WeaponIdType iId, CBasePlayer* pPlayer = nullptr, int iClip = 0, unsigned bitsFlags = 0);
 
 public:
-	static std::list<CBaseWeapon*>	m_lstWeapons;
+	static inline std::list<CBaseWeapon*>	m_lstWeapons;
 
 public:
 	WeaponIdType	m_iId					{ WEAPON_NONE };
@@ -283,6 +285,10 @@ public:	// basic logic funcs
 	void	DashStart	(void) override { return DefaultDashStart(CWpn::DASH_ENTER, CWpn::DASH_ENTER_TIME); }
 	void	DashEnd		(void) override { return DefaultDashEnd(CWpn::DASH_ENTER, CWpn::DASH_ENTER_TIME, CWpn::DASH_EXIT, CWpn::DASH_EXIT_TIME); }
 
+#ifndef CLIENT_DLL
+	void	Precache	(void) override;	// Generalized precache function - precache basical files only.
+#endif
+
 public:
 	float	GetMaxSpeed		(void) override { return CWpn::MAX_SPEED; }
 	void	ResetModel		(void) override;
@@ -362,10 +368,6 @@ enum mp5n_e
 	MP5N_SHOOT2,
 	MP5N_SHOOT3,
 };
-
-#define SCARH_VIEW_MODEL	"models/weapons/v_scarh.mdl"
-#define SCARH_WORLD_MODEL	"models/weapons/w_scarl.mdl"
-#define SCARH_FIRE_SFX		"weapons/SCARH/mk17_shoot.wav"
 
 class CSCARH : public CBaseWeaponTemplate<CSCARH>
 {
@@ -505,10 +507,6 @@ public:	// new functions
 	void AK47Fire(float flSpread, float flCycleTime = (60.0f / AK47_RPM));
 };
 
-#define XM8_VIEW_MODEL	"models/weapons/v_xm8.mdl"
-#define XM8_WORLD_MODEL	"models/weapons/w_xm8.mdl"
-#define XM8_FIRE_SFX	"weapons/xm8/xm8_shoot.wav"
-
 class CXM8 : public CBaseWeaponTemplate<CXM8>
 {
 public:	// Constants / Database
@@ -595,10 +593,6 @@ public:	// util funcs
 public:	// new functions
 	void XM8Fire(float flSpread, float flCycleTime = (60.0f / RPM));
 };
-
-#define AWP_VIEW_MODEL	"models/weapons/v_awp.mdl"
-#define AWP_WORLD_MODEL	"models/weapons/w_awp.mdl"
-#define AWP_FIRE_SFX	"weapons/l115a3/l115a3_fire.wav"
 
 class CAWP : public CBaseWeaponTemplate<CAWP>
 {
@@ -699,10 +693,6 @@ public:	// util funcs
 public:	// new funcs
 	void AWPFire(float flSpread, float flCycleTime = FIRE_INTERVAL);
 };
-
-#define DEagle_VIEW_MODEL	"models/weapons/v_deagle.mdl"
-#define DEagle_WORLD_MODEL	"models/weapons/w_deagle.mdl"
-#define DEagle_FIRE_SFX		"weapons/deagle/deagle_fire.wav"
 
 class CDEagle : public CBaseWeaponTemplate<CDEagle>
 {
@@ -978,10 +968,6 @@ namespace BasicKnife
 #endif
 };
 
-#define MK46_VIEW_MODEL		"models/weapons/v_mk46.mdl"
-#define MK46_WORLD_MODEL	"models/weapons/w_mk46.mdl"
-#define MK46_FIRE_SFX		"weapons/mk46/mk46_fire.wav"
-
 class CMK46 : public CBaseWeaponTemplate<CMK46>
 {
 public:	// Constants / Database
@@ -1129,10 +1115,6 @@ public:	// util funcs
 	virtual void	ResetModel		(void);
 	virtual float	GetSpread		(void)	{ return KSG12_CONE_VECTOR.x; }
 };
-
-#define M4A1_VIEW_MODEL		"models/weapons/v_m4a1.mdl"
-#define M4A1_WORLD_MODEL	"models/weapons/w_m4a1.mdl"
-#define M4A1_FIRE_SFX		"weapons/AR15/ar15_shoot.wav"
 
 class CM4A1 : public CBaseWeaponTemplate<CM4A1>
 {
@@ -1397,10 +1379,6 @@ public:	// new funcs
 	void MP7A1Fire(float flSpread, float flCycleTime = (60.0f / MP7A1_RPM));
 };
 
-#define M1014_VIEW_MODEL	"models/weapons/v_m1014.mdl"
-#define M1014_WORLD_MODEL	"models/weapons/w_m1014.mdl"
-#define M1014_FIRE_SFX		"weapons/m1014/m1014_fire.wav"
-
 class CM1014 : public CBaseWeaponTemplate<CM1014>
 {
 public:	// Constants / Database
@@ -1517,11 +1495,6 @@ public:	// util funcs
 	virtual float	GetSpread		(void)	{ return CONE_VECTOR.x; }
 };
 
-#define M45A1_VIEW_MODEL	"models/weapons/v_m45a1.mdl"
-#define M45A1_WORLD_MODEL	"models/w_elite.mdl"	// FIXME, BUGBUG
-#define M45A1_FIRE_SFX		"weapons/m45a1/m45a1_fire.wav"
-#define M45A1_FIRE_SFX_SIL	"weapons/m45a1/m45a1_fire_sil.wav"
-
 class CM45A1 : public CBaseWeaponTemplate<CM45A1>
 {
 public:	// Constants / Database
@@ -1620,11 +1593,6 @@ public:	// new functions
 	void M45A1Fire(float flSpread, float flCycleTime = FIRE_INTERVAL);
 };
 
-#define FN57_VIEW_MODEL		"models/weapons/v_fiveseven.mdl"
-#define FN57_WORLD_MODEL	"models/weapons/w_fiveseven.mdl"
-#define FN57_FIRE_SFX		"weapons/fiveseven/fiveseven_fire.wav"
-#define FN57_FIRE_SIL_SFX	"weapons/fiveseven/fiveseven_fire-sil.wav"
-
 class CFN57 : public CBaseWeaponTemplate<CFN57>
 {
 public:	// Constants / Database
@@ -1718,11 +1686,6 @@ public:	// new functions
 	void FiveSevenFire(float flSpread, float flCycleTime = FIRE_INTERVAL);
 };
 
-#define UMP45_VIEW_MODEL	"models/weapons/v_ump45.mdl"
-#define UMP45_WORLD_MODEL	"models/weapons/w_ump45.mdl"	
-#define UMP45_FIRE_SFX		"weapons/ump45/ump45_fire.wav"
-#define UMP45_FIRE_SIL_SFX	"weapons/ump45/ump45_fire.wav"	// FIXME
-
 class CUMP45 : public CBaseWeaponTemplate<CUMP45>
 {
 public:	// Constants / Database
@@ -1800,11 +1763,7 @@ public:	// new functions
 	void UMP45Fire(float flSpread, float flCycleTime = 60.0f / RPM);
 };
 
-#define PSG1_VIEW_MODEL		"models/weapons/v_psg1.mdl"
-#define PSG1_WORLD_MODEL	"models/weapons/w_psg1.mdl"
-#define PSG1_FIRE_SFX		"weapons/m14ebr/m14ebr_fire.wav"	// UNDONE
-
-class CPSG1 : public CBaseWeapon
+class CPSG1 : public CBaseWeaponTemplate<CPSG1>
 {
 public:	// Constants / Database
 	enum psg1_anim_e
@@ -1813,7 +1772,7 @@ public:	// Constants / Database
 		SHOOT,
 		RELOAD,
 		RELOAD_EMPTY,
-		DRAW,
+		DEPLOY,
 		DRAW_FIRST,
 		HOLSTER,
 		CHECK_MAGAZINE,
@@ -1838,8 +1797,8 @@ public:	// Constants / Database
 	static constexpr float	FIRE_ANIMTIME		= 0.4333f;
 	static constexpr float	RELOAD_TIME			= 3.0667F;
 	static constexpr float	RELOAD_EMPTY_TIME	= 3.8667F;
-	static constexpr float	DEPLOY_TIME			= 0.833F;
-	static constexpr float	DRAW_FIRST_TIME		= 2.033F;
+	static constexpr float	DEPLOY_TIME			= 0.8333F;
+	static constexpr float	DRAW_FIRST_TIME		= 2.0333F;
 	static constexpr float	HOLSTER_TIME		= 0.8333F;
 	static constexpr float	CHECK_MAGAZINE_TIME	= 3.0667F;
 	static constexpr float	BLOCK_UP_TIME		= 0.3667F;

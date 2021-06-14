@@ -61,7 +61,7 @@ Returns 1 if health is <= 0
 */
 bool CL_IsDead(void)
 {
-	return (CHudHealth::m_iHealth <= 0 || g_PlayerExtraInfo[gHUD::m_iPlayerNum].m_bIsDead);
+	return (CHudHealth::m_iHealth <= 0 || g_PlayerExtraInfo[gHUD::m_iPlayerNum].m_bIsDead || gPseudoPlayer.pev->deadflag != DEAD_NO);
 }
 
 /*

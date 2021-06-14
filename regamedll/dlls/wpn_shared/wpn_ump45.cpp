@@ -17,7 +17,7 @@ int CUMP45::m_iShell = 0;
 
 void CUMP45::Precache()
 {
-	PRECACHE_NECESSARY_FILES(UMP45);
+	BaseClass::Precache();
 
 	m_iShell = PRECACHE_MODEL("models/pshell.mdl");
 	m_usEvent = PRECACHE_EVENT(1, "events/ump45.sc");

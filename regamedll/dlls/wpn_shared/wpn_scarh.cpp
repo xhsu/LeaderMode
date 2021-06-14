@@ -17,7 +17,7 @@ int CSCARH::m_iShell = 0;
 
 void CSCARH::Precache()
 {
-	PRECACHE_NECESSARY_FILES(SCARH);
+	BaseClass::Precache();
 
 	m_iShell = PRECACHE_MODEL("models/rshell.mdl");
 	m_usEvent = PRECACHE_EVENT(1, "events/scarh.sc");

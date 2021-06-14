@@ -1281,6 +1281,10 @@ int R_StudioDrawModel(int flags)
 		if (g_pCurWeapon)
 			cl_righthand->value = g_pCurWeapon->UsingInvertedVMDL();
 
+		// Set the model before texture thinks.
+		if (g_pCurWeapon && gPseudoPlayer.pev->viewmodel)
+			g_pViewEnt->model = IEngineStudio.GetModelByIndex(gPseudoPlayer.pev->viewmodel);
+
 		// detecting vmdl changing and swapping the vmdl v_hands.bmp texture.
 		gViewModelHandsTexture::Think();
 	}

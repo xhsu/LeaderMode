@@ -12,14 +12,8 @@ local_state_t g_sWpnTo;
 usercmd_t g_sWpnCmd;
 const Vector g_vecZero = Vector(0, 0, 0);
 int g_iCurViewModelAnim = 0;
-CBaseWeapon* g_pCurWeapon = nullptr;
 WeaponIdType g_iSelectedWeapon = WEAPON_NONE;	// this means directly switch weapon. try to use gPseudoPlayer.StartSwitchingWeapon() instead!
 cvar_t* cl_holdtoaim = nullptr;	// HOLD to aim vs. PRESS to aim.
-
-CBasePlayer gPseudoPlayer;
-std::shared_ptr<pseudo_global_vars_s> gpGlobals;
-
-std::array<CBaseWeapon*, LAST_WEAPON> g_rgpClientWeapons;	// LUNA: switched to safer method.
 
 //
 // PSEUDO-PLAYER
@@ -30,6 +24,13 @@ bool g_bFreezeTimeOver = false;
 bool g_bInBombZone = false;
 bool g_bHoldingShield = false;
 bool g_bIsBlocked = false;	// this should be override, but tell the server!
+
+inline decltype(auto) CSGameRules(void)
+{
+	static std::shared_ptr<pseudo_gamerule_s> p = std::make_shared<pseudo_gamerule_s>();
+
+	return p;
+}
 
 // the construction function of pseudo player and gpGlobals
 CBasePlayer::CBasePlayer()
@@ -144,31 +145,7 @@ void CBasePlayer::ResetUsingEquipment(void)
 
 bool CBasePlayer::StartSwitchingWeapon(CBaseWeapon* pSwitchingTo)
 {
-	if (!pSwitchingTo)
-		return false;
-
-	// TODO
-	if ((m_pActiveItem && !m_pActiveItem->CanHolster()) /*|| !pSwitchingTo->CanDeploy()*/)
-		return false;
-
-	if (m_pActiveItem)
-	{
-		m_pActiveItem->HolsterStart();
-		m_iWpnSwitchingTo = pSwitchingTo->m_iId;
-
-		return true;
-	}
-	else
-	{
-		// no active weapon? which means we can directly deploy this one.
-		g_iSelectedWeapon = pSwitchingTo->m_iId;
-		return true;
-	}
-}
-
-bool CBasePlayer::StartSwitchingWeapon(WeaponIdType iId)
-{
-	if (iId <= WEAPON_NONE || iId >= LAST_WEAPON)
+	if (!pSwitchingTo || pSwitchingTo->IsDead())
 		return false;
 
 	// TODO
@@ -176,28 +153,48 @@ bool CBasePlayer::StartSwitchingWeapon(WeaponIdType iId)
 		return false;
 
 	// you can't deploy same weapon twice.
-	if (iId == m_pActiveItem->m_iId)
+	if (pSwitchingTo == m_pActiveItem)
 		return false;
 
 	if (m_pActiveItem)
 	{
 		m_pActiveItem->HolsterStart();
-		m_iWpnSwitchingTo = iId;
+		m_pWpnSwitchingTo = pSwitchingTo;
 
 		return true;
 	}
 	else
 	{
 		// no active weapon? which means we can directly deploy this one.
-		g_iSelectedWeapon = iId;
+		g_iSelectedWeapon = pSwitchingTo->m_iId;	// Additional line at client. Investigate the necessity.
+		return SwitchWeapon(pSwitchingTo);
+	}
+}
+
+bool CBasePlayer::StartSwitchingWeapon(WeaponIdType iSwitchingTo)
+{
+	for (auto& pWeapon : CBaseWeapon::m_lstWeapons)
+	{
+		if (pWeapon->IsDead())
+			continue;
+
+		if (pWeapon->m_iId != iSwitchingTo)
+			continue;
+
+		StartSwitchingWeapon(pWeapon);
 		return true;
 	}
+
+	return false;
 }
 
 bool CBasePlayer::SwitchWeapon(CBaseWeapon* pSwitchingTo)
 {
-	if (!pSwitchingTo)
+	if (!pSwitchingTo || pSwitchingTo->IsDead())
 		return false;
+
+	if (m_pActiveItem && m_pActiveItem->IsDead())
+		m_pActiveItem = nullptr;
 
 	// TODO
 	if ((m_pActiveItem && !m_pActiveItem->CanHolster()) /*|| !pSwitchingTo->CanDeploy()*/)
@@ -218,6 +215,58 @@ bool CBasePlayer::SwitchWeapon(CBaseWeapon* pSwitchingTo)
 	return true;
 }
 
+CBaseWeapon* CBasePlayer::HasWeapons(WeaponIdType iId)
+{
+	for (auto& pWeapon : CBaseWeapon::m_lstWeapons)
+	{
+		if (pWeapon->IsDead())
+			continue;
+
+		if (pWeapon->m_iId != iId)
+			continue;
+
+		return pWeapon;
+	}
+
+	return nullptr;
+}
+
+// Add a weapon to the player (Item == Weapon == Selectable Object)
+bool CBasePlayer::AddPlayerItem(CBaseWeapon* pItem)
+{
+	if (!pItem)
+		return false;
+
+	if (pItem->AddToPlayer(this))
+	{
+		// No gamerule event here.
+
+		if (pItem->m_pItemInfo->m_iSlot == PRIMARY_WEAPON_SLOT)
+			m_bHasPrimary = true;
+
+		// get it into player's inventory.
+		m_rgpPlayerItems[pItem->m_pItemInfo->m_iSlot] = pItem;
+		pev->weapons |= (1 << pItem->m_iId);	// TODO: abolish this?
+
+		// FX will be done at server side.
+
+		// Slot info will be sent from server side
+
+		// Shield settings can only be done from server side.
+
+		// should we switch to this item?
+		if (CSGameRules()->FShouldSwitchWeapon(this, pItem))
+		{
+			StartSwitchingWeapon(pItem);
+		}
+
+		gHUD::m_bitsHideHUDDisplay &= ~HIDEHUD_WEAPONS;
+		return true;
+	}
+
+	return false;
+}
+
 //
 // PSEUDO-WEAPON
 //
@@ -234,6 +283,67 @@ BOOL CanAttack(float attack_time, float curtime, BOOL isPredicted)
 	else
 	{
 		return (attack_time <= 0.0f) ? TRUE : FALSE;
+	}
+}
+
+bool pseudo_gamerule_s::FShouldSwitchWeapon(CBasePlayer* pPlayer, CBaseWeapon* pWeapon)
+{
+	// TODO: maybe reuse this ?
+	/*if (!pWeapon->CanDeploy())
+	{
+		// that weapon can't deploy anyway.
+		return FALSE;
+	}*/
+
+	if (!pPlayer->m_pActiveItem)
+	{
+		// player doesn't have an active item!
+		return TRUE;
+	}
+
+	// TODO: How to get keyinfo from client side?
+	// Infobuffer name: _cl_autowepswitch
+//	if (!pPlayer->m_iAutoWepSwitch)
+//		return FALSE;
+
+//	if (pPlayer->m_iAutoWepSwitch == 2 && (pPlayer->m_afButtonLast & (IN_ATTACK | IN_ATTACK2)))
+//		return FALSE;
+
+	if (!pPlayer->m_pActiveItem->CanHolster())
+	{
+		// can't put away the active item.
+		return FALSE;
+	}
+
+	if (pWeapon->m_pItemInfo->m_iWeight > pPlayer->m_pActiveItem->m_pItemInfo->m_iWeight)
+		return TRUE;
+
+	return FALSE;
+}
+
+void CBaseWeapon::TheWeaponsThink(void)
+{
+	for (auto iter = m_lstWeapons.begin(); iter != m_lstWeapons.end(); /*do nothing*/)
+	{
+		auto p = *iter;
+
+		if (p->IsDead())
+		{
+			delete p;
+			iter = m_lstWeapons.erase(iter);
+		}
+		else
+		{
+			// Player no longer in the game.
+			if (!g_bInGameWorld)
+				p->Kill();
+
+			// Player gets killed.
+			if (CL_IsDead())
+				p->Kill();
+
+			iter++;
+		}
 	}
 }
 
@@ -319,6 +429,8 @@ CBaseWeapon* CBaseWeapon::Give(WeaponIdType iId, CBasePlayer* pPlayer, int iClip
 		return nullptr;
 	}
 
+	m_lstWeapons.emplace_back(p);
+
 	p->m_iId = iId;
 	p->m_iClip = iClip ? iClip : g_rgWpnInfo[iId].m_iMaxClip;
 	p->m_bitsFlags = bitsFlags;
@@ -377,7 +489,7 @@ void CBaseWeapon::PostFrame()
 	// if we should be holster, then just do it. stop everything else.
 	if (m_bitsFlags & WPNSTATE_HOLSTERING)
 	{
-		m_pPlayer->SwitchWeapon(g_rgpClientWeapons[m_pPlayer->m_iWpnSwitchingTo]);
+		m_pPlayer->SwitchWeapon(m_pPlayer->m_pWpnSwitchingTo);
 		return;
 	}
 
@@ -744,11 +856,22 @@ bool CBaseWeapon::Melee(void)
 	if (m_bInZoom)
 		SecondaryAttack();
 
-	// do nothing melee-ish action on client side.
-	// this has to be executed from SV.
-
-	// but we should push-pop anims.
+	// Save the current state of anim.
 	PushAnim();
+
+	// Reduced from BaseKnife::Deploy() and Slash()
+	m_bitsFlags |= WPNSTATE_MELEE;	// mark for further process.
+
+	m_pPlayer->pev->fov = DEFAULT_FOV;
+	m_pPlayer->m_iLastZoom = DEFAULT_FOV;
+	m_pPlayer->m_bResumeZoom = false;
+
+	Q_strlcpy(m_pPlayer->m_szAnimExtention, "knife");
+	g_pViewEnt->model = gEngfuncs.CL_LoadModel("models/weapons/v_knife.mdl", &m_pPlayer->pev->viewmodel);
+
+	SendWeaponAnim(KNIFE_QUICK_SLASH, false);
+	m_pPlayer->m_flNextAttack = KNIFE_QUICK_SLASH_TIME;
+
 	return true;
 }
 
@@ -894,15 +1017,17 @@ bool CBaseWeapon::Drop(void** ppWeaponBoxReturned)
 	if (ppWeaponBoxReturned)
 		(*ppWeaponBoxReturned) = nullptr;
 
-	// we have nothing to do on client side.
-	// you can't set m_pPlayer to be null here. since only one player existed at client.dll.
+	// It is equivlent to have this weapon removed.
+	Kill();
 
 	return true;
 }
 
 bool CBaseWeapon::Kill(void)
 {
-	m_bitsFlags |= WPNSTATE_DEAD;
+	m_pPlayer = nullptr;
+
+	m_bitsFlags |= WPNSTATE_DEAD;	// Mark for death.
 	return true;
 }
 
@@ -1446,10 +1571,10 @@ void HUD_InitClientWeapons(void)
 
 	gpGlobals = std::make_shared<pseudo_global_vars_s>();
 
-	Q_memset(&g_rgpClientWeapons, NULL, sizeof(g_rgpClientWeapons));
+	for (auto& p : CBaseWeapon::m_lstWeapons)
+		p->Kill();
 
-	for (int i = WEAPON_NONE; i < LAST_WEAPON; i++)
-		g_rgpClientWeapons[i] = CBaseWeapon::Give((WeaponIdType)i, &gPseudoPlayer);
+	CBaseWeapon::m_lstWeapons.clear();
 }
 
 // from view.cpp
@@ -1466,10 +1591,12 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 {
 	using hr_clock = std::chrono::high_resolution_clock;
 
+	CBaseWeapon::TheWeaponsThink();	// Call it no matter what.
+
 	if (!from || !to || !cmd || !g_bInGameWorld)
 		return;
 
-	int i;
+//	int i;
 	int buttonsChanged;
 	static int lasthealth;
 	int flags;
@@ -1488,8 +1615,9 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	//gpGlobals->frametime = std::chrono::duration_cast<std::chrono::microseconds>(dur).count() / 1000000.0;	// Method offered by Crsky.
 
 	// Fill in data based on selected weapon
-	if (from->client.m_iId > WEAPON_NONE && from->client.m_iId < LAST_WEAPON)
-		g_pCurWeapon = g_rgpClientWeapons[from->client.m_iId];
+//	if (from->client.m_iId > WEAPON_NONE && from->client.m_iId < LAST_WEAPON)
+//		g_pCurWeapon = g_rgpClientWeapons[from->client.m_iId];
+	g_pCurWeapon = gPseudoPlayer.m_pActiveItem;
 
 	// these vars have to be obtained nomatter what.
 	g_iWaterLevel = from->client.waterlevel;
@@ -1568,9 +1696,9 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	gPseudoPlayer.pev->maxspeed = STATE->client.maxspeed; //!!! Taking "to"
 	gPseudoPlayer.pev->punchangle = STATE->client.punchangle; //!!! Taking "to"
 	gPseudoPlayer.pev->fov = gHUD::m_iFOV;	// 11072020 LUNA: from->client.fov is broken, keeping give me 0.
-	gPseudoPlayer.pev->weaponanim = from->client.weaponanim;
-	gPseudoPlayer.pev->viewmodel = from->client.viewmodel;
-	gPseudoPlayer.m_flNextAttack = from->client.m_flNextAttack;
+//	gPseudoPlayer.pev->weaponanim = from->client.weaponanim;
+//	gPseudoPlayer.pev->viewmodel = from->client.viewmodel;
+//	gPseudoPlayer.m_flNextAttack = from->client.m_flNextAttack;
 	gPseudoPlayer.m_iRoleType = g_iRoleType;	// synchronize local player role.
 
 	g_iPlayerFlags = gPseudoPlayer.pev->flags = from->client.flags;
@@ -1619,32 +1747,32 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	// Now see if we issued a changeweapon command ( and we're not dead )
 	// g_iSelectedWeapon was assign to cmd->weaponselect in input.cpp
 	// this is a weapon switching prediction.
-	if (cmd->weaponselect && (gPseudoPlayer.pev->deadflag != (DEAD_DISCARDBODY + 1)))
-	{
-		// Switched to a different weapon?
-		if (from->weapondata[cmd->weaponselect].m_iId == cmd->weaponselect)
-		{
-			CBaseWeapon* pNew = g_rgpClientWeapons[cmd->weaponselect];
-			if (pNew && (pNew != g_pCurWeapon))
-			{
-				// Put away old weapon
-				if (gPseudoPlayer.m_pActiveItem)
-					gPseudoPlayer.m_pActiveItem->Holstered();
+	//if (cmd->weaponselect && (gPseudoPlayer.pev->deadflag != (DEAD_DISCARDBODY + 1)))
+	//{
+	//	// Switched to a different weapon?
+	//	if (from->weapondata[cmd->weaponselect].m_iId == cmd->weaponselect)
+	//	{
+	//		CBaseWeapon* pNew = g_rgpClientWeapons[cmd->weaponselect];
+	//		if (pNew && (pNew != g_pCurWeapon))
+	//		{
+	//			// Put away old weapon
+	//			if (gPseudoPlayer.m_pActiveItem)
+	//				gPseudoPlayer.m_pActiveItem->Holstered();
 
-				gPseudoPlayer.m_pLastItem = gPseudoPlayer.m_pActiveItem;
-				gPseudoPlayer.m_pActiveItem = pNew;
+	//			gPseudoPlayer.m_pLastItem = gPseudoPlayer.m_pActiveItem;
+	//			gPseudoPlayer.m_pActiveItem = pNew;
 
-				// Deploy new weapon
-				if (gPseudoPlayer.m_pActiveItem)
-				{
-					gPseudoPlayer.m_pActiveItem->Deploy();
-				}
+	//			// Deploy new weapon
+	//			if (gPseudoPlayer.m_pActiveItem)
+	//			{
+	//				gPseudoPlayer.m_pActiveItem->Deploy();
+	//			}
 
-				// Update weapon id so we can predict things correctly.
-				to->client.m_iId = cmd->weaponselect;
-			}
-		}
-	}
+	//			// Update weapon id so we can predict things correctly.
+	//			to->client.m_iId = cmd->weaponselect;
+	//		}
+	//	}
+	//}
 
 	// Copy in results of prediction code
 	to->client.viewmodel = gPseudoPlayer.pev->viewmodel;
@@ -1674,20 +1802,52 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 		to->client.vuser4.y = 0;
 	}
 
-	for (i = 0; i < LAST_WEAPON; i++)
+	//for (i = 0; i < LAST_WEAPON; i++)
+	//{
+	//	CBaseWeapon* pCurrent = g_rgpClientWeapons[i];
+
+	//	weapon_data_t* pto = to->weapondata + i;
+
+	//	if (!pCurrent)
+	//	{
+	//		Q_memset(pto, NULL, sizeof(weapon_data_t));
+	//		continue;
+	//	}
+
+	//	// Decrement weapon counters, server does this at same time ( during post think, after doing everything else )
+	//	// LUNA: is this gpGlobals->framerate ???
+	//	pCurrent->m_flNextPrimaryAttack -= gpGlobals->frametime;	// LUNA: NEVER use cmd->msec / 1000.0f
+	//	pCurrent->m_flNextSecondaryAttack -= gpGlobals->frametime;
+	//	pCurrent->m_flTimeWeaponIdle -= gpGlobals->frametime;
+
+	//	if (pCurrent->m_flNextPrimaryAttack < -1.0)
+	//		pCurrent->m_flNextPrimaryAttack = -1.0;
+
+	//	if (pCurrent->m_flNextSecondaryAttack < -0.001)
+	//		pCurrent->m_flNextSecondaryAttack = -0.001;
+
+	//	if (pCurrent->m_flTimeWeaponIdle < -0.001)
+	//		pCurrent->m_flTimeWeaponIdle = -0.001;
+
+	//	pto->m_iClip = pCurrent->m_iClip;
+
+	//	pto->m_flNextPrimaryAttack = pCurrent->m_flNextPrimaryAttack;
+	//	pto->m_flNextSecondaryAttack = pCurrent->m_flNextSecondaryAttack;
+	//	pto->m_flTimeWeaponIdle = pCurrent->m_flTimeWeaponIdle;
+
+	//	pto->m_fInReload = pCurrent->m_bInReload;
+	//	pto->m_fInSpecialReload = pCurrent->m_bInZoom;
+	//	//pto->m_flNextReload = pCurrent->m_flNextReload / 1s;
+	//	//pto->fuser2 = pCurrent->m_flStartThrow.time_since_epoch() / 1s;
+	//	//pto->fuser3 = pCurrent->m_flReleaseThrow.time_since_epoch() / 1s;
+	//	//pto->iuser1 = pCurrent->m_iSwing;
+	//	pto->m_iWeaponState = pCurrent->m_bitsFlags;
+	//	pto->m_fInZoom = pCurrent->m_iShotsFired;
+	//	pto->m_fAimedDamage = pCurrent->m_flLastFire;
+	//}
+
+	for (auto& pCurrent : CBaseWeapon::m_lstWeapons)
 	{
-		CBaseWeapon* pCurrent = g_rgpClientWeapons[i];
-
-		weapon_data_t* pto = to->weapondata + i;
-
-		if (!pCurrent)
-		{
-			Q_memset(pto, NULL, sizeof(weapon_data_t));
-			continue;
-		}
-
-		// Decrement weapon counters, server does this at same time ( during post think, after doing everything else )
-		// LUNA: is this gpGlobals->framerate ???
 		pCurrent->m_flNextPrimaryAttack -= gpGlobals->frametime;	// LUNA: NEVER use cmd->msec / 1000.0f
 		pCurrent->m_flNextSecondaryAttack -= gpGlobals->frametime;
 		pCurrent->m_flTimeWeaponIdle -= gpGlobals->frametime;
@@ -1700,22 +1860,6 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 
 		if (pCurrent->m_flTimeWeaponIdle < -0.001)
 			pCurrent->m_flTimeWeaponIdle = -0.001;
-
-		pto->m_iClip = pCurrent->m_iClip;
-
-		pto->m_flNextPrimaryAttack = pCurrent->m_flNextPrimaryAttack;
-		pto->m_flNextSecondaryAttack = pCurrent->m_flNextSecondaryAttack;
-		pto->m_flTimeWeaponIdle = pCurrent->m_flTimeWeaponIdle;
-
-		pto->m_fInReload = pCurrent->m_bInReload;
-		pto->m_fInSpecialReload = pCurrent->m_bInZoom;
-		//pto->m_flNextReload = pCurrent->m_flNextReload / 1s;
-		//pto->fuser2 = pCurrent->m_flStartThrow.time_since_epoch() / 1s;
-		//pto->fuser3 = pCurrent->m_flReleaseThrow.time_since_epoch() / 1s;
-		//pto->iuser1 = pCurrent->m_iSwing;
-		pto->m_iWeaponState = pCurrent->m_bitsFlags;
-		pto->m_fInZoom = pCurrent->m_iShotsFired;
-		pto->m_fAimedDamage = pCurrent->m_flLastFire;
 	}
 
 #ifdef CHECKING_NEXT_PRIM_ATTACK_SYNC
@@ -1724,11 +1868,15 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 #endif
 
 	// m_flNextAttack is now part of the weapons, but is part of the player instead
-	to->client.m_flNextAttack -= gpGlobals->frametime;
-	if (to->client.m_flNextAttack < -0.001)
-	{
-		to->client.m_flNextAttack = -0.001;
-	}
+//	to->client.m_flNextAttack -= gpGlobals->frametime;
+//	if (to->client.m_flNextAttack < -0.001)
+//	{
+//		to->client.m_flNextAttack = -0.001;
+//	}
+
+	gPseudoPlayer.m_flNextAttack -= gpGlobals->frametime;
+	if (gPseudoPlayer.m_flNextAttack < -0.001)
+		gPseudoPlayer.m_flNextAttack = -0.001;
 }
 
 /*
@@ -1786,6 +1934,40 @@ void CommandFunc_Melee(void)
 
 /*
 =====================
+CommandFunc_AlterAct
+=====================
+*/
+void CommandFunc_AlterAct(void)
+{
+	// only pass to server when it is allowed in client.
+	if (g_pCurWeapon && g_pCurWeapon->AlterAct())
+		gEngfuncs.pfnServerCmd("changemode\n");
+}
+
+/*
+=====================
+CommandFunc_Give
+=====================
+*/
+void CommandFunc_Give(void)
+{
+	auto parg1 = gEngfuncs.Cmd_Argv(1);
+
+	if (gEngfuncs.Cmd_Argc() > 1 && !Q_strncmp(parg1, "weapon_", charsmax("weapon_")))
+	{
+		const auto pInfo = GetWeaponInfo(parg1);
+		if (pInfo)
+		{
+			//pPlayer->GiveNamedItem(pInfo->m_pszInternalName);
+			gPseudoPlayer.AddPlayerItem(CBaseWeapon::Give(pInfo->m_iId, &gPseudoPlayer));
+
+			gEngfuncs.pfnServerCmd(SharedVarArgs("give %s\n", parg1));
+		}
+	}
+}
+
+/*
+=====================
 Wpn_Init
 =====================
 */
@@ -1794,4 +1976,6 @@ void Wpn_Init()
 	cl_holdtoaim = gEngfuncs.pfnRegisterVariable("cl_holdtoaim", "0", FCVAR_ARCHIVE | FCVAR_CLIENTDLL | FCVAR_USERINFO);
 
 	gEngfuncs.pfnAddCommand("melee", CommandFunc_Melee);
+	gEngfuncs.pfnAddCommand("changemode", CommandFunc_AlterAct);
+	gEngfuncs.pfnAddCommand("give", CommandFunc_Give);
 }

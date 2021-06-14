@@ -2648,6 +2648,7 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 				if (pPlayer->m_pActiveItem)
 					pPlayer->m_pActiveItem->AlterAct();
 			}
+#ifdef _DEBUG
 			else if (FStrEq(pcmd, "tp"))
 			{
 				Vector vecOrg = Vector(Q_atoi(CMD_ARGV(1)), Q_atoi(CMD_ARGV(2)), Q_atoi(CMD_ARGV(3)));
@@ -2658,9 +2659,33 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 				Vector vecOrg = Vector(Q_atoi(CMD_ARGV(1)), Q_atoi(CMD_ARGV(2)), Q_atoi(CMD_ARGV(3)));
 				SET_ORIGIN(pEntity, pEntity->v.origin + vecOrg);
 			}
+#endif
 			else if (FStrEq(pcmd, "detonate"))
 			{
 				CGrenade::C4_Detonate(pPlayer);
+			}
+			else if (FStrEq(pcmd, "__shoot"))
+			{
+				union UShootData
+				{
+					UShootData() {}
+
+					char raw[192U - sizeof("__shoot")];
+
+					struct
+					{
+						WeaponIdType m_iId{ 0 };
+						Vector m_vecViewAngle{ g_vecZero };
+						Vector m_vecOrigin{ g_vecZero };
+						int iClip{ 0 };
+					}
+					data;
+				}
+				uCurrentShoot;
+
+				constexpr auto sizeofdata = sizeof(UShootData::data);
+
+				Q_strlcpy(uCurrentShoot.raw, CMD_ARGS() + sizeof("__shoot"));
 			}
 			else
 			{
@@ -3745,7 +3770,7 @@ void EXT_FUNC UpdateClientData(const edict_t *ent, int sendweapons, struct clien
 
 	cd->flags = pev->flags;
 	cd->health = pev->health;
-	cd->viewmodel = MODEL_INDEX(STRING(pev->viewmodel));
+	cd->viewmodel = MODEL_INDEX(DUMMY_VIEW_MODEL);	// Remove the ability that server can assign client's view model.
 	cd->waterlevel = pev->waterlevel;
 	cd->watertype = pev->watertype;
 	cd->weapons = pev->weapons;

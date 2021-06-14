@@ -28,6 +28,7 @@
 
 #include "precompiled.h"
 #include <algorithm>
+#include <random>
 
 BotPhraseManager *TheBotPhrases = nullptr;
 CountdownTimer BotChatterInterface::m_encourageTimer;
@@ -281,9 +282,13 @@ char *BotPhrase::GetSpeakable(int bankIndex, float *duration) const
 // Randomly shuffle the speakable order
 void BotPhrase::Randomize()
 {
+	// obtain a time-based seed:
+	static unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+	static std::default_random_engine e(seed);
+
 	for (size_t i = 0; i < m_voiceBank.size(); i++)
 	{
-		std::random_shuffle(m_voiceBank[i]->begin(), m_voiceBank[i]->end());
+		std::shuffle(m_voiceBank[i]->begin(), m_voiceBank[i]->end(), e);
 	}
 }
 

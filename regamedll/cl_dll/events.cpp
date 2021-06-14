@@ -1346,7 +1346,7 @@ DECLARE_EVENT(Fire57)
 
 	// original goldsrc api: VOL = 1.0, ATTN = 0.8
 	EV_PlayGunFire2(vecSrc + forward * 10.0f,
-		args->bparam1 ? FN57_FIRE_SIL_SFX : FN57_FIRE_SFX,
+		args->bparam1 ? CFN57::FIRE_SFX_SIL : CFN57::FIRE_SFX,
 		args->bparam1 ? QUIET_GUN_VOLUME : CFN57::GUN_VOLUME);
 
 	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, CFN57::EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_FIVESEVEN].m_iAmmoType, CFN57::PENETRATION);
@@ -1722,7 +1722,7 @@ DECLARE_EVENT(FirePSG1)
 	Vector vSpread = Vector(args->fparam1, args->fparam2, 0);
 
 	// original goldsrc api: VOL = 1.0, ATTN = 0.6
-	EV_PlayGunFire2(vecSrc + forward * 10.0f, PSG1_FIRE_SFX, CPSG1::GUN_VOLUME);
+	EV_PlayGunFire2(vecSrc + forward * 10.0f, CPSG1::FIRE_SFX, CPSG1::GUN_VOLUME);
 
 	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, CPSG1::EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_PSG1].m_iAmmoType, CPSG1::PENETRATION);
 }
@@ -1879,7 +1879,7 @@ DECLARE_EVENT(FireUMP45)
 
 	// original API: vol = 1.0, attn = 0.64, pitch = 94~110
 	EV_PlayGunFire(vecSrc + forward * 10.0f,
-		args->bparam2 ? UMP45_FIRE_SIL_SFX : UMP45_FIRE_SFX,
+		args->bparam2 ? CUMP45::FIRE_SIL_SFX : CUMP45::FIRE_SFX,
 		args->bparam2 ? QUIET_GUN_VOLUME : CUMP45::GUN_VOLUME,
 		1.0f, RANDOM_LONG(87, 105));
 

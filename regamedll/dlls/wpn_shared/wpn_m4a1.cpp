@@ -17,7 +17,7 @@ int CM4A1::m_iShell = 0;
 
 void CM4A1::Precache()
 {
-	PRECACHE_NECESSARY_FILES(M4A1);
+	BaseClass::Precache();
 
 	m_iShell = PRECACHE_MODEL("models/rshell.mdl");
 	m_usEvent = PRECACHE_EVENT(1, "events/m4a1.sc");

@@ -246,7 +246,6 @@ void gHUD::Init(void)
 	gEngfuncs.pfnAddCommand("lastinv", CommandFunc_SelectLastItem);
 	gEngfuncs.pfnAddCommand("eqpnext", CommandFunc_NextEquipment);
 	gEngfuncs.pfnAddCommand("eqpprev", CommandFunc_PrevEquipment);
-	gEngfuncs.pfnAddCommand("changemode", CommandFunc_AlterAct);
 	gEngfuncs.pfnAddCommand("updateoverview", &OverviewMgr::OnHUDReset);
 	gEngfuncs.pfnAddCommand("showteam", []() {g_pViewport->m_pTeamMenu->Show(!g_pViewport->m_pTeamMenu->IsVisible()); });
 	gEngfuncs.pfnAddCommand("declarerole", []() {g_pViewport->m_pRoleMenu->Show(!g_pViewport->m_pRoleMenu->IsVisible()); });
@@ -972,20 +971,37 @@ void gHUD::SlotInput(int iSlot)
 	if (iSlot <= SLOT_NO || iSlot >= MAX_ITEM_TYPES)
 		return;
 
-	const char* psz = g_rgWpnInfo[gHUD::m_WeaponList.m_rgiWeapons[iSlot]].m_pszInternalName;
-	if (psz && Q_strlen(psz))
+	for (auto& pWeapon : CBaseWeapon::m_lstWeapons)
 	{
-		char sz[128];
-		Q_strlcpy(sz, psz);
-		gEngfuncs.pfnServerCmd(sz);
-		gPseudoPlayer.StartSwitchingWeapon(gHUD::m_WeaponList.m_rgiWeapons[iSlot]);
+		if (pWeapon->IsDead())
+			continue;
 
-		gEngfuncs.pfnPlaySoundByName(WEAPONLIST_SELECT_SFX, VOL_NORM);
+		if (pWeapon->m_pItemInfo->m_iSlot != iSlot)
+			continue;
+
+		gEngfuncs.pfnServerCmd(pWeapon->m_pItemInfo->m_pszInternalName);
+		gPseudoPlayer.StartSwitchingWeapon(pWeapon);
+		PlaySound(WEAPONLIST_SELECT_SFX);
+
+		return;
 	}
-	else
-	{
-		gEngfuncs.pfnPlaySoundByName(WEAPONLIST_EMPTY_SFX, VOL_NORM);
-	}
+
+	PlaySound(WEAPONLIST_EMPTY_SFX);
+
+	//const char* psz = g_rgWpnInfo[gHUD::m_WeaponList.m_rgiWeapons[iSlot]].m_pszInternalName;
+	//if (psz && Q_strlen(psz))
+	//{
+	//	char sz[128];
+	//	Q_strlcpy(sz, psz);
+	//	gEngfuncs.pfnServerCmd(sz);
+	//	gPseudoPlayer.StartSwitchingWeapon(gHUD::m_WeaponList.m_rgiWeapons[iSlot]);
+
+	//	gEngfuncs.pfnPlaySoundByName(WEAPONLIST_SELECT_SFX, VOL_NORM);
+	//}
+	//else
+	//{
+	//	gEngfuncs.pfnPlaySoundByName(WEAPONLIST_EMPTY_SFX, VOL_NORM);
+	//}
 }
 
 void CommandFunc_Slot1(void) { gHUD::SlotInput(1); }
@@ -1125,9 +1141,10 @@ void CommandFunc_SelectLastItem(void)	// an equivlent function of void CBasePlay
 	{
 		for (int i = PRIMARY_WEAPON_SLOT; i < MAX_ITEM_TYPES; i++)
 		{
-			if (g_rgpClientWeapons[gHUD::m_WeaponList.m_rgiWeapons[i]] && g_rgpClientWeapons[gHUD::m_WeaponList.m_rgiWeapons[i]] != gPseudoPlayer.m_pActiveItem)
+			auto pWeapon = gPseudoPlayer.HasWeapons(gHUD::m_WeaponList.m_rgiWeapons[i]);
+			if (pWeapon && pWeapon != gPseudoPlayer.m_pActiveItem)
 			{
-				gPseudoPlayer.m_pLastItem = g_rgpClientWeapons[gHUD::m_WeaponList.m_rgiWeapons[i]];
+				gPseudoPlayer.m_pLastItem = pWeapon;
 				break;
 			}
 		}
@@ -1266,13 +1283,6 @@ void CommandFunc_PrevEquipment(void)
 	gEngfuncs.pfnServerCmd(SharedVarArgs("eqpselect %d\n", gPseudoPlayer.m_iUsingGrenadeId));
 
 	CHudEquipments::OnPrev();
-}
-
-void CommandFunc_AlterAct(void)
-{
-	// only pass to server when it is allowed in client.
-	if (g_pCurWeapon && g_pCurWeapon->AlterAct())
-		gEngfuncs.pfnServerCmd("changemode\n");
 }
 
 /*

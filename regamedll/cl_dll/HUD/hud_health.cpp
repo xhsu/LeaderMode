@@ -138,6 +138,14 @@ void CHudHealth::Draw(float flTime, bool bIntermission)
 
 void CHudHealth::Think(void)
 {
+	// TODO: Sync health with:
+	// UpdateClientData?
+	// View?
+	// UserCmd?
+	// PredictData?
+	// PM?
+	MsgFunc_Health(g_pparams.health);
+
 	if (m_flPercentage >= 0.2f)
 		m_flAlpha = Q_clamp<float>(m_flAlpha - gHUD::m_flUCDTimeDelta * 20.0f, MIN_ALPHA, 255);
 	else
