@@ -223,15 +223,6 @@ void CXM8::PrimaryAttack()
 	XM8Fire(GetSpread(), flInterval);
 }
 
-float CXM8::GetMaxSpeed(void)
-{
-	if (int(m_pPlayer->pev->fov) == DEFAULT_FOV)
-		return MAX_SPEED;
-
-	// Slower speed when zoomed in.
-	return MAX_SPEED_ZOOM;
-}
-
 float CXM8::GetSpread(void)
 {
 	m_flAccuracy = (float(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 215.0f) + ACCURACY_BASELINE;

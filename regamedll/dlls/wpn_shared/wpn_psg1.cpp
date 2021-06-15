@@ -229,8 +229,3 @@ bool CPSG1::HolsterStart()
 	// then holster.
 	return DefaultHolster(HOLSTER, HOLSTER_TIME);
 }
-
-float CPSG1::GetMaxSpeed()
-{
-	return (m_pPlayer->pev->fov >= DEFAULT_FOV) ? MAX_SPEED : MAX_SPEED_ZOOM;
-}

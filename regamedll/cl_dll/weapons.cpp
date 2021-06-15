@@ -482,6 +482,23 @@ bool CBaseWeapon::AddToPlayer(CBasePlayer* pPlayer)
 	return true;
 }
 
+template<class CWpn>
+bool CBaseWeaponTemplate<CWpn>::Deploy(void)
+{
+	if constexpr (DETECT_ACCURACY_BASELINE<CWpn>::value)
+		m_flAccuracy = CWpn::ACCURACY_BASELINE;
+
+	m_iShotsFired = 0;
+
+	return DefaultDeploy(
+		CWpn::VIEW_MODEL,
+		CWpn::WORLD_MODEL,
+		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? CWpn::DRAW_FIRST : CWpn::DEPLOY,
+		CWpn::POSTURE,
+		(m_bitsFlags & WPNSTATE_DRAW_FIRST) ? CWpn::DRAW_FIRST_TIME : CWpn::DEPLOY_TIME
+	);
+}
+
 void CBaseWeapon::PostFrame()
 {
 	int usableButtons = CL_ButtonBits();//m_pPlayer->pev->button;
@@ -1029,6 +1046,27 @@ bool CBaseWeapon::Kill(void)
 
 	m_bitsFlags |= WPNSTATE_DEAD;	// Mark for death.
 	return true;
+}
+
+template<class CWpn>
+float CBaseWeaponTemplate<CWpn>::GetMaxSpeed(void)
+{
+	if constexpr (DETECT_MAX_SPEED_ZOOM<CWpn>::value)
+	{
+		// Slower speed when zoomed in.
+		if (std::roundf(m_pPlayer->pev->fov) < DEFAULT_FOV)
+			return CWpn::MAX_SPEED_ZOOM;
+	}
+
+	if constexpr (DETECT_MAX_SPEED<CWpn>::value)
+	{
+		return CWpn::MAX_SPEED;
+	}
+
+	if constexpr (!DETECT_MAX_SPEED_ZOOM<CWpn>::value && !DETECT_MAX_SPEED<CWpn>::value)
+	{
+		return CBaseWeapon::GetMaxSpeed();
+	}
 }
 
 bool CBaseWeapon::AddPrimaryAmmo(int iCount)

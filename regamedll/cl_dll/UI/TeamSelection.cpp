@@ -132,10 +132,8 @@ CTeamMenu::CTeamMenu(void) : BaseClass(nullptr, "TeamMenu")
 	if (!m_sPlayerCountIcon)
 		m_sPlayerCountIcon.Load("sprites/Miscellaneous/SchemeNumber.dds");
 
-	m_CTBackgrounds[0].Load("sprites/ClassesIcon/Portraits/CommanderMonochrome.dds");
-	m_CTBackgrounds[1].Load("sprites/ClassesIcon/Portraits/CommanderColored.dds");
-	m_TERBackgrounds[0].Load("sprites/ClassesIcon/Portraits/GodfatherMonochrome.dds");
-	m_TERBackgrounds[1].Load("sprites/ClassesIcon/Portraits/GodfatherColored.dds");
+	m_CTImage.Load("sprites/ClassesIcon/Portraits/CommanderMonochrome.dds");
+	m_TImage.Load("sprites/ClassesIcon/Portraits/GodfatherMonochrome.dds");
 
 #pragma region Team Buttons Setup
 	Vector2D vecTButtonPos = Vector2D(iPanelWidth, iPanelTall) / 2 - Vector2D(MARGIN_BUTTON, BUTTON_SIZE) / 2 - Vector2D(BUTTON_SIZE, 0);
@@ -190,29 +188,32 @@ void CTeamMenu::OnThink(void)
 	if (IsVisible())
 		SetMouseInputEnabled(true);
 
-	m_flBackgroundAlphaGoals.fill(128);
-	m_vecBackgroundColorGoals.fill(Vector(1, 1, 1));
+	// FIXME: Temp solution.
+	if (m_CTColor.a() < 0x7F)
+		GetAnimationController()->RunAnimationCommand(this, "m_CTColor", BUTTON_IDLE_COLOR, 0, BUTTON_FADING_TIME, AnimationController::INTERPOLATOR_LINEAR);
+	if (m_TColor.a() < 0x7F)
+		GetAnimationController()->RunAnimationCommand(this, "m_TColor", BUTTON_IDLE_COLOR, 0, BUTTON_FADING_TIME, AnimationController::INTERPOLATOR_LINEAR);
 
-	if (m_pButtonCT->IsPendingSelected())
+	if (m_pButtonCT->IsPendingSelected() && !m_bPendingOnCT)
 	{
-		m_iHighlightedButton = TEAM_CT;
-		m_vecBackgroundColorGoals[TEAM_CT] = VEC_CT_COLOUR;
+		m_bPendingOnCT = true;
+		GetAnimationController()->RunAnimationCommand(this, "m_CTColor", BUTTON_CT_COLOR, 0, BUTTON_FADING_TIME, AnimationController::INTERPOLATOR_DEACCEL);
 	}
-	else if (m_pButtonT->IsPendingSelected())
+	else if (!m_pButtonCT->IsPendingSelected() && m_bPendingOnCT)
 	{
-		m_iHighlightedButton = TEAM_TERRORIST;
-		m_vecBackgroundColorGoals[TEAM_TERRORIST] = VEC_T_COLOUR;
+		m_bPendingOnCT = false;
+		GetAnimationController()->RunAnimationCommand(this, "m_CTColor", BUTTON_IDLE_COLOR, 0, BUTTON_FADING_TIME, AnimationController::INTERPOLATOR_LINEAR);
 	}
-	else
-		m_iHighlightedButton = TEAM_UNASSIGNED;
 
-	m_flBackgroundAlphaGoals[m_iHighlightedButton] = 255;
-
-	// Since the size of these arrays are the same, we can place them in a same loop.
-	for (unsigned i = 0; i < m_flBackgroundAlphas.size(); i++)
+	if (m_pButtonT->IsPendingSelected() && !m_bPendingOnT)
 	{
-		m_flBackgroundAlphas[i] += (m_flBackgroundAlphaGoals[i] - m_flBackgroundAlphas[i]) * g_flClientTimeDelta * 10;
-		m_vecBackgroundColors[i] += (m_vecBackgroundColorGoals[i] - m_vecBackgroundColors[i]) * g_flClientTimeDelta * 10.0;
+		m_bPendingOnT = true;
+		GetAnimationController()->RunAnimationCommand(this, "m_TColor", BUTTON_T_COLOR, 0, BUTTON_FADING_TIME, AnimationController::INTERPOLATOR_DEACCEL);
+	}
+	else if (!m_pButtonT->IsPendingSelected() && m_bPendingOnT)
+	{
+		m_bPendingOnT = false;
+		GetAnimationController()->RunAnimationCommand(this, "m_TColor", BUTTON_IDLE_COLOR, 0, BUTTON_FADING_TIME, AnimationController::INTERPOLATOR_LINEAR);
 	}
 }
 
@@ -221,44 +222,16 @@ void CTeamMenu::Paint(void)
 	BaseClass::Paint();
 
 	CTeamButton* pButton = nullptr;
-	switch (m_iHighlightedButton)
-	{
-	case TEAM_CT:
+
+	if (m_bPendingOnT)
+		pButton = dynamic_cast<CTeamButton *>(m_pButtonT);
+	else if (m_bPendingOnCT)
 		pButton = dynamic_cast<CTeamButton*>(m_pButtonCT);
-		break;
+	else if (m_pButtonObserver->IsPendingSelected())
+		pButton = dynamic_cast<CTeamButton*>(m_pButtonObserver);
 
-	case TEAM_TERRORIST:
-		pButton = dynamic_cast<CTeamButton*>(m_pButtonT);
-		break;
-
-	default:
-		return;	// No additional drawing.
-	}
-
-	if (!pButton)
-		return;
-
-	// Purpose: Paint an additional frame outside the button.
-	int x = 0, y = 0, w = 0, h = 0;
-	pButton->GetPos(x, y);
-	pButton->GetSize(w, h);
-	x -= MARGIN_BETWEEN_FRAME_AND_BUTTON + WIDTH_FRAME;
-	y -= MARGIN_BETWEEN_FRAME_AND_BUTTON + WIDTH_FRAME;
-
-	DrawUtils::glRegularPureColorDrawingInit(0xFFFFFF, 0xFF);
-
-	// Top-left
-	DrawUtils::Draw2DQuadNoTex(x, y, x + LENGTH_FRAME, y + WIDTH_FRAME);
-	DrawUtils::Draw2DQuadNoTex(x, y, x + WIDTH_FRAME, y + LENGTH_FRAME);
-
-	// Top-right
-	pButton->GetPos(x, y);
-	x += w + MARGIN_BETWEEN_FRAME_AND_BUTTON + WIDTH_FRAME;
-	y -= MARGIN_BETWEEN_FRAME_AND_BUTTON + WIDTH_FRAME;
-	DrawUtils::Draw2DQuadNoTex(x, y, x - LENGTH_FRAME, y + WIDTH_FRAME);
-	DrawUtils::Draw2DQuadNoTex(x, y, x - WIDTH_FRAME, y + LENGTH_FRAME);
-
-	DrawUtils::glRegularPureColorDrawingExit();
+	if (pButton)
+		DrawMouseHoveredEffects(pButton);
 }
 
 void CTeamMenu::PaintBackground(void)
@@ -268,46 +241,15 @@ void CTeamMenu::PaintBackground(void)
 	BaseClass::PaintBackground();
 
 	int iFrameTall = GetTall(), iFrameWide = GetWide();
-	image_t* pTerTex = &m_TERBackgrounds[0];//&m_TERBackgrounds[m_iHighlightedButton == TEAM_TERRORIST ? 1 : 0];
-	image_t* pCTTex = &m_CTBackgrounds[0];//&m_CTBackgrounds[m_iHighlightedButton == TEAM_CT ? 1 : 0];
 	int iDrawTall = round(iFrameTall * 0.65);
 
 	// T
-	DrawUtils::glRegularTexDrawingInit(m_vecBackgroundColors[TEAM_TERRORIST], m_flBackgroundAlphas[TEAM_TERRORIST] / 255.0);
-	DrawUtils::glSetTexture(pTerTex->m_iId);
-	DrawUtils::Draw2DQuad(0, iFrameTall - iDrawTall, pTerTex->CalculateWidthByDefinedHeight(iDrawTall), iFrameTall);
+	DrawUtils::glRegularTexDrawingInit(m_TColor.GetRawRGB(), m_TColor.a());
+	DrawUtils::glSetTexture(m_TImage.m_iId);
+	DrawUtils::Draw2DQuad(0, iFrameTall - iDrawTall, m_TImage.CalculateWidthByDefinedHeight(iDrawTall), iFrameTall);
 
 	// CT
-	DrawUtils::glSetColor(m_vecBackgroundColors[TEAM_CT], m_flBackgroundAlphas[TEAM_CT] / 255.0);
-	DrawUtils::glSetTexture(pCTTex->m_iId);
-	DrawUtils::Draw2DQuad(iFrameWide - pCTTex->CalculateWidthByDefinedHeight(iDrawTall), iFrameTall - iDrawTall, iFrameWide, iFrameTall);
-}
-
-void CTeamMenu::Show(bool bShow)
-{
-	if (BaseClass::IsVisible() == bShow)
-		return;
-
-	if (bShow)
-	{
-		Activate();
-
-		if (GetParent()->IsVisible())
-		{
-			SetMouseInputEnabled(true);
-			IN_DeactivateMouse();
-		}
-	}
-	else
-	{
-		SetVisible(false);
-
-		// Only do this when IClientVGUI is visible.
-		// Or this line will break the pause screen.
-		if (GetParent()->IsVisible())
-		{
-			SetMouseInputEnabled(false);
-			IN_ActivateMouse();
-		}
-	}
+	DrawUtils::glSetColor(m_CTColor.GetRawRGB(), m_CTColor.a());
+	DrawUtils::glSetTexture(m_CTImage.m_iId);
+	DrawUtils::Draw2DQuad(iFrameWide - m_CTImage.CalculateWidthByDefinedHeight(iDrawTall), iFrameTall - iDrawTall, iFrameWide, iFrameTall);
 }

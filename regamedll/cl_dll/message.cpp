@@ -183,6 +183,9 @@ MSG_FUNC(InitHUD)
 {
 	// this msg have no arguments.
 
+	// reset the overview first.
+	OverviewMgr::OnHUDReset();
+
 	for (auto& pHudElem : gHUD::m_lstHudElements)
 	{
 		pHudElem->InitHUDData();

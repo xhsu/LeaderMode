@@ -298,15 +298,6 @@ bool CAWP::HolsterStart(void)
 	return DefaultHolster(HOLSTER, HOLSTER_TIME);
 }
 
-float CAWP::GetMaxSpeed()
-{
-	if (int(m_pPlayer->pev->fov) == DEFAULT_FOV)
-		return MAX_SPEED;
-
-	// Slower speed when zoomed in.
-	return MAX_SPEED_ZOOM;
-}
-
 float CAWP::GetSpread(void)
 {
 	float flSpread = DefaultSpread(SPREAD_BASELINE, 0.25f, 0.75f, 20, 50);

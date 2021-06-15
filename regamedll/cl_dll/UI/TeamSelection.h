@@ -11,7 +11,7 @@ Modern Warfare Dev Team
 
 #pragma once
 
-class CTeamMenu : public vgui::Frame
+class CTeamMenu : public vgui::Frame, public CViewportPanelHelper<CTeamMenu>
 {
 	DECLARE_CLASS_SIMPLE(CTeamMenu, vgui::Frame);
 
@@ -24,19 +24,19 @@ public:
 	void Paint(void) final;
 	void PaintBackground(void) final;
 
-public:	// Custom new functions.
-	void Show(bool bShow);
-
 private:
-	vgui::LMImageButton* m_pButtonT, * m_pButtonCT, * m_pButtonObserver, * m_pButtonAuto;
-	unsigned short m_iHighlightedButton{ 0 };
-	std::array<vgui::image_t, 2> m_CTBackgrounds, m_TERBackgrounds;
-	std::array<float, 4> m_flBackgroundAlphas, m_flBackgroundAlphaGoals;	// both calculated in bytes.
-	std::array<Vector, 4> m_vecBackgroundColors, m_vecBackgroundColorGoals;	// HEX code.
+	vgui::LMImageButton* m_pButtonT, * m_pButtonCT, * m_pButtonObserver;
+	vgui::image_t m_CTImage, m_TImage;
+	CPanelAnimationVar(Color, m_CTColor, "m_CTColor", "255,255,255,128");
+	CPanelAnimationVar(Color, m_TColor, "m_TColor", "255,255,255,128");
+	bool m_bPendingOnCT : 1;
+	bool m_bPendingOnT : 1;
 
 public:
 	static constexpr auto LENGTH_FRAME = 36, WIDTH_FRAME = 4, MARGIN_BETWEEN_FRAME_AND_BUTTON = 12;
 	static constexpr auto MARGIN = 2, MARGIN_BUTTON = 256;
 	static constexpr auto BUTTON_SIZE = 256, FONT_SIZE = 48;
+	static constexpr auto BUTTON_FADING_TIME = 0.5f;
+	static constexpr auto BUTTON_IDLE_COLOR = Color(0xFFFFFF, 0x7F), BUTTON_CT_COLOR = Color(RGB_CT_COLOUR, 0xFF), BUTTON_T_COLOR = Color(RGB_T_COLOUR, 0xFF);
 	static inline vgui::image_t m_sPlayerCountIcon;
 };

@@ -269,17 +269,21 @@ public:	// util funcs
 };
 
 // Declare detectors
-GENERATE_HAS_MEMBER(ACCURACY_BASELINE);
+CREATE_MEMBER_DETECTOR(ACCURACY_BASELINE);
+CREATE_MEMBER_DETECTOR(MAX_SPEED_ZOOM);
+CREATE_MEMBER_DETECTOR(MAX_SPEED);
+CREATE_MEMBER_DETECTOR(SPREAD_BASELINE);
+CREATE_MEMBER_DETECTOR(CONE_VECTOR);
 
 // General template.
-template <class CWpn>
+template <typename CWpn>
 class CBaseWeaponTemplate : public CBaseWeapon
 {
 protected:
 	using BaseClass = CBaseWeaponTemplate<CWpn>;
 
 public:	// basic logic funcs
-	bool	Deploy		(void) override	{ m_flAccuracy = CWpn::ACCURACY_BASELINE; m_iShotsFired = 0; return DefaultDeploy(CWpn::VIEW_MODEL, CWpn::WORLD_MODEL, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? CWpn::DRAW_FIRST : CWpn::DEPLOY, CWpn::POSTURE, (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? CWpn::DRAW_FIRST_TIME : CWpn::DEPLOY_TIME); }
+	bool	Deploy		(void) override;
 	void	WeaponIdle	(void) override { return DefaultIdle(CWpn::DASHING); }
 	bool	HolsterStart(void) override	{ return DefaultHolster(CWpn::HOLSTER, CWpn::HOLSTER_TIME); }
 	void	DashStart	(void) override { return DefaultDashStart(CWpn::DASH_ENTER, CWpn::DASH_ENTER_TIME); }
@@ -289,8 +293,8 @@ public:	// basic logic funcs
 	void	Precache	(void) override;	// Generalized precache function - precache basical files only.
 #endif
 
-public:
-	float	GetMaxSpeed		(void) override { return CWpn::MAX_SPEED; }
+public:	// util funcs
+	float	GetMaxSpeed		(void) override;
 	void	ResetModel		(void) override;
 	bool	SetLeftHand		(bool bAppear) override { return DefaultSetLHand(bAppear, CWpn::LHAND_UP, CWpn::LHAND_UP_TIME, CWpn::LHAND_DOWN, CWpn::LHAND_DOWN_TIME); }
 	void	PlayBlockAnim	(void) override { return DefaultBlock(CWpn::BLOCK_UP, CWpn::BLOCK_UP_TIME, CWpn::BLOCK_DOWN, CWpn::BLOCK_DOWN_TIME); }
@@ -587,7 +591,6 @@ public:	// basic logic funcs
 	virtual bool	AlterAct		(void);
 
 public:	// util funcs
-	virtual float	GetMaxSpeed		(void);
 	virtual float	GetSpread		(void);
 
 public:	// new functions
@@ -648,7 +651,6 @@ public:	// Constants / Database
 	static constexpr float	EFFECTIVE_RANGE		= 8192.0f;
 	static constexpr int	GUN_VOLUME			= BIG_EXPLOSION_VOLUME;
 	static constexpr float	SPREAD_BASELINE		= 0.001f;
-	static constexpr float	ACCURACY_BASELINE	= 0;	// Dummy, unused.
 
 #ifndef CLIENT_DLL
 public:	// SV exclusive variables.
@@ -687,7 +689,6 @@ public:	// basic logic funcs
 	virtual bool	HolsterStart	(void);
 
 public:	// util funcs
-	virtual float	GetMaxSpeed		(void);
 	virtual float	GetSpread		(void);
 
 public:	// new funcs
@@ -1438,7 +1439,6 @@ public:	// Constants / Database
 	static constexpr Vector	CONE_VECTOR				= Vector(0.0725, 0.0725, 0.0); // special shotgun spreads
 	static constexpr int	GUN_VOLUME				= LOUD_GUN_VOLUME;
 	static constexpr float	RANGE_MODIFIER			= 1.172793196;	// 80% damage @700 inches.
-	static constexpr float	ACCURACY_BASELINE = 0;	// Dummy, unused.
 
 #ifndef CLIENT_DLL
 public:	// SV exclusive variables.
@@ -1833,7 +1833,6 @@ public:	// basic logic funcs
 	bool	HolsterStart	(void) final;
 
 public:	// util funcs
-	float	GetMaxSpeed		(void) final;
 	float	GetSpread		(void) final;
 
 public:	// new funcs

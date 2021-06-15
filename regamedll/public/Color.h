@@ -33,7 +33,8 @@ public:
 	// g - green component (0-255)
 	// b - blue component (0-255)
 	// a - alpha component, controls transparency (0 - transparent, 255 - opaque);
-	constexpr void SetColor(int r, int g, int b, int a = 0)
+	template <typename TR, typename TG, typename TB, typename TA>
+	constexpr void SetColor(TR r, TG g, TB b, TA a = 0)
 	{
 		_color[0] = (unsigned char)r;
 		_color[1] = (unsigned char)g;
@@ -41,12 +42,13 @@ public:
 		_color[3] = (unsigned char)a;
 	}
 
-	constexpr void GetColor(int &r, int &g, int &b, int &a) const
+	template <typename TR, typename TG, typename TB, typename TA>
+	constexpr void GetColor(TR &r, TG &g, TB &b, TA &a) const
 	{
-		r = _color[0];
-		g = _color[1];
-		b = _color[2];
-		a = _color[3];
+		r = static_cast<TR>(_color[0]);
+		g = static_cast<TG>(_color[1]);
+		b = static_cast<TB>(_color[2]);
+		a = static_cast<TA>(_color[3]);
 	}
 
 	constexpr void SetRawColor(uint32 color32)
@@ -58,19 +60,24 @@ public:
 	{
 		_color[0] = (ulRGB & 0xFF0000) >> 16;	// r
 		_color[1] = (ulRGB & 0xFF00) >> 8;		// g
-		_color[2] = ulRGB & 0xFF;				// b
+		_color[1] = ulRGB & 0xFF;				// b
 		_color[3] = a;
 	}
 
-	constexpr int GetRawColor() const
+	constexpr uint32 GetRawColor() const
 	{
-		return *((int *)this);
+		return *((uint32*)this);
 	}
 
-	inline constexpr int r() const	{ return _color[0]; }
-	inline constexpr int g() const	{ return _color[1]; }
-	inline constexpr int b() const	{ return _color[2]; }
-	inline constexpr int a() const	{ return _color[3]; }
+	constexpr uint32 GetRawRGB() const
+	{
+		return static_cast<uint32>(_color[0] << 16 | _color[1] << 8 | _color[1]);
+	}
+
+	inline constexpr uint8 r() const	{ return _color[0]; }
+	inline constexpr uint8 g() const	{ return _color[1]; }
+	inline constexpr uint8 b() const	{ return _color[2]; }
+	inline constexpr uint8 a() const	{ return _color[3]; }
 	
 	constexpr unsigned char &operator[](int index)
 	{

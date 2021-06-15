@@ -98,31 +98,10 @@ void Sys_GetRegKeyValueUnderRoot(const char* pszSubKey, const char* pszElement, 
 void Sys_SetRegKeyValueUnderRoot(const char* pszSubKey, const char* pszElement, const char* pszValue);
 void Sys_SplitPath(const char* path, char* drive, char* dir, char* fname, char* ext);
 
-#define GENERATE_HAS_MEMBER(member)                                               \
-                                                                                  \
-template < class T >                                                              \
-class HasMember_##member                                                          \
-{                                                                                 \
-private:                                                                          \
-    using Yes = char[2];                                                          \
-    using  No = char[1];                                                          \
-                                                                                  \
-    struct Fallback { int member; };                                              \
-    struct Derived : T, Fallback { };                                             \
-                                                                                  \
-    template < class U >                                                          \
-    static No& test ( decltype(U::member)* );                                     \
-    template < typename U >                                                       \
-    static Yes& test ( U* );                                                      \
-                                                                                  \
-public:                                                                           \
-    static constexpr bool RESULT = sizeof(test<Derived>(nullptr)) == sizeof(Yes); \
-};                                                                                \
-                                                                                  \
-template < class T >                                                              \
-struct HAS_MEMBER_##member                                                        \
-: public std::integral_constant<bool, HasMember_##member<T>::RESULT>              \
-{                                                                                 \
-}
-
-#define ENABLE_IF_MEMBER_PRESENT(classname, member)	template <typename = typename std::enable_if<HAS_MEMBER_##member<classname>::value>::type>
+#define CREATE_MEMBER_DETECTOR(X)							\
+	template <typename T, typename = void>					\
+	struct DETECT_##X : std::false_type {};					\
+															\
+	template <typename T>									\
+	struct DETECT_##X<T, std::void_t<decltype(T::X)>>		\
+		: std::true_type {}

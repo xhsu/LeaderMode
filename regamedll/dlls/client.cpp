@@ -2685,7 +2685,8 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 
 				constexpr auto sizeofdata = sizeof(UShootData::data);
 
-				Q_strlcpy(uCurrentShoot.raw, CMD_ARGS() + sizeof("__shoot"));
+				Q_strlcpy(uCurrentShoot.raw, CMD_ARGV(1) + sizeof("__shoot"));
+				RANDOM_LONG(1, 2);
 			}
 			else
 			{
