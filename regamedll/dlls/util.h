@@ -244,7 +244,7 @@ float UTIL_Approach(float target, float value, float speed);
 real_t UTIL_ApproachAngle(float target, float value, float speed);
 real_t UTIL_AngleDistance(float next, float cur);
 float UTIL_SplineFraction(float value, float scale);
-char *UTIL_VarArgs(char *format, ...);
+char *UTIL_VarArgs(const char *format, ...);
 Vector UTIL_GetAimVector(edict_t *pent, float flSpeed);
 bool UTIL_IsMasterTriggered(string_t sMaster, CBaseEntity *pActivator);
 BOOL UTIL_ShouldShowBlood(int color);

@@ -248,7 +248,7 @@ IMPLEMENT_SAVERESTORE(CBaseButton, CBaseToggle)
 
 void CBaseButton::Precache()
 {
-	char *pszSound;
+	const char *pszSound = nullptr;
 
 	// this button should spark in OFF state
 	if (pev->spawnflags & SF_BUTTON_SPARK_IF_OFF)
@@ -402,7 +402,7 @@ LINK_ENTITY_TO_CLASS(func_button, CBaseButton)
 
 void CBaseButton::Spawn()
 {
-	char  *pszSound;
+	const char  *pszSound;
 
 	//----------------------------------------------------
 	//determine sounds for buttons
@@ -478,9 +478,9 @@ void CBaseButton::Spawn()
 
 // Button sound table.
 // Also used by CBaseDoor to get 'touched' door lock/unlock sounds
-char *ButtonSound(int sound)
+const char *ButtonSound(int sound)
 {
-	char *pszSound;
+	const char *pszSound = nullptr;
 
 	switch (sound)
 	{
@@ -793,7 +793,7 @@ LINK_ENTITY_TO_CLASS(func_rot_button, CRotButton)
 
 void CRotButton::Spawn()
 {
-	char *pszSound;
+	const char *pszSound;
 
 	// determine sounds for buttons
 	// a sound of 0 should not make a sound
@@ -909,7 +909,7 @@ void CMomentaryRotButton::Spawn()
 	UTIL_SetOrigin(pev, pev->origin);
 	SET_MODEL(ENT(pev), STRING(pev->model));
 
-	char *pszSound = ButtonSound(m_sounds);
+	const char *pszSound = ButtonSound(m_sounds);
 	PRECACHE_SOUND(pszSound);
 	pev->noise = ALLOC_STRING(pszSound);
 	m_lastUsed = 0;

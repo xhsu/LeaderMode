@@ -15,7 +15,7 @@ Credits to Nagist!
 #include <winsani_out.h>
 #include <stdio.h>
 
-void* MH_SearchPattern(void* pStartSearch, DWORD dwSearchLen, char* pPattern, DWORD dwPatternLen)
+void* MH_SearchPattern(void* pStartSearch, DWORD dwSearchLen, const char* pPattern, DWORD dwPatternLen)
 {
 	DWORD dwStartAddr = (DWORD)pStartSearch;
 	DWORD dwEndAddr = dwStartAddr + dwSearchLen - dwPatternLen;

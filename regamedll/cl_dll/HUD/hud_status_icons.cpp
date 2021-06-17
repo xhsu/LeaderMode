@@ -177,7 +177,13 @@ void CHudStatusIcons::MsgFunc_StatusIcon(int iSize, void* pbuf)
 	if (m_mapShowing[szKey].m_bitsFlags & STATUSICON_TEXT_KEYBIND)
 	{
 		m_mapShowing[szKey].m_wcsText = L"[ " + std::wstring(ANSIToUnicode(gExtFuncs.pfnKey_NameForBinding(READ_STRING()))) + L" ]";
-		std::transform(m_mapShowing[szKey].m_wcsText.begin(), m_mapShowing[szKey].m_wcsText.end(), m_mapShowing[szKey].m_wcsText.begin(), std::toupper);	// Keeps it caps locked.
+
+		// LUNA: WTF C++20, you can't deduce the type of <typename _Fn>????
+		std::transform<std::wstring::iterator, std::wstring::iterator, int(__cdecl*)(int _C)>(
+			m_mapShowing[szKey].m_wcsText.begin(), m_mapShowing[szKey].m_wcsText.end(),
+			m_mapShowing[szKey].m_wcsText.begin(),
+			std::toupper
+		);	// Keeps it caps locked.
 	}
 	else if (m_mapShowing[szKey].m_bitsFlags & STATUSICON_TEXT_LOC)
 	{

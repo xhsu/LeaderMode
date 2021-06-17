@@ -6,6 +6,7 @@ Modern Warfare Dev Team
 Code - Luna the Reborn
 Model - Miracle(Innocent Blue)
 Sound - iDkGK
+Sprite - HL&CL
 
 */
 

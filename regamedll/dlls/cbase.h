@@ -157,7 +157,7 @@ public:
 	void EXPORT SUB_FadeOut();
 	void EXPORT SUB_CallUseToggle() { Use(this, this, USE_TOGGLE, 0); }
 	int ShouldToggle(USE_TYPE useType, BOOL currentState);
-	int FireBuckshots(ULONG cShots, const Vector& vecSrc, const Vector& vecDirShooting, const Vector& vecSpread, float flDistance, int iDamage, float flExponentialBase, int shared_rand);	// returns the offset of shared_rand.
+	int FireBuckshots(ULONG cShots, const Vector& vecSrc, const Vector& vecDirShooting, const Vector2D& vecSpread, float flDistance, int iDamage, float flExponentialBase, int shared_rand);	// returns the offset of shared_rand.
 	Vector2D FireBullets3(const Vector& vecSrc, const Vector& vecDirShooting, float flSpread, float flDistance, int iPenetration, AmmoIdType iBulletType, int iDamage, float flExponentialBase, int shared_rand = 0);
 	void SUB_UseTargets(CBaseEntity *pActivator, USE_TYPE useType, float value);
 	bool Intersects(CBaseEntity *pOther);

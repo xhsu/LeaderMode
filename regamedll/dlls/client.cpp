@@ -1,89 +1,8 @@
 #include "precompiled.h"
 
-int gmsgWeapPickup = 0;
-int gmsgHudText = 0;
-int gmsgHudTextPro = 0;
-int gmsgHudTextArgs = 0;
-int gmsgShake = 0;
-int gmsgFade = 0;
-int gmsgFlashlight = 0;
-int gmsgFlashBattery = 0;
-int gmsgResetHUD = 0;
-int gmsgInitHUD = 0;
-int gmsgViewMode = 0;
-int gmsgShowGameTitle = 0;
-int gmsgHealth = 0;
-int gmsgDamage = 0;
-int gmsgBattery = 0;
-int gmsgTrain = 0;
-int gmsgLogo = 0;
-int gmsgAmmoX = 0;
-int gmsgDeathMsg = 0;
-int gmsgScoreAttrib = 0;
-int gmsgScoreInfo = 0;
-int gmsgTeamInfo = 0;
-int gmsgTeamScore = 0;
-int gmsgGameMode = 0;
-int gmsgMOTD = 0;
-int gmsgServerName = 0;
-int gmsgAmmoPickup = 0;
-int gmsgItemPickup = 0;
-int gmsgHideWeapon = 0;
-int gmsgSayText = 0;
-int gmsgTextMsg = 0;
-int gmsgSetFOV = 0;
-int gmsgShowMenu = 0;
-int gmsgSendAudio = 0;
-int gmsgRoundTime = 0;
-int gmsgMoney = 0;
-int gmsgBlinkAcct = 0;
-int gmsgArmorType = 0;
-int gmsgStatusValue = 0;
-int gmsgStatusText = 0;
-int gmsgStatusIcon = 0;
-int gmsgBarTime = 0;
-int gmsgReloadSound = 0;
-int gmsgCrosshair = 0;
-int gmsgNVGToggle = 0;
-int gmsgRadar = 0;
-int gmsgSpectator = 0;
-int gmsgVGUIMenu = 0;
-int gmsgShadowIdx = 0;
-int gmsgAllowSpec = 0;
-int gmsgGeigerRange = 0;
-int gmsgSendCorpse = 0;
-int gmsgHLTV = 0;
-int gmsgSpecHealth = 0;
-int gmsgForceCam = 0;
-int gmsgReceiveW = 0;
-int gmsgBotVoice = 0;
-int gmsgBuyClose = 0;
-int gmsgItemStatus = 0;
-int gmsgLocation = 0;
-int gmsgSpecHealth2 = 0;
-int gmsgBarTime2 = 0;
-int gmsgBotProgress = 0;
-int gmsgBrass = 0;
-int gmsgFog = 0;
-int gmsgShowTimer = 0;
-int gmsgRole = 0;
-int gmsgRadarPoint = 0;
-int gmsgRadarRP = 0;
-int gmsgSetSlot = 0;
-int gmsgShoot = 0;
-int gmsgSteelSight = 0;
-int gmsgEqpSelect = 0;
-int gmsgSkillTimer = 0;
-int gmsgSound = 0;
-int gmsgSecVMDL = 0;
-int gmsgEquipment = 0;
-int gmsgManpower = 0;
-int gmsgScheme = 0;
-int gmsgNewRound = 0;
-
 bool g_bClientPrintEnable = true;
 
-char *sPlayerModelFiles[] =
+const char *sPlayerModelFiles[] =
 {
 	"models/player.mdl",
 	"models/player/leet/leet.mdl",
@@ -218,6 +137,7 @@ void LinkUserMessages()
 	gmsgManpower	  = REG_USER_MSG("Manpower", 2);
 	gmsgScheme		  = REG_USER_MSG("Scheme", 2);
 	gmsgNewRound	  = REG_USER_MSG("NewRound", 0);
+	gmsgGiveWpn		  = REG_USER_MSG("GiveWpn", 3);
 }
 
 void WriteSigonMessages()
@@ -722,8 +642,8 @@ void Host_Say(edict_t *pEntity, BOOL teamonly)
 		return;
 
 	const char *placeName = nullptr;
-	char *pszFormat = nullptr;
-	char *pszConsoleFormat = nullptr;
+	const char *pszFormat = nullptr;
+	const char *pszConsoleFormat = nullptr;
 	bool consoleUsesPlaceName = false;
 
 	// team only
@@ -927,7 +847,7 @@ void Host_Say(edict_t *pEntity, BOOL teamonly)
 		const char *temp = teamonly ? "say_team" : "say";
 		const char *deadText = (pPlayer->m_iTeam != SPECTATOR && bSenderDead) ? " (dead)" : "";
 
-		char *szTeam = GetTeam(pPlayer->m_iTeam);
+		const char *szTeam = GetTeam(pPlayer->m_iTeam);
 
 		UTIL_LogPrintf("\"%s<%i><%s><%s>\" %s \"%s\"%s\n", STRING(pPlayer->pev->netname), GETPLAYERUSERID(pPlayer->edict()), GETPLAYERAUTHID(pPlayer->edict()),
 			szTeam, temp, p, deadText);
@@ -1200,7 +1120,7 @@ void EXT_FUNC HandleMenu_ChooseAppearance(CBasePlayer *pPlayer, int slot)
 	struct
 	{
 		ModelName model_id;
-		char *model_name;
+		const char *model_name;
 		int model_name_index;
 
 	} appearance;
@@ -1555,7 +1475,7 @@ BOOL EXT_FUNC HandleMenu_ChooseTeam(CBasePlayer *pPlayer, int slot)
 	HandleMenu_ChooseAppearance(pPlayer, 6);
 
 	TeamName oldTeam;
-	char *szOldTeam, *szNewTeam;
+	const char *szOldTeam, *szNewTeam;
 
 	// Switch their actual team...
 	pPlayer->m_bTeamChanged = true;
@@ -2553,7 +2473,7 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 			{
 				if (!Q_strlen(parg1))
 				{
-					for each (CBaseSkill* pSkill in pPlayer->m_rgpSkills)
+					for (auto& pSkill : pPlayer->m_rgpSkills)
 					{
 						if (pSkill)
 							pSkill->Execute();

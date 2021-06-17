@@ -203,7 +203,7 @@ void ExplosionCreate(const Vector &center, Vector &angles, edict_t *pOwner, int 
 
 	Q_sprintf(buf, "%3d", magnitude);
 
-	kvd.szKeyName = "iMagnitude";
+	kvd.szKeyName = (char*)"iMagnitude";
 	kvd.szValue = buf;
 
 	pExplosion->KeyValue(&kvd);

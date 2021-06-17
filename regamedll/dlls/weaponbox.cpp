@@ -360,7 +360,7 @@ const char* CWeaponBox::GetCSModelName(WeaponIdType iId)
 	case WEAPON_M45A1:			modelName = CM45A1::WORLD_MODEL; break;
 	case WEAPON_FIVESEVEN:		modelName = CFN57::WORLD_MODEL; break;
 	case WEAPON_UMP45:			modelName = CUMP45::WORLD_MODEL; break;
-	case WEAPON_USP:			modelName = USP_WORLD_MODEL; break;
+	case WEAPON_USP:			modelName = CUSP::WORLD_MODEL; break;
 	case WEAPON_GLOCK18:		modelName = G18C_WORLD_MODEL; break;
 	case WEAPON_AWP:			modelName = CAWP::WORLD_MODEL; break;
 	case WEAPON_MP5N:			modelName = MP5N_WORLD_MODEL; break;

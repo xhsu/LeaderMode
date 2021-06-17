@@ -165,7 +165,7 @@ void Broadcast(const char *sentence)
 	MESSAGE_END();
 }
 
-char *GetTeam(int team)
+const char *GetTeam(int team)
 {
 	switch (team)
 	{
@@ -178,7 +178,7 @@ char *GetTeam(int team)
 
 void CHalfLifeMultiplay::EndRoundMessage(const char *sentence, ScenarioEventEndRound event)
 {
-	char *team = nullptr;
+	const char *team = nullptr;
 	const char *message = sentence;
 	bool bTeamTriggered = true;
 
@@ -1691,7 +1691,11 @@ void CHalfLifeMultiplay::AssignCommander(CBasePlayer *pPlayer)
 		WRITE_BYTE(0);
 		MESSAGE_END();
 
-		pPlayer ? iAbdicator->AssignRole(FindAvaliableRole(TERRORIST)) : iAbdicator->m_iRoleType = Role_UNASSIGNED;	// no new godfather means new round.
+		if (pPlayer)
+			iAbdicator->AssignRole(FindAvaliableRole(TERRORIST));
+		else
+			iAbdicator->m_iRoleType = Role_UNASSIGNED;	// no new commander means new round.
+
 		flSucceedHealth = iAbdicator->pev->health;	// this health will be assign to new leader. prevents the confidence motion mechanism abused by players.
 
 		iAbdicator->pev->health = 100.0f * (iAbdicator->pev->health / iAbdicator->pev->max_health);
@@ -1776,7 +1780,11 @@ void CHalfLifeMultiplay::AssignGodfather(CBasePlayer* pPlayer)
 		WRITE_BYTE(0);
 		MESSAGE_END();
 
-		pPlayer ? iAbdicator->AssignRole(FindAvaliableRole(TERRORIST)) : iAbdicator->m_iRoleType = Role_UNASSIGNED;	// no new godfather means new round.
+		if (pPlayer)
+			iAbdicator->AssignRole(FindAvaliableRole(TERRORIST));
+		else
+			iAbdicator->m_iRoleType = Role_UNASSIGNED;	// no new godfather means new round.
+
 		flSucceedHealth = iAbdicator->pev->health;	// this health will be assign to new leader. prevents the confidence motion mechanism abused by players.
 
 		iAbdicator->pev->health = 100.0f * (iAbdicator->pev->health / iAbdicator->pev->max_health);
@@ -2210,7 +2218,7 @@ void CHalfLifeMultiplay::ClientDisconnected(edict_t *pClient)
 				WRITE_STRING("");
 			MESSAGE_END();
 
-			char *team = GetTeam(pPlayer->m_iTeam);
+			const char *team = GetTeam(pPlayer->m_iTeam);
 
 			FireTargets("game_playerleave", pPlayer, pPlayer, USE_TOGGLE, 0);
 			UTIL_LogPrintf("\"%s<%i><%s><%s>\" disconnected\n", STRING(pPlayer->pev->netname), GETPLAYERUSERID(pPlayer->edict()), GETPLAYERAUTHID(pPlayer->edict()), team);
@@ -2707,7 +2715,7 @@ void EXT_FUNC CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, entvars_t* p
 	if (pVictim->pev == pKiller)
 	{
 		// killed self
-		char* team = GetTeam(pVictim->m_iTeam);
+		const char* team = GetTeam(pVictim->m_iTeam);
 		UTIL_LogPrintf("\"%s<%i><%s><%s>\" committed suicide with \"%s\"\n", STRING(pVictim->pev->netname), GETPLAYERUSERID(pVictim->edict()),
 			GETPLAYERAUTHID(pVictim->edict()), team, killer_weapon_name);
 	}
@@ -2724,7 +2732,7 @@ void EXT_FUNC CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, entvars_t* p
 	else
 	{
 		// killed by the world
-		char* team = GetTeam(pVictim->m_iTeam);
+		const char* team = GetTeam(pVictim->m_iTeam);
 		UTIL_LogPrintf("\"%s<%i><%s><%s>\" committed suicide with \"%s\" (world)\n", STRING(pVictim->pev->netname), GETPLAYERUSERID(pVictim->edict()),
 			GETPLAYERAUTHID(pVictim->edict()), team, killer_weapon_name);
 	}

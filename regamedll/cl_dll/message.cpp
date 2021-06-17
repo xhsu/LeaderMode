@@ -1360,6 +1360,18 @@ MSG_FUNC(NewRound)
 	return TRUE;
 }
 
+MSG_FUNC(GiveWpn)
+{
+	BEGIN_READ(pbuf, iSize);
+
+	WeaponIdType iId = (WeaponIdType)READ_BYTE();
+	int iClip = READ_SHORT();
+
+	gPseudoPlayer.AddPlayerItem(CBaseWeapon::Give(iId, &gPseudoPlayer, iClip));
+
+	return TRUE;
+}
+
 // player.cpp
 MSG_FUNC(Logo)
 {
@@ -1480,6 +1492,7 @@ void Msg_Init(void)
 	HOOK_USER_MSG(Manpower);
 	HOOK_USER_MSG(Scheme);
 	HOOK_USER_MSG(NewRound);
+	HOOK_USER_MSG(GiveWpn);
 
 	// player.cpp
 	HOOK_USER_MSG(Logo);

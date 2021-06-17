@@ -32,7 +32,7 @@ NOXREF void UTIL_DPrintf(DebugOutputType outputType, char *pszMsg, ...)
 	}
 }
 
-void UTIL_DPrintf(char *pszMsg, ...)
+void UTIL_DPrintf(const char *pszMsg, ...)
 {
 	if (!IsDeveloper())
 		return;

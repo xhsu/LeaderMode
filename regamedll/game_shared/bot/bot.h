@@ -217,7 +217,7 @@ public:
 	void Print(char *format,...) const;
 
 	// output message to console if we are being watched by the local player
-	void PrintIfWatched(char *format,...) const;
+	void PrintIfWatched(const char *format,...) const;
 
 	void BotThink();
 

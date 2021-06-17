@@ -47,7 +47,7 @@ const int MAX_DEBUG_BUFF_SIZE = 1024;
 
 bool IsDeveloper();
 void UTIL_DPrintf(DebugOutputType outputType, char *pszMsg, ...);
-void UTIL_DPrintf(char *pszMsg, ...);
+void UTIL_DPrintf(const char *pszMsg, ...);
 void PrintDebugFlags();
 
 void SetDebugFlag(const char *flagStr, bool state);

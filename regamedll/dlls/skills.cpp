@@ -10,12 +10,6 @@ Modern Warfare Dev Team
 #include "precompiled.h"
 
 
-const char* CBaseSkill::RADAR_BEEP_SFX = "leadermode/nes_8bit_alien3_radar_beep1.wav";
-const char* CBaseSkill::RADAR_TARGET_DEAD_SFX = "leadermode/sfx_event_duel_win_01.wav";
-const char* CBaseSkill::COOLDOWN_COMPLETE_SFX = "leadermode/pope_accepts_crusade_arrived.wav";
-const char* CBaseSkill::CRITICAL_SHOT_SFX = "leadermode/siege_attack.wav";
-int CBaseSkill::m_idBulletTrace = 0;
-
 void CBaseSkill::Precache()
 {
 	PRECACHE_SOUND(CSkillBulletproof::ACTIVATION_SFX);
@@ -42,6 +36,28 @@ void CBaseSkill::Precache()
 	CSkillIncendiaryAmmo::m_idSpark = PRECACHE_MODEL("sprites/xspark4.spr");
 
 	m_idBulletTrace = PRECACHE_MODEL("sprites/VFX/FireSmoke.spr");
+}
+
+template<typename T>
+T* CBaseSkill::Grand(CBasePlayer* pPlayer)
+{
+	T* p = new T;
+
+	if (pPlayer->m_rgpSkills[p->Classify()])
+	{
+		delete p;
+		return nullptr;
+	}
+
+	p->m_bUsingSkill = false;
+	p->m_bAllowSkill = true;
+	p->m_flTimeCooldownOver = gpGlobals->time;
+	p->m_flTimeLastUsed = -1.0;
+	p->m_pPlayer = pPlayer;
+
+	pPlayer->m_rgpSkills[p->Classify()] = p;
+
+	return p;
 }
 
 float CBaseSkill::GetHudPercentage() const
@@ -2452,3 +2468,29 @@ void CSkillIncendiaryAmmo::OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr
 
 	gBurningDOTMgr::Set(pPlayer, m_pPlayer, IGNITE_DURATION);
 }
+
+// Dummy or HACKHACK
+// FUCKING stupit C++
+#define VALIDATE_TEMPLATE(T) template T* CBaseSkill::Grand<T>(CBasePlayer* pPlayer)
+
+VALIDATE_TEMPLATE(CSkillRadarScan);
+VALIDATE_TEMPLATE(CSkillFireRate);
+VALIDATE_TEMPLATE(CSkillReduceDamage);
+VALIDATE_TEMPLATE(CSkillBulletproof);
+VALIDATE_TEMPLATE(CSkillArmorRegen);
+VALIDATE_TEMPLATE(CSkillExplosiveBullets);
+VALIDATE_TEMPLATE(CSkillInfiniteGrenade);
+VALIDATE_TEMPLATE(CSkillEnfoceHeadshot);
+VALIDATE_TEMPLATE(CSkillHighlightSight);
+VALIDATE_TEMPLATE(CSkillHealingShot);
+VALIDATE_TEMPLATE(CSkillGavelkind);
+VALIDATE_TEMPLATE(CSkillDmgIncByHP);
+VALIDATE_TEMPLATE(CSkillResistDeath);
+VALIDATE_TEMPLATE(CSkillTaserGun);
+VALIDATE_TEMPLATE(CSkillRetribution);
+VALIDATE_TEMPLATE(CSkillInvisible);
+VALIDATE_TEMPLATE(CSkillCriticalHit);
+VALIDATE_TEMPLATE(CSkillRadarScan2);
+VALIDATE_TEMPLATE(CSkillIncendiaryAmmo);
+
+#undef VALIDATE_TEMPLATE

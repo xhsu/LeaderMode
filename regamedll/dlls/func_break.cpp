@@ -394,7 +394,7 @@ void CBreakable::DamageSound()
 {
 	int pitch;
 	float fvol;
-	char *rgpsz[6];
+	std::array<const char*, 6> rgpsz;
 	int i = 0;
 	int material = m_Material;
 

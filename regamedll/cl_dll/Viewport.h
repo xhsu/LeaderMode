@@ -21,7 +21,7 @@ struct CViewportPanelHelper
 	//-----------------------------------------------------------------------------
 	// Purpose: Paint an additional frame outside the button.
 	//-----------------------------------------------------------------------------
-	template<class T> void DrawMouseHoveredEffects(T* pButton) const
+	template<class T> void DrawMouseHoveredEffects(T* pButton)
 	{
 		int x = 0, y = 0, w = 0, h = 0;
 		pButton->LocalToScreen(x, y);
@@ -81,15 +81,14 @@ struct CViewportPanelHelper
 	}
 
 private:
-	inline CControl* Panel() const
+	CControl* _pThis{ nullptr };
+	inline CControl* Panel()
 	{
-		static CControl* p = nullptr;
-
-		if (!p)
+		if (!_pThis)
 			// As long as this class has no VFT, you can use static_cast. Otherwise, use dynamic_cast.
-			p = const_cast<CControl*>(dynamic_cast<const CControl*>(this));
+			_pThis = dynamic_cast<CControl*>(this);
 
-		return p;
+		return _pThis;
 	}
 };
 

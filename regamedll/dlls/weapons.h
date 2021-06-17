@@ -54,6 +54,11 @@
 												}
 #endif
 
+#define IS_MEMBER_PRESENTED_CPP20_W(x)		DETECT_##x<CWpn>
+#define IS_MEMBER_PRESENTED_W(x)			DETECT_##x<CWpn>::value
+#define COMPILING_ERROR(error_msg)	[]<bool flag = false>()	\
+										{static_assert(flag, error_msg); }()	// C++20 exclusive.
+
 #define DUMMY_VIEW_MODEL	"models/weapons/v_nothing.mdl"
 
 class CBaseEntity;
@@ -127,11 +132,6 @@ public:
 	}
 
 protected:	// you can remove weapons only via its manager function.
-	CBaseWeapon() noexcept {}
-	CBaseWeapon(const CBaseWeapon& s) = default;
-	CBaseWeapon(CBaseWeapon&& s) = default;
-	CBaseWeapon& operator=(const CBaseWeapon& s) = default;
-	CBaseWeapon& operator=(CBaseWeapon&& s) = default;
 	virtual ~CBaseWeapon() {}
 
 public:
@@ -150,17 +150,17 @@ public:
 	float			m_flTimeWeaponIdle		{ 0.0f };
 	unsigned		m_bitsFlags				{ 0 };
 	int				m_iClip					{ 0 };
-	bool			m_bInReload				{ false };
+	bool			m_bInReload : 1			{ false };
 	int				m_iShotsFired			{ 0 };
 	float			m_flDecreaseShotsFired	{ 0.0f };
-	bool			m_bDirection			{ false };
+	bool			m_bDirection : 1		{ false };
 	float			m_flAccuracy			{ 0.0f };	// TODO: this should be remove later.
 	float			m_flLastFire			{ 0.0f };
 	AmmoIdType		m_iPrimaryAmmoType		{ AMMO_NONE };			// "primary" ammo index into players m_rgAmmo[]
 	AmmoIdType		m_iSecondaryAmmoType	{ AMMO_NONE };		// "secondary" ammo index into players m_rgAmmo[]
-	bool			m_bInZoom				{ false };
+	bool			m_bInZoom : 1			{ false };
 	RoleTypes		m_iVariation			{ Role_UNASSIGNED };	// weapons suppose to variegate accroading to their owner.
-	bool			m_bDelayRecovery		{ false };
+	bool			m_bDelayRecovery : 1	{ false };
 
 	struct	// this structure is for anim push and pop. it save & restore weapon state.
 	{
@@ -249,6 +249,9 @@ public:	// basic API and behaviour for weapons.
 	float	DefaultSpread	(float flBaseline, float flAimingMul, float flDuckingMul, float flWalkingMul, float flJumpingMul);
 
 public:	// util funcs
+	virtual	WeaponIdType Id			(void) { return m_iId; }
+	virtual	const WeaponInfo* WInfo	(void) { return m_pItemInfo; }
+	virtual	const AmmoInfo* AInfo	(void) { return m_pAmmoInfo; }
 	inline	bool	IsDead			(void) { return !!(m_bitsFlags & WPNSTATE_DEAD); }
 	virtual	float	GetMaxSpeed		(void) { return 260.0f; }
 	virtual	bool	AddPrimaryAmmo	(int iCount);	// fill in clip first, then bpammo.
@@ -269,11 +272,42 @@ public:	// util funcs
 };
 
 // Declare detectors
-CREATE_MEMBER_DETECTOR(ACCURACY_BASELINE);
-CREATE_MEMBER_DETECTOR(MAX_SPEED_ZOOM);
-CREATE_MEMBER_DETECTOR(MAX_SPEED);
-CREATE_MEMBER_DETECTOR(SPREAD_BASELINE);
-CREATE_MEMBER_DETECTOR(CONE_VECTOR);
+CREATE_MEMBER_DETECTOR_STATIC(m_usEvent);
+
+CREATE_MEMBER_DETECTOR_CUSTOM(ApplyClientFPFiringVisual) { t.ApplyClientFPFiringVisual(Vector2D::Zero()); };
+CREATE_MEMBER_DETECTOR_CUSTOM(ApplyRecoil) { t.ApplyRecoil(); };
+
+CREATE_MEMBER_DETECTOR_STATIC(ACCURACY_BASELINE);
+CREATE_MEMBER_DETECTOR_STATIC(MAX_SPEED_ZOOM);
+CREATE_MEMBER_DETECTOR_STATIC(MAX_SPEED);
+CREATE_MEMBER_DETECTOR_STATIC(SPREAD_BASELINE);
+CREATE_MEMBER_DETECTOR_STATIC(CONE_VECTOR);
+CREATE_MEMBER_DETECTOR_STATIC(RPM);
+CREATE_MEMBER_DETECTOR_STATIC(FIRE_INTERVAL);
+CREATE_MEMBER_DETECTOR_STATIC(GUN_VOLUME);
+CREATE_MEMBER_DETECTOR_STATIC(GUN_FLASH);
+CREATE_MEMBER_DETECTOR_STATIC(SHELL_MODEL);
+CREATE_MEMBER_DETECTOR_STATIC(EVENT_FILE);
+
+CREATE_MEMBER_DETECTOR_STATIC(SHOOT);
+CREATE_MEMBER_DETECTOR_STATIC(FIRE_ANIMTIME);
+
+CREATE_MEMBER_DETECTOR_STATIC(ATTRIB_NO_FIRE_UNDERWATER);
+CREATE_MEMBER_DETECTOR_CUSTOM(ATTRIB_SEMIAUTO) { {T::ATTRIB_SEMIAUTO == true}; };
+
+template <typename CWpn>
+concept IsShotgun = requires (CWpn wpn)
+{
+	{CWpn::CONE_VECTOR};
+	{CWpn::PROJECTILE_COUNT > 1};
+};
+
+template <typename CWpn>
+concept HasEvent = requires (CWpn wpn)
+{
+	{CWpn::EVENT_FILE};
+	{CWpn::ApplyClientTPFiringVisual};
+};
 
 // General template.
 template <typename CWpn>
@@ -289,69 +323,134 @@ public:	// basic logic funcs
 	void	DashStart	(void) override { return DefaultDashStart(CWpn::DASH_ENTER, CWpn::DASH_ENTER_TIME); }
 	void	DashEnd		(void) override { return DefaultDashEnd(CWpn::DASH_ENTER, CWpn::DASH_ENTER_TIME, CWpn::DASH_EXIT, CWpn::DASH_EXIT_TIME); }
 
+	template <DETECT_SHELL_MODEL T = CWpn> static inline int m_iShell = 0;
 #ifndef CLIENT_DLL
+	template <DETECT_EVENT_FILE T = CWpn> static inline unsigned short m_usEvent = 0;
+
 	void	Precache	(void) override;	// Generalized precache function - precache basical files only.
 #endif
 
 public:	// util funcs
+	WeaponIdType Id			(void) override;
+	const WeaponInfo* WInfo	(void) override	{ return &g_rgWpnInfo[Id()]; }
+	const AmmoInfo* AInfo	(void) override { return &g_rgAmmoInfo[WInfo()->m_iAmmoType]; }
 	float	GetMaxSpeed		(void) override;
 	void	ResetModel		(void) override;
 	bool	SetLeftHand		(bool bAppear) override { return DefaultSetLHand(bAppear, CWpn::LHAND_UP, CWpn::LHAND_UP_TIME, CWpn::LHAND_DOWN, CWpn::LHAND_DOWN_TIME); }
 	void	PlayBlockAnim	(void) override { return DefaultBlock(CWpn::BLOCK_UP, CWpn::BLOCK_UP_TIME, CWpn::BLOCK_DOWN, CWpn::BLOCK_DOWN_TIME); }
-};
+	float	GetSpread		(void) override { if constexpr (IS_MEMBER_PRESENTED_CPP20_W(SPREAD_BASELINE)) return CWpn::SPREAD_BASELINE; else return CBaseWeapon::GetSpread(); }
 
+	// New functions.
+	int	DefaultShoot		(void) requires(IsShotgun<CWpn>);	// @Return: iSeedOfs
+	Vector2D DefaultShoot	(float flSpread = -1, float flCycleTime = -1) requires(IS_MEMBER_PRESENTED_CPP20_W(SPREAD_BASELINE));	// @Return: vecSpreadResult
 
+	virtual	void	ApplyServerFiringVisual	(void);
+	virtual	int		AcquireShootAnim		(void)
+	{
+		if constexpr (IS_MEMBER_PRESENTED_CPP20_W(SHOOT))
+		{
+			return CWpn::SHOOT;
+		}
 
-#define USP_VIEW_MODEL		"models/weapons/v_usp.mdl"
-#define USP_WORLD_MODEL		"models/weapons/w_usp.mdl"
-#define USP_FIRE_SFX		"weapons/usp/usp_fire.wav"
+		return 0;
+	}
+	virtual	void	PlaybackEvent			(const Vector2D& vSpread);
+//	virtual	void	ApplyClientFPFiringVisual(const Vector2D& vSpread);
+//	static	void	ApplyClientTPFiringVisual(struct event_args_s* args);	// Like it says, handle the TP visual effect only.
 
-constexpr float USP_MAX_SPEED       = 250.0f;
-constexpr float USP_DAMAGE          = 32;
-constexpr float USP_RANGE_MODIFER   = 1.187260896;	// 80% damage @650 inches.
-constexpr float USP_DEPLOY_TIME		= 0.34f;
-constexpr float USP_RELOAD_TIME		= 1.87f;
-constexpr float USP_FIRE_INTERVAL	= 0.15f;
-constexpr float	USP_EFFECTIVE_RANGE = 4096.0f;
-constexpr int	USP_PENETRATION		= 1;	// 1 means it can't penetrate anything.
-constexpr float	USP_SPREAD_BASELINE	= 1.2f;
-
-enum usp_e
-{
-	USP_IDLE,
-	USP_SHOOT1,
-	USP_SHOOT2,
-	USP_SHOOT3,
-	USP_SHOOT_EMPTY,
-	USP_RELOAD,
-	USP_DRAW,
-};
-
-class CUSP : public CBaseWeapon
-{
-#ifndef CLIENT_DLL
-public:	// SV exclusive variables.
-	static unsigned short m_usEvent;
-	static int m_iShell;
-
-public:	// SV exclusive functions.
-	virtual void	Precache		(void);
+	static inline	void	RegisterEvent(void) requires(HasEvent<CWpn>)
+	{
+#ifdef CLIENT_DLL
+		gEngfuncs.pfnHookEvent(CWpn::EVENT_FILE, CWpn::ApplyClientTPFiringVisual);
 #endif
+	}
+
+private:
+	CWpn* _pThis{ nullptr };
+	inline CWpn* This() { if (!_pThis) _pThis = dynamic_cast<CWpn*>(this); return _pThis; }
+};
+
+
+
+class CUSP : public CBaseWeaponTemplate<CUSP>
+{
+#pragma region USP database
+public:
+	enum usp_e
+	{
+		IDLE = 0,
+		SHOOT,
+		SHOOT_LAST,
+		DEPLOY,
+		DRAW_FIRST,
+		HOLSTER,
+		RELOAD,
+		RELOAD_EMPTY,
+		INSPECTION,
+		LHAND_DOWN,
+		LHAND_UP,
+		BLOCK_UP,
+		BLOCK_DOWN,
+		DASH_ENTER,
+		DASHING,
+		DASH_EXIT,
+	};
+
+	static constexpr auto	VIEW_MODEL	= "models/weapons/v_usp.mdl";
+	static constexpr auto	WORLD_MODEL	= "models/weapons/w_usp.mdl";
+	static constexpr auto	FIRE_SFX	= "weapons/deagle/usp_fire.wav";
+	static constexpr auto	POSTURE		= "onehanded";
+	static constexpr auto	MAX_SPEED = 250.0f;
+	static constexpr auto	DAMAGE = 32;
+	static constexpr auto	RANGE_MODIFER = 1.187260896;	// 80% damage @650 inches.
+	static constexpr auto	FIRE_INTERVAL = 0.15f;
+	static constexpr auto	EFFECTIVE_RANGE = 4096.0f;
+	static constexpr auto	PENETRATION = 1;	// 1 means it can't penetrate anything.
+	static constexpr auto	SPREAD_BASELINE = 1.2f;
+	static constexpr auto	ACCURACY_BASELINE = 0.92f;
+	static constexpr auto	GUN_VOLUME = QUIET_GUN_VOLUME;
+	static constexpr auto	GUN_FLASH = DIM_GUN_FLASH;
+	static constexpr auto	SHELL_MODEL = "models/pshell.mdl";
+	static constexpr auto	EVENT_FILE = "events/usp.sc";
+
+	// Anim time
+	static constexpr auto	FIRE_ANIMTIME		= 13.0 / 30.0;
+	static constexpr auto	DEPLOY_TIME			= 16.0 / 30.0;
+	static constexpr auto	DRAW_FIRST_TIME		= 41.0 / 30.0;
+	static constexpr auto	HOLSTER_TIME		= 16.0 / 30.0;
+	static constexpr auto	RELOAD_TIME			= 66.0 / 30.0;
+	static constexpr auto	RELOAD_EMPTY_TIME	= 66.0 / 30.0;
+	static constexpr auto	INSPECTION_TIME		= 76.0 / 30.0;
+	static constexpr auto	LHAND_DOWN_TIME		= 11.0 / 30.0;
+	static constexpr auto	LHAND_UP_TIME		= 11.0 / 30.0;
+	static constexpr auto	BLOCK_UP_TIME		= 11.0 / 30.0;
+	static constexpr auto	BLOCK_DOWN_TIME		= 11.0 / 30.0;
+	static constexpr auto	DASH_ENTER_TIME		= 11.0 / 30.0;
+	static constexpr auto	DASH_EXIT_TIME		= 11.0 / 30.0;
+
+	// Attrib
+	static constexpr auto	ATTRIB_SEMIAUTO = true;
+#pragma endregion
 
 public:	// basic logic funcs
-	virtual bool	Deploy			(void);
-	virtual void	PrimaryAttack	(void) { return USPFire(GetSpread()); }
-	virtual void	SecondaryAttack	(void);
-	virtual	bool	Reload			(void);
-	virtual void	WeaponIdle		(void);
+	void	PrimaryAttack	(void) final { BaseClass::DefaultShoot(); }
+	void	SecondaryAttack	(void) final { return DefaultSteelSight(Vector(-1.905f, -2, 1.1f), 85); }
+	bool	Reload			(void) final;
 
 public:	// util funcs
-	virtual	float	GetMaxSpeed		(void) { return USP_MAX_SPEED; }
-	virtual void	ResetModel		(void);
-	virtual float	GetSpread		(void);
+	float	GetSpread		(void) final;
 
-public:	// new functions
-	void USPFire(float flSpread, float flCycleTime = USP_FIRE_INTERVAL);
+#ifdef CLIENT_DLL
+	bool	UsingInvertedVMDL(void) final { return false; }	// Model designed by InnocentBlue is not inverted.
+#endif
+
+public:	// new funcs
+	int		AcquireShootAnim(void) final { return m_iClip > 1 ? SHOOT : SHOOT_LAST; }
+	void	PlaybackEvent	(const Vector2D& vSpread) final;
+	void	ApplyClientFPFiringVisual(const Vector2D& vSpread);
+	void	ApplyRecoil		(void);
+
+	static	void	ApplyClientTPFiringVisual(struct event_args_s* args);
 };
 
 #define MP5N_VIEW_MODEL		"models/weapons/v_mp5.mdl"
@@ -1060,7 +1159,7 @@ constexpr float KSG12_TIME_START_RELOAD = 0.566f;
 constexpr float KSG12_TIME_INSERT		= 0.75f;
 constexpr float KSG12_TIME_ADD_AMMO		= 0.3f;
 constexpr float KSG12_TIME_AFTER_RELOAD = 1.033f;
-const	Vector	KSG12_CONE_VECTOR		= Vector(0.0675f, 0.0675f, 0.0f); // special shotgun spreads
+constexpr auto	KSG12_CONE_VECTOR		= Vector2D(0.0675f, 0.0675f); // special shotgun spreads
 constexpr float KSG12_RANGE_MODIFIER	= 1.172793196; // 80% damage @700 inches.
 
 enum ksg12_e
@@ -1436,7 +1535,7 @@ public:	// Constants / Database
 	static constexpr float	LHAND_DOWN_TIME			= 0.7f;
 	static constexpr float	DASH_ENTER_TIME			= 0.366F;
 	static constexpr float	DASH_EXIT_TIME			= 0.366F;
-	static constexpr Vector	CONE_VECTOR				= Vector(0.0725, 0.0725, 0.0); // special shotgun spreads
+	static constexpr auto	CONE_VECTOR				= Vector2D(0.0725, 0.0725); // special shotgun spreads
 	static constexpr int	GUN_VOLUME				= LOUD_GUN_VOLUME;
 	static constexpr float	RANGE_MODIFIER			= 1.172793196;	// 80% damage @700 inches.
 

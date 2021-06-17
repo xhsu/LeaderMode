@@ -34,40 +34,21 @@ public:
 	virtual ~CBaseSkill() {}
 
 	template <typename T>
-	static T* Grand(CBasePlayer* pPlayer)
-	{
-		T* p = new T;
-
-		if (pPlayer->m_rgpSkills[p->Classify()])
-		{
-			delete p;
-			return nullptr;
-		}
-
-		p->m_bUsingSkill = false;
-		p->m_bAllowSkill = true;
-		p->m_flTimeCooldownOver = gpGlobals->time;
-		p->m_flTimeLastUsed = -1.0;
-		p->m_pPlayer = pPlayer;
-
-		pPlayer->m_rgpSkills[p->Classify()] = p;
-
-		return p;
-	}
+	static T* Grand(CBasePlayer* pPlayer);
 
 public:
-	static const char* RADAR_BEEP_SFX;
-	static const char* RADAR_TARGET_DEAD_SFX;
-	static const char* COOLDOWN_COMPLETE_SFX;
-	static const char* CRITICAL_SHOT_SFX;
+	static constexpr auto RADAR_BEEP_SFX = "leadermode/nes_8bit_alien3_radar_beep1.wav";
+	static constexpr auto RADAR_TARGET_DEAD_SFX = "leadermode/sfx_event_duel_win_01.wav";
+	static constexpr auto COOLDOWN_COMPLETE_SFX = "leadermode/pope_accepts_crusade_arrived.wav";
+	static constexpr auto CRITICAL_SHOT_SFX = "leadermode/siege_attack.wav";
 
-	static int m_idBulletTrace;
+	static inline int m_idBulletTrace = 0;
 
 	static void	Precache();
 
 public:
-	bool m_bUsingSkill;
-	bool m_bAllowSkill;
+	bool m_bUsingSkill : 1;
+	bool m_bAllowSkill : 1;
 	float m_flTimeCooldownOver;
 	float m_flTimeLastUsed;
 	CBasePlayer* m_pPlayer;

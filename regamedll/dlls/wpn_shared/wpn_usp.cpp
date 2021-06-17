@@ -1,77 +1,18 @@
 /*
 
 Remastered Date: Mar 13 2020
+Remastered II Date: Jun 17 2021
 
 Modern Warfare Dev Team
 Code - Luna the Reborn
 Model - Miracle(Innocent Blue)
+Sound - iDkGK
+Sprite - HL&CL
 
 */
 
 #include "precompiled.h"
 
-#ifndef CLIENT_DLL
-
-unsigned short CUSP::m_usEvent = 0;
-int CUSP::m_iShell = 0;
-
-void CUSP::Precache()
-{
-	PRECACHE_NECESSARY_FILES(USP);
-
-	m_iShell = PRECACHE_MODEL("models/pshell.mdl");
-	m_usEvent = PRECACHE_EVENT(1, "events/usp.sc");
-}
-
-#else
-
-
-#endif
-
-bool CUSP::Deploy()
-{
-	m_flAccuracy = 0.92f;
-
-	return DefaultDeploy(USP_VIEW_MODEL, USP_WORLD_MODEL, USP_DRAW, "onehanded", USP_DEPLOY_TIME);
-}
-
-void CUSP::SecondaryAttack()
-{
-	m_bInZoom = !m_bInZoom;
-	m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + 0.3f;
-
-#ifdef CLIENT_DLL
-	// due to some logic problem, we actually cannot use m_bInZoom here.
-	// it would be override.
-
-	if (!g_vecGunOfsGoal.LengthSquared())
-	{
-		g_vecGunOfsGoal = Vector(-4.6f, -10.0f, 2.4f);
-		gHUD::m_iFOV = 85;	// allow clients to predict the zoom.
-	}
-	else
-	{
-		g_vecGunOfsGoal = g_vecZero;
-		gHUD::m_iFOV = 90;
-	}
-
-	// this model needs faster.
-	g_flGunOfsMovingSpeed = 10.0f;
-#else
-	// just zoom a liiiiittle bit.
-	// this doesn't suffer from the same bug where the gunofs does, since the FOV was actually sent from SV.
-	if (m_bInZoom)
-	{
-		m_pPlayer->pev->fov = 85;
-		EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, "weapons/steelsight_in.wav", 0.75f, ATTN_STATIC);
-	}
-	else
-	{
-		m_pPlayer->pev->fov = 90;
-		EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, "weapons/steelsight_out.wav", 0.75f, ATTN_STATIC);
-	}
-#endif
-}
 
 float CUSP::GetSpread(void)
 {
@@ -89,104 +30,121 @@ float CUSP::GetSpread(void)
 		}
 	}
 
-	return DefaultSpread(USP_SPREAD_BASELINE * (1.0f - m_flAccuracy), 0.1f, 0.75f, 2.0f, 5.0f);
+	return DefaultSpread(SPREAD_BASELINE * (1.0f - m_flAccuracy), 0.1f, 0.75f, 2.0f, 5.0f);
 }
 
-void CUSP::USPFire(float flSpread, float flCycleTime)
+void CUSP::PlaybackEvent(const Vector2D& vSpread)
 {
-	if (++m_iShotsFired > 1)
-	{
-		return;
-	}
-
-	m_flLastFire = gpGlobals->time;
-
-	if (m_iClip <= 0)
-	{
-		PlayEmptySound();
-		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.2f;
-
 #ifndef CLIENT_DLL
-		if (TheBots)
-		{
-			TheBots->OnEvent(EVENT_WEAPON_FIRED_ON_EMPTY, m_pPlayer);
-		}
+	PLAYBACK_EVENT_FULL(
+		FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL,
+		m_pPlayer->edict(),
+		m_usEvent<CUSP>,
+		0,
+		(float*)&g_vecZero, (float*)&g_vecZero,
+		vSpread.x, vSpread.y,
+		int(m_pPlayer->pev->punchangle.x * 100),
+		int(m_pPlayer->pev->punchangle.y * 100),
+		m_iClip == 0,
+		false	// unused.
+	);
 #endif
+}
 
-		return;
-	}
+void CUSP::ApplyClientFPFiringVisual(const Vector2D& vSpread)
+{
+#ifdef CLIENT_DLL
+	auto idx = gEngfuncs.GetLocalPlayer()->index;
+	bool bDucking = gEngfuncs.pEventAPI->EV_LocalPlayerDucking();
 
-	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
+	auto vecAngles = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
+	UTIL_MakeVectors(vecAngles);
 
-	m_iClip--;
+	EV_MuzzleFlash();
 
-	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
-	m_pPlayer->m_iWeaponVolume = QUIET_GUN_VOLUME;	// due to the silencer
-	m_pPlayer->m_iWeaponFlash = DIM_GUN_FLASH;
+	// first personal gun smoke.
+	Vector smoke_origin = g_pViewEnt->attachment[0] - gpGlobals->v_forward * 3.0f;
+	float base_scale = RANDOM_FLOAT(0.1, 0.25);
 
-	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
+	EV_HLDM_CreateSmoke(smoke_origin, gpGlobals->v_forward, 0, base_scale, 7, 7, 7, EV_PISTOL_SMOKE, m_pPlayer->pev->velocity, false, 35);
+	EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], gpGlobals->v_forward, 20, base_scale + 0.1, 10, 10, 10, EV_WALL_PUFF, m_pPlayer->pev->velocity, false, 35);
+	EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], gpGlobals->v_forward, 40, base_scale, 13, 13, 13, EV_WALL_PUFF, m_pPlayer->pev->velocity, false, 35);
 
-	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
+	// shoot anim.
+	SendWeaponAnim(AcquireShootAnim());
 
-	Vector vecSrc = m_pPlayer->GetGunPosition();
-	Vector vecAiming = gpGlobals->v_forward;
+	Vector ShellVelocity, ShellOrigin;
+	if (!cl_righthand->value)
+		EV_GetDefaultShellInfo(idx, bDucking, m_pPlayer->pev->origin, m_pPlayer->pev->velocity, ShellVelocity, ShellOrigin, gpGlobals->v_forward, gpGlobals->v_right, gpGlobals->v_up, 36.0, -14.0, -14.0);
+	else
+		EV_GetDefaultShellInfo(idx, bDucking, m_pPlayer->pev->origin, m_pPlayer->pev->velocity, ShellVelocity, ShellOrigin, gpGlobals->v_forward, gpGlobals->v_right, gpGlobals->v_up, 36.0, -14.0, 14.0);
 
-	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, USP_EFFECTIVE_RANGE, USP_PENETRATION, m_iPrimaryAmmoType, USP_DAMAGE, USP_RANGE_MODIFER, m_pPlayer->random_seed);
+	ShellOrigin = g_pViewEnt->attachment[1];	// use the weapon attachment instead.
+	ShellVelocity *= 0.5;
+	ShellVelocity.z += 45.0;
 
-#ifndef CLIENT_DLL
-	int seq = UTIL_SharedRandomFloat(m_pPlayer->random_seed, USP_SHOOT1, USP_SHOOT3);
-	if (m_iClip == 0)
-		seq = USP_SHOOT_EMPTY;
+	EV_EjectBrass(ShellOrigin, ShellVelocity, vecAngles.yaw, m_iShell<CUSP>, TE_BOUNCE_SHELL, 5);
 
-	SendWeaponAnim(seq);	// LUNA: I don't know why, but this has to be done on SV side, or client fire anim would be override.
-	PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL, m_pPlayer->edict(), m_usEvent, 0, (float*)&g_vecZero, (float*)&g_vecZero, vecDir.x, vecDir.y, (int)(m_pPlayer->pev->punchangle.x * 100), 0, m_iClip == 0, FALSE);
+	Vector vecSrc = EV_GetGunPosition(idx, bDucking, m_pPlayer->pev->origin);
 
-	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
-	{
-		m_pPlayer->SetSuitUpdate("!HEV_AMO0", SUIT_SENTENCE, SUIT_REPEAT_OK);
-	}
-#else
-	static event_args_t args;
-	Q_memset(&args, NULL, sizeof(args));
+	// original API: vol = 1.0, attn = 0.8, pitch = 87~105
+	EV_PlayGunFire(vecSrc + gpGlobals->v_forward * 10.0f, FIRE_SFX, QUIET_GUN_VOLUME, 1.0, RANDOM_LONG(87, 105));
 
-	args.angles = m_pPlayer->pev->v_angle;
-	args.bparam1 = m_iClip == 0;
-	args.bparam2 = false;	// silencer
-	args.ducking = gEngfuncs.pEventAPI->EV_LocalPlayerDucking();
-	args.entindex = gEngfuncs.GetLocalPlayer()->index;
-	args.flags = FEV_NOTHOST | FEV_RELIABLE | FEV_CLIENT | FEV_GLOBAL;
-	args.fparam1 = vecDir.x;
-	args.fparam2 = vecDir.y;
-	args.iparam1 = int(m_pPlayer->pev->punchangle.x * 100.0f);
-	args.iparam2 = 0;	// should be punchangle.y. but in USP, it's unused.
-	args.origin = m_pPlayer->pev->origin;
-	args.velocity = m_pPlayer->pev->velocity;
-
-	EV_FireUSP(&args);
+	EV_HLDM_FireBullets(idx,
+		gpGlobals->v_forward, gpGlobals->v_right, gpGlobals->v_up,
+		1, vecSrc, gpGlobals->v_forward,
+		vSpread, EFFECTIVE_RANGE, m_iPrimaryAmmoType,
+		PENETRATION);
 #endif
+}
 
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.0f;
-	m_pPlayer->m_vecVAngleShift.x -= 2.0f;
+void CUSP::ApplyRecoil(void)
+{
+	m_pPlayer->pev->punchangle.x -= 2.0f;
 }
 
 bool CUSP::Reload()
 {
-	if (DefaultReload(m_pItemInfo->m_iMaxClip, USP_RELOAD, USP_RELOAD_TIME))
+	if (DefaultReload(m_pItemInfo->m_iMaxClip, RELOAD, RELOAD_TIME))
 	{
-		m_flAccuracy = 0.92f;
+		m_flAccuracy = ACCURACY_BASELINE;
 		return true;
 	}
 
 	return false;
 }
 
-void CUSP::WeaponIdle()
+void CUSP::ApplyClientTPFiringVisual(struct event_args_s* args)
 {
-	if (m_iClip)
-	{
-		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 60.0f;
-		SendWeaponAnim(USP_IDLE);
-	}
-}
+#ifdef CLIENT_DLL
+	bool silencer_on = !args->bparam2;	// useless
+	bool empty = !args->bparam1;
+	int idx = args->entindex;
+	Vector origin(args->origin);
+	Vector angles(
+		args->iparam1 / 100.0f + args->angles[0],
+		args->iparam2 / 100.0f + args->angles[1],
+		args->angles[2]
+	);
+	Vector velocity(args->velocity);
 
-DECLARE_STANDARD_RESET_MODEL_FUNC(USP)
+	Vector forward, right, up;
+	AngleVectors(angles, forward, right, up);
+
+	Vector ShellVelocity, ShellOrigin;
+	EV_GetDefaultShellInfo(args->entindex, args->ducking, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -12.0, 4.0);
+	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, m_iShell<CUSP>, TE_BOUNCE_SHELL, 5);
+
+	Vector vecSrc = EV_GetGunPosition(args->entindex, args->ducking, origin);
+	Vector2D vSpread = Vector2D(args->fparam1, args->fparam2);
+
+	// original API: vol = 1.0, attn = 0.8, pitch = 87~105
+	EV_PlayGunFire(vecSrc + forward * 10.0f, FIRE_SFX, QUIET_GUN_VOLUME, 1.0, RANDOM_LONG(87, 105));
+
+	EV_HLDM_FireBullets(idx,
+		forward, right, up,
+		1, vecSrc, forward,
+		vSpread, EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_USP].m_iAmmoType,
+		PENETRATION);
+#endif
+}

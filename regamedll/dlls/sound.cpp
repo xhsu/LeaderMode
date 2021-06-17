@@ -1616,7 +1616,7 @@ float TEXTURETYPE_PlaySound(TraceResult *ptr, Vector vecSrc, Vector vecEnd, int 
 	const char *pTextureName;
 	float rgfl1[3];
 	float rgfl2[3];
-	char *rgsz[4];
+	const char *rgsz[4];
 	int cnt;
 	float fattn = ATTN_NORM;
 
@@ -1851,7 +1851,7 @@ void CSpeaker::Precache()
 
 void CSpeaker::SpeakerThink()
 {
-	char *szSoundFile = nullptr;
+	const char *szSoundFile = nullptr;
 	float flvolume = pev->health * 0.1f;
 	float flattenuation = 0.3f;
 	int flags = 0;

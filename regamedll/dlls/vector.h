@@ -156,7 +156,7 @@ public:
 
 		return flLen;
 	}
-	constexpr bool IsZero(vec_t tolerance = 0.01f) const
+	constexpr bool IsZero(vec_t tolerance = FLT_EPSILON) const
 	{
 		return (x > -tolerance && x < tolerance &&
 			y > -tolerance && y < tolerance);

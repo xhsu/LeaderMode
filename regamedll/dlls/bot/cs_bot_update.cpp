@@ -664,7 +664,7 @@ void CCSBot::Update()
 	{
 		if (GetMorale() < NEUTRAL && IsSafe() && GetSafeTimeRemaining() < 2.0f && IsHunting())
 		{
-			if (GetMorale() * -40.0 > RANDOM_FLOAT(0.0f, 100.0f))
+			if (float(GetMorale()) * -40.0 > RANDOM_FLOAT(0.0f, 100.0f))
 			{
 				if (TheCSBots()->IsOnOffense(this) || !TheCSBots()->IsDefenseRushing())
 				{

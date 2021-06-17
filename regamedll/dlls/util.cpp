@@ -908,7 +908,7 @@ float UTIL_SplineFraction(float value, float scale)
 	return 3.0f * (valueSquared * valueSquared) - (valueSquared * valueSquared * valueSquared + valueSquared * valueSquared * valueSquared);
 }
 
-char *UTIL_VarArgs(char *format, ...)
+char *UTIL_VarArgs(const char *format, ...)
 {
 	va_list argptr;
 	static char string[1024];

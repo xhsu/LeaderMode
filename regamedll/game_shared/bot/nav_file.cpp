@@ -807,7 +807,7 @@ NavErrorType LoadNavigationMap()
 		if (bspSize != saveBspSize)
 		{
 			// this nav file is out of date for this bsp file
-			char *msg = "*** WARNING ***\nThe AI navigation data is from a different version of this map.\nThe CPU players will likely not perform well.\n";
+			constexpr auto msg = "*** WARNING ***\nThe AI navigation data is from a different version of this map.\nThe CPU players will likely not perform well.\n";
 			HintMessageToAllPlayers(msg);
 			CONSOLE_ECHO("\n-----------------\n");
 			CONSOLE_ECHO(msg);

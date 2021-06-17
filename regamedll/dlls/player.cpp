@@ -102,7 +102,7 @@ void CBasePlayer::SendItemStatus()
 	MESSAGE_END();
 }
 
-bool EXT_FUNC CBasePlayer::SetClientUserInfoName(char *infobuffer, char *szNewName)
+bool EXT_FUNC CBasePlayer::SetClientUserInfoName(char *infobuffer, const char *szNewName)
 {
 	int nClientIndex = entindex();
 
@@ -134,7 +134,7 @@ bool EXT_FUNC CBasePlayer::SetClientUserInfoName(char *infobuffer, char *szNewNa
 	return true;
 }
 
-void CBasePlayer::SetClientUserInfoModel(char *infobuffer, char *szNewModel)
+void CBasePlayer::SetClientUserInfoModel(char *infobuffer, const char *szNewModel)
 {
 	if (szNewModel == nullptr)
 		return;
@@ -148,7 +148,7 @@ void CBasePlayer::SetClientUserInfoModel(char *infobuffer, char *szNewModel)
 void CBasePlayer::SetPlayerModel()
 {
 	char *infobuffer = GET_INFO_BUFFER(edict());
-	char *model;
+	const char *model;
 
 	if (m_iTeam == CT)
 	{
@@ -3718,7 +3718,7 @@ void CBasePlayer::CheckSuitUpdate()
 // sentence name ie: !HEV_AA0.  If iNoRepeat is specified in
 // seconds, then we won't repeat playback of this word or sentence
 // for at least that number of seconds.
-void CBasePlayer::SetSuitUpdate(char *name, bool group, int iNoRepeatTime)
+void CBasePlayer::SetSuitUpdate(const char *name, bool group, int iNoRepeatTime)
 {
 	;
 }
@@ -5031,8 +5031,11 @@ BOOL EXT_FUNC CBasePlayer::AddPlayerItem(CBaseWeapon *pItem)
 
 		// FX
 		EMIT_SOUND(edict(), CHAN_WEAPON, "items/gunpickup2.wav", VOL_NORM, ATTN_NORM);
-		MESSAGE_BEGIN(MSG_ONE, gmsgWeapPickup, nullptr, pev);
+
+		// Add a weapon from client side.
+		MESSAGE_BEGIN(MSG_ONE, gmsgGiveWpn, nullptr, pev);
 		WRITE_BYTE(pItem->m_iId);
+		WRITE_SHORT(pItem->m_iClip);
 		MESSAGE_END();
 
 		// Slot info for HUD.
@@ -6002,7 +6005,7 @@ CBaseEntity *EXT_FUNC CBasePlayer::DropPlayerItem(WeaponIdType iId)
 		if (!pWeapon->CanDrop() && IsAlive())
 		{
 			ClientPrint(pev, HUD_PRINTCENTER, "#Weapon_Cannot_Be_Dropped");
-			return false;
+			return nullptr;
 		}
 
 		// No more weapon
@@ -6041,10 +6044,10 @@ bool CBasePlayer::HasPlayerItem(WeaponIdType iId)
 void CBasePlayer::SwitchTeam()
 {
 	int oldTeam;
-	char *szOldTeam;
-	char *szNewTeam;
+	const char *szOldTeam;
+	const char *szNewTeam;
 	const char *szName;
-	char *szNewModel = nullptr;
+	const char *szNewModel = nullptr;
 
 	oldTeam = m_iTeam;
 

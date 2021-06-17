@@ -17,8 +17,17 @@ enum EV_SmokeTypes
 	EV_RIFLE_SMOKE,
 };
 
-void EV_EjectBrass(float* origin, float* velocity, float rotation, int model, int soundtype, float flAngularVel = 4.0f, float life = 15.0f);
-bool EV_IsLocal(int idx);
+extern void EV_MuzzleFlash(void);
+extern void EV_HLDM_CreateSmoke(float* origin, float* dir, int speed, float scale, int r, int g, int b, EV_SmokeTypes iSmokeType, float* base_velocity, bool bWind, int framerate);
+extern void EV_EjectBrass(float* origin, float* velocity, float rotation, int model, int soundtype, float flAngularVel = 4.0f, float life = 15.0f);
+extern bool EV_IsLocal(int idx);
+extern void EV_HLDM_FireBullets(int idx, Vector& forward, Vector& right, Vector& up, int cShots, Vector& vecSrc, Vector& vecDirShooting, const Vector2D& vecSpread, float flDistance, AmmoIdType iBulletType, int iPenetration);
+extern void EV_HLDM_FireBullets(int idx, Vector& forward, Vector& right, Vector& up, int cShots, Vector& vecSrc, Vector& vecDirShooting, const Vector2D& vecSpread, float flDistance, AmmoIdType iBulletType, int iPenetration, int shared_rand);
+extern void EV_GetDefaultShellInfo(int idx, bool ducking, const Vector& origin, const Vector& velocity, Vector& ShellVelocity, Vector& ShellOrigin, const Vector& forward, const Vector& right, const Vector& up, float forwardScale, float upScale, float rightScale);
+extern Vector EV_GetGunPosition(int idx, bool ducking, Vector origin);
+extern void EV_PlayGunFire(const Vector& src, const char* sample, float attn, float vol, int iPitch);
+extern void EV_PlayGunFire2(const Vector& src, const char* sample, float rad, float vol, int iPitch);
+extern void EV_PlayGunFire2(const Vector& src, const char* sample, float rad, float vol = 1.0f);
 
 extern int g_iRShell;
 extern int g_iPShell;
@@ -44,5 +53,5 @@ DECLARE_EVENT(FirePSG1);
 DECLARE_EVENT(FireSCARH);
 DECLARE_EVENT(FireSVD);
 DECLARE_EVENT(FireUMP45);
-DECLARE_EVENT(FireUSP);
+//DECLARE_EVENT(FireUSP);
 DECLARE_EVENT(FireXM8);

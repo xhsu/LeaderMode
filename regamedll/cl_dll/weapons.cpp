@@ -71,7 +71,7 @@ Vector2D CBasePlayer::FireBullets3(Vector vecSrc, Vector vecDirShooting, float v
 	return Vector2D(x * vecSpread, y * vecSpread);
 }
 
-int CBasePlayer::FireBuckshots(ULONG cShots, const Vector& vecSrc, const Vector& vecDirShooting, const Vector& vecSpread, float flDistance, int iDamage, float flExponentialBase, int shared_rand)
+int CBasePlayer::FireBuckshots(ULONG cShots, const Vector& vecSrc, const Vector& vecDirShooting, const Vector2D& vecSpread, float flDistance, int iDamage, float flExponentialBase, int shared_rand)
 {
 	int iSeedOfs = 0;	// keep track how many times we used the shared_rand.
 
@@ -485,8 +485,13 @@ bool CBaseWeapon::AddToPlayer(CBasePlayer* pPlayer)
 template<class CWpn>
 bool CBaseWeaponTemplate<CWpn>::Deploy(void)
 {
-	if constexpr (DETECT_ACCURACY_BASELINE<CWpn>::value)
+	if constexpr (IS_MEMBER_PRESENTED_CPP20_W(ACCURACY_BASELINE))
 		m_flAccuracy = CWpn::ACCURACY_BASELINE;
+
+#ifdef CLIENT_DLL
+	if constexpr (IS_MEMBER_PRESENTED_CPP20_W(SHELL_MODEL))
+		m_iShell<CWpn> = gEngfuncs.pEventAPI->EV_FindModelIndex(CWpn::SHELL_MODEL);
+#endif
 
 	m_iShotsFired = 0;
 
@@ -1048,32 +1053,6 @@ bool CBaseWeapon::Kill(void)
 	return true;
 }
 
-template<class CWpn>
-float CBaseWeaponTemplate<CWpn>::GetMaxSpeed(void)
-{
-	if constexpr (DETECT_MAX_SPEED_ZOOM<CWpn>::value)
-	{
-		// Slower speed when zoomed in.
-		if (std::roundf(m_pPlayer->pev->fov) < DEFAULT_FOV)
-			return CWpn::MAX_SPEED_ZOOM;
-	}
-
-	if constexpr (DETECT_MAX_SPEED<CWpn>::value)
-	{
-		return CWpn::MAX_SPEED;
-	}
-
-	if constexpr (!DETECT_MAX_SPEED_ZOOM<CWpn>::value && !DETECT_MAX_SPEED<CWpn>::value)
-	{
-		return CBaseWeapon::GetMaxSpeed();
-	}
-}
-
-bool CBaseWeapon::AddPrimaryAmmo(int iCount)
-{
-	return false;
-}
-
 void CBaseWeapon::UpdateBobParameters(void)
 {
 	// normally we don'touch any Omega stuff.
@@ -1114,6 +1093,144 @@ bool CBaseWeapon::DefaultDeploy(const char* szViewModel, const char* szWeaponMod
 	m_pPlayer->m_vecVAngleShift = g_vecZero;
 
 	return true;
+}
+
+template<typename CWpn>
+int CBaseWeaponTemplate<CWpn>::DefaultShoot(void)  requires(IsShotgun<CWpn>)
+{
+	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
+
+	return m_pPlayer->FireBuckshots(
+		CWpn::PROJECTILE_COUNT,
+		m_pPlayer->GetGunPosition(),
+		gpGlobals->v_forward,
+		CWpn::CONE_VECTOR,
+		CWpn::EFFECTIVE_RANGE,
+		CWpn::DAMAGE,
+		CWpn::RANGE_MODIFIER,
+		m_pPlayer->random_seed
+	);
+}
+
+template<typename CWpn>
+Vector2D CBaseWeaponTemplate<CWpn>::DefaultShoot(float flSpread, float flCycleTime)  requires(IS_MEMBER_PRESENTED_CPP20_W(SPREAD_BASELINE))
+{
+#pragma region Semiauto check.
+	if constexpr (IS_MEMBER_PRESENTED_CPP20_W(ATTRIB_SEMIAUTO))
+	{
+		if (++m_iShotsFired > 1)
+		{
+			return Vector2D::Zero();
+		}
+	}
+#pragma endregion
+
+#pragma region Check input variables
+	if (flSpread < 0.0f)
+		flSpread = This()->GetSpread();
+
+	if (flCycleTime < 0.0f)
+	{
+		if constexpr (IS_MEMBER_PRESENTED_CPP20_W(RPM))
+		{
+			flCycleTime = 60.0f / CWpn::RPM;
+		}
+		else if constexpr (IS_MEMBER_PRESENTED_CPP20_W(FIRE_INTERVAL))
+		{
+			flCycleTime = CWpn::FIRE_INTERVAL;
+		}
+		else
+		{
+			COMPILING_ERROR("One of two fire interval attrib must be provided: \"RPM\" or \"FIRE_INTERVAL\".");
+		}
+	}
+#pragma endregion
+
+#pragma region Underwater check.
+	if constexpr (IS_MEMBER_PRESENTED_CPP20_W(ATTRIB_NO_FIRE_UNDERWATER))
+	{
+		if (m_pPlayer->pev->waterlevel == 3)
+		{
+			PlayEmptySound();
+			m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.15f;
+			return Vector2D::Zero();
+		}
+	}
+#pragma endregion
+
+#pragma region Magazine check.
+	if (m_iClip <= 0)
+	{
+		PlayEmptySound();
+		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.2f;
+
+#ifndef CLIENT_DLL
+		if (TheBots)
+		{
+			TheBots->OnEvent(EVENT_WEAPON_FIRED_ON_EMPTY, m_pPlayer);
+		}
+#endif
+
+		return Vector2D::Zero();
+	}
+#pragma endregion
+
+	m_iClip--;
+
+#pragma region Server side visual effects
+	This()->ApplyServerFiringVisual();
+#pragma endregion
+
+#pragma region Fire bullets.
+	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
+
+	auto vSpread = m_pPlayer->FireBullets3(
+		m_pPlayer->GetGunPosition(),
+		gpGlobals->v_forward,
+		flSpread,
+		CWpn::EFFECTIVE_RANGE,
+		CWpn::PENETRATION,
+		m_iPrimaryAmmoType,
+		CWpn::DAMAGE,
+		CWpn::RANGE_MODIFER,
+		m_pPlayer->random_seed
+	);
+#pragma endregion
+
+#pragma region Notify all clients that this weapon has fired.
+	This()->PlaybackEvent(vSpread);
+#pragma endregion
+
+#pragma region Client visual effects
+	// If this code is running at client side, by default we have to call first personal VFX.
+	// The third personal VFX can only be refer in the events.
+	if constexpr (IS_MEMBER_PRESENTED_CPP20_W(ApplyClientFPFiringVisual))
+	{
+		This()->ApplyClientFPFiringVisual(vSpread);	// Allow an override of CWpn's version.
+	}
+#pragma endregion
+
+#pragma region Apply time defer to next attacks.
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
+
+	if constexpr (IS_MEMBER_PRESENTED_CPP20_W(FIRE_ANIMTIME))
+	{
+		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + CWpn::FIRE_ANIMTIME;
+	}
+	else
+	{
+		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + flCycleTime + 2.0f;
+	}
+#pragma endregion
+
+#pragma region Apply recoils.
+	if constexpr (IS_MEMBER_PRESENTED_CPP20_W(ApplyRecoil))
+	{
+		This()->ApplyRecoil();
+	}
+#pragma endregion
+
+	return vSpread;
 }
 
 void CBaseWeapon::DefaultIdle(int iDashingAnim, int iIdleAnim, float flDashLoop)
@@ -1438,6 +1555,152 @@ float CBaseWeapon::DefaultSpread(float flBaseline, float flAimingMul, float flDu
 	return flBaseline;	// it's already be modified.
 }
 
+template<typename CWpn>
+WeaponIdType CBaseWeaponTemplate<CWpn>::Id(void)
+{
+	// Pistols
+	if constexpr (std::is_same_v<CWpn, CG18C>)
+	{
+		return WEAPON_GLOCK18;
+	}
+	else if constexpr (std::is_same_v<CWpn, CUSP>)
+	{
+		return WEAPON_USP;
+	}
+	else if constexpr (std::is_same_v<CWpn, CAnaconda>)
+	{
+		return WEAPON_ANACONDA;
+	}
+	else if constexpr (std::is_same_v<CWpn, CDEagle>)
+	{
+		return WEAPON_DEAGLE;
+	}
+	else if constexpr (std::is_same_v<CWpn, CFN57>)
+	{
+		return WEAPON_FIVESEVEN;
+	}
+	else if constexpr (std::is_same_v<CWpn, CM45A1>)
+	{
+		return WEAPON_M45A1;
+	}
+
+	// Shotguns
+	else if constexpr (std::is_same_v<CWpn, CKSG12>)
+	{
+		return WEAPON_KSG12;
+	}
+	else if constexpr (std::is_same_v<CWpn, CM1014>)
+	{
+		return WEAPON_M1014;
+	}
+	//else if constexpr (std::is_same_v<CWpn, CAA12>)
+	//{
+	//	return WEAPON_AA12;
+	//}
+
+	// SMGs
+	else if constexpr (std::is_same_v<CWpn, CMP7A1>)
+	{
+		return WEAPON_MP7A1;
+	}
+	//else if constexpr (std::is_same_v<CWpn, CMAC10>)
+	//{
+	//	return WEAPON_MAC10;
+	//}
+	//else if constexpr (std::is_same_v<CWpn, CMP5N>)
+	//{
+	//	return WEAPON_MP5N;
+	//}
+	else if constexpr (std::is_same_v<CWpn, CUMP45>)
+	{
+		return WEAPON_UMP45;
+	}
+	//else if constexpr (std::is_same_v<CWpn, CP90>)
+	//{
+	//	return WEAPON_P90;
+	//}
+	//else if constexpr (std::is_same_v<CWpn, CKrissVector>)
+	//{
+	//	return WEAPON_VECTOR;
+	//}
+
+	// Assault Rifles
+	else if constexpr (std::is_same_v<CWpn, CAK47>)
+	{
+		return WEAPON_AK47;
+	}
+	else if constexpr (std::is_same_v<CWpn, CM4A1>)
+	{
+		return WEAPON_M4A1;
+	}
+	else if constexpr (std::is_same_v<CWpn, CSCARH>)
+	{
+		return WEAPON_SCARH;
+	}
+	else if constexpr (std::is_same_v<CWpn, CXM8>)
+	{
+		return WEAPON_XM8;
+	}
+
+	// Sniper Rifles
+	//else if constexpr (std::is_same_v<CWpn, CSRS>)
+	//{
+	//	return WEAPON_SRS;
+	//}
+	else if constexpr (std::is_same_v<CWpn, CSVD>)
+	{
+		return WEAPON_SVD;
+	}
+	else if constexpr (std::is_same_v<CWpn, CAWP>)
+	{
+		return WEAPON_AWP;
+	}
+	else if constexpr (std::is_same_v<CWpn, CPSG1>)
+	{
+		return WEAPON_PSG1;
+	}
+
+	// LMGs
+	else if constexpr (std::is_same_v<CWpn, CMK46>)
+	{
+		return WEAPON_MK46;
+	}
+	//else if constexpr (std::is_same_v<CWpn, CRPD>)
+	//{
+	//	return WEAPON_RPD;
+	//}
+
+	else
+	{
+		COMPILING_ERROR("Unregistered weapon class presented!");
+	}
+}
+
+template<class CWpn>
+float CBaseWeaponTemplate<CWpn>::GetMaxSpeed(void)
+{
+	if constexpr (IS_MEMBER_PRESENTED_CPP20_W(MAX_SPEED_ZOOM))
+	{
+		// Slower speed when zoomed in.
+		if (std::roundf(m_pPlayer->pev->fov) < DEFAULT_FOV)
+			return CWpn::MAX_SPEED_ZOOM;
+	}
+
+	if constexpr (IS_MEMBER_PRESENTED_CPP20_W(MAX_SPEED))
+	{
+		return CWpn::MAX_SPEED;
+	}
+	else
+	{
+		return CBaseWeapon::GetMaxSpeed();
+	}
+}
+
+bool CBaseWeapon::AddPrimaryAmmo(int iCount)
+{
+	return false;
+}
+
 void CBaseWeapon::SendWeaponAnim(int iAnim, bool bSkipLocal)
 {
 	g_iCurViewModelAnim = iAnim;
@@ -1571,6 +1834,41 @@ void CBaseWeaponTemplate<CWpn>::ResetModel(void)
 #else
 	g_pViewEnt->model = gEngfuncs.CL_LoadModel(CWpn::VIEW_MODEL, &m_pPlayer->pev->viewmodel);
 #endif
+}
+
+//template<typename CWpn>
+//inline void CBaseWeaponTemplate<CWpn>::RegisterEvent(void) requires(HasEvent<CWpn>)
+//{
+//#ifdef CLIENT_DLL
+//	gEngfuncs.pfnHookEvent(CWpn::EVENT_FILE, CWpn::ApplyClientTPFiringVisual);
+//#endif
+//}
+
+template<typename CWpn>
+void CBaseWeaponTemplate<CWpn>::ApplyServerFiringVisual(void)
+{
+	if constexpr (IS_MEMBER_PRESENTED_CPP20_W(GUN_FLASH))
+	{
+		m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
+		m_pPlayer->m_iWeaponFlash = CWpn::GUN_FLASH;
+	}
+
+	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+
+	if constexpr (IS_MEMBER_PRESENTED_CPP20_W(GUN_VOLUME))
+	{
+		m_pPlayer->m_iWeaponVolume = CWpn::GUN_VOLUME;
+	}
+	else
+	{
+		m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
+	}
+}
+
+template<typename CWpn>
+void CBaseWeaponTemplate<CWpn>::PlaybackEvent(const Vector2D& vSpread)
+{
+	// Nothing to do here.
 }
 
 //
@@ -1984,28 +2282,6 @@ void CommandFunc_AlterAct(void)
 
 /*
 =====================
-CommandFunc_Give
-=====================
-*/
-void CommandFunc_Give(void)
-{
-	auto parg1 = gEngfuncs.Cmd_Argv(1);
-
-	if (gEngfuncs.Cmd_Argc() > 1 && !Q_strncmp(parg1, "weapon_", charsmax("weapon_")))
-	{
-		const auto pInfo = GetWeaponInfo(parg1);
-		if (pInfo)
-		{
-			//pPlayer->GiveNamedItem(pInfo->m_pszInternalName);
-			gPseudoPlayer.AddPlayerItem(CBaseWeapon::Give(pInfo->m_iId, &gPseudoPlayer));
-
-			gEngfuncs.pfnServerCmd(SharedVarArgs("give %s\n", parg1));
-		}
-	}
-}
-
-/*
-=====================
 Wpn_Init
 =====================
 */
@@ -2015,5 +2291,4 @@ void Wpn_Init()
 
 	gEngfuncs.pfnAddCommand("melee", CommandFunc_Melee);
 	gEngfuncs.pfnAddCommand("changemode", CommandFunc_AlterAct);
-	gEngfuncs.pfnAddCommand("give", CommandFunc_Give);
 }

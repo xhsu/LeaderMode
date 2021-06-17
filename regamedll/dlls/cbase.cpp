@@ -988,7 +988,7 @@ void CBaseEntity::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vec
 	}
 }
 
-int CBaseEntity::FireBuckshots(ULONG cShots, const Vector& vecSrc, const Vector& vecDirShooting, const Vector& vecSpread, float flDistance, int iDamage, float flExponentialBase, int shared_rand)
+int CBaseEntity::FireBuckshots(ULONG cShots, const Vector& vecSrc, const Vector& vecDirShooting, const Vector2D& vecSpread, float flDistance, int iDamage, float flExponentialBase, int shared_rand)
 {
 	int iSeedOfs = 0;	// keep track how many times we used the shared_rand. 
 

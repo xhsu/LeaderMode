@@ -942,7 +942,7 @@ globalentity_t *CGlobalState::Find(string_t globalname)
 // This is available all the time now on impulse 104, remove later
 void CGlobalState::DumpGlobals()
 {
-	static char *estates[] = { "Off", "On", "Dead" };
+	static const char *estates[] = { "Off", "On", "Dead" };
 	globalentity_t *pTest;
 
 	ALERT(at_console, "-- Globals --\n");

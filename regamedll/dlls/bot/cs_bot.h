@@ -1610,7 +1610,7 @@ void Bot_RegisterCVars();
 int GetBotFollowCount(CBasePlayer *pLeader);
 const Vector *FindNearbyRetreatSpot(CCSBot *me, float maxRange);
 
-void drawProgressMeter(float progress, char *title);
+void drawProgressMeter(float progress, const char *title);
 void startProgressMeter(const char *title);
 void hideProgressMeter();
 

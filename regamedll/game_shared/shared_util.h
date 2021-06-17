@@ -105,3 +105,6 @@ void Sys_SplitPath(const char* path, char* drive, char* dir, char* fname, char* 
 	template <typename T>									\
 	struct DETECT_##X<T, std::void_t<decltype(T::X)>>		\
 		: std::true_type {}
+
+#define CREATE_MEMBER_DETECTOR_STATIC(x)	template<typename T> concept DETECT_##x = requires(T t) { T::x; }
+#define CREATE_MEMBER_DETECTOR_CUSTOM(x)	template<typename T> concept DETECT_##x = requires(T t)

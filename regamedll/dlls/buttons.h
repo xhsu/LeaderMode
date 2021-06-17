@@ -147,5 +147,5 @@ public:
 	virtual void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
 };
 
-char *ButtonSound(int sound);
+const char *ButtonSound(int sound);
 void DoSpark(entvars_t *pev, const Vector &location);
