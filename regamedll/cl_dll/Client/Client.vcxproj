@@ -95,7 +95,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir)..\;$(ProjectDir)..\..\;$(ProjectDir)..\..\pm_shared;$(ProjectDir)..\..\engine;$(ProjectDir)..\..\public;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>precompiled.h</PrecompiledHeaderFile>
-      <DisableSpecificWarnings>4244;26402;26429;26430;26433;26440;26446;26451;26461;26462;26481;26482;26485;26486;26489;26493;26496;26812;26814;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4244;26402;26429;26430;26433;26438;26440;26446;26451;26461;26462;26481;26482;26485;26486;26489;26493;26496;26812;26814;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -129,7 +129,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>CLIENT_WEAPONS;CLIENT_DLL;_CLIENT_DLL;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <DisableSpecificWarnings>4244;26402;26429;26430;26433;26440;26446;26451;26461;26462;26481;26482;26485;26486;26489;26493;26496;26812;26814;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4244;26402;26429;26430;26433;26438;26440;26446;26451;26461;26462;26481;26482;26485;26486;26489;26493;26496;26812;26814;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)..\;$(ProjectDir)..\..\;$(ProjectDir)..\..\pm_shared;$(ProjectDir)..\..\engine;$(ProjectDir)..\..\public;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>

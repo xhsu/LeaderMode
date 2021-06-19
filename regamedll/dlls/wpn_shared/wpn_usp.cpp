@@ -13,6 +13,122 @@ Sprite - HL&CL
 
 #include "precompiled.h"
 
+#ifdef CLIENT_DLL
+
+SCE_FIELD LHAND		= 1;
+SCE_FIELD LSLEEVE	= 3;
+SCE_FIELD SLIDE		= 5;
+SCE_FIELD MAGAZINE	= 6;
+SCE_FIELD BARREL	= 7;
+SCE_FIELD LASER		= 10;
+SCE_FIELD SIGHT		= 11;
+
+SCE_FIELD VISIBLE = 0;
+SCE_FIELD INVISIBLE	= 1;
+SCE_FIELD NORMAL = 0;
+SCE_FIELD SLIDE_STOP = 1;
+SCE_FIELD NO_BULLET = 1;
+SCE_FIELD BREECHBLOCK = 1;
+SCE_FIELD POS_AT_SLIDE_STOP = 2;
+
+int CUSP::CalcBodyParam(void)
+{
+	static BodyEnumInfo_t info[] =
+	{
+		{ 0, 1 },	// right hand	= 0;
+		{ 0, 2 },	// left hand	= 1;
+		{ 0, 1 },	// right sleeve	= 2;
+		{ 0, 2 },	// left sleeve	= 3;
+
+		{ 0, 1 },	// weapon_1		= 4;
+
+		{ 0, 2 },	// slide		= 5;
+		{ 0, 2 },	// bullets		= 6;
+		{ 0, 2 },	// barrel		= 7;
+		{ 0, 1 },	// hammer		= 8;
+		{ 0, 1 },	// weapon_2		= 9;
+		{ 0, 2 },	// laser		= 10;
+		{ 0, 3 },	// sight		= 11;
+	};
+
+	// mag state control.
+	if (m_iClip > 0)
+		info[MAGAZINE].body = NORMAL;
+	else
+		info[MAGAZINE].body = NO_BULLET;
+
+	// variation
+	switch (m_iVariation)
+	{
+	case Role_SWAT:
+	case Role_Medic:
+	case Role_MadScientist:
+		// sight
+		info[LASER].body = FALSE;
+		info[SIGHT].body = TRUE;
+		break;
+
+	case Role_Sharpshooter:
+		// laser
+		// sight
+		info[LASER].body = TRUE;
+		info[SIGHT].body = TRUE;
+		break;
+
+	case Role_Assassin:
+		// silencer
+		// sight
+		info[LASER].body = FALSE;
+		info[SIGHT].body = TRUE;
+		break;
+
+	default:
+		// nothing
+		info[LASER].body = FALSE;
+		info[SIGHT].body = FALSE;
+		break;
+	}
+
+	// slide stop vfx.
+	if (m_iClip <= 0 && (1 << m_pPlayer->pev->weaponanim) & BITS_SLIDE_STOP_ANIM)
+	{
+		info[SLIDE].body = SLIDE_STOP;
+		info[BARREL].body = BREECHBLOCK;
+
+		// also move the sight, if it exists.
+		if (info[SIGHT].body == TRUE)
+			info[SIGHT].body = POS_AT_SLIDE_STOP;
+	}
+	else
+	{
+		info[SLIDE].body = NORMAL;
+		info[BARREL].body = NORMAL;
+	}
+
+	return CalcBody(info, _countof(info));	// elements count of the info[].
+}
+
+#endif
+
+void CUSP::SecondaryAttack(void)
+{
+	switch (m_iVariation)
+	{
+	case Role_SWAT:
+	case Role_Sharpshooter:
+	case Role_Medic:
+	case Role_MadScientist:
+	case Role_Assassin:
+		// Electronic Sight
+		DefaultSteelSight(Vector(-2.69f, 5, 0.88), 75, 8.0f);
+		break;
+
+	default:
+		// Steel Sight
+		DefaultSteelSight(Vector(-2.7, 5, 1.4), 85);
+		break;
+	}
+}
 
 float CUSP::GetSpread(void)
 {
@@ -20,9 +136,9 @@ float CUSP::GetSpread(void)
 	{
 		m_flAccuracy -= (0.3f - (gpGlobals->time - m_flLastFire)) * 0.275f;
 
-		if (m_flAccuracy > 0.92f)
+		if (m_flAccuracy > ACCURACY_BASELINE)
 		{
-			m_flAccuracy = 0.92f;
+			m_flAccuracy = ACCURACY_BASELINE;
 		}
 		else if (m_flAccuracy < 0.6f)
 		{
@@ -31,24 +147,6 @@ float CUSP::GetSpread(void)
 	}
 
 	return DefaultSpread(SPREAD_BASELINE * (1.0f - m_flAccuracy), 0.1f, 0.75f, 2.0f, 5.0f);
-}
-
-void CUSP::PlaybackEvent(const Vector2D& vSpread)
-{
-#ifndef CLIENT_DLL
-	PLAYBACK_EVENT_FULL(
-		FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL,
-		m_pPlayer->edict(),
-		m_usEvent<CUSP>,
-		0,
-		(float*)&g_vecZero, (float*)&g_vecZero,
-		vSpread.x, vSpread.y,
-		int(m_pPlayer->pev->punchangle.x * 100),
-		int(m_pPlayer->pev->punchangle.y * 100),
-		m_iClip == 0,
-		false	// unused.
-	);
-#endif
 }
 
 void CUSP::ApplyClientFPFiringVisual(const Vector2D& vSpread)
@@ -94,7 +192,8 @@ void CUSP::ApplyClientFPFiringVisual(const Vector2D& vSpread)
 		gpGlobals->v_forward, gpGlobals->v_right, gpGlobals->v_up,
 		1, vecSrc, gpGlobals->v_forward,
 		vSpread, EFFECTIVE_RANGE, m_iPrimaryAmmoType,
-		PENETRATION);
+		PENETRATION,
+		m_pPlayer->random_seed);
 #endif
 }
 
@@ -103,48 +202,31 @@ void CUSP::ApplyRecoil(void)
 	m_pPlayer->pev->punchangle.x -= 2.0f;
 }
 
-bool CUSP::Reload()
-{
-	if (DefaultReload(m_pItemInfo->m_iMaxClip, RELOAD, RELOAD_TIME))
-	{
-		m_flAccuracy = ACCURACY_BASELINE;
-		return true;
-	}
-
-	return false;
-}
-
 void CUSP::ApplyClientTPFiringVisual(struct event_args_s* args)
 {
 #ifdef CLIENT_DLL
-	bool silencer_on = !args->bparam2;	// useless
-	bool empty = !args->bparam1;
+	bool bClipGreaterThanNaught = args->bparam1;
+	bool bInZoom = args->bparam2;
 	int idx = args->entindex;
-	Vector origin(args->origin);
-	Vector angles(
-		args->iparam1 / 100.0f + args->angles[0],
-		args->iparam2 / 100.0f + args->angles[1],
-		args->angles[2]
-	);
-	Vector velocity(args->velocity);
+	Vector2D vSpread(args->fparam1, args->fparam2);
+	int iSeed = args->iparam1;
+	RoleTypes iVariation = (RoleTypes)args->iparam2;
 
 	Vector forward, right, up;
-	AngleVectors(angles, forward, right, up);
+	AngleVectors(args->angles, forward, right, up);
 
 	Vector ShellVelocity, ShellOrigin;
-	EV_GetDefaultShellInfo(args->entindex, args->ducking, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -12.0, 4.0);
-	EV_EjectBrass(ShellOrigin, ShellVelocity, angles.yaw, m_iShell<CUSP>, TE_BOUNCE_SHELL, 5);
-
-	Vector vecSrc = EV_GetGunPosition(args->entindex, args->ducking, origin);
-	Vector2D vSpread = Vector2D(args->fparam1, args->fparam2);
+	EV_GetDefaultShellInfo(args->entindex, args->ducking, args->origin, args->velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -12.0, 4.0);
+	EV_EjectBrass(ShellOrigin, ShellVelocity, args->angles.yaw, m_iShell<CUSP>, TE_BOUNCE_SHELL, 5);
 
 	// original API: vol = 1.0, attn = 0.8, pitch = 87~105
-	EV_PlayGunFire(vecSrc + forward * 10.0f, FIRE_SFX, QUIET_GUN_VOLUME, 1.0, RANDOM_LONG(87, 105));
+	EV_PlayGunFire(args->origin + forward * 10.0f, FIRE_SFX, QUIET_GUN_VOLUME, 1.0, RANDOM_LONG(87, 105));
 
 	EV_HLDM_FireBullets(idx,
 		forward, right, up,
-		1, vecSrc, forward,
+		1, args->origin, forward,
 		vSpread, EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_USP].m_iAmmoType,
-		PENETRATION);
+		PENETRATION,
+		iSeed);
 #endif
 }

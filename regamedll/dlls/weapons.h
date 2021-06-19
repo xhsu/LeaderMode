@@ -55,9 +55,9 @@
 #endif
 
 #define IS_MEMBER_PRESENTED_CPP20_W(x)		DETECT_##x<CWpn>
-#define IS_MEMBER_PRESENTED_W(x)			DETECT_##x<CWpn>::value
 #define COMPILING_ERROR(error_msg)	[]<bool flag = false>()	\
 										{static_assert(flag, error_msg); }()	// C++20 exclusive.
+#define SCE_FIELD	static constexpr auto
 
 #define DUMMY_VIEW_MODEL	"models/weapons/v_nothing.mdl"
 
@@ -291,6 +291,9 @@ CREATE_MEMBER_DETECTOR_STATIC(EVENT_FILE);
 
 CREATE_MEMBER_DETECTOR_STATIC(SHOOT);
 CREATE_MEMBER_DETECTOR_STATIC(FIRE_ANIMTIME);
+CREATE_MEMBER_DETECTOR_STATIC(RELOAD_SOFT_DELAY_TIME);
+CREATE_MEMBER_DETECTOR_STATIC(RELOAD_EMPTY_SOFT_DELAY_TIME);
+CREATE_MEMBER_DETECTOR_STATIC(INSPECTION);
 
 CREATE_MEMBER_DETECTOR_STATIC(ATTRIB_NO_FIRE_UNDERWATER);
 CREATE_MEMBER_DETECTOR_CUSTOM(ATTRIB_SEMIAUTO) { {T::ATTRIB_SEMIAUTO == true}; };
@@ -309,6 +312,14 @@ concept HasEvent = requires (CWpn wpn)
 	{CWpn::ApplyClientTPFiringVisual};
 };
 
+template <typename CWpn>
+concept IsTubularMag = requires (CWpn wpn)
+{
+	{CWpn::START_RELOAD};
+	{CWpn::INSERT};
+	{CWpn::AFTER_RELOAD};
+};
+
 // General template.
 template <typename CWpn>
 class CBaseWeaponTemplate : public CBaseWeapon
@@ -319,6 +330,7 @@ protected:
 public:	// basic logic funcs
 	bool	Deploy		(void) override;
 	void	WeaponIdle	(void) override { return DefaultIdle(CWpn::DASHING); }
+	bool	Reload		(void) override;
 	bool	HolsterStart(void) override	{ return DefaultHolster(CWpn::HOLSTER, CWpn::HOLSTER_TIME); }
 	void	DashStart	(void) override { return DefaultDashStart(CWpn::DASH_ENTER, CWpn::DASH_ENTER_TIME); }
 	void	DashEnd		(void) override { return DefaultDashEnd(CWpn::DASH_ENTER, CWpn::DASH_ENTER_TIME, CWpn::DASH_EXIT, CWpn::DASH_EXIT_TIME); }
@@ -343,6 +355,7 @@ public:	// util funcs
 	// New functions.
 	int	DefaultShoot		(void) requires(IsShotgun<CWpn>);	// @Return: iSeedOfs
 	Vector2D DefaultShoot	(float flSpread = -1, float flCycleTime = -1) requires(IS_MEMBER_PRESENTED_CPP20_W(SPREAD_BASELINE));	// @Return: vecSpreadResult
+	bool DefaultMagReload	(void) requires(!IsTubularMag<CWpn>);
 
 	virtual	void	ApplyServerFiringVisual	(void);
 	virtual	int		AcquireShootAnim		(void)
@@ -396,22 +409,32 @@ public:
 		DASH_EXIT,
 	};
 
-	static constexpr auto	VIEW_MODEL	= "models/weapons/v_usp.mdl";
-	static constexpr auto	WORLD_MODEL	= "models/weapons/w_usp.mdl";
-	static constexpr auto	FIRE_SFX	= "weapons/deagle/usp_fire.wav";
-	static constexpr auto	POSTURE		= "onehanded";
-	static constexpr auto	MAX_SPEED = 250.0f;
-	static constexpr auto	DAMAGE = 32;
-	static constexpr auto	RANGE_MODIFER = 1.187260896;	// 80% damage @650 inches.
-	static constexpr auto	FIRE_INTERVAL = 0.15f;
-	static constexpr auto	EFFECTIVE_RANGE = 4096.0f;
-	static constexpr auto	PENETRATION = 1;	// 1 means it can't penetrate anything.
-	static constexpr auto	SPREAD_BASELINE = 1.2f;
-	static constexpr auto	ACCURACY_BASELINE = 0.92f;
-	static constexpr auto	GUN_VOLUME = QUIET_GUN_VOLUME;
-	static constexpr auto	GUN_FLASH = DIM_GUN_FLASH;
-	static constexpr auto	SHELL_MODEL = "models/pshell.mdl";
-	static constexpr auto	EVENT_FILE = "events/usp.sc";
+	// Slide stop available anims.
+	static constexpr auto	BITS_SLIDE_STOP_ANIM =	(1 << IDLE) |
+													(1 << DEPLOY) |
+													(1 << HOLSTER) |
+													(1 << INSPECTION) |
+													(1 << LHAND_DOWN) | (1 << LHAND_UP) |
+													(1 << BLOCK_DOWN) | (1 << BLOCK_UP) |
+													(1 << DASH_ENTER) | (1 << DASHING) | (1 << DASH_EXIT)/* |
+													(1 << SH_DASH_ENTER) | (1 << SH_DASHING) | (1 << SH_DASH_EXIT)*/;	// UNDONE, TODO
+
+	static constexpr auto	VIEW_MODEL			= "models/weapons/v_usp.mdl";
+	static constexpr auto	WORLD_MODEL			= "models/weapons/w_usp.mdl";
+	static constexpr auto	FIRE_SFX			= "weapons/usp/usp_fire.wav";
+	static constexpr auto	POSTURE				= "onehanded";
+	static constexpr auto	MAX_SPEED			= 250.0f;
+	static constexpr auto	DAMAGE				= 32;
+	static constexpr auto	RANGE_MODIFER		= 1.187260896;	// 80% damage @650 inches.
+	static constexpr auto	FIRE_INTERVAL		= 0.15f;
+	static constexpr auto	EFFECTIVE_RANGE		= 4096.0f;
+	static constexpr auto	PENETRATION			= 1;	// 1 means it can't penetrate anything.
+	static constexpr auto	SPREAD_BASELINE		= 1.2f;
+	static constexpr auto	ACCURACY_BASELINE	= 0.92f;
+	static constexpr auto	GUN_VOLUME			= QUIET_GUN_VOLUME;
+	static constexpr auto	GUN_FLASH			= DIM_GUN_FLASH;
+	static constexpr auto	SHELL_MODEL			= "models/pshell.mdl";
+	static constexpr auto	EVENT_FILE			= "events/usp.sc";
 
 	// Anim time
 	static constexpr auto	FIRE_ANIMTIME		= 13.0 / 30.0;
@@ -429,26 +452,25 @@ public:
 	static constexpr auto	DASH_EXIT_TIME		= 11.0 / 30.0;
 
 	// Attrib
-	static constexpr auto	ATTRIB_SEMIAUTO = true;
+	static constexpr auto	ATTRIB_SEMIAUTO		= true;
 #pragma endregion
 
 public:	// basic logic funcs
 	void	PrimaryAttack	(void) final { BaseClass::DefaultShoot(); }
-	void	SecondaryAttack	(void) final { return DefaultSteelSight(Vector(-1.905f, -2, 1.1f), 85); }
-	bool	Reload			(void) final;
+	void	SecondaryAttack	(void) final;
 
 public:	// util funcs
 	float	GetSpread		(void) final;
 
 #ifdef CLIENT_DLL
-	bool	UsingInvertedVMDL(void) final { return false; }	// Model designed by InnocentBlue is not inverted.
+	bool	UsingInvertedVMDL	(void) final { return false; }	// Model designed by InnocentBlue is not inverted.
+	int		CalcBodyParam		(void) final;
 #endif
 
 public:	// new funcs
-	int		AcquireShootAnim(void) final { return m_iClip > 1 ? SHOOT : SHOOT_LAST; }
-	void	PlaybackEvent	(const Vector2D& vSpread) final;
-	void	ApplyClientFPFiringVisual(const Vector2D& vSpread);
-	void	ApplyRecoil		(void);
+	int		AcquireShootAnim			(void) final { return m_iClip >= 1 ? SHOOT : SHOOT_LAST; }
+	void	ApplyClientFPFiringVisual	(const Vector2D& vSpread);
+	void	ApplyRecoil					(void);
 
 	static	void	ApplyClientTPFiringVisual(struct event_args_s* args);
 };
@@ -1632,7 +1654,7 @@ public:	// Constants / Database
 	static constexpr pcchar	FIRE_SFX_SIL		= "weapons/m45a1/m45a1_fire_sil.wav";
 	static constexpr pcchar	POSTURE				= "onehanded";
 	static constexpr float	MAX_SPEED			= 250.0f;
-	static constexpr float	RELOAD_EMPYT_TIME	= 2.6f;
+	static constexpr float	RELOAD_EMPTY_TIME	= 2.6f;
 	static constexpr float	RELOAD_TIME			= 2.166f;
 	static constexpr float	DRAW_FIRST_TIME		= 1.067F;
 	static constexpr float	DEPLOY_TIME			= 0.7F;

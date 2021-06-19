@@ -745,6 +745,17 @@ void CBaseWeapon::PostFrame()
 	}
 }
 
+template<typename CWpn>
+bool CBaseWeaponTemplate<CWpn>::Reload(void)
+{
+	if constexpr (!IsTubularMag<CWpn>)
+	{
+		return DefaultMagReload();
+	}
+
+	return CBaseWeapon::Reload();
+}
+
 bool CBaseWeapon::Melee(void)
 {
 	// you just.. can't do this.
@@ -1234,6 +1245,61 @@ bool CBaseWeapon::DefaultReload(int iClipSize, int iAnim, float flTotalDelay, fl
 		m_bitsFlags |= WPNSTATE_RELOAD_EMPTY;
 
 	return true;
+}
+
+template<typename CWpn>
+bool CBaseWeaponTemplate<CWpn>::DefaultMagReload(void) requires(!IsTubularMag<CWpn>)
+{
+	bool bReloadEntered = false;
+	if constexpr (IS_MEMBER_PRESENTED_CPP20_W(RELOAD_SOFT_DELAY_TIME) && IS_MEMBER_PRESENTED_CPP20_W(RELOAD_EMPTY_SOFT_DELAY_TIME))
+	{
+		bReloadEntered = DefaultReload(
+			WInfo()->m_iMaxClip,
+			m_iClip ? CWpn::RELOAD : CWpn::RELOAD_EMPTY,
+			m_iClip ? CWpn::RELOAD_TIME : CWpn::RELOAD_EMPTY_TIME,
+			m_iClip ? CWpn::RELOAD_SOFT_DELAY_TIME : CWpn::RELOAD_EMPTY_SOFT_DELAY_TIME
+		);
+	}
+	else if constexpr (IS_MEMBER_PRESENTED_CPP20_W(RELOAD_SOFT_DELAY_TIME))	// Only one of them presented.
+	{
+		bReloadEntered = DefaultReload(
+			WInfo()->m_iMaxClip,
+			m_iClip ? CWpn::RELOAD : CWpn::RELOAD_EMPTY,
+			m_iClip ? CWpn::RELOAD_TIME : CWpn::RELOAD_EMPTY_TIME,
+			CWpn::RELOAD_SOFT_DELAY_TIME
+		);
+	}
+	else
+	{
+		bReloadEntered = DefaultReload(
+			WInfo()->m_iMaxClip,
+			m_iClip ? CWpn::RELOAD : CWpn::RELOAD_EMPTY,
+			m_iClip ? CWpn::RELOAD_TIME : CWpn::RELOAD_EMPTY_TIME
+		);
+	}
+
+	if (bReloadEntered)
+	{
+		if constexpr (IS_MEMBER_PRESENTED_CPP20_W(ACCURACY_BASELINE))
+			m_flAccuracy = CWpn::ACCURACY_BASELINE;
+
+		return true;
+	}
+
+	// KF2 style inspection when you press R.
+	if constexpr (IS_MEMBER_PRESENTED_CPP20_W(INSPECTION))
+	{
+		if (m_pPlayer->pev->weaponanim != CWpn::INSPECTION)
+		{
+			if (m_bInZoom)
+				SecondaryAttack();
+
+			SendWeaponAnim(CWpn::INSPECTION);
+			m_flTimeWeaponIdle = CWpn::INSPECTION_TIME;
+		}
+	}
+
+	return false;
 }
 
 bool CBaseWeapon::DefaultHolster(int iHolsterAnim, float flHolsterDelay)
@@ -1863,12 +1929,13 @@ void CBaseWeaponTemplate<CWpn>::PlaybackEvent(const Vector2D& vSpread)
 		PLAYBACK_EVENT_FULL(
 			FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL,
 			m_pPlayer->edict(),
-			CWpn::m_usEvent,
-			0,
-			(float*)&g_vecZero, (float*)&g_vecZero,
+			CWpn::m_usEvent,	// Luna: the prefix 'template' here is not declaring a new template, it to explict state that we are referring the templated variable.
+			0,	// No delay.
+			m_pPlayer->GetGunPosition(),
+			m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle,
 			vSpread.x, vSpread.y,
-			int(m_pPlayer->pev->punchangle.x * 100),
-			int(m_pPlayer->pev->punchangle.y * 100),
+			m_pPlayer->random_seed,
+			m_iVariation,
 			m_iClip > 0,
 			m_bInZoom
 		);
