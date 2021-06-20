@@ -2525,18 +2525,20 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 				pPlayer->m_iUsingGrenadeId = iId;
 				pPlayer->ResetUsingEquipment();	// it is not a reset, it just a check.
 			}
-			else if (FStrEq(pcmd, "electrify"))
+#ifdef _DEBUG
+			else if (FStrEq(pcmd, "dot.electrify"))
 			{
 				gElectrifiedDOTMgr::Set(pPlayer, atoi(parg1), pPlayer->pev->origin + pPlayer->pev->view_ofs);
 			}
-			else if (FStrEq(pcmd, "poison"))
+			else if (FStrEq(pcmd, "dot.poison"))
 			{
 				gPoisonDOTMgr::Set(pPlayer, pPlayer, atoi(parg1));
 			}
-			else if (FStrEq(pcmd, "ignite"))
+			else if (FStrEq(pcmd, "dot.ignite"))
 			{
 				gBurningDOTMgr::Set(pPlayer, pPlayer, atoi(parg1));
 			}
+#endif
 			else if (FStrEq(pcmd, "melee"))
 			{
 				if (pPlayer->m_pActiveItem)
@@ -2569,12 +2571,12 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 					pPlayer->m_pActiveItem->AlterAct();
 			}
 #ifdef _DEBUG
-			else if (FStrEq(pcmd, "tp"))
+			else if (FStrEq(pcmd, "origin.tp"))
 			{
 				Vector vecOrg = Vector(Q_atoi(CMD_ARGV(1)), Q_atoi(CMD_ARGV(2)), Q_atoi(CMD_ARGV(3)));
 				SET_ORIGIN(pEntity, vecOrg);
 			}
-			else if (FStrEq(pcmd, "shift"))
+			else if (FStrEq(pcmd, "origin.shift"))
 			{
 				Vector vecOrg = Vector(Q_atoi(CMD_ARGV(1)), Q_atoi(CMD_ARGV(2)), Q_atoi(CMD_ARGV(3)));
 				SET_ORIGIN(pEntity, pEntity->v.origin + vecOrg);
@@ -2586,27 +2588,28 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 			}
 			else if (FStrEq(pcmd, "__shoot"))
 			{
-				union UShootData
+				auto p = InterpretPrimaryAttackMessage();
+				auto pWeapon = pPlayer->HasPlayerItem(p->m_iId);
+
+				if (pWeapon)
 				{
-					UShootData() {}
+					pWeapon->m_pPlayer->pev->v_angle = p->m_vecViewAngles;
+					pWeapon->m_pPlayer->pev->punchangle = Vector::Zero();
+					pWeapon->m_iClip = p->m_iClip;
 
-					char raw[192U - sizeof("__shoot")];
-
-					struct
-					{
-						WeaponIdType m_iId{ 0 };
-						Vector m_vecViewAngle{ g_vecZero };
-						Vector m_vecOrigin{ g_vecZero };
-						int iClip{ 0 };
-					}
-					data;
+					pWeapon->PrimaryAttack();
 				}
-				uCurrentShoot;
 
-				constexpr auto sizeofdata = sizeof(UShootData::data);
+#ifdef _DEBUG_CUSTOM_CLIENT_TO_SERVER_MESSAGE
+				auto szCommandString = std::format("[Received] {:d} {} {} {} {} {} {} {:d}\n",
+					(int)p->m_iId,
+					p->m_vecSrc.x, p->m_vecSrc.y, p->m_vecSrc.z,
+					p->m_vecViewAngles.x, p->m_vecViewAngles.y, p->m_vecViewAngles.z,
+					p->m_iClip
+				);
 
-				Q_strlcpy(uCurrentShoot.raw, CMD_ARGV(1) + sizeof("__shoot"));
-				RANDOM_LONG(1, 2);
+				SERVER_PRINT(szCommandString.c_str());
+#endif
 			}
 			else
 			{

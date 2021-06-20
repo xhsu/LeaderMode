@@ -215,7 +215,7 @@ bool CBasePlayer::SwitchWeapon(CBaseWeapon* pSwitchingTo)
 	return true;
 }
 
-CBaseWeapon* CBasePlayer::HasWeapons(WeaponIdType iId)
+CBaseWeapon* CBasePlayer::HasPlayerItem(WeaponIdType iId)
 {
 	for (auto& pWeapon : CBaseWeapon::m_lstWeapons)
 	{
@@ -284,6 +284,29 @@ BOOL CanAttack(float attack_time, float curtime, BOOL isPredicted)
 	{
 		return (attack_time <= 0.0f) ? TRUE : FALSE;
 	}
+}
+
+void IssuePrimaryAttackMessage(WeaponIdType iId, const Vector& vecSrc, const Vector& vecViewAngles, int iClip)
+{
+	auto szCommandString = std::format("__shoot {:d} {:X} {:X} {:X} {:X} {:X} {:X} {:d}\n",
+		(int)iId,
+		*(unsigned long*)&vecSrc.x, *(unsigned long*)&vecSrc.y, *(unsigned long*)&vecSrc.z,
+		*(unsigned long*)&vecViewAngles.x, *(unsigned long*)&vecViewAngles.y, *(unsigned long*)&vecViewAngles.z,
+		iClip
+	);
+
+	gEngfuncs.pfnServerCmd(szCommandString.c_str());
+
+#ifdef _DEBUG_CUSTOM_CLIENT_TO_SERVER_MESSAGE
+	szCommandString = std::format("[Sent] {:d} {} {} {} {} {} {} {:d}\n",
+		(int)iId,
+		vecSrc.x, vecSrc.y, vecSrc.z,
+		vecViewAngles.x, vecViewAngles.y, vecViewAngles.z,
+		iClip
+	);
+
+	gEngfuncs.pfnConsolePrint(szCommandString.c_str());
+#endif
 }
 
 bool pseudo_gamerule_s::FShouldSwitchWeapon(CBasePlayer* pPlayer, CBaseWeapon* pWeapon)
@@ -1206,6 +1229,7 @@ Vector2D CBaseWeaponTemplate<CWpn>::DefaultShoot(float flSpread, float flCycleTi
 		CWpn::RANGE_MODIFER,
 		m_pPlayer->random_seed
 	);
+	IssuePrimaryAttackMessage(Id(), m_pPlayer->GetGunPosition(), m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle, m_iClip);
 #pragma endregion
 
 #pragma region Notify all clients that this weapon has fired.

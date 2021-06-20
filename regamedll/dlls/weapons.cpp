@@ -201,6 +201,33 @@ BOOL CanAttack(float attack_time, float curtime, BOOL isPredicted)
 	}
 }
 
+primatk_msg_ptr InterpretPrimaryAttackMessage(void)
+{
+	int index = 1;	// Starting from param 1.
+	auto result = std::make_shared<primaryattack_message_s>();
+	result->m_iId = (WeaponIdType)std::atoi(CMD_ARGV(index++));
+
+	unsigned long ulx = std::stoul(CMD_ARGV(index++), nullptr, 16);
+	unsigned long uly = std::stoul(CMD_ARGV(index++), nullptr, 16);
+	unsigned long ulz = std::stoul(CMD_ARGV(index++), nullptr, 16);
+
+	result->m_vecSrc.x = *(float*)&ulx;
+	result->m_vecSrc.y = *(float*)&uly;
+	result->m_vecSrc.z = *(float*)&ulz;
+
+	ulx = std::stoul(CMD_ARGV(index++), nullptr, 16);
+	uly = std::stoul(CMD_ARGV(index++), nullptr, 16);
+	ulz = std::stoul(CMD_ARGV(index++), nullptr, 16);
+
+	result->m_vecViewAngles.x = *(float*)&ulx;
+	result->m_vecViewAngles.y = *(float*)&uly;
+	result->m_vecViewAngles.z = *(float*)&ulz;
+
+	result->m_iClip = std::atoi(CMD_ARGV(index++));
+
+	return result;
+}
+
 void CBaseWeapon::TheWeaponsThink(void)
 {
 	std::list<CBaseWeapon*>::iterator i = m_lstWeapons.begin();
@@ -1331,7 +1358,7 @@ void CBaseWeapon::DefaultSteelSight(const Vector& vecOfs, int iFOV, float flDrif
 	else
 	{
 		g_vecGunOfsGoal = g_vecZero;
-		gHUD::m_iFOV = 90;
+		gHUD::m_iFOV = DEFAULT_FOV;
 	}
 
 	// this model needs faster.
@@ -1346,7 +1373,7 @@ void CBaseWeapon::DefaultSteelSight(const Vector& vecOfs, int iFOV, float flDrif
 	}
 	else
 	{
-		m_pPlayer->pev->fov = 90;
+		m_pPlayer->pev->fov = DEFAULT_FOV;
 		EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, "weapons/steelsight_out.wav", 0.75f, ATTN_STATIC);
 	}
 #endif
@@ -1357,9 +1384,9 @@ void CBaseWeapon::DefaultScopeSight(const Vector& vecOfs, int iFOV, float flEnte
 	// this is the delay for the m_bResumeZoom.
 	m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + flEnterScopeDelay;
 
-	if (int(m_pPlayer->pev->fov) < 90)
+	if (int(m_pPlayer->pev->fov) < DEFAULT_FOV)
 	{
-		m_pPlayer->pev->fov = 90;
+		m_pPlayer->pev->fov = DEFAULT_FOV;
 
 #ifdef CLIENT_DLL
 		// zoom out anim.
@@ -1891,14 +1918,6 @@ void CBaseWeaponTemplate<CWpn>::ResetModel(void)
 #endif
 }
 
-//template<typename CWpn>
-//inline void CBaseWeaponTemplate<CWpn>::RegisterEvent(void) requires(HasEvent<CWpn>)
-//{
-//#ifdef CLIENT_DLL
-//	gEngfuncs.pfnHookEvent(CWpn::EVENT_FILE, CWpn::ApplyClientTPFiringVisual);
-//#endif
-//}
-
 template<typename CWpn>
 void CBaseWeaponTemplate<CWpn>::ApplyServerFiringVisual(void)
 {
@@ -1936,7 +1955,7 @@ void CBaseWeaponTemplate<CWpn>::PlaybackEvent(const Vector2D& vSpread)
 			vSpread.x, vSpread.y,
 			m_pPlayer->random_seed,
 			m_iVariation,
-			m_iClip > 0,
+			m_iClientClip > 0,	// This variable is what client reports.
 			m_bInZoom
 		);
 	}

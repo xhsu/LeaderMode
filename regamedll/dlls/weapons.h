@@ -26,8 +26,6 @@
 *
 */
 
-#include "game_shared/shared_util.h"
-
 #pragma once
 
 // debug macro
@@ -115,7 +113,9 @@ struct MULTIDAMAGE
 #include "ammo.h"
 #include "weapontype.h"
 #include "player_classes.h"
+#include "game_shared/shared_util.h"
 #include <list>
+#include <concepts>
 
 // something can place on your hand.
 class CBaseWeapon
@@ -301,23 +301,24 @@ CREATE_MEMBER_DETECTOR_CUSTOM(ATTRIB_SEMIAUTO) { {T::ATTRIB_SEMIAUTO == true}; }
 template <typename CWpn>
 concept IsShotgun = requires (CWpn wpn)
 {
-	{CWpn::CONE_VECTOR};
+	{CWpn::CONE_VECTOR} -> std::convertible_to<Vector2D>;
 	{CWpn::PROJECTILE_COUNT > 1};
+	{!IS_MEMBER_PRESENTED_CPP20_W(SPREAD_BASELINE)};
 };
 
 template <typename CWpn>
 concept HasEvent = requires (CWpn wpn)
 {
-	{CWpn::EVENT_FILE};
+	{CWpn::EVENT_FILE} -> std::convertible_to<const char*>;
 	{CWpn::ApplyClientTPFiringVisual};
 };
 
 template <typename CWpn>
 concept IsTubularMag = requires (CWpn wpn)
 {
-	{CWpn::START_RELOAD};
-	{CWpn::INSERT};
-	{CWpn::AFTER_RELOAD};
+	{CWpn::START_RELOAD > 0};
+	{CWpn::INSERT > 0};
+	{CWpn::AFTER_RELOAD > 0};
 };
 
 // General template.
@@ -328,12 +329,13 @@ protected:
 	using BaseClass = CBaseWeaponTemplate<CWpn>;
 
 public:	// basic logic funcs
-	bool	Deploy		(void) override;
-	void	WeaponIdle	(void) override { return DefaultIdle(CWpn::DASHING); }
-	bool	Reload		(void) override;
-	bool	HolsterStart(void) override	{ return DefaultHolster(CWpn::HOLSTER, CWpn::HOLSTER_TIME); }
-	void	DashStart	(void) override { return DefaultDashStart(CWpn::DASH_ENTER, CWpn::DASH_ENTER_TIME); }
-	void	DashEnd		(void) override { return DefaultDashEnd(CWpn::DASH_ENTER, CWpn::DASH_ENTER_TIME, CWpn::DASH_EXIT, CWpn::DASH_EXIT_TIME); }
+	bool	Deploy			(void) override;
+	void	PrimaryAttack	(void) override { if constexpr (IsShotgun<CWpn> || IS_MEMBER_PRESENTED_CPP20_W(SPREAD_BASELINE)) DefaultShoot(); }
+	void	WeaponIdle		(void) override { return DefaultIdle(CWpn::DASHING); }
+	bool	Reload			(void) override;
+	bool	HolsterStart	(void) override	{ return DefaultHolster(CWpn::HOLSTER, CWpn::HOLSTER_TIME); }
+	void	DashStart		(void) override { return DefaultDashStart(CWpn::DASH_ENTER, CWpn::DASH_ENTER_TIME); }
+	void	DashEnd			(void) override { return DefaultDashEnd(CWpn::DASH_ENTER, CWpn::DASH_ENTER_TIME, CWpn::DASH_EXIT, CWpn::DASH_EXIT_TIME); }
 
 	template <DETECT_SHELL_MODEL T = CWpn> static inline int m_iShell = 0;
 #ifndef CLIENT_DLL
@@ -355,10 +357,10 @@ public:	// util funcs
 	// New functions.
 	int	DefaultShoot		(void) requires(IsShotgun<CWpn>);	// @Return: iSeedOfs
 	Vector2D DefaultShoot	(float flSpread = -1, float flCycleTime = -1) requires(IS_MEMBER_PRESENTED_CPP20_W(SPREAD_BASELINE));	// @Return: vecSpreadResult
-	bool DefaultMagReload	(void) requires(!IsTubularMag<CWpn>);
+	bool DefaultMagReload	(void) requires(!IsTubularMag<CWpn>);	// Inspection anim is included.
 
 	virtual	void	ApplyServerFiringVisual	(void);
-	virtual	int		AcquireShootAnim		(void)
+	virtual	int		AcquireShootAnim		(void)	// This take place after the m_iClip is subtracted. Hence detecting the last shot should be (m_iClip < 1) == true
 	{
 		if constexpr (IS_MEMBER_PRESENTED_CPP20_W(SHOOT))
 		{
@@ -367,16 +369,13 @@ public:	// util funcs
 
 		return 0;
 	}
-	virtual	void	PlaybackEvent			(const Vector2D& vSpread);
-//	virtual	void	ApplyClientFPFiringVisual(const Vector2D& vSpread);
+	virtual	void	PlaybackEvent			(const Vector2D& vSpread);	// What message do you wish to send to non-m_pPlayer players? Received at static member RegisterEvent().
+//	virtual	void	ApplyClientFPFiringVisual(const Vector2D& vSpread);	// Called after m_iClip subtracted.
 //	static	void	ApplyClientTPFiringVisual(struct event_args_s* args);	// Like it says, handle the TP visual effect only.
 
-	static inline	void	RegisterEvent(void) requires(HasEvent<CWpn>)
-	{
 #ifdef CLIENT_DLL
-		gEngfuncs.pfnHookEvent(CWpn::EVENT_FILE, CWpn::ApplyClientTPFiringVisual);
+	static inline	void	RegisterEvent(void) requires(HasEvent<CWpn>)	{ gEngfuncs.pfnHookEvent(CWpn::EVENT_FILE, CWpn::ApplyClientTPFiringVisual); }
 #endif
-	}
 
 private:
 	CWpn* _pThis{ nullptr };
@@ -385,10 +384,9 @@ private:
 
 
 
-class CUSP : public CBaseWeaponTemplate<CUSP>
+struct CUSP : public CBaseWeaponTemplate<CUSP>
 {
 #pragma region USP database
-public:
 	enum usp_e
 	{
 		IDLE = 0,
@@ -455,11 +453,10 @@ public:
 	static constexpr auto	ATTRIB_SEMIAUTO		= true;
 #pragma endregion
 
-public:	// basic logic funcs
-	void	PrimaryAttack	(void) final { BaseClass::DefaultShoot(); }
+	// basic logic funcs
 	void	SecondaryAttack	(void) final;
 
-public:	// util funcs
+	// util funcs
 	float	GetSpread		(void) final;
 
 #ifdef CLIENT_DLL
@@ -467,7 +464,7 @@ public:	// util funcs
 	int		CalcBodyParam		(void) final;
 #endif
 
-public:	// new funcs
+	// new funcs
 	int		AcquireShootAnim			(void) final { return m_iClip >= 1 ? SHOOT : SHOOT_LAST; }
 	void	ApplyClientFPFiringVisual	(const Vector2D& vSpread);
 	void	ApplyRecoil					(void);
@@ -1986,6 +1983,72 @@ enum c4_e
 	C4_PICKUP,
 };
 
+// Index to typename converter.
+template <WeaponIdType iId>
+struct _Internal_GetTypename
+{
+	using result =
+
+		// Pistols
+		std::conditional_t < iId == WEAPON_GLOCK18, CG18C,
+		std::conditional_t < iId == WEAPON_USP, CUSP,
+		std::conditional_t < iId == WEAPON_ANACONDA, CAnaconda,
+		std::conditional_t < iId == WEAPON_DEAGLE, CDEagle,
+		std::conditional_t < iId == WEAPON_FIVESEVEN, CFN57,
+		std::conditional_t < iId == WEAPON_M45A1, CM45A1,
+
+		// Shotgun
+		std::conditional_t < iId == WEAPON_KSG12, CKSG12,
+		std::conditional_t < iId == WEAPON_M1014, CM1014,
+		std::conditional_t < iId == WEAPON_AA12, void,
+
+		// SMGs
+		std::conditional_t < iId == WEAPON_MP7A1, CMP7A1,
+		std::conditional_t < iId == WEAPON_MAC10, void,
+		std::conditional_t < iId == WEAPON_MP5N, void,
+		std::conditional_t < iId == WEAPON_UMP45, CUMP45,
+		std::conditional_t < iId == WEAPON_P90, void,
+		std::conditional_t < iId == WEAPON_VECTOR, void,
+
+		// Assault Rifle
+		std::conditional_t < iId == WEAPON_AK47, CAK47,
+		std::conditional_t < iId == WEAPON_M4A1, CM4A1,
+		std::conditional_t < iId == WEAPON_SCARH, CSCARH,
+		std::conditional_t < iId == WEAPON_XM8, CXM8,
+
+		// Sniper Rifle
+		std::conditional_t < iId == WEAPON_SRS, void,
+		std::conditional_t < iId == WEAPON_SVD, CSVD,
+		std::conditional_t < iId == WEAPON_AWP, CAWP,
+		std::conditional_t < iId == WEAPON_PSG1, CPSG1,
+
+		// LMGs
+		std::conditional_t < iId == WEAPON_MK46, CMK46,
+		std::conditional_t < iId == WEAPON_RPD, void,
+
+		// Fallback
+		void
+
+		>>>>>>
+		>>>
+		>>>>>>
+		>>>>
+		>>>>
+		>>;
+};
+
+template <WeaponIdType iId>
+using GetTypename = typename _Internal_GetTypename<iId>::result;
+
+struct primaryattack_message_s
+{
+	Vector m_vecSrc{ g_vecZero }, m_vecViewAngles{ g_vecZero };
+	WeaponIdType m_iId{ WEAPON_NONE };
+	int m_iClip{ 0 };
+};
+
+using primatk_msg_ptr = std::shared_ptr<primaryattack_message_s>;
+
 #ifndef CLIENT_DLL
 extern short g_sModelIndexLaser;
 extern short g_sModelIndexLaserDot;
@@ -2020,4 +2083,5 @@ void DecalGunshot(TraceResult *pTrace, int iBulletType, bool ClientOnly, entvars
 void EjectBrass(const Vector &vecOrigin, const Vector &vecVelocity, float rotation, int model, int soundtype, int entityIndex);
 void UTIL_PrecacheOtherWeapon(WeaponIdType iId);
 BOOL CanAttack(float attack_time, float curtime, BOOL isPredicted);
+primatk_msg_ptr InterpretPrimaryAttackMessage(void);
 #endif

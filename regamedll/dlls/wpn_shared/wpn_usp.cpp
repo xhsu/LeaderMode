@@ -120,7 +120,7 @@ void CUSP::SecondaryAttack(void)
 	case Role_MadScientist:
 	case Role_Assassin:
 		// Electronic Sight
-		DefaultSteelSight(Vector(-2.69f, 5, 0.88), 75, 8.0f);
+		DefaultSteelSight(Vector(-2.69f, 5, 0.88), 75);
 		break;
 
 	default:
@@ -199,7 +199,7 @@ void CUSP::ApplyClientFPFiringVisual(const Vector2D& vSpread)
 
 void CUSP::ApplyRecoil(void)
 {
-	m_pPlayer->pev->punchangle.x -= 2.0f;
+	m_pPlayer->m_vecVAngleShift.x -= 2.0f;
 }
 
 void CUSP::ApplyClientTPFiringVisual(struct event_args_s* args)

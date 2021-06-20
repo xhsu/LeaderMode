@@ -4551,6 +4551,22 @@ bool CBasePlayer::HasWeapons()
 	return false;
 }
 
+CBaseWeapon* CBasePlayer::HasWeapons(WeaponIdType iId)
+{
+	for (auto& pWeapon : CBaseWeapon::m_lstWeapons)
+	{
+		if (pWeapon->IsDead())
+			continue;
+
+		if (pWeapon->m_iId != iId)
+			continue;
+
+		return pWeapon;
+	}
+
+	return nullptr;
+}
+
 const char *CBasePlayer::TeamID()
 {
 	// Not fully connected yet
@@ -6030,15 +6046,15 @@ CBaseEntity *EXT_FUNC CBasePlayer::DropPlayerItem(WeaponIdType iId)
 }
 
 // Does the player already have this item?
-bool CBasePlayer::HasPlayerItem(WeaponIdType iId)
+CBaseWeapon* CBasePlayer::HasPlayerItem(WeaponIdType iId)
 {
 	for (auto pWeapon : CBaseWeapon::m_lstWeapons)
 	{
 		if (pWeapon->m_pPlayer == this && pWeapon->m_iId == iId && !pWeapon->IsDead())
-			return true;
+			return pWeapon;
 	}
 
-	return false;
+	return nullptr;
 }
 
 void CBasePlayer::SwitchTeam()

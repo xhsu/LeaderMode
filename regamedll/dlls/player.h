@@ -416,8 +416,8 @@ public:
 	void StartDeathCam();
 	void StartObserver(Vector &vecPosition, Vector &vecViewAngle);
 	void HandleSignals();
-	CBaseEntity *DropPlayerItem(WeaponIdType iId);
-	bool HasPlayerItem(WeaponIdType iId);
+	CBaseEntity* DropPlayerItem(WeaponIdType iId);
+	CBaseWeapon* HasPlayerItem(WeaponIdType iId);
 	bool HasWeapons();
 	void SelectLastItem();
 	void SelectItem(const char *pstr);
