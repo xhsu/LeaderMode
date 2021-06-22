@@ -178,6 +178,14 @@ inline bool EntityHandle<T>::operator==(T *pEntity) const
 {
 	assert(("EntityHandle<T>::operator==:  got a nullptr pointer!", pEntity != nullptr));
 
+#ifndef _DEBUG
+	if (pEntity == nullptr)
+	{
+		return false;
+	}
+	else
+#endif
+
 	if (m_serialnumber != pEntity->edict()->serialnumber)
 	{
 		return false;
