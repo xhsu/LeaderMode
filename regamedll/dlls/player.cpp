@@ -4551,22 +4551,6 @@ bool CBasePlayer::HasWeapons()
 	return false;
 }
 
-CBaseWeapon* CBasePlayer::HasWeapons(WeaponIdType iId)
-{
-	for (auto& pWeapon : CBaseWeapon::m_lstWeapons)
-	{
-		if (pWeapon->IsDead())
-			continue;
-
-		if (pWeapon->m_iId != iId)
-			continue;
-
-		return pWeapon;
-	}
-
-	return nullptr;
-}
-
 const char *CBasePlayer::TeamID()
 {
 	// Not fully connected yet

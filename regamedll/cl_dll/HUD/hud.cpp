@@ -1141,7 +1141,7 @@ void CommandFunc_SelectLastItem(void)	// an equivlent function of void CBasePlay
 	{
 		for (int i = PRIMARY_WEAPON_SLOT; i < MAX_ITEM_TYPES; i++)
 		{
-			auto pWeapon = gPseudoPlayer.HasWeapons(gHUD::m_WeaponList.m_rgiWeapons[i]);
+			auto pWeapon = gPseudoPlayer.HasPlayerItem(gHUD::m_WeaponList.m_rgiWeapons[i]);
 			if (pWeapon && pWeapon != gPseudoPlayer.m_pActiveItem)
 			{
 				gPseudoPlayer.m_pLastItem = pWeapon;

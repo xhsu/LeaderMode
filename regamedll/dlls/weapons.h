@@ -271,8 +271,23 @@ public:	// util funcs
 	virtual float	GetSpread		(void) { return 0.0f; }
 };
 
+// Upstream messages.
+struct primaryattack_message_s
+{
+	Vector m_vecSrc{ g_vecZero }, m_vecViewAngles{ g_vecZero };
+	WeaponIdType m_iId{ WEAPON_NONE };
+	int m_iClip{ 0 };
+
+	//static inline std::shared_ptr<primaryattack_message_s> Empty(void)
+	//{
+	//	return std::make_shared<primaryattack_message_s>;
+	//}
+};
+
+using primatk_msg_ptr = std::shared_ptr<primaryattack_message_s>;
+
 // Declare detectors
-CREATE_MEMBER_DETECTOR_STATIC(m_usEvent);
+CREATE_MEMBER_DETECTOR_CUSTOM(m_usEvent) { {T::m_usEvent} -> std::convertible_to<unsigned short>; };
 
 CREATE_MEMBER_DETECTOR_CUSTOM(ApplyClientFPFiringVisual) { t.ApplyClientFPFiringVisual(Vector2D::Zero()); };
 CREATE_MEMBER_DETECTOR_CUSTOM(ApplyRecoil) { t.ApplyRecoil(); };
@@ -375,6 +390,8 @@ public:	// util funcs
 
 #ifdef CLIENT_DLL
 	static inline	void	RegisterEvent(void) requires(HasEvent<CWpn>)	{ gEngfuncs.pfnHookEvent(CWpn::EVENT_FILE, CWpn::ApplyClientTPFiringVisual); }
+#else
+//	static void		PrimaryAttack	(primatk_msg_ptr args)	{}	// For real client upstream message.
 #endif
 
 private:
@@ -2039,15 +2056,6 @@ struct _Internal_GetTypename
 
 template <WeaponIdType iId>
 using GetTypename = typename _Internal_GetTypename<iId>::result;
-
-struct primaryattack_message_s
-{
-	Vector m_vecSrc{ g_vecZero }, m_vecViewAngles{ g_vecZero };
-	WeaponIdType m_iId{ WEAPON_NONE };
-	int m_iClip{ 0 };
-};
-
-using primatk_msg_ptr = std::shared_ptr<primaryattack_message_s>;
 
 #ifndef CLIENT_DLL
 extern short g_sModelIndexLaser;
