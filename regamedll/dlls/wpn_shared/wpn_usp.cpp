@@ -108,6 +108,12 @@ int CUSP::CalcBodyParam(void)
 	return CalcBody(info, _countof(info));	// elements count of the info[].
 }
 
+#else
+
+void CUSP::PrimaryAttack(primatk_msg_ptr p)	// Static version!
+{
+}
+
 #endif
 
 void CUSP::SecondaryAttack(void)

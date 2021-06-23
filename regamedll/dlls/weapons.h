@@ -278,10 +278,10 @@ struct primaryattack_message_s
 	WeaponIdType m_iId{ WEAPON_NONE };
 	int m_iClip{ 0 };
 
-	//static inline std::shared_ptr<primaryattack_message_s> Empty(void)
-	//{
-	//	return std::make_shared<primaryattack_message_s>;
-	//}
+	static inline std::shared_ptr<primaryattack_message_s> Empty(void)
+	{
+		return std::make_shared<primaryattack_message_s>();
+	}
 };
 
 using primatk_msg_ptr = std::shared_ptr<primaryattack_message_s>;
@@ -291,6 +291,7 @@ CREATE_MEMBER_DETECTOR_CUSTOM(m_usEvent) { {T::m_usEvent} -> std::convertible_to
 
 CREATE_MEMBER_DETECTOR_CUSTOM(ApplyClientFPFiringVisual) { t.ApplyClientFPFiringVisual(Vector2D::Zero()); };
 CREATE_MEMBER_DETECTOR_CUSTOM(ApplyRecoil) { t.ApplyRecoil(); };
+CREATE_MEMBER_DETECTOR_CUSTOM(PrimaryAttack) { T::PrimaryAttack(primaryattack_message_s::Empty()); };	// Only for server static primary attack method.
 
 CREATE_MEMBER_DETECTOR_STATIC(ACCURACY_BASELINE);
 CREATE_MEMBER_DETECTOR_STATIC(MAX_SPEED_ZOOM);
@@ -479,6 +480,8 @@ struct CUSP : public CBaseWeaponTemplate<CUSP>
 #ifdef CLIENT_DLL
 	bool	UsingInvertedVMDL	(void) final { return false; }	// Model designed by InnocentBlue is not inverted.
 	int		CalcBodyParam		(void) final;
+#else
+	static	void	PrimaryAttack	(primatk_msg_ptr p);
 #endif
 
 	// new funcs
@@ -2092,4 +2095,5 @@ void EjectBrass(const Vector &vecOrigin, const Vector &vecVelocity, float rotati
 void UTIL_PrecacheOtherWeapon(WeaponIdType iId);
 BOOL CanAttack(float attack_time, float curtime, BOOL isPredicted);
 primatk_msg_ptr InterpretPrimaryAttackMessage(void);
+void CallStaticPrimaryAttack(WeaponIdType iId, primatk_msg_ptr p);
 #endif

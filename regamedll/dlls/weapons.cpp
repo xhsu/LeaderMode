@@ -228,6 +228,59 @@ primatk_msg_ptr InterpretPrimaryAttackMessage(void)
 	return result;
 }
 
+void CallStaticPrimaryAttack(WeaponIdType iId, primatk_msg_ptr p)
+{
+#define LINK_ID(id)	case id:	\
+						if constexpr (DETECT_PrimaryAttack<GetTypename<id>>)	\
+						{	\
+							GetTypename<id>::PrimaryAttack(p);	\
+						}	\
+						break
+
+	constexpr auto b = DETECT_PrimaryAttack<CUSP>;
+	constexpr auto b2 = DETECT_PrimaryAttack<GetTypename<WEAPON_USP>>;
+
+	switch (iId)
+	{
+		LINK_ID(WEAPON_USP);
+		//LINK_ID(WEAPON_GLOCK18);
+		//LINK_ID(WEAPON_ANACONDA);
+		//LINK_ID(WEAPON_DEAGLE);
+		//LINK_ID(WEAPON_FIVESEVEN);
+		//LINK_ID(WEAPON_M45A1);
+
+		//LINK_ID(WEAPON_KSG12);
+		//LINK_ID(WEAPON_M1014);
+		//LINK_ID(WEAPON_AA12);
+
+		//LINK_ID(WEAPON_MP7A1);
+		//LINK_ID(WEAPON_MAC10);
+		//LINK_ID(WEAPON_MP5N);
+		//LINK_ID(WEAPON_UMP45);
+		//LINK_ID(WEAPON_P90);
+		//LINK_ID(WEAPON_VECTOR);
+
+		//LINK_ID(WEAPON_AK47);
+		//LINK_ID(WEAPON_M4A1);
+		//LINK_ID(WEAPON_SCARH);
+		//LINK_ID(WEAPON_XM8);
+
+		//LINK_ID(WEAPON_SRS);
+		//LINK_ID(WEAPON_SVD);
+		//LINK_ID(WEAPON_AWP);
+		//LINK_ID(WEAPON_PSG1);
+
+		//LINK_ID(WEAPON_MK46);
+		//LINK_ID(WEAPON_RPD);
+
+	default:
+		SERVER_PRINT(SharedVarArgs("Error: Unknow iId \"%d\" requesting primary attack!\n", iId));
+		return;
+	}
+
+#undef LINK_ID
+}
+
 void CBaseWeapon::TheWeaponsThink(void)
 {
 	std::list<CBaseWeapon*>::iterator i = m_lstWeapons.begin();
