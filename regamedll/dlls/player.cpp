@@ -526,6 +526,9 @@ BOOL EXT_FUNC CBasePlayer::TakeHealth(float flHealth, int bitsDamageType)
 
 Vector CBasePlayer::GetGunPosition()
 {
+	if (m_bIsOnClientRequestedFire)
+		return m_vecClientReportedGunPos;
+
 	return pev->origin + pev->view_ofs;
 }
 
@@ -7026,10 +7029,13 @@ CBaseWeapon *CBasePlayer::GetItemById(WeaponIdType weaponID)
 {
 	for (auto pWeapon : CBaseWeapon::m_lstWeapons)
 	{
+		if (pWeapon->IsDead())
+			continue;
+
 		if (pWeapon->m_pPlayer != this)
 			continue;
 
-		if (pWeapon->m_iId != weaponID)
+		if (pWeapon->Id() != weaponID)
 			continue;
 
 		return pWeapon;
@@ -7361,6 +7367,27 @@ void CBasePlayer::UpdateClientCvar(const char* cvarName, const char* value, int 
 	{
 		m_bHoldToAim = !!Q_atoi(value);
 	}
+}
+
+void CBasePlayer::ClientRequestFireWeapon(primatk_msg_ptr args)
+{
+	// There is no 'client' for BOTs.
+	if (IsBot())
+		return;
+
+	CBaseWeapon* pWeapon = GetItemById(args->m_iId);
+	if (!pWeapon)
+		return;
+
+	pWeapon->m_iClip = args->m_iClip + 1;	// Due to post sending.
+	this->m_vecClientReportedGunPos = args->m_vecSrc;
+	this->m_vecClientReportedViewAngles = args->m_vecViewAngles;
+	this->random_seed = args->m_iRandomSeed;
+	this->m_bIsOnClientRequestedFire = true;
+
+	pWeapon->PrimaryAttack();
+
+	this->m_bIsOnClientRequestedFire = false;
 }
 
 void CBasePlayer::AssignRole(RoleTypes iNewRole)

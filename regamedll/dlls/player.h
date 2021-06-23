@@ -509,6 +509,7 @@ public:
 	inline int QueryIndex(int i) { return i * gpGlobals->maxClients + entindex(); }
 	void QueryClientCvar(void);
 	void UpdateClientCvar(const char* cvarName, const char* value, int requestID);
+	void ClientRequestFireWeapon(primatk_msg_ptr args);
 
 	// new functions from leader mod.
 	void AssignRole(RoleTypes iNewRole);	// this function is only for skill installation.
@@ -722,9 +723,12 @@ public:
 	WeaponIdType m_iWpnSwitchingTo;
 	float m_flNextSkillTimerUpdate;
 	float m_flNextClientCvarQuery;
-	bool m_bHoldToAim;	// value should query from client.
+	bool m_bHoldToAim : 1;	// value should query from client.
 	std::array<bool, EQP_COUNT> m_rgbHasEquipment;	// designed for some equipments mean to be used(taken) in hand, but not occupied a slot.
 	std::array<bool, EQP_COUNT> m_rgbClientHasEquipment;
+	bool m_bIsOnClientRequestedFire : 1 {false};
+	Vector m_vecClientReportedGunPos{ g_vecZero };
+	Vector m_vecClientReportedViewAngles{ g_vecZero };
 
 	// overhealing mechanism.
 	float m_flOHNextThink;

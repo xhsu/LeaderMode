@@ -225,60 +225,9 @@ primatk_msg_ptr InterpretPrimaryAttackMessage(void)
 
 	result->m_iClip = std::atoi(CMD_ARGV(index++));
 
+	result->m_iRandomSeed = std::atoi(CMD_ARGV(index++));
+
 	return result;
-}
-
-void CallStaticPrimaryAttack(WeaponIdType iId, primatk_msg_ptr p)
-{
-#define LINK_ID(id)	case id:	\
-						if constexpr (DETECT_PrimaryAttack<GetTypename<id>>)	\
-						{	\
-							GetTypename<id>::PrimaryAttack(p);	\
-						}	\
-						break
-
-	constexpr auto b = DETECT_PrimaryAttack<CUSP>;
-	constexpr auto b2 = DETECT_PrimaryAttack<GetTypename<WEAPON_USP>>;
-
-	switch (iId)
-	{
-		LINK_ID(WEAPON_USP);
-		//LINK_ID(WEAPON_GLOCK18);
-		//LINK_ID(WEAPON_ANACONDA);
-		//LINK_ID(WEAPON_DEAGLE);
-		//LINK_ID(WEAPON_FIVESEVEN);
-		//LINK_ID(WEAPON_M45A1);
-
-		//LINK_ID(WEAPON_KSG12);
-		//LINK_ID(WEAPON_M1014);
-		//LINK_ID(WEAPON_AA12);
-
-		//LINK_ID(WEAPON_MP7A1);
-		//LINK_ID(WEAPON_MAC10);
-		//LINK_ID(WEAPON_MP5N);
-		//LINK_ID(WEAPON_UMP45);
-		//LINK_ID(WEAPON_P90);
-		//LINK_ID(WEAPON_VECTOR);
-
-		//LINK_ID(WEAPON_AK47);
-		//LINK_ID(WEAPON_M4A1);
-		//LINK_ID(WEAPON_SCARH);
-		//LINK_ID(WEAPON_XM8);
-
-		//LINK_ID(WEAPON_SRS);
-		//LINK_ID(WEAPON_SVD);
-		//LINK_ID(WEAPON_AWP);
-		//LINK_ID(WEAPON_PSG1);
-
-		//LINK_ID(WEAPON_MK46);
-		//LINK_ID(WEAPON_RPD);
-
-	default:
-		SERVER_PRINT(SharedVarArgs("Error: Unknow iId \"%d\" requesting primary attack!\n", iId));
-		return;
-	}
-
-#undef LINK_ID
 }
 
 void CBaseWeapon::TheWeaponsThink(void)
@@ -765,7 +714,10 @@ void CBaseWeapon::PostFrame()
 			WRITE_SHORT(m_pPlayer->random_seed);
 			MESSAGE_END();
 #endif
-			PrimaryAttack();
+			// (Human) Clinets now has total control over the primary attack.
+			if (!m_pPlayer->IsBot())
+				PrimaryAttack();
+
 			m_flNextPrimaryAttack *= m_pPlayer->WeaponFireIntervalModifier(this);	// passive skill applied.
 		}
 	}
@@ -1142,6 +1094,9 @@ int CBaseWeaponTemplate<CWpn>::DefaultShoot(void)  requires(IsShotgun<CWpn>)
 template<typename CWpn>
 Vector2D CBaseWeaponTemplate<CWpn>::DefaultShoot(float flSpread, float flCycleTime)  requires(IS_MEMBER_PRESENTED_CPP20_W(SPREAD_BASELINE))
 {
+	// Note: The server side is different from client side.
+	// The client version shall be prevail.
+
 #pragma region Semiauto check.
 	if constexpr (IS_MEMBER_PRESENTED_CPP20_W(ATTRIB_SEMIAUTO))
 	{
@@ -1209,7 +1164,10 @@ Vector2D CBaseWeaponTemplate<CWpn>::DefaultShoot(float flSpread, float flCycleTi
 #pragma endregion
 
 #pragma region Fire bullets.
-	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
+	UTIL_MakeVectors(m_bIsOnClientRequestedFire ?
+		m_pPlayer->m_vecClientReportedViewAngles :
+		(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle)
+	);
 
 	auto vSpread = m_pPlayer->FireBullets3(
 		m_pPlayer->GetGunPosition(),
@@ -1253,7 +1211,9 @@ Vector2D CBaseWeaponTemplate<CWpn>::DefaultShoot(float flSpread, float flCycleTi
 #pragma region Apply recoils.
 	if constexpr (IS_MEMBER_PRESENTED_CPP20_W(ApplyRecoil))
 	{
-		This()->ApplyRecoil();
+		// Only applys to BOTs.
+		if (m_pPlayer->IsBot())
+			This()->ApplyRecoil();
 	}
 #pragma endregion
 

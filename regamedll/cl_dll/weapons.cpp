@@ -286,23 +286,25 @@ BOOL CanAttack(float attack_time, float curtime, BOOL isPredicted)
 	}
 }
 
-void IssuePrimaryAttackMessage(WeaponIdType iId, const Vector& vecSrc, const Vector& vecViewAngles, int iClip)
+void IssuePrimaryAttackMessage(WeaponIdType iId, const Vector& vecSrc, const Vector& vecViewAngles, int iClip, int iRandomSeed)
 {
-	auto szCommandString = std::format("__shoot {:d} {:X} {:X} {:X} {:X} {:X} {:X} {:d}\n",
+	auto szCommandString = std::format("__shoot {:d} {:X} {:X} {:X} {:X} {:X} {:X} {:d} {:d}\n",
 		(int)iId,
 		*(unsigned long*)&vecSrc.x, *(unsigned long*)&vecSrc.y, *(unsigned long*)&vecSrc.z,
 		*(unsigned long*)&vecViewAngles.x, *(unsigned long*)&vecViewAngles.y, *(unsigned long*)&vecViewAngles.z,
-		iClip
+		iClip,
+		iRandomSeed
 	);
 
 	gEngfuncs.pfnServerCmd(szCommandString.c_str());
 
 #ifdef _DEBUG_CUSTOM_CLIENT_TO_SERVER_MESSAGE
-	szCommandString = std::format("[Sent] {:d} {} {} {} {} {} {} {:d}\n",
+	szCommandString = std::format("[Sent] {:d} {} {} {} {} {} {} {:d} {:d}\n",
 		(int)iId,
 		vecSrc.x, vecSrc.y, vecSrc.z,
 		vecViewAngles.x, vecViewAngles.y, vecViewAngles.z,
-		iClip
+		iClip,
+		iRandomSeed
 	);
 
 	gEngfuncs.pfnConsolePrint(szCommandString.c_str());
@@ -1229,7 +1231,8 @@ Vector2D CBaseWeaponTemplate<CWpn>::DefaultShoot(float flSpread, float flCycleTi
 		CWpn::RANGE_MODIFER,
 		m_pPlayer->random_seed
 	);
-	IssuePrimaryAttackMessage(Id(), m_pPlayer->GetGunPosition(), m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle, m_iClip);
+
+	IssuePrimaryAttackMessage(Id(), m_pPlayer->GetGunPosition(), m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle, m_iClip, m_pPlayer->random_seed);
 #pragma endregion
 
 #pragma region Notify all clients that this weapon has fired.
@@ -2097,9 +2100,6 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 
 	g_iWeaponFlags = g_pCurWeapon->m_bitsFlags;
 
-	// For random weapon events, use this seed to seed random # generator
-	gPseudoPlayer.random_seed = random_seed;
-
 	// Get old buttons from previous state.
 	gPseudoPlayer.m_afButtonLast = gPseudoPlayer.pev->button;
 
@@ -2332,6 +2332,9 @@ void HUD_PostRunCmd2(local_state_t* from, local_state_t* to, usercmd_s* cmd, int
 	g_sWpnTo = *to;
 	g_sWpnCmd = *cmd;
 	g_runfuncs = runfuncs;
+
+	// For random weapon events, use this seed to seed random # generator
+	gPseudoPlayer.random_seed = random_seed;
 
 	to->client.fov = g_lastFOV;
 

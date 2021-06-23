@@ -2589,23 +2589,15 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 			else if (FStrEq(pcmd, "__shoot"))
 			{
 				auto p = InterpretPrimaryAttackMessage();
-				auto pWeapon = pPlayer->HasPlayerItem(p->m_iId);
-
-				if (pWeapon)
-				{
-					pWeapon->m_pPlayer->pev->v_angle = p->m_vecViewAngles;
-					pWeapon->m_pPlayer->pev->punchangle = Vector::Zero();
-					pWeapon->m_iClip = p->m_iClip;
-
-					pWeapon->PrimaryAttack();
-				}
+				pPlayer->ClientRequestFireWeapon(p);
 
 #ifdef _DEBUG_CUSTOM_CLIENT_TO_SERVER_MESSAGE
-				auto szCommandString = std::format("[Received] {:d} {} {} {} {} {} {} {:d}\n",
+				auto szCommandString = std::format("[Received] {:d} {} {} {} {} {} {} {:d} {:d}\n",
 					(int)p->m_iId,
 					p->m_vecSrc.x, p->m_vecSrc.y, p->m_vecSrc.z,
 					p->m_vecViewAngles.x, p->m_vecViewAngles.y, p->m_vecViewAngles.z,
-					p->m_iClip
+					p->m_iClip,
+					p->m_iRandomSeed
 				);
 
 				SERVER_PRINT(szCommandString.c_str());

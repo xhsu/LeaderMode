@@ -82,7 +82,7 @@ public:
 	std::shared_ptr<pseudo_ent_var_s> pev;
 	int		m_iWeaponVolume;
 	int		m_iWeaponFlash;
-	int		random_seed;
+	uint32	random_seed;
 	bool	m_bResumeZoom : 1;
 	int		m_iLastZoom;
 	float	m_flEjectBrass;

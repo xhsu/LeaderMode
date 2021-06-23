@@ -96,11 +96,12 @@ inline void MESSAGE_BEGIN(int msg_dest, int msg_type, const float *pOrigin = nul
 	(*g_engfuncs.pfnMessageBegin)(msg_dest, msg_type, pOrigin, ed);
 }
 
-inline void WRITE_VECTOR(const Vector& v)
+template <typename T>
+inline void WRITE_VECTOR(const T& v)
 {
-	(*g_engfuncs.pfnWriteCoord)(v.x);
-	(*g_engfuncs.pfnWriteCoord)(v.y);
-	(*g_engfuncs.pfnWriteCoord)(v.z);
+	(*g_engfuncs.pfnWriteCoord)(v[0]);
+	(*g_engfuncs.pfnWriteCoord)(v[1]);
+	(*g_engfuncs.pfnWriteCoord)(v[2]);
 }
 
 template <typename T = void>

@@ -86,6 +86,44 @@ struct entity_field_alias_t
 	int field;
 };
 
+// struct info (filled by engine)
+typedef struct
+{
+	const char* name;
+	const int		offset;
+	const int		size;
+} delta_field_t;
+
+// one field
+typedef struct delta_s
+{
+	const char* name;
+	int		offset;		// in bytes
+	int		size;		// used for bounds checking in DT_STRING
+	int		flags;		// DT_INTEGER, DT_FLOAT etc
+	float		multiplier;
+	float		post_multiplier;	// for DEFINE_DELTA_POST
+	int		bits;		// how many bits we send\receive
+	qboolean		bInactive;	// unsetted by user request
+} delta_t;
+
+typedef void (*pfnDeltaEncode)(delta_t* pFields, const byte* from, const byte* to);
+
+typedef struct
+{
+	const char* pName;
+	const delta_field_t* pInfo;
+	const int		maxFields;	// maximum number of fields in struct
+	int		numFields;	// may be merged during initialization
+	delta_t* pFields;
+
+	// added these for custom entity encode
+	int		customEncode;
+	char		funcName[32];
+	pfnDeltaEncode	userCallback;
+	qboolean		bInitialized;
+} delta_info_t;
+
 C_DLLEXPORT int CountTeams();
 C_DLLEXPORT int CountTeamPlayers(int iTeam);
 
