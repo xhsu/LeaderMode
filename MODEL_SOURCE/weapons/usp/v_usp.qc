@@ -44,29 +44,11 @@ studio "leftsleeve"
 blank
 }
 
-$body "weapon" "usp"
-
-$bodygroup "slide"
-{
-studio "slide_forward"
-studio "slide_back"
-}
-
-$bodygroup "mag"
-{
-studio "mag_full"
-studio "mag_empty"
-}
-
 $bodygroup "barrel"
 {
 studio "barrel_normal"
 studio "barrel_empty"
 }
-
-$body "hammer" "hammer_ready"
-
-$body "weapon" "newMag"
 
 $bodygroup "laser"
 {
@@ -82,6 +64,28 @@ studio "miniScope_back"
 }
 
 
+$bodygroup "slide"
+{
+studio "slide_forward"
+studio "slide_back"
+}
+
+$bodygroup "mag"
+{
+studio "mag_full"
+studio "mag_empty"
+}
+
+
+$body "weapon" "usp"
+
+$body "hammer" "hammer_ready"
+
+$body "weapon" "newMag"
+
+
+
+
 
 
 // x attachment(s)
@@ -91,6 +95,8 @@ $attachment 1 "bone_weapon" -2.500000 2.000000 -2.000000
 // x animation sequence(s)
 $sequence "idle" "idle" fps 30 
 $sequence "fire" "fire" fps 30 
+$sequence "fire_2" "fire_2" fps 30
+$sequence "fire_2" "fire_3" fps 30
 $sequence "fire_last" "fire_last" fps 30
 $sequence "select" "select" fps 30 
 $sequence "select_first" "select_first" fps 30 
