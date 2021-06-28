@@ -357,7 +357,7 @@ public:	// basic logic funcs
 #ifndef CLIENT_DLL
 	template <DETECT_EVENT_FILE T = CWpn> static inline unsigned short m_usEvent = 0;
 
-	void	Precache	(void) override;	// Generalized precache function - precache basical files only.
+	void	Precache		(void) override;	// Generalized precache function - precache basical files only.
 #endif
 
 public:	// util funcs
@@ -451,19 +451,21 @@ struct CUSP : public CBaseWeaponTemplate<CUSP>
 	static constexpr auto	EVENT_FILE			= "events/usp.sc";
 
 	// Anim time
-	static constexpr auto	FIRE_ANIMTIME		= 13.0 / 30.0;
-	static constexpr auto	DEPLOY_TIME			= 16.0 / 30.0;
-	static constexpr auto	DRAW_FIRST_TIME		= 41.0 / 30.0;
-	static constexpr auto	HOLSTER_TIME		= 16.0 / 30.0;
-	static constexpr auto	RELOAD_TIME			= 66.0 / 30.0;
-	static constexpr auto	RELOAD_EMPTY_TIME	= 66.0 / 30.0;
-	static constexpr auto	INSPECTION_TIME		= 76.0 / 30.0;
-	static constexpr auto	LHAND_DOWN_TIME		= 11.0 / 30.0;
-	static constexpr auto	LHAND_UP_TIME		= 11.0 / 30.0;
-	static constexpr auto	BLOCK_UP_TIME		= 11.0 / 30.0;
-	static constexpr auto	BLOCK_DOWN_TIME		= 11.0 / 30.0;
-	static constexpr auto	DASH_ENTER_TIME		= 11.0 / 30.0;
-	static constexpr auto	DASH_EXIT_TIME		= 11.0 / 30.0;
+	static constexpr auto	FIRE_ANIMTIME					= 13.0 / 30.0;
+	static constexpr auto	DEPLOY_TIME						= 16.0 / 30.0;
+	static constexpr auto	DRAW_FIRST_TIME					= 41.0 / 30.0;
+	static constexpr auto	HOLSTER_TIME					= 16.0 / 30.0;
+	static constexpr auto	RELOAD_TIME						= 66.0 / 30.0;
+	static constexpr auto	RELOAD_SOFT_DELAY_TIME			= RELOAD_TIME - 44.0 / 30.0;
+	static constexpr auto	RELOAD_EMPTY_TIME				= 66.0 / 30.0;
+	static constexpr auto	RELOAD_EMPTY_SOFT_DELAY_TIME	= RELOAD_EMPTY_TIME - 45.0 / 30.0;
+	static constexpr auto	INSPECTION_TIME					= 76.0 / 30.0;
+	static constexpr auto	LHAND_DOWN_TIME					= 11.0 / 30.0;
+	static constexpr auto	LHAND_UP_TIME					= 11.0 / 30.0;
+	static constexpr auto	BLOCK_UP_TIME					= 11.0 / 30.0;
+	static constexpr auto	BLOCK_DOWN_TIME					= 11.0 / 30.0;
+	static constexpr auto	DASH_ENTER_TIME					= 11.0 / 30.0;
+	static constexpr auto	DASH_EXIT_TIME					= 11.0 / 30.0;
 
 	// Attrib
 	static constexpr auto	ATTRIB_SEMIAUTO		= true;
@@ -478,8 +480,6 @@ struct CUSP : public CBaseWeaponTemplate<CUSP>
 #ifdef CLIENT_DLL
 	bool	UsingInvertedVMDL	(void) final { return false; }	// Model designed by InnocentBlue is not inverted.
 	int		CalcBodyParam		(void) final;
-#else
-	void	DefaultClientQuestedFire	(primatk_msg_ptr p);
 #endif
 
 	// new funcs
@@ -509,9 +509,9 @@ enum mp5n_e
 	MP5N_SHOOT3,
 };
 
-class CSCARH : public CBaseWeaponTemplate<CSCARH>
+struct CSCARH : public CBaseWeaponTemplate<CSCARH>
 {
-public:	// Constants / Database
+#pragma region SCAR-H Database
 	enum scarh_anim_e
 	{
 		IDLE,
@@ -546,31 +546,38 @@ public:	// Constants / Database
 		DASH_EXIT,
 	};
 
-	static constexpr pcchar	VIEW_MODEL			= "models/weapons/v_scarh.mdl";
-	static constexpr pcchar	WORLD_MODEL			= "models/weapons/w_scarl.mdl";
-	static constexpr pcchar	FIRE_SFX			= "weapons/SCARH/mk17_shoot.wav";
-	static constexpr pcchar POSTURE				= "mp5";
-	static constexpr float	MAX_SPEED			= 235.0f;
-	static constexpr float	DAMAGE				= 54;
-	static constexpr float	RANGE_MODIFER		= 1.057371263;	// 80% damage @2000 inches.
-	static constexpr float	DEPLOY_TIME			= 0.97F;
-	static constexpr float	DRAW_FIRST_TIME		= 2.61F;
-	static constexpr float	RELOAD_TIME			= 2.6f;
-	static constexpr float	RELOAD_EMPTY_TIME	= 2.9f;
-	static constexpr float	CHECK_MAGAZINE_TIME	= 3.06F;
-	static constexpr float	HOLSTER_TIME		= 0.74F;
-	static constexpr float	DASH_ENTER_TIME		= 0.485F;
-	static constexpr float	DASH_EXIT_TIME		= 0.485F;
-	static constexpr float	BLOCK_UP_TIME		= 0.3333f;
-	static constexpr float	BLOCK_DOWN_TIME		= 0.3939f;
-	static constexpr float	LHAND_UP_TIME		= 0.5526f;
-	static constexpr float	LHAND_DOWN_TIME		= 0.4210f;
-	static constexpr float	RPM					= 550.0f;
-	static constexpr int	PENETRATION			= 2;
-	static constexpr float	EFFECTIVE_RANGE		= 8192.0f;
-	static constexpr int	GUN_VOLUME			= NORMAL_GUN_VOLUME;
-	static constexpr float	SPREAD_BASELINE		= 0.15f;
-	static constexpr float	ACCURACY_BASELINE	= 0.25f;
+	static constexpr auto	VIEW_MODEL			= "models/weapons/v_scarh.mdl";
+	static constexpr auto	WORLD_MODEL			= "models/weapons/w_scarl.mdl";
+	static constexpr auto	FIRE_SFX			= "weapons/SCARH/mk17_shoot.wav";
+	static constexpr auto	POSTURE				= "mp5";
+	static constexpr auto	MAX_SPEED			= 235.0f;
+	static constexpr auto	DAMAGE				= 54;
+	static constexpr auto	RANGE_MODIFER		= 1.057371263;	// 80% damage @2000 inches.
+	static constexpr auto	RPM					= 550.0f;
+	static constexpr auto	EFFECTIVE_RANGE		= 8192.0f;
+	static constexpr auto	PENETRATION			= 2;
+	static constexpr auto	SPREAD_BASELINE		= 0.15f;
+	static constexpr auto	ACCURACY_BASELINE	= 0.25f;
+	static constexpr auto	GUN_VOLUME			= NORMAL_GUN_VOLUME;
+	static constexpr auto	GUN_FLASH			= BRIGHT_GUN_FLASH;
+	static constexpr auto	SHELL_MODEL			= "models/rshell.mdl";
+	static constexpr auto	EVENT_FILE			= "events/scarh.sc";
+
+	// Anim time
+	static constexpr auto	FIRE_ANIMTIME					= 13.0 / 30.0;
+	static constexpr auto	DEPLOY_TIME = 0.97F;
+	static constexpr auto	DRAW_FIRST_TIME = 2.61F;
+	static constexpr auto	RELOAD_TIME = 2.6f;
+	static constexpr auto	RELOAD_EMPTY_TIME = 2.9f;
+	static constexpr auto	CHECK_MAGAZINE_TIME = 3.06F;
+	static constexpr auto	HOLSTER_TIME = 0.74F;
+	static constexpr auto	DASH_ENTER_TIME = 0.485F;
+	static constexpr auto	DASH_EXIT_TIME = 0.485F;
+	static constexpr auto	BLOCK_UP_TIME = 0.3333f;
+	static constexpr auto	BLOCK_DOWN_TIME = 0.3939f;
+	static constexpr auto	LHAND_UP_TIME = 0.5526f;
+	static constexpr auto	LHAND_DOWN_TIME = 0.4210f;
+#pragma endregion
 
 #ifndef CLIENT_DLL
 public:	// SV exclusive variables.

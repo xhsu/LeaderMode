@@ -901,8 +901,10 @@ bool CBaseWeaponTemplate<CWpn>::Reload(void)
 	{
 		return DefaultMagReload();
 	}
-
-	return CBaseWeapon::Reload();
+	else
+	{
+		return CBaseWeapon::Reload();
+	}
 }
 
 bool CBaseWeapon::Melee(void)
