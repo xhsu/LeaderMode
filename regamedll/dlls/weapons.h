@@ -309,7 +309,7 @@ CREATE_MEMBER_DETECTOR_STATIC(SHOOT);
 CREATE_MEMBER_DETECTOR_STATIC(FIRE_ANIMTIME);
 CREATE_MEMBER_DETECTOR_STATIC(RELOAD_SOFT_DELAY_TIME);
 CREATE_MEMBER_DETECTOR_STATIC(RELOAD_EMPTY_SOFT_DELAY_TIME);
-CREATE_MEMBER_DETECTOR_STATIC(INSPECTION);
+CREATE_MEMBER_DETECTOR_STATIC(CHECK_MAGAZINE);
 
 CREATE_MEMBER_DETECTOR_STATIC(ATTRIB_NO_FIRE_UNDERWATER);
 CREATE_MEMBER_DETECTOR_CUSTOM(ATTRIB_SEMIAUTO) { {T::ATTRIB_SEMIAUTO == true}; };
@@ -413,7 +413,7 @@ struct CUSP : public CBaseWeaponTemplate<CUSP>
 		HOLSTER,
 		RELOAD,
 		RELOAD_EMPTY,
-		INSPECTION,
+		CHECK_MAGAZINE,
 		LHAND_DOWN,
 		LHAND_UP,
 		BLOCK_UP,
@@ -427,7 +427,7 @@ struct CUSP : public CBaseWeaponTemplate<CUSP>
 	static constexpr auto	BITS_SLIDE_STOP_ANIM =	(1 << IDLE) |
 													(1 << DEPLOY) |
 													(1 << HOLSTER) |
-													(1 << INSPECTION) |
+													(1 << CHECK_MAGAZINE) |
 													(1 << LHAND_DOWN) | (1 << LHAND_UP) |
 													(1 << BLOCK_DOWN) | (1 << BLOCK_UP) |
 													(1 << DASH_ENTER) | (1 << DASHING) | (1 << DASH_EXIT)/* |
@@ -459,7 +459,7 @@ struct CUSP : public CBaseWeaponTemplate<CUSP>
 	static constexpr auto	RELOAD_SOFT_DELAY_TIME			= RELOAD_TIME - 44.0 / 30.0;
 	static constexpr auto	RELOAD_EMPTY_TIME				= 66.0 / 30.0;
 	static constexpr auto	RELOAD_EMPTY_SOFT_DELAY_TIME	= RELOAD_EMPTY_TIME - 45.0 / 30.0;
-	static constexpr auto	INSPECTION_TIME					= 76.0 / 30.0;
+	static constexpr auto	CHECK_MAGAZINE_TIME				= 76.0 / 30.0;
 	static constexpr auto	LHAND_DOWN_TIME					= 11.0 / 30.0;
 	static constexpr auto	LHAND_UP_TIME					= 11.0 / 30.0;
 	static constexpr auto	BLOCK_UP_TIME					= 11.0 / 30.0;
@@ -696,7 +696,7 @@ public:	// Constants / Database
 	static constexpr float	DRAW_FIRST_TIME			= 1.3F;
 	static constexpr float	DEPLOY_TIME				= 0.7F;
 	static constexpr float	HOLSTER_TIME			= 0.7F;
-	static constexpr float	CHECKMAG_TIME			= 2.2667F;
+	static constexpr float	CHECK_MAGAZINE_TIME		= 2.2667F;
 	static constexpr float	DASH_ENTER_TIME			= 0.8F;
 	static constexpr float	DASH_EXIT_TIME			= 0.533F;
 	static constexpr float	TO_SHARPSHOOTER_TIME	= 8.8F;
@@ -783,7 +783,7 @@ public:	// Constants / Database
 	static constexpr float	DEPLOY_TIME			= 0.733F;
 	static constexpr float	DRAW_FIRST_TIME		= 1.533F;
 	static constexpr float	HOLSTER_TIME		= 0.7333F;
-	static constexpr float	CHECKMAG_TIME		= 2.0333F;
+	static constexpr float	CHECK_MAGAZINE_TIME	= 2.0333F;
 	static constexpr float	BLOCK_UP_TIME		= 0.5333F;
 	static constexpr float	BLOCK_DOWN_TIME		= 0.5333F;
 	static constexpr float	LHAND_UP_TIME		= 0.7F;
@@ -878,7 +878,7 @@ public:	// Constants / Database
 	static constexpr float	DEPLOY_TIME			= 0.7f;
 	static constexpr float	DRAW_FIRST_TIME		= 1.8f;
 	static constexpr float	HOLSTER_TIME		= 0.7f;
-	static constexpr float	CHECKMAG_TIME		= 2.32f;
+	static constexpr float	CHECK_MAGAZINE_TIME	= 2.32f;
 	static constexpr float	BLOCK_UP_TIME		= 0.5333F;
 	static constexpr float	BLOCK_DOWN_TIME		= 0.5333F;
 	static constexpr float	LHAND_UP_TIME		= 0.6666F;
@@ -1779,7 +1779,7 @@ public:	// Constants / Database
 	static constexpr float	DRAW_FIRST_TIME		= 1.56F;
 	static constexpr float	DEPLOY_TIME			= 0.7F;
 	static constexpr float	HOLSTER_TIME		= 0.7F;
-	static constexpr float	CHECKMAG_TIME		= 2.033F;
+	static constexpr float	CHECK_MAGAZINE_TIME	= 2.033F;
 	static constexpr float	DASH_ENTER_TIME		= 0.8F;
 	static constexpr float	DASH_EXIT_TIME		= 0.37F;
 	static constexpr float	BLOCK_UP_TIME		= 0.4666f;

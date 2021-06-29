@@ -284,7 +284,7 @@ bool CFN57::Reload()
 			SecondaryAttack();
 
 		SendWeaponAnim(CHECK_MAGAZINE);
-		m_flTimeWeaponIdle = CHECKMAG_TIME;
+		m_flTimeWeaponIdle = CHECK_MAGAZINE_TIME;
 	}
 
 	return false;

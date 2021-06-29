@@ -1164,7 +1164,7 @@ Vector2D CBaseWeaponTemplate<CWpn>::DefaultShoot(float flSpread, float flCycleTi
 #pragma endregion
 
 #pragma region Fire bullets.
-	UTIL_MakeVectors(m_bIsOnClientRequestedFire ?
+	UTIL_MakeVectors(m_pPlayer->m_bIsOnClientRequestedFire ?
 		m_pPlayer->m_vecClientReportedViewAngles :
 		(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle)
 	);
@@ -1327,15 +1327,15 @@ bool CBaseWeaponTemplate<CWpn>::DefaultMagReload(void) requires(!IsTubularMag<CW
 	}
 
 	// KF2 style inspection when you press R.
-	if constexpr (IS_MEMBER_PRESENTED_CPP20_W(INSPECTION))
+	if constexpr (IS_MEMBER_PRESENTED_CPP20_W(CHECK_MAGAZINE))
 	{
-		if (m_pPlayer->pev->weaponanim != CWpn::INSPECTION)
+		if (m_pPlayer->pev->weaponanim != CWpn::CHECK_MAGAZINE)
 		{
 			if (m_bInZoom)
 				SecondaryAttack();
 
-			SendWeaponAnim(CWpn::INSPECTION);
-			m_flTimeWeaponIdle = CWpn::INSPECTION_TIME;
+			SendWeaponAnim(CWpn::CHECK_MAGAZINE);
+			m_flTimeWeaponIdle = CWpn::CHECK_MAGAZINE_TIME;
 		}
 	}
 
