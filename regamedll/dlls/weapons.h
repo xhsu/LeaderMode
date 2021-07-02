@@ -166,31 +166,24 @@ public:
 	struct	// this structure is for anim push and pop. it save & restore weapon state.
 	{
 		// on player.
-		int		m_iSequence;
-		float	m_flNextAttack;
-		float	m_flEjectBrass;
-		int		m_iShellModelIndex;
+		int		m_iSequence{ 0 };
+		float	m_flNextAttack{ 0.0f };
+		float	m_flEjectBrass{ 0.0f };
+		int		m_iShellModelIndex{ 0 };
 
 		// on weapon.
-		float	m_flNextPrimaryAttack;
-		float	m_flNextSecondaryAttack;
-		float	m_flTimeWeaponIdle;
+		float	m_flNextPrimaryAttack{ 0.0f };
+		float	m_flNextSecondaryAttack{ 0.0f };
+		float	m_flTimeWeaponIdle{ 0.0f };
 
 #ifdef CLIENT_DLL
 		// for model. these will be applied on g_pViewEnt.
-		float	m_flTimeAnimStarted;
-		float	m_flFramerate;
-		float	m_flFrame;
+		float	m_flTimeAnimStarted{ 0.0f };
+		float	m_flFramerate{ 0.0f };
+		float	m_flFrame{ 0.0f };
 #endif
 	}
-	m_Stack
-	{ 0, 0.0f, 0.0f, 0,
-		0.0f, 0.0f, 0.0f
-#ifndef CLIENT_DLL
-	};
-#else
-		, 0.0f, 0.0f, 0.0f };
-#endif
+	m_Stack;
 
 #ifndef CLIENT_DLL
 public:	// SV exclusive variables.
@@ -564,29 +557,34 @@ struct CSCARH : public CBaseWeaponTemplate<CSCARH>
 	static constexpr auto	EVENT_FILE			= "events/scarh.sc";
 
 	// Anim time
-	static constexpr auto	FIRE_ANIMTIME					= 13.0 / 30.0;
-	static constexpr auto	DEPLOY_TIME = 0.97F;
-	static constexpr auto	DRAW_FIRST_TIME = 2.61F;
-	static constexpr auto	RELOAD_TIME = 2.6f;
-	static constexpr auto	RELOAD_EMPTY_TIME = 2.9f;
-	static constexpr auto	CHECK_MAGAZINE_TIME = 3.06F;
-	static constexpr auto	HOLSTER_TIME = 0.74F;
-	static constexpr auto	DASH_ENTER_TIME = 0.485F;
-	static constexpr auto	DASH_EXIT_TIME = 0.485F;
-	static constexpr auto	BLOCK_UP_TIME = 0.3333f;
-	static constexpr auto	BLOCK_DOWN_TIME = 0.3939f;
-	static constexpr auto	LHAND_UP_TIME = 0.5526f;
-	static constexpr auto	LHAND_DOWN_TIME = 0.4210f;
+	static constexpr auto FIRE_ANIMTIME			= 6.0 / 20.0;
+	static constexpr auto shoot_Parts_TIME		= 16.0 / 33.0;
+	static constexpr auto rechamber_m870_TIME	= 31.0 / 30.0;
+	static constexpr auto RELOAD_TIME_TIME		= 86.0 / 33.0;
+	static constexpr auto RELOAD_EMPTY_TIME_TIME= 96.0 / 33.0;
+	static constexpr auto reload_eglm_TIME		= 115.0 / 33.0;
+	static constexpr auto reload_xm26_TIME		= 61.0 / 33.0;
+	static constexpr auto reload_xm26_empty_TIME= 78.0 / 30.0;
+	static constexpr auto reload_m870_start_TIME= 13.0 / 30.0;
+	static constexpr auto reload_m870_first_TIME= 66.0 / 30.0;
+	static constexpr auto reload_m870_loop_TIME	= 16.0 / 23.0;
+	static constexpr auto reload_m870_end_TIME	= 16.0 / 27.0;
+	static constexpr auto reload_m870_empty_TIME= 38.0 / 33.0;
+	static constexpr auto DRAW_FIRST_TIME_TIME	= 86.0 / 33.0;
+	static constexpr auto DEPLOY_TIME_TIME		= 36.0 / 37.0;
+	static constexpr auto Jump_TIME				= 31.0 / 30.0;
+	static constexpr auto CHECK_MAGAZINE_TIME	= 101.0 / 33.0;
+	static constexpr auto Switch_TIME			= 16.0 / 25.0;
+	static constexpr auto HOLSTER_TIME_TIME		= 26.0 / 35.0;
+	static constexpr auto BLOCK_UP_TIME_TIME	= 11.0 / 33.0;
+	static constexpr auto BLOCK_DOWN_TIME_TIME	= 13.0 / 33.0;
+	static constexpr auto LHAND_UP_TIME_TIME	= 21.0 / 38.0;
+	static constexpr auto LHAND_DOWN_TIME_TIME	= 16.0 / 38.0;
+	static constexpr auto DASH_ENTER_TIME_TIME	= 16.0 / 33.0;
+	static constexpr auto DASH_EXIT_TIME_TIME	= 16.0 / 33.0;
 #pragma endregion
 
-#ifndef CLIENT_DLL
-public:	// SV exclusive variables.
-	static unsigned short m_usEvent;
-	static int m_iShell;
-
-public:	// SV exclusive functions.
-	virtual void	Precache		(void);
-#else
+#ifdef CLIENT_DLL
 public:	// CL exclusive functions.
 	virtual void	Think			(void);
 	virtual int		CalcBodyParam	(void);
