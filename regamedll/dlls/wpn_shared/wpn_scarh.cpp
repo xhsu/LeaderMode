@@ -10,21 +10,33 @@ Model - Matoilet
 
 #include "precompiled.h"
 
-#ifndef CLIENT_DLL
-
-unsigned short CSCARH::m_usEvent = 0;
-int CSCARH::m_iShell = 0;
-
-void CSCARH::Precache()
+void CSCARH::SecondaryAttack()
 {
-	BaseClass::Precache();
+	switch (m_iVariation)
+	{
+	case Role_Sharpshooter:
+		// ACOG
+		DefaultSteelSight(Vector(-3.62f, -5, 0.5f), 55, 8.0f);
+		break;
 
-	m_iShell = PRECACHE_MODEL("models/rshell.mdl");
-	m_usEvent = PRECACHE_EVENT(1, "events/scarh.sc");
+	default:
+		// HOLO
+		DefaultSteelSight(Vector(-3.725F, -2, 0.615F), 85, 8.0f);
+		break;
+	}
 }
 
-#else
+float CSCARH::GetSpread(void)
+{
+	m_flAccuracy = (float(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 220.0f) + ACCURACY_BASELINE;
 
+	if (m_flAccuracy > 1.0f)
+		m_flAccuracy = 1.0f;
+
+	return DefaultSpread(SPREAD_BASELINE * m_flAccuracy, 0.1f, 0.75f, 2.0f, 5.0f);
+}
+
+#ifdef CLIENT_DLL
 int CSCARH::CalcBodyParam(void)
 {
 	BodyEnumInfo_t info[] =
@@ -99,30 +111,69 @@ void CSCARH::Think(void)
 
 #endif
 
-void CSCARH::SecondaryAttack()
+int CSCARH::AcquireShootAnim()
 {
-	switch (m_iVariation)
-	{
-	case Role_Sharpshooter:
-		// ACOG
-		DefaultSteelSight(Vector(-3.62f, -5, 0.5f), 55, 8.0f);
-		break;
+	if (!m_iClip)
+		return SHOOT_LAST;
 
-	default:
-		// HOLO
-		DefaultSteelSight(Vector(-3.725F, -2, 0.615F), 85, 8.0f);
-		break;
-	}
+	return UTIL_SharedRandomLong(m_pPlayer->random_seed, SHOOT1, SHOOT3);
 }
 
-float CSCARH::GetSpread(void)
+void CSCARH::ApplyClientFPFiringVisual(const Vector2D& vSpread)
 {
-	m_flAccuracy = (float(m_iShotsFired * m_iShotsFired * m_iShotsFired) / 220.0f) + ACCURACY_BASELINE;
+#ifdef CLIENT_DLL
+	auto idx = gEngfuncs.GetLocalPlayer()->index;
+	bool bDucking = gEngfuncs.pEventAPI->EV_LocalPlayerDucking();
 
-	if (m_flAccuracy > 1.0f)
-		m_flAccuracy = 1.0f;
+	auto vecAngles = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
+	UTIL_MakeVectors(vecAngles);
 
-	return DefaultSpread(SPREAD_BASELINE * m_flAccuracy, 0.1f, 0.75f, 2.0f, 5.0f);
+	EV_MuzzleFlash();
+
+	// first personal gun smoke.
+	EV_HLDM_CreateSmoke(3, 0.2, Color(18, 18, 18), EV_RIFLE_SMOKE, false, 35);
+
+	// shoot anim.
+	EV_PlayShootAnim();
+
+	// Shell stuff.
+	Vector ShellVelocity, ShellOrigin;
+	if (cl_righthand->value == 0)
+		EV_GetDefaultShellInfo(ShellVelocity, ShellOrigin, 20.0, -8.0, -10.0);
+	else
+		EV_GetDefaultShellInfo(ShellVelocity, ShellOrigin, 20.0, -8.0, 10.0);
+
+	ShellVelocity *= 1.65;
+	ShellVelocity.z -= 120;
+
+	EV_EjectBrass(ShellOrigin, ShellVelocity, vecAngles.yaw, m_iShell<CSCARH>, TE_BOUNCE_SHELL, 15);
+
+	// Ballistic calculation.
+	EV_HLDM_FireBullets(vSpread);
+
+	// Original GoldSrc API: VOL = 1.0, ATTN = 0.4
+	EV_PlayGunFire2();
+#endif // CLIENT_DLL
+}
+
+void CSCARH::ApplyRecoil(void)
+{
+	if (m_pPlayer->pev->velocity.Length2D() > 0)
+	{
+		KickBack(1.0, 0.45, 0.28, 0.04, 4.25, 2.5, 7);
+	}
+	else if (!(m_pPlayer->pev->flags & FL_ONGROUND))
+	{
+		KickBack(1.25, 0.45, 0.22, 0.18, 6.0, 4.0, 5);
+	}
+	else if (m_pPlayer->pev->flags & FL_DUCKING)
+	{
+		KickBack(0.6, 0.35, 0.2, 0.0125, 3.7, 2.0, 10);
+	}
+	else
+	{
+		KickBack(0.625, 0.375, 0.25, 0.0125, 4.0, 2.25, 9);
+	}
 }
 
 void CSCARH::SCARHFire(float flSpread, float flCycleTime)

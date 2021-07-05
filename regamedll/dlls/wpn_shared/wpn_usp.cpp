@@ -164,20 +164,19 @@ void CUSP::ApplyClientFPFiringVisual(const Vector2D& vSpread)
 	Vector smoke_origin = g_pViewEnt->attachment[0] - gpGlobals->v_forward * 3.0f;
 	float base_scale = RANDOM_FLOAT(0.1, 0.25);
 
-	EV_HLDM_CreateSmoke(smoke_origin, gpGlobals->v_forward, 0, base_scale, 7, 7, 7, EV_PISTOL_SMOKE, m_pPlayer->pev->velocity, false, 35);
-	EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], gpGlobals->v_forward, 20, base_scale + 0.1, 10, 10, 10, EV_WALL_PUFF, m_pPlayer->pev->velocity, false, 35);
-	EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], gpGlobals->v_forward, 40, base_scale, 13, 13, 13, EV_WALL_PUFF, m_pPlayer->pev->velocity, false, 35);
+	::EV_HLDM_CreateSmoke(smoke_origin, gpGlobals->v_forward, 0, base_scale, 7, 7, 7, EV_PISTOL_SMOKE, m_pPlayer->pev->velocity, false, 35);
+	EV_HLDM_CreateSmoke(20, base_scale + 0.1, Color(10, 10, 10), EV_WALL_PUFF, false, 35);
+	EV_HLDM_CreateSmoke(40, base_scale, Color(13, 13, 13), EV_WALL_PUFF, false, 35);
 
 	// shoot anim.
-	SendWeaponAnim(AcquireShootAnim());
+	EV_PlayShootAnim();
 
 	Vector ShellVelocity, ShellOrigin;
 	if (!cl_righthand->value)
-		EV_GetDefaultShellInfo(idx, bDucking, m_pPlayer->pev->origin, m_pPlayer->pev->velocity, ShellVelocity, ShellOrigin, gpGlobals->v_forward, gpGlobals->v_right, gpGlobals->v_up, 36.0, -14.0, -14.0);
+		EV_GetDefaultShellInfo(ShellVelocity, ShellOrigin, 36.0, -14.0, -14.0);
 	else
-		EV_GetDefaultShellInfo(idx, bDucking, m_pPlayer->pev->origin, m_pPlayer->pev->velocity, ShellVelocity, ShellOrigin, gpGlobals->v_forward, gpGlobals->v_right, gpGlobals->v_up, 36.0, -14.0, 14.0);
+		EV_GetDefaultShellInfo(ShellVelocity, ShellOrigin, 36.0, -14.0, 14.0);
 
-	ShellOrigin = g_pViewEnt->attachment[1];	// use the weapon attachment instead.
 	ShellVelocity *= 0.5;
 	ShellVelocity.z += 45.0;
 
@@ -188,12 +187,7 @@ void CUSP::ApplyClientFPFiringVisual(const Vector2D& vSpread)
 	// original API: vol = 1.0, attn = 0.8, pitch = 87~105
 	EV_PlayGunFire(vecSrc + gpGlobals->v_forward * 10.0f, FIRE_SFX, QUIET_GUN_VOLUME, 1.0, RANDOM_LONG(87, 105));
 
-	EV_HLDM_FireBullets(idx,
-		gpGlobals->v_forward, gpGlobals->v_right, gpGlobals->v_up,
-		1, vecSrc, gpGlobals->v_forward,
-		vSpread, EFFECTIVE_RANGE, m_iPrimaryAmmoType,
-		PENETRATION,
-		m_pPlayer->random_seed);
+	EV_HLDM_FireBullets(vSpread);
 #endif
 }
 
@@ -216,13 +210,13 @@ void CUSP::ApplyClientTPFiringVisual(struct event_args_s* args)
 	AngleVectors(args->angles, forward, right, up);
 
 	Vector ShellVelocity, ShellOrigin;
-	EV_GetDefaultShellInfo(args->entindex, args->ducking, args->origin, args->velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -12.0, 4.0);
+	::EV_GetDefaultShellInfo(args->entindex, args->ducking, args->origin, args->velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -12.0, 4.0);
 	EV_EjectBrass(ShellOrigin, ShellVelocity, args->angles.yaw, m_iShell<CUSP>, TE_BOUNCE_SHELL, 5);
 
 	// original API: vol = 1.0, attn = 0.8, pitch = 87~105
 	EV_PlayGunFire(args->origin + forward * 10.0f, FIRE_SFX, QUIET_GUN_VOLUME, 1.0, RANDOM_LONG(87, 105));
 
-	EV_HLDM_FireBullets(idx,
+	::EV_HLDM_FireBullets(idx,
 		forward, right, up,
 		1, args->origin, forward,
 		vSpread, EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_USP].m_iAmmoType,

@@ -23,9 +23,9 @@ class Color
 public:
 	// constructors
 	constexpr Color() : _color() { *((int*)this) = 0; }
-	constexpr Color(BYTE r, BYTE g, BYTE b) : _color() { _color[0] = r; _color[1] = g; _color[2] = b; _color[3] = 0; }
-	constexpr Color(BYTE r, BYTE g, BYTE b, BYTE a) : _color() { _color[0] = r; _color[1] = g; _color[2] = b; _color[3] = a; }
-	constexpr Color(uint32 ulRGB, BYTE a) : _color() { _color[0] = (ulRGB & 0xFF0000) >> 16; _color[1] = (ulRGB & 0xFF00) >> 8; _color[2] = ulRGB & 0xFF; _color[3] = a; }
+	constexpr Color(uint8 r, uint8 g, uint8 b) : _color() { _color[0] = r; _color[1] = g; _color[2] = b; _color[3] = 0; }
+	constexpr Color(uint8 r, uint8 g, uint8 b, uint8 a) : _color() { _color[0] = r; _color[1] = g; _color[2] = b; _color[3] = a; }
+	constexpr Color(uint32 ulRGB, uint8 a) : _color() { _color[0] = (ulRGB & 0xFF0000) >> 16; _color[1] = (ulRGB & 0xFF00) >> 8; _color[2] = ulRGB & 0xFF; _color[3] = a; }
 	constexpr Color(uint32 color32) : _color() { SetRawColor(color32); }
 	
 	// set the color
@@ -79,7 +79,7 @@ public:
 	inline constexpr uint8 b() const	{ return _color[2]; }
 	inline constexpr uint8 a() const	{ return _color[3]; }
 	
-	constexpr unsigned char &operator[](int index)
+	constexpr uint8& operator[](int index)
 	{
 		if (index >= _countof(_color))
 			throw;
@@ -87,7 +87,7 @@ public:
 		return _color[index];
 	}
 
-	constexpr const unsigned char &operator[](int index) const
+	constexpr const uint8& operator[](int index) const
 	{
 		if (index >= _countof(_color))
 			throw;
@@ -112,7 +112,7 @@ public:
 	}
 
 private:
-	unsigned char _color[4];
+	uint8 _color[4];
 };
 
 

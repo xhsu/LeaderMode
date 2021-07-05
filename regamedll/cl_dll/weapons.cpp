@@ -5,6 +5,7 @@ Created Date: Mar 12 2020
 */
 
 #include "precompiled.h"
+#include "..\dlls\weapons.h"
 
 int g_runfuncs = 0;
 local_state_t g_sWpnFrom;
@@ -1964,6 +1965,76 @@ template<typename CWpn>
 void CBaseWeaponTemplate<CWpn>::PlaybackEvent(const Vector2D& vSpread)
 {
 	// Nothing to do here.
+}
+
+template<typename CWpn>
+inline void CBaseWeaponTemplate<CWpn>::EV_HLDM_CreateSmoke(int speed, float scale, const Color& color, EV_SmokeTypes iSmokeType, bool bWind, int framerate)
+{
+	::EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], gpGlobals->v_forward, speed, scale, color.r(), color.g(), color.b(), iSmokeType, m_pPlayer->pev->velocity, bWind, framerate);
+}
+
+template<typename CWpn>
+inline void CBaseWeaponTemplate<CWpn>::EV_GetDefaultShellInfo(Vector& ShellVelocity, Vector& ShellOrigin, float forwardScale, float upScale, float rightScale)
+{
+	::EV_GetDefaultShellInfo(gEngfuncs.GetLocalPlayer()->index,
+		gEngfuncs.pEventAPI->EV_LocalPlayerDucking(),
+		m_pPlayer->pev->origin, m_pPlayer->pev->velocity,
+		ShellVelocity, ShellOrigin,
+		gpGlobals->v_forward, gpGlobals->v_right, gpGlobals->v_up,
+		forwardScale, upScale, rightScale
+	);
+
+	ShellOrigin = g_pViewEnt->attachment[1];	// Thus first personal only.
+}
+
+template<typename CWpn>
+inline void CBaseWeaponTemplate<CWpn>::EV_HLDM_FireBullets(const Vector2D& vecSpread) requires(!IsShotgun<CWpn>)
+{
+	auto vecSrc = EV_GetGunPosition(
+		gEngfuncs.GetLocalPlayer()->index,
+		gEngfuncs.pEventAPI->EV_LocalPlayerDucking(),
+		m_pPlayer->pev->origin
+	);
+
+	::EV_HLDM_FireBullets(
+		gEngfuncs.GetLocalPlayer()->index,
+		gpGlobals->v_forward, gpGlobals->v_right, gpGlobals->v_up,
+		1, vecSrc, gpGlobals->v_forward,
+		vecSpread, CWpn::EFFECTIVE_RANGE, m_iPrimaryAmmoType,
+		CWpn::PENETRATION,
+		m_pPlayer->random_seed
+	);
+}
+
+template<typename CWpn>
+inline void CBaseWeaponTemplate<CWpn>::EV_HLDM_FireBullets(void) requires(IsShotgun<CWpn>)
+{
+	auto vecSrc = EV_GetGunPosition(
+		gEngfuncs.GetLocalPlayer()->index,
+		gEngfuncs.pEventAPI->EV_LocalPlayerDucking(),
+		m_pPlayer->pev->origin
+	);
+
+	::EV_HLDM_FireBullets(
+		gEngfuncs.GetLocalPlayer()->index,
+		gpGlobals->v_forward, gpGlobals->v_right, gpGlobals->v_up,
+		CWpn::PROJECTILE_COUNT, vecSrc, gpGlobals->v_forward,
+		CWpn::CONE_VECTOR, CWpn::EFFECTIVE_RANGE, m_iPrimaryAmmoType,
+		1,
+		m_pPlayer->random_seed
+	);
+}
+
+template<typename CWpn>
+inline void CBaseWeaponTemplate<CWpn>::EV_PlayGunFire2(void)
+{
+	auto vecSrc = EV_GetGunPosition(
+		gEngfuncs.GetLocalPlayer()->index,
+		gEngfuncs.pEventAPI->EV_LocalPlayerDucking(),
+		m_pPlayer->pev->origin
+	);
+
+	::EV_PlayGunFire2(vecSrc + gpGlobals->v_forward * 10.0f, CWpn::FIRE_SFX, CWpn::GUN_VOLUME);
 }
 
 //

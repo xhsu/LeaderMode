@@ -115,6 +115,7 @@ struct MULTIDAMAGE
 #include "weapontype.h"
 #include "player_classes.h"
 #include "game_shared/shared_util.h"
+#include "public/Color.h"
 #include <list>
 #include <concepts>
 
@@ -383,7 +384,13 @@ public:	// util funcs
 //	static	void	ApplyClientTPFiringVisual(struct event_args_s* args);	// Like it says, handle the TP visual effect only.
 
 #ifdef CLIENT_DLL
-	static inline	void	RegisterEvent(void) requires(HasEvent<CWpn>)	{ gEngfuncs.pfnHookEvent(CWpn::EVENT_FILE, CWpn::ApplyClientTPFiringVisual); }
+	static	inline	auto	RegisterEvent			(void) requires(HasEvent<CWpn>)	{ return gEngfuncs.pfnHookEvent(CWpn::EVENT_FILE, CWpn::ApplyClientTPFiringVisual); }
+			inline	void	EV_PlayShootAnim		(void) { return SendWeaponAnim(AcquireShootAnim()); }
+			inline	void	EV_HLDM_CreateSmoke		(int speed, float scale, const Color& color, enum EV_SmokeTypes iSmokeType, bool bWind, int framerate);	// First personal only!
+			inline	void	EV_GetDefaultShellInfo	(Vector& ShellVelocity, Vector& ShellOrigin, float forwardScale, float upScale, float rightScale);	// First personal ONLY!
+			inline	void	EV_HLDM_FireBullets		(const Vector2D& vecSpread) requires(!IsShotgun<CWpn>);	// First personal ONLY!
+			inline	void	EV_HLDM_FireBullets		(void) requires(IsShotgun<CWpn>);	// First personal ONLY!
+			inline	void	EV_PlayGunFire2			(void);
 #endif
 
 private:
@@ -560,8 +567,8 @@ struct CSCARH : public CBaseWeaponTemplate<CSCARH>
 	static constexpr auto FIRE_ANIMTIME			= 6.0 / 20.0;
 	static constexpr auto shoot_Parts_TIME		= 16.0 / 33.0;
 	static constexpr auto rechamber_m870_TIME	= 31.0 / 30.0;
-	static constexpr auto RELOAD_TIME_TIME		= 86.0 / 33.0;
-	static constexpr auto RELOAD_EMPTY_TIME_TIME= 96.0 / 33.0;
+	static constexpr auto RELOAD_TIME			= 86.0 / 33.0;
+	static constexpr auto RELOAD_EMPTY_TIME		= 96.0 / 33.0;
 	static constexpr auto reload_eglm_TIME		= 115.0 / 33.0;
 	static constexpr auto reload_xm26_TIME		= 61.0 / 33.0;
 	static constexpr auto reload_xm26_empty_TIME= 78.0 / 30.0;
@@ -570,36 +577,38 @@ struct CSCARH : public CBaseWeaponTemplate<CSCARH>
 	static constexpr auto reload_m870_loop_TIME	= 16.0 / 23.0;
 	static constexpr auto reload_m870_end_TIME	= 16.0 / 27.0;
 	static constexpr auto reload_m870_empty_TIME= 38.0 / 33.0;
-	static constexpr auto DRAW_FIRST_TIME_TIME	= 86.0 / 33.0;
-	static constexpr auto DEPLOY_TIME_TIME		= 36.0 / 37.0;
+	static constexpr auto DRAW_FIRST_TIME		= 86.0 / 33.0;
+	static constexpr auto DEPLOY_TIME			= 36.0 / 37.0;
 	static constexpr auto Jump_TIME				= 31.0 / 30.0;
 	static constexpr auto CHECK_MAGAZINE_TIME	= 101.0 / 33.0;
 	static constexpr auto Switch_TIME			= 16.0 / 25.0;
-	static constexpr auto HOLSTER_TIME_TIME		= 26.0 / 35.0;
-	static constexpr auto BLOCK_UP_TIME_TIME	= 11.0 / 33.0;
-	static constexpr auto BLOCK_DOWN_TIME_TIME	= 13.0 / 33.0;
-	static constexpr auto LHAND_UP_TIME_TIME	= 21.0 / 38.0;
-	static constexpr auto LHAND_DOWN_TIME_TIME	= 16.0 / 38.0;
-	static constexpr auto DASH_ENTER_TIME_TIME	= 16.0 / 33.0;
-	static constexpr auto DASH_EXIT_TIME_TIME	= 16.0 / 33.0;
+	static constexpr auto HOLSTER_TIME			= 26.0 / 35.0;
+	static constexpr auto BLOCK_UP_TIME			= 11.0 / 33.0;
+	static constexpr auto BLOCK_DOWN_TIME		= 13.0 / 33.0;
+	static constexpr auto LHAND_UP_TIME			= 21.0 / 38.0;
+	static constexpr auto LHAND_DOWN_TIME		= 16.0 / 38.0;
+	static constexpr auto DASH_ENTER_TIME		= 16.0 / 33.0;
+	static constexpr auto DASH_EXIT_TIME		= 16.0 / 33.0;
 #pragma endregion
 
+	// basic logic funcs
+	void	SecondaryAttack	(void) final;
+
+	// util funcs
+	float	GetSpread		(void) final;
+
 #ifdef CLIENT_DLL
-public:	// CL exclusive functions.
-	virtual void	Think			(void);
-	virtual int		CalcBodyParam	(void);
+	// CL exclusive functions.
+	void	Think			(void) final;
+	int		CalcBodyParam	(void) final;
 #endif
 
-public:	// basic logic funcs
-	virtual void	PrimaryAttack	(void) { return SCARHFire(GetSpread()); }
-	virtual void	SecondaryAttack	(void);
-	virtual bool	Reload			(void);
+	// new funcs
+	int		AcquireShootAnim			(void) final;
+	void	ApplyClientFPFiringVisual	(const Vector2D& vSpread);
+	void	ApplyRecoil					(void);
 
-public:	// util funcs
-	virtual float	GetSpread		(void);
-
-public:	// new functions
-	void SCARHFire(float flSpread, float flCycleTime = (60.0f / RPM));
+	static	void	ApplyClientTPFiringVisual(struct event_args_s* args);
 };
 
 #define AK47_VIEW_MODEL		"models/weapons/v_ak47.mdl"
