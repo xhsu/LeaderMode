@@ -221,6 +221,7 @@ void CUSP::ApplyClientTPFiringVisual(struct event_args_s* args)
 		1, args->origin, forward,
 		vSpread, EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_USP].m_iAmmoType,
 		PENETRATION,
-		iSeed);
+		iSeed
+	);
 #endif
 }

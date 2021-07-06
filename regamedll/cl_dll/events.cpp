@@ -2441,7 +2441,7 @@ void Events_Init(void)
 	HOOK_EVENT(anaconda, FireAnaconda);
 	HOOK_EVENT(psg1, FirePSG1);
 	HOOK_EVENT(p90, FireP90);
-	HOOK_EVENT(scarh, FireSCARH);
+	CSCARH::RegisterEvent();	//HOOK_EVENT(scarh, FireSCARH);
 	HOOK_EVENT(mp7a1, FireMP7A1);
 	HOOK_EVENT(ump45, FireUMP45);
 	CUSP::RegisterEvent(); //HOOK_EVENT(usp, FireUSP);

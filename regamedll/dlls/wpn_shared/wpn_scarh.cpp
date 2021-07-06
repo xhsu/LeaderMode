@@ -37,6 +37,51 @@ float CSCARH::GetSpread(void)
 }
 
 #ifdef CLIENT_DLL
+
+SCE_FIELD LHAND	= 0;
+SCE_FIELD MAGAZINE = 6;
+SCE_FIELD STEEL_SIGHT = 7;
+SCE_FIELD SCOPES = 8;
+SCE_FIELD UNDERBARRELS = 9;
+SCE_FIELD NAIL_SHELL = 10;
+SCE_FIELD MUZZLE = 11;
+SCE_FIELD LASER = 12;
+
+// Hands
+SCE_FIELD VISIBLE = 0;
+SCE_FIELD INVISIBLE = 1;
+
+// Magazine
+SCE_FIELD FULL = 0;
+SCE_FIELD EMPTY = 1;
+
+// Steel sight
+SCE_FIELD FLIP_UP = 0;
+SCE_FIELD FLIP_DOWN = 1;
+SCE_FIELD NO_STEEL_SIGHT = 2;
+
+// Scopes
+SCE_FIELD NONE = 0;
+SCE_FIELD ROUND_RED_DOT = 1;
+SCE_FIELD HOLOGRAPHIC = 2;
+SCE_FIELD OPENED_RED_DOT = 3;
+SCE_FIELD ACOG = 4;
+SCE_FIELD MATOILET_SPECIAL_SCOPE_THAT_I_DONT_KNOW_WHAT_IT_IS = 5;
+
+// Underbarrels
+SCE_FIELD EGLM = 1;
+SCE_FIELD M870MCS = 2;
+SCE_FIELD XM26 = 3;
+
+// Nail status
+SCE_FIELD NEW = 0;
+SCE_FIELD DISPOSED_SHELL = 1;
+
+// Muzzle
+SCE_FIELD SILENCER = 1;
+SCE_FIELD COMPENSATOR = 2;
+SCE_FIELD FLASH_HIDER = 3;
+
 int CSCARH::CalcBodyParam(void)
 {
 	BodyEnumInfo_t info[] =
@@ -52,7 +97,7 @@ int CSCARH::CalcBodyParam(void)
 		{ 0, 2 },	// magazine		= 6;
 		{ 0, 3 },	// steel sight	= 7;
 		{ 0, 6 },	// scopes		= 8;
-		{ 0, 4 },	// attachments	= 9;
+		{ 0, 4 },	// underbarrels	= 9;
 		{ 0, 2 },	// nail/shell	= 10;
 		{ 0, 4 },	// muzzle		= 11;
 		{ 0, 2 },	// laser		= 12;
@@ -67,10 +112,10 @@ int CSCARH::CalcBodyParam(void)
 		// Recoil compensator.
 		// laser.
 
-		info[7].body = 2;
-		info[8].body = 4;
-		info[11].body = 2;
-		info[12].body = 1;
+		info[STEEL_SIGHT].body = NO_STEEL_SIGHT;
+		info[SCOPES].body = ACOG;
+		info[MUZZLE].body = COMPENSATOR;
+		info[LASER].body = TRUE;
 		break;
 
 	default:
@@ -78,20 +123,20 @@ int CSCARH::CalcBodyParam(void)
 		// filpped down steel sight.
 		// holographic sight.
 
-		info[7].body = 1;
-		info[8].body = 2;
+		info[STEEL_SIGHT].body = FLIP_DOWN;
+		info[SCOPES].body = HOLOGRAPHIC;
 		break;
 	}
 
 	if (!m_iClip)
-		info[6].body = 1;	// empty mag.
+		info[MAGAZINE].body = EMPTY;	// empty mag.
 
 	// in EMPTY reload, after we remove the empty mag, the new mag should be full of bullets.
 	if (m_bInReload && m_bitsFlags & WPNSTATE_RELOAD_EMPTY)
 	{
 		if (m_pPlayer->m_flNextAttack < 2.18F)	// in this anim, a new mag was taken out after around 0.3s. thus, 2.9F - 0.72f ~= 2.18f.
 		{
-			info[6].body = 0;	// full mag.
+			info[MAGAZINE].body = FULL;	// full mag.
 		}
 	}
 
@@ -176,113 +221,32 @@ void CSCARH::ApplyRecoil(void)
 	}
 }
 
-void CSCARH::SCARHFire(float flSpread, float flCycleTime)
+void CSCARH::ApplyClientTPFiringVisual(event_args_s* args)
 {
-	m_iShotsFired++;
-	m_bDelayRecovery = true;
+#ifdef CLIENT_DLL
+	bool bClipGreaterThanNaught = args->bparam1;
+	bool bInZoom = args->bparam2;
+	int idx = args->entindex;
+	Vector2D vSpread(args->fparam1, args->fparam2);
+	int iSeed = args->iparam1;
+	RoleTypes iVariation = (RoleTypes)args->iparam2;
 
-	if (m_iClip <= 0)
-	{
-		PlayEmptySound();
-		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.2f;
+	Vector forward, right, up;
+	AngleVectors(args->angles, forward, right, up);
 
-#ifndef CLIENT_DLL
-		if (TheBots)
-		{
-			TheBots->OnEvent(EVENT_WEAPON_FIRED_ON_EMPTY, m_pPlayer);
-		}
+	Vector ShellVelocity, ShellOrigin;
+	::EV_GetDefaultShellInfo(args->entindex, args->ducking, args->origin, args->velocity, ShellVelocity, ShellOrigin, forward, right, up, 20.0, -12.0, -4.0);
+	EV_EjectBrass(ShellOrigin, ShellVelocity, args->angles.yaw, m_iShell<CSCARH>, TE_BOUNCE_SHELL, 15);
+
+	// original goldsrc api: VOL = 1.0, ATTN = 0.4
+	::EV_PlayGunFire2(args->origin + forward * 10.0f, FIRE_SFX, GUN_VOLUME);
+
+	::EV_HLDM_FireBullets(idx,
+		forward, right, up,
+		1, args->origin, forward,
+		vSpread, EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_SCARH].m_iAmmoType,
+		PENETRATION,
+		iSeed
+	);
 #endif
-		return;
-	}
-
-	m_iClip--;
-	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
-	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
-
-	m_pPlayer->m_iWeaponVolume = GUN_VOLUME;
-	m_pPlayer->m_iWeaponFlash = BRIGHT_GUN_FLASH;
-
-	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
-
-	auto vecSrc = m_pPlayer->GetGunPosition();
-	auto vecAiming = gpGlobals->v_forward;
-
-	auto vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, EFFECTIVE_RANGE, PENETRATION, m_iPrimaryAmmoType, DAMAGE, RANGE_MODIFER, m_pPlayer->random_seed);
-
-#ifndef CLIENT_DLL
-	int seq = UTIL_SharedRandomLong(m_pPlayer->random_seed, SHOOT1, SHOOT3);
-	if (m_iClip == 0)
-		seq = SHOOT_LAST;
-
-	SendWeaponAnim(seq);
-	PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL, m_pPlayer->edict(), m_usEvent, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y,
-		int(m_pPlayer->pev->punchangle.x * 100), int(m_pPlayer->pev->punchangle.y * 100), m_iClip == 0, FALSE);
-
-	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
-	{
-		m_pPlayer->SetSuitUpdate("!HEV_AMO0", SUIT_SENTENCE, SUIT_REPEAT_OK);
-	}
-#else
-	static event_args_t args;
-	Q_memset(&args, NULL, sizeof(args));
-
-	args.angles = m_pPlayer->pev->v_angle;
-	args.bparam1 = m_iClip == 0;	// originally it was 5. I changed it to whether it's empty.
-	args.bparam2 = false;	// unused
-	args.ducking = gEngfuncs.pEventAPI->EV_LocalPlayerDucking();
-	args.entindex = gEngfuncs.GetLocalPlayer()->index;
-	args.flags = FEV_NOTHOST | FEV_RELIABLE | FEV_CLIENT | FEV_GLOBAL;
-	args.fparam1 = vecDir.x;
-	args.fparam2 = vecDir.y;
-	args.iparam1 = int(m_pPlayer->pev->punchangle.x * 100.0f);
-	args.iparam2 = int(m_pPlayer->pev->punchangle.y * 100.0f);
-	args.origin = m_pPlayer->pev->origin;
-	args.velocity = m_pPlayer->pev->velocity;
-
-	EV_FireSCARH(&args);
-#endif
-
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
-	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 2.0f;
-
-	if (m_pPlayer->pev->velocity.Length2D() > 0)
-	{
-		KickBack(1.0, 0.45, 0.28, 0.04, 4.25, 2.5, 7);
-	}
-	else if (!(m_pPlayer->pev->flags & FL_ONGROUND))
-	{
-		KickBack(1.25, 0.45, 0.22, 0.18, 6.0, 4.0, 5);
-	}
-	else if (m_pPlayer->pev->flags & FL_DUCKING)
-	{
-		KickBack(0.6, 0.35, 0.2, 0.0125, 3.7, 2.0, 10);
-	}
-	else
-	{
-		KickBack(0.625, 0.375, 0.25, 0.0125, 4.0, 2.25, 9);
-	}
-}
-
-bool CSCARH::Reload()
-{
-	if (DefaultReload(m_pItemInfo->m_iMaxClip,
-		m_iClip ? RELOAD : RELOAD_EMPTY,
-		m_iClip ? RELOAD_TIME : RELOAD_EMPTY_TIME,
-		m_iClip ? 0.69f : 0.54f))
-	{
-		m_flAccuracy = ACCURACY_BASELINE;
-		return true;
-	}
-
-	// KF2 ???
-	if (m_pPlayer->pev->weaponanim != CHECK_MAGAZINE)
-	{
-		if (m_bInZoom)
-			SecondaryAttack();
-
-		SendWeaponAnim(CHECK_MAGAZINE);
-		m_flTimeWeaponIdle = CHECK_MAGAZINE_TIME;
-	}
-
-	return false;
 }
