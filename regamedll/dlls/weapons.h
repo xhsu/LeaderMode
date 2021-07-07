@@ -27,6 +27,8 @@
 */
 
 #pragma once
+#ifndef SHARED_WEAPONS_H
+#define SHARED_WEAPONS_H
 
 // debug macro
 //#define RANDOM_SEED_CALIBRATION 1
@@ -386,11 +388,63 @@ public:	// util funcs
 #ifdef CLIENT_DLL
 	static	inline	auto	RegisterEvent			(void) requires(HasEvent<CWpn>)	{ return gEngfuncs.pfnHookEvent(CWpn::EVENT_FILE, CWpn::ApplyClientTPFiringVisual); }
 			inline	void	EV_PlayShootAnim		(void) { return SendWeaponAnim(AcquireShootAnim()); }
-			inline	void	EV_HLDM_CreateSmoke		(int speed, float scale, const Color& color, enum EV_SmokeTypes iSmokeType, bool bWind, int framerate);	// First personal only!
-			inline	void	EV_GetDefaultShellInfo	(Vector& ShellVelocity, Vector& ShellOrigin, float forwardScale, float upScale, float rightScale);	// First personal ONLY!
-			inline	void	EV_HLDM_FireBullets		(const Vector2D& vecSpread) requires(!IsShotgun<CWpn>);	// First personal ONLY!
-			inline	void	EV_HLDM_FireBullets		(void) requires(IsShotgun<CWpn>);	// First personal ONLY!
-			inline	void	EV_PlayGunFire2			(void);
+			inline	void	EV_HLDM_CreateSmoke		(int speed, float scale, const Color& color, enum EV_SmokeTypes iSmokeType, bool bWind, int framerate) { ::EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], gpGlobals->v_forward, speed, scale, color.r(), color.g(), color.b(), iSmokeType, m_pPlayer->pev->velocity, bWind, framerate); }	// First personal only!
+			inline	void	EV_GetDefaultShellInfo	(Vector& ShellVelocity, Vector& ShellOrigin, float forwardScale, float upScale, float rightScale)	// First personal ONLY!
+			{
+				::EV_GetDefaultShellInfo(gEngfuncs.GetLocalPlayer()->index,
+					gEngfuncs.pEventAPI->EV_LocalPlayerDucking(),
+					m_pPlayer->pev->origin, m_pPlayer->pev->velocity,
+					ShellVelocity, ShellOrigin,
+					gpGlobals->v_forward, gpGlobals->v_right, gpGlobals->v_up,
+					forwardScale, upScale, rightScale
+				);
+
+				ShellOrigin = g_pViewEnt->attachment[1];	// Thus first personal only.
+			}
+			inline	void	EV_HLDM_FireBullets		(const Vector2D& vecSpread) requires(!IsShotgun<CWpn>)	// First personal ONLY!
+			{
+				auto vecSrc = EV_GetGunPosition(
+					gEngfuncs.GetLocalPlayer()->index,
+					gEngfuncs.pEventAPI->EV_LocalPlayerDucking(),
+					m_pPlayer->pev->origin
+				);
+
+				::EV_HLDM_FireBullets(
+					gEngfuncs.GetLocalPlayer()->index,
+					gpGlobals->v_forward, gpGlobals->v_right, gpGlobals->v_up,
+					1, vecSrc, gpGlobals->v_forward,
+					vecSpread, CWpn::EFFECTIVE_RANGE, m_iPrimaryAmmoType,
+					CWpn::PENETRATION,
+					m_pPlayer->random_seed
+				);
+			}
+			inline	void	EV_HLDM_FireBullets		(void) requires(IsShotgun<CWpn>)	// First personal ONLY!
+			{
+				auto vecSrc = EV_GetGunPosition(
+					gEngfuncs.GetLocalPlayer()->index,
+					gEngfuncs.pEventAPI->EV_LocalPlayerDucking(),
+					m_pPlayer->pev->origin
+				);
+
+				::EV_HLDM_FireBullets(
+					gEngfuncs.GetLocalPlayer()->index,
+					gpGlobals->v_forward, gpGlobals->v_right, gpGlobals->v_up,
+					CWpn::PROJECTILE_COUNT, vecSrc, gpGlobals->v_forward,
+					CWpn::CONE_VECTOR, CWpn::EFFECTIVE_RANGE, m_iPrimaryAmmoType,
+					1,
+					m_pPlayer->random_seed
+				);
+			}
+			inline	void	EV_PlayGunFire2			(void)
+			{
+				auto vecSrc = EV_GetGunPosition(
+					gEngfuncs.GetLocalPlayer()->index,
+					gEngfuncs.pEventAPI->EV_LocalPlayerDucking(),
+					m_pPlayer->pev->origin
+				);
+
+				::EV_PlayGunFire2(vecSrc + gpGlobals->v_forward * 10.0f, CWpn::FIRE_SFX, CWpn::GUN_VOLUME);
+			}
 #endif
 
 private:
@@ -2110,3 +2164,5 @@ void UTIL_PrecacheOtherWeapon(WeaponIdType iId);
 BOOL CanAttack(float attack_time, float curtime, BOOL isPredicted);
 primatk_msg_ptr InterpretPrimaryAttackMessage(void);
 #endif
+
+#endif	// SHARED_WEAPONS_H

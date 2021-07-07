@@ -6,7 +6,9 @@ Created Date: Mar 12 2020
 
 #pragma once
 
-#include "../dlls/weapons.h"	// only import this.
+// Dummy declaration.
+class CBaseWeapon;
+class CBasePlayer;
 
 // util macros
 #define IS_AIMING	(g_pCurWeapon && (g_pCurWeapon->m_bInZoom || gHUD::m_iFOV < 90))
@@ -145,3 +147,6 @@ void UTIL_MakeVectors(const Vector& vec);
 void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd, double time, unsigned int random_seed);
 void HUD_PostRunCmd2(local_state_t* from, local_state_t* to, usercmd_s* cmd, int runfuncs, double time, unsigned int random_seed);
 void Wpn_Init();
+
+// Import shared weapons header.
+#include "../dlls/weapons.h"
