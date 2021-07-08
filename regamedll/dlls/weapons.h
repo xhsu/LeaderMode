@@ -333,6 +333,14 @@ concept IsTubularMag = requires (CWpn wpn)
 	{CWpn::AFTER_RELOAD > 0};
 };
 
+template <typename CWpn>
+concept IsManualRechamberWpn = requires (CWpn wpn)
+{
+	{CWpn::RECHAMBER > 0};	// Rechamber anim.
+	{CWpn::RECHAMBER_TIME > 0};
+	{CWpn::BITS_RECHAMBER_ANIM > 0};
+};
+
 // General template.
 template <typename CWpn>
 class CBaseWeaponTemplate : public CBaseWeapon
@@ -638,13 +646,13 @@ struct CSCARH : public CBaseWeaponTemplate<CSCARH>
 	static constexpr auto Jump_TIME						= 31.0 / 30.0;
 	static constexpr auto CHECK_MAGAZINE_TIME			= 101.0 / 33.0;
 	static constexpr auto Switch_TIME					= 16.0 / 25.0;
-	static constexpr auto HOLSTER_TIME			= 26.0 / 35.0;
-	static constexpr auto BLOCK_UP_TIME			= 11.0 / 33.0;
-	static constexpr auto BLOCK_DOWN_TIME		= 13.0 / 33.0;
-	static constexpr auto LHAND_UP_TIME			= 21.0 / 38.0;
-	static constexpr auto LHAND_DOWN_TIME		= 16.0 / 38.0;
-	static constexpr auto DASH_ENTER_TIME		= 16.0 / 33.0;
-	static constexpr auto DASH_EXIT_TIME		= 16.0 / 33.0;
+	static constexpr auto HOLSTER_TIME					= 26.0 / 35.0;
+	static constexpr auto BLOCK_UP_TIME					= 11.0 / 33.0;
+	static constexpr auto BLOCK_DOWN_TIME				= 13.0 / 33.0;
+	static constexpr auto LHAND_UP_TIME					= 21.0 / 38.0;
+	static constexpr auto LHAND_DOWN_TIME				= 16.0 / 38.0;
+	static constexpr auto DASH_ENTER_TIME				= 16.0 / 33.0;
+	static constexpr auto DASH_EXIT_TIME				= 16.0 / 33.0;
 #pragma endregion
 
 	// basic logic funcs
@@ -803,13 +811,13 @@ public:	// new functions
 	void XM8Fire(float flSpread, float flCycleTime = (60.0f / RPM));
 };
 
-class CAWP : public CBaseWeaponTemplate<CAWP>
+struct CAWP : public CBaseWeaponTemplate<CAWP>
 {
-public:	// Constants / Database
-	enum awp_anim_e
+#pragma region L115A3 Database
+	enum EL115A3Anims : BYTE
 	{
-		IDLE = 0,
-		SHOOT_REC,
+		IDLE,
+		SHOOT,
 		RECHAMBER,
 		SHOOT_LAST,
 		RELOAD,
@@ -824,53 +832,10 @@ public:	// Constants / Database
 		LHAND_DOWN,
 		DASH_ENTER,
 		DASHING,
-		DASH_EXIT
+		DASH_EXIT,
 	};
 
-	static constexpr pcchar	VIEW_MODEL			= "models/weapons/v_awp.mdl";
-	static constexpr pcchar	WORLD_MODEL			= "models/weapons/w_awp.mdl";
-	static constexpr pcchar	FIRE_SFX			= "weapons/l115a3/l115a3_fire.wav";
-	static constexpr pcchar POSTURE				= "rifle";
-	static constexpr float	MAX_SPEED			= 210.0f;
-	static constexpr float	MAX_SPEED_ZOOM		= 150.0f;
-	static constexpr float	DAMAGE				= 125.0f;
-	static constexpr float	RANGE_MODIFER		= 1.047585759;	// 80% damage @2400 inches.
-	static constexpr float	FIRE_INTERVAL		= 1.5f;
-	static constexpr float	FIRE_LAST_INV		= 0.5666f;
-	static constexpr float	TIME_SHELL_EJ		= 0.666F;
-	static constexpr float	TIME_RECHAMBER		= 1.2F;
-	static constexpr float	TIME_REC_SHELL_EJ	= 0.3667F;
-	static constexpr float	RELOAD_TIME			= 3.566F;
-	static constexpr float	RELOAD_EMPTY_TIME	= 4.5F;
-	static constexpr float	RELOAD_EMPTY_SHELL	= 0.4333f;
-	static constexpr float	DEPLOY_TIME			= 0.733F;
-	static constexpr float	DRAW_FIRST_TIME		= 1.533F;
-	static constexpr float	HOLSTER_TIME		= 0.7333F;
-	static constexpr float	CHECK_MAGAZINE_TIME	= 2.0333F;
-	static constexpr float	BLOCK_UP_TIME		= 0.5333F;
-	static constexpr float	BLOCK_DOWN_TIME		= 0.5333F;
-	static constexpr float	LHAND_UP_TIME		= 0.7F;
-	static constexpr float	LHAND_DOWN_TIME		= 0.7F;
-	static constexpr float	DASH_ENTER_TIME		= 0.4667F;
-	static constexpr float	DASH_EXIT_TIME		= 0.4667F;
-	static constexpr int	PENETRATION			= 3;
-	static constexpr float	EFFECTIVE_RANGE		= 8192.0f;
-	static constexpr int	GUN_VOLUME			= BIG_EXPLOSION_VOLUME;
-	static constexpr float	SPREAD_BASELINE		= 0.001f;
-
-#ifndef CLIENT_DLL
-public:	// SV exclusive variables.
-	static unsigned short m_usEvent;
-	static int m_iShell;
-
-public:	// SV exclusive functions.
-	virtual void	Precache(void);
-#else
-public:	// CL exclusive functions.
-	virtual	bool	UsingInvertedVMDL(void) { return false; }	// Model designed by InnocentBlue is not inverted.
-	virtual int		CalcBodyParam(void);
-#endif
-
+	
 	// Pin static anims.
 	static constexpr int BITS_PIN_UNINVOLVED_ANIM = (1 << IDLE) |
 													(1 << DEPLOY) |
@@ -882,23 +847,69 @@ public:	// CL exclusive functions.
 													(1 << DASH_ENTER) | (1 << DASHING) | (1 << DASH_EXIT);
 
 	// Rechamber acceptable anims.
-	static constexpr int BITS_RECHAMBER_ANIM = (1 << RECHAMBER) | (1 << SHOOT_REC) | (1 << RELOAD_EMPTY);
+	static constexpr int BITS_RECHAMBER_ANIM = (1 << RECHAMBER) | (1 << SHOOT) | (1 << RELOAD_EMPTY);
 
-public: // shared new vars.
-	float m_flTimeChamberCleared;
+	// Anim time.
+	static constexpr auto FIRE_ANIMTIME			= 45.0 / 30.0;
+	static constexpr auto RECHAMBER_TIME		= 36.0 / 30.0;
+	static constexpr auto SHOOT_LAST_TIME		= 17.0 / 30.0;
+	static constexpr auto RELOAD_TIME			= 107.0 / 30.0;
+	static constexpr auto RELOAD_EMPTY_TIME		= 135.0 / 30.0;
+	static constexpr auto DEPLOY_TIME			= 22.0 / 30.0;
+	static constexpr auto DRAW_FIRST_TIME		= 46.0 / 30.0;
+	static constexpr auto HOLSTER_TIME			= 22.0 / 30.0;
+	static constexpr auto CHECK_MAGAZINE_TIME	= 61.0 / 30.0;
+	static constexpr auto BLOCK_UP_TIME			= 16.0 / 30.0;
+	static constexpr auto BLOCK_DOWN_TIME		= 16.0 / 30.0;
+	static constexpr auto LHAND_UP_TIME			= 21.0 / 30.0;
+	static constexpr auto LHAND_DOWN_TIME		= 21.0 / 30.0;
+	static constexpr auto DASH_ENTER_TIME		= 14.0 / 30.0;
+	static constexpr auto DASH_EXIT_TIME		= 14.0 / 30.0;
 
-public:	// basic logic funcs
-	virtual void	Think			(void);
-	virtual void	PrimaryAttack	(void);
-	virtual void	SecondaryAttack	(void)	{ return DefaultScopeSight(Vector(-6.2f, -2, 1.1f), 25); }
-	virtual bool	Reload			(void);
-	virtual bool	HolsterStart	(void);
+	static constexpr auto	VIEW_MODEL			= "models/weapons/v_awp.mdl";
+	static constexpr auto	WORLD_MODEL			= "models/weapons/w_awp.mdl";
+	static constexpr auto	FIRE_SFX			= "weapons/l115a3/l115a3_fire.wav";
+	static constexpr auto	POSTURE				= "rifle";
+	static constexpr auto	MAX_SPEED			= 210.0f;
+	static constexpr auto	MAX_SPEED_ZOOM		= 150.0f;
+	static constexpr auto	DAMAGE				= 125.0f;
+	static constexpr auto	RANGE_MODIFER		= 1.047585759;	// 80% damage @2400 inches.
+	static constexpr auto	FIRE_INTERVAL		= FIRE_ANIMTIME;
+	static constexpr auto	EFFECTIVE_RANGE		= 8192.0f;
+	static constexpr auto	PENETRATION			= 3;
+	static constexpr auto	SPREAD_BASELINE		= 0.001f;
+	static constexpr auto	GUN_VOLUME			= BIG_EXPLOSION_VOLUME;
+	static constexpr auto	GUN_FLASH			= NORMAL_GUN_FLASH;
+	static constexpr auto	SHELL_MODEL			= "models/rshell_big.mdl";
+	static constexpr auto	EVENT_FILE			= "events/awp.sc";
 
-public:	// util funcs
-	virtual float	GetSpread		(void);
+	// Attrib
+	static constexpr auto	ATTRIB_SEMIAUTO		= true;
+#pragma endregion
 
-public:	// new funcs
-	void AWPFire(float flSpread, float flCycleTime = FIRE_INTERVAL);
+	// basic logic funcs
+	void	Think			(void) final;
+	void	PrimaryAttack	(void) final;
+	void	SecondaryAttack	(void) final { return DefaultScopeSight(Vector(-6.2f, -2, 1.1f), 25); }
+
+	// util funcs
+	float	GetSpread		(void) final;
+
+#ifdef CLIENT_DLL
+public:	// CL exclusive functions.
+	bool	UsingInvertedVMDL	(void) final	{ return false; }	// Model designed by InnocentBlue is not inverted.
+	int		CalcBodyParam		(void) final;
+#endif
+
+	// shared new vars.
+	float m_flTimeChamberCleared{ 0.0f };
+
+	// new funcs
+	int		AcquireShootAnim			(void) final { return m_iClip >= 1 ? SHOOT : SHOOT_LAST; }
+	void	ApplyClientFPFiringVisual	(const Vector2D& vSpread);
+	void	ApplyRecoil					(void);
+
+	static	void	ApplyClientTPFiringVisual(struct event_args_s* args);
 };
 
 class CDEagle : public CBaseWeaponTemplate<CDEagle>

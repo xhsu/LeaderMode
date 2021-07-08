@@ -12,20 +12,7 @@ Sound - iDkGK
 
 #include "precompiled.h"
 
-#ifndef CLIENT_DLL
-
-unsigned short CAWP::m_usEvent = 0;
-int CAWP::m_iShell = 0;
-
-void CAWP::Precache()
-{
-	BaseClass::Precache();
-
-	m_iShell = PRECACHE_MODEL("models/rshell_big.mdl");
-	m_usEvent = PRECACHE_EVENT(1, "events/awp.sc");
-}
-
-#else
+#ifdef CLIENT_DLL
 
 static constexpr int MAGAZINE = 9;
 static constexpr int EMPTY = 3;
@@ -130,7 +117,7 @@ void CAWP::Think(void)
 	}
 
 	// make it post.
-	CBaseWeapon::Think();
+	BaseClass::Think();
 }
 
 void CAWP::PrimaryAttack()
@@ -143,8 +130,8 @@ void CAWP::PrimaryAttack()
 			SecondaryAttack();
 
 		SendWeaponAnim(RECHAMBER);
-		m_pPlayer->m_flNextAttack = TIME_RECHAMBER;
-		m_flTimeWeaponIdle = TIME_RECHAMBER;	// prevent anim instant break.
+		m_pPlayer->m_flNextAttack = RECHAMBER_TIME;
+		m_flTimeWeaponIdle = RECHAMBER_TIME;	// prevent anim instant break.
 		m_flTimeChamberCleared = gpGlobals->time + TIME_REC_SHELL_EJ;
 
 #ifndef CLIENT_DLL
@@ -156,7 +143,7 @@ void CAWP::PrimaryAttack()
 	}
 
 	// PRE: use 1 to compare whether it is the last shot.
-	AWPFire(GetSpread(), m_iClip == 1 ? FIRE_LAST_INV : FIRE_INTERVAL);
+	BaseClass::PrimaryAttack();
 
 	// POST: unzoom. suggested by InnocentBlue.
 	// don't do it unless bullets still left.
