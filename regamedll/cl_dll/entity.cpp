@@ -234,6 +234,8 @@ void HUD_CreateEntities2(void)
 	//GetClientVoiceMgr()->CreateEntities();
 }
 
+std::unordered_map<std::string, std::vector<std::string>> s_mapRandomSoundCache;
+
 /*
 =========================
 HUD_StudioEvent
@@ -262,10 +264,40 @@ void HUD_StudioEvent2(const mstudioevent_s* pEvent, const cl_entity_s* pEntity)
 		gEngfuncs.pEfxAPI->R_SparkEffect((float*)&pEntity->attachment[0], Q_atoi(pEvent->options), -100, 100);
 		break;
 
+		// Randomize sound.
+	case 5014:
+		if (Q_strstr(pEvent->options, "*"))
+		{
+			if (s_mapRandomSoundCache.find(pEvent->options) == s_mapRandomSoundCache.end()
+				|| s_mapRandomSoundCache[pEvent->options].empty())
+			{
+				std::string sz(pEvent->options);
+				UTIL_ReplaceAll<std::string>(sz, "*", "%d");
+
+				char szFile[64], szFullPath[128];
+				for (int i = 0; i <= 9; i++)
+				{
+					Q_slprintf(szFile, sz.c_str(), i);
+					Q_strlcpy(szFullPath, "sound/");
+					Q_strlcat(szFullPath, szFile);
+
+					if (FILE_SYSTEM->FileExists(szFullPath))
+						s_mapRandomSoundCache[pEvent->options].emplace_back(szFile);
+				}
+			}
+
+			auto& vSoundContainer = s_mapRandomSoundCache[pEvent->options];
+			if (!vSoundContainer.empty())
+			{
+				auto rand = RANDOM_LONG(0, static_cast<int>(vSoundContainer.size()) - 1);
+				PlaySound(vSoundContainer[rand].c_str());
+			}
+		}
+		else	// SFX played as it says.
+
 		// Client side sound
 	case 5004:
 		//gEngfuncs.pfnPlaySoundByName((char*)pEvent->options, VOL_NORM);	// no more engine sound API.
-
 		PlaySound(pEvent->options);
 		break;
 
