@@ -86,7 +86,7 @@ int CAWP::CalcBodyParam(void)
 	}
 
 	// pin downed vfx.
-	if ((m_iClip <= 0 || m_flTimeChamberCleared) && (1 << m_pPlayer->pev->weaponanim) & BITS_PIN_UNINVOLVED_ANIM)
+	if ((m_iClip <= 0 || !m_bChamberCleared) && (1 << m_pPlayer->pev->weaponanim) & BITS_PIN_UNINVOLVED_ANIM)
 		info[PIN].body = DOWN;
 	else
 		info[PIN].body = UP;
@@ -94,36 +94,54 @@ int CAWP::CalcBodyParam(void)
 	return CalcBody(info, _countof(info));
 }
 
-#endif
-
-void CAWP::Think(void)
+bool CAWP::StudioEvent(const mstudioevent_s* pEvent)
 {
-	if (m_flTimeChamberCleared != 0 && m_flTimeChamberCleared <= gpGlobals->time)
+	switch (pEvent->event)
 	{
-		// you must playing designated anim to cancel this flag. also, you cannot in-scope.
-		if ((1 << m_pPlayer->pev->weaponanim) & BITS_RECHAMBER_ANIM && m_pPlayer->pev->fov == DEFAULT_FOV)
+	case 9527:	// Custom script.
+
+		if (m_QCScript.empty())	// Initialize script.
 		{
-			// flag cleared. you may shoot now.
-			m_flTimeChamberCleared = 0;
+			std::vector<std::string> rgszTokens;
+			UTIL_Split(pEvent->options, rgszTokens, ";");
+
+			for (auto& token : rgszTokens)
+			{
+				std::vector<std::string> rgszTokens2;
+				UTIL_Split(token, rgszTokens2, "=");
+
+				if (rgszTokens2.size() != 2)
+					continue;
+
+				for (auto& token2 : rgszTokens2)
+				{
+					ltrim(token2);
+					rtrim(token2);
+				}
+
+				if (rgszTokens2[0] == "m_bChamberCleared")
+				{
+					auto p = new QCScript::CValueAssignment(&m_bChamberCleared, rgszTokens2[1] == "true" ? true : false);
+					m_QCScript.push_back(p);
+				}
+			}
 		}
 		else
-		{
-			// sorry, you're doing something else to trick the system.
-			m_flTimeChamberCleared = gpGlobals->time + 9999.0f;
+			QCScript::Run(m_QCScript);
 
-			// also, block the shell vfx.
-			m_pPlayer->m_flEjectBrass = 0;
-		}
+		return true;
+
+	default:
+		return false;
 	}
-
-	// make it post.
-	BaseClass::Think();
 }
+
+#endif
 
 void CAWP::PrimaryAttack()
 {
 	// no rechamber, not shoot.
-	if (m_flTimeChamberCleared)
+	if (!m_bChamberCleared)
 	{
 		// unscope during this anim.
 		if (m_pPlayer->pev->fov != DEFAULT_FOV)
@@ -132,157 +150,21 @@ void CAWP::PrimaryAttack()
 		SendWeaponAnim(RECHAMBER);
 		m_pPlayer->m_flNextAttack = RECHAMBER_TIME;
 		m_flTimeWeaponIdle = RECHAMBER_TIME;	// prevent anim instant break.
-		m_flTimeChamberCleared = gpGlobals->time + TIME_REC_SHELL_EJ;
 
-#ifndef CLIENT_DLL
-		// display the shell.
-		m_pPlayer->m_flEjectBrass = gpGlobals->time + TIME_SHELL_EJ;
-		m_pPlayer->m_iShellModelIndex = m_iShell;
-#endif
 		return;
 	}
 
 	// PRE: use 1 to compare whether it is the last shot.
-	BaseClass::PrimaryAttack();
+	BaseClass::DefaultShoot(GetSpread(), m_iClip == 1 ? SHOOT_LAST_TIME : FIRE_INTERVAL);
 
 	// POST: unzoom. suggested by InnocentBlue.
 	// don't do it unless bullets still left.
 	if (m_pPlayer->pev->fov != DEFAULT_FOV)
 		SecondaryAttack();
 
-	// only make shells during a normal shoot.
-	// the SHOOT_LAST anim does not contain a shell ejecting behaviour.
-	if (m_iClip)
-	{
-		m_flTimeChamberCleared = gpGlobals->time + TIME_SHELL_EJ;
-
-#ifndef CLIENT_DLL
-		m_pPlayer->m_flEjectBrass = gpGlobals->time + TIME_SHELL_EJ;
-		m_pPlayer->m_iShellModelIndex = m_iShell;
-#endif
-	}
-
 	// since m_flNextPrimaryAttack is involved in DefaultScopeSight(), we have to place a limit.
-	// although m_flNextSecondaryAttack is set in AWPFire(), but actually after the SecondaryAttack() above, it's already invalid.
-	m_flNextSecondaryAttack = m_iClip == 1 ? FIRE_LAST_INV : FIRE_INTERVAL;
-}
-
-void CAWP::AWPFire(float flSpread, float flCycleTime)
-{
-	if (m_iClip <= 0)
-	{
-		PlayEmptySound();
-		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.2f;
-
-#ifndef CLIENT_DLL
-		if (TheBots)
-		{
-			TheBots->OnEvent(EVENT_WEAPON_FIRED_ON_EMPTY, m_pPlayer);
-		}
-#endif
-
-		return;
-	}
-
-	m_iClip--;
-	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
-	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
-
-	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
-
-	m_pPlayer->m_iWeaponVolume = GUN_VOLUME;
-	m_pPlayer->m_iWeaponFlash = NORMAL_GUN_FLASH;
-
-	Vector vecSrc = m_pPlayer->GetGunPosition();
-	Vector vecAiming = gpGlobals->v_forward;
-
-	Vector2D vecDir = m_pPlayer->FireBullets3(vecSrc, vecAiming, flSpread, EFFECTIVE_RANGE, PENETRATION, m_iPrimaryAmmoType, DAMAGE, RANGE_MODIFER, m_pPlayer->random_seed);
-
-#ifndef CLIENT_DLL
-	if (m_iClip > 0)
-		SendWeaponAnim(SHOOT_REC);
-	else
-		SendWeaponAnim(SHOOT_LAST);
-
-	PLAYBACK_EVENT_FULL(FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL, m_pPlayer->edict(), m_usEvent, 0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y,
-		int(m_pPlayer->pev->punchangle.x * 100), int(m_pPlayer->pev->punchangle.x * 100), m_iClip > 0, m_iVariation == Role_Assassin);
-	
-	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
-	{
-		m_pPlayer->SetSuitUpdate("!HEV_AMO0", SUIT_SENTENCE, SUIT_REPEAT_OK);
-	}
-#else
-	static event_args_t args;
-	Q_memset(&args, NULL, sizeof(args));
-
-	args.angles = m_pPlayer->pev->v_angle;
-	args.bparam1 = m_iClip > 0;
-	args.bparam2 = m_iVariation == Role_Assassin;
-	args.ducking = gEngfuncs.pEventAPI->EV_LocalPlayerDucking();
-	args.entindex = gEngfuncs.GetLocalPlayer()->index;
-	args.flags = FEV_NOTHOST | FEV_RELIABLE | FEV_CLIENT | FEV_GLOBAL;
-	args.fparam1 = vecDir.x;
-	args.fparam2 = vecDir.y;
-	args.iparam1 = int(m_pPlayer->pev->punchangle.x * 100.0f);
-	args.iparam2 = int(m_pPlayer->pev->punchangle.y * 100.0f);
-	args.origin = m_pPlayer->pev->origin;
-	args.velocity = m_pPlayer->pev->velocity;
-
-	EV_FireAWP(&args);
-#endif
-
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + flCycleTime;
-	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + flCycleTime;	// LUNA: ultimate prevention against evil players.
-
-	m_pPlayer->m_vecVAngleShift.x -= 12.0f;
-	m_pPlayer->m_vecVAngleShift.y -= UTIL_SharedRandomFloat(m_pPlayer->random_seed + PENETRATION, -2.0f, 2.0f);
-}
-
-bool CAWP::Reload()
-{
-	if (DefaultReload(m_pItemInfo->m_iMaxClip,
-		m_iClip ? RELOAD : RELOAD_EMPTY,
-		m_iClip ? RELOAD_TIME : RELOAD_EMPTY_TIME,
-		m_iClip ? 1.066f : 0.6f))
-	{
-#ifndef CLIENT_DLL
-		if (!m_iClip)
-		{
-			// only the RELOAD_EMPTY involves a rechamber action.
-			m_pPlayer->m_flEjectBrass = gpGlobals->time + RELOAD_EMPTY_SHELL;
-			m_pPlayer->m_iShellModelIndex = m_iShell;
-		}
-		else
-#endif
-			// this should be decide on both side.
-			// you can't use reload to avoid rechamber.
-			if (m_iClip > 0 && m_flTimeChamberCleared)
-				m_flTimeChamberCleared = gpGlobals->time + 9999.0f;
-
-		return true;
-	}
-
-	// KF2 ???
-	if (m_pPlayer->pev->weaponanim != CHECK_MAGAZINE)
-	{
-		if (m_pPlayer->pev->fov < DEFAULT_FOV)
-			SecondaryAttack();
-
-		SendWeaponAnim(CHECK_MAGAZINE);
-		m_flTimeWeaponIdle = CHECK_MAGAZINE_TIME;
-	}
-
-	return false;
-}
-
-bool CAWP::HolsterStart(void)
-{
-	// unzoom before holster.
-	if (m_pPlayer->pev->fov != DEFAULT_FOV)
-		SecondaryAttack();
-
-	// then holster.
-	return DefaultHolster(HOLSTER, HOLSTER_TIME);
+	// although m_flNextSecondaryAttack is set in DefaultShoot(), but actually after the SecondaryAttack() above, it's already invalid.
+	m_flNextSecondaryAttack = m_iClip == 0 ? SHOOT_LAST_TIME : FIRE_INTERVAL;
 }
 
 float CAWP::GetSpread(void)
@@ -293,4 +175,61 @@ float CAWP::GetSpread(void)
 		flSpread *= 20;	// additional 2000% penalty for unscope shooting.
 
 	return flSpread;
+}
+
+void CAWP::ApplyClientFPFiringVisual(const Vector2D& vSpread)
+{
+#ifdef CLIENT_DLL
+	UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
+
+	EV_MuzzleFlash();
+	EV_PlayShootAnim();
+
+	EV_HLDM_CreateSmoke(3, 0.5, Color(20, 20, 20), EV_PISTOL_SMOKE, false, 35);
+	EV_HLDM_CreateSmoke(40, 0.5, Color(15, 15, 15), EV_WALL_PUFF, false, 35);
+	EV_HLDM_CreateSmoke(80, 0.5, Color(10, 10, 10), EV_WALL_PUFF, false, 35);
+
+	auto vecSrc = EV_GetGunPosition(
+		gEngfuncs.GetLocalPlayer()->index,
+		gEngfuncs.pEventAPI->EV_LocalPlayerDucking(),
+		m_pPlayer->pev->origin
+	);
+
+	::EV_PlayGunFire2(vecSrc + gpGlobals->v_forward * 10.0f, FIRE_SFX, m_iVariation == Role_Assassin ? NORMAL_GUN_VOLUME : GUN_VOLUME);
+#endif // CLIENT_DLL
+}
+
+void CAWP::ApplyRecoil(void)
+{
+	m_pPlayer->m_vecVAngleShift.x -= 12.0f;
+	m_pPlayer->m_vecVAngleShift.y -= UTIL_SharedRandomFloat(m_pPlayer->random_seed + PENETRATION, -2.0f, 2.0f);
+}
+
+void CAWP::ApplyClientTPFiringVisual(event_args_s* args)
+{
+#ifdef CLIENT_DLL
+	bool bClipGreaterThanNaught = args->bparam1;
+	bool bInZoom = args->bparam2;
+	int idx = args->entindex;
+	Vector2D vSpread(args->fparam1, args->fparam2);
+	int iSeed = args->iparam1;
+	RoleTypes iVariation = (RoleTypes)args->iparam2;
+
+	Vector forward, right, up;
+	AngleVectors(args->angles, forward, right, up);
+
+	Vector vecSrc = EV_GetGunPosition(args->entindex, args->ducking, args->origin);
+
+	// original goldsrc api: VOL = 1.0, ATTN = 0.28
+	::EV_PlayGunFire2(vecSrc + forward * 10.0f, FIRE_SFX, iVariation == Role_Assassin ? NORMAL_GUN_VOLUME : GUN_VOLUME);
+
+	::EV_HLDM_FireBullets(idx,
+		forward, right, up,
+		1, args->origin, forward,
+		vSpread, EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_AWP].m_iAmmoType,
+		PENETRATION,
+		iSeed
+	);
+#endif // CLIENT_DLL
+
 }

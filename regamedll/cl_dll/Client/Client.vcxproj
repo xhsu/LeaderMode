@@ -307,6 +307,7 @@
     <ClInclude Include="..\..\dlls\player_classes.h" />
     <ClInclude Include="..\..\dlls\weapontype.h" />
     <ClInclude Include="..\..\engine\sfx.h" />
+    <ClInclude Include="..\..\game_shared\QCScriptExt.h" />
     <ClInclude Include="..\..\game_shared\shared_string.h" />
     <ClInclude Include="..\..\game_shared\shared_util.h" />
     <ClInclude Include="..\..\metahook\client.h" />

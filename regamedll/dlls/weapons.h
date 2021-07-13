@@ -117,6 +117,7 @@ struct MULTIDAMAGE
 #include "weapontype.h"
 #include "player_classes.h"
 #include "game_shared/shared_util.h"
+#include "game_shared/QCScriptExt.h"
 #include "public/Color.h"
 #include <list>
 #include <concepts>
@@ -230,6 +231,7 @@ public:	// CL xclusive functions.
 	virtual	bool	UsingInvertedVMDL(void)		{ return true; }	// by default, original CS/CZ vmdls are inverted displaying.
 	virtual int		CalcBodyParam(void)			{ return 0; }		// allow user to varient weapon body.
 	virtual	void	UpdateBobParameters(void);						// in which you may set some bob parameters.
+	virtual	bool	StudioEvent(const struct mstudioevent_s* pEvent)	{ return false; }	// Handle VMDL studio events. @return: Did you handle the event by yourself?
 #endif
 
 public:	// basic API and behaviour for weapons.
@@ -399,15 +401,14 @@ public:	// util funcs
 			inline	void	EV_HLDM_CreateSmoke		(int speed, float scale, const Color& color, enum EV_SmokeTypes iSmokeType, bool bWind, int framerate) { ::EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], gpGlobals->v_forward, speed, scale, color.r(), color.g(), color.b(), iSmokeType, m_pPlayer->pev->velocity, bWind, framerate); }	// First personal only!
 			inline	void	EV_GetDefaultShellInfo	(Vector& ShellVelocity, Vector& ShellOrigin, float forwardScale, float upScale, float rightScale)	// First personal ONLY!
 			{
-				::EV_GetDefaultShellInfo(gEngfuncs.GetLocalPlayer()->index,
+				::EV_GetDefaultShellInfo(
+					gEngfuncs.GetLocalPlayer()->index,
 					gEngfuncs.pEventAPI->EV_LocalPlayerDucking(),
 					m_pPlayer->pev->origin, m_pPlayer->pev->velocity,
 					ShellVelocity, ShellOrigin,
 					gpGlobals->v_forward, gpGlobals->v_right, gpGlobals->v_up,
 					forwardScale, upScale, rightScale
 				);
-
-				ShellOrigin = g_pViewEnt->attachment[1];	// Thus first personal only.
 			}
 			inline	void	EV_HLDM_FireBullets		(const Vector2D& vecSpread) requires(!IsShotgun<CWpn>)	// First personal ONLY!
 			{
@@ -888,7 +889,6 @@ struct CAWP : public CBaseWeaponTemplate<CAWP>
 #pragma endregion
 
 	// basic logic funcs
-	void	Think			(void) final;
 	void	PrimaryAttack	(void) final;
 	void	SecondaryAttack	(void) final { return DefaultScopeSight(Vector(-6.2f, -2, 1.1f), 25); }
 
@@ -899,10 +899,11 @@ struct CAWP : public CBaseWeaponTemplate<CAWP>
 public:	// CL exclusive functions.
 	bool	UsingInvertedVMDL	(void) final	{ return false; }	// Model designed by InnocentBlue is not inverted.
 	int		CalcBodyParam		(void) final;
+	bool	StudioEvent			(const struct mstudioevent_s* pEvent) final;
 #endif
 
-	// shared new vars.
-	float m_flTimeChamberCleared{ 0.0f };
+	bool	m_bChamberCleared{ true };
+	QCScript::OperationSet m_QCScript;
 
 	// new funcs
 	int		AcquireShootAnim			(void) final { return m_iClip >= 1 ? SHOOT : SHOOT_LAST; }

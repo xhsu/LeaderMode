@@ -235,6 +235,7 @@ void HUD_CreateEntities2(void)
 }
 
 std::unordered_map<std::string, std::vector<std::string>> s_mapRandomSoundCache;
+extern Vector v_angles;
 
 /*
 =========================
@@ -246,6 +247,9 @@ fired during this frame, handle the event by it's tag ( e.g., muzzleflash, sound
 */
 void HUD_StudioEvent2(const mstudioevent_s* pEvent, const cl_entity_s* pEntity)
 {
+	if (g_pCurWeapon && pEntity == g_pViewEnt && g_pCurWeapon->StudioEvent(pEvent))
+		return;
+
 	switch (pEvent->event)
 	{
 	case 5001:
@@ -263,6 +267,40 @@ void HUD_StudioEvent2(const mstudioevent_s* pEvent, const cl_entity_s* pEntity)
 	case 5002:
 		gEngfuncs.pEfxAPI->R_SparkEffect((float*)&pEntity->attachment[0], Q_atoi(pEvent->options), -100, 100);
 		break;
+
+		// Shell ejection.
+	case 5003:
+	{
+		std::vector<std::string> szTokens;
+		UTIL_Split(pEvent->options, szTokens);	// Split by space. i.e. ' '.
+
+		// [0] for vForward;
+		// [1] for vRight;
+		// [2] for vUp;
+		// [3] for Model file;
+		// [4] for Shell type;
+		// [5] for Shell angular velocity.
+		if (szTokens.size() != 6)
+			return;
+
+		char szModelPath[64] = "models/";
+		Vector ShellVelocity, ShellOrigin;
+		Q_strlcat(szModelPath, szTokens[3].c_str());
+
+		UTIL_MakeVectors(v_angles);
+
+		EV_GetDefaultShellInfo(
+			gEngfuncs.GetLocalPlayer()->index,
+			gEngfuncs.pEventAPI->EV_LocalPlayerDucking(),
+			gPseudoPlayer.pev->origin, gPseudoPlayer.pev->velocity,
+			ShellVelocity, ShellOrigin,
+			gpGlobals->v_forward, gpGlobals->v_right, gpGlobals->v_up,
+			std::stof(szTokens[0]), std::stof(szTokens[2]), std::stof(szTokens[1])
+		);
+
+		EV_EjectBrass(ShellOrigin, ShellVelocity, v_angles.yaw, gEngfuncs.pEventAPI->EV_FindModelIndex(szModelPath), std::stoi(szTokens[4]), std::stoi(szTokens[5]));
+		break;
+	}
 
 		// Randomize sound.
 	case 5014:

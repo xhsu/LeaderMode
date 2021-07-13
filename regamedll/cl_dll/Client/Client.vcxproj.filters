@@ -602,6 +602,9 @@
     <ClInclude Include="..\UI\Market.h">
       <Filter>cl_dll\UI</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\game_shared\QCScriptExt.h">
+      <Filter>game_shared</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="export.def">

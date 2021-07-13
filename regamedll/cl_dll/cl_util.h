@@ -94,8 +94,18 @@ void UTIL_ReplaceAll(stringTy& str, const stringTy& from, const stringTy& to)
 	}
 }
 
-//inline bool caseInsCharCompare(char a, char b) { return(toupper(a) == toupper(b)); }
-inline bool caseInsCharCompare(wchar_t a, wchar_t b) { return(towupper(a) == towupper(b)); }
+//template<typename charT>
+//inline bool caseInsCharCompare(charT a, charT b) requires std::is_same<charT, char>::value
+//{
+//	return(toupper(a) == toupper(b));
+//}
+
+template<typename charT>
+inline bool caseInsCharCompare(charT a, charT b)// requires std::is_same<charT, wchar_t>::value
+{
+	return(towupper(a) == towupper(b));
+}
+
 //template<typename stringTy> inline bool caseInsCharCompare(stringTy a, stringTy b) { return(std::toupper(a) == std::toupper(b)); }
 template<typename stringTy> inline bool UTIL_CaseInsensitiveCompare(const stringTy& s1, const stringTy& s2) { return ((s1.size() == s2.size()) && std::equal(s1.cbegin(), s1.cend(), s2.cbegin(), caseInsCharCompare)); }
 
@@ -126,3 +136,19 @@ Iter select_randomly(Iter start, Iter end)
 
 void UTIL_Split(const std::string& s, std::vector<std::string>& tokens, const std::string& delimiters = " ");
 bool UTIL_EntityValid(const cl_entity_t* pEntity);	// Incomplete.
+
+// trim from start (in place)
+inline void ltrim(std::string& s)
+{
+	s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
+		return !std::isspace(ch);
+		}));
+}
+
+// trim from end (in place)
+inline void rtrim(std::string& s)
+{
+	s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
+		return !std::isspace(ch);
+		}).base(), s.end());
+}

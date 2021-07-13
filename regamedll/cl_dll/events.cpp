@@ -112,7 +112,11 @@ void EV_GetDefaultShellInfo(int idx, bool ducking, const Vector& origin, const V
 	auto fU = gEngfuncs.pfnRandomFloat(100, 150);
 
 	ShellVelocity = velocity + right * fR + up * fU + forward * 25.0f;
-	ShellOrigin = origin + view_ofs + up * upScale + forward * forwardScale + right * rightScale;
+
+	if (EV_IsLocal(idx))
+		ShellOrigin = g_pViewEnt->attachment[1];
+	else
+		ShellOrigin = origin + view_ofs + up * upScale + forward * forwardScale + right * rightScale;
 }
 
 /*
@@ -1086,46 +1090,6 @@ DECLARE_EVENT(FireXM8)
 	EV_PlayGunFire2(vecSrc + forward * 10.0f, CXM8::FIRE_SFX, CXM8::GUN_VOLUME);
 
 	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, CXM8::EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_XM8].m_iAmmoType, CXM8::PENETRATION);
-}
-
-DECLARE_EVENT(FireAWP)
-{
-	int idx = args->entindex;
-	Vector origin = args->origin;
-	Vector angles = args->angles;
-	Vector velocity = args->velocity;
-	Vector forward = args->angles.MakeVector(), right, up;
-
-	angles.pitch += args->iparam1 / 100.0;
-	angles.yaw += args->iparam2 / 100.0;
-
-	gEngfuncs.pfnAngleVectors(angles, forward, right, up);
-
-	if (EV_IsLocal(idx))
-	{
-		EV_MuzzleFlash();
-
-		if (g_pCurWeapon)
-		{
-			if (args->bparam1)	// m_iClip > 0
-				g_pCurWeapon->SendWeaponAnim(CAWP::SHOOT_REC);
-			else
-				g_pCurWeapon->SendWeaponAnim(CAWP::SHOOT_LAST);
-		}
-
-		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 3, 0.5, 20, 20, 20, EV_PISTOL_SMOKE, velocity, false, 35);
-		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 40, 0.5, 15, 15, 15, EV_WALL_PUFF, velocity, false, 35);
-		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0], forward, 80, 0.5, 10, 10, 10, EV_WALL_PUFF, velocity, false, 35);
-	}
-
-	Vector vecSrc = EV_GetGunPosition(args->entindex, args->ducking, origin);
-	Vector2D vSpread = Vector2D(args->fparam1, args->fparam2);
-
-	// in awp, bparam2 is SILENCER.
-	// original goldsrc api: VOL = 1.0, ATTN = 0.28
-	EV_PlayGunFire2(vecSrc + forward * 10.0f, CAWP::FIRE_SFX, args->bparam2 ? NORMAL_GUN_VOLUME : CAWP::GUN_VOLUME);
-
-	EV_HLDM_FireBullets(idx, forward, right, up, 1, vecSrc, forward, vSpread, CAWP::EFFECTIVE_RANGE, g_rgWpnInfo[WEAPON_AWP].m_iAmmoType, CAWP::PENETRATION);
 }
 
 DECLARE_EVENT(FireDEagle)
@@ -2427,7 +2391,7 @@ DECLARE_EVENT(C4Explo)
 void Events_Init(void)
 {
 	HOOK_EVENT(ak47, FireAK47);
-	HOOK_EVENT(awp, FireAWP);
+	CAWP::RegisterEvent();	//HOOK_EVENT(awp, FireAWP);
 	HOOK_EVENT(deagle, FireDEagle);
 	HOOK_EVENT(m45a1, FireM45A1);
 	HOOK_EVENT(fiveseven, Fire57);
