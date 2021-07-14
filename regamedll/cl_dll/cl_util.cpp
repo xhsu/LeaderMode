@@ -408,7 +408,7 @@ const wchar_t* UTIL_GetLocalisation(const char* szToken)
 
 GLuint UTIL_VguiSurfaceNewTextureId(void)
 {
-	return (GLuint)VGUI_SURFACE->CreateNewTextureID();
+	return static_cast<GLuint>(VGUI_SURFACE->CreateNewTextureID());
 }
 
 std::string& strip(std::string& s, const std::string& chars = " ")

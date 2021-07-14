@@ -94,20 +94,35 @@ void UTIL_ReplaceAll(stringTy& str, const stringTy& from, const stringTy& to)
 	}
 }
 
-//template<typename charT>
-//inline bool caseInsCharCompare(charT a, charT b) requires std::is_same<charT, char>::value
-//{
-//	return(toupper(a) == toupper(b));
-//}
-
-template<typename charT>
-inline bool caseInsCharCompare(charT a, charT b)// requires std::is_same<charT, wchar_t>::value
+template<typename stringTy>
+inline bool UTIL_CaseInsensitiveCompare(const stringTy& s1, const stringTy& s2)
 {
-	return(towupper(a) == towupper(b));
+	if constexpr (std::is_same_v<stringTy, std::wstring>)
+	{
+		return ((s1.size() == s2.size()) && std::equal(s1.cbegin(), s1.cend(), s2.cbegin(),
+			[](wchar_t a, wchar_t b)
+			{
+				return (towupper(a) == towupper(b));
+			}
+			));
+	}
+	else if constexpr (std::is_same_v<stringTy, std::string>)
+	{
+		return ((s1.size() == s2.size()) && std::equal(s1.cbegin(), s1.cend(), s2.cbegin(),
+			[](char a, char b)
+			{
+				return (toupper(a) == toupper(b));
+			}
+		));
+	}
+	else
+	{
+		[] <bool flag = false>()
+		{
+			static_assert(flag, "UTIL_CaseInsensitiveCompare supports only string or wstring.");
+		}();	// C++20 exclusive.
+	}
 }
-
-//template<typename stringTy> inline bool caseInsCharCompare(stringTy a, stringTy b) { return(std::toupper(a) == std::toupper(b)); }
-template<typename stringTy> inline bool UTIL_CaseInsensitiveCompare(const stringTy& s1, const stringTy& s2) { return ((s1.size() == s2.size()) && std::equal(s1.cbegin(), s1.cend(), s2.cbegin(), caseInsCharCompare)); }
 
 template<typename ... Args>
 std::string string_format(const std::string& format, Args ... args)
@@ -138,7 +153,8 @@ void UTIL_Split(const std::string& s, std::vector<std::string>& tokens, const st
 bool UTIL_EntityValid(const cl_entity_t* pEntity);	// Incomplete.
 
 // trim from start (in place)
-inline void ltrim(std::string& s)
+template<typename T>
+inline void ltrim(T& s)
 {
 	s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
 		return !std::isspace(ch);
@@ -146,7 +162,8 @@ inline void ltrim(std::string& s)
 }
 
 // trim from end (in place)
-inline void rtrim(std::string& s)
+template<typename T>
+inline void rtrim(T& s)
 {
 	s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
 		return !std::isspace(ch);
