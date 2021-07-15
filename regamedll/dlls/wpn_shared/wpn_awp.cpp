@@ -121,7 +121,7 @@ bool CAWP::StudioEvent(const mstudioevent_s* pEvent)
 
 				if (rgszTokens2[0] == "m_bChamberCleared")
 				{
-					auto p = new QCScript::CValueAssignment(&m_bChamberCleared, rgszTokens2[1] == "true" ? true : false);
+					auto p = new QCScript::CAssignmentDirect(&m_bChamberCleared, rgszTokens2[1] == "true" ? true : false);
 					m_QCScript.push_back(p);
 				}
 			}
