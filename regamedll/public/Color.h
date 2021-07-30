@@ -60,7 +60,7 @@ public:
 	{
 		_color[0] = (ulRGB & 0xFF0000) >> 16;	// r
 		_color[1] = (ulRGB & 0xFF00) >> 8;		// g
-		_color[1] = ulRGB & 0xFF;				// b
+		_color[2] = ulRGB & 0xFF;				// b
 		_color[3] = a;
 	}
 
@@ -71,7 +71,7 @@ public:
 
 	constexpr uint32 GetRawRGB() const
 	{
-		return static_cast<uint32>(_color[0] << 16 | _color[1] << 8 | _color[1]);
+		return static_cast<uint32>(_color[0] << 16 | _color[1] << 8 | _color[2]);
 	}
 
 	inline constexpr uint8 r() const	{ return _color[0]; }
