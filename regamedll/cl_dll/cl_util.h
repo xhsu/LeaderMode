@@ -169,3 +169,9 @@ inline void rtrim(T& s)
 		return !std::isspace(ch);
 		}).base(), s.end());
 }
+
+inline bool UTIL_IsStringNumber(const std::string& s)
+{
+	return !s.empty() && std::find_if(s.begin(),
+		s.end(), [](unsigned char c) { return !std::isdigit(c); }) == s.end();
+}

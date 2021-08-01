@@ -234,7 +234,7 @@ unsigned int glSeed = 0;
 
 float UTIL_WeaponTimeBase()
 {
-	return 0.0f;	// always return 0.0 at client.
+	return FLT_EPSILON;	// always return 0.0 at client.
 }
 
 unsigned int U_Random()

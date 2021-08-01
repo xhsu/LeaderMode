@@ -272,6 +272,7 @@ void HUD_StudioEvent2(const mstudioevent_s* pEvent, const cl_entity_s* pEntity)
 	case 5003:
 	{
 		std::vector<std::string> szTokens;
+		szTokens.resize(6);
 		UTIL_Split(pEvent->options, szTokens);	// Split by space. i.e. ' '.
 
 		// [0] for vForward;
@@ -298,7 +299,15 @@ void HUD_StudioEvent2(const mstudioevent_s* pEvent, const cl_entity_s* pEntity)
 			std::stof(szTokens[0]), std::stof(szTokens[2]), std::stof(szTokens[1])
 		);
 
-		EV_EjectBrass(ShellOrigin, ShellVelocity, v_angles.yaw, gEngfuncs.pEventAPI->EV_FindModelIndex(szModelPath), std::stoi(szTokens[4]), std::stoi(szTokens[5]));
+		int iShellSoundType = TE_BOUNCE_NULL;
+		if (UTIL_IsStringNumber(szTokens[4]))
+			iShellSoundType = std::stoi(szTokens[4]);
+		else if (szTokens[4] == "TE_BOUNCE_SHELL")
+			iShellSoundType = TE_BOUNCE_SHELL;
+		else if (szTokens[4] == "TE_BOUNCE_SHOTSHELL")
+			iShellSoundType = TE_BOUNCE_SHOTSHELL;
+
+		EV_EjectBrass(ShellOrigin, ShellVelocity, v_angles.yaw, gEngfuncs.pEventAPI->EV_FindModelIndex(szModelPath), iShellSoundType, std::stoi(szTokens[5]));
 		break;
 	}
 
@@ -338,6 +347,70 @@ void HUD_StudioEvent2(const mstudioevent_s* pEvent, const cl_entity_s* pEntity)
 		//gEngfuncs.pfnPlaySoundByName((char*)pEvent->options, VOL_NORM);	// no more engine sound API.
 		PlaySound(pEvent->options);
 		break;
+
+		// Smoke effects.
+	case 5005:
+	{
+		std::vector<std::string> szTokens;
+		szTokens.resize(6);
+		UTIL_Split(pEvent->options, szTokens);	// Split by space. i.e. ' '.
+
+		/*
+		[0]	speed
+		[1] scale, random range.
+		[2]	hex color 0xRRGGBB
+		[3] smoke type
+		[4] bWind
+		[5] framerate
+		*/
+		if (szTokens.size() != 6)
+			return;
+
+		// Scale
+		float flScale = 1;
+		if (auto p = Q_strstr(szTokens[1].c_str(), "-"), p2 = p; p != nullptr)
+		{
+			*(char*)p2 = '\0';
+			p2++;
+
+			flScale = RANDOM_FLOAT(atof(p), atof(p2));
+		}
+		else
+			flScale = std::stof(szTokens[1]);
+
+		// Color
+		Color color(std::stoul(szTokens[2], nullptr, 16), 0);
+
+		// Direction
+		UTIL_MakeVectors(v_angles + gPseudoPlayer.pev->punchangle);
+
+		// Smoke type
+		EV_SmokeTypes iSmokeType = EV_BLACK_SMOKE;
+		if (szTokens[3] == "EV_WALL_PUFF")
+			iSmokeType = EV_WALL_PUFF;
+		else if (szTokens[3] == "EV_PISTOL_SMOKE")
+			iSmokeType = EV_PISTOL_SMOKE;
+		else if (szTokens[3] == "EV_RIFLE_SMOKE")
+			iSmokeType = EV_RIFLE_SMOKE;
+
+		// Wind
+		bool bWind = false;
+		if (!Q_stricmp(szTokens[4].c_str(), "true"))
+			bWind = true;
+
+		EV_HLDM_CreateSmoke(g_pViewEnt->attachment[0],
+			gpGlobals->v_forward,
+			std::stof(szTokens[0]),	// speed
+			flScale,	// scale
+			color.r(),	// r
+			color.g(),	// g
+			color.b(),	// b
+			iSmokeType,
+			g_vPlayerVelocity,
+			bWind,	// bWind
+			std::stof(szTokens[5])	// framerate
+		);
+	}
 
 	default:
 		break;

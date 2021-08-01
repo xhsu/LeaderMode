@@ -53,6 +53,8 @@ namespace QCScript
 	template<typename T>
 	struct CBaseUnaryOperation : public CBaseExpression
 	{
+		using BaseClass = CBaseUnaryOperation<T>;
+
 		CBaseUnaryOperation(T* ptr) :
 			m_ptr(ptr),
 			m_bShouldFreeRValue(false)
@@ -82,6 +84,8 @@ namespace QCScript
 	template<typename T>
 	struct CBaseBinaryOperationConst : public CBaseExpression
 	{
+		using BaseClass = CBaseBinaryOperationConst<T>;
+
 		CBaseBinaryOperationConst(const T* lhs, const T* rhs) :
 			m_pLHS(lhs),
 			m_pRHS(rhs),
@@ -114,6 +118,8 @@ namespace QCScript
 	template<typename T>
 	struct CBaseBinaryOperationRHSConst : public CBaseExpression
 	{
+		using BaseClass = CBaseBinaryOperationRHSConst<T>;
+
 		CBaseBinaryOperationRHSConst(T* lhs, const T* rhs) :
 			m_pLHS(lhs),
 			m_pRHS(rhs),
@@ -160,6 +166,8 @@ namespace QCScript
 	template<typename T>
 	struct CAssignmentDirect : public CBaseBinaryOperationRHSConst<T>
 	{
+		using CBaseBinaryOperationRHSConst<T>::CBaseBinaryOperationRHSConst;
+
 		bool Act(void) final
 		{
 			*this->m_pLHS = *this->m_pRHS;
@@ -179,6 +187,8 @@ namespace QCScript
 	template<typename T>
 	struct CCompOpEqualTo : public CBaseBinaryOperationConst<T>
 	{
+		using CBaseBinaryOperationConst<T>::CBaseBinaryOperationConst;
+
 		Result Evaluate(void) const final
 		{
 			return static_cast<bool>(*this->m_pLHS == *this->m_pRHS);
@@ -192,6 +202,8 @@ namespace QCScript
 	template<typename T>
 	struct CCompOpNotEqualTo : public CBaseBinaryOperationConst<T>
 	{
+		using CBaseBinaryOperationConst<T>::CBaseBinaryOperationConst;
+
 		Result Evaluate(void) const final
 		{
 			return static_cast<bool>(*this->m_pLHS != *this->m_pRHS);

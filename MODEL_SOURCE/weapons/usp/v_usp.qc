@@ -94,15 +94,37 @@ $attachment 1 "bone_weapon" -2.500000 2.000000 -2.000000
 
 // x animation sequence(s)
 $sequence "idle" "idle" fps 30 
-$sequence "fire" "fire" fps 30 
-$sequence "fire_2" "fire_2" fps 30
-$sequence "fire_2" "fire_3" fps 30
-$sequence "fire_last" "fire_last" fps 30
+$sequence "fire" "fire" fps 30 {
+  { event 5005 1 "20 0.1-0.25 0x0A0A0A EV_WALL_PUFF false 35" } 
+  { event 5005 1 "40 0.25 0x0C0C0C EV_WALL_PUFF false 35" } 
+  { event 5003 2 "36 -14 14 pshell.mdl TE_BOUNCE_SHELL 5" } 
+}
+$sequence "fire_2" "fire_2" fps 30 {
+  { event 5005 1 "20 0.1-0.25 0x0A0A0A EV_WALL_PUFF false 35" } 
+  { event 5005 1 "40 0.25 0x0C0C0C EV_WALL_PUFF false 35" } 
+  { event 5003 2 "36 -14 14 pshell.mdl TE_BOUNCE_SHELL 5" } 
+}
+$sequence "fire_2" "fire_3" fps 30 {
+  { event 5005 1 "20 0.1-0.25 0x0A0A0A EV_WALL_PUFF false 35" } 
+  { event 5005 1 "40 0.25 0x0C0C0C EV_WALL_PUFF false 35" } 
+  { event 5003 2 "36 -14 14 pshell.mdl TE_BOUNCE_SHELL 5" } 
+}
+$sequence "fire_last" "fire_last" fps 30 {
+  { event 5005 1 "20 0.1-0.25 0x0A0A0A EV_WALL_PUFF false 35" } 
+  { event 5005 1 "40 0.25 0x0C0C0C EV_WALL_PUFF false 35" } 
+  { event 5003 2 "36 -14 14 pshell.mdl TE_BOUNCE_SHELL 5" } 
+}
 $sequence "select" "select" fps 30 
-$sequence "select_first" "select_first" fps 30 
+$sequence "select_first" "select_first" fps 30 {
+  { event 9527 20 "m_bitsFlags &= ~WPNSTATE_DRAW_FIRST;" } 
+}
 $sequence "holster" "holster" fps 30 
-$sequence "reload" "reload" fps 30 
-$sequence "reload_empty" "reload_empty" fps 30 
+$sequence "reload" "reload" fps 30 {
+  { event 9527 44 "m_pPlayer->m_flNextAttack = 0;" } 
+}
+$sequence "reload_empty" "reload_empty" fps 30 {
+  { event 9527 45 "m_pPlayer->m_flNextAttack = 0;" } 
+}
 $sequence "checkMag" "checkMag" fps 30 
 $sequence "hand_off" "hand_off" fps 30 
 $sequence "hand_on" "hand_on" fps 30 

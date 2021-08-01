@@ -172,6 +172,7 @@
     <ClCompile Include="..\..\dlls\weapontype.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\..\dlls\wpn_shared\weapons_impl.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_ak47.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_anaconda.cpp" />
     <ClCompile Include="..\..\dlls\wpn_shared\wpn_awp.cpp" />
