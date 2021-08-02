@@ -84,388 +84,6 @@ concept IsManualRechamberWpn = requires (CWpn wpn)
 
 #pragma region BaseTemplate class
 
-struct BaseWeapon : public IWeapon
-{
-#ifndef CLIENT_DLL
-	EntityHandle<CBasePlayer>	m_pPlayer;		// one of these two must be valid. or this weapon will be removed.
-	EntityHandle<CWeaponBox>	m_pWeaponBox;
-#else
-	CBasePlayer* m_pPlayer{ nullptr };	// local pseudo-player
-#endif
-
-	//-----------------------------------------------------------------------------
-	// Purpose:	Behaviours.
-	//			These are a series of abilities a weapon able to achieve.
-	//-----------------------------------------------------------------------------
-#pragma region Behaviours.
-	/*
-	* Purpose:	Will always be called every frame if this weapon is currently activated. Occurs before PostFrame() as its name indicates.
-	* Usage:	Passive event.
-	*/
-	void	Think(void)	override
-	{
-
-	}
-
-	/*
-	* Purpose:	Prepare this weapon object to be associated to another superior object.
-	* Usage:	Passive event. Should be called from a Player class or WeaponBox class.
-	* Return:	'true' when successfully attached.
-	*/
-	virtual	bool	Attach(void* pObject) = 0;
-
-	/*
-	* Purpose:	Grab this weapon out and activate it. This will overwrite the active weapon status but does NOT trigger holster for the previously activated weapon.
-	* Usage:	Try player swap function instead.
-	* Return:	'true' when successfully deployed.
-	*/
-	virtual	bool	Deploy(void) = 0;
-
-	/*
-	* Purpose:	Pause a weapon's animation and timing function. i.e. freeze a weapon or place a time stop magic on it.
-	* Usage:	Anytime when a weapon is activated.
-	*/
-	virtual	void	Pause(void) = 0;
-
-	/*
-	* Purpose:	Revoke the freeze status of a weapon. i.e. undo Pause() function.
-	* Usage:	Anytime after a weapon is freezed.
-	*/
-	virtual	void	Resume(void) = 0;
-
-	/*
-	* Purpose:	Called every frame when a weapon is not performing a 'complex behaviour'.
-	* Usage:	Passive event.
-	* TODO:		This should be merged into Think().
-	*/
-	virtual void	PostFrame(void) = 0;
-
-	/*
-	* Purpose:	-
-	* Usage:	Anytime when a weapon is activated.
-	*/
-	virtual	void	PrimaryAttack(void) = 0;
-
-	/*
-	* Purpose:	-
-	* Usage:	Anytime when a weapon is activated.
-	*/
-	virtual	void	Aim(void) = 0;
-
-	/*
-	* Purpose:	The fallback passive event if a weapon just doing nothing at all.
-	* Usage:	Passive event.
-	*/
-	virtual void	Idle(void) = 0;
-
-	/*
-	* Purpose:	Refill or make a weapon ready to fire again.
-	* Usage:	Anytime when a weapon is activated and not reloading.
-	* Return:	'true' when a reloading process successfully started.
-	*/
-	virtual	bool	Reload(void) = 0;
-
-	/*
-	* Purpose:	Perform a close-range combat with this weapon. This will cause a Pause() for the weapon.
-	* Usage:	Anytime after this weapon is depolyed.
-	* Return:	'true' when a melee attack successfully performed.
-	*/
-	virtual	bool	Melee(void) = 0;
-
-	/*
-	* Purpose:	'Use' this weapon in alternative way.
-	* Usage:	Anytime after this weapon is deployed.
-	* Return:	'true' if its alternative ability successfully performed.
-	*/
-	virtual bool	AlterAct(void) = 0;
-
-	/*
-	* Purpose:	Check whether the weapon is blocked so that it is currently malfunctioning.
-	* Usage:	Should be called in pre-phase of every frame.
-	* Return:	'true' if this weapon is malfunctioning.
-	*/
-	virtual	bool	Blockage(void) = 0;
-
-	/*
-	* Purpose:	Deactivate a weapon. However, this will not automatically activate another weapon.
-	* Usage:	Use swap function in player class instead.
-	* Return:	'true' if holstering process started for this weapon.
-	*/
-	virtual	bool	HolsterStart(void) = 0;
-
-	/*
-	* Purpose:	-
-	* Usage:	Passive event. Called when a weapon is completely deactivated.
-	*/
-	virtual	void	Holstered(void) = 0;
-
-	/*
-	* Purpose:	-
-	* Usage:	Passive event. Called by player class so that weapon object is shifting to dashing status.
-	*/
-	virtual	void	DashStart(void) = 0;
-
-	/*
-	* Purpose:	-
-	* Usage:	Passive event. Called by a player class so that weapon object is shifting to normal status.
-	*/
-	virtual	void	DashEnd(void) = 0;
-
-	/*
-	* Purpose:	Pause the weapon and move left hand out of screen.
-	* Usage:	Anytime when weapon is activated.
-	* Return:	'true' if successfully freed.
-	*/
-	virtual	bool	FreeupLeftHand(void) = 0;
-
-	/*
-	* Purpose:	Resume the weapon and reach the left hand onto handguard again.
-	* Usage:	Anytime when left hand is freed up.
-	* Return:	'true' if successfully reached.
-	*/
-	virtual bool	ReachLeftHand(void) = 0;
-
-	/*
-	* Purpose:	Detach this object from its owner.
-	* Usage:	Anytime when this object is valid.
-	* Return:	'true' if successfully detached.
-	*/
-	virtual bool	Detach(void) = 0;
-
-	/*
-	* Purpose:	Drop this weapon to ground.
-	* Usage:	Anytime when this object is valid.
-	* Return:	'true' if it is successfully dropped on ground.
-	*/
-	virtual	bool	Drop(void** ppWeaponBoxReturned = nullptr) = 0;
-
-	/*
-	* Purpose:	Remove this weapon object.
-	* Usage:	Anytime.
-	* Return:	'true' if this object is successfully removed.
-	*/
-	virtual	bool	Kill(void) = 0;
-#pragma endregion
-
-	//-----------------------------------------------------------------------------
-	// Purpose:	Resource Handling.
-	//-----------------------------------------------------------------------------
-#pragma region Resource Handling.
-	/*
-	* Purpose:	Pack and compress data of this weapon.
-	* Usage:	Anytime when this object is valid.
-	* Return:	'true' when successfully packed.
-	*/
-	virtual	bool	PackData(void* pDatabase) = 0;
-
-	/*
-	* Purpose:	Unpack and override the data from database to local object.
-	* Usage:	Anytime when this object is valid.
-	* Return:	'true' when successfully unpacked.
-	*/
-	virtual	bool	ParseData(void* pDatabase) = 0;
-
-	/*
-	* Purpose:	Precache all necessary files into buffer.
-	* Usage:	Anytime. Careful for the outter game engine timing.
-	*/
-	virtual	void	Precache(void) = 0;
-#pragma endregion
-
-	//-----------------------------------------------------------------------------
-	// Purpose:	Model Handling.
-	//-----------------------------------------------------------------------------
-#pragma region Model Handling.
-	/*
-	* Purpose:	Aquire information regarding model inversion.
-	* Usage:	Anytime when this object is valid.
-	* Return:	'true' for mirroring model, 'false' for doing nothing.
-	*/
-	virtual	bool	ShouldInvertMdl(void) = 0;
-
-	/*
-	* Purpose:	Aquire information regarding 'cl_entity_t::curstate.body' and 'edict_t::body'.
-	* Usage:	Anytime when this object is valid.
-	* Return:	The 'body' value, if applicable.
-	*/
-	virtual	int		CalcBodyParts(void) = 0;
-
-	/*
-	* Purpose:	Aquire information for first-personal view model bobing effect.
-	* Usage:	Anytime when this object is valid. Normally called before bob visual is applied.
-	* Return:	The multiplier of Omega factor and multiplier of Amplitude factor. Formula: Pos = A * sine(omega * t + phi).
-	*/
-	virtual	void	CalcBobParam(float& flOmegaModifier, float& flAmplitudeModifier) = 0;
-
-	/*
-	* Purpose:	Handling a studio event from model QC.
-	* Usage:	Passive event. Called from engine when necessary.
-	* Return:	'true' if the event is handled.
-	*/
-	virtual	bool	StudioEvent(const struct mstudioevent_s* pEvent)
-	{
-
-	}
-#pragma endregion
-
-	//-----------------------------------------------------------------------------
-	// Purpose:	Static Data Manager.
-	//-----------------------------------------------------------------------------
-#pragma region Data API.
-	/*
-	* Purpose:	Aquire information regarding weapon type index.
-	* Usage:	Anytime when this object is valid.
-	* Return:	Enumerator index value.
-	*/
-	virtual	WeaponIdType Id(void) = 0;
-
-	/*
-	* Purpose:	Aquire information regarding weapon general database.
-	* Usage:	Anytime when this object is valid.
-	* Return:	Non-modifiable data structure.
-	*/
-	virtual	const struct WeaponInfo* WpnInfo(void) = 0;
-
-	/*
-	* Purpose:	Aquire information regarding the ammunition this weapon is using.
-	* Usage:	Anytime when this object is valid.
-	* Return:	Non-modifiable data structure.
-	*/
-	virtual	const struct AmmoInfo* AmmoInfo(void) = 0;
-#pragma endregion
-
-	//-----------------------------------------------------------------------------
-	// Purpose:	Status Inquiry Functions.
-	//-----------------------------------------------------------------------------
-#pragma region Status Inquiry APIs.
-	/*
-	* Purpose:	Inquire whether this object is invalided.
-	* Usage:	Anytime.
-	* Return:	'true' if this object is already invalid.
-	*/
-	virtual	bool	IsDead(void) = 0;
-
-	/*
-	* Purpose:	Inquire whether this weapon is currently dual wielding.
-	* Usage:	Anytime when this object is valid.
-	* Return:	'true' if this weapon is currently in dual mode.
-	*/
-	virtual	bool	IsDualWielding(void) = 0;
-
-	/*
-	* Purpose:	Inquire whether this weapon is currently in dashing mode.
-	* Usage:	Anytime when this object is activated.
-	* Return:	'true' if the owner of this weapon is currently dashing.
-	* TODO:		This should be a player function.
-	*/
-	virtual	bool	IsDashing(void) = 0;
-
-	/*
-	* Purpose:	Inquire whether the player is aiming.
-	* Usage:	Anytime when this object is activated.
-	* Return:	'true' if the owner of this weapon is currently aiming.
-	*/
-	virtual bool	IsAiming(void) = 0;
-
-	/*
-	* Purpose:	Inquire whether this weapon is currently being use in a way that shouldn't be interrupted.
-	* Usage:	Anytime when this object is activated.
-	* Return:	'true' if this weapon is currently busy.
-	*/
-	virtual	bool	IsBusy(void) = 0;
-#pragma endregion
-
-	//-----------------------------------------------------------------------------
-	// Purpose:	Capability Inquiry Functions.
-	//-----------------------------------------------------------------------------
-#pragma region Capability Inquiry APIs.
-	/*
-	* Purpose:	Inquire whether this weapon can be depolyed.
-	* Usage:	Anytime when it is valid.
-	* Return:	'true' if this object capable to do so.
-	*/
-	virtual	bool	CanDepoly(void) = 0;
-
-	/*
-	* Purpose:	Inquire whether this weapon can be holstered.
-	* Usage:	Anytime when it is valid.
-	* Return:	'true' if this object capable to do so.
-	*/
-	virtual	bool	CanHolster(void) = 0;
-
-	/*
-	* Purpose:	Inquire whether this weapon can be dropped.
-	* Usage:	Anytime when it is valid.
-	* Return:	'true' if this object capable to do so.
-	*/
-	virtual	bool	CanDrop(void) = 0;
-
-	/*
-	* Purpose:	Inquire whether this weapon can be dual wielding.
-	* Usage:	Anytime when it is valid.
-	* Return:	'true' if this object capable to do so.
-	*/
-	virtual	bool	CanDualWield(void) = 0;
-#pragma endregion
-
-	/*
-	* Purpose:	Inquire the current maxium moving speed.
-	* Usage:	Anytime when it is valid.
-	* Return:	Current maxium speed.
-	*/
-	virtual	float	GetMaxSpeed(void) = 0;
-
-	/*
-	* Purpose:	Insert certain amount of bullets into this weapon. Exceeding bullets would placed into player inventory.
-	* Usage:	Anytime when it had attached onto an holder object.
-	* Return:	'true' if added successfully.
-	*/
-	virtual	bool	InsertAmmo(int iCount) = 0;
-
-	/*
-	* Purpose:	Play an indexed animation from model sequence.
-	* Usage:	Anytime when it is activated.
-	*/
-	virtual	void	Animate(int iWhat) = 0;
-
-	/*
-	* Purpose:	Play sound effect of this firearm when its trigger is being pulled but already emptied.
-	* Usage:	Anytime when it is valid.
-	*/
-	virtual	void	PlayEmptySound(const Vector& vecWhere) = 0;
-
-	/*
-	* Purpose:	Play shooting sound effect of this firearm.
-	* Usage:	Anytime when it is valid.
-	*/
-	virtual	void	PlayFireSound(const Vector& vecWhere) = 0;
-
-	/*
-	* Purpose:	Play reloading sound effect of this firearm.
-	* Usage:	Anytime when it is valid.
-	*/
-	virtual	void	PlayReloadSound(const Vector& vecWhere) = 0;
-
-	/*
-	* Purpose:	Enforcing model displayment on its holder.
-	* Usage:	Anytime when it is attached to an object.
-	*/
-	virtual	void	ResetModel(void) = 0;
-
-	/*
-	* Purpose:	Change the varient of this weapon.
-	* Usage:	Anytime when it is valid. Called when the role of holder changed or the holder itself changed.
-	*/
-	virtual	void	Vary(RoleTypes iType) = 0;
-
-	/*
-	* Purpose:	Inquire current spread status.
-	* Usage:	Anytime when it is valid.
-	* Return:	The spread range from 0 to 1. 1 indicates spreading all across screen whereas 0 means no spread radius.
-	*/
-	virtual	float	GetSpread(void) = 0;
-};
-
 template <typename CWpn>
 struct CBaseWeapon : public IWeapon
 {
@@ -521,6 +139,11 @@ struct CBaseWeapon : public IWeapon
 	float			m_flBlockCheck	{ 0.0f };
 	Vector			m_vecBlockOffset{ g_vecZero };
 #endif
+
+	template <DETECT_SHELL_MODEL T = CWpn> static inline int m_iShell = 0;
+#ifndef CLIENT_DLL
+	template <DETECT_EVENT_FILE T = CWpn> static inline unsigned short m_usEvent = 0;
+#endif
 #pragma endregion
 
 #pragma region Behaviours.
@@ -551,7 +174,11 @@ struct CBaseWeapon : public IWeapon
 		// if we should be holster, then just do it. stop everything else.
 		if (m_bitsFlags & WPNSTATE_HOLSTERING)
 		{
+#ifdef CLIENT_DLL
 			m_pPlayer->SwitchWeapon(m_pPlayer->m_pWpnSwitchingTo);
+#else
+			m_pPlayer->SwitchWeapon(m_pPlayer->GetItemById(m_pPlayer->m_iWpnSwitchingTo));
+#endif
 			return;
 		}
 
@@ -806,15 +433,72 @@ struct CBaseWeapon : public IWeapon
 		if (FNullEnt(pPlayer))
 			return false;
 
-		if (pPlayer->m_rgpPlayerItems[g_rgWpnInfo[m_iId].m_iSlot] != nullptr)	// this player already got one in this slot!
+		if (pPlayer->m_rgpPlayerItems[WpnInfo()->m_iSlot] != nullptr)	// this player already got one in this slot!
 			return false;
 
 		m_pWeaponBox = nullptr;	// make the weaponbox disown me.
+#endif
 		m_pPlayer = pPlayer;
 		m_bitsFlags |= WPNSTATE_DRAW_FIRST;	// play draw_first anim.
 
 		Vary(pPlayer->m_iRoleType);
+		return true;
+	}
+
+	bool	Deploy(void) override
+	{
+		if constexpr (IS_MEMBER_PRESENTED_CPP20_W(ACCURACY_BASELINE))
+			m_flAccuracy = CWpn::ACCURACY_BASELINE;
+
+#ifdef CLIENT_DLL
+		// Initialize shell model.
+		// Technically it needs to be done only once.
+		if constexpr (IS_MEMBER_PRESENTED_CPP20_W(SHELL_MODEL))
+			m_iShell<CWpn> = gEngfuncs.pEventAPI->EV_FindModelIndex(CWpn::SHELL_MODEL);
 #endif
+
+#ifndef CLIENT_DLL
+		m_pPlayer->pev->viewmodel = MAKE_STRING(CWpn::VIEW_MODEL);
+		m_pPlayer->pev->weaponmodel = MAKE_STRING(CWpn::WORLD_MODEL);
+#else
+		g_pViewEnt->model = gEngfuncs.CL_LoadModel(CWpn::VIEW_MODEL, &m_pPlayer->pev->viewmodel);
+#endif // !CLIENT_DLL
+
+		Q_strlcpy(m_pPlayer->m_szAnimExtention, CWpn::POSTURE);
+		Animate((m_bitsFlags & WPNSTATE_DRAW_FIRST) ? CWpn::DRAW_FIRST : CWpn::DEPLOY);
+
+		m_pPlayer->m_flNextAttack = (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? CWpn::DRAW_FIRST_TIME : CWpn::DEPLOY_TIME;
+		m_flTimeWeaponIdle = (m_bitsFlags & WPNSTATE_DRAW_FIRST) ? CWpn::DRAW_FIRST_TIME : CWpn::DEPLOY_TIME + 0.75f;
+		m_flDecreaseShotsFired = gpGlobals->time;
+		m_bitsFlags &= ~WPNSTATE_HOLSTERING;	// remove this marker on deploy. !
+		m_iShotsFired = 0;
+
+		m_pPlayer->pev->fov = DEFAULT_FOV;
+		m_pPlayer->m_iLastZoom = DEFAULT_FOV;
+		m_pPlayer->m_bResumeZoom = false;
+		m_pPlayer->m_vecVAngleShift = Vector::Zero();
+
+		return true;
+	}
+
+	void	Pause(void) override
+	{
+		m_Stack.m_flEjectBrass			= m_pPlayer->m_flEjectBrass - gpGlobals->time;
+		m_Stack.m_flNextAttack			= m_pPlayer->m_flNextAttack;
+		m_Stack.m_flNextPrimaryAttack	= m_flNextPrimaryAttack;
+		m_Stack.m_flNextSecondaryAttack	= m_flNextSecondaryAttack;
+		m_Stack.m_flTimeWeaponIdle		= m_flTimeWeaponIdle;
+		m_Stack.m_iShellModelIndex		= m_pPlayer->m_iShellModelIndex;
+
+#ifdef CLIENT_DLL
+		m_Stack.m_flFrame				= g_pViewEnt->curstate.frame;
+		m_Stack.m_flFramerate			= g_pViewEnt->curstate.framerate;
+		m_Stack.m_flTimeAnimStarted		= gEngfuncs.GetClientTime() - g_flTimeViewModelAnimStart;
+		m_Stack.m_iSequence				= g_pViewEnt->curstate.sequence;
+#else
+		m_Stack.m_iSequence				= m_pPlayer->pev->weaponanim;
+#endif // CLIENT_DLL
+
 	}
 #pragma endregion
 };
