@@ -104,6 +104,7 @@ struct CBaseWeapon : public IWeapon
 	bool			m_bInZoom : 1			{ false };
 	RoleTypes		m_iVariation			{ Role_UNASSIGNED };	// weapons suppose to variegate accroading to their owner.
 	bool			m_bDelayRecovery : 1	{ false };
+	double			m_flTimeAutoResume		{ -1.0 };
 
 	struct	// this structure is for anim push and pop. it save & restore weapon state.
 	{
@@ -149,9 +150,32 @@ struct CBaseWeapon : public IWeapon
 #pragma region Behaviours.
 	void	Think(void) override
 	{
+		if (m_bitsFlags & WPNSTATE_PAUSED)
+		{
+			if (m_bitsFlags & WPNSTATE_AUTO_RESUME && m_flTimeAutoResume < UTIL_WeaponTimeBase())
+			{
+				Resume();
+			}
+
+#ifdef CLIENT_DLL
+			else if (m_bitsFlags & WPNSTATE_VISUAL_FREEZED)
+			{
+
+				g_pViewEnt->curstate.frame = m_Stack.m_flFrame;
+				g_pViewEnt->curstate.framerate = m_Stack.m_flFramerate;
+				g_flTimeViewModelAnimStart = gEngfuncs.GetClientTime() - m_Stack.m_flTimeAnimStarted;
+				g_pViewEnt->curstate.sequence = m_Stack.m_iSequence;	// you have to set all these 2 places at CL side.
+				m_pPlayer->pev->weaponanim = m_Stack.m_iSequence;
+
+			}
+#endif
+
+			return;
+		}
+
 		// Eject shell moved to QC (i.e. StudioEvent())
 
-#pragma region Dash
+#pragma region Dash TODO: move to player.
 		if (!(m_bitsFlags & WPNSTATE_BUSY) && m_pPlayer->pev->button & IN_RUN && m_pPlayer->pev->button & IN_FORWARD && !(m_pPlayer->pev->flags & FL_DUCKING) && m_pPlayer->pev->flags & FL_ONGROUND)
 		{
 			DashStart();
@@ -424,6 +448,14 @@ struct CBaseWeapon : public IWeapon
 		}
 	}
 
+	void	BackgroundFrame(double flFrameRate) override
+	{
+		m_flNextPrimaryAttack = Q_max(0.0, m_flNextPrimaryAttack - flFrameRate);
+		m_flNextSecondaryAttack = Q_max(0.0, m_flNextSecondaryAttack - flFrameRate);
+		m_flTimeWeaponIdle = Q_max(0.0, m_flTimeWeaponIdle - flFrameRate);
+		m_flTimeAutoResume = Q_max(0.0, m_flTimeAutoResume - flFrameRate);
+	}
+
 	bool	Attach(void* pObject) override
 	{
 		CBasePlayer* pPlayer = static_cast<CBasePlayer*>(pObject);
@@ -481,8 +513,19 @@ struct CBaseWeapon : public IWeapon
 		return true;
 	}
 
-	void	Pause(void) override
+	void	Pause(float flTimeAutoResume, bool bEnforceUpdatePauseDatabase) override
 	{
+		if (m_bitsFlags & WPNSTATE_PAUSED && !bEnforceUpdatePauseDatabase)
+			return;
+
+		m_bitsFlags |= WPNSTATE_PAUSED;
+
+		if (flTimeAutoResume > 0.0f)
+		{
+			m_bitsFlags |= WPNSTATE_AUTO_RESUME;
+			m_flTimeAutoResume = flTimeAutoResume;
+		}
+
 		m_Stack.m_flEjectBrass			= m_pPlayer->m_flEjectBrass - gpGlobals->time;
 		m_Stack.m_flNextAttack			= m_pPlayer->m_flNextAttack;
 		m_Stack.m_flNextPrimaryAttack	= m_flNextPrimaryAttack;
@@ -498,7 +541,36 @@ struct CBaseWeapon : public IWeapon
 #else
 		m_Stack.m_iSequence				= m_pPlayer->pev->weaponanim;
 #endif // CLIENT_DLL
+	}
 
+	void	Resume(void)
+	{
+		if (!(m_bitsFlags & WPNSTATE_PAUSED))
+			return;
+
+		m_pPlayer->m_flEjectBrass		= m_Stack.m_flEjectBrass + gpGlobals->time;
+		m_pPlayer->m_flNextAttack		= m_Stack.m_flNextAttack;
+		m_flNextPrimaryAttack			= m_Stack.m_flNextPrimaryAttack;
+		m_flNextSecondaryAttack			= m_Stack.m_flNextSecondaryAttack;
+		m_flTimeWeaponIdle				= m_Stack.m_flTimeWeaponIdle;
+		m_pPlayer->pev->weaponanim		= m_Stack.m_iSequence;
+		m_pPlayer->m_iShellModelIndex	= m_Stack.m_iShellModelIndex;
+
+#ifdef CLIENT_DLL
+		// Same stuff we wrote when handling WPNSTATE_VISUAL_FREEZED.
+		g_pViewEnt->curstate.frame		= m_Stack.m_flFrame;
+		g_pViewEnt->curstate.framerate	= m_Stack.m_flFramerate;
+		g_flTimeViewModelAnimStart		= gEngfuncs.GetClientTime() - m_Stack.m_flTimeAnimStarted;
+		g_pViewEnt->curstate.sequence	= m_Stack.m_iSequence;	// you have to set all these 2 places at CL side.
+		m_pPlayer->pev->weaponanim		= m_Stack.m_iSequence;
+#endif
+
+		// LUNA: I don't know why, but execute this can prevent anim-restart over. This has to be done on both side.
+		Animate(m_Stack.m_iSequence);
+
+		// clear stack data, remove the flags
+		Q_memset(&m_Stack, NULL, sizeof(m_Stack));
+		m_bitsFlags &= ~(WPNSTATE_PAUSED | WPNSTATE_AUTO_RESUME | WPNSTATE_VISUAL_FREEZED);
 	}
 #pragma endregion
 };
@@ -516,6 +588,16 @@ void IWeapon::TheWeaponsThink(void)
 		}
 		else
 			iter++;
+	}
+
+	// Iterate through again, this time run the frame.
+	for (auto iter = _lstWeapons.begin(); iter != _lstWeapons.end(); /* nothing */)
+	{
+#ifndef CLIENT_DLL
+		(*iter)->BackgroundFrame(g_flTrueServerFrameRate);
+#else
+		(*iter)->BackgroundFrame(g_flClientTimeDelta);
+#endif // !CLIENT_DLL
 	}
 }
 

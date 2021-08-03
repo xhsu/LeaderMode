@@ -116,7 +116,7 @@ enum ItemCostType
 	SHIELDGUN_PRICE		= 2200,
 };
 
-enum WeaponState
+enum WeaponState : uint32
 {
 	// Manager markers.
 	WPNSTATE_DEAD				= BIT(0),	// mark for remove.
@@ -137,13 +137,16 @@ enum WeaponState
 	WPNSTATE_DASHING			= BIT(9),	// get a speed boost?
 	WPNSTATE_NO_LHAND			= BIT(10),	// left hand is currently doing something...
 	WPNSTATE_AUTO_LAND_UP		= BIT(11),	// left hand will automaticlly backup when the m_flNextAttack is up.
+	WPNSTATE_PAUSED				= BIT(12),	// weapon are foced paused.
+	WPNSTATE_AUTO_RESUME		= BIT(13),	// Automatically resume when some time variable reaches zero. (UNDONE, WPN_UNDONE)
+	WPNSTATE_VISUAL_FREEZED		= BIT(14),	// A special case of WPNSTATE_PAUSED. In this case, the animation will freezed as long as data.
 
 	// Weapon-specific flags.
-	WPNSTATE_XM8_CHANGING		= BIT(12),
+	WPNSTATE_XM8_CHANGING		= BIT(15),
 
 	// Sets
 	WPNSTATE_SPECIAL_STATE		= WPNSTATE_XM8_CHANGING,
-	WPNSTATE_BUSY				= WPNSTATE_MELEE | WPNSTATE_QUICK_THROWING | WPNSTATE_HOLSTERING | WPNSTATE_DASHING | WPNSTATE_SPECIAL_STATE | WPNSTATE_NO_LHAND,	// unable to do other 'busy' things.
+	WPNSTATE_BUSY				= WPNSTATE_MELEE | WPNSTATE_QUICK_THROWING | WPNSTATE_HOLSTERING | WPNSTATE_DASHING | WPNSTATE_SPECIAL_STATE | WPNSTATE_NO_LHAND | WPNSTATE_PAUSED,	// unable to do other 'busy' things.
 
 	// Disused
 	WPNSTATE_SHIELD_DRAWN		= BIT(31)	// disused, but reserved.

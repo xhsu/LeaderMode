@@ -139,9 +139,9 @@ inline char *_strlwr(char *start)
 	#define Q_atoi atoi
 	#define Q_atof atof
 	#define Q_sqrt sqrt
-	#define Q_min min
-	#define Q_max max
-	#define Q_clamp clamp
+	#define Q_min std::min
+	#define Q_max std::max
+	#define Q_clamp std::clamp
 	#define Q_abs abs
 	#define Q_fabs fabs
 	#define Q_tan tan

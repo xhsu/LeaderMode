@@ -215,7 +215,7 @@ inline const char *GetTeamName(int team)
 	}
 }
 
-extern float g_flTrueServerFrameRate;
+extern double g_flTrueServerFrameRate;
 
 inline int gmsgWeapPickup = 0;
 inline int gmsgHudText = 0;

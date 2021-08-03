@@ -2807,7 +2807,7 @@ void EXT_FUNC ParmsChangeLevel()
 }
 
 //static float g_flLastServerTime = 0.0f;	// You can't and shouldn't use it outside of StartFrame().
-float g_flTrueServerFrameRate = 0.0f;
+double g_flTrueServerFrameRate = 0.0;
 
 void EXT_FUNC StartFrame()
 {

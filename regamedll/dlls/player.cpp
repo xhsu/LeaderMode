@@ -3848,12 +3848,12 @@ pt_end:
 	{
 		if (m_rgpPlayerItems[i])
 		{
-			m_rgpPlayerItems[i]->m_flNextPrimaryAttack = Q_max(m_rgpPlayerItems[i]->m_flNextPrimaryAttack - g_flTrueServerFrameRate, -1.0f);	// LUNA: Should never use gpGlobals->frametime on weapon.
-			m_rgpPlayerItems[i]->m_flNextSecondaryAttack = Q_max(m_rgpPlayerItems[i]->m_flNextSecondaryAttack - g_flTrueServerFrameRate, -0.001f);
+			m_rgpPlayerItems[i]->m_flNextPrimaryAttack = Q_max(m_rgpPlayerItems[i]->m_flNextPrimaryAttack - g_flTrueServerFrameRate, -1.0);	// LUNA: Should never use gpGlobals->frametime on weapon.
+			m_rgpPlayerItems[i]->m_flNextSecondaryAttack = Q_max(m_rgpPlayerItems[i]->m_flNextSecondaryAttack - g_flTrueServerFrameRate, -0.001);
 
 			if (m_rgpPlayerItems[i]->m_flTimeWeaponIdle != 1000.0f)
 			{
-				m_rgpPlayerItems[i]->m_flTimeWeaponIdle = Q_max(m_rgpPlayerItems[i]->m_flTimeWeaponIdle - g_flTrueServerFrameRate, -0.001f);
+				m_rgpPlayerItems[i]->m_flTimeWeaponIdle = Q_max(m_rgpPlayerItems[i]->m_flTimeWeaponIdle - g_flTrueServerFrameRate, -0.001);
 			}
 
 			// used by original CBasePlayerItem.

@@ -184,6 +184,12 @@ public:
 	virtual	void	Think			(void) = 0;
 
 	/*
+	* Purpose:	Will always be called every frame by TheWeaponsThink() no matter what.
+	* Usage:	Passive event. Valid until object marked as dead.
+	*/
+	virtual void	BackgroundFrame	(double flFrameRate) = 0;
+
+	/*
 	* Purpose:	Prepare this weapon object to be associated to another superior object.
 	* Usage:	Passive event. Should be called from a Player class or WeaponBox class.
 	* Return:	'true' when successfully attached.
@@ -200,21 +206,16 @@ public:
 	/*
 	* Purpose:	Pause a weapon's animation and timing function. i.e. freeze a weapon or place a time stop magic on it.
 	* Usage:	Anytime when a weapon is activated.
+	* @param	[flTimeAutoResume] - How long should it automatically recovered from pause status? -1.0 or any negative number to not auto resume.
+	* @param	[bEnforceUpdatePauseDatabase] - If it is already in pause, should the function enforce the data recording and overwrite the last one?
 	*/
-	virtual	void	Pause			(void) = 0;
+	virtual	void	Pause			(float flTimeAutoResume = -1.0f, bool bEnforceUpdatePauseDatabase = false) = 0;
 
 	/*
 	* Purpose:	Revoke the freeze status of a weapon. i.e. undo Pause() function.
 	* Usage:	Anytime after a weapon is freezed.
 	*/
 	virtual	void	Resume			(void) = 0;
-
-	/*
-	* Purpose:	Called every frame when a weapon is not performing a 'complex behaviour'.
-	* Usage:	Passive event.
-	* TODO:		This should be merged into Think().
-	*/
-	virtual void	PostFrame		(void) = 0;
 
 	/*
 	* Purpose:	-
