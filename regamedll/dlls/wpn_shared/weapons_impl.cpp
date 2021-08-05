@@ -69,6 +69,22 @@ concept IsManualRechamberWpn = requires (CWpn wpn)
 	{CWpn::RECHAMBER_TIME > 0};
 	{CWpn::BITS_RECHAMBER_ANIM > 0};
 };
+
+template <typename CWpn>
+concept CanSteelSight = requires (CWpn wpn)
+{
+	{CWpn::AIM_FOV > 0};
+	{CWpn::AIM_OFFSET} -> std::convertible_to<Vector>;
+	{CWpn::ATTRIB_USE_STEEL_SIGHT == true};
+};
+
+template <typename CWpn>
+concept CanScopeSight = requires (CWpn wpn)
+{
+	{CWpn::AIM_FOV > 0};
+	{CWpn::AIM_OFFSET} -> std::convertible_to<Vector>;
+	{CWpn::ATTRIB_USE_SCOPE_SIGHT == true};
+};
 #pragma endregion
 
 #pragma region UTILs
@@ -278,7 +294,7 @@ struct CBaseWeapon : public IWeapon
 				// we have additional thing to do on client site.
 				if constexpr (IS_MEMBER_PRESENTED_CPP20_W(ATTRIB_AIM_FADE_FROM_BLACK))
 				{
-					gHUD::m_SniperScope.SetFadeFromBlack(ATTRIB_AIM_FADE_FROM_BLACK);
+					gHUD::m_SniperScope.SetFadeFromBlack(CWpn::ATTRIB_AIM_FADE_FROM_BLACK);
 				}
 #endif
 			}
@@ -655,7 +671,7 @@ struct CBaseWeapon : public IWeapon
 			m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
 #pragma endregion
 
-#pragma region Fire bullets.
+#pragma region Fire bullets et Playback event
 		UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
 
 		void* pParam = nullptr;
@@ -692,22 +708,12 @@ struct CBaseWeapon : public IWeapon
 			);
 		}
 
+		// Playback event moved to here.
 		Transmit(TRANSMIT_PLAYBACK_EV, pParam);
-
-		IssuePrimaryAttackMessage(Id(), m_pPlayer->GetGunPosition(), m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle, m_iClip, m_pPlayer->random_seed);
-#pragma endregion
-
-#pragma region Notify all clients that this weapon has fired.
-		This()->PlaybackEvent(vSpread);
 #pragma endregion
 
 #pragma region Client visual effects
-		// If this code is running at client side, by default we have to call first personal VFX.
-		// The third personal VFX can only be refer in the events.
-		if constexpr (IS_MEMBER_PRESENTED_CPP20_W(ApplyClientFPFiringVisual))
-		{
-			This()->ApplyClientFPFiringVisual(vSpread);	// Allow an override of CWpn's version.
-		}
+		// Totally moved to QC to decide.
 #pragma endregion
 
 #pragma region Apply time defer to next attacks.
@@ -730,6 +736,111 @@ struct CBaseWeapon : public IWeapon
 		}
 #pragma endregion
 	}
+
+	void	PrimaryAttack(void) override
+	{
+		DefaultShoot();
+	}
+
+	void	DefaultSteelSight(const Vector& vecOfs, int iFOV, float flDriftingSpeed = 10, float flNextSecondaryAttack = 0.3)
+	{
+		m_bInZoom = !m_bInZoom;
+		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flNextSecondaryAttack;
+		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + flNextSecondaryAttack;	// set/reset the gun bob amp.
+
+#ifdef CLIENT_DLL
+	// due to some logic problem, we actually cannot use m_bInZoom here.
+	// it would be override.
+
+		if (!g_vecGunOfsGoal.LengthSquared())
+		{
+			g_vecGunOfsGoal = vecOfs;
+			gHUD::m_iFOV = iFOV;	// allow clients to predict the zoom.
+		}
+		else
+		{
+			g_vecGunOfsGoal = g_vecZero;
+			gHUD::m_iFOV = DEFAULT_FOV;
+		}
+
+		// this model needs faster.
+		g_flGunOfsMovingSpeed = flDriftingSpeed;
+#else
+	// just zoom a liiiiittle bit.
+	// this doesn't suffer from the same bug where the gunofs does, since the FOV was actually sent from SV.
+		if (m_bInZoom)
+		{
+			m_pPlayer->pev->fov = iFOV;
+			EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, "weapons/steelsight_in.wav", 0.75f, ATTN_STATIC);
+		}
+		else
+		{
+			m_pPlayer->pev->fov = DEFAULT_FOV;
+			EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, "weapons/steelsight_out.wav", 0.75f, ATTN_STATIC);
+		}
+#endif
+	}
+
+	void	DefaultScopeSight(const Vector& vecOfs, int iFOV, float flEnterScopeDelay = 0.25, float flDriftingSpeed = 10, float flNextSecondaryAttack = 0.3)
+	{
+		// this is the delay for the m_bResumeZoom.
+		m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + flEnterScopeDelay;
+
+		if (static_cast<int>(m_pPlayer->pev->fov) != DEFAULT_FOV)
+		{
+			m_pPlayer->pev->fov = DEFAULT_FOV;
+
+#ifdef CLIENT_DLL
+			// zoom out anim.
+			g_vecGunOfsGoal = g_vecZero;
+
+			// manually set fade.
+			if constexpr (IS_MEMBER_PRESENTED_CPP20_W(ATTRIB_AIM_FADE_FROM_BLACK))
+				gHUD::m_SniperScope.SetFadeFromBlack(CWpn::ATTRIB_AIM_FADE_FROM_BLACK, 0);
+#endif
+		}
+		else
+		{
+			// get ready to zoom in.
+			m_pPlayer->m_iLastZoom = iFOV;
+			m_pPlayer->m_bResumeZoom = true;
+
+#ifdef CLIENT_DLL
+			// zoom in anim.
+			g_vecGunOfsGoal = vecOfs;
+#endif
+		}
+
+#ifndef CLIENT_DLL
+		if (TheBots)
+		{
+			TheBots->OnEvent(EVENT_WEAPON_ZOOMED, m_pPlayer);
+		}
+
+		// SFX only emitted from SV.
+		EMIT_SOUND(m_pPlayer->edict(), CHAN_ITEM, "weapons/zoom.wav", 0.2, 2.4);
+#else
+		g_flGunOfsMovingSpeed = flDriftingSpeed;
+#endif
+
+		// slow down while we zooming.
+		m_pPlayer->ResetMaxSpeed();
+
+		m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flNextSecondaryAttack;
+	}
+
+	void	Aim(void) override
+	{
+		if constexpr (CanSteelSight<CWpn>)
+		{
+			DefaultSteelSight(CWpn::AIM_OFFSET, CWpn::AIM_FOV);
+		}
+		else if constexpr (CanScopeSight<CWpn>)
+		{
+			DefaultScopeSight(CWpn::AIM_OFFSET, CWpn::AIM_FOV);
+		}
+	}
+
 #pragma endregion
 
 #pragma region Private to template.
