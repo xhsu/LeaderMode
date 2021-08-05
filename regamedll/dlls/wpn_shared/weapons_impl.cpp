@@ -89,6 +89,11 @@ struct CBaseWeapon : public IWeapon
 {
 	using BaseClass = CBaseWeaponTemplate<CWpn>;
 
+	enum : int
+	{
+		TRANSMIT_PLAYBACK_EV = 1,
+	};
+
 #pragma region Members
 	float			m_flNextPrimaryAttack	{ 0.0f };
 	float			m_flNextSecondaryAttack	{ 0.0f };
@@ -543,7 +548,7 @@ struct CBaseWeapon : public IWeapon
 #endif // CLIENT_DLL
 	}
 
-	void	Resume(void)
+	void	Resume(void) override
 	{
 		if (!(m_bitsFlags & WPNSTATE_PAUSED))
 			return;
@@ -572,7 +577,167 @@ struct CBaseWeapon : public IWeapon
 		Q_memset(&m_Stack, NULL, sizeof(m_Stack));
 		m_bitsFlags &= ~(WPNSTATE_PAUSED | WPNSTATE_AUTO_RESUME | WPNSTATE_VISUAL_FREEZED);
 	}
+
+	void	DefaultShoot(float flSpread = -1.0f, float flCycleTime = -1.0f)
+	{
+#pragma region Semiauto check.
+		if constexpr (IS_MEMBER_PRESENTED_CPP20_W(ATTRIB_SEMIAUTO))
+		{
+			if (++m_iShotsFired > 1)
+				return;
+		}
 #pragma endregion
+
+#pragma region Check input variables
+		if (flSpread < 0.0f)
+			flSpread = GetSpread();
+
+		if (flCycleTime < 0.0f)
+		{
+			if constexpr (IS_MEMBER_PRESENTED_CPP20_W(RPM))
+			{
+				flCycleTime = 60.0f / CWpn::RPM;
+			}
+			else if constexpr (IS_MEMBER_PRESENTED_CPP20_W(FIRE_INTERVAL))
+			{
+				flCycleTime = CWpn::FIRE_INTERVAL;
+			}
+			else
+			{
+				COMPILING_ERROR("One of two fire interval attrib must be provided: \"RPM\" or \"FIRE_INTERVAL\".");
+			}
+		}
+#pragma endregion
+
+#pragma region Underwater check.
+		if constexpr (IS_MEMBER_PRESENTED_CPP20_W(ATTRIB_NO_FIRE_UNDERWATER))
+		{
+			if (m_pPlayer->pev->waterlevel == 3)
+			{
+				PlayEmptySound(m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs);
+				m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.15f;
+				return;
+			}
+		}
+#pragma endregion
+
+#pragma region Magazine check.
+		if (m_iClip <= 0)
+		{
+			PlayEmptySound(m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs);
+			m_flNextPrimaryAttack = UTIL_WeaponTimeBase() + 0.2f;
+
+#ifndef CLIENT_DLL
+			if (TheBots)
+			{
+				TheBots->OnEvent(EVENT_WEAPON_FIRED_ON_EMPTY, m_pPlayer);
+			}
+#endif
+
+			return;
+		}
+#pragma endregion
+
+		m_iClip--;
+
+#pragma region Server side visual effects
+		if constexpr (IS_MEMBER_PRESENTED_CPP20_W(GUN_FLASH))
+		{
+			m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
+			m_pPlayer->m_iWeaponFlash = CWpn::GUN_FLASH;
+		}
+
+		m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+
+		if constexpr (IS_MEMBER_PRESENTED_CPP20_W(GUN_VOLUME))
+			m_pPlayer->m_iWeaponVolume = CWpn::GUN_VOLUME;
+		else
+			m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
+#pragma endregion
+
+#pragma region Fire bullets.
+		UTIL_MakeVectors(m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle);
+
+		void* pParam = nullptr;
+
+		if constexpr (IsShotgun<CWpn>)
+		{
+			pParam = calloc(1, sizeof(int));
+
+			*(int*)pParam = m_pPlayer->FireBuckshots(
+				CWpn::PROJECTILE_COUNT,
+				m_pPlayer->GetGunPosition(),
+				gpGlobals->v_forward,
+				CWpn::CONE_VECTOR,
+				CWpn::EFFECTIVE_RANGE,
+				CWpn::DAMAGE,
+				CWpn::RANGE_MODIFIER,
+				m_pPlayer->random_seed
+			);
+		}
+		else
+		{
+			pParam = calloc(1, sizeof(Vector2D));
+
+			*(Vector2D*)pParam = m_pPlayer->FireBullets3(
+				m_pPlayer->GetGunPosition(),
+				gpGlobals->v_forward,
+				flSpread,
+				CWpn::EFFECTIVE_RANGE,
+				CWpn::PENETRATION,
+				AmmoInfo()->m_iId,
+				CWpn::DAMAGE,
+				CWpn::RANGE_MODIFER,
+				m_pPlayer->random_seed
+			);
+		}
+
+		Transmit(TRANSMIT_PLAYBACK_EV, pParam);
+
+		IssuePrimaryAttackMessage(Id(), m_pPlayer->GetGunPosition(), m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle, m_iClip, m_pPlayer->random_seed);
+#pragma endregion
+
+#pragma region Notify all clients that this weapon has fired.
+		This()->PlaybackEvent(vSpread);
+#pragma endregion
+
+#pragma region Client visual effects
+		// If this code is running at client side, by default we have to call first personal VFX.
+		// The third personal VFX can only be refer in the events.
+		if constexpr (IS_MEMBER_PRESENTED_CPP20_W(ApplyClientFPFiringVisual))
+		{
+			This()->ApplyClientFPFiringVisual(vSpread);	// Allow an override of CWpn's version.
+		}
+#pragma endregion
+
+#pragma region Apply time defer to next attacks.
+		m_flNextPrimaryAttack = m_flNextSecondaryAttack = UTIL_WeaponTimeBase() + flCycleTime;
+
+		if constexpr (IS_MEMBER_PRESENTED_CPP20_W(FIRE_ANIMTIME))
+		{
+			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + CWpn::FIRE_ANIMTIME;
+		}
+		else
+		{
+			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + flCycleTime + 2.0f;
+		}
+#pragma endregion
+
+#pragma region Apply recoils.
+		if constexpr (IS_MEMBER_PRESENTED_CPP20_W(ApplyRecoil))
+		{
+			This()->ApplyRecoil();
+		}
+#pragma endregion
+	}
+#pragma endregion
+
+#pragma region Private to template.
+	private:
+		CWpn* _pThis{ nullptr };
+		inline CWpn* This() { if (!_pThis) _pThis = dynamic_cast<CWpn*>(this); return _pThis; }
+#pragma endregion
+
 };
 
 #pragma region Interface manager

@@ -343,6 +343,14 @@ public:
 	virtual	bool	ParseData		(void* pDatabase) = 0;
 
 	/*
+	* Purpose:		Start a transmitting process.
+	* Usage:		Anytime when this object is valid.
+	* Return:		'true' when data transmitted successfully.
+	* @pParameters:	This pointer will always be freed unless it is nullptr. NOT deleted, but freed.
+	*/
+	virtual bool	Transmit		(int iType, void* pParameters) = 0;
+
+	/*
 	* Purpose:	Precache all necessary files into buffer.
 	* Usage:	Anytime. Careful for the outter game engine timing.
 	*/
