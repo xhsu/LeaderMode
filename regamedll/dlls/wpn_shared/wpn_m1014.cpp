@@ -283,10 +283,10 @@ bool CM1014::Reload(void)
 			SendWeaponAnim(INSPECTION);
 			m_flTimeWeaponIdle = INSPECTION_TIME;
 		}
-		else if (m_iClip > 0 && m_pPlayer->pev->weaponanim != CHECKMAG)
+		else if (m_iClip > 0 && m_pPlayer->pev->weaponanim != CHECK_MAGAZINE)
 		{
-			SendWeaponAnim(CHECKMAG);
-			m_flTimeWeaponIdle = CHECKMAG_TIME;
+			SendWeaponAnim(CHECK_MAGAZINE);
+			m_flTimeWeaponIdle = CHECK_MAGAZINE_TIME;
 		}
 
 		return false;

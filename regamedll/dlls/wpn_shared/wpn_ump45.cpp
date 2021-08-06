@@ -224,13 +224,13 @@ bool CUMP45::Reload()
 	}
 
 	// KF2 ???
-	if (m_pPlayer->pev->weaponanim != CHECKMAG)
+	if (m_pPlayer->pev->weaponanim != CHECK_MAGAZINE)
 	{
 		if (m_bInZoom)
 			SecondaryAttack();
 
-		SendWeaponAnim(CHECKMAG);
-		m_flTimeWeaponIdle = CHECKMAG_TIME;
+		SendWeaponAnim(CHECK_MAGAZINE);
+		m_flTimeWeaponIdle = CHECK_MAGAZINE_TIME;
 	}
 
 	return false;

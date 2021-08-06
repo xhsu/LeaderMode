@@ -380,7 +380,7 @@ public:
 	* Usage:	Anytime when this object is valid. Normally called before bob visual is applied.
 	* Return:	The multiplier of Omega factor and multiplier of Amplitude factor. Formula: Pos = A * sine(omega * t + phi).
 	*/
-	virtual	void	CalcBobParam	(float& flOmegaModifier, float& flAmplitudeModifier) = 0;
+	virtual	void	CalcBobParam	(double& flOmegaModifier, double& flAmplitudeModifier) = 0;
 
 	/*
 	* Purpose:	Handling a studio event from model QC.
@@ -2041,7 +2041,7 @@ public:	// Constants / Database
 		DRAW_FIRST,
 		DEPLOY,
 		HOLSTER,
-		CHECKMAG,
+		CHECK_MAGAZINE,
 		INSPECTION,
 		BLOCK_UP,
 		BLOCK_DOWN,
@@ -2072,7 +2072,7 @@ public:	// Constants / Database
 	static constexpr float	DRAW_FIRST_TIME			= 1.9f;
 	static constexpr float	DEPLOY_TIME				= 0.833f;
 	static constexpr float	HOLSTER_TIME			= 0.833f;
-	static constexpr float	CHECKMAG_TIME			= 2.3f;
+	static constexpr float	CHECK_MAGAZINE_TIME			= 2.3f;
 	static constexpr float	INSPECTION_TIME			= 1.8f;
 	static constexpr float	BLOCK_UP_TIME			= 0.366F;
 	static constexpr float	BLOCK_DOWN_TIME			= 0.366F;
@@ -2343,7 +2343,7 @@ public:	// Constants / Database
 		DEPLOY,
 		DRAW_FIRST,
 		HOLSTER,
-		CHECKMAG,
+		CHECK_MAGAZINE,
 		TO_SEMI,
 		TO_AUTO,
 		BLOCK_UP,
@@ -2368,7 +2368,7 @@ public:	// Constants / Database
 	static constexpr float	DEPLOY_TIME		= 0.6333F;
 	static constexpr float	DRAW_FIRST_TIME	= 1.2F;
 	static constexpr float	HOLSTER_TIME	= 0.6333F;
-	static constexpr float	CHECKMAG_TIME	= 3.6F;
+	static constexpr float	CHECK_MAGAZINE_TIME	= 3.6F;
 	static constexpr float	BLOCK_UP_TIME	= 0.3667F;
 	static constexpr float	BLOCK_DOWN_TIME	= 0.3667F;
 	static constexpr float	LHAND_DOWN_TIME	= 0.7F;

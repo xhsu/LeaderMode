@@ -85,6 +85,12 @@ concept CanScopeSight = requires (CWpn wpn)
 	{CWpn::AIM_OFFSET} -> std::convertible_to<Vector>;
 	{CWpn::ATTRIB_USE_SCOPE_SIGHT == true};
 };
+
+template <typename CWpn>
+concept IsIdleAnimLooped = requires (CWpn wpn)
+{
+	{CWpn::IDLE_TIME > 0.0f};
+};
 #pragma endregion
 
 #pragma region UTILs
@@ -126,6 +132,10 @@ struct CBaseWeapon : public IWeapon
 	RoleTypes		m_iVariation			{ Role_UNASSIGNED };	// weapons suppose to variegate accroading to their owner.
 	bool			m_bDelayRecovery : 1	{ false };
 	double			m_flTimeAutoResume		{ -1.0 };
+	bool			m_bAllowEmptySound : 1	{ false };	// Used for semi-auto weapon only.
+	bool			m_bStartFromEmpty : 1	{ false };	// For tublar weapons. TODO: move to QC.
+	float			m_flNextInsertAnim		{ -1.0f };	// For tublar weapons.
+	bool			m_bSetForceStopReload:1	{ false };	// For tublar weapons.
 
 	struct	// this structure is for anim push and pop. it save & restore weapon state.
 	{
@@ -193,6 +203,15 @@ struct CBaseWeapon : public IWeapon
 
 			return;
 		}
+
+#pragma region General Resets
+		if constexpr (IS_MEMBER_PRESENTED_CPP20_W(ATTRIB_SEMIAUTO))
+		{
+			if (m_pPlayer->m_afButtonReleased & IN_ATTACK)
+				m_bAllowEmptySound = true;	// only one empty sound per time.
+		}
+#pragma endregion
+
 
 		// Eject shell moved to QC (i.e. StudioEvent())
 
@@ -300,10 +319,10 @@ struct CBaseWeapon : public IWeapon
 			}
 		}
 
-#pragma region Mag-feeding weapon post reload handling.
-		// complete the magazine-based reload.
+#pragma region Weapon post reload handling.
 		if constexpr (!IsTubularMag<CWpn>)
 		{
+			// complete the magazine-based reload.
 			if (m_bInReload /* Don't need to check m_pPlayer->m_flNextAttack anymore. It is covered above. */)
 			{
 				int j = Q_min(WpnInfo()->m_iMaxClip - m_iClip, m_pPlayer->m_rgAmmo[AmmoInfo()->m_iId]);
@@ -321,6 +340,35 @@ struct CBaseWeapon : public IWeapon
 
 				m_bInReload = false;
 				m_bitsFlags &= ~WPNSTATE_RELOAD_EMPTY;	// remove it anyway.
+			}
+		}
+		else
+		{
+			// Tublar weapon - continuous reloading.
+			if (m_bInReload)
+			{
+				if (m_flNextInsertAnim <= gpGlobals->time && m_iClip < WpnInfo()->m_iMaxClip && m_pPlayer->m_rgAmmo[AmmoInfo()->m_iId] > 0)
+				{
+					Animate(CWpn::INSERT);
+					m_pPlayer->SetAnimation(PLAYER_RELOAD);
+
+					m_flNextInsertAnim = gpGlobals->time + CWpn::TIME_INSERT;
+				}
+
+				// SFX for inserting ammo: Moved to QC.
+
+				// Data update for inserting ammo: Moved to QC.
+
+				if (((m_iClip >= WpnInfo()->m_iMaxClip || m_pPlayer->m_rgAmmo[AmmoInfo()->m_iId] <= 0) && m_flNextInsertAnim <= gpGlobals->time)
+					|| m_bSetForceStopReload || m_pPlayer->pev->button & (IN_ATTACK | IN_RUN))
+				{
+					Animate(CWpn::AFTER_RELOAD);
+					m_pPlayer->m_flNextAttack = CWpn::TIME_AFTER_RELOAD;
+					m_flTimeWeaponIdle = CWpn::TIME_AFTER_RELOAD;
+
+					m_bInReload = false;
+					m_bSetForceStopReload = false;
+				}
 			}
 		}
 #pragma endregion
@@ -502,6 +550,9 @@ struct CBaseWeapon : public IWeapon
 	{
 		if constexpr (IS_MEMBER_PRESENTED_CPP20_W(ACCURACY_BASELINE))
 			m_flAccuracy = CWpn::ACCURACY_BASELINE;
+
+		if constexpr (IS_MEMBER_PRESENTED_CPP20_W(ATTRIB_SEMIAUTO))
+			m_bAllowEmptySound = true;
 
 #ifdef CLIENT_DLL
 		// Initialize shell model.
@@ -839,6 +890,134 @@ struct CBaseWeapon : public IWeapon
 		{
 			DefaultScopeSight(CWpn::AIM_OFFSET, CWpn::AIM_FOV);
 		}
+	}
+
+	void	Idle(void) override
+	{
+#ifdef CLIENT_DLL
+		CalcBobParam(g_flGunBobOmegaModifier, g_flGunBobAmplitudeModifier);
+#endif
+		// the priority of these anims:
+		// 1. Running first. You can't be BLOCKED during a RUN.
+		// 2. Block. You can't aimming if you are blocked.
+		// 3. Aim.
+
+		if (m_bitsFlags & WPNSTATE_DASHING)
+		{
+			if constexpr (IsIdleAnimLooped<CWpn>)
+				m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + CWpn::IDLE_TIME;
+
+			Animate(CWpn::IDLE);
+		}
+		else if ((m_pPlayer->m_afButtonPressed | m_pPlayer->m_afButtonReleased) & IN_BLOCK
+			|| (m_pPlayer->pev->button & IN_BLOCK && m_pPlayer->pev->weaponanim == CWpn::IDLE))
+		{
+			// you can't aim during a BLOCK section.
+			if (m_bInZoom || m_pPlayer->pev->fov != DEFAULT_FOV)
+				Aim();
+
+			m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 20.0f;
+			Blockage();	// UNDONE, are these two equivlent?
+		}
+		else if (m_pPlayer->pev->weaponanim != CWpn::IDLE)
+		{
+			Animate(CWpn::IDLE);
+		}
+	}
+
+	bool	DefaultMagReload(void) requires(!IsTubularMag<CWpn>)
+	{
+		if (m_pPlayer->m_rgAmmo[AmmoInfo()->m_iId] <= 0 || m_iClip >= WpnInfo()->m_iMaxClip)
+		{
+			// KF2 style inspection when you press R and failed reload attempt.
+			if constexpr (IS_MEMBER_PRESENTED_CPP20_W(CHECK_MAGAZINE))
+			{
+				if (m_pPlayer->pev->weaponanim != CWpn::CHECK_MAGAZINE)
+				{
+					if (m_bInZoom)
+						Aim();
+
+					Animate(CWpn::CHECK_MAGAZINE);
+					m_flTimeWeaponIdle = CWpn::CHECK_MAGAZINE_TIME;
+				}
+			}
+
+			return false;
+		}
+
+		// exit scope
+		if (m_bInZoom || static_cast<int>(m_pPlayer->pev->fov) != DEFAULT_FOV)
+			Aim();	// close scope when we reload.
+
+		// 3rd personal anim & SFX
+		m_pPlayer->SetAnimation(PLAYER_RELOAD);
+		PlayReloadSound(m_pPlayer->pev->origin);
+
+		// reset accuracy data
+		m_iShotsFired = 0;
+		if constexpr (IS_MEMBER_PRESENTED_CPP20_W(ACCURACY_BASELINE))
+			m_flAccuracy = CWpn::ACCURACY_BASELINE;
+
+		// pause weapon actions
+		// Aug 06 2021, LUNA: Soft delay function moved to QC.
+		m_pPlayer->m_flNextAttack = m_iClip ? CWpn::RELOAD_TIME : CWpn::RELOAD_EMPTY_TIME;
+		m_flTimeWeaponIdle = m_iClip ? CWpn::RELOAD_TIME : CWpn::RELOAD_EMPTY_TIME;
+		m_flNextPrimaryAttack = m_iClip ? CWpn::RELOAD_TIME : CWpn::RELOAD_EMPTY_TIME;
+		m_flNextSecondaryAttack = m_iClip ? CWpn::RELOAD_TIME : CWpn::RELOAD_EMPTY_TIME;
+		m_bInReload = true;
+
+		// 1st personal anim
+		Animate(m_iClip ? CWpn::RELOAD : CWpn::RELOAD_EMPTY);
+
+		// it's currently useless.. but let's do it anyway.
+		if (!m_iClip)
+			m_bitsFlags |= WPNSTATE_RELOAD_EMPTY;
+
+		return true;
+	}
+
+	bool	DefaultTublarReload(void) requires(IsTubularMag<CWpn>)
+	{
+		if (m_iClip >= WpnInfo()->m_iMaxClip || m_pPlayer->m_rgAmmo[AmmoInfo()->m_iId] <= 0 || m_pPlayer->pev->button & IN_ATTACK)	// you just can't hold ATTACK and attempts reload.
+		{
+			// KF2 style.
+			if (m_iClip <= 0 && m_pPlayer->pev->weaponanim != CWpn::INSPECTION)	// inspection anim.
+			{
+				Animate(CWpn::INSPECTION);
+				m_flTimeWeaponIdle = CWpn::INSPECTION_TIME;
+			}
+			else if (m_iClip > 0 && m_pPlayer->pev->weaponanim != CWpn::CHECK_MAGAZINE)
+			{
+				Animate(CWpn::CHECK_MAGAZINE);
+				m_flTimeWeaponIdle = CWpn::CHECK_MAGAZINE_TIME;
+			}
+
+			return false;
+		}
+
+		if (m_bInZoom)
+			Aim();	// close scope when we reload.
+
+		m_iShotsFired = 0;
+		m_bInReload = true;
+		m_bStartFromEmpty = !!(m_iClip <= 0);
+		m_pPlayer->m_flNextAttack = 0;
+		m_flTimeWeaponIdle = m_bStartFromEmpty ? CWpn::TIME_START_RELOAD_FIRST : CWpn::TIME_START_RELOAD;
+		m_flNextInsertAnim = gpGlobals->time + (m_bStartFromEmpty ? CWpn::TIME_START_RELOAD_FIRST : CWpn::TIME_START_RELOAD);
+
+		Animate(m_bStartFromEmpty ? CWpn::START_RELOAD_FIRST : CWpn::START_RELOAD);
+		return true;
+	}
+
+	bool	Reload(void) override
+	{
+		if (m_bInReload)
+			return false;	// What the fuck, man?
+
+		if constexpr (IsTubularMag<CWpn>)
+			return DefaultTublarReload();
+		else
+			return DefaultMagReload();
 	}
 
 #pragma endregion
