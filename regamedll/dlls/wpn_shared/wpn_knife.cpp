@@ -1,13 +1,5 @@
 #include "precompiled.h"
 
-#ifndef CLIENT_DLL	// SV exclusive variables.
-EntityHandle<CBasePlayer>	BasicKnife::m_pPlayer;	// player currently running this code.
-#else	// CL exclusive variables.
-CBasePlayer* BasicKnife::m_pPlayer = &gPseudoPlayer;	// local pseudo-player.
-#endif
-
-// the weapon which calling quick slash.
-CBaseWeapon* BasicKnife::m_pWeapon = nullptr;
 
 void BasicKnife::Precache()
 {
@@ -27,11 +19,11 @@ void BasicKnife::Precache()
 #endif
 }
 
-bool BasicKnife::Deploy(CBaseWeapon* pWeapon)
+bool BasicKnife::Deploy(IWeapon* pWeapon)
 {
 	m_pWeapon = pWeapon;
-	m_pPlayer = pWeapon->m_pPlayer;
-	m_pWeapon->m_bitsFlags |= WPNSTATE_MELEE;	// mark for further process.
+	m_pPlayer = static_cast<CBasePlayer*>(pWeapon->GetOwner());
+	*m_pWeapon->Flags() |= WPNSTATE_MELEE;	// mark for further process.
 
 	m_pPlayer->pev->fov = DEFAULT_FOV;
 	m_pPlayer->m_iLastZoom = DEFAULT_FOV;
@@ -50,6 +42,7 @@ bool BasicKnife::Deploy(CBaseWeapon* pWeapon)
 	return true;
 }
 
+#ifndef CLIENT_DLL
 void FindHullIntersection(const Vector &vecSrc, TraceResult &tr, float *mins, float *maxs, edict_t *pEntity)
 {
 	int i, j, k;
@@ -96,9 +89,11 @@ void FindHullIntersection(const Vector &vecSrc, TraceResult &tr, float *mins, fl
 		}
 	}
 }
+#endif
 
 void BasicKnife::Swing()
 {
+#ifndef CLIENT_DLL
 	BOOL fDidHit = FALSE;
 	TraceResult tr;
 	Vector vecSrc, vecEnd;
@@ -137,7 +132,7 @@ void BasicKnife::Swing()
 
 	if (tr.flFraction >= 1.0f)
 	{
-		m_pWeapon->SendWeaponAnim(KNIFE_QUICK_SLASH, false);	// this anim msg has to be send!
+		m_pWeapon->Animate(KNIFE_QUICK_SLASH);	// this anim msg has to be send!
 		m_pPlayer->m_flNextAttack = KNIFE_QUICK_SLASH_TIME;
 
 		// play wiff or swish sound
@@ -154,7 +149,7 @@ void BasicKnife::Swing()
 		// hit
 		fDidHit = TRUE;
 
-		m_pWeapon->SendWeaponAnim(KNIFE_QUICK_SLASH, false);	// this anim msg has to be send!
+		m_pWeapon->Animate(KNIFE_QUICK_SLASH);	// this anim msg has to be send!
 		m_pPlayer->m_flNextAttack = KNIFE_QUICK_SLASH_TIME;
 
 		// play thwack, smack, or dong sound
@@ -219,4 +214,8 @@ void BasicKnife::Swing()
 			EMIT_SOUND_DYN(m_pPlayer->edict(), CHAN_ITEM, "weapons/knife_hitwall1.wav", VOL_NORM, ATTN_NORM, 0, RANDOM_LONG(0, 3) + 98);
 		}
 	}
+#else
+	m_pWeapon->Animate(KNIFE_QUICK_SLASH);
+	m_pPlayer->m_flNextAttack = KNIFE_QUICK_SLASH_TIME;
+#endif
 }

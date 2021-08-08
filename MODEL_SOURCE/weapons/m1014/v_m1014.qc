@@ -88,14 +88,20 @@ $sequence "reload_start_first2" "reload_start_first2" fps 30 {
   { event 5004 1 "weapons/m1014/m1014_reload_start.wav" } 
   { event 5004 19 "weapons/m1014/m1014_shell_takeout.wav" } 
   { event 5004 30 "weapons/m1014/m1014_shell_sideload.wav" } 
+  { event 9527 33 "m_iClip++; AMMUNITION--;" } 
   { event 5004 41 "weapons/m1014/m1014_boltrelease.wav" } 
   { event 5004 51 "weapons/m1014/m1014_ready.wav" } 
  }
-$sequence "reload_insert2" "reload_insert2" fps 35 { event 5004 1 "weapons/m1014/m1014_shell_takeout.wav" } { event 5004 9 "weapons/m1014/m1014_shell_insert.wav" } 
+$sequence "reload_insert2" "reload_insert2" fps 35 {
+  { event 5004 1 "weapons/m1014/m1014_shell_takeout.wav" } 
+  { event 9527 6 "m_iClip++; AMMUNITION--;" } 
+  { event 5004 9 "weapons/m1014/m1014_shell_insert.wav" } 
+ }
 $sequence "reload_exit2" "reload_exit2" fps 30 { event 5004 1 "weapons/m1014/m1014_reload_end.wav" } 
 $sequence "select_first" "select_first" fps 30 {
   { event 5004 1 "weapons/m1014/m1014_deploy.wav" } 
   { event 5004 21 "weapons/m1014/m1014_boltback.wav" } 
+  { event 9527 28 "m_bitsFlags &= ~WPNSTATE_DRAW_FIRST;" } 
   { event 5004 30 "weapons/m1014/m1014_boltrelease.wav" } 
   { event 5004 40 "weapons/m1014/m1014_ready.wav" } 
  }

@@ -546,6 +546,20 @@ public:
 	* Return:	The spread range from 0 to 1. 1 indicates spreading all across screen whereas 0 means no spread radius.
 	*/
 	virtual	float	GetSpread		(void) = 0;
+
+	/*
+	* Purpose:	Inquire current weapon flags.
+	* Usage:	Anytime when it is valid.
+	* Return:	The pointer to flag variable.
+	*/
+	virtual uint32*	Flags			(void) = 0;
+
+	/*
+	* Purpose:	Inquire current weapon owner. Could be a player or a weaponbox or even a nullptr.
+	* Usage:	Anytime when it is valid.
+	* Return:	The pointer to owner.
+	*/
+	virtual void*	GetOwner		(void) = 0;
 };
 
 // something can place on your hand.
@@ -1599,18 +1613,19 @@ enum knife_e
 
 namespace BasicKnife
 {
-#ifndef CLIENT_DLL	// SV exclusive namespace.
-
 	// player currently running this code.
-	extern EntityHandle<CBasePlayer>	m_pPlayer;
+#ifndef CLIENT_DLL
+	inline EntityHandle<CBasePlayer>	m_pPlayer;
+#else
+	inline CBasePlayer* m_pPlayer;
+#endif
 
 	// the weapon which calling quick slash.
-	extern CBaseWeapon* m_pWeapon;
+	inline IWeapon* m_pWeapon;
 
 	void Precache();
-	bool Deploy(CBaseWeapon* pWeapon);
+	bool Deploy(IWeapon* pWeapon);
 	void Swing();
-#endif
 };
 
 class CMK46 : public CBaseWeaponTemplate<CMK46>

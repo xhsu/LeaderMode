@@ -100,6 +100,7 @@ concept IsIdleAnimLooped = requires (CWpn wpn)
 #else
 #define IS_HOLD_TO_AIM	(m_pPlayer->m_bHoldToAim)
 #endif
+#define AMMUNITION	m_pPlayer->m_rgAmmo[AmmoInfo()->m_iId]
 #pragma endregion
 
 
@@ -107,7 +108,7 @@ concept IsIdleAnimLooped = requires (CWpn wpn)
 #pragma region BaseTemplate class
 
 template <typename CWpn>
-struct CBaseWeapon : public IWeapon
+struct CWeapon : public IWeapon
 {
 	using BaseClass = CBaseWeaponTemplate<CWpn>;
 
@@ -325,17 +326,17 @@ struct CBaseWeapon : public IWeapon
 			// complete the magazine-based reload.
 			if (m_bInReload /* Don't need to check m_pPlayer->m_flNextAttack anymore. It is covered above. */)
 			{
-				int j = Q_min(WpnInfo()->m_iMaxClip - m_iClip, m_pPlayer->m_rgAmmo[AmmoInfo()->m_iId]);
+				int j = Q_min(WpnInfo()->m_iMaxClip - m_iClip, AMMUNITION);
 
 				// Add them to the clip
 				m_iClip += j;
-				m_pPlayer->m_rgAmmo[AmmoInfo()->m_iId] -= j;
+				AMMUNITION -= j;
 
 				// not reloaded from empty? extra 1 bullet.
-				if (!(m_bitsFlags & WPNSTATE_RELOAD_EMPTY) && m_pPlayer->m_rgAmmo[AmmoInfo()->m_iId] > 0)
+				if (!(m_bitsFlags & WPNSTATE_RELOAD_EMPTY) && AMMUNITION > 0)
 				{
 					m_iClip++;
-					m_pPlayer->m_rgAmmo[AmmoInfo()->m_iId]--;
+					AMMUNITION--;
 				}
 
 				m_bInReload = false;
@@ -347,19 +348,20 @@ struct CBaseWeapon : public IWeapon
 			// Tublar weapon - continuous reloading.
 			if (m_bInReload)
 			{
-				if (m_flNextInsertAnim <= gpGlobals->time && m_iClip < WpnInfo()->m_iMaxClip && m_pPlayer->m_rgAmmo[AmmoInfo()->m_iId] > 0)
+				if (m_flNextInsertAnim <= gpGlobals->time && m_iClip < WpnInfo()->m_iMaxClip && AMMUNITION > 0)
 				{
 					Animate(CWpn::INSERT);
 					m_pPlayer->SetAnimation(PLAYER_RELOAD);
+					PlayReloadSound(m_pPlayer->pev->origin);	// Should be a no-host playing.
 
 					m_flNextInsertAnim = gpGlobals->time + CWpn::TIME_INSERT;
 				}
 
-				// SFX for inserting ammo: Moved to QC.
+				// SFX for inserting ammo: Moved to QC. Global SFX without host is moved above.
 
 				// Data update for inserting ammo: Moved to QC.
 
-				if (((m_iClip >= WpnInfo()->m_iMaxClip || m_pPlayer->m_rgAmmo[AmmoInfo()->m_iId] <= 0) && m_flNextInsertAnim <= gpGlobals->time)
+				if (((m_iClip >= WpnInfo()->m_iMaxClip || AMMUNITION <= 0) && m_flNextInsertAnim <= gpGlobals->time)
 					|| m_bSetForceStopReload || m_pPlayer->pev->button & (IN_ATTACK | IN_RUN))
 				{
 					Animate(CWpn::AFTER_RELOAD);
@@ -585,7 +587,7 @@ struct CBaseWeapon : public IWeapon
 		return true;
 	}
 
-	void	Pause(float flTimeAutoResume, bool bEnforceUpdatePauseDatabase) override
+	void	Pause(float flTimeAutoResume = -1, bool bEnforceUpdatePauseDatabase = false) override
 	{
 		if (m_bitsFlags & WPNSTATE_PAUSED && !bEnforceUpdatePauseDatabase)
 			return;
@@ -927,7 +929,7 @@ struct CBaseWeapon : public IWeapon
 
 	bool	DefaultMagReload(void) requires(!IsTubularMag<CWpn>)
 	{
-		if (m_pPlayer->m_rgAmmo[AmmoInfo()->m_iId] <= 0 || m_iClip >= WpnInfo()->m_iMaxClip)
+		if (AMMUNITION <= 0 || m_iClip >= WpnInfo()->m_iMaxClip)
 		{
 			// KF2 style inspection when you press R and failed reload attempt.
 			if constexpr (IS_MEMBER_PRESENTED_CPP20_W(CHECK_MAGAZINE))
@@ -978,7 +980,7 @@ struct CBaseWeapon : public IWeapon
 
 	bool	DefaultTublarReload(void) requires(IsTubularMag<CWpn>)
 	{
-		if (m_iClip >= WpnInfo()->m_iMaxClip || m_pPlayer->m_rgAmmo[AmmoInfo()->m_iId] <= 0 || m_pPlayer->pev->button & IN_ATTACK)	// you just can't hold ATTACK and attempts reload.
+		if (m_iClip >= WpnInfo()->m_iMaxClip || AMMUNITION <= 0 || m_pPlayer->pev->button & IN_ATTACK)	// you just can't hold ATTACK and attempts reload.
 		{
 			// KF2 style.
 			if (m_iClip <= 0 && m_pPlayer->pev->weaponanim != CWpn::INSPECTION)	// inspection anim.
@@ -1020,9 +1022,32 @@ struct CBaseWeapon : public IWeapon
 			return DefaultMagReload();
 	}
 
+	bool	Melee(void) override
+	{
+		// you just.. can't do this.
+		if (m_bitsFlags & WPNSTATE_BUSY)
+			return false;
+
+		if (m_bInZoom)
+			Aim();
+
+		// Save the current state of anim.
+		Pause();
+
+		BasicKnife::Deploy(this);
+		BasicKnife::Swing();
+		return true;
+	}
+
+	bool	AlterAct(void)	override {}	// Avoid calling null virtual function.
+
+	bool	Blockage(void)	override
+	{
+	}
+
 #pragma endregion
 
-#pragma region Private to template.
+#pragma region Private to this template.
 	private:
 		CWpn* _pThis{ nullptr };
 		inline CWpn* This() { if (!_pThis) _pThis = dynamic_cast<CWpn*>(this); return _pThis; }
