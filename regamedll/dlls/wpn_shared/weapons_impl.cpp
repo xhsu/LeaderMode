@@ -110,7 +110,7 @@ concept IsIdleAnimLooped = requires (CWpn wpn)
 template <typename CWpn>
 struct CWeapon : public IWeapon
 {
-	using BaseClass = CBaseWeaponTemplate<CWpn>;
+	using BaseClass = CWeapon<CWpn>;
 
 	enum : int
 	{
@@ -589,16 +589,19 @@ struct CWeapon : public IWeapon
 
 	void	Pause(float flTimeAutoResume = -1, bool bEnforceUpdatePauseDatabase = false) override
 	{
-		if (m_bitsFlags & WPNSTATE_PAUSED && !bEnforceUpdatePauseDatabase)
-			return;
-
-		m_bitsFlags |= WPNSTATE_PAUSED;
-
-		if (flTimeAutoResume > 0.0f)
+		// You can use this function to setup an auto-resume.
+		if (m_bitsFlags & WPNSTATE_PAUSED && flTimeAutoResume > 0.0f)
 		{
 			m_bitsFlags |= WPNSTATE_AUTO_RESUME;
 			m_flTimeAutoResume = flTimeAutoResume;
 		}
+		else
+			m_bitsFlags &= ~WPNSTATE_AUTO_RESUME;
+
+		if (m_bitsFlags & WPNSTATE_PAUSED && !bEnforceUpdatePauseDatabase)
+			return;
+
+		m_bitsFlags |= WPNSTATE_PAUSED;
 
 		m_Stack.m_flEjectBrass			= m_pPlayer->m_flEjectBrass - gpGlobals->time;
 		m_Stack.m_flNextAttack			= m_pPlayer->m_flNextAttack;
@@ -1041,8 +1044,188 @@ struct CWeapon : public IWeapon
 
 	bool	AlterAct(void)	override {}	// Avoid calling null virtual function.
 
-	bool	Blockage(void)	override
+	bool	Blockage(void)	override	// UNDONE, this should be a function both checking block status and playing animation.
 	{
+		// we are using "play anim mid-way" method.
+		// go check CBaseWeapon::DefaultDashEnd() for detailed commentary.
+		bool bBlocked = !!(m_pPlayer->pev->button & IN_BLOCK);
+
+		if (bBlocked && m_pPlayer->pev->weaponanim != CWpn::BLOCK_UP)
+		{
+#ifdef CLIENT_DLL
+			// time to play iEnterAnim.
+			if (m_pPlayer->pev->weaponanim == CWpn::BLOCK_DOWN)
+			{
+				float flAlreadyPlayed = gEngfuncs.GetClientTime() - g_flTimeViewModelAnimStart;
+
+				Animate(CWpn::BLOCK_UP);
+
+				if (flAlreadyPlayed >= CWpn::BLOCK_DOWN_TIME)
+					return;
+
+				float flAlreadyPlayedRatio = flAlreadyPlayed / CWpn::BLOCK_DOWN_TIME;
+
+				g_flTimeViewModelAnimStart -= CWpn::BLOCK_UP_TIME * (1.0f - flAlreadyPlayedRatio);
+			}
+			else
+#endif
+			{
+				Animate(CWpn::BLOCK_UP);
+			}
+		}
+
+		// therefore, you should not keep calling it in Think() or Frame().
+		else if (!bBlocked && m_pPlayer->pev->weaponanim != CWpn::BLOCK_DOWN)
+		{
+#ifdef CLIENT_DLL
+			if (m_pPlayer->pev->weaponanim == CWpn::BLOCK_UP)
+			{
+				float flAlreadyPlayed = gEngfuncs.GetClientTime() - g_flTimeViewModelAnimStart;
+
+				Animate(CWpn::BLOCK_DOWN);
+
+				if (flAlreadyPlayed >= CWpn::BLOCK_UP_TIME)
+					return;
+
+				float flAlreadyPlayedRatio = flAlreadyPlayed / CWpn::BLOCK_UP_TIME;
+
+				g_flTimeViewModelAnimStart -= CWpn::BLOCK_DOWN_TIME * (1.0f - flAlreadyPlayedRatio);
+			}
+			else
+#endif
+			{
+				Animate(CWpn::BLOCK_DOWN);
+			}
+		}
+	}
+
+	bool	HolsterStart(void) override
+	{
+		m_pPlayer->m_flEjectBrass = 0;	// prevents famous AWP-shell-ejecting bug.
+
+		Animate(CWpn::HOLSTER);
+		m_pPlayer->m_flNextAttack = CWpn::HOLSTER_TIME;
+		m_bitsFlags |= WPNSTATE_HOLSTERING;
+
+		return true;
+	}
+
+	void	Holstered(void)	override	// TODO: Merge more holster stuff inside?
+	{
+		// if user is insist to holster weapon, we should allow that.
+		// LUNA: no longer check CanHolster() before Holster().
+
+		m_bInReload = false;
+		m_bInZoom = false;
+
+#ifdef CLIENT_DLL
+		g_vecGunOfsGoal = Vector::Zero();
+		g_flGunOfsMovingSpeed = 10.0f;
+#endif // CLIENT_DLL
+
+		m_pPlayer->pev->viewmodel = 0;
+		m_pPlayer->pev->weaponmodel = 0;
+		m_pPlayer->pev->fov = DEFAULT_FOV;
+	}
+
+	void	DashStart(void) override
+	{
+		if (m_bInReload)
+			m_bInReload = false;
+
+		if (m_bInZoom || m_pPlayer->pev->fov < DEFAULT_FOV)
+		{
+#ifndef CLIENT_DLL
+			Aim();
+#else
+			g_vecGunOfsGoal = g_vecZero;
+			g_flGunOfsMovingSpeed = 10.0f;
+			gHUD::m_iFOV = DEFAULT_FOV;
+#endif
+		}
+
+		Animate(CWpn::DASH_ENTER);
+		m_pPlayer->m_flNextAttack = CWpn::DASH_ENTER_TIME;
+		m_flTimeWeaponIdle = CWpn::DASH_ENTER_TIME;
+		m_bitsFlags |= WPNSTATE_DASHING;
+	}
+
+	void	DashEnd(void) override
+	{
+		if (m_pPlayer->m_flNextAttack > 0.0f && m_pPlayer->pev->weaponanim == CWpn::DASH_ENTER)
+		{
+			// this is how much you procees to the dashing phase.
+			// for example, assuming the whole length is 1.0s, you start 0.7s and decide to cancel.
+			// although there's only 0.3s to the dashing phase, but turning back still requires another equally 0.7s.
+			// "m_pPlayer->m_flNextAttack" is the 0.3s of full length. you need to get the rest part, i.e. the 70%.
+			float flRunStartUnplayedRatio = 1.0f - m_pPlayer->m_flNextAttack / CWpn::DASH_ENTER_TIME;
+
+			// stick on the last instance in the comment: 70% * 1.0s(full length) = 0.7s, this is the time we need to turning back.
+			float flRunStopTimeLeft = CWpn::DASH_EXIT_TIME * flRunStartUnplayedRatio;
+
+			// play the anim.
+			Animate(CWpn::DASH_EXIT);
+
+#ifdef CLIENT_DLL
+			// why we are using the "0.3s" here?
+			// this is because the g_flTimeViewModelAnimStart actually means how much time had passed since the anim was ordered to play.
+			// if we need to play 0.7s, we have to told system we only played it for 0.3s. right?
+			g_flTimeViewModelAnimStart = gEngfuncs.GetClientTime() - (CWpn::DASH_EXIT_TIME - flRunStopTimeLeft);
+#endif
+
+			// force everything else to wait.
+			m_pPlayer->m_flNextAttack = m_flNextPrimaryAttack = m_flNextSecondaryAttack = m_flTimeWeaponIdle = flRunStopTimeLeft;
+		}
+
+		// if RUN_START is normally played and finished, go normal.
+		else
+		{
+			Animate(CWpn::DASH_EXIT);
+			m_pPlayer->m_flNextAttack = CWpn::DASH_EXIT_TIME;
+			m_flTimeWeaponIdle = CWpn::DASH_EXIT_TIME;
+		}
+
+		// either way, we have to remove this flag.
+		m_bitsFlags &= ~WPNSTATE_DASHING;
+
+#ifdef CLIENT_DLL
+		// remove the exaggerating shaking vfx.
+		g_flGunBobAmplitudeModifier = 1.0f;
+#endif
+	}
+
+	bool	FreeupLeftHand(void) override
+	{
+		if (!(m_bitsFlags & WPNSTATE_NO_LHAND))
+		{
+			Pause();
+
+			Animate(CWpn::LHAND_DOWN);
+			m_pPlayer->m_flNextAttack = CWpn::LHAND_DOWN_TIME;
+			m_flTimeWeaponIdle = CWpn::LHAND_DOWN_TIME;
+			m_bitsFlags |= WPNSTATE_NO_LHAND;
+
+			return true;
+		}
+
+		return false;
+	}
+
+	bool	ReachLeftHand(void) override
+	{
+		if (m_bitsFlags & WPNSTATE_NO_LHAND)
+		{
+			Pause(CWpn::LHAND_UP_TIME);	// Setup an auto-resume timer.
+
+			Animate(CWpn::LHAND_UP);
+			m_pPlayer->m_flNextAttack = CWpn::LHAND_UP_TIME;
+			m_flTimeWeaponIdle = CWpn::LHAND_UP_TIME;
+			m_bitsFlags &= ~WPNSTATE_NO_LHAND;
+
+			return true;
+		}
+
+		return false;
 	}
 
 #pragma endregion
