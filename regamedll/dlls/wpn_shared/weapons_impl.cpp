@@ -163,7 +163,7 @@ struct CWeapon : public IWeapon
 #ifndef CLIENT_DLL
 	// SV exclusive variables.
 	EntityHandle<CBasePlayer>	m_pPlayer;		// one of these two must be valid. or this weapon will be removed.
-	EntityHandle<CWeaponBox>	m_pWeaponBox;
+	EntityHandle<CWeaponBox>	m_pWeaponBox;	// Aug 10 2021, LUNA: don't know why keeping this. The weaponbox is no longer saving a actual entity. Weapon object gets destoried when dropped on ground.
 	int		m_iClientClip		{ 0 };
 	int		m_iClientWeaponState{ 0 };
 #else
@@ -529,12 +529,24 @@ struct CWeapon : public IWeapon
 
 	bool	Attach(void* pObject) override
 	{
-		CBasePlayer* pPlayer = static_cast<CBasePlayer*>(pObject);
+		CBaseEntity* pEntity = static_cast<CBaseEntity*>(pObject);
+		CBasePlayer* pPlayer = dynamic_cast<CBasePlayer*>(pEntity);
 
 #ifndef CLIENT_DLL
 		// how can I add to someone who didn't even exist?
 		if (FNullEnt(pPlayer))
+		{
+			// Is it a weaponbox?
+			if (CWeaponBox* pWeaponBox = dynamic_cast<CWeaponBox*>(pEntity); !FNullEnt(pWeaponBox))
+			{
+				m_pWeaponBox = pWeaponBox;
+				m_pPlayer = nullptr;
+
+				return true;
+			}
+
 			return false;
+		}
 
 		if (pPlayer->m_rgpPlayerItems[WpnInfo()->m_iSlot] != nullptr)	// this player already got one in this slot!
 			return false;
@@ -1228,6 +1240,121 @@ struct CWeapon : public IWeapon
 		return false;
 	}
 
+	bool	Detach(void) override
+	{
+		m_flNextPrimaryAttack = 0;
+		m_flNextSecondaryAttack = 0;
+		m_flTimeWeaponIdle = 0;
+		m_bitsFlags = 0;
+		m_bInReload = 0;
+		m_iShotsFired = 0;
+		m_flDecreaseShotsFired = 0;
+		m_flAccuracy = 0;
+		m_flLastFire = 0;
+		m_bInZoom = 0;
+		m_iVariation = Role_UNASSIGNED;
+		m_bDelayRecovery = 0;
+		m_flTimeAutoResume = 0;
+		m_bAllowEmptySound = 0;
+		m_bStartFromEmpty = 0;
+		m_flNextInsertAnim = 0;
+		m_bSetForceStopReload = 0;
+
+		Q_memset(&m_Stack, NULL, sizeof(m_Stack));
+
+#ifndef CLIENT_DLL
+		// SV exclusive variables.
+		m_pPlayer = nullptr;		// one of these two must be valid. or this weapon will be removed.
+		m_pWeaponBox = nullptr;
+		m_iClientClip = -1;	// Force these value to be updated when attach to a new player.
+		m_iClientWeaponState = -1;
+#else
+		// CL exclusive variables.
+		// UNDONE: Never reset player on client side. Should be just a simple deletion.
+		m_flBlockCheck = 9999;
+		m_vecBlockOffset = Vector::Zero();
+#endif
+
+		return true;
+	}
+
+	bool	Drop(void** ppWeaponBoxReturned = nullptr) override
+	{
+#ifndef CLIENT_DLL
+		// LUNA: you cannot reject drop request here. it depents on player/other functions.
+
+		// LUNA: you can't call it here. You have to wait it called in pWeaponBox->PackWeapon(). or this would result in packing weapon failure.
+		//RemovePlayerItem(pWeapon);
+
+		UTIL_MakeVectors(m_pPlayer->pev->angles);
+
+		CWeaponBox* pWeaponBox = dynamic_cast<CWeaponBox*>(CBaseEntity::Create("weaponbox", m_pPlayer->pev->origin + gpGlobals->v_forward * 10, m_pPlayer->pev->angles, m_pPlayer->edict()));
+		pWeaponBox->pev->angles.x = 0;
+		pWeaponBox->pev->angles.z = 0;
+		pWeaponBox->SetThink(&CWeaponBox::Kill);
+		pWeaponBox->pev->nextthink = gpGlobals->time + item_staytime.value;
+		pWeaponBox->PackWeapon(this);	// !this call would detach weapon from CBasePlayer databse and attack it to CWeaponBox database.
+
+		if (m_pPlayer->IsAlive())	// drop by intense
+			pWeaponBox->pev->velocity = m_pPlayer->pev->velocity + gpGlobals->v_forward * 300 + gpGlobals->v_forward * 100;	// this velocity would be override soon.
+		else
+		{
+			pWeaponBox->pev->velocity = m_pPlayer->pev->velocity * 0.85f;	// drop due to death.
+		}
+
+		// if this item is using bpammo instead of magzine, we should pack all player bpammo.
+		if (WpnInfo()->m_bitsFlags & ITEM_FLAG_EXHAUSTIBLE)
+		{
+			if (AmmoInfo()->m_iId > AMMO_NONE && AmmoInfo()->m_iId < AMMO_MAXTYPE)
+			{
+				pWeaponBox->GiveAmmo(m_pPlayer->m_rgAmmo[AmmoInfo()->m_iId], AmmoInfo()->m_iId);
+				m_pPlayer->m_rgAmmo[AmmoInfo()->m_iId] = 0;
+			}
+		}
+
+		const char* modelname = CWeaponBox::GetCSModelName(Id());
+		if (modelname)
+		{
+			pWeaponBox->SetModel(modelname);
+		}
+
+		// if the caller is inquiring CWeaponBox, give it to him.
+		if (ppWeaponBoxReturned != nullptr)
+		{
+			(*ppWeaponBoxReturned) = pWeaponBox;
+		}
+
+		// have to re-zero m_pPlayer.
+		// otherwise, since CBasePlayer::RemovePlayerItem() had it removed from m_rgpPlayerItems[], CBaseWeapons::WeaponsThink() would consider this is an error weapon.
+		m_pPlayer = nullptr;
+#endif
+
+		Kill();
+		return true;
+
+	}
+
+	bool	Kill(void) override
+	{
+#ifndef CLIENT_DLL
+		if (m_pPlayer.IsValid())
+		{
+			m_pPlayer->RemovePlayerItem(this);
+			m_pPlayer = nullptr;
+		}
+
+		if (m_pWeaponBox.IsValid())
+		{
+			m_pWeaponBox = nullptr;
+		}
+#else
+		m_pPlayer = nullptr;
+#endif
+
+		m_bitsFlags |= WPNSTATE_DEAD;
+		return true;
+	}
+
 #pragma endregion
 
 #pragma region Private to this template.
@@ -1247,20 +1374,18 @@ void IWeapon::TheWeaponsThink(void)
 		if ((*iter)->IsDead())
 		{
 			delete (*iter);	// The deleting process contains a erase operation in the list.
-			iter = _lstWeapons.begin();	// Hence we have to start it over, for the iterator had been invalided.
+			iter = _lstWeapons.erase(iter);
 		}
 		else
-			iter++;
-	}
-
-	// Iterate through again, this time run the frame.
-	for (auto iter = _lstWeapons.begin(); iter != _lstWeapons.end(); /* nothing */)
-	{
+		{
 #ifndef CLIENT_DLL
-		(*iter)->BackgroundFrame(g_flTrueServerFrameRate);
+			(*iter)->BackgroundFrame(g_flTrueServerFrameRate);
 #else
-		(*iter)->BackgroundFrame(g_flClientTimeDelta);
+			(*iter)->BackgroundFrame(g_flClientTimeDelta);
 #endif // !CLIENT_DLL
+
+			iter++;
+		}
 	}
 }
 

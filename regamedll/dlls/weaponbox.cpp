@@ -6,16 +6,7 @@ Created Date: Mar 13 2020
 
 #include "precompiled.h"
 
-TYPEDESCRIPTION CWeaponBox::m_SaveData[] =
-{
-	DEFINE_ARRAY(CWeaponBox, m_rgAmmo, FIELD_INTEGER, MAX_AMMO_SLOTS),
-	DEFINE_ARRAY(CWeaponBox, m_rgpPlayerItems, FIELD_CLASSPTR, MAX_ITEM_TYPES),
-};
-
-const float CWeaponBox::THROWING_FORCE = 350.0f;
-
 LINK_ENTITY_TO_CLASS(weaponbox, CWeaponBox)
-IMPLEMENT_SAVERESTORE(CWeaponBox, CBaseEntity)
 
 void CWeaponBox::Precache()
 {
@@ -85,11 +76,7 @@ void CWeaponBox::Spawn()
 void CWeaponBox::Kill()
 {
 	// destroy the weapons
-	for (int i = 0; i < MAX_ITEM_TYPES; i++)
-	{
-		if (m_rgpPlayerItems[i])
-			m_rgpPlayerItems[i]->Kill();
-	}
+	// Aug 10 2021, LUNA: Weapons are now stay on client side.
 
 	// remove the box
 	UTIL_Remove(this);
@@ -141,48 +128,26 @@ void CWeaponBox::Touch(CBaseEntity* pOther)
 		return;
 	}
 
-	CBasePlayer* pPlayer = static_cast<CBasePlayer*>(pOther);
+	CBasePlayer* pPlayer = dynamic_cast<CBasePlayer*>(pOther);
 
 	if (pPlayer->m_bShieldDrawn)
 		return;
 
 	bool bRemove = true;
 
-	// go through my weapons and try to give the usable ones to the player.
 	// it's important the the player be given ammo first, so the weapons code doesn't refuse
 	// to deploy a better weapon that the player may pick up because he has no ammo for it.
-	for (int i = 0; i < MAX_ITEM_TYPES; i++)
-	{
-		if (!m_rgpPlayerItems[i])
-			continue;
 
-		if (pPlayer->AddPlayerItem(m_rgpPlayerItems[i]))
-		{
-			m_rgpPlayerItems[i] = nullptr;	// unlink this weapon from our CWeaponBox.
-		}
-	}
-
-	for (int i = 0; i < MAX_ITEM_TYPES; i++)
-	{
-		// still, at least a weapon remains! don't del me!
-		if (m_rgpPlayerItems[i])
-		{
-			bRemove = false;
-			break;
-		}
-	}
+	if (!IWeapon::Give(m_StoredWeapon.what, pPlayer, m_StoredWeapon.clip, m_StoredWeapon.flags))
+		bRemove = false;
 
 	if (bRemove)
 	{
-		// dole out ammo
-		for (int n = 0; n < MAX_AMMO_SLOTS; n++)
-		{
-			// there's some ammo of this type.
-			pPlayer->GiveAmmo(m_rgAmmo[n], (AmmoIdType)n);
+		// dole out ammo once we confirm that this player can hold this weapon.
+		pPlayer->GiveAmmo(m_StoredAmmo.count, m_StoredAmmo.what);
 
-			// now empty the ammo from the weaponbox since we just gave it to the player
-			m_rgAmmo[n] = 0;
-		}
+		m_StoredAmmo.count = 0;
+		m_StoredAmmo.what = AMMO_NONE;
 	}
 
 	if (bRemove)
@@ -212,57 +177,55 @@ void CWeaponBox::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE use
 	if (m_bHadBeenSold)	// this box had been sold!
 		return;
 
-	for (int i = 0; i < MAX_ITEM_TYPES; i++)
-	{
-		auto pWeapon = m_rgpPlayerItems[i];
+	auto pInfo = GetWeaponInfo(m_StoredWeapon.what);
 
-		if (pWeapon && !pWeapon->IsDead())
-		{
-			pPlayer->AddAccount(pWeapon->m_pItemInfo->m_iCost / 2, RT_SOLD_ITEM);
-			UTIL_SayText(pPlayer, "#LeaderMod_Commander_Sk_SeizeWpn", WeaponIDToAlias(pWeapon->m_iId), std::to_string(pWeapon->m_pItemInfo->m_iCost / 2).c_str());
-			EMIT_SOUND(pPlayer->edict(), CHAN_ITEM, SFX_REFUND_GUNS, VOL_NORM, ATTN_NORM);
+	pPlayer->AddAccount(pInfo->m_iCost / 2, RT_SOLD_ITEM);
+	UTIL_SayText(pPlayer, "#LeaderMod_Commander_Sk_SeizeWpn", WeaponIDToAlias(m_StoredWeapon.what), std::to_string(pInfo->m_iCost / 2).c_str());
+	EMIT_SOUND(pPlayer->edict(), CHAN_ITEM, SFX_REFUND_GUNS, VOL_NORM, ATTN_NORM);
 
-			pWeapon->Kill();
-		}
-	}
+	Q_memset(&m_StoredWeapon, NULL, sizeof(m_StoredWeapon));
 
-	pev->nextthink = gpGlobals->time + 0.01f;
+	pev->nextthink = gpGlobals->time + 0.01f;	// De facto removal.
 	m_bHadBeenSold = true;
 }
 
 // Add this weapon to the box
-bool CWeaponBox::PackWeapon(CBaseWeapon* pWeapon)
+bool CWeaponBox::PackWeapon(IWeapon* pWeapon)
 {
 	// is one of these weapons already packed in this box?
-	if (HasWeapon(pWeapon->m_iId))
+	if (m_StoredWeapon.what != WEAPON_NONE)
 	{
 		// box can only hold one of each weapon type
 		return false;
 	}
 
-	if (m_rgpPlayerItems[pWeapon->m_pItemInfo->m_iSlot] && m_rgpPlayerItems[pWeapon->m_pItemInfo->m_iSlot] != pWeapon)
-	{
-		// the slot it wants to occupy has beed taken.
-		return false;
-	}
+	CBasePlayer* pPlayer = static_cast<CBasePlayer*>(pWeapon->GetOwner());
 
-	if (pWeapon->m_pPlayer)
+	if (pPlayer)
 	{
-		if (pWeapon->m_pPlayer->m_pActiveItem == pWeapon)
+		if (pPlayer->m_pActiveItem == pWeapon)
 		{
 			pWeapon->Holstered();	// it's dropping weapon. just data-ly holster it.
 		}
 
-		if (!pWeapon->m_pPlayer->RemovePlayerItem(pWeapon))
+		if (!pPlayer->RemovePlayerItem(pWeapon))
 		{
 			// failed to unhook the weapon from the player!
 			return false;
 		}
 	}
 
-	m_rgpPlayerItems[pWeapon->m_pItemInfo->m_iSlot] = pWeapon;
-	pWeapon->m_pWeaponBox = this;
+	m_StoredWeapon.what = pWeapon->Id();
+	m_StoredWeapon.clip = *pWeapon->Clip();
+	m_StoredWeapon.flags = *pWeapon->Flags();
 
+	if (pPlayer)
+	{
+		m_StoredAmmo.what = pWeapon->AmmoInfo()->m_iId;
+		m_StoredAmmo.count = pPlayer->m_rgAmmo[pWeapon->AmmoInfo()->m_iId];
+	}
+
+	pWeapon->Attach(this);
 	return true;
 }
 
@@ -271,49 +234,16 @@ bool CWeaponBox::GiveAmmo(int iCount, AmmoIdType iId)
 	if (iId <= 0 || iId >= AMMO_MAXTYPE)
 		return false;
 
-	m_rgAmmo[iId] += iCount;	// there is no ammunition carry limit for CWeaponBox.
+	m_StoredAmmo.count += iCount;
+	m_StoredAmmo.what = iId;
+
 	return true;
-}
-
-// Is a weapon of this type already packed in this box?
-bool CWeaponBox::HasWeapon(WeaponIdType iId)
-{
-	for (auto pWeapon : CBaseWeapon::m_lstWeapons)
-	{
-		if (pWeapon->m_pWeaponBox != this)
-			continue;
-
-		if (pWeapon->m_iId != iId)
-			continue;
-
-		return true;
-	}
-
-	return false;
 }
 
 // Is there anything in this box?
 bool CWeaponBox::IsEmpty()
 {
-	int i;
-	for (i = 0; i < MAX_ITEM_TYPES; i++)
-	{
-		if (m_rgpPlayerItems[i])
-		{
-			return false;
-		}
-	}
-
-	for (i = 0; i < MAX_AMMO_SLOTS; i++)
-	{
-		if (m_rgAmmo[i] > 0)
-		{
-			// still have a bit of this type of ammo
-			return false;
-		}
-	}
-
-	return true;
+	return m_StoredAmmo.count > 0 || m_StoredWeapon.what > WEAPON_NONE;
 }
 
 void CWeaponBox::SetObjectCollisionBox()

@@ -141,16 +141,7 @@ class IWeapon
 	IWeapon& operator=(IWeapon&&) = delete;
 
 protected:
-	virtual ~IWeapon()
-	{
-		for (auto iter = _lstWeapons.begin(); iter != _lstWeapons.end(); /* nothing */)
-		{
-			if (*iter == this)
-				iter = _lstWeapons.erase(iter);
-			else
-				iter++;
-		}
-	}
+	virtual ~IWeapon() {}	// Use Kill() instead.
 
 public:
 
@@ -560,6 +551,13 @@ public:
 	* Return:	The pointer to owner.
 	*/
 	virtual void*	GetOwner		(void) = 0;
+
+	/*
+	* Purpose:	Inquire current weapon clip.
+	* Usage:	Anytime when it is valid.
+	* Return:	nullptr if the weapon has no clip. Otherwise the point to its clip variable.
+	*/
+	virtual int*	Clip			(void) = 0;
 };
 
 // something can place on your hand.

@@ -14,7 +14,7 @@ LUNA:	The concept here is quite simple:
 
 class CWeaponBox : public CBaseEntity
 {
-	static const float THROWING_FORCE;
+	static constexpr float THROWING_FORCE = 350;
 
 public:
 	static const char* GetCSModelName(WeaponIdType iId);
@@ -23,8 +23,6 @@ public:
 	virtual void Spawn();
 	virtual void Precache();
 	virtual void KeyValue(KeyValueData* pkvd);
-	virtual int Save(CSave& save);
-	virtual int Restore(CRestore& restore);
 	virtual int ObjectCaps() { return FCAP_ACROSS_TRANSITION | FCAP_IMPULSE_USE; }
 	virtual void SetObjectCollisionBox();
 	virtual void TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType);
@@ -39,14 +37,24 @@ public:
 	void EXPORT Kill();
 	void SetModel(const char* pszModelName);
 
-	bool HasWeapon(WeaponIdType iId);
-	bool PackWeapon(CBaseWeapon* pWeapon);
+	bool PackWeapon(IWeapon* pWeapon);
 
 public:
-	static TYPEDESCRIPTION m_SaveData[];
+	bool m_bHadBeenSold : 1 { false };
+	float m_flNextPhysSFX{ 0.0f };
 
-	CBaseWeapon* m_rgpPlayerItems[MAX_ITEM_TYPES];
-	int m_rgAmmo[MAX_AMMO_SLOTS];
-	bool m_bHadBeenSold;
-	float m_flNextPhysSFX;
+	struct
+	{
+		WeaponIdType what{ WEAPON_NONE };
+		uint32 flags{ 0U };
+		short clip{ 0 };
+	}
+	m_StoredWeapon;
+
+	struct
+	{
+		AmmoIdType what{ AMMO_NONE };
+		short count{ 0 };
+	}
+	m_StoredAmmo;
 };

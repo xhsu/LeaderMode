@@ -86,6 +86,7 @@ $sequence "aim_fire_last" "aim_fire_last" fps 30 { event 5001 0 "26" }
 $sequence "reload_start2" "reload_start2" fps 30 { event 5004 1 "weapons/m1014/m1014_reload_start.wav" } 
 $sequence "reload_start_first2" "reload_start_first2" fps 30 {
   { event 5004 1 "weapons/m1014/m1014_reload_start.wav" } 
+  { event 9527 1 "m_bStartFromEmpty = true;" } 
   { event 5004 19 "weapons/m1014/m1014_shell_takeout.wav" } 
   { event 5004 30 "weapons/m1014/m1014_shell_sideload.wav" } 
   { event 9527 33 "m_iClip++; AMMUNITION--;" } 
