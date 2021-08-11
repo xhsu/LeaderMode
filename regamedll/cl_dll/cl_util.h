@@ -150,6 +150,7 @@ Iter select_randomly(Iter start, Iter end)
 }
 
 void UTIL_Split(const std::string& s, std::vector<std::string>& tokens, const std::string& delimiters = " ");
+void UTIL_Split(const std::string& s, std::vector<char*>& tokens, const std::string& delimiters);
 bool UTIL_EntityValid(const cl_entity_t* pEntity);	// Incomplete.
 
 // trim from start (in place)
@@ -174,4 +175,17 @@ inline bool UTIL_IsStringNumber(const std::string& s)
 {
 	return !s.empty() && std::find_if(s.begin(),
 		s.end(), [](unsigned char c) { return !std::isdigit(c); }) == s.end();
+}
+
+inline int constexpr strlen_c(const char* str)
+{
+	return *str ? 1 + strlen_c(str + 1) : 0;
+}
+
+inline const char* UTIL_GetRestPartOfString(const char* pSource, const char* pDeletion)
+{
+	auto p = strstr(pSource, pDeletion);
+	auto l = strlen(pDeletion);
+
+	return p ? p + l : nullptr;
 }

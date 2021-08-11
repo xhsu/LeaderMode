@@ -8,6 +8,9 @@ Modern Warfare Dev Team
 */
 
 #include "precompiled.h"
+#include <functional>
+#include <string>
+#include <unordered_map>
 
 #pragma region Detectors
 // Declare detectors
@@ -111,6 +114,7 @@ template <typename CWpn>
 struct CWeapon : public IWeapon
 {
 	using BaseClass = CWeapon<CWpn>;
+	using ScriptMap = std::unordered_map<std::string, std::function<void(void)>>;
 
 	enum : int
 	{
@@ -137,6 +141,7 @@ struct CWeapon : public IWeapon
 	bool			m_bStartFromEmpty : 1	{ false };	// For tublar weapons. TODO: move to QC.
 	float			m_flNextInsertAnim		{ -1.0f };	// For tublar weapons.
 	bool			m_bSetForceStopReload:1	{ false };	// For tublar weapons.
+	ScriptMap		m_QCScript;
 
 	struct	// this structure is for anim push and pop. it save & restore weapon state.
 	{
@@ -1353,6 +1358,192 @@ struct CWeapon : public IWeapon
 
 		m_bitsFlags |= WPNSTATE_DEAD;
 		return true;
+	}
+
+#pragma endregion
+
+#pragma region Resource Handling.
+	bool	PackData(void* pDatabase) override
+	{ 
+		return false;
+	}
+
+	bool	ParseData(void* pDatabase) override
+	{
+		return false;
+	}
+
+	bool	Transmit(int iType, void* pParameters) override
+	{
+		switch (iType)
+		{
+		case TRANSMIT_PLAYBACK_EV:
+		{
+			// This can only happen on server side.
+#ifndef CLIENT_DLL
+
+			// Shotgun.
+			if constexpr (IsShotgun<CWpn> && HasEvent<CWpn>)
+			{
+				auto piSeedOfs = static_cast<int*>(pParameters);
+
+				PLAYBACK_EVENT_FULL(
+					FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL,
+					m_pPlayer->edict(),
+					CWpn::m_usEvent,	// Luna: the prefix 'template' here is not declaring a new template, it to explict state that we are referring the templated variable.
+					0,	// No delay.
+					m_pPlayer->GetGunPosition(),
+					m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle,
+					*piSeedOfs, 0.0f,	// Only param 1 is used.
+					m_pPlayer->random_seed,
+					m_iVariation,
+					m_iClientClip > 0,	// This variable is what client reports.
+					m_bInZoom
+				);
+			}
+
+			// Regular weapon.
+			else if constexpr (HasEvent<CWpn>)
+			{
+				auto pvSpread = static_cast<Vector2D*>(pParameters);
+
+				PLAYBACK_EVENT_FULL(
+					FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL,
+					m_pPlayer->edict(),
+					CWpn::m_usEvent,	// Luna: the prefix 'template' here is not declaring a new template, it to explict state that we are referring the templated variable.
+					0,	// No delay.
+					m_pPlayer->GetGunPosition(),
+					m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle,
+					pvSpread->x, pvSpread->y,
+					m_pPlayer->random_seed,
+					m_iVariation,
+					m_iClientClip > 0,	// This variable is what client reports.
+					m_bInZoom
+				);
+			}
+#endif
+			goto LAB_TRANSMIT_FREE_PARAM_AND_RETURN;
+		}
+
+		default:
+			free(pParameters);
+			return false;
+		}
+
+	LAB_TRANSMIT_FREE_PARAM_AND_RETURN:;
+		free(pParameters);
+		return true;
+	}
+
+	void	Precache(void)
+	{
+#ifndef CLIENT_DLL
+		PRECACHE_MODEL(CWpn::VIEW_MODEL);
+		PRECACHE_MODEL(CWpn::WORLD_MODEL);
+		PRECACHE_SOUND(CWpn::FIRE_SFX);
+
+		if constexpr (IS_MEMBER_PRESENTED_CPP20_W(EVENT_FILE))
+			m_usEvent<CWpn> = PRECACHE_EVENT(1, CWpn::EVENT_FILE);
+
+		if constexpr (IS_MEMBER_PRESENTED_CPP20_W(SHELL_MODEL))
+			m_iShell<CWpn> = PRECACHE_MODEL(CWpn::SHELL_MODEL);
+#endif // !CLIENT_DLL
+	}
+
+#pragma endregion
+
+#pragma region Model Handling.
+	bool	ShouldInvertMdl(void) override { return false; }	// Most IB's model doesn't need this.
+	
+	int		CalcBodyParts(void) override { return 0; }	// Determind on classes.
+
+	void	CalcBobParam(double& flOmegaModifier, double& flAmplitudeModifier) override
+	{
+		// normally we don'touch any Omega stuff.
+		flOmegaModifier = 1.0;
+
+		// less shake when scoping.
+		if (m_bInZoom)
+			flAmplitudeModifier = 0.35;
+
+		// common sense: running will cause your hands shake more.
+		else if (m_bitsFlags & WPNSTATE_DASHING)
+			flAmplitudeModifier = 10.0;
+
+		// normal walking shake.
+		else
+			flAmplitudeModifier = 0.75;
+	}
+
+	bool	StudioEvent(const struct mstudioevent_s* pEvent) override
+	{
+#ifdef CLIENT_DLL
+		if (pEvent->event == 9527)
+		{
+			std::vector<char*> rgszTokens;
+			UTIL_Split(pEvent->options, rgszTokens, ";");
+
+			for (auto& token : rgszTokens)
+			{
+				if (m_QCScript.find(token) == m_QCScript.end())
+				{
+#pragma region m_bitsFlags
+					if (auto p = Q_strstr(token, "m_bitsFlags &= ~"); p != nullptr)
+					{
+
+#define FLAG_REG(x)	else if (!Q_strcmp(p, #x)) bitFlag = x
+
+						p += strlen_c("m_bitsFlags &= ~");
+
+						uint32 bitFlag = 0U;
+
+						if (0)	RANDOM_LONG(0, 1);	// Placeholder.
+
+						FLAG_REG(WPNSTATE_AUTO_LAND_UP);
+						FLAG_REG(WPNSTATE_AUTO_RESUME);
+						FLAG_REG(WPNSTATE_BUSY);
+						FLAG_REG(WPNSTATE_DASHING);
+						FLAG_REG(WPNSTATE_DEAD);
+						FLAG_REG(WPNSTATE_DRAW_FIRST);
+						FLAG_REG(WPNSTATE_HOLSTERING);
+						FLAG_REG(WPNSTATE_MELEE);
+						FLAG_REG(WPNSTATE_NO_LHAND);
+						FLAG_REG(WPNSTATE_PAUSED);
+						FLAG_REG(WPNSTATE_QT_EXIT);
+						FLAG_REG(WPNSTATE_QT_RELEASE);
+						FLAG_REG(WPNSTATE_QT_SHOULD_SPAWN);
+						FLAG_REG(WPNSTATE_QUICK_THROWING);
+						FLAG_REG(WPNSTATE_RELOAD_EMPTY);
+						FLAG_REG(WPNSTATE_SHIELD_DRAWN);
+						FLAG_REG(WPNSTATE_SPECIAL_STATE);
+						FLAG_REG(WPNSTATE_VISUAL_FREEZED);
+						FLAG_REG(WPNSTATE_XM8_CHANGING);
+
+						else
+							throw;
+
+						m_QCScript[token] = [this, bitFlag](void) { m_bitsFlags &= ~bitFlag; };
+#undef FLAG_REG
+					}
+#pragma endregion
+
+#pragma region m_pPlayer->m_flNextAttack
+					else if (auto p = Q_strstr(token, "m_pPlayer->m_flNextAttack = "); p != nullptr)
+					{
+						float flValue = std::atof()
+					}
+#pragma endregion
+				}
+
+				m_QCScript[token]();
+			}
+
+			return true;
+		}
+
+#endif // CLIENT_DLL
+
+		return false;
 	}
 
 #pragma endregion

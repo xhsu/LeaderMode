@@ -431,6 +431,19 @@ void UTIL_Split(const std::string& s, std::vector<std::string>& tokens, const st
 	}
 }
 
+void UTIL_Split(const std::string& s, std::vector<char*>& tokens, const std::string& delimiters)
+{
+	std::string::size_type lastPos = s.find_first_not_of(delimiters, 0);
+	std::string::size_type pos = s.find_first_of(delimiters, lastPos);
+
+	while (std::string::npos != pos || std::string::npos != lastPos)
+	{
+		tokens.push_back(Q_strdup(s.substr(lastPos, pos - lastPos).c_str()));
+		lastPos = s.find_first_not_of(delimiters, pos);
+		pos = s.find_first_of(delimiters, lastPos);
+	}
+}
+
 void parse(std::string& s, std::unordered_map<std::string, std::string>& items)
 {
 	std::vector<std::string> elements;
