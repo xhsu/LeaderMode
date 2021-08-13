@@ -187,5 +187,5 @@ inline const char* UTIL_GetRestPartOfString(const char* pSource, const char* pDe
 	auto p = strstr(pSource, pDeletion);
 	auto l = strlen(pDeletion);
 
-	return p ? p + l : nullptr;
+	return p ? (p + l) : nullptr;
 }

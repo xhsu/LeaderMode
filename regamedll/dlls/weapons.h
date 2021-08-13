@@ -384,7 +384,7 @@ public:
 //-----------------------------------------------------------------------------
 // Purpose:	Static Data Manager.
 //-----------------------------------------------------------------------------
-#pragma region Data API.
+#pragma region Constant Data Inquiry API.
 	/*
 	* Purpose:	Aquire information regarding weapon type index.
 	* Usage:	Anytime when this object is valid.

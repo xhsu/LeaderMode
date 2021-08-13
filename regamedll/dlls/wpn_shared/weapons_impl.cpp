@@ -1390,7 +1390,7 @@ struct CWeapon : public IWeapon
 				PLAYBACK_EVENT_FULL(
 					FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL,
 					m_pPlayer->edict(),
-					CWpn::m_usEvent,	// Luna: the prefix 'template' here is not declaring a new template, it to explict state that we are referring the templated variable.
+					m_usEvent<CWpn>,	// Luna: the prefix 'template' here is not declaring a new template, it to explict state that we are referring the templated variable.
 					0,	// No delay.
 					m_pPlayer->GetGunPosition(),
 					m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle,
@@ -1410,7 +1410,7 @@ struct CWeapon : public IWeapon
 				PLAYBACK_EVENT_FULL(
 					FEV_NOTHOST | FEV_RELIABLE | FEV_SERVER | FEV_GLOBAL,
 					m_pPlayer->edict(),
-					CWpn::m_usEvent,	// Luna: the prefix 'template' here is not declaring a new template, it to explict state that we are referring the templated variable.
+					m_usEvent<CWpn>,	// Luna: the prefix 'template' here is not declaring a new template, it to explict state that we are referring the templated variable.
 					0,	// No delay.
 					m_pPlayer->GetGunPosition(),
 					m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle,
@@ -1488,12 +1488,19 @@ struct CWeapon : public IWeapon
 				if (m_QCScript.find(token) == m_QCScript.end())
 				{
 #pragma region m_bitsFlags
-					if (auto p = Q_strstr(token, "m_bitsFlags &= ~"); p != nullptr)
+					if (auto p2 = UTIL_GetRestPartOfString(token, "m_bitsFlags"); p2 != nullptr)
 					{
 
 #define FLAG_REG(x)	else if (!Q_strcmp(p, #x)) bitFlag = x
 
-						p += strlen_c("m_bitsFlags &= ~");
+						auto p = UTIL_GetRestPartOfString(p2, " &= ~");
+						auto bBitsOr = false;
+
+						if (!p2)
+						{
+							p = UTIL_GetRestPartOfString(p2, " |= ");
+							bBitsOr = true;
+						}
 
 						uint32 bitFlag = 0U;
 
@@ -1520,9 +1527,12 @@ struct CWeapon : public IWeapon
 						FLAG_REG(WPNSTATE_XM8_CHANGING);
 
 						else
-							throw;
+							bitFlag = std::stoul(p, nullptr, Q_strstr(token, "0x") ? 16 : 10);
 
-						m_QCScript[token] = [this, bitFlag](void) { m_bitsFlags &= ~bitFlag; };
+						if (bBitsOr)
+							m_QCScript[token] = [this, bitFlag](void) { m_bitsFlags |= bitFlag; };
+						else
+							m_QCScript[token] = [this, bitFlag](void) { m_bitsFlags &= ~bitFlag; };
 #undef FLAG_REG
 					}
 #pragma endregion
@@ -1530,9 +1540,87 @@ struct CWeapon : public IWeapon
 #pragma region m_pPlayer->m_flNextAttack
 					else if (auto p = Q_strstr(token, "m_pPlayer->m_flNextAttack = "); p != nullptr)
 					{
-						float flValue = std::atof()
+						p += strlen_c("m_pPlayer->m_flNextAttack = ");
+
+						float flValue = std::atof(p);
+
+						m_QCScript[token] = [this, flValue](void) { m_pPlayer->m_flNextAttack = flValue; };
 					}
 #pragma endregion
+
+#pragma region m_bStartFromEmpty
+					else if (auto p = Q_strstr(token, "m_bStartFromEmpty = "); p != nullptr)
+					{
+						p += strlen_c("m_bStartFromEmpty = ");
+
+						bool bValue = !Q_stricmp(p, "true");
+
+						m_QCScript[token] = [this, bValue](void) { m_bStartFromEmpty = bValue; };
+					}
+#pragma endregion
+
+#pragma region m_iClip
+					else if (auto p = UTIL_GetRestPartOfString(token, "m_iClip"); p != nullptr)
+					{
+						if (auto p2 = UTIL_GetRestPartOfString(p, " += "); p2)
+						{
+							int iValue = std::atoi(p2);
+							m_QCScript[token] = [this, iValue](void) { m_iClip += iValue; };
+						}
+						else if (auto p2 = UTIL_GetRestPartOfString(p, " -= "); p2)
+						{
+							int iValue = std::atoi(p2);
+							m_QCScript[token] = [this, iValue](void) { m_iClip -= iValue; };
+						}
+						else if (auto p2 = UTIL_GetRestPartOfString(p, " = "); p2)
+						{
+							int iValue = std::atoi(p2);
+							m_QCScript[token] = [this, iValue](void) { m_iClip = iValue; };
+						}
+						else if (Q_strstr(p, "++"))
+						{
+							m_QCScript[token] = [this](void) { m_iClip++; };
+						}
+						else if (Q_strstr(p, "--"))
+						{
+							m_QCScript[token] = [this](void) { m_iClip--; };
+						}
+						else
+							throw;
+					}
+#pragma endregion
+
+#pragma region AMMUNITION
+					else if (auto p = UTIL_GetRestPartOfString(token, "AMMUNITION"); p != nullptr)
+					{
+						if (auto p2 = UTIL_GetRestPartOfString(p, " += "); p2)
+						{
+							int iValue = std::atoi(p2);
+							m_QCScript[token] = [this, iValue](void) { AMMUNITION += iValue; };
+						}
+						else if (auto p2 = UTIL_GetRestPartOfString(p, " -= "); p2)
+						{
+							int iValue = std::atoi(p2);
+							m_QCScript[token] = [this, iValue](void) { AMMUNITION -= iValue; };
+						}
+						else if (auto p2 = UTIL_GetRestPartOfString(p, " = "); p2)
+						{
+							int iValue = std::atoi(p2);
+							m_QCScript[token] = [this, iValue](void) { AMMUNITION = iValue; };
+						}
+						else if (Q_strstr(p, "++"))
+						{
+							m_QCScript[token] = [this](void) { AMMUNITION++; };
+						}
+						else if (Q_strstr(p, "--"))
+						{
+							m_QCScript[token] = [this](void) { AMMUNITION--; };
+						}
+						else
+							throw;
+					}
+#pragma endregion
+
 				}
 
 				m_QCScript[token]();
@@ -1544,6 +1632,311 @@ struct CWeapon : public IWeapon
 #endif // CLIENT_DLL
 
 		return false;
+	}
+
+#pragma endregion
+
+#pragma region Constant Data Inquiry API.
+	WeaponIdType Id(void)	override
+	{
+		// Pistols
+		if constexpr (std::is_same_v<CWpn, CG18C>)
+		{
+			return WEAPON_GLOCK18;
+		}
+		else if constexpr (std::is_same_v<CWpn, CUSP>)
+		{
+			return WEAPON_USP;
+		}
+		else if constexpr (std::is_same_v<CWpn, CAnaconda>)
+		{
+			return WEAPON_ANACONDA;
+		}
+		else if constexpr (std::is_same_v<CWpn, CDEagle>)
+		{
+			return WEAPON_DEAGLE;
+		}
+		else if constexpr (std::is_same_v<CWpn, CFN57>)
+		{
+			return WEAPON_FIVESEVEN;
+		}
+		else if constexpr (std::is_same_v<CWpn, CM45A1>)
+		{
+			return WEAPON_M45A1;
+		}
+
+		// Shotguns
+		else if constexpr (std::is_same_v<CWpn, CKSG12>)
+		{
+			return WEAPON_KSG12;
+		}
+		else if constexpr (std::is_same_v<CWpn, CM1014>)
+		{
+			return WEAPON_M1014;
+		}
+		//else if constexpr (std::is_same_v<CWpn, CAA12>)
+		//{
+		//	return WEAPON_AA12;
+		//}
+
+		// SMGs
+		else if constexpr (std::is_same_v<CWpn, CMP7A1>)
+		{
+			return WEAPON_MP7A1;
+		}
+		//else if constexpr (std::is_same_v<CWpn, CMAC10>)
+		//{
+		//	return WEAPON_MAC10;
+		//}
+		//else if constexpr (std::is_same_v<CWpn, CMP5N>)
+		//{
+		//	return WEAPON_MP5N;
+		//}
+		else if constexpr (std::is_same_v<CWpn, CUMP45>)
+		{
+			return WEAPON_UMP45;
+		}
+		//else if constexpr (std::is_same_v<CWpn, CP90>)
+		//{
+		//	return WEAPON_P90;
+		//}
+		//else if constexpr (std::is_same_v<CWpn, CKrissVector>)
+		//{
+		//	return WEAPON_VECTOR;
+		//}
+
+		// Assault Rifles
+		else if constexpr (std::is_same_v<CWpn, CAK47>)
+		{
+			return WEAPON_AK47;
+		}
+		else if constexpr (std::is_same_v<CWpn, CM4A1>)
+		{
+			return WEAPON_M4A1;
+		}
+		else if constexpr (std::is_same_v<CWpn, CSCARH>)
+		{
+			return WEAPON_SCARH;
+		}
+		else if constexpr (std::is_same_v<CWpn, CXM8>)
+		{
+			return WEAPON_XM8;
+		}
+
+		// Sniper Rifles
+		//else if constexpr (std::is_same_v<CWpn, CSRS>)
+		//{
+		//	return WEAPON_SRS;
+		//}
+		else if constexpr (std::is_same_v<CWpn, CSVD>)
+		{
+			return WEAPON_SVD;
+		}
+		else if constexpr (std::is_same_v<CWpn, CAWP>)
+		{
+			return WEAPON_AWP;
+		}
+		else if constexpr (std::is_same_v<CWpn, CPSG1>)
+		{
+			return WEAPON_PSG1;
+		}
+
+		// LMGs
+		else if constexpr (std::is_same_v<CWpn, CMK46>)
+		{
+			return WEAPON_MK46;
+		}
+		//else if constexpr (std::is_same_v<CWpn, CRPD>)
+		//{
+		//	return WEAPON_RPD;
+		//}
+
+		else
+		{
+			COMPILING_ERROR("Unregistered weapon class presented!");
+		}
+	}
+
+	const struct WeaponInfo*	WpnInfo(void) override { return &g_rgWpnInfo[Id()]; }
+
+	const struct AmmoInfo*		AmmoInfo(void) override { return &g_rgAmmoInfo[WpnInfo()->m_iAmmoType]; }
+
+#pragma endregion
+
+#pragma region Status Inquiry APIs.
+	bool	IsDead(void) override { return m_bitsFlags & WPNSTATE_DEAD; }
+
+	bool	IsDualWielding(void) override { return false; }	// UNDONE. It is querying current status not potential. Waiting for overrides.
+
+	bool	IsDashing(void)	override { return m_bitsFlags & WPNSTATE_DASHING; }
+
+	bool	IsAiming(void)	override { return m_bInZoom; }
+
+	bool	IsBusy(void)	override { return m_bitsFlags & WPNSTATE_BUSY; }
+
+#pragma endregion
+
+#pragma region Capability Inquiry APIs.
+	bool	CanDepoly(void)	override
+	{
+		return !(WpnInfo()->m_bitsFlags & ITEM_FLAG_EXHAUSTIBLE && m_pPlayer && AMMUNITION <= 0);
+	}
+
+	bool	CanHolster(void)	override
+	{
+		if (m_pPlayer->m_flNextAttack <= 0.0f && m_bitsFlags & WPNSTATE_HOLSTERING)	// the holster is completed.
+			return true;
+
+		if (IsBusy())
+			return false;
+
+		return true;
+	}
+
+	bool	CanDrop(void)	override
+	{
+		return CanHolster();	// UNDONE. Should be discuessed.
+	}
+
+	bool	CanDualWield(void)	override
+	{
+		return false;	// pending on overrides.
+	}
+
+#pragma endregion
+
+#pragma region Dynamic Data Inquiry API.
+	float	GetMaxSpeed(void) override
+	{
+		if constexpr (IS_MEMBER_PRESENTED_CPP20_W(MAX_SPEED_ZOOM))
+		{
+			// Slower speed when zoomed in.
+			if (std::roundf(m_pPlayer->pev->fov) < DEFAULT_FOV)
+				return CWpn::MAX_SPEED_ZOOM;
+		}
+
+		if constexpr (IS_MEMBER_PRESENTED_CPP20_W(MAX_SPEED))
+		{
+			return CWpn::MAX_SPEED;
+		}
+		else
+		{
+			return 260.0f;	// Default hovering speed.
+		}
+	}
+
+	bool	InsertAmmo(int iCount) override
+	{
+#ifndef CLIENT_DLL
+		CBaseEntity* pEntity = nullptr;
+		if (m_pPlayer.IsValid())	// player has the priority of having the ammo. although it's impossible that both m_pPlayer and m_pWeaponBox are valid, it must be wrong.
+			pEntity = m_pPlayer;
+		else if (m_pWeaponBox.IsValid())
+			pEntity = m_pWeaponBox;
+#else
+		auto pEntity = m_pPlayer;
+#endif
+		if (!pEntity)	// this is a dead weapon. SOON.
+			return false;
+
+		if (iCount <= 0)
+			return true;	// Of course you can insert air into your mag.
+
+		auto iAmmoType = AmmoInfo()->m_iId;
+		if (iAmmoType <= 0 || iAmmoType >= AMMO_MAXTYPE)	// wrongful ammo type!
+			return false;
+
+		bool bGotAmmo = false;
+
+		if (WpnInfo()->m_iMaxClip < 1)
+		{
+			m_iClip = WEAPON_NOCLIP;
+			bGotAmmo = pEntity->GiveAmmo(iCount, iAmmoType);
+		}
+		else if (m_iClip < WpnInfo()->m_iMaxClip)
+		{
+			if (m_iClip + iCount <= WpnInfo()->m_iMaxClip)	// not enough or just fill.
+			{
+				m_iClip += iCount;
+			}
+			else
+			{
+				iCount = m_iClip + iCount - WpnInfo()->m_iMaxClip;
+				m_iClip = WpnInfo()->m_iMaxClip;
+
+				bGotAmmo = pEntity->GiveAmmo(iCount, iAmmoType);
+			}
+		}
+		else
+		{
+			bGotAmmo = pEntity->GiveAmmo(iCount, iAmmoType);
+		}
+
+#ifndef CLIENT_DLL
+		if (pEntity->IsPlayer())	// only a player can make this sound.
+			EMIT_SOUND(pEntity->edict(), CHAN_ITEM, "items/9mmclip1.wav", VOL_NORM, ATTN_NORM);
+#else
+		PlaySound("items/9mmclip1.wav");
+#endif
+		return bGotAmmo;
+	}
+
+	void	Animate(int iAnim) override
+	{
+#ifndef CLIENT_DLL
+		m_pPlayer->pev->weaponanim = iAnim;
+
+#ifdef CLIENT_WEAPONS
+		if (/*bSkipLocal && */ENGINE_CANSKIP(m_pPlayer->edict()))
+			return;
+#endif
+
+		MESSAGE_BEGIN(MSG_ONE, SVC_WEAPONANIM, nullptr, m_pPlayer->pev);
+		WRITE_BYTE(iAnim);		// sequence number
+		WRITE_BYTE(0);			// weaponmodel bodygroup. it doesn't matter at SV side, since the client will override it anyway.
+		MESSAGE_END();
+#else
+		m_pPlayer->pev->weaponanim = iAnim;
+		gEngfuncs.pfnWeaponAnim(iAnim, CalcBodyParts());
+
+		// save the time for the renderer.
+		g_flTimeViewModelAnimStart = gEngfuncs.GetClientTime();
+#endif
+	}
+
+	void	PlayEmptySound(const Vector& vecWhere) override
+	{
+		if constexpr (IS_MEMBER_PRESENTED_CPP20_W(ATTRIB_SEMIAUTO))
+		{
+			if (!m_bAllowEmptySound)
+				return;
+
+			m_bAllowEmptySound = true;
+		}
+
+		switch (Id())
+		{
+		case WEAPON_USP:
+		case WEAPON_GLOCK18:
+		case WEAPON_ANACONDA:
+		case WEAPON_DEAGLE:
+		case WEAPON_M45A1:
+		case WEAPON_FIVESEVEN:
+#ifndef CLIENT_DLL
+			UTIL_Play3DSoundWithoutHost(m_pPlayer, vecWhere, CWpn::GUN_VOLUME / 8.0, SSZ_DRYFIRE_PISTOL, RANDOM_LONG(92, 108));
+#else
+			PlaySound(g_rgpszSharedString[SSZ_DRYFIRE_PISTOL], 1, RANDOM_LONG(92, 108));
+#endif
+			break;
+
+		default:
+#ifndef CLIENT_DLL
+			UTIL_Play3DSoundWithoutHost(m_pPlayer, vecWhere, CWpn::GUN_VOLUME / 8.0, SSZ_DRYFIRE_RIFLE, RANDOM_LONG(92, 108));
+#else
+			PlaySound(g_rgpszSharedString[SSZ_DRYFIRE_RIFLE], 1, RANDOM_LONG(92, 108));
+#endif
+			break;
+		}
 	}
 
 #pragma endregion

@@ -63,6 +63,7 @@ struct pseudo_global_vars_s	// pseudo globalvars_t
 struct pseudo_gamerule_s	// pseudo CHalfLifeMultiplay
 {
 	bool FShouldSwitchWeapon(CBasePlayer* pPlayer, CBaseWeapon* pWeapon);
+	bool CanHaveAmmo(CBasePlayer* pPlayer, AmmoIdType iId);
 };
 
 class CBasePlayer	// pseudo player
@@ -121,6 +122,7 @@ public:
 	bool	SwitchWeapon(CBaseWeapon* pSwitchingTo);	// skip holster anim.
 	CBaseWeapon* HasPlayerItem(WeaponIdType iId);
 	bool	AddPlayerItem(CBaseWeapon* pItem);
+	bool	GiveAmmo(int iAmount, AmmoIdType iId);
 };
 
 extern int g_runfuncs;

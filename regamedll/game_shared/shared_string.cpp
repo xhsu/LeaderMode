@@ -16,4 +16,6 @@ std::array<const char*, SSZ_COUNT> g_rgpszSharedString =
 	"weapons/m1014/m1014_shell_insert.wav",
 	"weapons/m1014/m1014_shell_sideload.wav",
 	C4_VIEW_MODEL,
+	"weapons/dryfire_pistol.wav",
+	"weapons/dryfire_rifle.wav",
 };

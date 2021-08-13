@@ -268,6 +268,35 @@ bool CBasePlayer::AddPlayerItem(CBaseWeapon* pItem)
 	return false;
 }
 
+bool CBasePlayer::GiveAmmo(int iAmount, AmmoIdType iId)
+{
+	if (iAmount <= 0)
+		return false;	// never add air to your inventory.
+
+	if (pev->flags & FL_SPECTATOR)
+		return false;
+
+	if (iId <= AMMO_NONE || iId >= AMMO_MAXTYPE)
+	{
+		// no ammo.
+		return false;
+	}
+
+	if (!CSGameRules()->CanHaveAmmo(this, iId))	// game rules say I can't have any more of this ammo type.
+		return false;
+
+	int iAdd = Q_min(iAmount, GetAmmoInfo(iId)->m_iMax - m_rgAmmo[iId]);
+	if (iAdd < 1)
+		return false;
+
+	m_rgAmmo[iId] += iAdd;
+
+	// No message sent on client side.
+	// To HUD???
+
+	return true;
+}
+
 //
 // PSEUDO-WEAPON
 //
@@ -345,6 +374,11 @@ bool pseudo_gamerule_s::FShouldSwitchWeapon(CBasePlayer* pPlayer, CBaseWeapon* p
 		return TRUE;
 
 	return FALSE;
+}
+
+bool pseudo_gamerule_s::CanHaveAmmo(CBasePlayer* pPlayer, AmmoIdType iId)
+{
+	return !!(pPlayer->m_rgAmmo[iId] < g_rgAmmoInfo[iId].m_iMax);
 }
 
 void CBaseWeapon::TheWeaponsThink(void)
