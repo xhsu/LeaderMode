@@ -37,17 +37,17 @@ CREATE_MEMBER_DETECTOR_STATIC(RELOAD_SOFT_DELAY_TIME);
 CREATE_MEMBER_DETECTOR_STATIC(RELOAD_EMPTY_SOFT_DELAY_TIME);
 CREATE_MEMBER_DETECTOR_STATIC(CHECK_MAGAZINE);
 
-CREATE_MEMBER_DETECTOR_CUSTOM(ATTRIB_NO_FIRE_UNDERWATER) { {T::ATTRIB_NO_FIRE_UNDERWATER == true}; };
-CREATE_MEMBER_DETECTOR_CUSTOM(ATTRIB_SEMIAUTO) { {T::ATTRIB_SEMIAUTO == true}; };
-CREATE_MEMBER_DETECTOR_CUSTOM(ATTRIB_AIM_FADE_FROM_BLACK) { {T::ATTRIB_AIM_FADE_FROM_BLACK > 0.0f}; };
+CREATE_MEMBER_DETECTOR_CUSTOM(ATTRIB_NO_FIRE_UNDERWATER) { requires T::ATTRIB_NO_FIRE_UNDERWATER; };
+CREATE_MEMBER_DETECTOR_CUSTOM(ATTRIB_SEMIAUTO) { requires T::ATTRIB_SEMIAUTO; };
+CREATE_MEMBER_DETECTOR_CUSTOM(ATTRIB_AIM_FADE_FROM_BLACK) { requires T::ATTRIB_AIM_FADE_FROM_BLACK > 0.0f; };
 
 
 template <typename CWpn>
 concept IsShotgun = requires (CWpn wpn)
 {
 	{CWpn::CONE_VECTOR} -> std::convertible_to<Vector2D>;
-	{CWpn::PROJECTILE_COUNT > 1};
-	{!IS_MEMBER_PRESENTED_CPP20_W(SPREAD_BASELINE)};
+	requires CWpn::PROJECTILE_COUNT > 1;
+	requires !IS_MEMBER_PRESENTED_CPP20_W(SPREAD_BASELINE);
 };
 
 template <typename CWpn>
@@ -60,39 +60,39 @@ concept HasEvent = requires (CWpn wpn)
 template <typename CWpn>
 concept IsTubularMag = requires (CWpn wpn)
 {
-	{CWpn::START_RELOAD > 0};
-	{CWpn::INSERT > 0};
-	{CWpn::AFTER_RELOAD > 0};
+	requires CWpn::START_RELOAD > 0;
+	requires CWpn::INSERT > 0;
+	requires CWpn::AFTER_RELOAD > 0;
 };
 
 template <typename CWpn>
 concept IsManualRechamberWpn = requires (CWpn wpn)
 {
-	{CWpn::RECHAMBER > 0};	// Rechamber anim.
-	{CWpn::RECHAMBER_TIME > 0};
-	{CWpn::BITS_RECHAMBER_ANIM > 0};
+	requires CWpn::RECHAMBER > 0;	// Rechamber anim.
+	requires CWpn::RECHAMBER_TIME > 0;
+	requires CWpn::BITS_RECHAMBER_ANIM > 0;
 };
 
 template <typename CWpn>
 concept CanSteelSight = requires (CWpn wpn)
 {
-	{CWpn::AIM_FOV > 0};
+	requires CWpn::AIM_FOV > 0;
 	{CWpn::AIM_OFFSET} -> std::convertible_to<Vector>;
-	{CWpn::ATTRIB_USE_STEEL_SIGHT == true};
+	requires CWpn::ATTRIB_USE_STEEL_SIGHT;
 };
 
 template <typename CWpn>
 concept CanScopeSight = requires (CWpn wpn)
 {
-	{CWpn::AIM_FOV > 0};
+	requires CWpn::AIM_FOV > 0;
 	{CWpn::AIM_OFFSET} -> std::convertible_to<Vector>;
-	{CWpn::ATTRIB_USE_SCOPE_SIGHT == true};
+	requires CWpn::ATTRIB_USE_SCOPE_SIGHT;
 };
 
 template <typename CWpn>
 concept IsIdleAnimLooped = requires (CWpn wpn)
 {
-	{CWpn::IDLE_TIME > 0.0f};
+	requires CWpn::IDLE_TIME > 0.0f;
 };
 #pragma endregion
 
@@ -534,10 +534,10 @@ struct CWeapon : public IWeapon
 
 	bool	Attach(void* pObject) override
 	{
+#ifndef CLIENT_DLL
 		CBaseEntity* pEntity = static_cast<CBaseEntity*>(pObject);
 		CBasePlayer* pPlayer = dynamic_cast<CBasePlayer*>(pEntity);
 
-#ifndef CLIENT_DLL
 		// how can I add to someone who didn't even exist?
 		if (FNullEnt(pPlayer))
 		{
@@ -557,7 +557,10 @@ struct CWeapon : public IWeapon
 			return false;
 
 		m_pWeaponBox = nullptr;	// make the weaponbox disown me.
+#else
+		auto pPlayer = &gPseudoPlayer;
 #endif
+
 		m_pPlayer = pPlayer;
 		m_bitsFlags |= WPNSTATE_DRAW_FIRST;	// play draw_first anim.
 

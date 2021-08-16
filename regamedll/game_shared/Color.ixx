@@ -43,20 +43,36 @@ export struct Color4b
 	// g - green component (0-255)
 	// b - blue component (0-255)
 	// a - alpha component, controls transparency (0 - transparent, 255 - opaque);
-	constexpr void SetColor(Arithmetic auto r, Arithmetic auto g, Arithmetic auto b, Arithmetic auto a)
+	constexpr void SetColor(std::integral auto r, std::integral auto g, std::integral auto b, std::integral auto a)
 	{
-		_color[0] = (unsigned char)r;
-		_color[1] = (unsigned char)g;
-		_color[2] = (unsigned char)b;
-		_color[3] = (unsigned char)a;
+		_color[0] = static_cast<uint8>(r);
+		_color[1] = static_cast<uint8>(g);
+		_color[2] = static_cast<uint8>(b);
+		_color[3] = static_cast<uint8>(a);
 	}
 
-	constexpr void GetColor(Arithmetic auto& r, Arithmetic auto& g, Arithmetic auto& b, Arithmetic auto& a) const
+	constexpr void SetColor(std::floating_point auto r, std::floating_point auto g, std::floating_point auto b, std::floating_point auto a)
+	{
+		_color[0] = static_cast<uint8>(r * 255.0);
+		_color[1] = static_cast<uint8>(g * 255.0);
+		_color[2] = static_cast<uint8>(b * 255.0);
+		_color[3] = static_cast<uint8>(a * 255.0);
+	}
+
+	constexpr void GetColor(std::integral auto& r, std::integral auto& g, std::integral auto& b, std::integral auto& a) const
 	{
 		r = static_cast<std::remove_reference_t<decltype(r)>>(_color[0]);
 		g = static_cast<std::remove_reference_t<decltype(g)>>(_color[1]);
 		b = static_cast<std::remove_reference_t<decltype(b)>>(_color[2]);
 		a = static_cast<std::remove_reference_t<decltype(a)>>(_color[3]);
+	}
+
+	constexpr void GetColor(std::floating_point auto& r, std::floating_point auto& g, std::floating_point auto& b, std::floating_point auto& a) const
+	{
+		r = static_cast<std::remove_reference_t<decltype(r)>>(_color[0]) / 255.0;
+		g = static_cast<std::remove_reference_t<decltype(g)>>(_color[1]) / 255.0;
+		b = static_cast<std::remove_reference_t<decltype(b)>>(_color[2]) / 255.0;
+		a = static_cast<std::remove_reference_t<decltype(a)>>(_color[3]) / 255.0;
 	}
 
 	constexpr void SetRawColor(uint32 hexColorAGBR)
@@ -120,7 +136,7 @@ export struct Color4b
 		}
 	}
 
-	constexpr const uint8& operator[](int index) const
+	constexpr const uint8& operator[](std::integral auto index) const
 	{
 		if (index >= _countof(_color))
 			throw;
@@ -153,8 +169,7 @@ export struct Color4b
 		}
 	}
 
-	constexpr bool operator== (const Color4b& rhs) const { return (*((int*)this) == *((int*)&rhs)); }
-	constexpr bool operator!= (const Color4b& rhs) const { return !(operator==(rhs)); }
+	constexpr bool operator== (const Color4b& rhs) const { return (*((int*)this) == *((int*)&rhs)); }	// operator!= will be automatically generated in C++20.
 	constexpr Color4b& operator=(const Color4b& rhs) { *((int*)this) = *((int*)&rhs); return *this; }
 
 	constexpr decltype(auto) operator~() const { return Color4b(*((uint32*)this) ^ 0xFFFFFF); }	// Reversed color. It is easier on HEX calculation.
@@ -336,8 +351,12 @@ export struct Color4f
 		}
 	}
 
-	constexpr void GetHSV(double& h, double& s, double& v) const
+	constexpr void GetHSV(Arithmetic auto& h, Arithmetic auto& s, Arithmetic auto& v) const
 	{
+		using hueTy = std::remove_reference_t<decltype(h)>;
+		using saturationTy = std::remove_reference_t<decltype(s)>;
+		using valueTy = std::remove_reference_t<decltype(v)>;
+
 		double r = _r * 255.0, g = _g * 255.0, b = _b * 255.0;	// mask the function call.
 		auto min = std::min({ r, g, b });
 		auto max = std::max({ r, g, b });
@@ -348,7 +367,7 @@ export struct Color4f
 		if (delta < DBL_EPSILON)
 		{
 			s = 0;
-			h = std::numeric_limits<double>::quiet_NaN();	// undefined
+			h = std::numeric_limits<hueTy>::quiet_NaN();	// undefined
 
 			return;
 		}
@@ -362,7 +381,7 @@ export struct Color4f
 			// if max is 0, then r = g = b = 0              
 			// s = 0, h is undefined
 			s = 0.0;
-			h = std::numeric_limits<double>::quiet_NaN();	// its now undefined
+			h = std::numeric_limits<hueTy>::quiet_NaN();	// its now undefined
 
 			return;
 		}
@@ -415,8 +434,12 @@ export struct Color4f
 		}
 	}
 
-	constexpr void GetHSL(double& h, double& s, double& l) const
+	constexpr void GetHSL(Arithmetic auto& h, Arithmetic auto& s, Arithmetic auto& l) const
 	{
+		using hueTy = std::remove_reference_t<decltype(h)>;
+		using saturationTy = std::remove_reference_t<decltype(s)>;
+		using lightnessTy = std::remove_reference_t<decltype(l)>;
+
 		auto min = std::min({ _r, _g, _b });
 		auto max = std::max({ _r, _g, _b });
 		auto delta = max - min;
@@ -558,7 +581,7 @@ export struct Color4f
 
 	// Operators.
 	// Retrieve these actually returns you the original floating color value.
-	constexpr double& operator[](int index)
+	constexpr double& operator[](std::integral auto index)
 	{
 		if (index >= 4)	// [0 - R, 1 - G, 2 - B, 3 - A]
 			throw;
@@ -592,7 +615,7 @@ export struct Color4f
 	}
 
 	// Const version for those const object.
-	constexpr const double operator[](int index) const
+	constexpr const double operator[](std::integral auto index) const
 	{
 		if (index >= 4)	// [0 - R, 1 - G, 2 - B, 3 - A]
 			throw;
@@ -643,9 +666,7 @@ export struct Color4f
 	}
 
 	constexpr bool operator== (const Color4f& rhs) const { return _r == rhs._r && _g == rhs._g && _b == rhs._b && _a == rhs._a; }	// Shame on C++, 'memcmp' should be a constexpr function.
-	constexpr bool operator== (const Color4b& rhs) const { return GetRawColor() == rhs.GetRawColor(); }
-	constexpr bool operator!= (const Color4f& rhs) const { return _r != rhs._r || _g != rhs._g || _b != rhs._b || _a != rhs._a; }
-	constexpr bool operator!= (const Color4b& rhs) const { return GetRawColor() != rhs.GetRawColor(); }
+	constexpr bool operator== (const Color4b& rhs) const { return GetRawColor() == rhs.GetRawColor(); }	// Operator!= will be automatically generated by C++20.
 
 	constexpr Color4f& operator=(const Color4f& rhs) { _r = rhs._r; _g = rhs._g; _b = rhs._b; _a = rhs._a; return *this; }	// Shame on C++, 'memcpy' should be a constexpr function.
 	constexpr Color4f& operator=(const Color4b& rhs) { SetRawColor(rhs); return *this; }
@@ -660,10 +681,10 @@ export struct Color4f
 	constexpr decltype(auto) operator+=(const Color4b& v) { return (*this = *this + v); }
 	constexpr decltype(auto) operator-=(const Color4b& v) { return (*this = *this - v); }
 
-	constexpr decltype(auto) operator*(float fl) const { return RGB(_r * fl, _g * fl, _b * fl); }
-	constexpr decltype(auto) operator/(float fl) const { return RGB(_r / fl, _g / fl, _b / fl); }
-	constexpr decltype(auto) operator*=(float fl) { return (*this = *this * fl); }
-	constexpr decltype(auto) operator/=(float fl) { return (*this = *this / fl); }
+	constexpr decltype(auto) operator*(Arithmetic auto fl) const { return RGB(_r * fl, _g * fl, _b * fl); }
+	constexpr decltype(auto) operator/(Arithmetic auto fl) const { return RGB(_r / fl, _g / fl, _b / fl); }
+	constexpr decltype(auto) operator*=(Arithmetic auto fl) { return (*this = *this * fl); }
+	constexpr decltype(auto) operator/=(Arithmetic auto fl) { return (*this = *this / fl); }
 
 	constexpr decltype(auto) operator~() const { return Color4f(GetRawRGB() ^ 0xFFFFFF); }	// Inverse color. By definition it is the hue that actually 'reversed'. i.e. (hue + 180) % 360.
 
