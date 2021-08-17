@@ -2,11 +2,12 @@ module;
 
 #define _USE_MATH_DEFINES
 #include <float.h>
-#include <math.h>
 
+#include <array>
 #include <bit>
-#include <cmath>
 #include <concepts>
+
+#include "gcem.hpp"
 
 export module Vector;
 
@@ -33,67 +34,70 @@ export inline constexpr float rsqrt(float x)
 #endif
 }
 
-export template <typename T>
-concept IsDouble = requires (T t)
+inline constexpr auto Q_abs(const auto& v)
 {
-	{t.x} -> std::same_as<float>;
-	{t.y} -> std::same_as<float>;
-};
+	return v >= 0 ? v : -v;
+}
+
+// Completement of std::integral and std::floating_point.
+template<typename T> concept Arithmetic = std::is_arithmetic_v<T>;
+// Completement of std::is_pointer.
+template<typename T> concept IsIterator = std::is_pointer_v<typename std::iterator_traits<T>::pointer>;
+
+// Concepts for this module.
+template<typename T> concept ProperIter = requires(T iter) { *iter++; };
+template<typename A> concept ProperArray2 = requires(A array) { requires array.max_size() >= 2U; };
+template<typename A> concept ProperArray3 = requires(A array) { requires array.max_size() >= 3U; };
 
 export using vec_t = float;
+constexpr auto VEC_EPSILON = std::numeric_limits<vec_t>::epsilon();
+constexpr auto VEC_NAN = std::numeric_limits<vec_t>::quiet_NaN();
+constexpr auto VEC_INFINITY = std::numeric_limits<vec_t>::infinity();
 
 // Used for many pathfinding and many other operations that are treated as planar rather than 3D.
 export struct Vector2D
 {
-	// Construction/destruction
+	// Construction
 	constexpr Vector2D(Vector2D&& s) = default;
 	Vector2D& operator=(const Vector2D& s) = default;
 	Vector2D& operator=(Vector2D&& s) = default;
 	constexpr Vector2D() : x(0), y(0) {}
-	template<typename TX, typename TY> constexpr Vector2D(TX X, TY Y) : x(static_cast<vec_t>(X)), y(static_cast<vec_t>(Y)) {}
-	template<typename T> constexpr Vector2D(T sideLength) : width(static_cast<vec_t>(sideLength)), height(static_cast<vec_t>(sideLength)) {}
-	template<typename T> constexpr Vector2D(const T& v) : x(v.x), y(v.y) {}
-	template<typename T> explicit constexpr Vector2D(const T rgfl[2]) : x(rgfl[0]), y(rgfl[1]) {}
+	constexpr Vector2D(Arithmetic auto X, Arithmetic auto Y) : x(static_cast<vec_t>(X)), y(static_cast<vec_t>(Y)) {}
+	explicit constexpr Vector2D(Arithmetic auto sideLength) : width(static_cast<vec_t>(sideLength)), height(static_cast<vec_t>(sideLength)) {}
+	template<Arithmetic T, std::size_t size> requires(size >= 2U) explicit constexpr Vector2D(const T (&rgfl)[size]) : x(static_cast<vec_t>(rgfl[0])), y(static_cast<vec_t>(rgfl[1])) {}
 
 	// Operators
 	constexpr decltype(auto) operator-()         const { return Vector2D(-x, -y); }
-	constexpr bool operator==(const Vector2D& v) const { return x == v.x && y == v.y; }
-	constexpr bool operator!=(const Vector2D& v) const { return !(*this == v); }
+	constexpr bool operator==(const Vector2D& v) const { return Q_abs(x - v.x) < VEC_EPSILON && Q_abs(y - v.y) < VEC_EPSILON; }
+	constexpr std::strong_ordering operator<=> (const Vector2D& v) const { auto const lhs = Length(), rhs = v.Length(); return lhs < rhs ? std::strong_ordering::less : lhs > rhs ? std::strong_ordering::greater : std::strong_ordering::equal; }
+	constexpr std::strong_ordering operator<=> (Arithmetic auto fl) const { auto const l = static_cast<decltype(fl)>(Length()); return l < fl ? std::strong_ordering::less : l > fl ? std::strong_ordering::greater : std::strong_ordering::equal; }
+
+	constexpr decltype(auto) operator=(std::nullptr_t) { return Zero(); }
 
 	constexpr decltype(auto) operator+(const Vector2D& v)  const { return Vector2D(x + v.x, y + v.y); }
 	constexpr decltype(auto) operator-(const Vector2D& v)  const { return Vector2D(x - v.x, y - v.y); }
-	constexpr decltype(auto) operator*(const Vector2D& v)  const { return Vector2D(x * v.x, y * v.y); }
-	constexpr decltype(auto) operator/(const Vector2D& v)  const { return Vector2D(x / v.x, y / v.y); }
-
 	constexpr decltype(auto) operator+=(const Vector2D& v) { return (*this = *this + v); }
 	constexpr decltype(auto) operator-=(const Vector2D& v) { return (*this = *this - v); }
-	constexpr decltype(auto) operator*=(const Vector2D& v) { return (*this = *this * v); }
-	constexpr decltype(auto) operator/=(const Vector2D& v) { return (*this = *this / v); }
 
-	template<typename T> constexpr decltype(auto) operator*(T fl) const { return Vector2D(x * fl, y * fl); }
-	template<typename T> constexpr decltype(auto) operator/(T fl) const { return Vector2D(x / fl, y / fl); }
-
-	constexpr decltype(auto) operator=(std::nullptr_t) { return Vector2D(0, 0); }
-	template<typename T> constexpr decltype(auto) operator*=(T fl) { return (*this = *this * fl); }
-	template<typename T> constexpr decltype(auto) operator/=(T fl) { return (*this = *this / fl); }
+	constexpr decltype(auto) operator*(Arithmetic auto fl) const { return Vector2D(x * fl, y * fl); }
+	constexpr decltype(auto) operator/(Arithmetic auto fl) const { return Vector2D(x / fl, y / fl); }
+	constexpr decltype(auto) operator*=(Arithmetic auto fl) { return (*this = *this * fl); }
+	constexpr decltype(auto) operator/=(Arithmetic auto fl) { return (*this = *this / fl); }
 
 	// Static methods
-	static constexpr decltype(auto) Zero() { return Vector2D(0, 0); }
-	static constexpr decltype(auto) I() { return Vector2D(1, 0); }
-	static constexpr decltype(auto) J() { return Vector2D(0, 1); }
+	static constexpr Vector2D Zero() { return Vector2D(0, 0); }
+	static constexpr Vector2D I() { return Vector2D(1, 0); }
+	static constexpr Vector2D J() { return Vector2D(0, 1); }
 
 	// Methods
 	inline void Clear() { x = 0; y = 0; }
-	template<class OutputIter> inline void CopyToIter(OutputIter arr) const { *arr++ = x; *arr++ = y; }
+	inline void CopyToIter(ProperIter auto it) const { *it++ = x; *it++ = y; }
+	inline void CopyToArray(ProperArray2 auto arr) const { arr[0] = x; arr[1] = y; }
 	constexpr float Length() const { return 1.0f / rsqrt(x * x + y * y); }	// Get the vector's magnitude
 	constexpr vec_t LengthSquared() const { return x * x + y * y; }	// Get the vector's magnitude squared
-
-	constexpr operator float* () { return &x; } // Vectors will now automatically convert to float * when needed
-	constexpr operator const float* () const { return &x; } // Vectors will now automatically convert to float * when needed
-
 	constexpr Vector2D Normalize() const
 	{
-		if (LengthSquared() <= FLT_EPSILON)
+		if (LengthSquared() <= VEC_EPSILON)
 			return Zero();
 
 		auto invsqrt = rsqrt(x * x + y * y);
@@ -101,7 +105,7 @@ export struct Vector2D
 	}
 	constexpr float NormalizeInPlace()
 	{
-		if (LengthSquared() <= FLT_EPSILON)
+		if (LengthSquared() <= VEC_EPSILON)
 		{
 			x = 1;
 			y = 0;
@@ -116,17 +120,17 @@ export struct Vector2D
 
 		return 1.0f / fl;
 	}
-	template<typename T> constexpr Vector2D SetLength(T newlen) const
+	constexpr Vector2D SetLength(Arithmetic auto newlen) const
 	{
-		if (LengthSquared() <= FLT_EPSILON)
+		if (LengthSquared() <= VEC_EPSILON)
 			return Zero();
 
 		auto fl = static_cast<float>(newlen) * rsqrt(x * x + y * y);
 		return Vector2D(x * fl, y * fl);
 	}
-	template<typename T> constexpr void SetLengthInPlace(T newlen)
+	constexpr void SetLengthInPlace(Arithmetic auto newlen)
 	{
-		if (LengthSquared() <= FLT_EPSILON)
+		if (LengthSquared() <= VEC_EPSILON)
 		{
 			x = 0;
 			y = 0;
@@ -139,33 +143,29 @@ export struct Vector2D
 		x *= fl;
 		y *= fl;
 	}
-
-	// LUNA: comparison with Vector3 was moved to the end of this file.
-	template<typename T> constexpr bool operator< (T fl) const { return !!(LengthSquared() < (fl * fl)); }
-	template<typename T> constexpr bool operator<= (T fl) const { return !!(LengthSquared() <= (fl * fl)); }
-	constexpr bool operator< (const Vector2D& v) const { return !!(LengthSquared() < v.LengthSquared()); }
-	constexpr bool operator<= (const Vector2D& v) const { return !!(LengthSquared() <= v.LengthSquared()); }
-	template<typename T> constexpr bool operator> (T fl) const { return !!(LengthSquared() > (fl * fl)); }
-	template<typename T> constexpr bool operator>= (T fl) const { return !!(LengthSquared() >= (fl * fl)); }
-	constexpr bool operator> (const Vector2D& v) const { return !!(LengthSquared() > v.LengthSquared()); }
-	constexpr bool operator>= (const Vector2D& v) const { return !!(LengthSquared() >= v.LengthSquared()); }
-
-	template<typename T = float>
-	constexpr bool IsZero(T tolerance = FLT_EPSILON) const
+	constexpr bool IsZero(vec_t tolerance = VEC_EPSILON) const
 	{
-		return (x > -tolerance && x < tolerance&&
-			y > -tolerance && y < tolerance);
+		return (
+			x > -tolerance && x < tolerance &&
+			y > -tolerance && y < tolerance
+		);
 	}
+	constexpr bool IsNaN() const { return x == VEC_NAN || y == VEC_NAN; }
+
+	// Conversion
+	constexpr operator float* () { return &x; } // Vectors will now automatically convert to float * when needed
+	constexpr operator const float* () const { return &x; } // Vectors will now automatically convert to float * when needed
 
 	explicit constexpr operator bool () const { return !IsZero(); }	// Can be placed in if() now.
+	explicit constexpr operator float() const { return Length(); }
 
-	// anti-clockwise.
-	template<typename T>
-	Vector2D Rotate(T angle) const
+	// Linear Algebra
+	// Rotate in counter-clockwise. Angles in degree.
+	constexpr Vector2D Rotate(Arithmetic auto angle) const
 	{
 		auto a = (static_cast<double>(angle) * M_PI / 180.0);
-		auto c = cos(a);
-		auto s = sin(a);
+		auto c = gcem::cos(a);
+		auto s = gcem::sin(a);
 
 		return Vector2D(
 			c * x - s * y,
@@ -178,31 +178,25 @@ export struct Vector2D
 	union { vec_t y; vec_t height; };
 };
 
-export inline constexpr auto DotProduct(const Vector2D& a, const Vector2D& b)
+export constexpr auto DotProduct(const Vector2D& a, const Vector2D& b)
 {
 	return (a.x * b.x + a.y * b.y);
 }
 
-export template<typename T>
-inline constexpr Vector2D operator*(T fl, const Vector2D& v)
+export constexpr Vector2D operator*(Arithmetic auto fl, const Vector2D& v)
 {
 	return v * fl;
 }
 
-export inline auto operator^(const Vector2D& a, const Vector2D& b)
+// Get the angle between two vectors. Returns an angle in degree.
+export constexpr auto operator^(const Vector2D& a, const Vector2D& b)
 {
-	auto length_ab = a.Length() * b.Length();
+	double length_ab = a.Length() * b.Length();
 
-	if (length_ab < FLT_EPSILON)
+	if (length_ab < DBL_EPSILON)
 		return 0.0;
 
-	return acos(DotProduct(a, b) / length_ab) * (180.0 / M_PI);
-}
-
-template<typename T>
-inline constexpr auto Q_abs(const T& v)
-{
-	return v > static_cast<T>(0) ? v : -v;
+	return gcem::acos(DotProduct(a, b) / length_ab) * (180.0 / M_PI);
 }
 
 // 3D Vector
@@ -214,69 +208,53 @@ export struct Vector
 	Vector& operator=(const Vector& s) = default;
 	Vector& operator=(Vector&& s) = default;
 	constexpr Vector() : x(0), y(0), z(0) {}
-	template<typename TX, typename TY, typename TZ> constexpr Vector(TX X, TY Y, TZ Z) : x(static_cast<vec_t>(X)), y(static_cast<vec_t>(Y)), z(static_cast<vec_t>(Z)) {}
-	template<typename TZ> constexpr Vector(const Vector2D& v2d, TZ Z) : x(v2d.x), y(v2d.y), z(static_cast<vec_t>(Z)) {}
-	template<typename T> constexpr Vector(const T rgfl[3]) : x(static_cast<vec_t>(rgfl[0])), y(static_cast<vec_t>(rgfl[1])), z(static_cast<vec_t>(rgfl[2])) {}
+	constexpr Vector(Arithmetic auto X, Arithmetic auto Y, Arithmetic auto Z) : x(static_cast<vec_t>(X)), y(static_cast<vec_t>(Y)), z(static_cast<vec_t>(Z)) {}
+	constexpr Vector(const Vector2D& v2d, Arithmetic auto Z) : x(v2d.x), y(v2d.y), z(static_cast<vec_t>(Z)) {}
+	template<Arithmetic T, std::size_t size> requires(size >= 3U) explicit constexpr Vector(const T(&rgfl)[size]) : x(static_cast<vec_t>(rgfl[0])), y(static_cast<vec_t>(rgfl[1])), z(static_cast<vec_t>(rgfl[2])) {}
 
 	// Operators
 	constexpr decltype(auto) operator-()       const { return Vector(-x, -y, -z); }
-	constexpr bool operator==(const Vector& v) const { return Q_abs(x - v.x) <= FLT_EPSILON && Q_abs(y - v.y) <= FLT_EPSILON && Q_abs(z - v.z) <= FLT_EPSILON; }
-	constexpr bool operator!=(const Vector& v) const { return !(*this == v); }
+	constexpr bool operator==(const Vector& v) const { return Q_abs(x - v.x) < VEC_EPSILON && Q_abs(y - v.y) < VEC_EPSILON && Q_abs(z - v.z) < VEC_EPSILON; }
+	constexpr std::strong_ordering operator<=> (const Vector& v) const { auto const lhs = Length(), rhs = v.Length(); return lhs < rhs ? std::strong_ordering::less : lhs > rhs ? std::strong_ordering::greater : std::strong_ordering::equal; }
+	constexpr std::strong_ordering operator<=> (Arithmetic auto fl) const { auto const l = static_cast<decltype(fl)>(Length()); return l < fl ? std::strong_ordering::less : l > fl ? std::strong_ordering::greater : std::strong_ordering::equal; }
 
-	constexpr decltype(auto) operator=(std::nullptr_t) { return Vector(0, 0, 0); }
+	constexpr decltype(auto) operator=(std::nullptr_t) { return Zero(); }
 
 	constexpr decltype(auto) operator+(const Vector& v) const { return Vector(x + v.x, y + v.y, z + v.z); }
 	constexpr decltype(auto) operator-(const Vector& v) const { return Vector(x - v.x, y - v.y, z - v.z); }
 	constexpr decltype(auto) operator+=(const Vector& v) { return (*this = *this + v); }
 	constexpr decltype(auto) operator-=(const Vector& v) { return (*this = *this - v); }
 
-	constexpr decltype(auto) operator*(float fl) const { return Vector(vec_t(x * fl), vec_t(y * fl), vec_t(z * fl)); }
-	constexpr decltype(auto) operator/(float fl) const { return Vector(vec_t(x / fl), vec_t(y / fl), vec_t(z / fl)); }
-	constexpr decltype(auto) operator*=(float fl) { return (*this = *this * fl); }
-	constexpr decltype(auto) operator/=(float fl) { return (*this = *this / fl); }
+	constexpr decltype(auto) operator*(Arithmetic auto fl) const { return Vector(x * fl, y * fl, z * fl); }
+	constexpr decltype(auto) operator/(Arithmetic auto fl) const { return Vector(x / fl, y / fl, z / fl); }
+	constexpr decltype(auto) operator*=(Arithmetic auto fl) { return (*this = *this * fl); }
+	constexpr decltype(auto) operator/=(Arithmetic auto fl) { return (*this = *this / fl); }
 
 	// Static methods
-	static constexpr decltype(auto) Zero() { return Vector(0, 0, 0); }
-	static constexpr decltype(auto) I() { return Vector(1, 0, 0); }
-	static constexpr decltype(auto) J() { return Vector(0, 1, 0); }
-	static constexpr decltype(auto) K() { return Vector(0, 0, 1); }
+	static constexpr Vector Zero() { return Vector(0, 0, 0); }
+	static constexpr Vector I() { return Vector(1, 0, 0); }
+	static constexpr Vector J() { return Vector(0, 1, 0); }
+	static constexpr Vector K() { return Vector(0, 0, 1); }
 
-	void Clear()
-	{
-		x = 0;
-		y = 0;
-		z = 0;
-	}
-
-	template<class OutputIter>
-	void CopyToIter(OutputIter arr) const
-	{
-		*arr++ = x;
-		*arr++ = y;
-		*arr++ = z;
-	}
-
+	// Methods
+	inline void Clear() { x = y = z = 0; }
+	inline void CopyToIter(ProperIter auto it) const { *it++ = x; *it++ = y; *it++ = z; }
+	inline void CopyToArray(ProperArray3 auto arr) const { arr[0] = x; arr[1] = y; arr[2] = z; }
 	constexpr float Length() const { return 1.0f / rsqrt(x * x + y * y + z * z); }	// Get the vector's magnitude
 	constexpr vec_t LengthSquared() const { return (x * x + y * y + z * z); }	// Get the vector's magnitude squared
 	constexpr float Length2D() const { return 1.0f / rsqrt(x * x + y * y); }	// Get the vector's magnitude, but only consider its X and Y component
 	constexpr float Length2DSquared() const { return (x * x + y * y); }
-
-	constexpr operator float* () { return &x; } // Vectors will now automatically convert to float * when needed
-	constexpr operator const float* () const { return &x; } // Vectors will now automatically convert to float * when needed
-
-	// for out precision normalize
 	constexpr Vector Normalize() const
 	{
-		if (LengthSquared() <= FLT_EPSILON)
+		if (LengthSquared() <= VEC_EPSILON)
 			return Zero();
 
 		auto invsqrt = rsqrt(x * x + y * y + z * z);
 		return Vector(x * invsqrt, y * invsqrt, z * invsqrt);
 	}
-
 	constexpr float NormalizeInPlace()
 	{
-		if (LengthSquared() <= FLT_EPSILON)
+		if (LengthSquared() <= VEC_EPSILON)
 		{
 			x = 1;
 			y = 0;
@@ -293,19 +271,17 @@ export struct Vector
 
 		return 1.0f / fl;
 	}
-
-	template<typename T> constexpr Vector SetLength(T newlen) const
+	constexpr Vector SetLength(Arithmetic auto newlen) const
 	{
-		if (LengthSquared() <= FLT_EPSILON)
+		if (LengthSquared() <= VEC_EPSILON)
 			return Zero();
 
 		auto fl = static_cast<float>(newlen) * rsqrt(x * x + y * y + z * z);
 		return Vector(x * fl, y * fl, z * fl);
 	}
-
-	template<typename T> constexpr void SetLengthInPlace(T newlen)
+	constexpr void SetLengthInPlace(Arithmetic auto newlen)
 	{
-		if (LengthSquared() <= FLT_EPSILON)
+		if (LengthSquared() <= VEC_EPSILON)
 		{
 			x = 0;
 			y = 0;
@@ -320,49 +296,41 @@ export struct Vector
 		y *= fl;
 		z *= fl;
 	}
-
-	constexpr Vector2D Make2D() const
+	constexpr bool IsZero(vec_t tolerance = VEC_EPSILON) const
 	{
-		return Vector2D(x, y);
+		return (
+			x > -tolerance && x < tolerance &&
+			y > -tolerance && y < tolerance &&
+			z > -tolerance && z < tolerance
+		);
 	}
+	constexpr bool IsNaN() const { return x == VEC_NAN || y == VEC_NAN || z == VEC_NAN; }
+	constexpr Vector2D Make2D() const { return Vector2D(x, y); }
 
-	template<typename T> constexpr bool operator< (T fl) const { return !!(LengthSquared() < (fl * fl)); }
-	template<typename T> constexpr bool operator<= (T fl) const { return !!(LengthSquared() <= (fl * fl)); }
-	constexpr bool operator< (const Vector& v) const { return !!(LengthSquared() < v.LengthSquared()); }
-	constexpr bool operator<= (const Vector& v) const { return !!(LengthSquared() <= v.LengthSquared()); }
-	template<typename T> constexpr bool operator> (T fl) const { return !!(LengthSquared() > (fl * fl)); }
-	template<typename T> constexpr bool operator>= (T fl) const { return !!(LengthSquared() >= (fl * fl)); }
-	constexpr bool operator> (const Vector& v) const { return !!(LengthSquared() > v.LengthSquared()); }
-	constexpr bool operator>= (const Vector& v) const { return !!(LengthSquared() >= v.LengthSquared()); }
-
-	constexpr bool IsZero() const
-	{
-		return (x > -FLT_EPSILON && x < FLT_EPSILON&&
-			y > -FLT_EPSILON && y < FLT_EPSILON&&
-			z > -FLT_EPSILON && z < FLT_EPSILON);
-	}
-
+	// Conversion
+	constexpr operator float* () { return &x; } // Vectors will now automatically convert to float * when needed
+	constexpr operator const float* () const { return &x; } // Vectors will now automatically convert to float * when needed
+	
 	explicit constexpr operator bool() const { return !IsZero(); }	// Can be placed in if() now.
+	explicit constexpr operator float() const { return Length(); }
 
-	bool IsNaN() const
-	{
-		return std::isnan(x) || std::isnan(y) || std::isnan(z);
-	}
-
-	Vector MakeVector() const
+	// Linear Algebra
+	// Convert Eular angles to its 'forward' vector.
+	constexpr Vector MakeVector() const
 	{
 		auto rad_pitch = (pitch * M_PI / 180.0f);
 		auto rad_yaw = (yaw * M_PI / 180.0f);
-		auto tmp = std::cos(rad_pitch);
+		auto tmp = gcem::cos(rad_pitch);
 
 		return Vector(
-			-tmp * -std::cos(rad_yaw),	// x
-			std::sin(rad_yaw) * tmp,	// y
-			-std::sin(rad_pitch)		// z
+			-tmp * -gcem::cos(rad_yaw),	// x
+			gcem::sin(rad_yaw) * tmp,	// y
+			-gcem::sin(rad_pitch)		// z
 		);
 	}
 
-	Vector VectorAngles(void) const
+	// Convert an forward vector to a set of Eular angles.
+	constexpr Vector VectorAngles(void) const
 	{
 		Vector a;
 		a.pitch = 0;
@@ -379,14 +347,14 @@ export struct Vector
 		}
 		else
 		{
-			a.yaw = vec_t(std::atan2(-y, x) * 180.0 / M_PI);
+			a.yaw = vec_t(gcem::atan2(-y, x) * 180.0 / M_PI);
 			if (a.yaw < 0)
 				a.yaw += 360;
 
 			a.yaw = 360.0f - a.yaw;	// LUNA: why???
 
 			auto tmp = rsqrt(x * x + y * y);
-			a.pitch = vec_t(std::atan(z * tmp) * 180.0 / M_PI);
+			a.pitch = vec_t(gcem::atan(z * tmp) * 180.0 / M_PI);
 			if (a.pitch < 0)
 				a.pitch += 360;
 		}
@@ -394,11 +362,11 @@ export struct Vector
 		return a;
 	}
 
-	Vector RotateX(float angle) const
+	constexpr Vector RotateX(float angle) const
 	{
 		auto a = (angle * M_PI / 180.0);
-		auto c = std::cos(a);
-		auto s = std::sin(a);
+		auto c = gcem::cos(a);
+		auto s = gcem::sin(a);
 
 		return Vector(
 			x,
@@ -407,11 +375,11 @@ export struct Vector
 		);
 	}
 
-	Vector RotateY(float angle) const
+	constexpr Vector RotateY(float angle) const
 	{
 		auto a = (angle * M_PI / 180.0);
-		auto c = std::cos(a);
-		auto s = std::sin(a);
+		auto c = gcem::cos(a);
+		auto s = gcem::sin(a);
 
 		return Vector(
 			c * x + s * z,
@@ -420,11 +388,11 @@ export struct Vector
 		);
 	}
 
-	Vector RotateZ(float angle) const
+	constexpr Vector RotateZ(float angle) const
 	{
 		auto a = (angle * M_PI / 180.0);
-		auto c = std::cos(a);
-		auto s = std::sin(a);
+		auto c = gcem::cos(a);
+		auto s = gcem::sin(a);
 
 		return Vector(
 			c * x - s * y,
@@ -439,22 +407,22 @@ export struct Vector
 	union { vec_t z; vec_t roll;	};
 };
 
-export inline constexpr Vector operator*(float fl, const Vector& v)
+export constexpr Vector operator*(float fl, const Vector& v)
 {
 	return v * fl;
 }
 
-export inline constexpr auto DotProduct(const Vector& a, const Vector& b)
+export constexpr auto DotProduct(const Vector& a, const Vector& b)
 {
 	return (a.x * b.x + a.y * b.y + a.z * b.z);
 }
 
-export inline constexpr auto DotProduct2D(const Vector& a, const Vector& b)
+export constexpr auto DotProduct2D(const Vector& a, const Vector& b)
 {
 	return (a.x * b.x + a.y * b.y);
 }
 
-export inline constexpr auto CrossProduct(const Vector& a, const Vector& b)
+export constexpr auto CrossProduct(const Vector& a, const Vector& b)
 {
 	return Vector(
 		a.y * b.z - a.z * b.y,
@@ -463,12 +431,119 @@ export inline constexpr auto CrossProduct(const Vector& a, const Vector& b)
 	);
 }
 
-export inline auto operator^(const Vector& a, const Vector& b)
+// Get the angle between two vectors. Returns an angle in degree.
+export constexpr auto operator^(const Vector& a, const Vector& b)
 {
 	double length_ab = static_cast<double>(a.Length() * b.Length());
 
 	if (Q_abs(length_ab) < DBL_EPSILON)
 		return 0.0;
 
-	return std::acos(DotProduct(a, b) / length_ab) * (180.0 / M_PI);
+	return gcem::acos(DotProduct(a, b) / length_ab) * (180.0 / M_PI);
 }
+
+export using qtn_t = double;
+constexpr auto QTN_EPSILON = std::numeric_limits<qtn_t>::epsilon();
+constexpr auto QTN_NAN = std::numeric_limits<qtn_t>::quiet_NaN();
+constexpr auto QTN_INFINITY = std::numeric_limits<qtn_t>::infinity();
+
+export struct Quaternion
+{
+	constexpr Quaternion(Quaternion&& s) = default;
+	Quaternion& operator=(const Quaternion& s) = default;
+	Quaternion& operator=(Quaternion&& s) = default;
+	constexpr Quaternion() : a(1), b(0), c(0), d(0) {}	// Identity.
+	constexpr Quaternion(Arithmetic auto W, Arithmetic auto X, Arithmetic auto Y, Arithmetic auto Z) : a(static_cast<qtn_t>(W)), b(static_cast<qtn_t>(X)), c(static_cast<qtn_t>(Y)), d(static_cast<qtn_t>(Z)) {}
+
+	// Static Methods
+	static constexpr decltype(auto) Zero() { return Quaternion(0, 0, 0, 0); }
+	static constexpr decltype(auto) Identity() { return Quaternion(1, 0, 0, 0); }
+	static constexpr decltype(auto) VA(const Vector& norm, qtn_t angle_in_degree)
+	{
+		auto angle = angle_in_degree * M_PI / 180.0;
+		auto cosine = gcem::cos(0.5 * angle);
+		auto sine = gcem::sin(0.5 * angle);
+
+		return Quaternion(cosine, norm.x * sine, norm.y * sine, norm.z * sine);
+	}
+	static constexpr decltype(auto) Euler(double yaw, double pitch, double roll) // yaw (Z), pitch (Y), roll (X)
+	{
+		yaw *= M_PI / 180.0;
+		pitch *= M_PI / 180.0;
+		roll *= M_PI / 180.0;
+
+		double cy = gcem::cos(yaw * 0.5);
+		double sy = gcem::sin(yaw * 0.5);
+		double cp = gcem::cos(pitch * 0.5);
+		double sp = gcem::sin(pitch * 0.5);
+		double cr = gcem::cos(roll * 0.5);
+		double sr = gcem::sin(roll * 0.5);
+
+		return Quaternion(
+			cr * cp * cy + sr * sp * sy,
+			sr * cp * cy - cr * sp * sy,
+			cr * sp * cy + sr * cp * sy,
+			cr * cp * sy - sr * sp * cy
+		);
+	}
+	static constexpr decltype(auto) Euler(const Vector& v) { return Euler(v.yaw, v.pitch, v.roll); }
+
+	// Properties
+	inline constexpr decltype(auto) Norm() const { return gcem::sqrt(a * a + b * b + c * c + d * d); }
+	inline constexpr decltype(auto) Conjugate() const { return Quaternion(a, -b, -c, -d); }
+	inline constexpr decltype(auto) Versor() const { return *this / Norm(); }
+	inline constexpr decltype(auto) Reciprocal() const { return Conjugate() / (a * a + b * b + c * c + d * d); }
+	inline constexpr decltype(auto) Real() const { return a; }
+	inline constexpr decltype(auto) Pure() const { return Vector(b, c, d); }
+
+	// Operators
+	constexpr decltype(auto) operator*(const Quaternion& q) const { return Quaternion(a * q.a - b * q.b - c * q.c - d * q.d, a * q.a + b * q.b + c * q.c - d * q.d, a * q.a - b * q.b + c * q.c + d * q.d, a * q.a + b * q.b - c * q.c + d * q.d); }
+	constexpr decltype(auto) operator*=(const Quaternion& q) { return (*this = *this * q); }
+
+	constexpr decltype(auto) operator*(Arithmetic auto x) const { return Quaternion(a * x, b * x, c * x, d * x); }
+	constexpr decltype(auto) operator*=(Arithmetic auto x) { return (*this = *this * x); }
+	constexpr decltype(auto) operator/(Arithmetic auto x) const { return Quaternion(a / x, b / x, c / x, d / x); }
+	constexpr decltype(auto) operator/=(Arithmetic auto x) { return (*this = *this / x); }
+
+	constexpr decltype(auto) operator*(const Vector& v) const { return v + ((CrossProduct(Pure(), v) * a) + CrossProduct(Pure(), CrossProduct(Pure(), v))) * 2.0f; }	// Rotate a vector by this quaternion.
+
+	// Conversion
+	constexpr Vector Euler() const
+	{
+		Vector vecAngles;
+
+		// roll (x-axis rotation)
+		auto sinr_cosp = 2 * (a * b + c * d);
+		auto cosr_cosp = 1 - 2 * (b * b + c * c);
+		vecAngles.roll = (vec_t)gcem::atan2(sinr_cosp, cosr_cosp);
+
+		// pitch (y-axis rotation)
+		auto sinp = 2 * (a * c - d * b);
+		if (gcem::abs(sinp) >= 1)
+			vecAngles.pitch = (vec_t)gcem::copysign(M_PI / 2.0, sinp); // use 90 degrees if out of range
+		else
+			vecAngles.pitch = (vec_t)gcem::asin(sinp);
+
+		// yaw (z-axis rotation)
+		auto siny_cosp = 2 * (a * d + b * c);
+		auto cosy_cosp = 1 - 2 * (c * c + d * d);
+		vecAngles.yaw = (vec_t)gcem::atan2(siny_cosp, cosy_cosp);
+
+		// Rad to Deg
+		vecAngles *= 180.0 / M_PI;
+
+		return vecAngles;
+	}
+
+	//inline constexpr Matrix3x3 M3x3() const
+	//{
+	//	return Matrix3x3(a * a + b * b - c * c - d * d, 2.0 * (b * c - a * d), 2.0 * (b * d + a * c),
+	//		2.0 * (b * c + a * d), a * a - b * b + c * c - d * d, 2.0 * (c * d - a * b),
+	//		2.0 * (b * d - a * c), 2.0 * (c * d + a * b), a * a - b * b - c * c + d * d);
+	//}
+
+	// Members
+	qtn_t a, b, c, d;	// w, x, y, z
+};
+
+export constexpr auto operator*(Arithmetic auto fl, const Quaternion& q) { return q * fl; }	// Scalar multiplication is commutative, but nothing else.

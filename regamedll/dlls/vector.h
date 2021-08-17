@@ -379,6 +379,34 @@ public:
 			0,			0,			1
 		);
 	}
+	static decltype(auto) Shear2D(float angle_with_x_axis, float angle_with_y_axis)
+	{
+		auto radx = angle_with_x_axis * M_PI / 180.0, rady = angle_with_y_axis * M_PI / 180.0;
+		return Matrix3x3(
+			1.0f,			std::tan(radx),	0,
+			std::tan(rady),	1.0f,			0,
+			0,				0,				1
+		);
+	}
+	static constexpr decltype(auto) Reflection2D(const Vector2D& v)	// For reflection about a line that goes through the origin, let {\displaystyle \mathbf {l} =(l_{x},l_{y})}{\displaystyle \mathbf {l} =(l_{x},l_{y})} be a vector in the direction of the line.
+	{
+		double y_sq = v.y * v.y, x_sq = v.x * v.x;
+		double xy = v.x * v.y;
+
+		return Matrix3x3(
+			x_sq - y_sq,	2 * xy,			0,
+			2 * xy,			y_sq - x_sq,	0,
+			0,				0,				1
+		);
+	}
+	static constexpr decltype(auto) OrthogonalProjection2D(const Vector2D& v)	// o project a vector orthogonally onto a line that goes through the origin, let {\displaystyle \mathbf {u} =(u_{x},u_{y})}{\displaystyle \mathbf {u} =(u_{x},u_{y})} be a vector in the direction of the line.
+	{
+		return Matrix3x3(
+			v.x * v.x,	v.x * v.y,	0,
+			v.x * v.y,	v.y * v.y,	0,
+			0,				0,		1
+		);
+	}
 
 	// Operators
 	constexpr decltype(auto) operator~() const	// Inverse matrix

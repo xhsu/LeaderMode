@@ -1221,7 +1221,13 @@ MSG_FUNC(Sound)
 {
 	BEGIN_READ(pbuf, iSize);
 
-	bool bUsing3D = !!READ_BYTE();
+#define FSND_USING_3D	(1<<0)
+#define FSND_USING_SSTR	(1<<1)
+#define FSND_HAS_PITCH	(1<<2)
+#define FSND_HAS_VOLUME	(1<<3)
+
+	byte bitsFlags = READ_BYTE();
+	bool bUsing3D = !!(bitsFlags & FSND_USING_3D);
 	Vector vecSrc = g_vecZero;
 	float flRange = 0;
 
@@ -1233,28 +1239,34 @@ MSG_FUNC(Sound)
 		flRange = READ_COORD();
 	}
 
-	bool bUsingSharedString = !!READ_BYTE();
+	bool bUsingSharedString = !!(bitsFlags & FSND_USING_SSTR);
 	char szSample[192];
 	if (bUsingSharedString)
 	{
 		int index = READ_BYTE();
-		Q_strcpy(szSample, g_rgpszSharedString[index]);
+		Q_strlcpy(szSample, g_rgpszSharedString[index]);
 	}
 	else
 	{
-		Q_strcpy(szSample, READ_STRING());
+		Q_strlcpy(szSample, READ_STRING());
 	}
 
-	int iPitch = READ_BYTE();
+	float flVol = 1;
+	if (bitsFlags & FSND_HAS_VOLUME)
+		flVol = static_cast<float>(READ_BYTE()) / 100.0f;
+
+	int iPitch = 100;
+	if (bitsFlags & FSND_HAS_PITCH)
+		iPitch = READ_BYTE();
 
 	// play the sound
 	if (bUsing3D)
 	{
-		Play3DSound(szSample, 1.0f, flRange, vecSrc, iPitch);
+		Play3DSound(szSample, 0, flRange, vecSrc, flVol, iPitch);
 	}
 	else
 	{
-		PlaySound(szSample, 1.0f, iPitch);
+		PlaySound(szSample, flVol, iPitch);
 	}
 
 	return TRUE;

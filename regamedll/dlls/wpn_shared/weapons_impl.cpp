@@ -12,6 +12,9 @@ Modern Warfare Dev Team
 #include <string>
 #include <unordered_map>
 
+// Completement of std::integral and std::floating_point.
+template<typename T> concept Arithmetic = std::is_arithmetic_v<T>;
+
 #pragma region Detectors
 // Declare detectors
 CREATE_MEMBER_DETECTOR_CUSTOM(m_usEvent) { {T::m_usEvent} -> std::convertible_to<unsigned short>; };
@@ -93,6 +96,16 @@ template <typename CWpn>
 concept IsIdleAnimLooped = requires (CWpn wpn)
 {
 	requires CWpn::IDLE_TIME > 0.0f;
+};
+
+template <typename CWpn>
+concept HasFireSoundDefined = requires(CWpn wpn)
+{
+	{CWpn::FIRE_SFX} -> std::convertible_to<std::string>;
+	{CWpn::FIRE_SFX_VOLUME} -> std::floating_point;
+	{CWpn::FIRE_SFX_RADIUS} -> Arithmetic;
+	{CWpn::FIRE_SFX_PITCH[0]} -> Arithmetic;
+	{CWpn::FIRE_SFX_PITCH[1]} -> Arithmetic;
 };
 #pragma endregion
 
@@ -1926,7 +1939,7 @@ struct CWeapon : public IWeapon
 		case WEAPON_M45A1:
 		case WEAPON_FIVESEVEN:
 #ifndef CLIENT_DLL
-			UTIL_Play3DSoundWithoutHost(m_pPlayer, vecWhere, CWpn::GUN_VOLUME / 8.0, SSZ_DRYFIRE_PISTOL, RANDOM_LONG(92, 108));
+			UTIL_Play3DSound<FSND_NO_HOST>(m_pPlayer, vecWhere, CWpn::GUN_VOLUME / 8.0, SSZ_DRYFIRE_PISTOL, 0.5, RANDOM_LONG(92, 108));
 #else
 			PlaySound(g_rgpszSharedString[SSZ_DRYFIRE_PISTOL], 1, RANDOM_LONG(92, 108));
 #endif
@@ -1934,11 +1947,23 @@ struct CWeapon : public IWeapon
 
 		default:
 #ifndef CLIENT_DLL
-			UTIL_Play3DSoundWithoutHost(m_pPlayer, vecWhere, CWpn::GUN_VOLUME / 8.0, SSZ_DRYFIRE_RIFLE, RANDOM_LONG(92, 108));
+			UTIL_Play3DSound<FSND_NO_HOST>(m_pPlayer, vecWhere, CWpn::GUN_VOLUME / 8.0, SSZ_DRYFIRE_RIFLE, 0.5, RANDOM_LONG(92, 108));
 #else
 			PlaySound(g_rgpszSharedString[SSZ_DRYFIRE_RIFLE], 1, RANDOM_LONG(92, 108));
 #endif
 			break;
+		}
+	}
+
+	void	PlayFireSound(const Vector& vecWhere) override
+	{
+		if constexpr (HasFireSoundDefined<CWpn>)
+		{
+#ifndef CLIENT_DLL
+			UTIL_Play3DSound<FSND_NO_HOST>(m_pPlayer, vecWhere, CWpn::GUN_VOLUME, CWpn::FIRE_SFX, CWpn::FIRE_SFX_VOLUME, RANDOM_LONG(CWpn::FIRE_SFX_PITCH[0], CWpn::FIRE_SFX_PITCH[1]));
+#else
+			Play3DSound(CWpn::FIRE_SFX, 0, CWpn::FIRE_SFX_RADIUS, vecWhere, CWpn::FIRE_SFX_VOLUME, RANDOM_LONG(CWpn::FIRE_SFX_PITCH[0], CWpn::FIRE_SFX_PITCH[1]));
+#endif
 		}
 	}
 
