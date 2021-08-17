@@ -9,6 +9,8 @@ module;
 #include <memory>
 #include <type_traits>
 
+#include "../external/gcem/include/gcem.hpp"
+
 export module Color;
 
 using uint8 = unsigned __int8;

@@ -7,7 +7,7 @@ module;
 #include <bit>
 #include <concepts>
 
-#include "gcem.hpp"
+#include "../external/gcem/include/gcem.hpp"
 
 export module Vector;
 
