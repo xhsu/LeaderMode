@@ -390,7 +390,7 @@ public:
 	* Usage:	Anytime when this object is valid.
 	* Return:	Enumerator index value.
 	*/
-	virtual	WeaponIdType Id					(void) = 0;
+	virtual	constexpr WeaponIdType Id		(void) = 0;
 
 	/*
 	* Purpose:	Aquire information regarding weapon general database.

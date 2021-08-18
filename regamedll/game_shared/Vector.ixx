@@ -5,6 +5,7 @@ module;
 
 #include <array>
 #include <bit>
+#include <cassert>
 #include <concepts>
 
 #include "../external/gcem/include/gcem.hpp"
@@ -407,7 +408,7 @@ export struct Vector
 	union { vec_t z; vec_t roll;	};
 };
 
-export constexpr Vector operator*(float fl, const Vector& v)
+export constexpr Vector operator*(Arithmetic auto fl, const Vector& v)
 {
 	return v * fl;
 }
@@ -440,6 +441,322 @@ export constexpr auto operator^(const Vector& a, const Vector& b)
 		return 0.0;
 
 	return gcem::acos(DotProduct(a, b) / length_ab) * (180.0 / M_PI);
+}
+
+export using mxs_t = double;
+constexpr auto MXS_EPSILON = std::numeric_limits<mxs_t>::epsilon();
+constexpr auto MXS_NAN = std::numeric_limits<mxs_t>::quiet_NaN();
+constexpr auto MXS_INFINITY = std::numeric_limits<mxs_t>::infinity();
+
+export template<size_t _rows, size_t _cols>
+requires(_rows > 0U && _cols > 0U)
+struct Matrix
+{
+	// Constants
+	static constexpr auto ROWS = _rows;
+	static constexpr auto COLUMNS = _cols;
+	static constexpr bool SQUARE_MX = _rows == _cols;
+
+	// Types
+	template<typename T> using row_init_t = std::initializer_list<T>;
+	using this_t = Matrix<ROWS, COLUMNS>;
+
+	// Constructors
+	constexpr Matrix(Matrix&& m) = default;
+	Matrix& operator=(const Matrix& m) = default;
+	Matrix& operator=(Matrix&& m) = default;
+	constexpr Matrix() : _data() {}
+	template<Arithmetic T> constexpr Matrix(const T(&array)[ROWS][COLUMNS])	// Why can't I use the keyword 'auto' as auto-template here?
+	{
+		for (size_t i = 0; i < ROWS; i++)
+		{
+			for (size_t j = 0; j < COLUMNS; j++)
+			{
+				_data[i][j] = array[i][j];
+			}
+		}
+	}
+	template<Arithmetic T> constexpr Matrix(const std::initializer_list<row_init_t<T>>& list)
+	{
+		assert(list.size() >= ROWS);
+		size_t r = 0;
+
+		for (auto& row : list)
+		{
+			assert(row.size() >= COLUMNS);
+			size_t c = 0;
+
+			for (auto& cell : row)
+			{
+				_data[r][c] = cell;
+				c++;
+			}
+
+			r++;
+		}
+	}
+	template<Arithmetic T> constexpr Matrix(const std::initializer_list<T>& list)
+	{
+		assert(list.size() >= ROWS * COLUMNS);
+
+		auto iter = list.begin();
+		for (size_t i = 0; i < ROWS; i++)
+		{
+			for (size_t j = 0; j < COLUMNS; j++)
+			{
+				assert(iter != list.end());	// list is too short!
+
+				_data[i][j] = *iter;
+				iter++;
+			}
+		}
+	}
+	template<size_t BRows, size_t BCols> explicit constexpr Matrix(const Matrix<BRows, BCols>& B) : _data()	// Enforce conversion.
+	{
+		if constexpr (SQUARE_MX)
+		{
+			*this = Identity();
+		}
+
+		for (size_t i = 0; i < std::min(BRows, ROWS); i++)
+		{
+			for (size_t j = 0; j < std::min(BCols, COLUMNS); j++)
+				_data[i][j] = B[i][j];
+		}
+	}
+
+	// Static Methods
+	static constexpr decltype(auto) Identity() requires(SQUARE_MX)
+	{
+		this_t m;
+
+		for (size_t i = 0; i < ROWS; i++)
+			m[i][i] = 1;
+
+		return m;
+	}
+	static constexpr decltype(auto) Zero() { static const this_t m; return m; }
+
+	// Properties
+	constexpr decltype(auto) Transpose() const
+	{
+		Matrix<COLUMNS, ROWS> m;
+
+		for (size_t i = 0; i < ROWS; i++)
+		{
+			for (size_t j = 0; j < COLUMNS; j++)
+			{
+				m[j][i] = _data[i][j];
+			}
+		}
+
+		return m;
+	}
+	constexpr decltype(auto) Cofactor(size_t r, size_t c) const requires(ROWS > 1U && COLUMNS > 1U)
+	{
+		assert(r < ROWS);
+		assert(c < COLUMNS);
+
+		Matrix<ROWS - 1U, COLUMNS - 1U> m;
+
+		for (size_t i = 0; i < ROWS; i++)
+		{
+			size_t row = 0U;
+			if (i < r)
+				row = i;
+			else if (i > r)
+				row = i - 1U;
+			else // i == r, same row.
+				continue;
+
+			for (size_t j = 0; j < COLUMNS; j++)
+			{
+				size_t col = 0U;
+				if (j < c)
+					col = j;
+				else if (j > c)
+					col = j - 1U;
+				else // j == c, same column.
+					continue;
+
+				m[row][col] = _data[i][j];
+			}
+		}
+
+		return m;
+	}
+	constexpr decltype(auto) Cofactor() const requires(SQUARE_MX)
+	{
+		this_t m;
+
+		for (size_t i = 0; i < ROWS; i++)
+		{
+			for (size_t j = 0; j < COLUMNS; j++)
+			{
+				m[i][j] = (((i + j) % 2U == 0U) ? 1.0 : -1.0) * Cofactor(i, j).Determinant();
+			}
+		}
+
+		return m;
+	}
+	constexpr decltype(auto) Determinant() const requires(SQUARE_MX)
+	{
+		// Base case: if matrix contains single element
+		if constexpr (ROWS == 1U)
+		{
+			// The usage of STATIC_IF here is because that Matrix<0, 0> will cause error.
+			return _data[0][0];
+		}
+		else
+		{
+			mxs_t D = 0; // Initialize result
+			float sign = 1;	// To store sign multiplier
+
+			// Iterate for each element of first row
+			for (size_t f = 0; f < COLUMNS; f++)
+			{
+				// Getting Cofactor of A[0][f]
+				D += sign * _data[0][f] * Cofactor(0, f).Determinant();
+
+				// terms are to be added with alternate sign
+				sign *= -1.0f;
+			}
+
+			return D;
+		}
+	}
+	constexpr decltype(auto) Adjoint() const requires(SQUARE_MX)
+	{
+		if constexpr (ROWS == 1U && COLUMNS == 1U)
+		{
+			static const Matrix<1, 1> m({ {1.0} });
+			return m;
+		}
+		else
+		{
+			this_t m;
+
+			for (size_t i = 0; i < ROWS; i++)
+			{
+				for (size_t j = 0; j < COLUMNS; j++)
+				{
+					// Transpose of the cofactor matrix.
+					m[j][i] = (((i + j) % 2U == 0U) ? 1.0 : -1.0) * Cofactor(i, j).Determinant();
+				}
+			}
+
+			return m;
+		}
+	}
+	constexpr decltype(auto) Inverse() const requires(SQUARE_MX)
+	{
+		auto det = Determinant();
+		assert(det != 0);	// Singular matrices have no inverse.
+
+		return Adjoint() / det;
+	}
+
+	// Operators
+	template<size_t BRows, size_t BCols>
+	constexpr decltype(auto) operator==(const Matrix<BRows, BCols>& B) const
+	{
+		if constexpr (BRows != ROWS || BCols != COLUMNS)
+		{
+			// Can't put a limitation on '==' comperasion operator when rows or columns are not equal.
+			// Because it still got a meaning: not equal.
+			return false;
+		}
+		else
+		{
+			for (size_t i = 0; i < ROWS; i++)
+			{
+				for (size_t j = 0; j < COLUMNS; j++)
+				{
+					if (B[i][j] != _data[i][j])
+						return false;
+				}
+			}
+
+			return true;
+		}
+	}
+	template<size_t BRows, size_t BCols>
+	constexpr decltype(auto) operator*(const Matrix<BRows, BCols>& B) const requires(COLUMNS == BRows)
+	{
+		Matrix<ROWS, BCols> res;
+
+		for (size_t i = 0; i < ROWS; i++)
+		{
+			for (size_t j = 0; j < BCols; j++)
+			{
+				res[i][j] = 0;
+				for (size_t k = 0; k < COLUMNS; k++)
+				{
+					res[i][j] += _data[i][k] * B[k][j];
+				}
+			}
+		}
+
+		return res;
+	}
+	constexpr decltype(auto) operator+(const this_t& B) const
+	{
+		this_t res;
+
+		for (size_t i = 0; i < ROWS; i++)
+		{
+			for (size_t j = 0; j < COLUMNS; j++)
+			{
+				res[i][j] = _data[i][j] * B[i][j];
+			}
+		}
+
+		return res;
+	}
+
+	constexpr decltype(auto) operator*(Arithmetic auto fl) const
+	{
+		this_t res;
+
+		for (size_t i = 0; i < ROWS; i++)
+		{
+			for (size_t j = 0; j < COLUMNS; j++)
+			{
+				res[i][j] = _data[i][j] * fl;
+			}
+		}
+
+		return res;
+	}
+	constexpr decltype(auto) operator/(Arithmetic auto fl) const
+	{
+		this_t res;
+
+		for (size_t i = 0; i < ROWS; i++)
+		{
+			for (size_t j = 0; j < COLUMNS; j++)
+			{
+				res[i][j] = _data[i][j] / fl;
+			}
+		}
+
+		return res;
+	}
+	constexpr decltype(auto) operator*=(Arithmetic auto fl) { return (*this = *this * fl); }
+	constexpr decltype(auto) operator/=(Arithmetic auto fl) { return (*this = *this / fl); }
+
+	constexpr decltype(auto) operator~() const requires(SQUARE_MX) { return Inverse(); }
+
+	constexpr mxs_t* operator[](size_t rows) { assert(rows < ROWS); return &_data[rows][0]; }
+	constexpr const mxs_t* operator[](size_t rows) const { assert(rows < ROWS); return &_data[rows][0]; }
+
+private:
+	mxs_t _data[ROWS][COLUMNS];
+};
+
+export template<size_t _rows, size_t _cols> constexpr auto operator*(Arithmetic auto fl, const Matrix<_rows, _cols>& m)
+{
+	return m * fl;
 }
 
 export using qtn_t = double;
@@ -535,12 +852,14 @@ export struct Quaternion
 		return vecAngles;
 	}
 
-	//inline constexpr Matrix3x3 M3x3() const
-	//{
-	//	return Matrix3x3(a * a + b * b - c * c - d * d, 2.0 * (b * c - a * d), 2.0 * (b * d + a * c),
-	//		2.0 * (b * c + a * d), a * a - b * b + c * c - d * d, 2.0 * (c * d - a * b),
-	//		2.0 * (b * d - a * c), 2.0 * (c * d + a * b), a * a - b * b - c * c + d * d);
-	//}
+	constexpr Matrix<3, 3> M3x3() const
+	{
+		return Matrix<3, 3>({
+			{a * a + b * b - c * c - d * d, 2.0 * (b * c - a * d), 2.0 * (b * d + a * c)},
+			{2.0 * (b * c + a * d), a * a - b * b + c * c - d * d, 2.0 * (c * d - a * b)},
+			{2.0 * (b * d - a * c), 2.0 * (c * d + a * b), a * a - b * b - c * c + d * d}
+		});
+	}
 
 	// Members
 	qtn_t a, b, c, d;	// w, x, y, z

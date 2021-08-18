@@ -1653,7 +1653,7 @@ struct CWeapon : public IWeapon
 #pragma endregion
 
 #pragma region Constant Data Inquiry API.
-	static consteval WeaponIdType _Index(void)
+	static constexpr WeaponIdType _Index(void)
 	{
 		// Pistols
 		if constexpr (std::is_same_v<CWpn, CG18C>)
