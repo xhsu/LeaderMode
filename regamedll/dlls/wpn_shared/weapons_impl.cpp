@@ -1653,7 +1653,7 @@ struct CWeapon : public IWeapon
 #pragma endregion
 
 #pragma region Constant Data Inquiry API.
-	WeaponIdType Id(void)	override
+	static consteval WeaponIdType _Index(void)
 	{
 		// Pistols
 		if constexpr (std::is_same_v<CWpn, CG18C>)
@@ -1773,9 +1773,11 @@ struct CWeapon : public IWeapon
 		}
 	}
 
-	const struct WeaponInfo*	WpnInfo(void) override { return &g_rgWpnInfo[Id()]; }
+	constexpr WeaponIdType		Id(void)		override { return _Index(); }
 
-	const struct AmmoInfo*		AmmoInfo(void) override { return &g_rgAmmoInfo[WpnInfo()->m_iAmmoType]; }
+	const struct WeaponInfo*	WpnInfo(void)	override { return &g_rgWpnInfo[Id()]; }
+
+	const struct AmmoInfo*		AmmoInfo(void)	override { return &g_rgAmmoInfo[WpnInfo()->m_iAmmoType]; }
 
 #pragma endregion
 
@@ -1967,6 +1969,77 @@ struct CWeapon : public IWeapon
 		}
 	}
 
+	void	PlayReloadSound(const Vector& vecWhere) override
+	{
+#ifndef CLIENT_DLL
+		CBasePlayer* pPlayer = nullptr;
+		while ((pPlayer = UTIL_FindEntityByClassname(pPlayer, "player")))
+		{
+			if (pPlayer->IsDormant())
+				continue;
+
+			if (pPlayer == m_pPlayer)
+				continue;
+
+			if (pPlayer->m_iObserverLastMode == OBS_IN_EYE && pPlayer->m_hObserverTarget.IsValid() && pPlayer->m_hObserverTarget->entindex() == m_pPlayer->entindex())	// avoid the sfx send to the observer.
+				continue;
+
+			float distance = (vecWhere - pPlayer->pev->origin).Length();
+			if (distance <= MAX_DIST_RELOAD_SOUND)
+			{
+				MESSAGE_BEGIN(MSG_ONE, gmsgReloadSound, nullptr, pPlayer->pev);
+				WRITE_BYTE(int((1.0f - (distance / MAX_DIST_RELOAD_SOUND)) * 255.0f));
+
+				if constexpr (_Index() == WEAPON_M1014 || _Index() == WEAPON_KSG12)
+					WRITE_BYTE(0);
+				else
+					WRITE_BYTE(1);
+
+				MESSAGE_END();
+			}
+		}
+#endif
+	}
+
+	void	ResetModel(void) override
+	{
+#ifndef CLIENT_DLL
+		m_pPlayer->pev->viewmodel = MAKE_STRING(CWpn::VIEW_MODEL);
+		m_pPlayer->pev->weaponmodel = MAKE_STRING(CWpn::WORLD_MODEL);
+#else
+		g_pViewEnt->model = gEngfuncs.CL_LoadModel(CWpn::VIEW_MODEL, &m_pPlayer->pev->viewmodel);
+#endif
+	}
+
+	void	Vary(RoleTypes iType) override {}	// Dummy, waiting to be override.
+
+	float	GetSpread(void) override
+	{
+		if constexpr (IS_MEMBER_PRESENTED_CPP20_W(SPREAD_BASELINE))
+			return CWpn::SPREAD_BASELINE;
+		else if constexpr (IsShotgun<CWpn>)
+			return CWpn::CONE_VECTOR.x;
+		else
+			return 0;
+	}
+
+	uint32*	Flags(void) override { return &m_bitsFlags; }
+
+	void*	GetOwner(void) override
+	{
+#ifndef CLIENT_DLL
+		if (m_pWeaponBox.IsValid())
+			return m_pWeaponBox.Get()->pvPrivateData;
+		else if (m_pPlayer.IsValid())
+			return m_pPlayer.Get()->pvPrivateData;
+		else
+			return nullptr;
+#else
+		return m_pPlayer;
+#endif
+	}
+
+	int*	Clip(void) override { return &m_iClip; }
 #pragma endregion
 
 #pragma region Private to this template.
