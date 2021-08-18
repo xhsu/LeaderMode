@@ -7,6 +7,8 @@ module;
 #include <bit>
 #include <cassert>
 #include <concepts>
+#include <iomanip>
+#include <iostream>
 
 #include "../external/gcem/include/gcem.hpp"
 
@@ -199,6 +201,15 @@ export constexpr auto operator^(const Vector2D& a, const Vector2D& b)
 
 	return gcem::acos(DotProduct(a, b) / length_ab) * (180.0 / M_PI);
 }
+
+#ifdef _IOSTREAM_
+export std::ostream& operator<<(std::ostream& o, const Vector2D& v)
+{
+	o << "X: " << v.x << std::endl;
+	o << "Y: " << v.y << std::endl;
+	return o;
+}
+#endif // _IOSTREAM_
 
 // 3D Vector
 // Same data-layout as engine's vec3_t, which is a vec_t[3]
@@ -443,12 +454,22 @@ export constexpr auto operator^(const Vector& a, const Vector& b)
 	return gcem::acos(DotProduct(a, b) / length_ab) * (180.0 / M_PI);
 }
 
+#ifdef _IOSTREAM_
+export std::ostream& operator<<(std::ostream& o, const Vector& v)
+{
+	o << "X: " << v.x << std::endl;
+	o << "Y: " << v.y << std::endl;
+	o << "Z: " << v.z << std::endl;
+	return o;
+}
+#endif // _IOSTREAM_
+
 export using mxs_t = double;
 constexpr auto MXS_EPSILON = std::numeric_limits<mxs_t>::epsilon();
 constexpr auto MXS_NAN = std::numeric_limits<mxs_t>::quiet_NaN();
 constexpr auto MXS_INFINITY = std::numeric_limits<mxs_t>::infinity();
 
-export template<size_t _rows, size_t _cols>
+export template<size_t _rows = 1U, size_t _cols = 1U>
 requires(_rows > 0U && _cols > 0U)
 struct Matrix
 {
@@ -458,7 +479,7 @@ struct Matrix
 	static constexpr bool SQUARE_MX = _rows == _cols;
 
 	// Types
-	template<typename T> using row_init_t = std::initializer_list<T>;
+	using row_init_t = std::initializer_list<mxs_t>;
 	using this_t = Matrix<ROWS, COLUMNS>;
 
 	// Constructors
@@ -476,7 +497,7 @@ struct Matrix
 			}
 		}
 	}
-	template<Arithmetic T> constexpr Matrix(const std::initializer_list<row_init_t<T>>& list)
+	constexpr Matrix(const std::initializer_list<row_init_t>&& list)
 	{
 		assert(list.size() >= ROWS);
 		size_t r = 0;
@@ -495,7 +516,7 @@ struct Matrix
 			r++;
 		}
 	}
-	template<Arithmetic T> constexpr Matrix(const std::initializer_list<T>& list)
+	constexpr Matrix(const row_init_t&& list)
 	{
 		assert(list.size() >= ROWS * COLUMNS);
 
@@ -524,6 +545,17 @@ struct Matrix
 				_data[i][j] = B[i][j];
 		}
 	}
+	explicit constexpr Matrix(const Vector2D& v) requires(ROWS == 2U && COLUMNS == 1U)
+	{
+		_data[0][0] = v.x;
+		_data[1][0] = v.y;
+	}
+	explicit constexpr Matrix(const Vector& v) requires(ROWS == 3U && COLUMNS == 1U)
+	{
+		_data[0][0] = v.x;
+		_data[1][0] = v.y;
+		_data[2][0] = v.z;
+	}
 
 	// Static Methods
 	static constexpr decltype(auto) Identity() requires(SQUARE_MX)
@@ -536,6 +568,29 @@ struct Matrix
 		return m;
 	}
 	static constexpr decltype(auto) Zero() { static const this_t m; return m; }
+	static constexpr decltype(auto) Rotation(Arithmetic auto degree)	// 2D rotation. Idealy generates a 2x2 matrix.
+	{
+		const auto rad = degree / 180.0 * M_PI;
+		const auto c = gcem::cos(rad);
+		const auto s = gcem::sin(rad);
+
+		if constexpr (ROWS == 2U && COLUMNS == 2U)
+		{
+			return Matrix<2, 2>({
+				{c, -s},
+				{s, c}
+			});
+		}
+		else
+		{
+			return static_cast<this_t>(	// Use our special defined matrix convert function.
+				Matrix<2, 2>({
+					{c, -s},
+					{s, c}
+				})
+			);
+		}
+	}
 
 	// Properties
 	constexpr decltype(auto) Transpose() const
@@ -657,6 +712,8 @@ struct Matrix
 	}
 
 	// Operators
+	// 
+	// Between matrices.
 	template<size_t BRows, size_t BCols>
 	constexpr decltype(auto) operator==(const Matrix<BRows, BCols>& B) const
 	{
@@ -713,7 +770,8 @@ struct Matrix
 
 		return res;
 	}
-
+	//
+	// Between matrix and scalar.
 	constexpr decltype(auto) operator*(Arithmetic auto fl) const
 	{
 		this_t res;
@@ -744,11 +802,62 @@ struct Matrix
 	}
 	constexpr decltype(auto) operator*=(Arithmetic auto fl) { return (*this = *this * fl); }
 	constexpr decltype(auto) operator/=(Arithmetic auto fl) { return (*this = *this / fl); }
+	//
+	// Between matrix and vector.
+	constexpr Vector2D operator*(const Vector2D& v) const requires(COLUMNS >= 2U)
+	{
+		Matrix<COLUMNS, 1> matrixlise_v2;
+		matrixlise_v2[0][0] = v.x;
+		matrixlise_v2[1][0] = v.y;
 
+		if constexpr (COLUMNS > 2U)
+		{
+			for (size_t i = 2; i < COLUMNS; i++)
+			{
+				matrixlise_v2[i][0] = 1;	// Fill the rest part with a dummy 1. NOT A ZERO!
+			}
+		}
+
+		auto result = *this * matrixlise_v2;
+
+		return Vector2D(result[0][0], result[1][0]);
+	}
+	constexpr Vector operator*(const Vector& v) const requires(COLUMNS >= 3U)
+	{
+		Matrix<COLUMNS, 1> matrixlise_v3;
+		matrixlise_v3[0][0] = v.x;
+		matrixlise_v3[1][0] = v.y;
+		matrixlise_v3[2][0] = v.z;
+
+		if constexpr (COLUMNS > 3U)
+		{
+			for (size_t i = 3; i < COLUMNS; i++)
+			{
+				matrixlise_v3[i][0] = 1;	// Fill the rest part with a dummy 1. NOT A ZERO!
+			}
+		}
+
+		auto result = *this * matrixlise_v3;
+
+		return Vector(result[0][0], result[1][0], result[2][0]);
+	}
+	//
+	// Shotcut operator(related to math symbol)
 	constexpr decltype(auto) operator~() const requires(SQUARE_MX) { return Inverse(); }
-
+	//
+	// Accessor to each cell.
 	constexpr mxs_t* operator[](size_t rows) { assert(rows < ROWS); return &_data[rows][0]; }
 	constexpr const mxs_t* operator[](size_t rows) const { assert(rows < ROWS); return &_data[rows][0]; }
+
+	// Conversion
+	constexpr decltype(auto) ToVector() const requires(COLUMNS == 1U && (ROWS == 2U || ROWS == 3U))
+	{
+		// Vectors are written vertically in matrices.
+		if constexpr (ROWS == 2U)
+			return Vector2D(_data[0][0], _data[1][0]);
+		else if constexpr (ROWS == 3U)
+			return Vector(_data[0][0], _data[1][0], _data[2][0]);
+	}
 
 private:
 	mxs_t _data[ROWS][COLUMNS];
@@ -758,6 +867,23 @@ export template<size_t _rows, size_t _cols> constexpr auto operator*(Arithmetic 
 {
 	return m * fl;
 }
+
+#ifdef _IOSTREAM_
+export template<size_t _rows, size_t _cols> std::ostream& operator<<(std::ostream& o, const Matrix<_rows, _cols>& m)
+{
+	for (size_t i = 0; i < _rows; i++)
+	{
+		for (size_t j = 0; j < _cols; j++)
+		{
+			o << m[i][j] << std::setw(6);
+		}
+
+		o << std::endl << std::left;
+	}
+
+	return o;
+}
+#endif // _IOSTREAM_
 
 export using qtn_t = double;
 constexpr auto QTN_EPSILON = std::numeric_limits<qtn_t>::epsilon();
@@ -866,3 +992,14 @@ export struct Quaternion
 };
 
 export constexpr auto operator*(Arithmetic auto fl, const Quaternion& q) { return q * fl; }	// Scalar multiplication is commutative, but nothing else.
+
+#ifdef _IOSTREAM_
+export std::ostream& operator<<(std::ostream& o, const Quaternion& q)
+{
+	o << "W: " << q.a << std::endl;
+	o << "X: " << q.b << std::endl;
+	o << "Y: " << q.c << std::endl;
+	o << "Z: " << q.d << std::endl;
+	return o;
+}
+#endif // _IOSTREAM_
