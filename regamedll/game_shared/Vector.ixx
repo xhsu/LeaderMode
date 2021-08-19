@@ -545,16 +545,26 @@ struct Matrix
 				_data[i][j] = B[i][j];
 		}
 	}
-	explicit constexpr Matrix(const Vector2D& v) requires(ROWS == 2U && COLUMNS == 1U)
+	explicit constexpr Matrix(const Vector2D& v) requires(ROWS >= 2U && COLUMNS == 1U) : _data()
 	{
 		_data[0][0] = v.x;
 		_data[1][0] = v.y;
+
+		if constexpr (ROWS > 2U)
+		{
+			_data[ROWS - 1U][0] = 1;	// For example, if you wish Vector2(x, y) transcript to matrix<4, 1>, it must be [x, y, 0, 1].
+		}
 	}
-	explicit constexpr Matrix(const Vector& v) requires(ROWS == 3U && COLUMNS == 1U)
+	explicit constexpr Matrix(const Vector& v) requires(ROWS >= 3U && COLUMNS == 1U) : _data()
 	{
 		_data[0][0] = v.x;
 		_data[1][0] = v.y;
 		_data[2][0] = v.z;
+
+		if constexpr (ROWS > 3U)
+		{
+			_data[ROWS - 1U][0] = 1;	// For example, if you wish Vector3(x, y, z) transcript to matrix<5, 1>, it must be [x, y, z, 0, 1].
+		}
 	}
 
 	// Static Methods
@@ -590,6 +600,99 @@ struct Matrix
 				})
 			);
 		}
+	}
+	static constexpr decltype(auto) Rotation(Arithmetic auto yaw, Arithmetic auto pitch, Arithmetic auto roll) // 3D rotation. yaw (Z), pitch (Y), roll (X)
+	{
+		const auto y = yaw / 180.0 * M_PI, p = pitch / 180.0 * M_PI, r = roll / 180.0 * M_PI;
+		const auto cy = gcem::cos(y), sy = gcem::sin(y);
+		const auto cp = gcem::cos(p), sp = gcem::sin(p);
+		const auto cr = gcem::cos(r), sr = gcem::sin(r);
+
+		if constexpr (ROWS == 3U && COLUMNS == 3U)
+		{
+			return this_t({
+				{cy * cp, cy * sp * sr - sy * cr, cy * sp * cr + sy * sr},
+				{sy * cp, sy * sp * sr + cy * cr, sy * sp * cr - cy * sr},
+				{-sp, cp * sr, cp * cr}
+			});
+		}
+		else
+		{
+			return static_cast<this_t>(Matrix<3, 3>({
+				{cy * cp, cy * sp * sr - sy * cr, cy * sp * cr + sy * sr},
+				{sy * cp, sy * sp * sr + cy * cr, sy * sp * cr - cy * sr},
+				{-sp, cp * sr, cp * cr}
+			}));
+		}
+	}
+	static constexpr decltype(auto) Rotation(const Vector& vecEulerAngles) { return Rotation(vecEulerAngles.yaw, vecEulerAngles.pitch, vecEulerAngles.roll); }
+	static constexpr decltype(auto) Rotation(const Vector& vecAxis, double degree)	// Axis must be a unit vector. In counter-clockwise. Quaternion is recommended in this case.
+	{
+		const auto& x = vecAxis.x;
+		const auto& y = vecAxis.y;
+		const auto& z = vecAxis.z;
+
+		degree *= M_PI / 180.0;
+		const auto c = gcem::cos(degree);
+		const auto s = gcem::sin(degree);
+
+		if constexpr (ROWS == 3U && COLUMNS == 3U)
+		{
+			return this_t({
+				{c + x * x * (1 - c), x * y * (1 - c) - z * s, x * z * (1 - c) + y * s},
+				{y * x * (1 - c) + z * s, c + y * y * (1 - c), y * z * (1 - c) - x * s},
+				{z * x * (1 - c) - y * s, z * y * (1 - c) + x * s, c + z * z * (1 - c)}
+			});
+		}
+		else
+		{
+			return static_cast<this_t>(Matrix<3, 3>({
+				{c + x * x * (1 - c), x * y * (1 - c) - z * s, x * z * (1 - c) + y * s},
+				{y * x * (1 - c) + z * s, c + y * y * (1 - c), y * z * (1 - c) - x * s},
+				{z * x * (1 - c) - y * s, z * y * (1 - c) + x * s, c + z * z * (1 - c)}
+			}));
+		}
+	}
+	static constexpr decltype(auto) Scale(mxs_t scale) requires(SQUARE_MX)
+	{
+		this_t m;
+
+		for (size_t i = 0; i < ROWS; i++)
+			m[i][i] = scale;
+
+		return m;
+	}
+	static constexpr decltype(auto) Scale(mxs_t x = 1, mxs_t y = 1) requires(ROWS == 2U && COLUMNS == 2U)
+	{
+		return this_t({
+			{x, 0},
+			{0, y}
+		});
+	}
+	static constexpr decltype(auto) Scale(mxs_t x = 1, mxs_t y = 1, mxs_t z = 1) requires(ROWS == 3U && COLUMNS == 3U)
+	{
+		return this_t({
+			{x, 0, 0},
+			{0, y, 0},
+			{0, 0, z}
+		});
+	}
+	static constexpr decltype(auto) Translate(mxs_t x = 0, mxs_t y = 0) requires(ROWS == 3U && COLUMNS == 3U)	// 2D. Trnaslate requires an extra dimension on matrix.
+	{
+		return this_t({
+			{1, 0, x},
+			{0, 1, y},
+			{0, 0, 1}
+		});
+	}
+	static constexpr decltype(auto) Translate(mxs_t x = 0, mxs_t y = 0, mxs_t z = 0) requires(ROWS == 4U && COLUMNS == 4U)	// 3D. Trnaslate requires an extra dimension on matrix.
+	{
+		return this_t({
+			{1, 0, 0, x},
+			{0, 1, 0, y},
+			{0, 0, 1, z},
+			{0, 0, 0, 1}
+		});
 	}
 
 	// Properties
@@ -770,6 +873,23 @@ struct Matrix
 
 		return res;
 	}
+	template<size_t BRows, size_t BCols>
+	constexpr decltype(auto) operator|(const Matrix<BRows, BCols>& B) const requires(ROWS == BRows)	// Direct combine. Such that I|J|K == M3x3::Identity.
+	{
+		constexpr size_t C_COLS = COLUMNS + BCols;
+
+		Matrix<ROWS, C_COLS> m;
+
+		for (size_t i = 0; i < ROWS; i++)
+		{
+			for (size_t j = 0; j < C_COLS; j++)
+			{
+				m[i][j] = (j < COLUMNS ? _data[i][j] : B[i][j - COLUMNS]);
+			}
+		}
+
+		return m;
+	}
 	//
 	// Between matrix and scalar.
 	constexpr decltype(auto) operator*(Arithmetic auto fl) const
@@ -841,6 +961,23 @@ struct Matrix
 
 		return Vector(result[0][0], result[1][0], result[2][0]);
 	}
+	constexpr Matrix<3, 3> operator|(const Vector2D& v) const requires(SQUARE_MX && ROWS == 2U)
+	{
+		return Matrix<3, 3>({
+			{_data[0][0], _data[0][1], v.x},
+			{_data[1][0], _data[1][1], v.y},
+			{0, 0, 1}
+		});
+	}
+	constexpr Matrix<4, 4> operator|(const Vector& v) const requires(SQUARE_MX && ROWS == 3U)
+	{
+		return Matrix<4, 4>({
+			{_data[0][0], _data[0][1], _data[0][2], v.x},
+			{_data[1][0], _data[1][1], _data[1][2], v.y},
+			{_data[2][0], _data[2][1], _data[2][2], v.z},
+			{0, 0, 0, 1}
+		});
+	}
 	//
 	// Shotcut operator(related to math symbol)
 	constexpr decltype(auto) operator~() const requires(SQUARE_MX) { return Inverse(); }
@@ -875,7 +1012,7 @@ export template<size_t _rows, size_t _cols> std::ostream& operator<<(std::ostrea
 	{
 		for (size_t j = 0; j < _cols; j++)
 		{
-			o << m[i][j] << std::setw(6);
+			o << m[i][j] << std::setw(10);
 		}
 
 		o << std::endl << std::left;
@@ -897,39 +1034,40 @@ export struct Quaternion
 	Quaternion& operator=(Quaternion&& s) = default;
 	constexpr Quaternion() : a(1), b(0), c(0), d(0) {}	// Identity.
 	constexpr Quaternion(Arithmetic auto W, Arithmetic auto X, Arithmetic auto Y, Arithmetic auto Z) : a(static_cast<qtn_t>(W)), b(static_cast<qtn_t>(X)), c(static_cast<qtn_t>(Y)), d(static_cast<qtn_t>(Z)) {}
-
-	// Static Methods
-	static constexpr decltype(auto) Zero() { return Quaternion(0, 0, 0, 0); }
-	static constexpr decltype(auto) Identity() { return Quaternion(1, 0, 0, 0); }
-	static constexpr decltype(auto) VA(const Vector& norm, qtn_t angle_in_degree)
-	{
-		auto angle = angle_in_degree * M_PI / 180.0;
-		auto cosine = gcem::cos(0.5 * angle);
-		auto sine = gcem::sin(0.5 * angle);
-
-		return Quaternion(cosine, norm.x * sine, norm.y * sine, norm.z * sine);
-	}
-	static constexpr decltype(auto) Euler(double yaw, double pitch, double roll) // yaw (Z), pitch (Y), roll (X)
+	constexpr Quaternion(qtn_t yaw, qtn_t pitch, qtn_t roll) // yaw (Z), pitch (Y), roll (X)
 	{
 		yaw *= M_PI / 180.0;
 		pitch *= M_PI / 180.0;
 		roll *= M_PI / 180.0;
 
-		double cy = gcem::cos(yaw * 0.5);
-		double sy = gcem::sin(yaw * 0.5);
-		double cp = gcem::cos(pitch * 0.5);
-		double sp = gcem::sin(pitch * 0.5);
-		double cr = gcem::cos(roll * 0.5);
-		double sr = gcem::sin(roll * 0.5);
+		auto cy = gcem::cos(yaw * 0.5);
+		auto sy = gcem::sin(yaw * 0.5);
+		auto cp = gcem::cos(pitch * 0.5);
+		auto sp = gcem::sin(pitch * 0.5);
+		auto cr = gcem::cos(roll * 0.5);
+		auto sr = gcem::sin(roll * 0.5);
 
-		return Quaternion(
-			cr * cp * cy + sr * sp * sy,
-			sr * cp * cy - cr * sp * sy,
-			cr * sp * cy + sr * cp * sy,
-			cr * cp * sy - sr * sp * cy
-		);
+		a = cr * cp * cy + sr * sp * sy;
+		b = sr * cp * cy - cr * sp * sy;
+		c = cr * sp * cy + sr * cp * sy;
+		d = cr * cp * sy - sr * sp * cy;
 	}
-	static constexpr decltype(auto) Euler(const Vector& v) { return Euler(v.yaw, v.pitch, v.roll); }
+	constexpr Quaternion(const Vector& vecEulerAngles) : Quaternion(vecEulerAngles.yaw, vecEulerAngles.pitch, vecEulerAngles.roll) {}
+	constexpr Quaternion(const Vector& vecAxis, qtn_t degree)	// Axis must be a unit vector. In counter-clockwise.
+	{
+		degree *= M_PI / 180.0;
+		auto cosine = gcem::cos(0.5 * degree);
+		auto sine = gcem::sin(0.5 * degree);
+
+		a = cosine;
+		b = vecAxis.x * sine;
+		c = vecAxis.y * sine;
+		d = vecAxis.z * sine;
+	}
+
+	// Static Methods
+	static constexpr decltype(auto) Zero() { return Quaternion(0, 0, 0, 0); }
+	static constexpr decltype(auto) Identity() { return Quaternion(1, 0, 0, 0); }
 
 	// Properties
 	inline constexpr decltype(auto) Norm() const { return gcem::sqrt(a * a + b * b + c * c + d * d); }
