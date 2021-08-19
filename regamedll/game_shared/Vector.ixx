@@ -1,14 +1,12 @@
 module;
 
-#define _USE_MATH_DEFINES
-#include <float.h>
-
 #include <array>
 #include <bit>
 #include <cassert>
 #include <concepts>
 #include <iomanip>
 #include <iostream>
+#include <numbers>
 
 #include "../external/gcem/include/gcem.hpp"
 
@@ -166,7 +164,7 @@ export struct Vector2D
 	// Rotate in counter-clockwise. Angles in degree.
 	constexpr Vector2D Rotate(Arithmetic auto angle) const
 	{
-		auto a = (static_cast<double>(angle) * M_PI / 180.0);
+		auto a = (static_cast<double>(angle) * std::numbers::pi / 180.0);
 		auto c = gcem::cos(a);
 		auto s = gcem::sin(a);
 
@@ -199,7 +197,7 @@ export constexpr auto operator^(const Vector2D& a, const Vector2D& b)
 	if (length_ab < DBL_EPSILON)
 		return 0.0;
 
-	return gcem::acos(DotProduct(a, b) / length_ab) * (180.0 / M_PI);
+	return gcem::acos(DotProduct(a, b) / length_ab) * (180.0 / std::numbers::pi);
 }
 
 #ifdef _IOSTREAM_
@@ -330,8 +328,8 @@ export struct Vector
 	// Convert Eular angles to its 'forward' vector.
 	constexpr Vector MakeVector() const
 	{
-		auto rad_pitch = (pitch * M_PI / 180.0f);
-		auto rad_yaw = (yaw * M_PI / 180.0f);
+		auto rad_pitch = (pitch * std::numbers::pi / 180.0f);
+		auto rad_yaw = (yaw * std::numbers::pi / 180.0f);
 		auto tmp = gcem::cos(rad_pitch);
 
 		return Vector(
@@ -359,14 +357,14 @@ export struct Vector
 		}
 		else
 		{
-			a.yaw = vec_t(gcem::atan2(-y, x) * 180.0 / M_PI);
+			a.yaw = vec_t(gcem::atan2(-y, x) * 180.0 / std::numbers::pi);
 			if (a.yaw < 0)
 				a.yaw += 360;
 
 			a.yaw = 360.0f - a.yaw;	// LUNA: why???
 
 			auto tmp = rsqrt(x * x + y * y);
-			a.pitch = vec_t(gcem::atan(z * tmp) * 180.0 / M_PI);
+			a.pitch = vec_t(gcem::atan(z * tmp) * 180.0 / std::numbers::pi);
 			if (a.pitch < 0)
 				a.pitch += 360;
 		}
@@ -376,7 +374,7 @@ export struct Vector
 
 	constexpr Vector RotateX(float angle) const
 	{
-		auto a = (angle * M_PI / 180.0);
+		auto a = (angle * std::numbers::pi / 180.0);
 		auto c = gcem::cos(a);
 		auto s = gcem::sin(a);
 
@@ -389,7 +387,7 @@ export struct Vector
 
 	constexpr Vector RotateY(float angle) const
 	{
-		auto a = (angle * M_PI / 180.0);
+		auto a = (angle * std::numbers::pi / 180.0);
 		auto c = gcem::cos(a);
 		auto s = gcem::sin(a);
 
@@ -402,7 +400,7 @@ export struct Vector
 
 	constexpr Vector RotateZ(float angle) const
 	{
-		auto a = (angle * M_PI / 180.0);
+		auto a = (angle * std::numbers::pi / 180.0);
 		auto c = gcem::cos(a);
 		auto s = gcem::sin(a);
 
@@ -451,7 +449,7 @@ export constexpr auto operator^(const Vector& a, const Vector& b)
 	if (Q_abs(length_ab) < DBL_EPSILON)
 		return 0.0;
 
-	return gcem::acos(DotProduct(a, b) / length_ab) * (180.0 / M_PI);
+	return gcem::acos(DotProduct(a, b) / length_ab) * (180.0 / std::numbers::pi);
 }
 
 #ifdef _IOSTREAM_
@@ -483,9 +481,6 @@ struct Matrix
 	using this_t = Matrix<ROWS, COLUMNS>;
 
 	// Constructors
-	constexpr Matrix(Matrix&& m) = default;
-	Matrix& operator=(const Matrix& m) = default;
-	Matrix& operator=(Matrix&& m) = default;
 	constexpr Matrix() : _data() {}
 	template<Arithmetic T> constexpr Matrix(const T(&array)[ROWS][COLUMNS])	// Why can't I use the keyword 'auto' as auto-template here?
 	{
@@ -580,7 +575,7 @@ struct Matrix
 	static constexpr decltype(auto) Zero() { static const this_t m; return m; }
 	static constexpr decltype(auto) Rotation(Arithmetic auto degree)	// 2D rotation. Idealy generates a 2x2 matrix.
 	{
-		const auto rad = degree / 180.0 * M_PI;
+		const auto rad = degree / 180.0 * std::numbers::pi;
 		const auto c = gcem::cos(rad);
 		const auto s = gcem::sin(rad);
 
@@ -603,7 +598,7 @@ struct Matrix
 	}
 	static constexpr decltype(auto) Rotation(Arithmetic auto yaw, Arithmetic auto pitch, Arithmetic auto roll) // 3D rotation. yaw (Z), pitch (Y), roll (X)
 	{
-		const auto y = yaw / 180.0 * M_PI, p = pitch / 180.0 * M_PI, r = roll / 180.0 * M_PI;
+		const auto y = yaw / 180.0 * std::numbers::pi, p = pitch / 180.0 * std::numbers::pi, r = roll / 180.0 * std::numbers::pi;
 		const auto cy = gcem::cos(y), sy = gcem::sin(y);
 		const auto cp = gcem::cos(p), sp = gcem::sin(p);
 		const auto cr = gcem::cos(r), sr = gcem::sin(r);
@@ -632,7 +627,7 @@ struct Matrix
 		const auto& y = vecAxis.y;
 		const auto& z = vecAxis.z;
 
-		degree *= M_PI / 180.0;
+		degree *= std::numbers::pi / 180.0;
 		const auto c = gcem::cos(degree);
 		const auto s = gcem::sin(degree);
 
@@ -1036,9 +1031,9 @@ export struct Quaternion
 	constexpr Quaternion(Arithmetic auto W, Arithmetic auto X, Arithmetic auto Y, Arithmetic auto Z) : a(static_cast<qtn_t>(W)), b(static_cast<qtn_t>(X)), c(static_cast<qtn_t>(Y)), d(static_cast<qtn_t>(Z)) {}
 	constexpr Quaternion(qtn_t yaw, qtn_t pitch, qtn_t roll) // yaw (Z), pitch (Y), roll (X)
 	{
-		yaw *= M_PI / 180.0;
-		pitch *= M_PI / 180.0;
-		roll *= M_PI / 180.0;
+		yaw *= std::numbers::pi / 180.0;
+		pitch *= std::numbers::pi / 180.0;
+		roll *= std::numbers::pi / 180.0;
 
 		auto cy = gcem::cos(yaw * 0.5);
 		auto sy = gcem::sin(yaw * 0.5);
@@ -1052,10 +1047,10 @@ export struct Quaternion
 		c = cr * sp * cy + sr * cp * sy;
 		d = cr * cp * sy - sr * sp * cy;
 	}
-	constexpr Quaternion(const Vector& vecEulerAngles) : Quaternion(vecEulerAngles.yaw, vecEulerAngles.pitch, vecEulerAngles.roll) {}
+	explicit constexpr Quaternion(const Vector& vecEulerAngles) : Quaternion(vecEulerAngles.yaw, vecEulerAngles.pitch, vecEulerAngles.roll) {}
 	constexpr Quaternion(const Vector& vecAxis, qtn_t degree)	// Axis must be a unit vector. In counter-clockwise.
 	{
-		degree *= M_PI / 180.0;
+		degree *= std::numbers::pi / 180.0;
 		auto cosine = gcem::cos(0.5 * degree);
 		auto sine = gcem::sin(0.5 * degree);
 
@@ -1063,6 +1058,13 @@ export struct Quaternion
 		b = vecAxis.x * sine;
 		c = vecAxis.y * sine;
 		d = vecAxis.z * sine;
+	}
+	explicit constexpr Quaternion(const Matrix<3, 3>& m)	// 'm' must be a pure rotation matrix! 
+	{
+		a = gcem::sqrt(1.0 + m[0][0] + m[1][1] + m[2][2]) / 2.0;
+		b = (m[2][1] - m[1][2]) / (4 * a);
+		c = (m[0][2] - m[2][0]) / (4 * a);
+		d = (m[1][0] - m[0][1]) / (4 * a);
 	}
 
 	// Static Methods
@@ -1101,7 +1103,7 @@ export struct Quaternion
 		// pitch (y-axis rotation)
 		auto sinp = 2 * (a * c - d * b);
 		if (gcem::abs(sinp) >= 1)
-			vecAngles.pitch = (vec_t)gcem::copysign(M_PI / 2.0, sinp); // use 90 degrees if out of range
+			vecAngles.pitch = (vec_t)gcem::copysign(std::numbers::pi / 2.0, sinp); // use 90 degrees if out of range
 		else
 			vecAngles.pitch = (vec_t)gcem::asin(sinp);
 
@@ -1111,7 +1113,7 @@ export struct Quaternion
 		vecAngles.yaw = (vec_t)gcem::atan2(siny_cosp, cosy_cosp);
 
 		// Rad to Deg
-		vecAngles *= 180.0 / M_PI;
+		vecAngles *= 180.0 / std::numbers::pi;
 
 		return vecAngles;
 	}

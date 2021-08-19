@@ -412,6 +412,37 @@ void HUD_StudioEvent2(const mstudioevent_s* pEvent, const cl_entity_s* pEntity)
 		);
 	}
 
+		// Dynamic light.
+	case 5006:
+	{
+		using namespace std;
+
+		vector<string> szTokens;
+		szTokens.resize(5);
+		UTIL_Split(pEvent->options, szTokens);
+
+		if (szTokens.size() != 5)
+			return;
+
+		dlight_t* l = gEngfuncs.pEfxAPI->CL_AllocDlight(0);
+		Color clr(stoul(szTokens[2], nullptr, 16));
+
+		/*
+		[0]	attachment #
+		[1] light radius
+		[2]	hex color 0xRRGGBB
+		[3] die time.
+		[4] decay
+		*/
+		l->origin = g_pViewEnt->attachment[stoi(szTokens[0])];
+		l->radius = stof(szTokens[1]);
+		l->color.r = clr.r();
+		l->color.g = clr.g();
+		l->color.b = clr.b();
+		l->die = gEngfuncs.GetClientTime() + stof(szTokens[3]);
+		l->decay = stof(szTokens[4]);
+	}
+
 	default:
 		break;
 	}
