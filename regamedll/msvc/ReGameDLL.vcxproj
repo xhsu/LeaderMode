@@ -408,6 +408,7 @@
     <ClInclude Include="..\dlls\triggers.h" />
     <ClInclude Include="..\dlls\unisignals.h" />
     <ClInclude Include="..\dlls\util.h" />
+    <ClInclude Include="..\dlls\util.hpp" />
     <ClInclude Include="..\dlls\vector.h" />
     <ClInclude Include="..\dlls\vehicle.h" />
     <ClInclude Include="..\dlls\weaponbox.h" />

@@ -89,6 +89,9 @@
 #include "plats.h"
 #include "buttons.h"
 
+// Post ent-classes-declaration util set
+#include "util.hpp"
+
 // CSBOT and Nav
 #include "game_shared/GameEvent.h"		// Game event enum used by career mode, tutor system, and bots
 #include "game_shared/bot/bot_util.h"

@@ -17,9 +17,6 @@ class CWeaponBox : public CBaseEntity
 	static constexpr float THROWING_FORCE = 350;
 
 public:
-	static const char* GetCSModelName(WeaponIdType iId);
-
-public:
 	virtual void Spawn();
 	virtual void Precache();
 	virtual void KeyValue(KeyValueData* pkvd);

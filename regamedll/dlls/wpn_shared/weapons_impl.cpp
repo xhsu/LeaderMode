@@ -13,101 +13,102 @@ Modern Warfare Dev Team
 #include <unordered_map>
 
 // Completement of std::integral and std::floating_point.
-template<typename T> concept Arithmetic = std::is_arithmetic_v<T>;
+//template<typename T> concept Arithmetic = std::is_arithmetic_v<T>;
 
-#pragma region Detectors
-// Declare detectors
-CREATE_MEMBER_DETECTOR_CUSTOM(m_usEvent) { {T::m_usEvent} -> std::convertible_to<unsigned short>; };
-
-CREATE_MEMBER_DETECTOR_CUSTOM(ApplyClientFPFiringVisual) { t.ApplyClientFPFiringVisual(Vector2D::Zero()); };
-CREATE_MEMBER_DETECTOR_CUSTOM(ApplyRecoil) { t.ApplyRecoil(); };
-
-CREATE_MEMBER_DETECTOR_STATIC(ACCURACY_BASELINE);
-CREATE_MEMBER_DETECTOR_STATIC(MAX_SPEED_ZOOM);
-CREATE_MEMBER_DETECTOR_STATIC(MAX_SPEED);
-CREATE_MEMBER_DETECTOR_STATIC(SPREAD_BASELINE);
-CREATE_MEMBER_DETECTOR_STATIC(CONE_VECTOR);
-CREATE_MEMBER_DETECTOR_STATIC(RPM);
-CREATE_MEMBER_DETECTOR_STATIC(FIRE_INTERVAL);
-CREATE_MEMBER_DETECTOR_STATIC(GUN_VOLUME);
-CREATE_MEMBER_DETECTOR_STATIC(GUN_FLASH);
-CREATE_MEMBER_DETECTOR_STATIC(SHELL_MODEL);
-CREATE_MEMBER_DETECTOR_STATIC(EVENT_FILE);
-
-CREATE_MEMBER_DETECTOR_STATIC(SHOOT);
-CREATE_MEMBER_DETECTOR_STATIC(FIRE_ANIMTIME);
-CREATE_MEMBER_DETECTOR_STATIC(RELOAD_SOFT_DELAY_TIME);
-CREATE_MEMBER_DETECTOR_STATIC(RELOAD_EMPTY_SOFT_DELAY_TIME);
-CREATE_MEMBER_DETECTOR_STATIC(CHECK_MAGAZINE);
-
-CREATE_MEMBER_DETECTOR_CUSTOM(ATTRIB_NO_FIRE_UNDERWATER) { requires T::ATTRIB_NO_FIRE_UNDERWATER; };
-CREATE_MEMBER_DETECTOR_CUSTOM(ATTRIB_SEMIAUTO) { requires T::ATTRIB_SEMIAUTO; };
-CREATE_MEMBER_DETECTOR_CUSTOM(ATTRIB_AIM_FADE_FROM_BLACK) { requires T::ATTRIB_AIM_FADE_FROM_BLACK > 0.0f; };
-
-
-template <typename CWpn>
-concept IsShotgun = requires (CWpn wpn)
-{
-	{CWpn::CONE_VECTOR} -> std::convertible_to<Vector2D>;
-	requires CWpn::PROJECTILE_COUNT > 1;
-	requires !IS_MEMBER_PRESENTED_CPP20_W(SPREAD_BASELINE);
-};
-
-template <typename CWpn>
-concept HasEvent = requires (CWpn wpn)
-{
-	{CWpn::EVENT_FILE} -> std::convertible_to<const char*>;
-	{CWpn::ApplyClientTPFiringVisual};
-};
-
-template <typename CWpn>
-concept IsTubularMag = requires (CWpn wpn)
-{
-	requires CWpn::START_RELOAD > 0;
-	requires CWpn::INSERT > 0;
-	requires CWpn::AFTER_RELOAD > 0;
-};
-
-template <typename CWpn>
-concept IsManualRechamberWpn = requires (CWpn wpn)
-{
-	requires CWpn::RECHAMBER > 0;	// Rechamber anim.
-	requires CWpn::RECHAMBER_TIME > 0;
-	requires CWpn::BITS_RECHAMBER_ANIM > 0;
-};
-
-template <typename CWpn>
-concept CanSteelSight = requires (CWpn wpn)
-{
-	requires CWpn::AIM_FOV > 0;
-	{CWpn::AIM_OFFSET} -> std::convertible_to<Vector>;
-	requires CWpn::ATTRIB_USE_STEEL_SIGHT;
-};
-
-template <typename CWpn>
-concept CanScopeSight = requires (CWpn wpn)
-{
-	requires CWpn::AIM_FOV > 0;
-	{CWpn::AIM_OFFSET} -> std::convertible_to<Vector>;
-	requires CWpn::ATTRIB_USE_SCOPE_SIGHT;
-};
-
-template <typename CWpn>
-concept IsIdleAnimLooped = requires (CWpn wpn)
-{
-	requires CWpn::IDLE_TIME > 0.0f;
-};
-
-template <typename CWpn>
-concept HasFireSoundDefined = requires(CWpn wpn)
-{
-	{CWpn::FIRE_SFX} -> std::convertible_to<std::string>;
-	{CWpn::FIRE_SFX_VOLUME} -> std::floating_point;
-	{CWpn::FIRE_SFX_RADIUS} -> Arithmetic;
-	{CWpn::FIRE_SFX_PITCH[0]} -> Arithmetic;
-	{CWpn::FIRE_SFX_PITCH[1]} -> Arithmetic;
-};
-#pragma endregion
+//#pragma region Detectors
+//// Declare detectors
+//CREATE_MEMBER_DETECTOR_CUSTOM(m_usEvent) { {T::m_usEvent} -> std::convertible_to<unsigned short>; };
+//
+//CREATE_MEMBER_DETECTOR_CUSTOM(ApplyClientFPFiringVisual) { t.ApplyClientFPFiringVisual(Vector2D::Zero()); };
+//CREATE_MEMBER_DETECTOR_CUSTOM(ApplyRecoil) { t.ApplyRecoil(); };
+//
+//CREATE_MEMBER_DETECTOR_STATIC(ACCURACY_BASELINE);
+//CREATE_MEMBER_DETECTOR_STATIC(MAX_SPEED_ZOOM);
+//CREATE_MEMBER_DETECTOR_STATIC(MAX_SPEED);
+//CREATE_MEMBER_DETECTOR_STATIC(SPREAD_BASELINE);
+//CREATE_MEMBER_DETECTOR_STATIC(CONE_VECTOR);
+//CREATE_MEMBER_DETECTOR_STATIC(RPM);
+//CREATE_MEMBER_DETECTOR_STATIC(FIRE_INTERVAL);
+//CREATE_MEMBER_DETECTOR_STATIC(GUN_VOLUME);
+//CREATE_MEMBER_DETECTOR_STATIC(GUN_FLASH);
+//CREATE_MEMBER_DETECTOR_STATIC(SHELL_MODEL);
+//CREATE_MEMBER_DETECTOR_STATIC(EVENT_FILE);
+//
+//CREATE_MEMBER_DETECTOR_STATIC(SHOOT);
+//CREATE_MEMBER_DETECTOR_STATIC(FIRE_ANIMTIME);
+//CREATE_MEMBER_DETECTOR_STATIC(RELOAD_SOFT_DELAY_TIME);
+//CREATE_MEMBER_DETECTOR_STATIC(RELOAD_EMPTY_SOFT_DELAY_TIME);
+//CREATE_MEMBER_DETECTOR_STATIC(CHECK_MAGAZINE);
+//
+//CREATE_MEMBER_DETECTOR_CUSTOM(ATTRIB_NO_FIRE_UNDERWATER) { requires T::ATTRIB_NO_FIRE_UNDERWATER; };
+//CREATE_MEMBER_DETECTOR_CUSTOM(ATTRIB_SEMIAUTO) { requires T::ATTRIB_SEMIAUTO; };
+//CREATE_MEMBER_DETECTOR_CUSTOM(ATTRIB_AIM_FADE_FROM_BLACK) { requires T::ATTRIB_AIM_FADE_FROM_BLACK > 0.0f; };
+//CREATE_MEMBER_DETECTOR_STATIC(ATTRIB_INVERT_VMDL);
+//
+//
+//template <typename CWpn>
+//concept IsShotgun = requires (CWpn wpn)
+//{
+//	{CWpn::CONE_VECTOR} -> std::convertible_to<Vector2D>;
+//	requires CWpn::PROJECTILE_COUNT > 1;
+//	requires !IS_MEMBER_PRESENTED_CPP20_W(SPREAD_BASELINE);
+//};
+//
+//template <typename CWpn>
+//concept HasEvent = requires (CWpn wpn)
+//{
+//	{CWpn::EVENT_FILE} -> std::convertible_to<const char*>;
+//	{CWpn::ApplyClientTPFiringVisual};
+//};
+//
+//template <typename CWpn>
+//concept IsTubularMag = requires (CWpn wpn)
+//{
+//	requires CWpn::START_RELOAD > 0;
+//	requires CWpn::INSERT > 0;
+//	requires CWpn::AFTER_RELOAD > 0;
+//};
+//
+//template <typename CWpn>
+//concept IsManualRechamberWpn = requires (CWpn wpn)
+//{
+//	requires CWpn::RECHAMBER > 0;	// Rechamber anim.
+//	requires CWpn::RECHAMBER_TIME > 0;
+//	requires CWpn::BITS_RECHAMBER_ANIM > 0;
+//};
+//
+//template <typename CWpn>
+//concept CanSteelSight = requires (CWpn wpn)
+//{
+//	requires CWpn::AIM_FOV > 0;
+//	{CWpn::AIM_OFFSET} -> std::convertible_to<Vector>;
+//	requires CWpn::ATTRIB_USE_STEEL_SIGHT;
+//};
+//
+//template <typename CWpn>
+//concept CanScopeSight = requires (CWpn wpn)
+//{
+//	requires CWpn::AIM_FOV > 0;
+//	{CWpn::AIM_OFFSET} -> std::convertible_to<Vector>;
+//	requires CWpn::ATTRIB_USE_SCOPE_SIGHT;
+//};
+//
+//template <typename CWpn>
+//concept IsIdleAnimLooped = requires (CWpn wpn)
+//{
+//	requires CWpn::IDLE_TIME > 0.0f;
+//};
+//
+//template <typename CWpn>
+//concept HasFireSoundDefined = requires(CWpn wpn)
+//{
+//	{CWpn::FIRE_SFX} -> std::convertible_to<std::string>;
+//	{CWpn::FIRE_SFX_VOLUME} -> std::floating_point;
+//	{CWpn::FIRE_SFX_RADIUS} -> Arithmetic;
+//	{CWpn::FIRE_SFX_PITCH[0]} -> Arithmetic;
+//	{CWpn::FIRE_SFX_PITCH[1]} -> Arithmetic;
+//};
+//#pragma endregion
 
 #pragma region UTILs
 // Check hold to aim.
@@ -118,6 +119,11 @@ concept HasFireSoundDefined = requires(CWpn wpn)
 #endif
 #define AMMUNITION	m_pPlayer->m_rgAmmo[AmmoInfo()->m_iId]
 #pragma endregion
+
+#pragma region Class dummy
+struct NCUSP;
+#pragma endregion
+
 
 
 
@@ -1333,11 +1339,7 @@ struct CWeapon : public IWeapon
 			}
 		}
 
-		const char* modelname = CWeaponBox::GetCSModelName(Id());
-		if (modelname)
-		{
-			pWeaponBox->SetModel(modelname);
-		}
+		pWeaponBox->SetModel(WorldModel());
 
 		// if the caller is inquiring CWeaponBox, give it to him.
 		if (ppWeaponBoxReturned != nullptr)
@@ -1469,7 +1471,7 @@ struct CWeapon : public IWeapon
 #pragma endregion
 
 #pragma region Model Handling.
-	bool	ShouldInvertMdl(void) override { return false; }	// Most IB's model doesn't need this.
+	bool	ShouldInvertMdl(void) override { if constexpr (IS_MEMBER_PRESENTED_CPP20_W(ATTRIB_INVERT_VMDL)) return CWpn::ATTRIB_INVERT_VMDL; else return false; }	// Most IB's model doesn't need this.
 	
 	int		CalcBodyParts(void) override { return 0; }	// Determind on classes.
 
@@ -1660,7 +1662,7 @@ struct CWeapon : public IWeapon
 		{
 			return WEAPON_GLOCK18;
 		}
-		else if constexpr (std::is_same_v<CWpn, CUSP>)
+		else if constexpr (std::is_same_v<CWpn, NCUSP>)
 		{
 			return WEAPON_USP;
 		}
@@ -1778,6 +1780,10 @@ struct CWeapon : public IWeapon
 	const struct WeaponInfo*	WpnInfo(void)	override { return &g_rgWpnInfo[Id()]; }
 
 	const struct AmmoInfo*		AmmoInfo(void)	override { return &g_rgAmmoInfo[WpnInfo()->m_iAmmoType]; }
+
+	constexpr const char*		ViewModel(void)	override { return CWpn::VIEW_MODEL; }
+
+	constexpr const char*		WorldModel(void)override { return CWpn::WORLD_MODEL; }
 
 #pragma endregion
 
@@ -2013,6 +2019,23 @@ struct CWeapon : public IWeapon
 
 	void	Vary(RoleTypes iType) override {}	// Dummy, waiting to be override.
 
+	float	DefaultSpread(float flBaseline, float flAimingMul, float flDuckingMul, float flWalkingMul, float flJumpingMul)
+	{
+		if (!(m_pPlayer->pev->flags & FL_ONGROUND))
+			flBaseline *= flJumpingMul;
+
+		if (m_pPlayer->pev->velocity.Length2D() > 0)	// z speed does not included.
+			flBaseline *= flWalkingMul;
+
+		if (m_pPlayer->pev->flags & FL_DUCKING)
+			flBaseline *= flDuckingMul;
+
+		if (m_bInZoom || m_pPlayer->pev->fov < DEFAULT_FOV)
+			flBaseline *= flAimingMul;
+
+		return flBaseline;	// it's already be modified.
+	}
+
 	float	GetSpread(void) override
 	{
 		if constexpr (IS_MEMBER_PRESENTED_CPP20_W(SPREAD_BASELINE))
@@ -2050,6 +2073,220 @@ struct CWeapon : public IWeapon
 
 };
 
+struct NCUSP : public CWeapon<NCUSP>
+{
+	#pragma region USP database
+	enum usp_e
+	{
+		IDLE = 0,
+		SHOOT,
+		SHOOT_LAST,
+		DEPLOY,
+		DRAW_FIRST,
+		HOLSTER,
+		RELOAD,
+		RELOAD_EMPTY,
+		CHECK_MAGAZINE,
+		LHAND_DOWN,
+		LHAND_UP,
+		BLOCK_UP,
+		BLOCK_DOWN,
+		DASH_ENTER,
+		DASHING,
+		DASH_EXIT,
+	};
+
+	// Slide stop available anims.
+	static constexpr auto	BITS_SLIDE_STOP_ANIM =	(1 << IDLE) |
+													(1 << DEPLOY) |
+													(1 << HOLSTER) |
+													(1 << CHECK_MAGAZINE) |
+													(1 << LHAND_DOWN) | (1 << LHAND_UP) |
+													(1 << BLOCK_DOWN) | (1 << BLOCK_UP) |
+													(1 << DASH_ENTER) | (1 << DASHING) | (1 << DASH_EXIT)/* |
+													(1 << SH_DASH_ENTER) | (1 << SH_DASHING) | (1 << SH_DASH_EXIT)*/;	// UNDONE, TODO
+
+	static constexpr auto	VIEW_MODEL			= "models/weapons/v_usp.mdl";
+	static constexpr auto	WORLD_MODEL			= "models/weapons/w_usp.mdl";
+	static constexpr auto	FIRE_SFX			= "weapons/usp/usp_fire.wav";
+	static constexpr auto	POSTURE				= "onehanded";
+	static constexpr auto	MAX_SPEED			= 250.0f;
+	static constexpr auto	DAMAGE				= 32;
+	static constexpr auto	RANGE_MODIFER		= 1.187260896;	// 80% damage @650 inches.
+	static constexpr auto	FIRE_INTERVAL		= 0.15f;
+	static constexpr auto	EFFECTIVE_RANGE		= 4096.0f;
+	static constexpr auto	PENETRATION			= 1;	// 1 means it can't penetrate anything.
+	static constexpr auto	SPREAD_BASELINE		= 1.2f;
+	static constexpr auto	ACCURACY_BASELINE	= 0.92f;
+	static constexpr auto	GUN_VOLUME			= QUIET_GUN_VOLUME;
+	static constexpr auto	GUN_FLASH			= DIM_GUN_FLASH;
+	static constexpr auto	SHELL_MODEL			= "models/pshell.mdl";
+//	static constexpr auto	EVENT_FILE			= "events/usp.sc";
+
+	// Anim time
+	static constexpr auto	FIRE_ANIMTIME					= 13.0 / 30.0;
+	static constexpr auto	DEPLOY_TIME						= 16.0 / 30.0;
+	static constexpr auto	DRAW_FIRST_TIME					= 41.0 / 30.0;
+	static constexpr auto	HOLSTER_TIME					= 16.0 / 30.0;
+	static constexpr auto	RELOAD_TIME						= 66.0 / 30.0;
+	static constexpr auto	RELOAD_EMPTY_TIME				= 66.0 / 30.0;
+	static constexpr auto	CHECK_MAGAZINE_TIME				= 76.0 / 30.0;
+	static constexpr auto	LHAND_DOWN_TIME					= 11.0 / 30.0;
+	static constexpr auto	LHAND_UP_TIME					= 11.0 / 30.0;
+	static constexpr auto	BLOCK_UP_TIME					= 11.0 / 30.0;
+	static constexpr auto	BLOCK_DOWN_TIME					= 11.0 / 30.0;
+	static constexpr auto	DASH_ENTER_TIME					= 11.0 / 30.0;
+	static constexpr auto	DASH_EXIT_TIME					= 11.0 / 30.0;
+
+	// Attrib
+	static constexpr auto	ATTRIB_SEMIAUTO				= true;
+	static constexpr auto	ATTRIB_AIM_FADE_FROM_BLACK	= false;
+	static constexpr auto	ATTRIB_NO_FIRE_UNDERWATER	= true;
+	static constexpr auto	ATTRIB_INVERT_VMDL			= false;
+#pragma endregion
+
+	// Behaviours
+	void	Aim(void) final
+	{
+		switch (m_iVariation)
+		{
+		case Role_SWAT:
+		case Role_Sharpshooter:
+		case Role_Medic:
+		case Role_MadScientist:
+		case Role_Assassin:
+			// Electronic Sight
+			DefaultSteelSight(Vector(-2.69f, 5, 0.88), 75);
+			break;
+
+		default:
+			// Steel Sight
+			DefaultSteelSight(Vector(-2.7, 5, 1.4), 85);
+			break;
+		}
+	}
+
+	// Model handling
+	int		CalcBodyParts(void) final
+	{
+		SCE_FIELD LHAND = 1;
+		SCE_FIELD LSLEEVE = 3;
+		SCE_FIELD SLIDE = 5;
+		SCE_FIELD MAGAZINE = 6;
+		SCE_FIELD BARREL = 7;
+		SCE_FIELD LASER = 10;
+		SCE_FIELD SIGHT = 11;
+
+		SCE_FIELD VISIBLE = 0;
+		SCE_FIELD INVISIBLE = 1;
+		SCE_FIELD NORMAL = 0;
+		SCE_FIELD SLIDE_STOP = 1;
+		SCE_FIELD NO_BULLET = 1;
+		SCE_FIELD BREECHBLOCK = 1;
+		SCE_FIELD POS_AT_SLIDE_STOP = 2;
+
+		static BodyEnumInfo_t info[] =
+		{
+			{ 0, 1 },	// right hand	= 0;
+			{ 0, 2 },	// left hand	= 1;
+			{ 0, 1 },	// right sleeve	= 2;
+			{ 0, 2 },	// left sleeve	= 3;
+
+			{ 0, 1 },	// weapon_1		= 4;
+
+			{ 0, 2 },	// slide		= 5;
+			{ 0, 2 },	// bullets		= 6;
+			{ 0, 2 },	// barrel		= 7;
+			{ 0, 1 },	// hammer		= 8;
+			{ 0, 1 },	// weapon_2		= 9;
+			{ 0, 2 },	// laser		= 10;
+			{ 0, 3 },	// sight		= 11;
+		};
+
+		// mag state control.
+		if (m_iClip > 0)
+			info[MAGAZINE].body = NORMAL;
+		else
+			info[MAGAZINE].body = NO_BULLET;
+
+		// variation
+		switch (m_iVariation)
+		{
+		case Role_SWAT:
+		case Role_Medic:
+		case Role_MadScientist:
+			// sight
+			info[LASER].body = FALSE;
+			info[SIGHT].body = TRUE;
+			break;
+
+		case Role_Sharpshooter:
+			// laser
+			// sight
+			info[LASER].body = TRUE;
+			info[SIGHT].body = TRUE;
+			break;
+
+		case Role_Assassin:
+			// silencer
+			// sight
+			info[LASER].body = FALSE;
+			info[SIGHT].body = TRUE;
+			break;
+
+		default:
+			// nothing
+			info[LASER].body = FALSE;
+			info[SIGHT].body = FALSE;
+			break;
+		}
+
+		// slide stop vfx.
+		if (m_iClip <= 0 && (1 << m_pPlayer->pev->weaponanim) & BITS_SLIDE_STOP_ANIM)
+		{
+			info[SLIDE].body = SLIDE_STOP;
+			info[BARREL].body = BREECHBLOCK;
+
+			// also move the sight, if it exists.
+			if (info[SIGHT].body == TRUE)
+				info[SIGHT].body = POS_AT_SLIDE_STOP;
+		}
+		else
+		{
+			info[SLIDE].body = NORMAL;
+			info[BARREL].body = NORMAL;
+		}
+
+		return CalcBody(info);	// elements count of the info[].
+	}
+
+	// Dynamic data inquiry
+	float	GetSpread(void) final
+	{
+		if (m_flLastFire != 0.0f)
+		{
+			m_flAccuracy -= (0.3f - (gpGlobals->time - m_flLastFire)) * 0.275f;
+
+			if (m_flAccuracy > ACCURACY_BASELINE)
+			{
+				m_flAccuracy = ACCURACY_BASELINE;
+			}
+			else if (m_flAccuracy < 0.6f)
+			{
+				m_flAccuracy = 0.6f;
+			}
+		}
+
+		return DefaultSpread(SPREAD_BASELINE * (1.0f - m_flAccuracy), 0.1f, 0.75f, 2.0f, 5.0f);
+	}
+
+	// Functions required by template.
+	void	ApplyRecoil(void)
+	{
+		m_pPlayer->m_vecVAngleShift.x -= 2;
+	}
+};
+
 #pragma region Interface manager
 
 void IWeapon::TheWeaponsThink(void)
@@ -2076,7 +2313,78 @@ void IWeapon::TheWeaponsThink(void)
 
 IWeapon* IWeapon::Give(WeaponIdType iId, void* pPlayer, int iClip, unsigned bitsFlags)
 {
-	return nullptr;
+	IWeapon* p = nullptr;
+
+	switch (iId)
+	{
+	case WEAPON_NONE:
+		break;
+	case WEAPON_GLOCK18:
+		break;
+	case WEAPON_USP:
+		p = new NCUSP;
+		break;
+	case WEAPON_ANACONDA:
+		break;
+	case WEAPON_DEAGLE:
+		break;
+	case WEAPON_FIVESEVEN:
+		break;
+	case WEAPON_M45A1:
+		break;
+	case WEAPON_KSG12:
+		break;
+	case WEAPON_M1014:
+		break;
+	case WEAPON_AA12:
+		break;
+	case WEAPON_MP7A1:
+		break;
+	case WEAPON_MAC10:
+		break;
+	case WEAPON_MP5N:
+		break;
+	case WEAPON_UMP45:
+		break;
+	case WEAPON_P90:
+		break;
+	case WEAPON_VECTOR:
+		break;
+	case WEAPON_AK47:
+		break;
+	case WEAPON_M4A1:
+		break;
+	case WEAPON_SCARH:
+		break;
+	case WEAPON_XM8:
+		break;
+	case WEAPON_SRS:
+		break;
+	case WEAPON_SVD:
+		break;
+	case WEAPON_AWP:
+		break;
+	case WEAPON_PSG1:
+		break;
+	case WEAPON_MK46:
+		break;
+	case WEAPON_RPD:
+		break;
+
+	case LAST_WEAPON:
+	case WEAPON_SHIELDGUN:
+	default:
+		break;
+	}
+
+	if (p)
+	{
+		*p->Clip() = iClip;
+		*p->Flags() = bitsFlags;
+		p->Attach(pPlayer);
+	}
+
+	return p;
 }
 
 #pragma endregion

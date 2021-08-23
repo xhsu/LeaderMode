@@ -129,6 +129,7 @@ class IWeapon
 //			Managing a pure-virtual interface class.
 //-----------------------------------------------------------------------------
 #pragma region Interface manager.
+protected:
 	static inline std::list<IWeapon*> _lstWeapons;
 
 	void* operator new(size_t size) { return calloc(1, size); }	// Generally speaking, calloc() is faster than malloc() with memset().
@@ -139,8 +140,6 @@ class IWeapon
 	IWeapon(IWeapon&&) = delete;
 	IWeapon& operator=(const IWeapon&) = delete;
 	IWeapon& operator=(IWeapon&&) = delete;
-
-protected:
 	virtual ~IWeapon() {}	// Use Kill() instead.
 
 public:
@@ -405,6 +404,14 @@ public:
 	* Return:	Non-modifiable data structure.
 	*/
 	virtual	const struct AmmoInfo* AmmoInfo	(void) = 0;
+
+	/*
+	* Purpose:	Aquire the file name of weapon model.
+	* Usage:	Anytime.
+	* Return:	A const char* to the file name including its path.
+	*/
+	virtual constexpr const char* ViewModel	(void) = 0;
+	virtual constexpr const char* WorldModel(void) = 0;
 #pragma endregion
 
 //-----------------------------------------------------------------------------
@@ -723,6 +730,9 @@ struct primaryattack_message_s
 
 using primatk_msg_ptr = std::shared_ptr<primaryattack_message_s>;
 
+// Completement of std::integral and std::floating_point.
+template<typename T> concept Arithmetic = std::is_arithmetic_v<T>;
+
 // Declare detectors
 CREATE_MEMBER_DETECTOR_CUSTOM(m_usEvent) { {T::m_usEvent} -> std::convertible_to<unsigned short>; };
 
@@ -747,15 +757,18 @@ CREATE_MEMBER_DETECTOR_STATIC(RELOAD_SOFT_DELAY_TIME);
 CREATE_MEMBER_DETECTOR_STATIC(RELOAD_EMPTY_SOFT_DELAY_TIME);
 CREATE_MEMBER_DETECTOR_STATIC(CHECK_MAGAZINE);
 
-CREATE_MEMBER_DETECTOR_STATIC(ATTRIB_NO_FIRE_UNDERWATER);
-CREATE_MEMBER_DETECTOR_CUSTOM(ATTRIB_SEMIAUTO) { {T::ATTRIB_SEMIAUTO == true}; };
+CREATE_MEMBER_DETECTOR_CUSTOM(ATTRIB_NO_FIRE_UNDERWATER) { requires T::ATTRIB_NO_FIRE_UNDERWATER; };
+CREATE_MEMBER_DETECTOR_CUSTOM(ATTRIB_SEMIAUTO) { requires T::ATTRIB_SEMIAUTO; };
+CREATE_MEMBER_DETECTOR_CUSTOM(ATTRIB_AIM_FADE_FROM_BLACK) { requires T::ATTRIB_AIM_FADE_FROM_BLACK > 0.0f; };
+CREATE_MEMBER_DETECTOR_STATIC(ATTRIB_INVERT_VMDL);
+
 
 template <typename CWpn>
 concept IsShotgun = requires (CWpn wpn)
 {
 	{CWpn::CONE_VECTOR} -> std::convertible_to<Vector2D>;
-	{CWpn::PROJECTILE_COUNT > 1};
-	{!IS_MEMBER_PRESENTED_CPP20_W(SPREAD_BASELINE)};
+	requires CWpn::PROJECTILE_COUNT > 1;
+	requires !IS_MEMBER_PRESENTED_CPP20_W(SPREAD_BASELINE);
 };
 
 template <typename CWpn>
@@ -768,17 +781,49 @@ concept HasEvent = requires (CWpn wpn)
 template <typename CWpn>
 concept IsTubularMag = requires (CWpn wpn)
 {
-	{CWpn::START_RELOAD > 0};
-	{CWpn::INSERT > 0};
-	{CWpn::AFTER_RELOAD > 0};
+	requires CWpn::START_RELOAD > 0;
+	requires CWpn::INSERT > 0;
+	requires CWpn::AFTER_RELOAD > 0;
 };
 
 template <typename CWpn>
 concept IsManualRechamberWpn = requires (CWpn wpn)
 {
-	{CWpn::RECHAMBER > 0};	// Rechamber anim.
-	{CWpn::RECHAMBER_TIME > 0};
-	{CWpn::BITS_RECHAMBER_ANIM > 0};
+	requires CWpn::RECHAMBER > 0;	// Rechamber anim.
+	requires CWpn::RECHAMBER_TIME > 0;
+	requires CWpn::BITS_RECHAMBER_ANIM > 0;
+};
+
+template <typename CWpn>
+concept CanSteelSight = requires (CWpn wpn)
+{
+	requires CWpn::AIM_FOV > 0;
+	{CWpn::AIM_OFFSET} -> std::convertible_to<Vector>;
+	requires CWpn::ATTRIB_USE_STEEL_SIGHT;
+};
+
+template <typename CWpn>
+concept CanScopeSight = requires (CWpn wpn)
+{
+	requires CWpn::AIM_FOV > 0;
+	{CWpn::AIM_OFFSET} -> std::convertible_to<Vector>;
+	requires CWpn::ATTRIB_USE_SCOPE_SIGHT;
+};
+
+template <typename CWpn>
+concept IsIdleAnimLooped = requires (CWpn wpn)
+{
+	requires CWpn::IDLE_TIME > 0.0f;
+};
+
+template <typename CWpn>
+concept HasFireSoundDefined = requires(CWpn wpn)
+{
+	{CWpn::FIRE_SFX} -> std::convertible_to<std::string>;
+	{CWpn::FIRE_SFX_VOLUME} -> std::floating_point;
+	{CWpn::FIRE_SFX_RADIUS} -> Arithmetic;
+	{CWpn::FIRE_SFX_PITCH[0]} -> Arithmetic;
+	{CWpn::FIRE_SFX_PITCH[1]} -> Arithmetic;
 };
 
 // General template.

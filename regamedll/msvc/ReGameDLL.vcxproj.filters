@@ -897,6 +897,9 @@
     <ClInclude Include="..\tier0\platform.h">
       <Filter>tier0</Filter>
     </ClInclude>
+    <ClInclude Include="..\dlls\util.hpp">
+      <Filter>dlls</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\linux\appversion.sh">

@@ -44,7 +44,7 @@
 // Function is doubt reversed
 #define TODOBODY
 
-#define BIT(n) (1<<(n))
+#define BIT(n) (1U<<(n##U))
 
 #ifdef HAVE_STRONG_TYPEDEF
 enum class string_t: unsigned int {};

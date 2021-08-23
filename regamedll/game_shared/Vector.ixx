@@ -35,10 +35,8 @@ export inline constexpr float rsqrt(float x)
 #endif
 }
 
-inline constexpr auto Q_abs(const auto& v)
-{
-	return v >= 0 ? v : -v;
-}
+// Fuck std. Why can't they implement this simple thing?
+template<typename... ArgTys> constexpr bool Q_IsNaN(const ArgTys... numbers) { return ((numbers != numbers) || ...); }
 
 // Completement of std::integral and std::floating_point.
 template<typename T> concept Arithmetic = std::is_arithmetic_v<T>;
@@ -69,7 +67,7 @@ export struct Vector2D
 
 	// Operators
 	constexpr decltype(auto) operator-()         const { return Vector2D(-x, -y); }
-	constexpr bool operator==(const Vector2D& v) const { return Q_abs(x - v.x) < VEC_EPSILON && Q_abs(y - v.y) < VEC_EPSILON; }
+	constexpr bool operator==(const Vector2D& v) const { return gcem::abs(x - v.x) < VEC_EPSILON && gcem::abs(y - v.y) < VEC_EPSILON; }
 	constexpr std::strong_ordering operator<=> (const Vector2D& v) const { auto const lhs = Length(), rhs = v.Length(); return lhs < rhs ? std::strong_ordering::less : lhs > rhs ? std::strong_ordering::greater : std::strong_ordering::equal; }
 	constexpr std::strong_ordering operator<=> (Arithmetic auto fl) const { auto const l = static_cast<decltype(fl)>(Length()); return l < fl ? std::strong_ordering::less : l > fl ? std::strong_ordering::greater : std::strong_ordering::equal; }
 
@@ -151,7 +149,7 @@ export struct Vector2D
 			y > -tolerance && y < tolerance
 		);
 	}
-	constexpr bool IsNaN() const { return x == VEC_NAN || y == VEC_NAN; }
+	constexpr bool IsNaN() const { return Q_IsNaN(x, y); }
 
 	// Conversion
 	constexpr operator float* () { return &x; } // Vectors will now automatically convert to float * when needed
@@ -224,7 +222,7 @@ export struct Vector
 
 	// Operators
 	constexpr decltype(auto) operator-()       const { return Vector(-x, -y, -z); }
-	constexpr bool operator==(const Vector& v) const { return Q_abs(x - v.x) < VEC_EPSILON && Q_abs(y - v.y) < VEC_EPSILON && Q_abs(z - v.z) < VEC_EPSILON; }
+	constexpr bool operator==(const Vector& v) const { return gcem::abs(x - v.x) < VEC_EPSILON && gcem::abs(y - v.y) < VEC_EPSILON && gcem::abs(z - v.z) < VEC_EPSILON; }
 	constexpr std::strong_ordering operator<=> (const Vector& v) const { auto const lhs = Length(), rhs = v.Length(); return lhs < rhs ? std::strong_ordering::less : lhs > rhs ? std::strong_ordering::greater : std::strong_ordering::equal; }
 	constexpr std::strong_ordering operator<=> (Arithmetic auto fl) const { auto const l = static_cast<decltype(fl)>(Length()); return l < fl ? std::strong_ordering::less : l > fl ? std::strong_ordering::greater : std::strong_ordering::equal; }
 
@@ -314,7 +312,7 @@ export struct Vector
 			z > -tolerance && z < tolerance
 		);
 	}
-	constexpr bool IsNaN() const { return x == VEC_NAN || y == VEC_NAN || z == VEC_NAN; }
+	constexpr bool IsNaN() const { return Q_IsNaN(x, y, z); }
 	constexpr Vector2D Make2D() const { return Vector2D(x, y); }
 
 	// Conversion
@@ -446,7 +444,7 @@ export constexpr auto operator^(const Vector& a, const Vector& b)
 {
 	double length_ab = static_cast<double>(a.Length() * b.Length());
 
-	if (Q_abs(length_ab) < DBL_EPSILON)
+	if (gcem::abs(length_ab) < DBL_EPSILON)
 		return 0.0;
 
 	return gcem::acos(DotProduct(a, b) / length_ab) * (180.0 / std::numbers::pi);
@@ -809,6 +807,44 @@ struct Matrix
 		return Adjoint() / det;
 	}
 
+	// Methods
+	constexpr decltype(auto) ReplaceCol(size_t c, const std::initializer_list<mxs_t>&& list)
+	{
+		assert(c < COLUMNS);
+
+		size_t r = 0U;
+
+		for (auto cell : list)
+		{
+			if (gcem::internal::is_nan(cell))	// Special key: if a cell is NaN, skip it.
+				continue;
+
+			_data[r][c] = cell;
+			r++;
+
+			if (r >= ROWS)
+				break;
+		}
+	}
+	constexpr decltype(auto) ReplaceRow(size_t r, const std::initializer_list<mxs_t>&& list)
+	{
+		assert(r < COLUMNS);
+
+		size_t c = 0U;
+
+		for (auto cell : list)
+		{
+			if (gcem::internal::is_nan(cell))	// Special key: if a cell is NaN, skip it.
+				continue;
+
+			_data[r][c] = cell;
+			c++;
+
+			if (c >= ROWS)
+				break;
+		}
+	}
+
 	// Operators
 	// 
 	// Between matrices.
@@ -982,13 +1018,24 @@ struct Matrix
 	constexpr const mxs_t* operator[](size_t rows) const { assert(rows < ROWS); return &_data[rows][0]; }
 
 	// Conversion
-	constexpr decltype(auto) ToVector() const requires(COLUMNS == 1U && (ROWS == 2U || ROWS == 3U))
+	constexpr decltype(auto) ToVector(size_t c = 0U) const
 	{
+		assert(c < COLUMNS);
+
 		// Vectors are written vertically in matrices.
 		if constexpr (ROWS == 2U)
-			return Vector2D(_data[0][0], _data[1][0]);
+			return Vector2D(_data[0][c], _data[1][c]);
 		else if constexpr (ROWS == 3U)
-			return Vector(_data[0][0], _data[1][0], _data[2][0]);
+			return Vector(_data[0][c], _data[1][c], _data[2][c]);
+		else
+		{
+			Matrix<ROWS, 1> m;
+
+			for (size_t i = 0U; i < ROWS; i++)
+				m[i][0] = _data[i][c];
+
+			return m;
+		}
 	}
 
 private:
@@ -1078,6 +1125,9 @@ export struct Quaternion
 	inline constexpr decltype(auto) Reciprocal() const { return Conjugate() / (a * a + b * b + c * c + d * d); }
 	inline constexpr decltype(auto) Real() const { return a; }
 	inline constexpr decltype(auto) Pure() const { return Vector(b, c, d); }
+
+	// Methods
+	constexpr bool IsNaN() const { return Q_IsNaN(a, b, c, d); }
 
 	// Operators
 	constexpr decltype(auto) operator*(const Quaternion& q) const { return Quaternion(a * q.a - b * q.b - c * q.c - d * q.d, a * q.a + b * q.b + c * q.c - d * q.d, a * q.a - b * q.b + c * q.c + d * q.d, a * q.a + b * q.b - c * q.c + d * q.d); }
