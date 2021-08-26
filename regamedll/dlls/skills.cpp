@@ -505,44 +505,19 @@ bool CSkillBulletproof::Execute()
 	// give vest + helmet
 	m_pPlayer->GiveNamedItem("item_assaultsuit");
 
-	// reload all weapons
-	for (auto pWeapon : CBaseWeapon::m_lstWeapons)
-	{
-		if (!pWeapon->m_pPlayer.IsValid())
-			continue;
-
-		if (pWeapon->m_pPlayer->entindex() != m_pPlayer->entindex())
-			continue;
-
-		if (pWeapon->IsDead())
-			continue;
-
-		pWeapon->AddPrimaryAmmo(pWeapon->m_pItemInfo->m_iMaxClip + pWeapon->m_pAmmoInfo->m_iMax);	// fill up all ammunition!
-	}
-
 	CBasePlayer* pPlayer = nullptr;
 	while ((pPlayer = UTIL_FindEntityInSphere(pPlayer, m_pPlayer->pev->origin, GIFT_RADIUS)))
 	{
 		if (!pPlayer->IsPlayer())
 			continue;
 
-		if (pPlayer == m_pPlayer)	// not again...
-			continue;
-
-		for (auto pWeapon : CBaseWeapon::m_lstWeapons)
-		{
-			if (!pWeapon->m_pPlayer.IsValid())
-				continue;
-
-			if (pWeapon->m_pPlayer->entindex() != m_pPlayer->entindex())
-				continue;
-
-			if (pWeapon->IsDead())
-				continue;
-
-			if (pWeapon->m_pItemInfo->m_iMaxClip > 0)	// this weapon is using a clip!
-				pWeapon->AddPrimaryAmmo(pWeapon->m_pItemInfo->m_iMaxClip);
-		}
+		// Client should:
+		// If you are the SWAT who enact his skill: Refill all ammo and clip.
+		// If you are the teammates around: Insert an entire clip and stop reload.
+		MESSAGE_BEGIN(MSG_ONE, gmsgSkillEnact, m_pPlayer->pev->origin, pPlayer->edict());
+		WRITE_BYTE(m_pPlayer->entindex());
+		WRITE_BYTE(GetIndex());
+		MESSAGE_END();
 	}
 
 	m_pPlayer->m_pActiveItem->Deploy();	// just some feeling stuff.
@@ -1775,7 +1750,7 @@ bool CSkillTaserGun::Terminate()
 	return true;
 }
 
-float CSkillTaserGun::WeaponFireIntervalModifier(CBaseWeapon* pWeapon)
+float CSkillTaserGun::WeaponFireIntervalModifier(IWeapon* pWeapon)
 {
 	// play the shooting sfx here.
 	// if I place it at trace line, the shotgun would freaking out.

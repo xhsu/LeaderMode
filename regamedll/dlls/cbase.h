@@ -39,7 +39,7 @@ class CRestore;
 class CBasePlayer;
 class CBaseEntity;
 class CBaseMonster;
-class CBaseWeapon;	// LUNA: this is NOT a derived class of CBaseEntity anymore!
+class IWeapon;	// LUNA: this is NOT a derived class of CBaseEntity anymore!
 class CSquadMonster;
 
 enum AmmoIdType : BYTE;
@@ -62,10 +62,10 @@ public:
 		free(ptr);
 	}
 	CBaseEntity() noexcept {}
-	CBaseEntity(const CBaseEntity& s) = default;
-	CBaseEntity(CBaseEntity&& s) = default;
-	CBaseEntity& operator=(const CBaseEntity& s) = default;
-	CBaseEntity& operator=(CBaseEntity&& s) = default;
+	CBaseEntity(const CBaseEntity& s) = delete;
+	CBaseEntity(CBaseEntity&& s) = delete;
+	CBaseEntity& operator=(const CBaseEntity& s) = delete;
+	CBaseEntity& operator=(CBaseEntity&& s) = delete;
 	virtual ~CBaseEntity() {}
 
 public:

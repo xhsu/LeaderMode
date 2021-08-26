@@ -138,6 +138,7 @@ void LinkUserMessages()
 	gmsgScheme		  = REG_USER_MSG("Scheme", 2);
 	gmsgNewRound	  = REG_USER_MSG("NewRound", 0);
 	gmsgGiveWpn		  = REG_USER_MSG("GiveWpn", 3);
+	gmsgSkillEnact	  = REG_USER_MSG("SkillEnact", 2);
 }
 
 void WriteSigonMessages()

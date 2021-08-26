@@ -12,7 +12,7 @@
 #pragma once
 #endif
 
-#include <stdexcept>
+#include <concepts>
 
 //-----------------------------------------------------------------------------
 // Purpose: Basic handler for an rgb set of colors
@@ -162,6 +162,17 @@ struct Color
 	constexpr Color& operator=(const Color& rhs) { *((int*)this) = *((int*)&rhs); return *this; }
 
 	constexpr decltype(auto) operator~() const { return Color(*((uint32*)this) ^ 0xFFFFFF); }	// Reversed color. It is easier on HEX calculation.
+
+	constexpr decltype(auto) operator*(double fl) const
+	{
+		Color c;
+		c._color[0] = static_cast<uint8>((double)_color[0] * fl);
+		c._color[1] = static_cast<uint8>((double)_color[1] * fl);
+		c._color[2] = static_cast<uint8>((double)_color[2] * fl);
+		c._color[3] = _color[3];
+
+		return c;
+	}
 
 private:
 	uint8 _color[4];

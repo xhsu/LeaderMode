@@ -33,7 +33,7 @@
 #include "public/Color.h"
 
 class CUtlBuffer;
-class Color;
+struct Color;
 
 //-----------------------------------------------------------------------------
 // Purpose: Simple recursive data access class

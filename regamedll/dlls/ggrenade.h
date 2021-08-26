@@ -9,6 +9,9 @@ Created Date: Mar 13 2020
 extern int g_iSpriteGroundexp1;
 extern int g_iSpriteZerogxplode2;
 
+// spawn flags
+#define SF_DETONATE                 BIT(0) // Grenades flagged with this will be triggered when the owner calls detonateSatchelCharges
+
 // combat.cpp
 float GetAmountOfPlayerVisible(Vector vecSrc, CBaseEntity* pEntity);
 

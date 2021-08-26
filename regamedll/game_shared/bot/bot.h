@@ -281,6 +281,9 @@ private:
 
 	// index of top of stack
 	int m_postureStackIndex;
+
+	// Luna: Now only BOTs has weapon on server side.
+	IWeapon* m_pActiveItem;
 };
 
 inline void CBot::SetModel(const char *modelName)
@@ -308,18 +311,15 @@ inline void CBot::Walk()
 
 inline bool CBot::IsActiveWeaponReloading() const
 {
-	if (!m_pActiveItem)
-		return false;
-
-	return m_pActiveItem->m_bInReload;
+	return m_pActiveItem && !m_pActiveItem->IsDead() && m_pActiveItem->IsReloading();
 }
 
 inline bool CBot::IsActiveWeaponRecoilHigh() const
 {
-	if (m_pActiveItem)
+	if (m_pActiveItem && !m_pActiveItem->IsDead())
 	{
-		const float highRecoil = 0.4f;
-		return (m_pActiveItem->m_flAccuracy > highRecoil) != 0;
+		constexpr float highRecoil = 0.4f;
+		return (m_pActiveItem->Accuracy() > highRecoil) != 0;
 	}
 
 	return false;

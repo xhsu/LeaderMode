@@ -468,7 +468,7 @@ public:
 	void GiveShield(bool bDeploy = true);
 	bool IsHittingShield(Vector &vecDirection, TraceResult *ptr);
 	bool SelectSpawnSpot(const char *pEntClassName, CBaseEntity* &pSpot);
-	bool IsReloading() const;
+	bool IsReloading() const { return m_Activity == ACT_RELOAD || m_IdealActivity == ACT_RELOAD; }
 	bool IsBlind() const { return (m_blindUntilTime > gpGlobals->time); }
 	bool IsAutoFollowAllowed() const { return (gpGlobals->time > m_allowAutoFollowTime); }
 	void InhibitAutoFollow(float duration) { m_allowAutoFollowTime = gpGlobals->time + duration; }
@@ -509,7 +509,6 @@ public:
 	inline int QueryIndex(int i) { return i * gpGlobals->maxClients + entindex(); }
 	void QueryClientCvar(void);
 	void UpdateClientCvar(const char* cvarName, const char* value, int requestID);
-	void ClientRequestFireWeapon(primatk_msg_ptr args);
 
 	// new functions from leader mod.
 	void AssignRole(RoleTypes iNewRole);	// this function is only for skill installation.
@@ -785,17 +784,6 @@ public:
 	EntityHandle<CBasePlayer> m_hEntToIgnoreTouchesFrom;
 	float m_flTimeToIgnoreTouches;
 };
-
-inline bool CBasePlayer::IsReloading() const
-{
-	CBaseWeapon *pCurrentWeapon = static_cast<CBaseWeapon*>(m_pActiveItem);
-	if (pCurrentWeapon && pCurrentWeapon->m_bInReload)
-	{
-		return true;
-	}
-
-	return false;
-}
 
 // returns a CBaseEntity pointer to a player by index.  Only returns if the player is spawned and connected otherwise returns NULL
 // Index is 1 based

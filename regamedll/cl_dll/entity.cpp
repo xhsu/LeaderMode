@@ -368,9 +368,9 @@ void HUD_StudioEvent2(const mstudioevent_s* pEvent, const cl_entity_s* pEntity)
 
 		// Scale
 		float flScale = 1;
-		if (auto p = Q_strstr(szTokens[1].c_str(), "-"), p2 = p; p != nullptr)
+		if (auto p = Q_strstr(szTokens[1].data(), "-"), p2 = p; p != nullptr)
 		{
-			*(char*)p2 = '\0';
+			*p2 = '\0';
 			p2++;
 
 			flScale = RANDOM_FLOAT(atof(p), atof(p2));

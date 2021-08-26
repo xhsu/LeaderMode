@@ -22,14 +22,8 @@ class CBaseSkill
 {
 public:
 	// avoid the complex memset();
-	void* operator new(size_t size)
-	{
-		return calloc(1, size);
-	}
-	void operator delete(void* ptr)
-	{
-		free(ptr);
-	}
+	void* operator new(size_t size)	{ return calloc(1, size); }
+	void operator delete(void* ptr) { return free(ptr); }
 	CBaseSkill() {}
 	virtual ~CBaseSkill() {}
 
@@ -76,7 +70,7 @@ public:	// skill action
 	virtual void TerminatePeers() const;
 
 	// passive skill: weapons
-	virtual float WeaponFireIntervalModifier(CBaseWeapon* pWeapon) { return 1.0f; }
+	virtual float WeaponFireIntervalModifier(IWeapon* pWeapon) { return 1.0f; }
 	virtual void OnGrenadeThrew(EquipmentIdType iId, CGrenade* pGrenade) { }
 
 	// passive skill: damage
@@ -136,7 +130,7 @@ public:
 
 	SkillIndex GetIndex() const { return SkillIndex_FireRate; }
 
-	float WeaponFireIntervalModifier(CBaseWeapon* pWeapon) { return m_bUsingSkill ? FIREINTERVAL_MODIFIER : 1.0f; }
+	float WeaponFireIntervalModifier(IWeapon* pWeapon) { return m_bUsingSkill ? FIREINTERVAL_MODIFIER : 1.0f; }
 };
 
 // Role_Commander: Stainless Steel
@@ -390,7 +384,7 @@ public:
 
 	SkillIndex GetIndex() const { return SkillIndex_TaserGun; }
 
-	float WeaponFireIntervalModifier(CBaseWeapon* pWeapon);
+	float WeaponFireIntervalModifier(IWeapon* pWeapon);
 	void OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr);
 };
 

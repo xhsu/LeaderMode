@@ -13,102 +13,102 @@ Modern Warfare Dev Team
 #include <unordered_map>
 
 // Completement of std::integral and std::floating_point.
-//template<typename T> concept Arithmetic = std::is_arithmetic_v<T>;
+template<typename T> concept Arithmetic = std::is_arithmetic_v<T>;
 
-//#pragma region Detectors
-//// Declare detectors
-//CREATE_MEMBER_DETECTOR_CUSTOM(m_usEvent) { {T::m_usEvent} -> std::convertible_to<unsigned short>; };
-//
-//CREATE_MEMBER_DETECTOR_CUSTOM(ApplyClientFPFiringVisual) { t.ApplyClientFPFiringVisual(Vector2D::Zero()); };
-//CREATE_MEMBER_DETECTOR_CUSTOM(ApplyRecoil) { t.ApplyRecoil(); };
-//
-//CREATE_MEMBER_DETECTOR_STATIC(ACCURACY_BASELINE);
-//CREATE_MEMBER_DETECTOR_STATIC(MAX_SPEED_ZOOM);
-//CREATE_MEMBER_DETECTOR_STATIC(MAX_SPEED);
-//CREATE_MEMBER_DETECTOR_STATIC(SPREAD_BASELINE);
-//CREATE_MEMBER_DETECTOR_STATIC(CONE_VECTOR);
-//CREATE_MEMBER_DETECTOR_STATIC(RPM);
-//CREATE_MEMBER_DETECTOR_STATIC(FIRE_INTERVAL);
-//CREATE_MEMBER_DETECTOR_STATIC(GUN_VOLUME);
-//CREATE_MEMBER_DETECTOR_STATIC(GUN_FLASH);
-//CREATE_MEMBER_DETECTOR_STATIC(SHELL_MODEL);
-//CREATE_MEMBER_DETECTOR_STATIC(EVENT_FILE);
-//
-//CREATE_MEMBER_DETECTOR_STATIC(SHOOT);
-//CREATE_MEMBER_DETECTOR_STATIC(FIRE_ANIMTIME);
-//CREATE_MEMBER_DETECTOR_STATIC(RELOAD_SOFT_DELAY_TIME);
-//CREATE_MEMBER_DETECTOR_STATIC(RELOAD_EMPTY_SOFT_DELAY_TIME);
-//CREATE_MEMBER_DETECTOR_STATIC(CHECK_MAGAZINE);
-//
-//CREATE_MEMBER_DETECTOR_CUSTOM(ATTRIB_NO_FIRE_UNDERWATER) { requires T::ATTRIB_NO_FIRE_UNDERWATER; };
-//CREATE_MEMBER_DETECTOR_CUSTOM(ATTRIB_SEMIAUTO) { requires T::ATTRIB_SEMIAUTO; };
-//CREATE_MEMBER_DETECTOR_CUSTOM(ATTRIB_AIM_FADE_FROM_BLACK) { requires T::ATTRIB_AIM_FADE_FROM_BLACK > 0.0f; };
-//CREATE_MEMBER_DETECTOR_STATIC(ATTRIB_INVERT_VMDL);
-//
-//
-//template <typename CWpn>
-//concept IsShotgun = requires (CWpn wpn)
-//{
-//	{CWpn::CONE_VECTOR} -> std::convertible_to<Vector2D>;
-//	requires CWpn::PROJECTILE_COUNT > 1;
-//	requires !IS_MEMBER_PRESENTED_CPP20_W(SPREAD_BASELINE);
-//};
-//
-//template <typename CWpn>
-//concept HasEvent = requires (CWpn wpn)
-//{
-//	{CWpn::EVENT_FILE} -> std::convertible_to<const char*>;
-//	{CWpn::ApplyClientTPFiringVisual};
-//};
-//
-//template <typename CWpn>
-//concept IsTubularMag = requires (CWpn wpn)
-//{
-//	requires CWpn::START_RELOAD > 0;
-//	requires CWpn::INSERT > 0;
-//	requires CWpn::AFTER_RELOAD > 0;
-//};
-//
-//template <typename CWpn>
-//concept IsManualRechamberWpn = requires (CWpn wpn)
-//{
-//	requires CWpn::RECHAMBER > 0;	// Rechamber anim.
-//	requires CWpn::RECHAMBER_TIME > 0;
-//	requires CWpn::BITS_RECHAMBER_ANIM > 0;
-//};
-//
-//template <typename CWpn>
-//concept CanSteelSight = requires (CWpn wpn)
-//{
-//	requires CWpn::AIM_FOV > 0;
-//	{CWpn::AIM_OFFSET} -> std::convertible_to<Vector>;
-//	requires CWpn::ATTRIB_USE_STEEL_SIGHT;
-//};
-//
-//template <typename CWpn>
-//concept CanScopeSight = requires (CWpn wpn)
-//{
-//	requires CWpn::AIM_FOV > 0;
-//	{CWpn::AIM_OFFSET} -> std::convertible_to<Vector>;
-//	requires CWpn::ATTRIB_USE_SCOPE_SIGHT;
-//};
-//
-//template <typename CWpn>
-//concept IsIdleAnimLooped = requires (CWpn wpn)
-//{
-//	requires CWpn::IDLE_TIME > 0.0f;
-//};
-//
-//template <typename CWpn>
-//concept HasFireSoundDefined = requires(CWpn wpn)
-//{
-//	{CWpn::FIRE_SFX} -> std::convertible_to<std::string>;
-//	{CWpn::FIRE_SFX_VOLUME} -> std::floating_point;
-//	{CWpn::FIRE_SFX_RADIUS} -> Arithmetic;
-//	{CWpn::FIRE_SFX_PITCH[0]} -> Arithmetic;
-//	{CWpn::FIRE_SFX_PITCH[1]} -> Arithmetic;
-//};
-//#pragma endregion
+#pragma region Detectors
+// Declare detectors
+CREATE_MEMBER_DETECTOR_CUSTOM(m_usEvent) { {T::m_usEvent} -> std::convertible_to<unsigned short>; };
+
+CREATE_MEMBER_DETECTOR_CUSTOM(ApplyClientFPFiringVisual) { t.ApplyClientFPFiringVisual(Vector2D::Zero()); };
+CREATE_MEMBER_DETECTOR_CUSTOM(ApplyRecoil) { t.ApplyRecoil(); };
+
+CREATE_MEMBER_DETECTOR_STATIC(ACCURACY_BASELINE);
+CREATE_MEMBER_DETECTOR_STATIC(MAX_SPEED_ZOOM);
+CREATE_MEMBER_DETECTOR_STATIC(MAX_SPEED);
+CREATE_MEMBER_DETECTOR_STATIC(SPREAD_BASELINE);
+CREATE_MEMBER_DETECTOR_STATIC(CONE_VECTOR);
+CREATE_MEMBER_DETECTOR_STATIC(RPM);
+CREATE_MEMBER_DETECTOR_STATIC(FIRE_INTERVAL);
+CREATE_MEMBER_DETECTOR_STATIC(GUN_VOLUME);
+CREATE_MEMBER_DETECTOR_STATIC(GUN_FLASH);
+CREATE_MEMBER_DETECTOR_STATIC(SHELL_MODEL);
+CREATE_MEMBER_DETECTOR_STATIC(EVENT_FILE);
+
+CREATE_MEMBER_DETECTOR_STATIC(SHOOT);
+CREATE_MEMBER_DETECTOR_STATIC(FIRE_ANIMTIME);
+CREATE_MEMBER_DETECTOR_STATIC(RELOAD_SOFT_DELAY_TIME);
+CREATE_MEMBER_DETECTOR_STATIC(RELOAD_EMPTY_SOFT_DELAY_TIME);
+CREATE_MEMBER_DETECTOR_STATIC(CHECK_MAGAZINE);
+
+CREATE_MEMBER_DETECTOR_CUSTOM(ATTRIB_NO_FIRE_UNDERWATER) { requires T::ATTRIB_NO_FIRE_UNDERWATER; };
+CREATE_MEMBER_DETECTOR_CUSTOM(ATTRIB_SEMIAUTO) { requires T::ATTRIB_SEMIAUTO; };
+CREATE_MEMBER_DETECTOR_CUSTOM(ATTRIB_AIM_FADE_FROM_BLACK) { requires T::ATTRIB_AIM_FADE_FROM_BLACK > 0.0f; };
+CREATE_MEMBER_DETECTOR_STATIC(ATTRIB_INVERT_VMDL);
+
+
+template <typename CWpn>
+concept IsShotgun = requires (CWpn wpn)
+{
+	{CWpn::CONE_VECTOR} -> std::convertible_to<Vector2D>;
+	requires CWpn::PROJECTILE_COUNT > 1;
+	requires !IS_MEMBER_PRESENTED_CPP20_W(SPREAD_BASELINE);
+};
+
+template <typename CWpn>
+concept HasEvent = requires (CWpn wpn)
+{
+	{CWpn::EVENT_FILE} -> std::convertible_to<const char*>;
+	{CWpn::ApplyClientTPFiringVisual};
+};
+
+template <typename CWpn>
+concept IsTubularMag = requires (CWpn wpn)
+{
+	requires CWpn::START_RELOAD > 0;
+	requires CWpn::INSERT > 0;
+	requires CWpn::AFTER_RELOAD > 0;
+};
+
+template <typename CWpn>
+concept IsManualRechamberWpn = requires (CWpn wpn)
+{
+	requires CWpn::RECHAMBER > 0;	// Rechamber anim.
+	requires CWpn::RECHAMBER_TIME > 0;
+	requires CWpn::BITS_RECHAMBER_ANIM > 0;
+};
+
+template <typename CWpn>
+concept CanSteelSight = requires (CWpn wpn)
+{
+	requires CWpn::AIM_FOV > 0;
+	{CWpn::AIM_OFFSET} -> std::convertible_to<Vector>;
+	requires CWpn::ATTRIB_USE_STEEL_SIGHT;
+};
+
+template <typename CWpn>
+concept CanScopeSight = requires (CWpn wpn)
+{
+	requires CWpn::AIM_FOV > 0;
+	{CWpn::AIM_OFFSET} -> std::convertible_to<Vector>;
+	requires CWpn::ATTRIB_USE_SCOPE_SIGHT;
+};
+
+template <typename CWpn>
+concept IsIdleAnimLooped = requires (CWpn wpn)
+{
+	requires CWpn::IDLE_TIME > 0.0f;
+};
+
+template <typename CWpn>
+concept HasFireSoundDefined = requires(CWpn wpn)
+{
+	{CWpn::FIRE_SFX} -> std::convertible_to<std::string>;
+	{CWpn::FIRE_SFX_VOLUME} -> std::floating_point;
+	{CWpn::FIRE_SFX_RADIUS} -> Arithmetic;
+	{CWpn::FIRE_SFX_PITCH[0]} -> Arithmetic;
+	{CWpn::FIRE_SFX_PITCH[1]} -> Arithmetic;
+};
+#pragma endregion
 
 #pragma region UTILs
 // Check hold to aim.
@@ -1081,7 +1081,7 @@ struct CWeapon : public IWeapon
 		return true;
 	}
 
-	bool	AlterAct(void)	override {}	// Avoid calling null virtual function.
+	bool	AlterAct(void)	override { return false; }	// Avoid calling null virtual function.
 
 	bool	Blockage(void)	override	// UNDONE, this should be a function both checking block status and playing animation.
 	{
@@ -1100,7 +1100,7 @@ struct CWeapon : public IWeapon
 				Animate(CWpn::BLOCK_UP);
 
 				if (flAlreadyPlayed >= CWpn::BLOCK_DOWN_TIME)
-					return;
+					return bBlocked;
 
 				float flAlreadyPlayedRatio = flAlreadyPlayed / CWpn::BLOCK_DOWN_TIME;
 
@@ -1124,7 +1124,7 @@ struct CWeapon : public IWeapon
 				Animate(CWpn::BLOCK_DOWN);
 
 				if (flAlreadyPlayed >= CWpn::BLOCK_UP_TIME)
-					return;
+					return bBlocked;
 
 				float flAlreadyPlayedRatio = flAlreadyPlayed / CWpn::BLOCK_UP_TIME;
 
@@ -1136,6 +1136,8 @@ struct CWeapon : public IWeapon
 				Animate(CWpn::BLOCK_DOWN);
 			}
 		}
+
+		return bBlocked;
 	}
 
 	bool	HolsterStart(void) override
@@ -1362,7 +1364,7 @@ struct CWeapon : public IWeapon
 #ifndef CLIENT_DLL
 		if (m_pPlayer.IsValid())
 		{
-			m_pPlayer->RemovePlayerItem(this);
+//			m_pPlayer->RemovePlayerItem(this);
 			m_pPlayer = nullptr;
 		}
 

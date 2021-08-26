@@ -18,9 +18,6 @@ short int g_sModelIndexCTGhost;
 short int g_sModelIndexTGhost;
 short int g_sModelIndexC4Glow;
 
-MULTIDAMAGE gMultiDamage;
-
-
 // Resets the global multi damage accumulator
 void ClearMultiDamage()
 {
@@ -199,35 +196,6 @@ BOOL CanAttack(float attack_time, float curtime, BOOL isPredicted)
 	{
 		return (attack_time <= 0.0f) ? TRUE : FALSE;
 	}
-}
-
-primatk_msg_ptr InterpretPrimaryAttackMessage(void)
-{
-	int index = 1;	// Starting from param 1.
-	auto result = std::make_shared<primaryattack_message_s>();
-	result->m_iId = (WeaponIdType)std::atoi(CMD_ARGV(index++));
-
-	unsigned long ulx = std::stoul(CMD_ARGV(index++), nullptr, 16);
-	unsigned long uly = std::stoul(CMD_ARGV(index++), nullptr, 16);
-	unsigned long ulz = std::stoul(CMD_ARGV(index++), nullptr, 16);
-
-	result->m_vecSrc.x = *(float*)&ulx;
-	result->m_vecSrc.y = *(float*)&uly;
-	result->m_vecSrc.z = *(float*)&ulz;
-
-	ulx = std::stoul(CMD_ARGV(index++), nullptr, 16);
-	uly = std::stoul(CMD_ARGV(index++), nullptr, 16);
-	ulz = std::stoul(CMD_ARGV(index++), nullptr, 16);
-
-	result->m_vecViewAngles.x = *(float*)&ulx;
-	result->m_vecViewAngles.y = *(float*)&uly;
-	result->m_vecViewAngles.z = *(float*)&ulz;
-
-	result->m_iClip = std::atoi(CMD_ARGV(index++));
-
-	result->m_iRandomSeed = std::atoi(CMD_ARGV(index++));
-
-	return result;
 }
 
 void CBaseWeapon::TheWeaponsThink(void)

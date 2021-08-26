@@ -595,7 +595,7 @@ public:
 	CBasePlayer *FindNearbyPlayer();
 	void AdjustSafeTime();							// called when enemy seen to adjust safe time for this round
 	void EXPORT BotTouch(CBaseEntity *pOther);
-	bool HasAnyAmmo(CBaseWeapon *weapon) const;
+	bool HasAnyAmmo(IWeapon*weapon) const;
 
 private:
 	friend class CCSBotManager;
@@ -838,7 +838,7 @@ private:
 	bool m_isAimingAtEnemy;					// if true, we are trying to aim at our enemy
 	bool m_isRapidFiring;					// if true, RunUpkeep() will toggle our primary attack as fast as it can
 	IntervalTimer m_equipTimer;				// how long have we had our current weapon equipped
-	bool DoEquip(CBaseWeapon *pWeapon);	// equip the given item
+	bool DoEquip(IWeapon *pWeapon);			// equip the given item
 
 	void ReloadCheck();						// reload our weapon if we must
 	// UNDONE: maybe future scope/steelsight here?
@@ -1331,9 +1331,9 @@ inline bool CCSBot::IsNotMoving() const
 	return pev->velocity < stillSpeed;
 }
 
-inline bool CCSBot::HasAnyAmmo(CBaseWeapon *weapon) const
+inline bool CCSBot::HasAnyAmmo(IWeapon *weapon) const
 {
-	return (weapon->m_iClip != 0 || m_rgAmmo[weapon->m_iPrimaryAmmoType] > 0);
+	return (weapon->Clip() != 0 || m_rgAmmo[weapon->AmmoInfo()->m_iId] > 0);
 }
 
 class CollectRetreatSpotsFunctor
@@ -1614,5 +1614,5 @@ void drawProgressMeter(float progress, const char *title);
 void startProgressMeter(const char *title);
 void hideProgressMeter();
 
-bool isSniperRifle(CBaseWeapon *item);
+bool isSniperRifle(IWeapon *item);
 float StayOnLadderLine(CCSBot *me, const CNavLadder *ladder);

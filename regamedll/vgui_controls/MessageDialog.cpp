@@ -335,8 +335,7 @@ void CMessageDialog::PaintBackground( void )
 	int y = titleY + titleTall;
 
 	// draw an inset
-	Color darkColor;
-	darkColor.SetColor( 0.70f * (float)col.r(), 0.70f * (float)col.g(), 0.70f * (float)col.b(), col.a() );
+	Color darkColor = col * 0.7;
 	vgui::surface()->DrawSetColor( darkColor );
 	vgui::surface()->DrawFilledRect( 8, y, wide - 8, tall - 8 );
 }

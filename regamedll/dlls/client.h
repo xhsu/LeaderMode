@@ -298,3 +298,4 @@ inline int gmsgManpower = 0;
 inline int gmsgScheme = 0;
 inline int gmsgNewRound = 0;
 inline int gmsgGiveWpn = 0;
+inline int gmsgSkillEnact = 0;

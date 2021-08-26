@@ -37,6 +37,31 @@
 #define GRENADE_SLOT		4
 #define EQUIPMENT_SLOT		5
 
+#define ITEM_FLAG_NONE				0
+#define ITEM_FLAG_SELECTONEMPTY     1
+#define ITEM_FLAG_NOAUTORELOAD      2
+#define ITEM_FLAG_NOAUTOSWITCHEMPTY 4
+#define ITEM_FLAG_LIMITINWORLD      8
+#define ITEM_FLAG_EXHAUSTIBLE       16 // A player can totally exhaust their ammo supply and lose this weapon
+
+// the maximum amount of ammo each weapon's clip can hold
+#define WEAPON_NOCLIP               -1
+
+#define LOUD_GUN_VOLUME             1000
+#define NORMAL_GUN_VOLUME           600
+#define QUIET_GUN_VOLUME            200
+
+#define BRIGHT_GUN_FLASH            512
+#define NORMAL_GUN_FLASH            256
+#define DIM_GUN_FLASH               128
+
+#define BIG_EXPLOSION_VOLUME        2048
+#define NORMAL_EXPLOSION_VOLUME     1024
+#define SMALL_EXPLOSION_VOLUME      512
+
+#define WEAPON_ACTIVITY_VOLUME      64
+
+
 #define WPN_P	-1	// penalty: price * 2
 #define WPN_F	0	// forbidden: price * 99999
 #define WPN_A	1	// allowed: price * 1
@@ -233,6 +258,13 @@ enum EquipmentIdType : BYTE
 	FIRST_MISC = EQP_DETONATOR,
 	LAST_MISC = EQP_FLASHLIGHT,
 };
+
+#define ARMOR_NONE		0.0f	// No armor
+#define ARMOR_KEVLAR	1.0f	// Body vest only
+#define ARMOR_VESTHELM	2.0f	// Vest and helmet
+
+constexpr float MAX_NORMAL_BATTERY = 100.0f;
+constexpr float MAX_DIST_RELOAD_SOUND = 512.0f;
 
 struct EquipmentInfo
 {
