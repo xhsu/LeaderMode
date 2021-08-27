@@ -83,22 +83,13 @@ public:
 	// constructor initializes all values to zero
 	CBot();
 
-	virtual void Spawn();
+	void Spawn() override;
 
-	// invoked when injured by something
-	virtual BOOL TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)
-	{
-		return CBasePlayer::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
-	}
-	// invoked when killed
-	virtual void Killed(entvars_t *pevAttacker, int iGib)
-	{
-		CBasePlayer::Killed(pevAttacker, iGib);
-	}
+	void Think() override {};
+	BOOL IsBot() override { return TRUE; }
+	Vector GetAutoaimVector(float flDelta) override;
 
-	virtual void Think() {};
-	virtual BOOL IsBot() { return TRUE; }
-	virtual Vector GetAutoaimVector(float flDelta);
+	void PostThink() override;
 
 	// invoked when in contact with a CWeaponBox
 	virtual void OnTouchingWeapon(CWeaponBox *box) {}
@@ -168,6 +159,18 @@ public:
 	virtual void ExecuteCommand();
 	virtual void SetModel(const char *modelName);
 
+	// Additional function for weapon handling.
+	virtual IWeapon* AddPlayerItem(WeaponIdType iId, int iClip = -1, unsigned bitsFlags = 0);
+	virtual bool RemovePlayerItem(WeaponIdType iId);
+	bool GiveAmmo(int iAmount, AmmoIdType iId) override;
+	bool StartSwitchingWeapon(IWeapon* pSwitchingTo);
+	bool SwitchWeapon(IWeapon* pSwitchingTo);
+	bool HasAnyWeapon() override;
+	IWeapon* HasWeapon(WeaponIdType iId) override;
+	CWeaponBox* DropPlayerItem(WeaponIdType iId) override;
+	void PackDeadPlayerItems() override;
+	void RemoveAllItems(bool removeSuit) override;
+
 public:
 	// return bot's unique ID
 	unsigned int GetID() const { return m_id; }
@@ -221,7 +224,7 @@ public:
 
 	void BotThink();
 
-	BOOL IsNetClient() { return FALSE; }
+	BOOL IsNetClient() override { return FALSE; }
 
 	// return our personality profile
 	const BotProfile *GetProfile() const { return m_profile; }
@@ -282,8 +285,11 @@ private:
 	// index of top of stack
 	int m_postureStackIndex;
 
+public:
 	// Luna: Now only BOTs has weapon on server side.
-	IWeapon* m_pActiveItem;
+	IWeapon* m_pActiveItem{ nullptr }, * m_pLastItem{ nullptr };
+	std::array<IWeapon*, MAX_ITEM_TYPES> m_rgpPlayerItems;
+	std::array<int, MAX_AMMO_SLOTS> m_rgAmmo;
 };
 
 inline void CBot::SetModel(const char *modelName)

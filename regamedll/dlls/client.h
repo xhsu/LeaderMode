@@ -30,6 +30,9 @@
 
 #include "menus.h"
 
+// Dummy class
+class CBot;
+
 // custom enum
 enum ChooseTeamMenuSlot
 {
@@ -151,15 +154,15 @@ void ProcessKickVote(CBasePlayer *pVotingPlayer, CBasePlayer *pKickPlayer);
 void CheckStartMoney();
 void ClientPutInServer(edict_t *pEntity);
 void Host_Say(edict_t *pEntity, BOOL teamonly);
-CBaseWeapon *BuyWeapon(CBasePlayer *pPlayer, WeaponIdType weaponID);
-void BuyEquipment(CBasePlayer *pPlayer, EquipmentIdType iSlot);
+IWeapon *BuyWeapon(CBot *pPlayer, WeaponIdType weaponID);
+void BuyEquipment(CBot *pPlayer, EquipmentIdType iSlot);
 void HandleMenu_ChooseAppearance(CBasePlayer *pPlayer, int slot);
 BOOL HandleMenu_ChooseTeam(CBasePlayer *pPlayer, int slot);
 void Radio1(CBasePlayer *pPlayer, int slot);
 void Radio2(CBasePlayer *pPlayer, int slot);
 void Radio3(CBasePlayer *pPlayer, int slot);
-bool BuyGunAmmo(CBasePlayer *pPlayer, CBaseWeapon *weapon, bool bBlinkMoney = true);
-bool BuyAmmo(CBasePlayer *pPlayer, int nSlot, bool bBlinkMoney = true);
+bool BuyGunAmmo(CBot *pPlayer, IWeapon *weapon, bool bBlinkMoney = true);
+bool BuyAmmo(CBot *pPlayer, int nSlot, bool bBlinkMoney = true);
 CBaseEntity *EntityFromUserID(int userID);
 int CountPlayersInServer();
 BOOL HandleRadioAliasCommands(CBasePlayer *pPlayer, const char *pszCommand);
@@ -217,7 +220,6 @@ inline const char *GetTeamName(int team)
 
 extern double g_flTrueServerFrameRate;
 
-inline int gmsgWeapPickup = 0;
 inline int gmsgHudText = 0;
 inline int gmsgHudTextPro = 0;
 inline int gmsgHudTextArgs = 0;
@@ -234,7 +236,6 @@ inline int gmsgDamage = 0;
 inline int gmsgBattery = 0;
 inline int gmsgTrain = 0;
 inline int gmsgLogo = 0;
-inline int gmsgAmmoX = 0;
 inline int gmsgDeathMsg = 0;
 inline int gmsgScoreAttrib = 0;
 inline int gmsgScoreInfo = 0;
@@ -243,7 +244,6 @@ inline int gmsgTeamScore = 0;
 inline int gmsgGameMode = 0;
 inline int gmsgMOTD = 0;
 inline int gmsgServerName = 0;
-inline int gmsgAmmoPickup = 0;
 inline int gmsgItemPickup = 0;
 inline int gmsgHideWeapon = 0;
 inline int gmsgSayText = 0;
@@ -286,9 +286,6 @@ inline int gmsgShowTimer = 0;
 inline int gmsgRole = 0;
 inline int gmsgRadarPoint = 0;
 inline int gmsgRadarRP = 0;
-inline int gmsgSetSlot = 0;
-inline int gmsgShoot = 0;
-inline int gmsgSteelSight = 0;
 inline int gmsgEqpSelect = 0;
 inline int gmsgSkillTimer = 0;
 inline int gmsgSound = 0;

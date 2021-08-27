@@ -48,10 +48,6 @@ TYPEDESCRIPTION CBasePlayer::m_playerSaveData[] =
 	DEFINE_ARRAY(CBasePlayer, m_rgiSuitNoRepeat, FIELD_INTEGER, MAX_SUIT_NOREPEAT),
 	DEFINE_ARRAY(CBasePlayer, m_rgflSuitNoRepeatTime, FIELD_TIME, MAX_SUIT_NOREPEAT),
 	DEFINE_FIELD(CBasePlayer, m_lastDamageAmount, FIELD_INTEGER),
-	DEFINE_ARRAY(CBasePlayer, m_rgpPlayerItems, FIELD_CLASSPTR, MAX_ITEM_TYPES),
-	DEFINE_FIELD(CBasePlayer, m_pActiveItem, FIELD_CLASSPTR),
-	DEFINE_FIELD(CBasePlayer, m_pLastItem, FIELD_CLASSPTR),
-	DEFINE_ARRAY(CBasePlayer, m_rgAmmo, FIELD_INTEGER, MAX_AMMO_SLOTS),
 	DEFINE_FIELD(CBasePlayer, m_idrowndmg, FIELD_INTEGER),
 	DEFINE_FIELD(CBasePlayer, m_idrownrestored, FIELD_INTEGER),
 	DEFINE_FIELD(CBasePlayer, m_iTrain, FIELD_INTEGER),
@@ -715,11 +711,18 @@ const char *GetWeaponName(entvars_t *pevInflictor, entvars_t *pKiller)
 			if (pevInflictor == pKiller)
 			{
 				// If the inflictor is the killer, then it must be their current weapon doing the damage
-				CBasePlayer *pAttacker = CBasePlayer::Instance(pKiller);
-				if (pAttacker && pAttacker->IsPlayer())
+				CBasePlayer* pAttacker = CBasePlayer::Instance(pKiller);
+				if (pAttacker->IsBot())
 				{
-					if (pAttacker->m_pActiveItem)
-						killer_weapon_name = pAttacker->m_pActiveItem->m_pItemInfo->m_pszInternalName;
+					auto pBot = dynamic_cast<CBot*>(pAttacker);
+
+					if (pBot && pBot->m_pActiveItem)
+						killer_weapon_name = pBot->m_pActiveItem->WpnInfo()->m_pszInternalName;
+				}
+				else
+				{
+					// #WPN_UNDONE_UPSTREAM_MSG
+					// Need to find a way to let server know what weapon you are using.
 				}
 			}
 			else
@@ -775,22 +778,23 @@ void LogAttack(CBasePlayer *pAttacker, CBasePlayer *pVictim, int teamAttack, int
 // NOTE: each call to TakeDamage with bitsDamageType set to a time-based damage
 // type will cause the damage time countdown to be reset.  Thus the ongoing effects of poison, radiation
 // etc are implemented with subsequent calls to TakeDamage using DMG_GENERIC.
-BOOL CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType)
+bool CBasePlayer::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)
 {
-	BOOL bTookDamage;
+	bool bTookDamage;
 	float flRatio = ARMOR_RATIO;
 	float flBonus = ARMOR_BONUS;
 	int iGunType = 0;
 	float flShieldRatio = 0;
-	BOOL bTeamAttack = FALSE;
+	bool bTeamAttack = false;
 	int armorHit = 0;
 	CBasePlayer *pAttack = nullptr;
+	CBot* pBotAttacker = nullptr;
 
 	if (bitsDamageType & (DMG_EXPLOSION | DMG_BLAST | DMG_FALL))
 		m_LastHitGroup = HITGROUP_GENERIC;
 
 	else if (m_LastHitGroup == HITGROUP_SHIELD && (bitsDamageType & DMG_BULLET))
-		return FALSE;
+		return false;
 
 	if (HasShield())
 		flShieldRatio = 0.2;
@@ -802,12 +806,15 @@ BOOL CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 	{
 		pAttack = CBasePlayer::Instance(pevAttacker);
 		flDamage *= pAttack->PlayerDamageDealtModifier(bitsDamageType);
+
+		if (pAttack->IsBot())
+			pBotAttacker = dynamic_cast<CBot*>(pAttack);
 	}
 
 	if (bitsDamageType & (DMG_EXPLOSION | DMG_BLAST))
 	{
 		if (!IsAlive())
-			return FALSE;
+			return false;
 
 		if (bitsDamageType & DMG_EXPLOSION)
 		{
@@ -835,7 +842,7 @@ BOOL CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 					{
 						// if cvar friendlyfire is disabled
 						// and if the victim is teammate then ignore this damage
-						return FALSE;
+						return false;
 					}
 				}
 			}
@@ -953,7 +960,7 @@ BOOL CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 	if (!g_pGameRules->FPlayerCanTakeDamage(this, pAttacker) && !FClassnameIs(pevInflictor, "grenade"))
 	{
 		// Refuse the damage
-		return FALSE;
+		return false;
 	}
 
 	if ((bitsDamageType & DMG_BLAST) && g_pGameRules->IsMultiplayer())
@@ -964,7 +971,7 @@ BOOL CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 
 	// Already dead
 	if (!IsAlive())
-		return FALSE;
+		return false;
 
 	pAttacker = GetClassPtr((CBaseEntity *)pevAttacker);
 
@@ -983,7 +990,7 @@ BOOL CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 					pAttack->HintMessage("#Hint_try_not_to_injure_teammates");
 				}
 
-				bTeamAttack = TRUE;
+				bTeamAttack = true;
 				if (gpGlobals->time > pAttack->m_flLastAttackedTeammate + 0.6f)
 				{
 					CBaseEntity *pEntity = nullptr;
@@ -1010,10 +1017,13 @@ BOOL CBasePlayer::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 				ff_damage_reduction_other.value), 0.0f, 1.0f);
 		}
 
-		if (pAttack->m_pActiveItem)
+		if (pBotAttacker && pBotAttacker->m_pActiveItem)
 		{
-			iGunType = pAttack->m_pActiveItem->m_iId;
+			iGunType = pBotAttacker->m_pActiveItem->Id();
 			flRatio += flShieldRatio;
+
+			// #WPN_UNDONE_UPSTREAM_MSG
+			// Make sure that server know what weapon is attacking this victim.
 
 			switch (iGunType)
 			{
@@ -1205,49 +1215,16 @@ void CBasePlayer::PackDeadPlayerItems()
 
 	if (bPackGun)
 	{
-		bool bShieldDropped = false;
-		if (HasShield())
-		{
-			DropShield();
-			bShieldDropped = true;
-		}
-
-		CWeaponBox* pWeaponBox = nullptr;
-		AmmoIdType iAmmoId = AMMO_NONE;
-
-		for (int i = 0; i < MAX_ITEM_TYPES; i++)
-		{
-			// LUNA: in LeaderMod, we pack all weapons.
-
-			if (!m_rgpPlayerItems[i] || !m_rgpPlayerItems[i]->CanDrop())
-				continue;
-
-			// save this value. we don't have any access to it after we pack it into CWeaponBox.
-			iAmmoId = m_rgpPlayerItems[i]->m_iPrimaryAmmoType;
-
-			if (!m_rgpPlayerItems[i]->Drop((void**)&pWeaponBox))
-				continue;
-
-			// drop randomly around player.
-			pWeaponBox->pev->origin += Vector(RANDOM_FLOAT(-10, 10), RANDOM_FLOAT(-10, 10), 0);
-
-			// pack some ammo into this weaponbox.
-			if (bPackAmmo && iAmmoId != AMMO_NONE)
-			{
-				pWeaponBox->GiveAmmo(m_rgAmmo[iAmmoId], iAmmoId);
-				m_rgAmmo[iAmmoId] = 0;
-			}
-
-		}
+		// #WPN_UNDONE_UPSTREAM_MSG
+		// How to make server know all of your weapons??
 	}
 
-	RemoveAllItems(TRUE);
+	RemoveAllItems(true);
 }
 
-void CBasePlayer::RemoveAllItems(BOOL removeSuit)
+void CBasePlayer::RemoveAllItems(bool removeSuit)
 {
 	bool bKillProgBar = false;
-	int i;
 
 	if (m_pTank)
 	{
@@ -1260,29 +1237,8 @@ void CBasePlayer::RemoveAllItems(BOOL removeSuit)
 	if (bKillProgBar)
 		SetProgressBarTime(0);
 
-	if (m_pActiveItem)
-	{
-		ResetAutoaim();
+	gmsgRmWpn::Send(MSG_ONE, pev, 254);	// 254: current weapon.
 
-		m_pActiveItem->Holstered();	// it's weapon removal anyway.
-		m_pActiveItem = nullptr;
-	}
-
-	m_pLastItem = nullptr;
-
-	for (i = 0; i < MAX_ITEM_TYPES; i++)
-	{
-		m_pActiveItem = m_rgpPlayerItems[i];
-
-		if (m_pActiveItem)
-		{
-			m_pActiveItem->Drop();
-		}
-
-		m_rgpPlayerItems[i] = nullptr;
-	}
-
-	m_pActiveItem = nullptr;
 	m_bHasPrimary = false;
 
 	// ReGameDLL Fixes: Version 5.16.0.465
@@ -1300,8 +1256,7 @@ void CBasePlayer::RemoveAllItems(BOOL removeSuit)
 	else
 		pev->weapons &= ~WEAPON_ALLWEAPONS;
 
-	for (i = 0; i < MAX_AMMO_SLOTS; i++)
-		m_rgAmmo[i] = 0;
+	gmsgAmmo::Send(MSG_ONE, pev, 255, -9999);	// 255: all ammo.
 
 	UpdateClientData();
 
@@ -2798,7 +2753,7 @@ void CBasePlayer::PlayerDeathThink()
 			pev->velocity = flForward * pev->velocity.Normalize();
 	}
 
-	if (HasWeapons())
+	if (HasAnyWeapon())
 	{
 		// we drop the guns here because weapons that have an area effect and can kill their user
 		// will sometimes crash coming back from CBasePlayer::Killed() if they kill their owner because the
@@ -3771,6 +3726,7 @@ void EXT_FUNC CBasePlayer::PostThink()
 
 	// do weapon stuff
 	ItemPostFrame();
+	ImpulseCommands();
 
 	// check to see if player landed hard enough to make a sound
 	// falling farther than half of the maximum safe distance, but not as far a max safe distance will
@@ -4543,13 +4499,10 @@ void CBasePlayer::SelectLastItem()
 }
 
 // HasWeapons - do I have any weapons at all?
-bool CBasePlayer::HasWeapons()
+bool CBasePlayer::HasAnyWeapon()
 {
-	for (auto item : m_rgpPlayerItems)
-	{
-		if (item)
-			return true;
-	}
+	// #WPN_UNDONE_UPSTREAM_MSG
+	// Imply the method for server to know does client has weapon.
 
 	return false;
 }
@@ -5015,198 +4968,12 @@ void CBasePlayer::HandleSignals()
 	}
 }
 
-// Add a weapon to the player (Item == Weapon == Selectable Object)
-BOOL EXT_FUNC CBasePlayer::AddPlayerItem(CBaseWeapon *pItem)
-{
-	if (!pItem)
-		return FALSE;
-
-	if (pItem->AddToPlayer(this))
-	{
-		CSGameRules()->PlayerGotWeapon(this, pItem);
-
-		if (pItem->m_pItemInfo->m_iSlot == PRIMARY_WEAPON_SLOT)
-			m_bHasPrimary = true;
-
-		// get it into player's inventory.
-		m_rgpPlayerItems[pItem->m_pItemInfo->m_iSlot] = pItem;
-		pev->weapons |= (1 << pItem->m_iId);	// TODO: abolish this?
-
-		// FX
-		EMIT_SOUND(edict(), CHAN_WEAPON, "items/gunpickup2.wav", VOL_NORM, ATTN_NORM);
-
-		// Add a weapon from client side.
-		MESSAGE_BEGIN(MSG_ONE, gmsgGiveWpn, nullptr, pev);
-		WRITE_BYTE(pItem->m_iId);
-		WRITE_SHORT(pItem->m_iClip);
-		MESSAGE_END();
-
-		// Slot info for HUD.
-		MESSAGE_BEGIN(MSG_ONE, gmsgSetSlot, nullptr, pev);
-		WRITE_BYTE(pItem->m_iId);
-		WRITE_BYTE(pItem->m_pItemInfo->m_iSlot);
-		MESSAGE_END();
-
-		if (HasShield())
-			pev->gamestate = HITGROUP_SHIELD_ENABLED;
-
-		// should we switch to this item?
-		if (CSGameRules()->FShouldSwitchWeapon(this, pItem))
-		{
-			if (!m_bShieldDrawn)
-			{
-				StartSwitchingWeapon(pItem);
-			}
-		}
-
-		m_iHideHUD &= ~HIDEHUD_WEAPONS;
-		return TRUE;
-	}
-
-	return FALSE;
-}
-
-BOOL EXT_FUNC CBasePlayer::RemovePlayerItem(CBaseWeapon *pItem)	// this should be called from CBaseWeapon::Kill() !!!
-{
-	if (m_pActiveItem == pItem)
-	{
-		ResetAutoaim();
-		ResetMaxSpeed();
-
-		// ReGameDLL Fixes: Version 5.16.0.465
-		pev->fov = m_iLastZoom = DEFAULT_FOV;
-		m_bResumeZoom = false;
-		m_pActiveItem = nullptr;
-
-		pev->viewmodel = 0;
-		pev->weaponmodel = 0;
-	}
-
-	// if item being removed is the last weapon, we should clear the record.
-	// because the SelectLastItem() won't check the ownership of last item.
-	if (m_pLastItem == pItem)
-		m_pLastItem = nullptr;
-
-	// remove from client display.
-	pev->weapons &= ~(1 << pItem->m_iId);
-	MESSAGE_BEGIN(MSG_ONE, gmsgSetSlot, nullptr, pev);
-	WRITE_BYTE(0);
-	WRITE_BYTE(pItem->m_pItemInfo->m_iSlot);
-	MESSAGE_END();
-
-	// remove from server inventory.
-	if (m_rgpPlayerItems[pItem->m_pItemInfo->m_iSlot] == pItem)
-	{
-		m_rgpPlayerItems[pItem->m_pItemInfo->m_iSlot] = nullptr;	// however, even if you don't call from CBaseWeapon::Kill(), WeaponsThink() would kill the weapon due to this nullptr assignment.
-		return TRUE;
-	}
-
-	return FALSE;
-}
-
-// Returns the unique ID for the ammo, or -1 if error
-bool CBasePlayer::GiveAmmo(int iAmount, AmmoIdType iId)
-{
-	if (iAmount <= 0)
-		return false;	// never add air to your inventory.
-
-	if (pev->flags & FL_SPECTATOR)
-		return false;
-
-	if (iId <= AMMO_NONE || iId >= AMMO_MAXTYPE)
-	{
-		// no ammo.
-		return false;
-	}
-
-	if (!CSGameRules()->CanHaveAmmo(this, iId))	// game rules say I can't have any more of this ammo type.
-		return false;
-
-	int iAdd = Q_min(iAmount, GetAmmoInfo(iId)->m_iMax - m_rgAmmo[iId]);
-	if (iAdd < 1)
-		return false;
-
-	m_rgAmmo[iId] += iAdd;
-
-	// make sure the ammo messages have been linked first
-	if (gmsgAmmoPickup)
-	{
-		// Send the message that ammo has been picked up
-		MESSAGE_BEGIN(MSG_ONE, gmsgAmmoPickup, nullptr, pev);
-			WRITE_BYTE(iId); // ammo ID
-			WRITE_BYTE(iAdd); // amount
-		MESSAGE_END();
-	}
-
-	return true;
-}
-
-// Called every frame by the player PreThink
-void CBasePlayer::ItemPreFrame()
-{
-	if (!m_pActiveItem)
-		return;
-
-	m_pActiveItem->Think();	// think would be call nomatter what.
-}
-
-// Called every frame by the player PostThink
-void CBasePlayer::ItemPostFrame()
-{
-	static int fInSelect = FALSE;
-
-	// check if the player is using a tank
-	if (m_pTank)
-		return;
-
-	if (m_pActiveItem)
-	{
-		if (HasShield() && IsReloading())
-		{
-			if (pev->button & IN_ATTACK2)
-				m_flNextAttack = 0;
-		}
-	}
-
-#ifdef CLIENT_WEAPONS
-	if (m_flNextAttack > 0)
-#else
-	if (gpGlobals->time < m_flNextAttack)
-#endif
-		return;
-
-	ImpulseCommands();
-
-	if (m_pActiveItem)
-		m_pActiveItem->PostFrame();
-}
-
-void CBasePlayer::SendAmmoUpdate()
-{
-	for (int i = 0; i < MAX_AMMO_SLOTS; i++)
-	{
-		if (m_rgAmmo[i] != m_rgAmmoLast[i])
-		{
-			m_rgAmmoLast[i] = m_rgAmmo[i];
-
-			assert(m_rgAmmo[i] >= 0);
-			assert(m_rgAmmo[i] <= 255);
-
-			// send "Ammo" update message
-			MESSAGE_BEGIN(MSG_ONE, gmsgAmmoX, nullptr, pev);
-				WRITE_BYTE(i);
-				WRITE_BYTE(Q_clamp(m_rgAmmo[i], 0, 255)); // clamp the value to one byte
-			MESSAGE_END();
-		}
-	}
-}
-
 void CBasePlayer::SendWeatherInfo()
 {
 	auto SendReceiveW = [&](BYTE byte)
 	{
 		MESSAGE_BEGIN(MSG_ONE, gmsgReceiveW, nullptr, pev);
-				WRITE_BYTE(byte);
+		WRITE_BYTE(byte);
 		MESSAGE_END();
 	};
 
@@ -5985,63 +5752,28 @@ void CBasePlayer::UpdateStatusBar()
 }
 
 // DropPlayerItem - drop the named item, or if no name, the active item.
-CBaseEntity *EXT_FUNC CBasePlayer::DropPlayerItem(WeaponIdType iId)
+CWeaponBox* CBasePlayer::DropPlayerItem(WeaponIdType iId)
 {
-	if (iId <= WEAPON_NONE || iId >= LAST_WEAPON)
-	{
-		// if this string has no length, the client didn't type a name!
-		// assume player wants to drop the active item.
-		// make the string null to make future operations in this function easier
-		iId = WEAPON_NONE;
-	}
+	gmsgRmWpn::Send(MSG_ONE, pev, iId);
 
-	if (!iId && HasShield())
-	{
-		DropShield();
-		return nullptr;
-	}
+	UTIL_MakeVectors(pev->angles);
 
-	auto pWeapon = iId ? GetItemById(iId) : m_pActiveItem;
+	CWeaponBox* pWeaponBox = dynamic_cast<CWeaponBox*>(CBaseEntity::Create("weaponbox", pev->origin + gpGlobals->v_forward * 10, pev->angles, edict()));
+	pWeaponBox->pev->angles.x = 0;
+	pWeaponBox->pev->angles.z = 0;
+	pWeaponBox->SetThink(&CWeaponBox::Kill);
+	pWeaponBox->pev->nextthink = gpGlobals->time + item_staytime.value;
 
-	if (pWeapon)
-	{
-		if (!pWeapon->CanDrop() && IsAlive())
-		{
-			ClientPrint(pev, HUD_PRINTCENTER, "#Weapon_Cannot_Be_Dropped");
-			return nullptr;
-		}
+	if (IsAlive())	// drop by intense
+		pWeaponBox->pev->velocity = pev->velocity + gpGlobals->v_forward * CWeaponBox::THROWING_FORCE + gpGlobals->v_forward * 100;	// this velocity would be override soon.
+	else
+		pWeaponBox->pev->velocity = pev->velocity * 0.85f;	// drop due to death.
 
-		// No more weapon
-		if ((pev->weapons & ~(1 << WEAPON_SUIT)) == 0)
-			m_iHideHUD |= HIDEHUD_WEAPONS;
+	// #WPN_UNDONE_UPSTREAM_MSG somehow imply ammo packing.
 
-		g_pGameRules->GetNextBestWeapon(this, pWeapon);
-		UTIL_MakeVectors(pev->angles);
+	//pWeaponBox->SetModel();	// #WPN_UNDONE_UPSTREAM_MSG somehow get model on server side...
 
-		if (pWeapon->m_pItemInfo->m_iSlot == PRIMARY_WEAPON_SLOT)
-			m_bHasPrimary = false;
-
-		// the actual drop.
-		CWeaponBox* pWeaponBox = nullptr;
-		if (!pWeapon->Drop((void**)&pWeaponBox))
-			return nullptr;
-
-		return pWeaponBox;
-	}
-
-	return nullptr;
-}
-
-// Does the player already have this item?
-CBaseWeapon* CBasePlayer::HasPlayerItem(WeaponIdType iId)
-{
-	for (auto pWeapon : CBaseWeapon::m_lstWeapons)
-	{
-		if (pWeapon->m_pPlayer == this && pWeapon->m_iId == iId && !pWeapon->IsDead())
-			return pWeapon;
-	}
-
-	return nullptr;
+	return pWeaponBox;
 }
 
 void CBasePlayer::SwitchTeam()
@@ -6711,22 +6443,6 @@ const char *GetWeaponAliasFromName(const char *weaponName)
 	return weaponName;
 }
 
-bool CurrentWeaponSatisfies(CBaseWeapon *pWeapon, int id, int classId)
-{
-	if (!pWeapon)
-		return false;
-
-	const char *weaponName = GetWeaponAliasFromName(pWeapon->m_pItemInfo->m_pszInternalName);
-
-	if (id && AliasToWeaponID(weaponName) == id)
-		return true;
-
-	if (classId && AliasToWeaponClass(weaponName) == classId)
-		return true;
-
-	return false;
-}
-
 void CBasePlayer::ParseAutoBuy()
 {
 	WeaponIdType iRecommandedPrim = WEAPON_NONE, iRecommandedSed = WEAPON_NONE;
@@ -6933,36 +6649,6 @@ void CBasePlayer::UpdateLocation(bool forceUpdate)
 	}
 }
 
-void CBasePlayer::ReloadWeapons(CBaseWeapon *pWeapon, bool bForceReload, bool bForceRefill)
-{
-	bool bCanAutoReload = (bForceReload || auto_reload_weapons.value != 0.0f);
-	bool bCanRefillBPAmmo = (bForceRefill || refill_bpammo_weapons.value != 0.0f);
-
-	if (!bCanAutoReload && !bCanRefillBPAmmo)
-		return;
-
-	// if we died in the previous round
-	// so that we have nothing to reload
-	if (!m_bNotKilled)
-		return;
-
-	// to ignore first spawn on ClientPutinServer
-	if (m_bJustConnected)
-		return;
-
-	for (auto pWeapon : CBaseWeapon::m_lstWeapons)
-	{
-		if (pWeapon->m_pPlayer != this)
-			continue;
-
-		if (bCanAutoReload)
-			pWeapon->m_iClip = pWeapon->m_pItemInfo->m_iMaxClip;
-
-		if (bCanRefillBPAmmo)
-			m_rgAmmo[pWeapon->m_iPrimaryAmmoType] = pWeapon->m_pAmmoInfo->m_iMax;
-	}
-}
-
 void CBasePlayer::TeamChangeUpdate()
 {
 	MESSAGE_BEGIN(MSG_ALL, gmsgTeamInfo);
@@ -7023,25 +6709,6 @@ void CBasePlayer::DropPrimary()
 
 		DropPlayerItem(pWeapon->m_iId);
 	}
-}
-
-CBaseWeapon *CBasePlayer::GetItemById(WeaponIdType weaponID)
-{
-	for (auto pWeapon : CBaseWeapon::m_lstWeapons)
-	{
-		if (pWeapon->IsDead())
-			continue;
-
-		if (pWeapon->m_pPlayer != this)
-			continue;
-
-		if (pWeapon->Id() != weaponID)
-			continue;
-
-		return pWeapon;
-	}
-
-	return nullptr;
 }
 
 void CBasePlayer::Disconnect()
@@ -7267,7 +6934,7 @@ void CBasePlayer::ResetUsingEquipment(void)
 	AmmoIdType iAmmoId = AMMO_NONE;
 	EquipmentIdType iCandidate = CSGameRules()->SelectProperGrenade(this);
 
-	// check inventory of recommanded equipment.
+	// check inventory of recommended equipment.
 	if (GetGrenadeInventory(iCandidate))
 	{
 		// it's good? take and leave.
@@ -7288,65 +6955,6 @@ void CBasePlayer::ResetUsingEquipment(void)
 	}
 
 	m_iUsingGrenadeId = iCandidate;
-}
-
-bool CBasePlayer::StartSwitchingWeapon(CBaseWeapon* pSwitchingTo)
-{
-	if (!pSwitchingTo)
-		return false;
-
-	// TODO
-	if ((m_pActiveItem && !m_pActiveItem->CanHolster()) /*|| !pSwitchingTo->CanDeploy()*/)
-		return false;
-
-	if (m_pActiveItem)
-	{
-		m_pActiveItem->HolsterStart();
-		m_iWpnSwitchingTo = pSwitchingTo->m_iId;
-
-		return true;
-	}
-	else
-	{
-		// no active weapon? which means we can directly deploy this one.
-		return SwitchWeapon(pSwitchingTo);
-	}
-}
-
-bool CBasePlayer::SwitchWeapon(CBaseWeapon* pSwitchingTo)
-{
-	if (!pSwitchingTo)
-		return false;
-
-	// TODO
-	if ((m_pActiveItem && !m_pActiveItem->CanHolster()) /*|| !pSwitchingTo->CanDeploy()*/)
-		return false;
-
-	ResetAutoaim();
-
-	if (m_pActiveItem)
-	{
-		m_pActiveItem->Holstered();
-	}
-
-	if (HasShield())
-	{
-		if (m_pActiveItem)
-			m_pActiveItem->m_bitsFlags &= ~WPNSTATE_SHIELD_DRAWN;
-
-		m_bShieldDrawn = false;
-		UpdateShieldCrosshair(true);
-	}
-
-	m_pLastItem = m_pActiveItem;
-	m_pActiveItem = pSwitchingTo;
-
-	m_pActiveItem->Deploy();
-	m_pActiveItem->UpdateClientData();
-
-	ResetMaxSpeed();
-
-	return true;
 }
 
 void CBasePlayer::QueryClientCvar(void)
@@ -7579,14 +7187,14 @@ void CBasePlayer::DischargePrimarySkill(CBasePlayer* pCause)
 	}
 }
 
-float CBasePlayer::WeaponFireIntervalModifier(CBaseWeapon* pWeapon)
+float CBasePlayer::WeaponFireIntervalModifier(IWeapon* pWeapon)
 {
 	float flResult = 1.0f;
 
 	for (int i = SkillType_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
 	{
 		if (m_rgpSkills[i])
-			flResult *= m_rgpSkills[i]->WeaponFireIntervalModifier(pWeapon);	// the active or not is determind in the function itself.
+			flResult *= m_rgpSkills[i]->WeaponFireIntervalModifier(pWeapon);	// the active or not is determined in the function itself.
 	}
 
 	return flResult;
@@ -7599,7 +7207,7 @@ float CBasePlayer::PlayerDamageSufferedModifier(int bitsDamageTypes)
 	for (int i = SkillType_UNASSIGNED; i < SKILLTYPE_COUNT; i++)
 	{
 		if (m_rgpSkills[i])
-			flResult *= m_rgpSkills[i]->PlayerDamageSufferedModifier(bitsDamageTypes);	// the active or not is determind in the function itself.
+			flResult *= m_rgpSkills[i]->PlayerDamageSufferedModifier(bitsDamageTypes);	// the active or not is determined in the function itself.
 	}
 
 	return flResult;

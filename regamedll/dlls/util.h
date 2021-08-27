@@ -146,7 +146,7 @@ inline int ENTINDEX(const entvars_t *pev) { return (*g_engfuncs.pfnIndexOfEdict)
 inline edict_t *INDEXENT(int iEdictNum) { return (*g_engfuncs.pfnPEntityOfEntIndex)(iEdictNum); }
 #endif // INDEXENT
 
-inline void MESSAGE_BEGIN(int msg_dest, int msg_type, const float *pOrigin, entvars_t *ent) { MESSAGE_BEGIN(msg_dest, msg_type, pOrigin, ENT(ent)); }
+inline void MESSAGE_BEGIN(int msg_dest, int msg_type, const float *pOrigin, const entvars_t *ent) { MESSAGE_BEGIN(msg_dest, msg_type, pOrigin, ENT(ent)); }
 inline bool FNullEnt(EOFFSET eoffset) { return (eoffset == 0); }
 inline bool FNullEnt(entvars_t *pev) { return (pev == nullptr || FNullEnt(OFFSET(pev))); }
 inline bool FNullEnt(const edict_t *pent) { return (pent == nullptr || pent->free || FNullEnt(OFFSET(pent))); }

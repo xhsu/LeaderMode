@@ -65,6 +65,13 @@ int GetBotFollowCount(CBasePlayer *pLeader)
 	return count;
 }
 
+void CCSBot::Spawn()
+{
+	CBot::Spawn();
+
+	// #WPN_UNDONE_BOT
+}
+
 // Change movement speed to walking
 void CCSBot::Walk()
 {
@@ -97,7 +104,7 @@ bool CCSBot::Jump(bool mustJump)
 
 // Invoked when injured by something
 // NOTE: We dont want to directly call Attack() here, or the bots will have super-human reaction times when injured
-BOOL CCSBot::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)
+bool CCSBot::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)
 {
 	CBaseEntity *pAttacker = GetClassPtr((CBaseEntity *)pevInflictor);
 

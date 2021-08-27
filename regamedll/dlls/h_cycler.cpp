@@ -115,7 +115,7 @@ void CCycler::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useTyp
 }
 
 // CyclerPain , changes sequences when shot
-BOOL CCycler::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)
+bool CCycler::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)
 {
 	if (m_animate)
 	{
@@ -210,14 +210,14 @@ void CCyclerSprite::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	ALERT(at_console, "Sprite: %s\n", STRING(pev->model));
 }
 
-BOOL CCyclerSprite::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)
+bool CCyclerSprite::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)
 {
 	if (m_maxFrame > 1.0)
 	{
 		Animate(1.0);
 	}
 
-	return TRUE;
+	return true;
 }
 
 void CCyclerSprite::Animate(float frames)

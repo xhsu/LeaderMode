@@ -6,6 +6,7 @@ module;
 #include <concepts>
 #include <iomanip>
 #include <iostream>
+#include <limits>
 #include <numbers>
 
 #include "../external/gcem/include/gcem.hpp"
@@ -444,7 +445,7 @@ export constexpr auto operator^(const Vector& a, const Vector& b)
 {
 	double length_ab = static_cast<double>(a.Length() * b.Length());
 
-	if (gcem::abs(length_ab) < DBL_EPSILON)
+	if (gcem::abs(length_ab) < std::numeric_limits<double>::epsilon())
 		return 0.0;
 
 	return gcem::acos(DotProduct(a, b) / length_ab) * (180.0 / std::numbers::pi);

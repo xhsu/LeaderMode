@@ -1289,7 +1289,7 @@ MSG_FUNC(SecVMDL)
 	int iModelReadMode = READ_BYTE();
 	char szModel[192];
 
-	// switch-case doesnot applied here. C2360 and C2361.
+	// switch-case does not applied here. C2360 and C2361.
 	switch (iModelReadMode)
 	{
 	case FALSE:
@@ -1377,9 +1377,10 @@ MSG_FUNC(GiveWpn)
 	BEGIN_READ(pbuf, iSize);
 
 	WeaponIdType iId = (WeaponIdType)READ_BYTE();
-	int iClip = READ_SHORT();
+	int iClip = READ_BYTE();
+	unsigned bitsFlags = READ_LONG();
 
-	gPseudoPlayer.AddPlayerItem(CBaseWeapon::Give(iId, &gPseudoPlayer, iClip));
+	gPseudoPlayer.AddPlayerItem(IWeapon::Give(iId, &gPseudoPlayer, iClip, bitsFlags));
 
 	return TRUE;
 }

@@ -235,19 +235,10 @@ BOOL CFuncTank::StartControl(CBasePlayer *pController)
 
 	m_pController = pController;
 
-	if (m_pController->m_pActiveItem)
-	{
-		m_pController->m_pActiveItem->Holstered();	// it's unlike any switching weapon.
-		m_pController->pev->weaponmodel = 0;
-		m_pController->pev->viewmodel = 0;
+	gmsgUseTank::Send(MSG_ONE, pController->pev, entindex(), TRUE);
 
-		// ReGameDLL Fixes: Version 5.16.0.465
-		// if (m_pController->m_iFOV != DEFAULT_FOV)
-		{
-			m_pController->pev->fov = m_pController->m_iLastZoom = DEFAULT_FOV;
-			m_pController->m_bResumeZoom = false;
-		}
-	}
+	// #WPN_UNDONE_CL
+	// Move the tank hiding functionality to Client.
 
 	m_pController->m_iHideHUD |= HIDEHUD_WEAPONS;
 	m_vecControllerUsePos = m_pController->pev->origin;
@@ -263,22 +254,12 @@ void CFuncTank::StopControl()
 	if (!m_pController)
 		return;
 
-	if (m_pController->m_pActiveItem)
-	{
-		m_pController->m_pActiveItem->Deploy();
+	gmsgUseTank::Send(MSG_ONE, m_pController->pev, entindex(), FALSE);
 
-		if (m_pController->IsPlayer())
-		{
-			m_pController->ResetMaxSpeed();
-		}
-	}
+	// #WPN_UNDONE_CL
+	// Move the tank hiding functionality to Client.
 
 	ALERT(at_console, "stopped using TANK\n");
-
-	if (m_pController->m_pActiveItem)
-	{
-		m_pController->m_iHideHUD &= ~HIDEHUD_WEAPONS;
-	}
 
 	pev->nextthink = 0;
 	m_pController = nullptr;

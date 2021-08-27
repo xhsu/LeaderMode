@@ -387,7 +387,7 @@ BOOL CBaseMonster::TakeHealth(float flHealth, int bitsDamageType)
 //
 // Time-based damage: only occurs while the monster is within the trigger_hurt.
 // When a monster is poisoned via an arrow etc it takes all the poison damage at once.
-BOOL CBaseMonster::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)
+bool CBaseMonster::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)
 {
 	if (pev->takedamage == DAMAGE_NO)
 		return FALSE;

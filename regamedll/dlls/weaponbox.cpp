@@ -199,7 +199,8 @@ bool CWeaponBox::PackWeapon(IWeapon* pWeapon)
 		return false;
 	}
 
-	CBasePlayer* pPlayer = static_cast<CBasePlayer*>(pWeapon->GetOwner());
+	auto pPlayer = static_cast<CBot*>(pWeapon->GetOwner());
+	assert(pPlayer->IsBot());
 
 	if (pPlayer)
 	{
@@ -208,7 +209,7 @@ bool CWeaponBox::PackWeapon(IWeapon* pWeapon)
 			pWeapon->Holstered();	// it's dropping weapon. just data-ly holster it.
 		}
 
-		if (!pPlayer->RemovePlayerItem(pWeapon))
+		if (!pPlayer->RemovePlayerItem(pWeapon->Id()))
 		{
 			// failed to unhook the weapon from the player!
 			return false;
@@ -216,8 +217,8 @@ bool CWeaponBox::PackWeapon(IWeapon* pWeapon)
 	}
 
 	m_StoredWeapon.what = pWeapon->Id();
-	m_StoredWeapon.clip = *pWeapon->Clip();
-	m_StoredWeapon.flags = *pWeapon->Flags();
+	m_StoredWeapon.clip = pWeapon->Clip();
+	m_StoredWeapon.flags = pWeapon->Flags();
 
 	if (pPlayer)
 	{

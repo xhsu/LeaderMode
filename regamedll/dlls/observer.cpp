@@ -287,47 +287,6 @@ void CBasePlayer::Observer_CheckTarget()
 	}
 }
 
-void CBasePlayer::Observer_CheckProperties()
-{
-	// try to find a traget if we have no current one
-	if (pev->iuser1 == OBS_IN_EYE && m_hObserverTarget)
-	{
-		CBasePlayer *target = UTIL_PlayerByIndex(m_hObserverTarget->entindex());
-
-		if (!target)
-			return;
-
-		int weapon = target->m_pActiveItem ? target->m_pActiveItem->m_iId : 0;
-
-		// use fov of tracked client
-		if (pev->fov != target->pev->fov || m_iObserverWeapon != weapon)
-		{
-			m_iClientFOV = pev->fov = target->pev->fov;
-
-			// write fov before wepon data, so zoomed crosshair is set correctly
-			MESSAGE_BEGIN(MSG_ONE, gmsgSetFOV, nullptr, pev);
-				WRITE_BYTE(int(pev->fov));
-			MESSAGE_END();
-
-			m_iObserverWeapon = weapon;
-
-			// send weapon update
-			// deleted by LUNA: gmsgCurWeapon
-		}
-	}
-	else
-	{
-		pev->fov = DEFAULT_FOV;
-
-		if (m_iObserverWeapon)
-		{
-			m_iObserverWeapon = 0;
-
-			// deleted by LUNA: gmsgCurWeapon
-		}
-	}
-}
-
 // Attempt to change the observer mode
 void CBasePlayer::Observer_SetMode(int iMode)
 {
@@ -398,7 +357,7 @@ void CBasePlayer::Observer_SetMode(int iMode)
 
 	UpdateClientEffects(this, oldMode);
 
-	// print spepctaor mode on client screen
+	// print spectator mode on client screen
 
 	char modemsg[16];
 	Q_sprintf(modemsg, "#Spec_Mode%i", pev->iuser1);
@@ -412,5 +371,4 @@ void CBasePlayer::Observer_Think()
 {
 	Observer_HandleButtons();
 	Observer_CheckTarget();
-	Observer_CheckProperties();
 }

@@ -186,8 +186,8 @@ public:
 	virtual void Think();
 	virtual BOOL IsAllowedToSpawn(CBaseEntity *pEntity);
 
-	virtual BOOL FShouldSwitchWeapon(CBasePlayer *pPlayer, CBaseWeapon *pWeapon);
-	virtual BOOL GetNextBestWeapon(CBasePlayer *pPlayer, CBaseWeapon* pCurrentWeapon);
+	virtual BOOL FShouldSwitchWeapon(CBot* pPlayer, IWeapon* pWeapon);
+	virtual BOOL GetNextBestWeapon(CBot* pPlayer, IWeapon* pCurrentWeapon);
 
 	virtual BOOL IsMultiplayer();
 	virtual BOOL IsDeathmatch();
@@ -225,15 +225,15 @@ public:
 	virtual void DeathNotice(CBasePlayer *pVictim, entvars_t *pKiller, entvars_t *pInflictor);
 
 	// Weapon retrieval
-	virtual bool CanHavePlayerItem(CBasePlayer* pPlayer, WeaponIdType iId, bool bPrintHint);	// The player is touching an CBasePlayerItem, do I give it to him?
-	virtual void PlayerGotWeapon(CBasePlayer *pPlayer, CBaseWeapon *pWeapon);
+	virtual bool CanHavePlayerItem(CBot* pPlayer, WeaponIdType iId, bool bPrintHint);	// The player is touching an CBasePlayerItem, do I give it to him?
+	virtual void PlayerGotWeapon(CBot* pPlayer, IWeapon* pWeapon);
 
 	// Ammo retrieval
-	virtual bool CanHaveAmmo(CBasePlayer* pPlayer, AmmoIdType iId);		// can this player take more of this ammo?
+	virtual bool CanHaveAmmo(CBot* pPlayer, AmmoIdType iId);		// can this player take more of this ammo?
 	virtual void PlayerGotAmmo(CBasePlayer* pPlayer, AmmoIdType iId, int iCount) {}				// called each time a player picks up some ammo in the world
 
 	// Item retrieval
-	virtual BOOL CanHaveItem(CBasePlayer *pPlayer, CItem *pItem);
+	virtual bool CanHaveItem(CBasePlayer *pPlayer, CItem *pItem);
 	virtual void PlayerGotItem(CBasePlayer *pPlayer, CItem *pItem);
 
 	// Item spawn/respawn control

@@ -1929,7 +1929,7 @@ BOOL CHalfLifeMultiplay::IsCoOp()
 	return gpGlobals->coop;
 }
 
-BOOL EXT_FUNC CHalfLifeMultiplay::FShouldSwitchWeapon(CBasePlayer *pPlayer, CBaseWeapon *pWeapon)
+BOOL CHalfLifeMultiplay::FShouldSwitchWeapon(CBot *pPlayer, IWeapon *pWeapon)
 {
 	// TODO: maybe reuse this ?
 	/*if (!pWeapon->CanDeploy())
@@ -1956,16 +1956,16 @@ BOOL EXT_FUNC CHalfLifeMultiplay::FShouldSwitchWeapon(CBasePlayer *pPlayer, CBas
 		return FALSE;
 	}
 
-	if (pWeapon->m_pItemInfo->m_iWeight > pPlayer->m_pActiveItem->m_pItemInfo->m_iWeight)
+	if (pWeapon->WpnInfo()->m_iWeight > pPlayer->m_pActiveItem->WpnInfo()->m_iWeight)
 		return TRUE;
 
 	return FALSE;
 }
 
-BOOL EXT_FUNC CHalfLifeMultiplay::GetNextBestWeapon(CBasePlayer *pPlayer, CBaseWeapon *pCurrentWeapon)
+BOOL CHalfLifeMultiplay::GetNextBestWeapon(CBot *pPlayer, IWeapon* pCurrentWeapon)
 {
-	CBaseWeapon *pCheck;
-	CBaseWeapon *pBest; // this will be used in the event that we don't find a weapon in the same category.
+	IWeapon *pCheck = nullptr;
+	IWeapon *pBest = nullptr; // this will be used in the event that we don't find a weapon in the same category.
 	int iBestWeight;
 	int i;
 
@@ -1975,7 +1975,7 @@ BOOL EXT_FUNC CHalfLifeMultiplay::GetNextBestWeapon(CBasePlayer *pPlayer, CBaseW
 		return FALSE;
 	}
 
-	iBestWeight = -1; // no weapon lower than -1 can be autoswitched to
+	iBestWeight = -1; // no weapon lower than -1 can be auto switched to
 	pBest = nullptr;
 
 	for (i = 0; i < MAX_ITEM_TYPES; i++)
@@ -1985,7 +1985,7 @@ BOOL EXT_FUNC CHalfLifeMultiplay::GetNextBestWeapon(CBasePlayer *pPlayer, CBaseW
 		if (pCheck)
 		{
 			// don't reselect the weapon we're trying to get rid of
-			if (pCheck->m_pItemInfo->m_iWeight > iBestWeight && pCheck != pCurrentWeapon)
+			if (pCheck->WpnInfo()->m_iWeight > iBestWeight && pCheck != pCurrentWeapon)
 			{
 				//ALERT (at_console, "Considering %s\n", STRING(pCheck->pev->classname));
 				// we keep updating the 'best' weapon just in case we can't find a weapon of the same weight
@@ -1994,8 +1994,8 @@ BOOL EXT_FUNC CHalfLifeMultiplay::GetNextBestWeapon(CBasePlayer *pPlayer, CBaseW
 				// TODO
 				//if (pCheck->CanDeploy())
 				//{
-					// if this weapon is useable, flag it as the best
-					iBestWeight = pCheck->m_pItemInfo->m_iWeight;
+					// if this weapon is usable, flag it as the best
+					iBestWeight = pCheck->WpnInfo()->m_iWeight;
 					pBest = pCheck;
 				//}
 			}
@@ -2005,8 +2005,8 @@ BOOL EXT_FUNC CHalfLifeMultiplay::GetNextBestWeapon(CBasePlayer *pPlayer, CBaseW
 		}
 	}
 
-	// if we make it here, we've checked all the weapons and found no useable
-	// weapon in the same catagory as the current weapon.
+	// if we make it here, we've checked all the weapons and found no usable
+	// weapon in the same category as the current weapon.
 
 	// if pBest is null, we didn't find ANYTHING. Shouldn't be possible- should always
 	// at least get the crowbar, but ya never know.
@@ -2297,37 +2297,37 @@ void CHalfLifeMultiplay::PlayerThink(CBasePlayer *pPlayer)
 		pPlayer->m_bCanShoot = true;
 	}
 
-	if (pPlayer->m_pActiveItem)
+	if (CBot* pBot = dynamic_cast<CBot*>(pPlayer); pBot && pBot->m_pActiveItem)
 	{
-		if (pPlayer->m_pActiveItem->m_bitsFlags & WPNSTATE_SHIELD_DRAWN)
+		if (pBot->m_pActiveItem->Flags() & WPNSTATE_SHIELD_DRAWN)
 		{
-			pPlayer->m_bCanShoot = false;
+			pBot->m_bCanShoot = false;
 		}
 
 		// Superior Firepower Doctrine allows you have your clip constantly regen.
-		if (m_rgTeamTacticalScheme[pPlayer->m_iTeam] == Doctrine_SuperiorFirepower && pPlayer->m_flTSThink < gpGlobals->time)
+		if (m_rgTeamTacticalScheme[pBot->m_iTeam] == Doctrine_SuperiorFirepower && pBot->m_flTSThink < gpGlobals->time)
 		{
-			pPlayer->m_flTSThink = gpGlobals->time + 1.0f;
+			pBot->m_flTSThink = gpGlobals->time + 1.0f;
 
 			int iClipAdd = 0; //int(float(pWeapon->iinfo()->m_iMaxClip) * 0.04f)
 
-			if (pPlayer->m_pActiveItem->m_pItemInfo->m_iMaxClip >= 113)	// 4.5 / 0.04
+			if (pBot->m_pActiveItem->WpnInfo()->m_iMaxClip >= 113)	// 4.5 / 0.04
 				iClipAdd = 5;
-			else if (pPlayer->m_pActiveItem->m_pItemInfo->m_iMaxClip >= 88)
+			else if (pBot->m_pActiveItem->WpnInfo()->m_iMaxClip >= 88)
 				iClipAdd = 4;
-			else if (pPlayer->m_pActiveItem->m_pItemInfo->m_iMaxClip >= 63)
+			else if (pBot->m_pActiveItem->WpnInfo()->m_iMaxClip >= 63)
 				iClipAdd = 3;
-			else if (pPlayer->m_pActiveItem->m_pItemInfo->m_iMaxClip >= 38)
+			else if (pBot->m_pActiveItem->WpnInfo()->m_iMaxClip >= 38)
 				iClipAdd = 2;
-			else if (pPlayer->m_pActiveItem->m_pItemInfo->m_iMaxClip >= 13)
+			else if (pBot->m_pActiveItem->WpnInfo()->m_iMaxClip >= 13)
 				iClipAdd = 1;
 
-			if (iClipAdd > 0 && pPlayer->m_pActiveItem->m_iClip < 127)
+			if (iClipAdd > 0 && pBot->m_pActiveItem->Clip() < 127)
 			{
-				pPlayer->m_pActiveItem->m_iClip += iClipAdd;
+				pBot->m_pActiveItem->Clip() += iClipAdd;
 
-				if (pPlayer->m_pActiveItem->m_iClip > 127)
-					pPlayer->m_pActiveItem->m_iClip = 127;
+				if (pBot->m_pActiveItem->Clip() > 127)
+					pBot->m_pActiveItem->Clip() = 127;
 
 				if (!RANDOM_LONG(0, 3))	// if you play it constantly, it IS annoying.
 				{
@@ -2337,6 +2337,14 @@ void CHalfLifeMultiplay::PlayerThink(CBasePlayer *pPlayer)
 				}
 			}
 		}
+	}
+
+	// #WPN_UNDONE_CL
+	// Imply the superior_firepower at client.
+
+	if (m_rgTeamTacticalScheme[pPlayer->m_iTeam] == Doctrine_SuperiorFirepower && pPlayer->m_flTSThink < gpGlobals->time)
+	{
+		gmsgSchemeEv::Send(MSG_ONE, pPlayer->pev);
 	}
 
 	// Doctrine_GrandBattleplan gives player 50$ every 5 sec.
@@ -2351,11 +2359,11 @@ void CHalfLifeMultiplay::PlayerThink(CBasePlayer *pPlayer)
 	if (pPlayer->m_iMenu != Menu_ChooseTeam && pPlayer->m_iJoiningState == SHOWTEAMSELECT)
 	{
 		int slot = MENU_SLOT_TEAM_UNDEFINED;
-		if (!Q_stricmp(humans_join_team.string, "T"))
+		if (Q_stricmp(humans_join_team.string, "T") == 0)
 		{
 			slot = MENU_SLOT_TEAM_TERRORIST;
 		}
-		else if (!Q_stricmp(humans_join_team.string, "CT"))
+		else if (Q_stricmp(humans_join_team.string, "CT") == 0)
 		{
 			slot = MENU_SLOT_TEAM_CT;
 		}
@@ -2671,10 +2679,17 @@ void EXT_FUNC CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, entvars_t* p
 				CBasePlayer* pAttacker = CBasePlayer::Instance(pKiller);
 				if (pAttacker && pAttacker->IsPlayer())
 				{
-					if (pAttacker->m_pActiveItem)
+					if (pAttacker->IsBot())
 					{
-						killer_weapon_name = pAttacker->m_pActiveItem->m_pItemInfo->m_pszInternalName;
+						auto pBot = dynamic_cast<CBot*>(pAttacker);
+
+						if (pBot && pBot->m_pActiveItem)
+							killer_weapon_name = pBot->m_pActiveItem->WpnInfo()->m_pszInternalName;
 					}
+
+					// #WPN_UNDONE_UPSTREAM_MSG
+					// Need to find a way to let server know what weapon you are using.
+					// Actually this problem may also appear on pev->weaponmodel.
 				}
 			}
 			else
@@ -2754,23 +2769,23 @@ void EXT_FUNC CHalfLifeMultiplay::DeathNotice(CBasePlayer* pVictim, entvars_t* p
 	if (pVictim->m_bHeadshotKilled)
 		WRITE_LONG(9 | DRC_FLAG_DRAMATIC | DRC_FLAG_SLOWMOTION);
 	else
-		WRITE_LONG(7 | DRC_FLAG_DRAMATIC);			// eventflags (priority and flags)
+		WRITE_LONG(7 | DRC_FLAG_DRAMATIC);			// event flags (priority and flags)
 
 	MESSAGE_END();
 }
 
 // Player has grabbed a weapon that was sitting in the world
-void CHalfLifeMultiplay::PlayerGotWeapon(CBasePlayer *pPlayer, CBaseWeapon *pWeapon)
+void CHalfLifeMultiplay::PlayerGotWeapon(CBot *pPlayer, IWeapon *pWeapon)
 {
 }
 
-bool CHalfLifeMultiplay::CanHaveAmmo(CBasePlayer* pPlayer, AmmoIdType iId)
+bool CHalfLifeMultiplay::CanHaveAmmo(CBot* pPlayer, AmmoIdType iId)
 {
 	return !!(pPlayer->m_rgAmmo[iId] < g_rgAmmoInfo[iId].m_iMax);
 }
 
 // Returns FALSE if the player is not allowed to pick up this weapon
-bool CHalfLifeMultiplay::CanHavePlayerItem(CBasePlayer* pPlayer, WeaponIdType iId, bool bPrintHint)
+bool CHalfLifeMultiplay::CanHavePlayerItem(CBot* pPlayer, WeaponIdType iId, bool bPrintHint)
 {
 	// only living players can have items
 	if (pPlayer->pev->deadflag != DEAD_NO)
@@ -2797,7 +2812,7 @@ bool CHalfLifeMultiplay::CanHavePlayerItem(CBasePlayer* pPlayer, WeaponIdType iI
 	if (pPlayer->HasShield() && iId == WEAPON_SHIELDGUN)
 		return false;
 
-	if (pPlayer->m_rgpPlayerItems[PRIMARY_WEAPON_SLOT] && pPlayer->m_rgpPlayerItems[PRIMARY_WEAPON_SLOT]->m_iId == iId)
+	if (pPlayer->m_rgpPlayerItems[PRIMARY_WEAPON_SLOT] && pPlayer->m_rgpPlayerItems[PRIMARY_WEAPON_SLOT]->Id() == iId)
 	{
 		if (g_bClientPrintEnable && bPrintHint)
 		{
@@ -2807,7 +2822,7 @@ bool CHalfLifeMultiplay::CanHavePlayerItem(CBasePlayer* pPlayer, WeaponIdType iI
 		return false;
 	}
 
-	if (pPlayer->m_rgpPlayerItems[PISTOL_SLOT] && pPlayer->m_rgpPlayerItems[PISTOL_SLOT]->m_iId == iId)
+	if (pPlayer->m_rgpPlayerItems[PISTOL_SLOT] && pPlayer->m_rgpPlayerItems[PISTOL_SLOT]->Id() == iId)
 	{
 		if (g_bClientPrintEnable && bPrintHint)
 		{
@@ -2823,7 +2838,7 @@ bool CHalfLifeMultiplay::CanHavePlayerItem(CBasePlayer* pPlayer, WeaponIdType iI
 		{
 			// we can't carry anymore ammo for this gun. We can only
 			// have the gun if we aren't already carrying one of this type
-			if (pPlayer->HasPlayerItem(iId))
+			if (pPlayer->HasWeapon(iId))
 			{
 				return false;
 			}
@@ -2832,19 +2847,19 @@ bool CHalfLifeMultiplay::CanHavePlayerItem(CBasePlayer* pPlayer, WeaponIdType iI
 	else
 	{
 		// weapon doesn't use ammo, don't take another if you already have it.
-		if (pPlayer->HasPlayerItem(iId))
+		if (pPlayer->HasWeapon(iId))
 		{
-			return FALSE;
+			return false;
 		}
 	}
 
 	// note: will fall through to here if GetItemInfo doesn't fill the struct!
-	return TRUE;
+	return true;
 }
 
-BOOL CHalfLifeMultiplay::CanHaveItem(CBasePlayer *pPlayer, CItem *pItem)
+bool CHalfLifeMultiplay::CanHaveItem(CBasePlayer *pPlayer, CItem *pItem)
 {
-	return TRUE;
+	return true;
 }
 
 void CHalfLifeMultiplay::PlayerGotItem(CBasePlayer *pPlayer, CItem *pItem)
@@ -3925,8 +3940,16 @@ void CHalfLifeMultiplay::GiveDefaultItems(CBasePlayer* pPlayer)
 {
 	pPlayer->RemoveAllItems(FALSE);
 
-	pPlayer->AddPlayerItem(CBaseWeapon::Give(WEAPON_USP, pPlayer));
-	pPlayer->GiveAmmo(24, AMMO_45acp);
+	if (auto pBot = dynamic_cast<CBot*>(pPlayer); pBot != nullptr)
+	{
+		pBot->AddPlayerItem(WEAPON_USP);
+		pBot->GiveAmmo(24, AMMO_45acp);
+	}
+	else  // real player
+	{
+		MESSAGE_BEGIN(MSG_ONE, gmsgGiveWpn, pPlayer->pev->origin, pPlayer->edict());
+		
+	}
 
 	if (m_rgTeamTacticalScheme[pPlayer->m_iTeam] != Doctrine_GrandBattleplan)
 		return;

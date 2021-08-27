@@ -596,19 +596,25 @@ void CGrenade::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useTy
 	if (m_bC4BeingPickingUp || pev->flags & FL_KILLME)
 		return;
 
-	CBaseWeapon* pWeapon = pPlayer->m_pActiveItem;
-	if (pWeapon && pWeapon->m_bitsFlags & WPNSTATE_BUSY)	// if we are going to player the LHAND pickup anim, the current weapon must remain idled.
-		return;
+	// #WPN_UNDONE_CL
+	// C4 pick up for a real player.
 
-	m_bC4BeingPickingUp = true;	// mark for delete. (?)
+	if (auto pBot = dynamic_cast<CBot*>(pPlayer); pBot)
+	{
+		IWeapon* pWeapon = pBot->m_pActiveItem;
+		if (pWeapon && pWeapon->Flags() & WPNSTATE_BUSY)	// if we are going to player the LHAND pickup animation, the current weapon must remain idled.
+			return;
 
-	pWeapon->SetLeftHand(false);
-	pWeapon->m_bitsFlags |= WPNSTATE_AUTO_LAND_UP;
-	UTIL_SetSecondaryVMDL(pPlayer, SSZ_C4_VMDL, C4_PICKUP, false);	// this is an enforced sending.
+		m_bC4BeingPickingUp = true;	// mark for delete. (?)
 
-	// prepare to remove this entity.
-	pev->nextthink = gpGlobals->time + C4_TIME_PICKUP_HAPPEN;
-	SetThink(&CGrenade::C4PickUpThink);
+		pWeapon->FreeupLeftHand();
+		pWeapon->Flags() |= WPNSTATE_AUTO_LAND_UP;
+		UTIL_SetSecondaryVMDL(pPlayer, SSZ_C4_VMDL, C4_PICKUP, false);	// this is an enforced sending.
+
+		// prepare to remove this entity.
+		pev->nextthink = gpGlobals->time + C4_TIME_PICKUP_HAPPEN;
+		SetThink(&CGrenade::C4PickUpThink);
+	}
 }
 
 void CGrenade::TumbleThink()

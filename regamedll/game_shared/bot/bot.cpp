@@ -62,6 +62,372 @@ Vector CBot::GetAutoaimVector(float flDelta)
 	return gpGlobals->v_forward;
 }
 
+void CBot::PostThink()
+{
+	__super::PostThink();
+
+	// m_flNextAttack doesn't matter here.
+	// It's up to the Think() to decide now.
+
+	if (m_pActiveItem && !m_pTank)
+		m_pActiveItem->Think();
+}
+
+// Add a weapon to the player (Item == Weapon == Selectable Object)
+IWeapon* CBot::AddPlayerItem(WeaponIdType iId, int iClip /*= -1*/, unsigned bitsFlags /*= 0*/)
+{
+	if (iId <= WEAPON_NONE || iId > LAST_WEAPON)
+		return nullptr;
+
+	auto pWeapon = IWeapon::Give(iId, this, iClip, bitsFlags);	// Attach() included.
+
+	if (pWeapon)
+	{
+		CSGameRules()->PlayerGotWeapon(this, pWeapon);
+
+		if (pWeapon->WpnInfo()->m_iSlot == PRIMARY_WEAPON_SLOT)
+			m_bHasPrimary = true;
+
+		// enlist into inventory.
+		m_rgpPlayerItems[pWeapon->WpnInfo()->m_iSlot] = pWeapon;
+
+		// FX
+		EMIT_SOUND(edict(), CHAN_WEAPON, "items/gunpickup2.wav", VOL_NORM, ATTN_NORM);
+
+		// #PROJ_COMMANDER_SHIELD
+		// Shield status update should be place into all player.
+		// Find a way to update real player as well.
+		if (HasShield())
+			pev->gamestate = HITGROUP_SHIELD_ENABLED;
+
+		if (CSGameRules()->FShouldSwitchWeapon(this, pWeapon))
+		{
+			if (!m_bShieldDrawn)
+				StartSwitchingWeapon(pWeapon);
+		}
+
+		m_iHideHUD &= ~HIDEHUD_WEAPONS;
+	}
+
+	return pWeapon;
+}
+
+bool CBot::RemovePlayerItem(WeaponIdType iId)
+{
+	if (m_pActiveItem->Id() == iId)
+	{
+		ResetAutoaim();
+		ResetMaxSpeed();
+
+		// ReGameDLL Fixes: Version 5.16.0.465
+		pev->fov = m_iLastZoom = DEFAULT_FOV;
+		m_bResumeZoom = false;
+		m_pActiveItem = nullptr;
+
+		pev->viewmodel = 0;
+		pev->weaponmodel = 0;
+	}
+
+	// if item being removed is the last weapon, we should clear the record.
+	// because the SelectLastItem() won't check the ownership of last item.
+	if (m_pLastItem->Id() == iId)
+		m_pLastItem = nullptr;
+
+	// remove from server inventory.
+	if (m_rgpPlayerItems[iId->m_pItemInfo->m_iSlot] == iId)
+	{
+		m_rgpPlayerItems[iId->m_pItemInfo->m_iSlot] = nullptr;	// however, even if you don't call from CBaseWeapon::Kill(), WeaponsThink() would kill the weapon due to this nullptr assignment.
+		return true;
+	}
+
+	return false;
+}
+
+// Returns the unique ID for the ammo, or -1 if error
+bool CBot::GiveAmmo(int iAmount, AmmoIdType iId)
+{
+	if (iAmount <= 0)
+		return false;	// never add air to your inventory.
+
+	if (pev->flags & FL_SPECTATOR)
+		return false;
+
+	if (iId <= AMMO_NONE || iId >= AMMO_MAXTYPE)
+	{
+		// no ammo.
+		return false;
+	}
+
+	if (!CSGameRules()->CanHaveAmmo(this, iId))	// game rules say I can't have any more of this ammo type.
+		return false;
+
+	int iAdd = Q_min(iAmount, GetAmmoInfo(iId)->m_iMax - m_rgAmmo[iId]);
+	if (iAdd < 1)
+		return false;
+
+	m_rgAmmo[iId] += iAdd;
+
+	// make sure the ammo messages have been linked first
+	if (gmsgAmmoPickup)
+	{
+		// Send the message that ammo has been picked up
+		MESSAGE_BEGIN(MSG_ONE, gmsgAmmoPickup, nullptr, pev);
+		WRITE_BYTE(iId); // ammo ID
+		WRITE_BYTE(iAdd); // amount
+		MESSAGE_END();
+	}
+
+	return true;
+}
+
+bool CBot::StartSwitchingWeapon(IWeapon* pSwitchingTo)
+{
+	if (!pSwitchingTo)
+		return false;
+
+	// #WPN_TODO
+	if ((m_pActiveItem && !m_pActiveItem->CanHolster()) /*|| !pSwitchingTo->CanDeploy()*/)
+		return false;
+
+	if (m_pActiveItem)
+	{
+		m_pActiveItem->HolsterStart();
+		m_iWpnSwitchingTo = pSwitchingTo->Id();
+
+		return true;
+	}
+	else
+	{
+		// no active weapon? which means we can directly deploy this one.
+		return SwitchWeapon(pSwitchingTo);
+	}
+}
+
+bool CBot::SwitchWeapon(IWeapon* pSwitchingTo)
+{
+	if (!pSwitchingTo)
+		return false;
+
+	// #WPN_TODO
+	if ((m_pActiveItem && !m_pActiveItem->CanHolster()) /*|| !pSwitchingTo->CanDeploy()*/)
+		return false;
+
+	ResetAutoaim();
+
+	if (m_pActiveItem)
+	{
+		m_pActiveItem->Holstered();
+	}
+
+	if (HasShield())
+	{
+		if (m_pActiveItem)
+			m_pActiveItem->Flags() &= ~WPNSTATE_SHIELD_DRAWN;
+
+		m_bShieldDrawn = false;
+		UpdateShieldCrosshair(true);
+	}
+
+	m_pLastItem = m_pActiveItem;
+	m_pActiveItem = pSwitchingTo;
+
+	m_pActiveItem->Deploy();
+	// No 'UpdateClientData' anymore. (For weapon).
+
+	ResetMaxSpeed();
+
+	return true;
+}
+
+bool CBot::HasAnyWeapon()
+{
+	for (auto& p : m_rgpPlayerItems)
+	{
+		if (p->IsDead())
+			continue;
+
+		return true;
+	}
+
+	return false;
+}
+
+IWeapon* CBot::HasWeapon(WeaponIdType iId)
+{
+	for (auto& p : m_rgpPlayerItems)
+	{
+		if (p->IsDead())
+			continue;
+
+		if (p->Id() == iId)
+			return p;
+	}
+
+	return nullptr;
+}
+
+CWeaponBox* CBot::DropPlayerItem(WeaponIdType iId)
+{
+	if (iId <= WEAPON_NONE || iId >= LAST_WEAPON)
+	{
+		// if this string has no length, the client didn't type a name!
+		// assume player wants to drop the active item.
+		// make the string null to make future operations in this function easier
+		iId = WEAPON_NONE;
+	}
+
+	if (!iId && HasShield())
+	{
+		DropShield();
+		return nullptr;
+	}
+
+	auto pWeapon = iId ? HasWeapon(iId) : m_pActiveItem;
+
+	if (pWeapon)
+	{
+		if (!pWeapon->CanDrop() && IsAlive())
+		{
+			ClientPrint(pev, HUD_PRINTCENTER, "#Weapon_Cannot_Be_Dropped");
+			return nullptr;
+		}
+
+		// No more weapon
+		if ((pev->weapons & ~(1 << WEAPON_SUIT)) == 0)
+			m_iHideHUD |= HIDEHUD_WEAPONS;
+
+		g_pGameRules->GetNextBestWeapon(this, pWeapon);
+		UTIL_MakeVectors(pev->angles);
+
+		if (pWeapon->WpnInfo()->m_iSlot == PRIMARY_WEAPON_SLOT)
+			m_bHasPrimary = false;
+
+		// the actual drop.
+		CWeaponBox* pWeaponBox = nullptr;
+		if (!pWeapon->Drop((void**)&pWeaponBox))
+			return nullptr;
+
+		return pWeaponBox;
+	}
+
+	return nullptr;
+}
+
+void CBot::PackDeadPlayerItems()
+{
+	// get the game rules
+	bool bPackGun = (CSGameRules()->DeadPlayerWeapons(this) != GR_PLR_DROP_GUN_NO);
+	bool bPackAmmo = (CSGameRules()->DeadPlayerAmmo(this) != GR_PLR_DROP_AMMO_NO);
+
+	if (bPackGun)
+	{
+		bool bShieldDropped = false;
+		if (HasShield())
+		{
+			DropShield();
+			bShieldDropped = true;
+		}
+
+		CWeaponBox* pWeaponBox = nullptr;
+		AmmoIdType iAmmoId = AMMO_NONE;
+
+		for (int i = 0; i < MAX_ITEM_TYPES; i++)
+		{
+			// LUNA: in LeaderMod, we pack all weapons.
+
+			if (!m_rgpPlayerItems[i] || !m_rgpPlayerItems[i]->CanDrop())
+				continue;
+
+			// save this value. we don't have any access to it after we pack it into CWeaponBox.
+			iAmmoId = m_rgpPlayerItems[i]->AmmoInfo()->m_iId;
+
+			if (!m_rgpPlayerItems[i]->Drop((void**)&pWeaponBox))
+				continue;
+
+			// drop randomly around player.
+			pWeaponBox->pev->origin += Vector(RANDOM_FLOAT(-10, 10), RANDOM_FLOAT(-10, 10), 0);
+
+			// pack some ammo into this weaponbox.
+			if (bPackAmmo && iAmmoId != AMMO_NONE)
+			{
+				pWeaponBox->GiveAmmo(m_rgAmmo[iAmmoId], iAmmoId);
+				m_rgAmmo[iAmmoId] = 0;
+			}
+
+		}
+	}
+
+	RemoveAllItems(true);
+}
+
+void CBot::RemoveAllItems(bool removeSuit)
+{
+	bool bKillProgBar = false;
+	int i;
+
+	if (m_pTank)
+	{
+		m_pTank->Use(this, this, USE_OFF, 0);
+		m_pTank = nullptr;
+	}
+
+	RemoveShield();
+
+	if (bKillProgBar)
+		SetProgressBarTime(0);
+
+	if (m_pActiveItem)
+	{
+		ResetAutoaim();
+
+		m_pActiveItem->Holstered();	// it's weapon removal anyway.
+		m_pActiveItem = nullptr;
+	}
+
+	m_pLastItem = nullptr;
+
+	for (i = 0; i < MAX_ITEM_TYPES; i++)
+	{
+		m_pActiveItem = m_rgpPlayerItems[i];
+
+		if (m_pActiveItem)
+		{
+			m_pActiveItem->Drop();
+		}
+
+		m_rgpPlayerItems[i] = nullptr;
+	}
+
+	m_pActiveItem = nullptr;
+	m_bHasPrimary = false;
+
+	// ReGameDLL Fixes: Version 5.16.0.465
+	// if (m_iFOV != DEFAULT_FOV)
+	{
+		pev->fov = m_iLastZoom = DEFAULT_FOV;
+		m_bResumeZoom = false;
+	}
+
+	pev->viewmodel = 0;
+	pev->weaponmodel = 0;
+
+	if (removeSuit)
+		pev->weapons = 0;
+	else
+		pev->weapons &= ~WEAPON_ALLWEAPONS;
+
+	for (i = 0; i < MAX_AMMO_SLOTS; i++)
+		m_rgAmmo[i] = 0;
+
+	UpdateClientData();
+
+	m_iHideHUD |= HIDEHUD_WEAPONS;
+
+	m_bHasNightVision = false;
+	SendItemStatus();
+	ResetMaxSpeed();	// ReGameDLL Fixes: Version 5.16.0.465
+}
+
 void CBot::BotThink()
 {
 	if (gpGlobals->time >= m_flNextBotThink)
@@ -211,16 +577,16 @@ float CBot::GetActiveWeaponAmmoRatio() const
 		return 0.0f;
 
 	// Weapons with no ammo are always full
-	if (m_pActiveItem->m_iClip < 0)
+	if (m_pActiveItem->Clip() < 0)
 		return 1.0f;
 
-	return float(m_pActiveItem->m_iClip) / float(m_pActiveItem->m_pItemInfo->m_iMaxClip);
+	return float(m_pActiveItem->Clip()) / float(m_pActiveItem->WpnInfo()->m_iMaxClip);
 }
 
 // Return true if active weapon has an empty clip
 bool CBot::IsActiveWeaponClipEmpty() const
 {
-	if (m_pActiveItem && m_pActiveItem->m_iClip == 0)
+	if (m_pActiveItem && m_pActiveItem->Clip() == 0)
 		return true;
 
 	return false;
@@ -232,10 +598,10 @@ bool CBot::IsActiveWeaponOutOfAmmo() const
 	if (!m_pActiveItem)
 		return true;
 
-	if (m_pActiveItem->m_iClip < 0)
+	if (m_pActiveItem->Clip() < 0)
 		return false;
 
-	if (m_pActiveItem->m_iClip == 0 && m_rgAmmo[m_pActiveItem->m_iPrimaryAmmoType] <= 0)
+	if (m_pActiveItem->Clip() == 0 && m_rgAmmo[m_pActiveItem->AmmoInfo()->m_iId] <= 0)
 		return true;
 
 	return false;

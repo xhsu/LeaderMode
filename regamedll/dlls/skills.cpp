@@ -511,7 +511,7 @@ bool CSkillBulletproof::Execute()
 		if (!pPlayer->IsPlayer())
 			continue;
 
-		// Client should:
+		// Client should: #SKILL_UNDONE
 		// If you are the SWAT who enact his skill: Refill all ammo and clip.
 		// If you are the teammates around: Insert an entire clip and stop reload.
 		MESSAGE_BEGIN(MSG_ONE, gmsgSkillEnact, m_pPlayer->pev->origin, pPlayer->edict());
@@ -520,7 +520,6 @@ bool CSkillBulletproof::Execute()
 		MESSAGE_END();
 	}
 
-	m_pPlayer->m_pActiveItem->Deploy();	// just some feeling stuff.
 	UTIL_ScreenFade(m_pPlayer, Vector(179, 217, 255), 0.5f, GetDuration(), 40, FFADE_IN);
 	EMIT_SOUND(m_pPlayer->edict(), CHAN_AUTO, ACTIVATION_SFX, VOL_NORM, ATTN_NONE);
 

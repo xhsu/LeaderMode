@@ -26,7 +26,7 @@ static int giSize;
 static int giRead;
 static int giBadRead;
 
-int READ_OK( void )
+bool READ_OK(void)
 {
 	return !giBadRead;
 }

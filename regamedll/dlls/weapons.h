@@ -101,7 +101,7 @@ public:
 #pragma endregion
 
 //-----------------------------------------------------------------------------
-// Purpose:	Behaviours.
+// Purpose:	Behaviors.
 //			These are a series of abilities a weapon able to achieve.
 //-----------------------------------------------------------------------------
 #pragma region Behaviours.
@@ -172,7 +172,7 @@ public:
 
 	/*
 	* Purpose:	Perform a close-range combat with this weapon. This will cause a Pause() for the weapon.
-	* Usage:	Anytime after this weapon is depolyed.
+	* Usage:	Anytime after this weapon is deployed.
 	* Return:	'true' when a melee attack successfully performed.
 	*/
 	virtual	bool	Melee			(void) = 0;
@@ -280,7 +280,7 @@ public:
 
 	/*
 	* Purpose:	Precache all necessary files into buffer.
-	* Usage:	Anytime. Careful for the outter game engine timing.
+	* Usage:	Only when engine is precaching stuff.
 	*/
 	virtual	void	Precache		(void) = 0;
 #pragma endregion
@@ -290,21 +290,21 @@ public:
 //-----------------------------------------------------------------------------
 #pragma region Model Handling.
 	/*
-	* Purpose:	Aquire information regarding model inversion.
+	* Purpose:	Acquire information regarding model inversion.
 	* Usage:	Anytime when this object is valid.
 	* Return:	'true' for mirroring model, 'false' for doing nothing.
 	*/
 	virtual	bool	ShouldInvertMdl	(void) = 0;
 
 	/*
-	* Purpose:	Aquire information regarding 'cl_entity_t::curstate.body' and 'edict_t::body'.
+	* Purpose:	Acquire information regarding 'cl_entity_t::curstate.body' and 'edict_t::body'.
 	* Usage:	Anytime when this object is valid.
 	* Return:	The 'body' value, if applicable.
 	*/
 	virtual	int		CalcBodyParts	(void) = 0;
 
 	/*
-	* Purpose:	Aquire information for first-personal view model bobing effect.
+	* Purpose:	Acquire information for first-personal view model bobbing effect.
 	* Usage:	Anytime when this object is valid. Normally called before bob visual is applied.
 	* Return:	The multiplier of Omega factor and multiplier of Amplitude factor. Formula: Pos = A * sine(omega * t + phi).
 	*/
@@ -323,28 +323,28 @@ public:
 //-----------------------------------------------------------------------------
 #pragma region Constant Data Inquiry API.
 	/*
-	* Purpose:	Aquire information regarding weapon type index.
+	* Purpose:	Acquire information regarding weapon type index.
 	* Usage:	Anytime when this object is valid.
 	* Return:	Enumerator index value.
 	*/
 	virtual	constexpr WeaponIdType Id		(void) = 0;
 
 	/*
-	* Purpose:	Aquire information regarding weapon general database.
+	* Purpose:	Acquire information regarding weapon general database.
 	* Usage:	Anytime when this object is valid.
 	* Return:	Non-modifiable data structure.
 	*/
 	virtual	const struct WeaponInfo* WpnInfo(void)	const = 0;
 
 	/*
-	* Purpose:	Aquire information regarding the ammunition this weapon is using.
+	* Purpose:	Acquire information regarding the ammunition this weapon is using.
 	* Usage:	Anytime when this object is valid.
 	* Return:	Non-modifiable data structure.
 	*/
 	virtual	const struct AmmoInfo* AmmoInfo	(void)	const = 0;
 
 	/*
-	* Purpose:	Aquire the file name of weapon model.
+	* Purpose:	Acquire the file name of weapon model.
 	* Usage:	Anytime.
 	* Return:	A const char* to the file name including its path.
 	*/
@@ -400,7 +400,7 @@ public:
 //-----------------------------------------------------------------------------
 #pragma region Capability Inquiry APIs.
 	/*
-	* Purpose:	Inquire whether this weapon can be depolyed.
+	* Purpose:	Inquire whether this weapon can be deployed.
 	* Usage:	Anytime when it is valid.
 	* Return:	'true' if this object capable to do so.
 	*/
@@ -429,9 +429,9 @@ public:
 #pragma endregion
 
 	/*
-	* Purpose:	Inquire the current maxium moving speed.
+	* Purpose:	Inquire the current maximum moving speed.
 	* Usage:	Anytime when it is valid.
-	* Return:	Current maxium speed.
+	* Return:	Current maximum speed.
 	*/
 	virtual	float	GetMaxSpeed		(void) = 0;
 
@@ -467,13 +467,13 @@ public:
 	virtual	void	PlayReloadSound	(const Vector& vecWhere) = 0;
 
 	/*
-	* Purpose:	Enforcing model displayment on its holder.
+	* Purpose:	Update model appearance on its holder.
 	* Usage:	Anytime when it is attached to an object.
 	*/
 	virtual	void	ResetModel		(void) = 0;
 
 	/*
-	* Purpose:	Change the varient of this weapon.
+	* Purpose:	Change the variant of this weapon.
 	* Usage:	Anytime when it is valid. Called when the role of holder changed or the holder itself changed.
 	*/
 	virtual	void	Vary			(RoleTypes iType) = 0;

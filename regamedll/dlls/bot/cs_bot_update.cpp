@@ -502,8 +502,7 @@ void CCSBot::Update()
 		if (doToss)
 		{
 			// quick throw only requires release button.
-			if (m_pActiveItem)
-				m_pActiveItem->QuickThrowRelease();
+			// #WPN_UNDONE_BOT throw grenade. just release it.
 
 			m_isWaitingToTossGrenade = false;
 		}

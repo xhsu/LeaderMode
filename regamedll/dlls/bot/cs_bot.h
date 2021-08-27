@@ -273,35 +273,36 @@ class CCSBot: public CBot
 {
 public:
 	CCSBot();																											// constructor initializes all values to zero
-	virtual BOOL TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);		// invoked when injured by something (EXTEND) - returns the amount of damage inflicted
-	virtual void Killed(entvars_t *pevAttacker, int iGib);																// invoked when killed (EXTEND)
-	virtual void RoundRespawn();
-	virtual void Blind(float duration, float holdTime, float fadeTime, int alpha = 255);								// player blinded by a flashbang
-	virtual void OnTouchingWeapon(CWeaponBox *box);																		// invoked when in contact with a CWeaponBox
+	void Spawn() override;
+	bool TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType) override;		// invoked when injured by something (EXTEND) - returns the amount of damage inflicted
+	void Killed(entvars_t *pevAttacker, int iGib) override;																// invoked when killed (EXTEND)
+	void RoundRespawn() override;
+	void Blind(float duration, float holdTime, float fadeTime, int alpha = 255) override;								// player blinded by a flashbang
+	void OnTouchingWeapon(CWeaponBox *box) override;																	// invoked when in contact with a CWeaponBox
 
-	virtual bool Initialize(const BotProfile *profile);						// (EXTEND) prepare bot for action
-	virtual void SpawnBot();												// (EXTEND) spawn the bot into the game
+	bool Initialize(const BotProfile *profile) override;					// (EXTEND) prepare bot for action
+	void SpawnBot() override;												// (EXTEND) spawn the bot into the game
 
-	virtual void Upkeep();													// lightweight maintenance, invoked frequently
-	virtual void Update();													// heavyweight algorithms, invoked less often
+	void Upkeep() override;													// lightweight maintenance, invoked frequently
+	void Update() override;													// heavyweight algorithms, invoked less often
 
-	virtual void Walk();
-	virtual bool Jump(bool mustJump = false);								// returns true if jump was started
+	void Walk() override;
+	bool Jump(bool mustJump = false) override;								// returns true if jump was started
 
-	virtual void OnEvent(GameEventType event, CBaseEntity *pEntity = nullptr, CBaseEntity *pOther = nullptr);		// invoked when event occurs in the game (some events have NULL entity)
+	void OnEvent(GameEventType event, CBaseEntity *pEntity = nullptr, CBaseEntity *pOther = nullptr) override;		// invoked when event occurs in the game (some events have NULL entity)
 
 	#define CHECK_FOV true
-	virtual bool IsVisible(const Vector *pos, bool testFOV = false) const;											// return true if we can see the point
-	virtual bool IsVisible(CBasePlayer *pPlayer, bool testFOV = false, unsigned char *visParts = nullptr) const;	// return true if we can see any part of the player
+	bool IsVisible(const Vector *pos, bool testFOV = false) const override;											// return true if we can see the point
+	bool IsVisible(CBasePlayer *pPlayer, bool testFOV = false, unsigned char *visParts = nullptr) const override;	// return true if we can see any part of the player
 
-	virtual bool IsEnemyPartVisible(VisiblePartType part) const;													// if enemy is visible, return the part we see for our current enemy
+	bool IsEnemyPartVisible(VisiblePartType part) const override;													// if enemy is visible, return the part we see for our current enemy
 
 public:
 	void Disconnect();
 
 	// behavior properties
 	float GetCombatRange() const;
-	bool IsRogue() const;					// return true if we dont listen to teammates or pursue scenario goals
+	bool IsRogue() const;					// return true if we don't listen to teammates or pursue scenario goals
 	void SetRogue(bool rogue);
 	bool IsHurrying() const;				// return true if we are in a hurry
 	void Hurry(float duration);				// force bot to hurry

@@ -334,9 +334,14 @@ void gElectrifiedDOTMgr::Think(CBasePlayer* pPlayer)
 
 	if (gpGlobals->time - pPlayer->m_flElectrifyStarts > 6.0f)	// drop primary weapon.
 	{
-		if (pPlayer->m_rgpPlayerItems[PRIMARY_WEAPON_SLOT])
+		if (auto pBot = dynamic_cast<CBot*>(pPlayer); pBot)
 		{
-			pPlayer->DropPlayerItem(pPlayer->m_rgpPlayerItems[PRIMARY_WEAPON_SLOT]->m_iId);
+			if (pBot->m_rgpPlayerItems[PRIMARY_WEAPON_SLOT])
+				pBot->DropPlayerItem(pBot->m_rgpPlayerItems[PRIMARY_WEAPON_SLOT]->Id());
+		}
+		else // For real player. #WPN_UNDONE_CL Drop weapon.
+		{
+			gmsgRmWpn::Send(MSG_ONE, pPlayer->pev, 255U);	// 255 indicates current weapon.
 		}
 	}
 

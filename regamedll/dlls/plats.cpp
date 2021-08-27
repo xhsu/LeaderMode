@@ -2120,7 +2120,7 @@ void CGunTarget::Stop()
 	pev->takedamage = DAMAGE_NO;
 }
 
-BOOL CGunTarget::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)
+bool CGunTarget::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)
 {
 	if (pev->health > 0)
 	{
@@ -2138,7 +2138,7 @@ BOOL CGunTarget::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 		}
 	}
 
-	return FALSE;
+	return false;
 }
 
 void CGunTarget::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)

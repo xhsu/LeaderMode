@@ -108,7 +108,7 @@ public:
 
 	void RemoveElement(ELEMTYPE elem)
 	{
-		FindAndRemove(elem);
+		BaseClass::FindAndRemove(elem);
 	}
 
 	void *GetBaseData(void)

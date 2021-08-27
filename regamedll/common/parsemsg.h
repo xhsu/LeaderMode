@@ -34,7 +34,7 @@ char* READ_STRING( void );
 float READ_COORD( void );
 float READ_ANGLE( void );
 float READ_HIRESANGLE( void );
-int READ_OK( void );
+bool READ_OK( void );
 
 //--------------------------------------------------------------------------------------------------------------
 class BufferWriter

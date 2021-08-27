@@ -1325,7 +1325,7 @@ struct CWeapon : public IWeapon
 		pWeaponBox->PackWeapon(this);	// !this call would detach weapon from CBasePlayer databse and attack it to CWeaponBox database.
 
 		if (m_pPlayer->IsAlive())	// drop by intense
-			pWeaponBox->pev->velocity = m_pPlayer->pev->velocity + gpGlobals->v_forward * 300 + gpGlobals->v_forward * 100;	// this velocity would be override soon.
+			pWeaponBox->pev->velocity = m_pPlayer->pev->velocity + gpGlobals->v_forward * CWeaponBox::THROWING_FORCE + gpGlobals->v_forward * 100;	// this velocity would be override soon.
 		else
 		{
 			pWeaponBox->pev->velocity = m_pPlayer->pev->velocity * 0.85f;	// drop due to death.
@@ -2300,6 +2300,13 @@ void IWeapon::TheWeaponsThink(void)
 			delete (*iter);	// The deleting process contains a erase operation in the list.
 			iter = _lstWeapons.erase(iter);
 		}
+#ifndef CLIENT_DLL
+		else if (CBot* pBot = static_cast<CBot*>((*iter)->GetOwner()); pBot && pBot->IsBot())
+		{
+			if (pBot->m_rgpPlayerItems[(*iter)->WpnInfo()->m_iSlot] != (*iter))
+				(*iter)->Kill();
+		}
+#endif
 		else
 		{
 #ifndef CLIENT_DLL
@@ -2381,12 +2388,18 @@ IWeapon* IWeapon::Give(WeaponIdType iId, void* pPlayer, int iClip, unsigned bits
 
 	if (p)
 	{
-		*p->Clip() = iClip;
-		*p->Flags() = bitsFlags;
-		p->Attach(pPlayer);
+		p->Clip() = iClip;
+		p->Flags() = bitsFlags;
+		
+		if (p->Attach(pPlayer))
+			return p;
+		else
+			return nullptr;
 	}
-
-	return p;
+	else
+	{
+		return nullptr;
+	}
 }
 
 #pragma endregion

@@ -233,7 +233,7 @@ CBaseWeapon* CBasePlayer::HasPlayerItem(WeaponIdType iId)
 }
 
 // Add a weapon to the player (Item == Weapon == Selectable Object)
-bool CBasePlayer::AddPlayerItem(CBaseWeapon* pItem)
+bool CBasePlayer::AddPlayerItem(IWeapon *pItem)
 {
 	if (!pItem)
 		return false;

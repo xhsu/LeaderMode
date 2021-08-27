@@ -27,16 +27,16 @@ class PHandle
 public:
 	PHandle() : m_iPanelID(INVALID_PANEL) {} //m_iSerialNumber(0), m_pListEntry(0) {}
 
-	Panel *Get();
-	Panel *Set( Panel *pPanel );
-	Panel *Set( HPanel hPanel );
+	Panel* Get();
+	Panel* Set(Panel* pPanel);
+	Panel* Set(HPanel hPanel);
 
-	operator Panel *()						{ return Get(); }
-	Panel * operator ->()					{ return Get(); }
-	Panel * operator = (Panel *pPanel)		{ return Set(pPanel); }
+	Panel* operator->() { return Get(); }
+	Panel* operator= (Panel* pPanel) { return Set(pPanel); }
 
-	bool operator == (Panel *pPanel)		{ return (Get() == pPanel); }
-	operator bool ()						{ return Get() != 0; }
+	bool operator== (Panel* pPanel) { return (Get() == pPanel); }
+	operator bool() { return Get() != 0; }
+	operator Panel*() { return Get(); }
 
 private:
 	HPanel m_iPanelID;

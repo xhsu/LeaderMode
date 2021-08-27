@@ -14,19 +14,20 @@ LUNA:	The concept here is quite simple:
 
 class CWeaponBox : public CBaseEntity
 {
+public:
 	static constexpr float THROWING_FORCE = 350;
 
 public:
-	virtual void Spawn();
-	virtual void Precache();
-	virtual void KeyValue(KeyValueData* pkvd);
-	virtual int ObjectCaps() { return FCAP_ACROSS_TRANSITION | FCAP_IMPULSE_USE; }
-	virtual void SetObjectCollisionBox();
-	virtual void TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType);
-	virtual BOOL TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType);
-	virtual bool GiveAmmo(int iCount, AmmoIdType iId);
-	virtual void Touch(CBaseEntity* pOther);
-	virtual void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType = USE_OFF, float value = 0.0f);
+	void Spawn() override;
+	void Precache() override;
+	void KeyValue(KeyValueData* pkvd) override;
+	int ObjectCaps() override { return FCAP_ACROSS_TRANSITION | FCAP_IMPULSE_USE; }
+	void SetObjectCollisionBox() override;
+	void TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType) override;
+	bool TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) override;
+	bool GiveAmmo(int iCount, AmmoIdType iId) override;
+	void Touch(CBaseEntity* pOther) override;
+	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType = USE_OFF, float value = 0.0f) override;
 
 public:
 	bool IsEmpty();

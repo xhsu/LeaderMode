@@ -335,14 +335,11 @@ public:
 	virtual int ObjectCaps();
 	virtual int Classify();
 	virtual void TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
-	virtual BOOL TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
+	virtual bool TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
 	virtual BOOL TakeHealth(float flHealth, int bitsDamageType);
 	virtual void Killed(entvars_t *pevAttacker, int iGib);
 	virtual void AddPoints(int score, BOOL bAllowNegativeScore);
 	virtual void AddPointsToTeam(int score, BOOL bAllowNegativeScore);
-	virtual BOOL AddPlayerItem(CBaseWeapon* pItem);
-	virtual BOOL RemovePlayerItem(CBaseWeapon* pItem);
-	virtual bool GiveAmmo(int iAmount, AmmoIdType iId);
 
 	virtual BOOL IsAlive() { return (pev->deadflag == DEAD_NO && pev->health > 0.0f); }
 	virtual BOOL IsPlayer() { return (pev->flags & FL_SPECTATOR) != FL_SPECTATOR; }
@@ -382,7 +379,6 @@ public:
 	void Observer_HandleButtons();
 	void Observer_SetMode(int iMode);
 	void Observer_CheckTarget();
-	void Observer_CheckProperties();
 	int GetObserverMode() { return pev->iuser1; }
 	void Radio(const char *msg_id, const char *msg_verbose = nullptr, short pitch = 100, bool showIcon = true);
 	CBasePlayer *GetNextRadioRecipient(CBasePlayer *pStartPlayer);
@@ -396,8 +392,8 @@ public:
 	bool IsLookingAtPosition(Vector *pos, float angleTolerance = 20.0f);
 	void Reset();
 	void SetScoreboardAttributes(CBasePlayer *destination = nullptr);
-	void PackDeadPlayerItems();
-	void RemoveAllItems(BOOL removeSuit);
+	virtual void PackDeadPlayerItems();
+	virtual void RemoveAllItems(bool removeSuit);
 	void SetProgressBarTime(int time);
 	void SetProgressBarTime2(int time, float timeElapsed);
 	void SetPlayerModel();
@@ -416,18 +412,16 @@ public:
 	void StartDeathCam();
 	void StartObserver(Vector &vecPosition, Vector &vecViewAngle);
 	void HandleSignals();
-	CBaseEntity* DropPlayerItem(WeaponIdType iId);
-	CBaseWeapon* HasPlayerItem(WeaponIdType iId);
-	bool HasWeapons();
+	virtual CWeaponBox* DropPlayerItem(WeaponIdType iId);
+	virtual IWeapon* HasWeapon(WeaponIdType iId) { return nullptr; }
+	virtual bool HasAnyWeapon();
 	void SelectLastItem();
 	void SelectItem(const char *pstr);
-	void ItemPreFrame();
-	void ItemPostFrame();
+
 	CBaseEntity *GiveNamedItem(const char *pszName);
 	void EnableControl(BOOL fControl);
 	bool HintMessage(const char *pMessage, BOOL bDisplayIfPlayerDead = FALSE, BOOL bOverride = FALSE);
 	bool HintMessageEx(const char *pMessage, float duration = 6.0f, bool bDisplayIfPlayerDead = false, bool bOverride = false);
-	void SendAmmoUpdate();
 	void SendFOV(int fov);
 	void WaterMove();
 	void EXPORT PlayerDeathThink();
@@ -484,7 +478,6 @@ public:
 	void SendItemStatus();
 	edict_t *EntSelectSpawnPoint();
 	void SetScoreAttrib(CBasePlayer *dest);
-	void ReloadWeapons(CBaseWeapon *pWeapon = nullptr, bool bForceReload = false, bool bForceRefill = false);
 	void TeamChangeUpdate();
 	bool HasRestrictItem(ItemID item, ItemRestType type);
 	void DropSecondary();
@@ -495,8 +488,6 @@ public:
 	bool ShouldToShowAccount(CBasePlayer *pReceiver) const;
 	bool ShouldToShowHealthInfo(CBasePlayer *pReceiver) const;
 
-	CBaseWeapon* GetItemById(WeaponIdType weaponID);
-
 	void SetSpawnProtection(float flProtectionTime);
 	void RemoveSpawnProtection();
 	void DropIdlePlayer(const char *reason);
@@ -504,8 +495,6 @@ public:
 	int GetGrenadeInventory(EquipmentIdType iId);
 	int* GetGrenadeInventoryPointer(EquipmentIdType iId);
 	void ResetUsingEquipment(void);
-	bool StartSwitchingWeapon(CBaseWeapon* pSwitchingTo);	// play normal holster anim.
-	bool SwitchWeapon(CBaseWeapon* pSwitchingTo);	// skip holster anim.
 	inline int QueryIndex(int i) { return i * gpGlobals->maxClients + entindex(); }
 	void QueryClientCvar(void);
 	void UpdateClientCvar(const char* cvarName, const char* value, int requestID);
@@ -518,7 +507,7 @@ public:
 	void DischargePrimarySkill(CBasePlayer* pCause);	// due to this player, I have to stop my skill.
 
 	// passive skill calculation hub
-	float WeaponFireIntervalModifier(CBaseWeapon* pWeapon);
+	float WeaponFireIntervalModifier(IWeapon* pWeapon);
 	float PlayerDamageSufferedModifier(int bitsDamageTypes);
 	float PlayerDamageDealtModifier(int bitsDamageTypes);
 	void OnPlayerDamagedPre(entvars_t* pevInflictor, entvars_t* pevAttacker, float& flDamage, int& bitsDamageTypes);
@@ -540,7 +529,6 @@ public:
 	int random_seed;
 	EntityHandle<CBasePlayer> m_hObserverTarget;
 	float m_flNextObserverInput;
-	int m_iObserverWeapon;
 	int m_iObserverLastMode;
 	float m_flFlinchTime;
 	float m_flAnimTime;
@@ -650,12 +638,6 @@ public:
 	int m_iClientHideHUD;
 	int m_iClientFOV;	// m_iFOV is now merged with pev->fov.
 	int m_iNumSpawns;
-	CBaseWeapon* m_rgpPlayerItems[MAX_ITEM_TYPES];
-	CBaseWeapon* m_pActiveItem;
-	CBaseWeapon* m_pClientActiveItem;
-	CBaseWeapon* m_pLastItem;
-	std::array<int, MAX_AMMO_SLOTS> m_rgAmmo;
-	std::array<int, MAX_AMMO_SLOTS> m_rgAmmoLast;
 	Vector m_vecAutoAim;
 	BOOL m_fOnTarget;
 	int m_iDeaths;
@@ -827,4 +809,3 @@ bool IsPrimaryWeaponId(int id);
 bool IsSecondaryWeaponClass(int classId);
 bool IsSecondaryWeaponId(int id);
 const char *GetWeaponAliasFromName(const char *weaponName);
-bool CurrentWeaponSatisfies(CBaseWeapon* pWeapon, int id, int classId);

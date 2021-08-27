@@ -251,7 +251,7 @@ bool MenuHandler_Buy3(CBasePlayer* pPlayer, int iSlot)
 
 			int bitsValidButtons = MENU_KEY_0;
 			for (int i = 0; i < g_iMenuItemCount; i++)
-				bitsValidButtons |= BIT(i);	// MENU_KEY_1 is BIT(0), so...
+				bitsValidButtons |= (1U << i);	// MENU_KEY_1 is BIT(0), so...
 
 			ShowMenu(pPlayer, bitsValidButtons, -1, szMenuText);
 			pPlayer->m_iMenu = Menu_BuyEquipments;
@@ -277,8 +277,12 @@ bool MenuHandler_Buy3(CBasePlayer* pPlayer, int iSlot)
 	}
 }
 
-bool MenuHandler_BuyPistols(CBasePlayer* pPlayer, int iSlot)
+bool MenuHandler_BuyPistols(CBasePlayer* pl, int iSlot)
 {
+	CBot* pPlayer = dynamic_cast<CBot*>(pl);
+	if (!pPlayer)
+		return false;
+
 	switch (iSlot)
 	{
 	case 1:
@@ -304,8 +308,12 @@ bool MenuHandler_BuyPistols(CBasePlayer* pPlayer, int iSlot)
 	}
 }
 
-bool MenuHandler_BuyShotguns(CBasePlayer* pPlayer, int iSlot)
+bool MenuHandler_BuyShotguns(CBasePlayer* pl, int iSlot)
 {
+	CBot* pPlayer = dynamic_cast<CBot*>(pl);
+	if (!pPlayer)
+		return false;
+
 	switch (iSlot)
 	{
 	case 1:
@@ -322,8 +330,12 @@ bool MenuHandler_BuyShotguns(CBasePlayer* pPlayer, int iSlot)
 	}
 }
 
-bool MenuHandler_BuySMGs(CBasePlayer* pPlayer, int iSlot)
+bool MenuHandler_BuySMGs(CBasePlayer* pl, int iSlot)
 {
+	CBot* pPlayer = dynamic_cast<CBot*>(pl);
+	if (!pPlayer)
+		return false;
+
 	switch (iSlot)
 	{
 	case 1:
@@ -349,8 +361,12 @@ bool MenuHandler_BuySMGs(CBasePlayer* pPlayer, int iSlot)
 	}
 }
 
-bool MenuHandler_BuyAssaultFirearms(CBasePlayer* pPlayer, int iSlot)
+bool MenuHandler_BuyAssaultFirearms(CBasePlayer* pl, int iSlot)
 {
+	CBot* pPlayer = dynamic_cast<CBot*>(pl);
+	if (!pPlayer)
+		return false;
+
 	switch (iSlot)
 	{
 	case 1:
@@ -376,8 +392,12 @@ bool MenuHandler_BuyAssaultFirearms(CBasePlayer* pPlayer, int iSlot)
 	}
 }
 
-bool MenuHandler_BuySniperRifles(CBasePlayer* pPlayer, int iSlot)
+bool MenuHandler_BuySniperRifles(CBasePlayer* pl, int iSlot)
 {
+	CBot* pPlayer = dynamic_cast<CBot*>(pl);
+	if (!pPlayer)
+		return false;
+
 	switch (iSlot)
 	{
 	case 1:
@@ -397,8 +417,12 @@ bool MenuHandler_BuySniperRifles(CBasePlayer* pPlayer, int iSlot)
 	}
 }
 
-bool MenuHandler_BuyEquipments(CBasePlayer* pPlayer, int iSlot)
+bool MenuHandler_BuyEquipments(CBasePlayer* pl, int iSlot)
 {
+	CBot* pPlayer = dynamic_cast<CBot*>(pl);
+	if (!pPlayer)
+		return false;
+
 	BuyEquipment(pPlayer, (EquipmentIdType)pPlayer->m_vMenuItems[iSlot]);
 	return true;
 }

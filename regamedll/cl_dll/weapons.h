@@ -121,7 +121,7 @@ public:
 	bool	StartSwitchingWeapon(WeaponIdType iSwitchingTo);	// play normal holster anim.
 	bool	SwitchWeapon(CBaseWeapon* pSwitchingTo);	// skip holster anim.
 	CBaseWeapon* HasPlayerItem(WeaponIdType iId);
-	bool	AddPlayerItem(CBaseWeapon* pItem);
+	bool AddPlayerItem(IWeapon *pItem);
 	bool	GiveAmmo(int iAmount, AmmoIdType iId);
 };
 

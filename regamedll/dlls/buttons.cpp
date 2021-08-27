@@ -345,7 +345,7 @@ void CBaseButton::KeyValue(KeyValueData *pkvd)
 }
 
 // ButtonShot
-BOOL CBaseButton::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)
+bool CBaseButton::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)
 {
 	BUTTON_CODE code = ButtonResponseToTouch();
 
@@ -1263,8 +1263,8 @@ int CButtonTarget::ObjectCaps()
 	return caps;
 }
 
-BOOL CButtonTarget::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)
+bool CButtonTarget::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)
 {
 	Use(Instance(pevAttacker), this, USE_TOGGLE, 0);
-	return TRUE;
+	return true;
 }
