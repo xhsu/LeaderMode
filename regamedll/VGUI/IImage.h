@@ -7,7 +7,7 @@
 
 #include "VGUI.h"
 
-class Color;
+struct Color;
 
 namespace vgui
 {

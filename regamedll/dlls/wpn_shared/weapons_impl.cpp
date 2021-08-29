@@ -157,9 +157,9 @@ struct CWeapon : public IWeapon
 	bool			m_bDelayRecovery : 1	{ false };
 	double			m_flTimeAutoResume		{ -1.0 };
 	bool			m_bAllowEmptySound : 1	{ false };	// Used for semi-auto weapon only.
-	bool			m_bStartFromEmpty : 1	{ false };	// For tublar weapons. TODO: move to QC.
-	float			m_flNextInsertAnim		{ -1.0f };	// For tublar weapons.
-	bool			m_bSetForceStopReload:1	{ false };	// For tublar weapons.
+	bool			m_bStartFromEmpty : 1	{ false };	// For tubular weapons. TODO: move to QC.
+	float			m_flNextInsertAnim		{ -1.0f };	// For tubular weapons.
+	bool			m_bSetForceStopReload:1	{ false };	// For tubular weapons.
 	ScriptMap		m_QCScript;
 
 	struct	// this structure is for anim push and pop. it save & restore weapon state.
@@ -254,7 +254,7 @@ struct CWeapon : public IWeapon
 		}
 #pragma endregion
 
-		// Useage of equipments moved to player class.
+		// Usage of equipments moved to player class.
 
 		// PostFrame() was merged.
 		if (m_pPlayer->m_flNextAttack > 0)
@@ -369,7 +369,7 @@ struct CWeapon : public IWeapon
 		}
 		else
 		{
-			// Tublar weapon - continuous reloading.
+			// Tubular weapon - continuous reloading.
 			if (m_bInReload)
 			{
 				if (m_flNextInsertAnim <= gpGlobals->time && m_iClip < WpnInfo()->m_iMaxClip && AMMUNITION > 0)
@@ -525,7 +525,7 @@ struct CWeapon : public IWeapon
 
 			if (!(m_bitsFlags & WPNSTATE_SHIELD_DRAWN))
 			{
-				// weapon is useable. Reload if empty and weapon has waited as long as it has to after firing
+				// weapon is usable. Reload if empty and weapon has waited as long as it has to after firing
 				if (!m_iClip && !(WpnInfo()->m_bitsFlags & ITEM_FLAG_NOAUTORELOAD) && m_flNextPrimaryAttack < UTIL_WeaponTimeBase())
 				{
 					Reload();
@@ -536,7 +536,7 @@ struct CWeapon : public IWeapon
 
 		// Removal of first draw flag is up to QC now.
 
-		// Fallback behaviour.
+		// Fallback behavior.
 		if (m_flTimeWeaponIdle < UTIL_WeaponTimeBase())
 		{
 			Idle();

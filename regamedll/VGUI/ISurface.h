@@ -30,7 +30,7 @@
 #undef PlaySound
 #endif
 
-class Color;
+struct Color;
 
 namespace vgui
 {

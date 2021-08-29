@@ -428,14 +428,6 @@ void EXT_FUNC CHalfLifeMultiplay::RemoveGuns()
 
 	while ((toremove = UTIL_FindEntityByClassname(toremove, "weaponbox")))
 		((CWeaponBox *)toremove)->Kill();
-
-	toremove = nullptr;
-
-	while ((toremove = UTIL_FindEntityByClassname(toremove, "weapon_shield")))
-	{
-		toremove->SetThink(&CBaseEntity::SUB_Remove);
-		toremove->pev->nextthink = gpGlobals->time + 0.1;
-	}
 }
 
 void CHalfLifeMultiplay::UpdateTeamScores()

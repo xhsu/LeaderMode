@@ -572,7 +572,7 @@ struct Matrix
 		return m;
 	}
 	static constexpr decltype(auto) Zero() { static const this_t m; return m; }
-	static constexpr decltype(auto) Rotation(Arithmetic auto degree)	// 2D rotation. Idealy generates a 2x2 matrix.
+	static constexpr decltype(auto) Rotation(Arithmetic auto degree)	// 2D rotation. Ideally generates a 2x2 matrix.
 	{
 		const auto rad = degree / 180.0 * std::numbers::pi;
 		const auto c = gcem::cos(rad);
@@ -671,7 +671,7 @@ struct Matrix
 			{0, 0, z}
 		});
 	}
-	static constexpr decltype(auto) Translate(mxs_t x = 0, mxs_t y = 0) requires(ROWS == 3U && COLUMNS == 3U)	// 2D. Trnaslate requires an extra dimension on matrix.
+	static constexpr decltype(auto) Translate(mxs_t x = 0, mxs_t y = 0) requires(ROWS == 3U && COLUMNS == 3U)	// 2D. Translate requires an extra dimension on matrix.
 	{
 		return this_t({
 			{1, 0, x},
@@ -679,7 +679,7 @@ struct Matrix
 			{0, 0, 1}
 		});
 	}
-	static constexpr decltype(auto) Translate(mxs_t x = 0, mxs_t y = 0, mxs_t z = 0) requires(ROWS == 4U && COLUMNS == 4U)	// 3D. Trnaslate requires an extra dimension on matrix.
+	static constexpr decltype(auto) Translate(mxs_t x = 0, mxs_t y = 0, mxs_t z = 0) requires(ROWS == 4U && COLUMNS == 4U)	// 3D. Translate requires an extra dimension on matrix.
 	{
 		return this_t({
 			{1, 0, 0, x},
@@ -1011,7 +1011,7 @@ struct Matrix
 		});
 	}
 	//
-	// Shotcut operator(related to math symbol)
+	// Shortcut operator(related to math symbol)
 	constexpr decltype(auto) operator~() const requires(SQUARE_MX) { return Inverse(); }
 	//
 	// Accessor to each cell.

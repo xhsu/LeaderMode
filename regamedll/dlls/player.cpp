@@ -1232,8 +1232,6 @@ void CBasePlayer::RemoveAllItems(bool removeSuit)
 		m_pTank = nullptr;
 	}
 
-	RemoveShield();
-
 	if (bKillProgBar)
 		SetProgressBarTime(0);
 
@@ -2322,140 +2320,16 @@ void CBasePlayer::WaterMove()
 	}
 }
 
-BOOL CBasePlayer::IsOnLadder()
+bool CBasePlayer::IsOnLadder()
 {
 	return pev->movetype == MOVETYPE_FLY;
 }
 
-LINK_ENTITY_TO_CLASS(weapon_shield, CWShield)
-
-void CWShield::Spawn()
-{
-	pev->movetype = MOVETYPE_TOSS;
-	pev->solid = SOLID_TRIGGER;
-
-	UTIL_SetSize(pev, g_vecZero, g_vecZero);
-	SET_MODEL(ENT(pev), "models/w_shield.mdl");
-}
-
-void CWShield::Touch(CBaseEntity *pOther)
-{
-	if (!pOther->IsPlayer())
-		return;
-
-	CBasePlayer *pPlayer = (CBasePlayer *)pOther;
-
-	if (pPlayer->pev->deadflag != DEAD_NO)
-		return;
-
-	if (m_hEntToIgnoreTouchesFrom && m_hEntToIgnoreTouchesFrom == pPlayer)
-	{
-		if (m_flTimeToIgnoreTouches > gpGlobals->time)
-			return;
-
-		m_hEntToIgnoreTouchesFrom = nullptr;
-	}
-
-	if (!pPlayer->m_bHasPrimary)
-	{
-		if (pPlayer->m_pActiveItem)
-		{
-			if (!pPlayer->m_pActiveItem->CanHolster())
-				return;
-		}
-
-		if (CSGameRules()->CanHavePlayerItem(pPlayer, WEAPON_SHIELDGUN, false))
-			return;
-
-		pPlayer->GiveShield();
-
-		EMIT_SOUND(edict(), CHAN_ITEM, "items/gunpickup2.wav", VOL_NORM, ATTN_NORM);
-		UTIL_Remove(this);
-
-		pev->nextthink = gpGlobals->time + 0.1;
-	}
-}
-
-void EXT_FUNC CBasePlayer::GiveShield(bool bDeploy)
-{
-	m_bOwnsShield = true;
-	m_bHasPrimary = true;
-
-	pev->gamestate = HITGROUP_SHIELD_ENABLED;
-
-	if (m_pActiveItem)
-	{
-		if (bDeploy)
-		{
-			if (m_rgAmmo[m_pActiveItem->m_iPrimaryAmmoType] > 0)
-				m_pActiveItem->Holstered();
-
-			if (!m_pActiveItem->Deploy())
-				CSGameRules()->GetNextBestWeapon(this, m_pActiveItem);
-		}
-	}
-}
-
-void CBasePlayer::RemoveShield()
-{
-	if (HasShield())
-	{
-		m_bOwnsShield = false;
-		m_bHasPrimary = false;
-		m_bShieldDrawn = false;
-		pev->gamestate = HITGROUP_SHIELD_DISABLED;
-
-		UpdateShieldCrosshair(true);
-	}
-}
-
-CBaseEntity *EXT_FUNC CBasePlayer::DropShield(bool bDeploy)
-{
-	if (!HasShield())
-		return nullptr;
-
-	if (m_pActiveItem && !m_pActiveItem->CanHolster())
-		return nullptr;
-
-	if (m_pActiveItem)
-	{
-		// WPN_UNDONE
-		//if (m_pActiveItem->m_flStartThrow != 0.0f)
-			//m_pActiveItem->Holster();
-	}
-
-	if (IsReloading())
-	{
-		m_pActiveItem->m_bInReload = false;
-		m_flNextAttack = 0;
-	}
-
-	if (m_pActiveItem && IsProtectedByShield())
-		m_pActiveItem->SecondaryAttack();
-
-	m_bShieldDrawn = false;
-
-	RemoveShield();
-
-	if (m_pActiveItem && bDeploy)
-		m_pActiveItem->Deploy();
-
-	UTIL_MakeVectors(pev->angles);
-
-	CWShield *pShield = (CWShield *)CBaseEntity::Create("weapon_shield", pev->origin + gpGlobals->v_forward * 10, pev->angles, edict());
-
-	pShield->pev->angles.x = 0;
-	pShield->pev->angles.z = 0;
-	pShield->pev->velocity = gpGlobals->v_forward * 400;
-	pShield->SetThink(&CBaseEntity::SUB_Remove);
-	pShield->pev->nextthink = gpGlobals->time + item_staytime.value;
-	pShield->SetCantBePickedUpByUser(this, 2.0);
-
-	return pShield;
-}
-
 bool CBasePlayer::HasShield()
 {
+	// #PROJ_COMMANDER_SHIELD
+	// Only factor is that is this player a commander?
+
 	return m_bOwnsShield;
 }
 
@@ -2862,15 +2736,16 @@ void EXT_FUNC CBasePlayer::StartDeathCam()
 
 void EXT_FUNC CBasePlayer::StartObserver(Vector& vecPosition, Vector& vecViewAngle)
 {
-	// clear any clientside entities attached to this player
+	// clear any client side entities attached to this player
 	MESSAGE_BEGIN(MSG_PAS, SVC_TEMPENTITY, pev->origin);
 	WRITE_BYTE(TE_KILLPLAYERATTACHMENTS);
 	WRITE_BYTE(entindex());
 	MESSAGE_END();
 
 	// Holster weapon immediately, to allow it to cleanup
-	if (m_pActiveItem)
-		m_pActiveItem->Holstered();
+	// #WPN_UNDONE_CL
+	// Is it even a problem?
+	gmsgRmWpn::Send(MSG_ONE, pev, 254);
 
 	if (m_pTank)
 	{
@@ -2906,8 +2781,6 @@ void EXT_FUNC CBasePlayer::StartObserver(Vector& vecPosition, Vector& vecViewAng
 	m_afPhysicsFlags &= ~PFLAG_DUCKING;
 	pev->flags &= ~FL_DUCKING;
 	pev->health = 1;
-
-	m_iObserverWeapon = 0;
 
 	// Find a player to watch
 	m_flNextObserverInput = 0;

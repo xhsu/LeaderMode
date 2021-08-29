@@ -15,7 +15,7 @@
 #include "VGUI.h"
 #include "public/interface.h"
 
-class Color;
+struct Color;
 
 namespace vgui
 {

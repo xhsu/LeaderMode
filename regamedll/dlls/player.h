@@ -401,7 +401,7 @@ public:
 	void SetClientUserInfoModel(char *infobuffer, const char *szNewModel);
 	void SetNewPlayerModel(const char *modelName);
 	void CheckPowerups();
-	BOOL IsOnLadder();
+	bool IsOnLadder();
 	bool FlashlightIsOn();
 	void FlashlightTurnOn();
 	void FlashlightTurnOff();
@@ -457,9 +457,6 @@ public:
 	void UpdateShieldCrosshair(bool draw);
 	bool HasShield();
 	bool IsProtectedByShield() { return HasShield() && m_bShieldDrawn; }
-	void RemoveShield();
-	CBaseEntity *DropShield(bool bDeploy = true);
-	void GiveShield(bool bDeploy = true);
 	bool IsHittingShield(Vector &vecDirection, TraceResult *ptr);
 	bool SelectSpawnSpot(const char *pEntClassName, CBaseEntity* &pSpot);
 	bool IsReloading() const { return m_Activity == ACT_RELOAD || m_IdealActivity == ACT_RELOAD; }
@@ -747,24 +744,6 @@ public:
 	float m_flBurningFlameThink;
 	float m_flBurningNextDamage;
 	float m_flBurningSFX;
-};
-
-class CWShield: public CBaseEntity
-{
-public:
-	virtual void Spawn();
-	virtual void EXPORT Touch(CBaseEntity *pOther);
-
-public:
-	void SetCantBePickedUpByUser(CBasePlayer *pPlayer, float time)
-	{
-		m_hEntToIgnoreTouchesFrom = pPlayer;
-		m_flTimeToIgnoreTouches = gpGlobals->time + time;
-	}
-
-public:
-	EntityHandle<CBasePlayer> m_hEntToIgnoreTouchesFrom;
-	float m_flTimeToIgnoreTouches;
 };
 
 // returns a CBaseEntity pointer to a player by index.  Only returns if the player is spawned and connected otherwise returns NULL

@@ -70,7 +70,7 @@ void CBot::PostThink()
 	// It's up to the Think() to decide now.
 
 	if (m_pActiveItem && !m_pTank)
-		m_pActiveItem->Think();
+		m_pActiveItem->Think();	// Should place it after the player moved?
 }
 
 // Add a weapon to the player (Item == Weapon == Selectable Object)
@@ -134,9 +134,9 @@ bool CBot::RemovePlayerItem(WeaponIdType iId)
 		m_pLastItem = nullptr;
 
 	// remove from server inventory.
-	if (m_rgpPlayerItems[iId->m_pItemInfo->m_iSlot] == iId)
+	if (auto pWeapon = HasWeapon(iId); m_rgpPlayerItems[pWeapon->WpnInfo()->m_iSlot] == pWeapon)
 	{
-		m_rgpPlayerItems[iId->m_pItemInfo->m_iSlot] = nullptr;	// however, even if you don't call from CBaseWeapon::Kill(), WeaponsThink() would kill the weapon due to this nullptr assignment.
+		m_rgpPlayerItems[pWeapon->WpnInfo()->m_iSlot] = nullptr;	// however, even if you don't call from CBaseWeapon::Kill(), WeaponsThink() would kill the weapon due to this nullptr assignment.
 		return true;
 	}
 
@@ -167,15 +167,8 @@ bool CBot::GiveAmmo(int iAmount, AmmoIdType iId)
 
 	m_rgAmmo[iId] += iAdd;
 
-	// make sure the ammo messages have been linked first
-	if (gmsgAmmoPickup)
-	{
-		// Send the message that ammo has been picked up
-		MESSAGE_BEGIN(MSG_ONE, gmsgAmmoPickup, nullptr, pev);
-		WRITE_BYTE(iId); // ammo ID
-		WRITE_BYTE(iAdd); // amount
-		MESSAGE_END();
-	}
+	// #WPN_UNDONE_CMD
+	// Maybe add a method to regular real player such that server may send a meesage to ask client add ammo?
 
 	return true;
 }
@@ -276,12 +269,6 @@ CWeaponBox* CBot::DropPlayerItem(WeaponIdType iId)
 		iId = WEAPON_NONE;
 	}
 
-	if (!iId && HasShield())
-	{
-		DropShield();
-		return nullptr;
-	}
-
 	auto pWeapon = iId ? HasWeapon(iId) : m_pActiveItem;
 
 	if (pWeapon)
@@ -321,13 +308,6 @@ void CBot::PackDeadPlayerItems()
 
 	if (bPackGun)
 	{
-		bool bShieldDropped = false;
-		if (HasShield())
-		{
-			DropShield();
-			bShieldDropped = true;
-		}
-
 		CWeaponBox* pWeaponBox = nullptr;
 		AmmoIdType iAmmoId = AMMO_NONE;
 
@@ -370,8 +350,6 @@ void CBot::RemoveAllItems(bool removeSuit)
 		m_pTank->Use(this, this, USE_OFF, 0);
 		m_pTank = nullptr;
 	}
-
-	RemoveShield();
 
 	if (bKillProgBar)
 		SetProgressBarTime(0);
