@@ -89,6 +89,7 @@ public:
 	BOOL IsBot() override { return TRUE; }
 	Vector GetAutoaimVector(float flDelta) override;
 
+	void PreThink() override;
 	void PostThink() override;
 
 	// invoked when in contact with a CWeaponBox
@@ -163,13 +164,17 @@ public:
 	virtual IWeapon* AddPlayerItem(WeaponIdType iId, int iClip = -1, unsigned bitsFlags = 0);
 	virtual bool RemovePlayerItem(WeaponIdType iId);
 	bool GiveAmmo(int iAmount, AmmoIdType iId) override;
+	bool StartSwitchingWeapon(WeaponIdType iId) override { return StartSwitchingWeapon(HasWeapon(iId)); }
 	bool StartSwitchingWeapon(IWeapon* pSwitchingTo);
+	bool SwitchWeapon(WeaponIdType iId) override { return SwitchWeapon(HasWeapon(iId)); }
 	bool SwitchWeapon(IWeapon* pSwitchingTo);
 	bool HasAnyWeapon() override;
 	IWeapon* HasWeapon(WeaponIdType iId) override;
 	CWeaponBox* DropPlayerItem(WeaponIdType iId) override;
 	void PackDeadPlayerItems() override;
 	void RemoveAllItems(bool removeSuit) override;
+	void SelectLastItem() override;
+	void SelectItem(const char* pstr) override;
 
 public:
 	// return bot's unique ID

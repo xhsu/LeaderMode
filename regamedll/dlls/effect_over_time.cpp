@@ -341,7 +341,7 @@ void gElectrifiedDOTMgr::Think(CBasePlayer* pPlayer)
 		}
 		else // For real player. #WPN_UNDONE_CL Drop weapon.
 		{
-			gmsgRmWpn::Send(MSG_ONE, pPlayer->pev, 255U);	// 255 indicates current weapon.
+			gmsgRmWpn::Send(MSG_ONE, pPlayer->pev, 0);	// 0 is the current weapon.
 		}
 	}
 

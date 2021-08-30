@@ -134,7 +134,7 @@ void LinkUserMessages()
 	gmsgGiveWpn		  = REG_USER_MSG("GiveWpn", sizeof(byte) * 2 + sizeof(int));
 	gmsgSkillEnact	  = REG_USER_MSG("SkillEnact", 2);
 
-	RegisterMessage<gmsgRmWpn, gmsgUseTank, gmsgSchemeEv, gmsgAmmo>();
+	RegisterMessage<gmsgRmWpn, gmsgUseTank, gmsgSchemeEv, gmsgAmmo, gmsgDeployWpn, gmsgBuy>();
 }
 
 void WriteSigonMessages()
@@ -2367,13 +2367,7 @@ void EXT_FUNC InternalCommand(edict_t *pEntity, const char *pcmd, const char *pa
 			}
 			else if (FStrEq(pcmd, "drop"))
 			{
-				// player is dropping an item.
-				if (pPlayer->HasShield())
-				{
-					pPlayer->DropShield();
-				}
-				else
-					pPlayer->DropPlayerItem(WeaponClassnameToID(parg1));
+				pPlayer->DropPlayerItem(WeaponClassnameToID(parg1));
 			}
 			else if (FStrEq(pcmd, "fov"))
 			{

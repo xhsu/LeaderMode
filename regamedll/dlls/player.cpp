@@ -1235,8 +1235,9 @@ void CBasePlayer::RemoveAllItems(bool removeSuit)
 	if (bKillProgBar)
 		SetProgressBarTime(0);
 
-	gmsgRmWpn::Send(MSG_ONE, pev, 254);	// 254: current weapon.
+	gmsgRmWpn::Send(MSG_ONE, pev, 0);	// 0: current weapon.
 
+	m_rgiPlayerItems.fill(WEAPON_NONE);
 	m_bHasPrimary = false;
 
 	// ReGameDLL Fixes: Version 5.16.0.465
@@ -2745,7 +2746,7 @@ void EXT_FUNC CBasePlayer::StartObserver(Vector& vecPosition, Vector& vecViewAng
 	// Holster weapon immediately, to allow it to cleanup
 	// #WPN_UNDONE_CL
 	// Is it even a problem?
-	gmsgRmWpn::Send(MSG_ONE, pev, 254);
+	gmsgRmWpn::Send(MSG_ONE, pev, 0);	// 0: Current weapon.
 
 	if (m_pTank)
 	{
@@ -3146,7 +3147,8 @@ void EXT_FUNC CBasePlayer::PreThink()
 	// is this still used?
 	UTIL_MakeVectors(pev->v_angle);
 
-	ItemPreFrame();
+	// #MARKER_FOR_DELETED Original ItemPreFrame() being called.
+
 	WaterMove();
 
 	if (pev->flags & FL_ONGROUND)
@@ -3598,14 +3600,15 @@ void EXT_FUNC CBasePlayer::PostThink()
 	}
 
 	// do weapon stuff
-	ItemPostFrame();
+	// #MARKER_FOR_DELETED Original ItemPostFrame() being called.
+
 	ImpulseCommands();
 
 	// check to see if player landed hard enough to make a sound
 	// falling farther than half of the maximum safe distance, but not as far a max safe distance will
-	// play a bootscrape sound, and no damage will be inflicted. Fallling a distance shorter than half
+	// play a bootscrape sound, and no damage will be inflicted. Falling a distance shorter than half
 	// of maximum safe distance will make no sound. Falling farther than max safe distance will play a
-	// fallpain sound, and damage will be inflicted based on how far the player fell
+	// fall pain sound, and damage will be inflicted based on how far the player fell
 	if ((pev->flags & FL_ONGROUND) && pev->health > 0.0f && m_flFallVelocity >= PLAYER_FALL_PUNCH_THRESHHOLD)
 	{
 		if (pev->watertype != CONTENT_WATER)
@@ -3671,24 +3674,7 @@ void EXT_FUNC CBasePlayer::PostThink()
 
 pt_end:
 #ifdef CLIENT_WEAPONS
-	// Decay timers on weapons
-	// go through all of the weapons and make a list of the ones to pack
-	for (int i = 0; i < MAX_ITEM_TYPES; i++)
-	{
-		if (m_rgpPlayerItems[i])
-		{
-			m_rgpPlayerItems[i]->m_flNextPrimaryAttack = Q_max(m_rgpPlayerItems[i]->m_flNextPrimaryAttack - g_flTrueServerFrameRate, -1.0);	// LUNA: Should never use gpGlobals->frametime on weapon.
-			m_rgpPlayerItems[i]->m_flNextSecondaryAttack = Q_max(m_rgpPlayerItems[i]->m_flNextSecondaryAttack - g_flTrueServerFrameRate, -0.001);
-
-			if (m_rgpPlayerItems[i]->m_flTimeWeaponIdle != 1000.0f)
-			{
-				m_rgpPlayerItems[i]->m_flTimeWeaponIdle = Q_max(m_rgpPlayerItems[i]->m_flTimeWeaponIdle - g_flTrueServerFrameRate, -0.001);
-			}
-
-			// used by original CBasePlayerItem.
-			//pPlayerItem = pPlayerItem->m_pNext;
-		}
-	}
+	// #MARKER_FOR_DELETED Original subtraction of timing.
 
 #ifdef CHECKING_NEXT_PRIM_ATTACK_SYNC
 	if (m_pActiveItem && m_pActiveItem->m_flNextPrimaryAttack > 0.0f)
@@ -3943,7 +3929,7 @@ void EXT_FUNC CBasePlayer::Spawn()
 	m_bitsHUDDamage = -1;
 	m_bitsDamageType = 0;
 	m_afPhysicsFlags = 0;
-	m_fLongJump = FALSE;
+	m_fLongJump = false;
 	m_iClientFOV = 0;
 	m_pentCurBombTarget = nullptr;
 
@@ -4028,8 +4014,6 @@ void EXT_FUNC CBasePlayer::Spawn()
 	m_iFlashBattery = 99;
 	m_flFlashLightTime = 1;
 
-	ReloadWeapons();
-
 	pev->body = 0;
 
 	if (m_bMissionBriefing)
@@ -4063,31 +4047,21 @@ void EXT_FUNC CBasePlayer::Spawn()
 	m_HackedGunPos = Vector(0, 32, 0);
 
 	m_iHideHUD &= ~(HIDEHUD_WEAPONS | HIDEHUD_HEALTH | HIDEHUD_TIMER | HIDEHUD_MONEY | HIDEHUD_CROSSHAIR);
-	m_fNoPlayerSound = FALSE;
-	m_pLastItem = nullptr;
-	m_bClientWeaponUpToDate = FALSE;
-	m_pClientActiveItem = nullptr;
+	m_fNoPlayerSound = false;
+	m_bClientWeaponUpToDate = false;
 	m_iClientBattery = -1;
 
 	m_iClientHideHUD = -1;
 
 	if (!m_bNotKilled)
 	{
-
-		for (i = 0; i < MAX_AMMO_SLOTS; i++)
-			m_rgAmmo[i] = 0;
-
+		m_rgiPlayerItems.fill(WEAPON_NONE);
 		m_bHasPrimary = false;
 		m_bHasNightVision = false;
 
 		m_iHideHUD |= HIDEHUD_WEAPONS;
 
 		SendItemStatus();
-	}
-	else
-	{
-		for (i = 0; i < MAX_AMMO_SLOTS; i++)
-			m_rgAmmoLast[i] = -1;
 	}
 
 	MESSAGE_BEGIN(MSG_ONE, gmsgNVGToggle, nullptr, pev);
@@ -4296,7 +4270,7 @@ void CBasePlayer::Reset()
 	m_bNotKilled = false;
 
 	// RemoveShield() included
-	RemoveAllItems(TRUE);
+	RemoveAllItems(true);
 
 	CheckStartMoney();
 	AddAccount(startmoney.value, RT_PLAYER_RESET);
@@ -4328,47 +4302,22 @@ void CBasePlayer::SelectItem(const char *pstr)
 		return;
 	}
 
-	if (m_pActiveItem && !m_pActiveItem->CanHolster())
-		return;
+	// #WPN_UNDONE_CL
+	// Add a message to make client deploy certain weapon.
+	// Maybe not here, but in StartSwitchingWeapon().
 
-	auto pWeapon = GetItemById(WeaponClassnameToID(pstr));
-	if (!pWeapon || pWeapon == m_pActiveItem)
-		return;
+	auto iId = WeaponClassnameToID(pstr);
 
-	StartSwitchingWeapon(pWeapon);
+	// #WPN_UNDONE_CMD
+	// Determine whether the weapon of this ID is the current one.
+
+	StartSwitchingWeapon(iId);
 }
 
 void CBasePlayer::SelectLastItem()
 {
-	// this action can cancel grenade throw.
-	if (m_pActiveItem && m_pActiveItem->m_bitsFlags & WPNSTATE_QUICK_THROWING)
-	{
-		m_pActiveItem->m_bitsFlags |= WPNSTATE_QT_EXIT;
-		m_flNextAttack = 0;
-		return;
-	}
-
-	if (m_pActiveItem && !m_pActiveItem->CanHolster())
-		return;
-
-	if (!m_pLastItem || m_pLastItem == m_pActiveItem)
-	{
-		for (int i = PRIMARY_WEAPON_SLOT; i < MAX_ITEM_TYPES; i++)
-		{
-			if (m_rgpPlayerItems[i] && m_rgpPlayerItems[i] != m_pActiveItem)
-			{
-				m_pLastItem = m_rgpPlayerItems[i];
-				break;
-			}
-		}
-	}
-
-	if (!m_pLastItem || m_pLastItem == m_pActiveItem)
-		return;
-
-	auto temp = m_pActiveItem;	// save this, and we can set it to last weapon later on.
-	StartSwitchingWeapon(m_pLastItem);
-	m_pLastItem = temp;
+	// #WPN_UNDONE_CL
+	// It should be just a message to tell client that select last weapon.
 }
 
 // HasWeapons - do I have any weapons at all?
@@ -4469,6 +4418,22 @@ void CBloodSplat::Spray()
 
 	SetThink(&CBloodSplat::SUB_Remove);
 	pev->nextthink = gpGlobals->time + 0.1f;
+}
+
+bool CBasePlayer::StartSwitchingWeapon(WeaponIdType iId)
+{
+	// #WPN_UNDONE_CMD
+	// Pre-determine is iId the current weapon.
+
+	gmsgDeployWpn::Send(MSG_ONE, pev, iId, false);
+	return true;	// Assuming true.
+}
+
+bool CBasePlayer::SwitchWeapon(WeaponIdType iId)
+{
+	// #WPN_UNDONE_CL
+	// Add a message to tell client instant switching.
+	return false;
 }
 
 // external function for 3rd-party
@@ -5114,20 +5079,9 @@ void EXT_FUNC CBasePlayer::UpdateClientData()
 		m_iTrain &= ~TRAIN_NEW;
 	}
 
-	SendAmmoUpdate();
-
 	// Update all the items
-	for (int i = 0; i < MAX_ITEM_TYPES; i++)
-	{
-		if (m_rgpPlayerItems[i])
-		{
-			// each item updates it's successors
-			m_rgpPlayerItems[i]->UpdateClientData();
-		}
-	}
+	// No more weapon info update.
 
-	// Cache and client weapon change
-	m_pClientActiveItem = m_pActiveItem;
 	m_iClientFOV = int(pev->fov);
 
 	// Update Status Bar
@@ -5139,14 +5093,18 @@ void EXT_FUNC CBasePlayer::UpdateClientData()
 
 	if (!(m_flDisplayHistory & DHF_AMMO_EXHAUSTED))
 	{
-		if (m_pActiveItem && !(m_pActiveItem->m_pItemInfo->m_bitsFlags & ITEM_FLAG_EXHAUSTIBLE))
+		// #WPN_POLISH_HINT
+		// Ammo... I have no idea what to do.
+		// Maybe move this entire to client?
+
+		/*if (m_pActiveItem && !(m_pActiveItem->m_pItemInfo->m_bitsFlags & ITEM_FLAG_EXHAUSTIBLE))
 		{
 			if (m_rgAmmo[m_pActiveItem->m_iPrimaryAmmoType] < 1 && m_pActiveItem->m_iClip == 0)
 			{
 				m_flDisplayHistory |= DHF_AMMO_EXHAUSTED;
 				HintMessage("#Hint_out_of_ammo");
 			}
-		}
+		}*/
 	}
 
 	if (gpGlobals->time > m_tmHandleSignals)
@@ -5362,8 +5320,13 @@ void CBasePlayer::EnableControl(BOOL fControl)
 
 void EXT_FUNC CBasePlayer::ResetMaxSpeed()
 {
-	// default speed.
-	float speed = 240;
+	// default speed for player.
+	// client will restrain the speed by client weapons. No need to worry.
+	float speed = 400;
+
+	CBot* me = nullptr;
+	if (IsBot())
+		me = dynamic_cast<CBot*>(this);
 
 	if (GetObserverMode() != OBS_NONE)
 	{
@@ -5375,20 +5338,21 @@ void EXT_FUNC CBasePlayer::ResetMaxSpeed()
 		// Player should not move during the freeze period
 		speed = 1;
 	}
-	else if (m_pActiveItem)
+	else if (me)	// Is bot?
 	{
 		// Get player speed from selected weapon
-		speed = m_pActiveItem->GetMaxSpeed();
+		speed = me->m_pActiveItem->GetMaxSpeed();
 	}
 
 	// hook it right before reset it.
 	OnResetPlayerMaxspeed(speed);
 
+	// #WPN_UNDONE_CL Imply these on client.
 	// since the addition of dashing mechanism, players are limited in around 35% of original speed.
 	// however, BOTs are not. therefore, the speed set for players have to increase.
 	// the constant 40 is the threshold of sniper scoping. below that value, client would consider this player is using his full speed no matter what.
-	if (!IsBot() && int(pev->fov) > 40)
-		speed *= 1.35f;
+	/*if (!IsBot() && int(pev->fov) > 40)
+		speed *= 1.35f;*/
 
 	SET_CLIENT_MAXSPEED(edict(), speed);
 	pev->maxspeed = speed;
@@ -5627,7 +5591,7 @@ void CBasePlayer::UpdateStatusBar()
 // DropPlayerItem - drop the named item, or if no name, the active item.
 CWeaponBox* CBasePlayer::DropPlayerItem(WeaponIdType iId)
 {
-	gmsgRmWpn::Send(MSG_ONE, pev, iId);
+	gmsgRmWpn::Send(MSG_ONE, pev, iId);	// Just remove at client. The weaponbox entity is spawn at server.
 
 	UTIL_MakeVectors(pev->angles);
 
@@ -6307,10 +6271,12 @@ bool IsSecondaryWeaponId(int id)
 
 const char *GetWeaponAliasFromName(const char *weaponName)
 {
-	const char cut_weapon[] = "weapon_";
-	if (!Q_strncmp(weaponName, cut_weapon, sizeof(cut_weapon) - 1))
+	constexpr auto weapon_str = "weapon_";
+	constexpr auto weapon_len = std::char_traits<char>::length(weapon_str);
+
+	if (!Q_strncmp(weaponName, weapon_str, weapon_len))
 	{
-		weaponName += sizeof(cut_weapon) - 1;
+		weaponName += weapon_len;
 	}
 
 	return weaponName;
@@ -6346,16 +6312,16 @@ void CBasePlayer::ParseAutoBuy()
 		iRecommandedPrim = WEAPON_UMP45;
 		break;
 
-	case Role_Sharpshooter:	// we recommand sharpshooter use DEAGLE.
+	case Role_Sharpshooter:	// we recommend sharpshooter use DEAGLE.
 	default:
 		iRecommandedPrim = WEAPON_NONE;
 		break;
 	}
 
 	// analysis best 2nd weapon from prim weapon.
-	if (m_rgpPlayerItems[PRIMARY_WEAPON_SLOT])
+	if (m_rgiPlayerItems[PRIMARY_WEAPON_SLOT])
 	{
-		switch (m_rgpPlayerItems[PRIMARY_WEAPON_SLOT]->m_pItemInfo->m_iClassType)
+		switch (g_rgWpnInfo[m_rgiPlayerItems[PRIMARY_WEAPON_SLOT]].m_iClassType)
 		{
 		case WEAPONCLASS_SUBMACHINEGUN:
 		case WEAPONCLASS_MACHINEGUN:
@@ -6402,22 +6368,22 @@ void CBasePlayer::ParseAutoBuy()
 		}
 	}
 
-	if (!m_rgpPlayerItems[PRIMARY_WEAPON_SLOT])
-		BuyWeapon(this, iRecommandedPrim);
+	if (!m_rgiPlayerItems[PRIMARY_WEAPON_SLOT])
+		gmsgBuy::Send(MSG_ONE, pev, BUYTYPE_WPN, iRecommandedPrim, 1);
 
-	BuyAmmo(this, PRIMARY_WEAPON_SLOT);
+	gmsgBuy::Send(MSG_ONE, pev, BUYTYPE_AMMO, g_rgWpnInfo[iRecommandedPrim].m_iAmmoType, 9999);	// Buy as much as possible.
 
-	if (!m_rgpPlayerItems[PISTOL_SLOT])
-		BuyWeapon(this, iRecommandedSed);
+	if (!m_rgiPlayerItems[PISTOL_SLOT])
+		gmsgBuy::Send(MSG_ONE, pev, BUYTYPE_WPN, iRecommandedSed, 1);
 
-	BuyAmmo(this, PISTOL_SLOT);
+	gmsgBuy::Send(MSG_ONE, pev, BUYTYPE_AMMO, g_rgWpnInfo[iRecommandedSed].m_iAmmoType, 9999);
 
-	BuyEquipment(this, EQP_KEVLAR);
-	BuyEquipment(this, EQP_ASSAULT_SUIT);
-	BuyEquipment(this, CSGameRules()->SelectProperGrenade(this));
+	gmsgBuy::Send(MSG_ONE, pev, BUYTYPE_EQP, EQP_KEVLAR, 1);
+	gmsgBuy::Send(MSG_ONE, pev, BUYTYPE_EQP, EQP_ASSAULT_SUIT, 1);
+	gmsgBuy::Send(MSG_ONE, pev, BUYTYPE_EQP, CSGameRules()->SelectProperGrenade(this), 99);	// Same as above, buy as much as possible.
 
 	if (m_iAccount > 12000)	// too much money? I can fix that for you!
-		BuyEquipment(this, EQP_NVG);
+		gmsgBuy::Send(MSG_ONE, pev, BUYTYPE_EQP, EQP_NVG, 1);
 }
 
 void CBasePlayer::ParseRebuy()
@@ -6430,7 +6396,7 @@ void CBasePlayer::ParseRebuy()
 
 	for (auto iId : m_lstRebuy)
 	{
-		BuyWeapon(this, iId);
+		gmsgBuy::Send(MSG_ONE, pev, BUYTYPE_WPN, iId, 1);
 	}
 }
 
@@ -6438,11 +6404,8 @@ void CBasePlayer::SaveRebuy()
 {
 	m_lstRebuy.clear();
 
-	for (int i = 0; i < MAX_ITEM_TYPES; i++)
-	{
-		if (m_rgpPlayerItems[i])
-			m_lstRebuy.emplace_back(m_rgpPlayerItems[i]->m_iId);
-	}
+	for (auto& iId : m_rgiPlayerItems)
+		m_lstRebuy.push_back(iId);
 
 	char szText[192];
 	Q_snprintf(szText, sizeof(szText) - 1, "$[Cyan]Rebuy items set: ");
@@ -6542,46 +6505,12 @@ bool EXT_FUNC CBasePlayer::HasRestrictItem(ItemID item, ItemRestType type)
 
 void CBasePlayer::DropSecondary()
 {
-	if (HasShield())
-	{
-		if (IsProtectedByShield() && m_pActiveItem)
-		{
-			m_pActiveItem->SecondaryAttack();
-		}
-
-		m_bShieldDrawn = false;
-	}
-
-	for (auto pWeapon : CBaseWeapon::m_lstWeapons)
-	{
-		if (pWeapon->m_pPlayer != this)
-			continue;
-
-		if (pWeapon->m_pItemInfo->m_iSlot != PISTOL_SLOT)
-			continue;
-
-		DropPlayerItem(pWeapon->m_iId);
-	}
+	DropPlayerItem(m_rgiPlayerItems[PISTOL_SLOT]);
 }
 
 void CBasePlayer::DropPrimary()
 {
-	if (HasShield())
-	{
-		DropShield();
-		return;
-	}
-
-	for (auto pWeapon : CBaseWeapon::m_lstWeapons)
-	{
-		if (pWeapon->m_pPlayer != this)
-			continue;
-
-		if (pWeapon->m_pItemInfo->m_iSlot != PRIMARY_WEAPON_SLOT)
-			continue;
-
-		DropPlayerItem(pWeapon->m_iId);
-	}
+	DropPlayerItem(m_rgiPlayerItems[PRIMARY_WEAPON_SLOT]);
 }
 
 void CBasePlayer::Disconnect()
@@ -6941,17 +6870,8 @@ void CBasePlayer::AssignRole(RoleTypes iNewRole)
 	// remember, this must be used after m_iRoleType be renewed.
 	CheckItemAccessibility();
 
-	// after the weapons are checked, variegate them.
-	for (auto pWeapon : CBaseWeapon::m_lstWeapons)
-	{
-		if (pWeapon->m_pPlayer != this)
-			continue;
-
-		if (pWeapon->IsDead())
-			continue;
-
-		pWeapon->SetVariation(m_iRoleType);
-	}
+	// #WPN_UNDONE_CL
+	// Move weapon variation to client.
 
 	// tell client the fact.
 	MESSAGE_BEGIN(MSG_ALL, gmsgRole);
@@ -6966,23 +6886,24 @@ void CBasePlayer::AssignRole(RoleTypes iNewRole)
 
 void CBasePlayer::CheckItemAccessibility()
 {
-	for (auto pWeapon : CBaseWeapon::m_lstWeapons)
-	{
-		if (pWeapon->m_pPlayer != this)
-			continue;
+	// #WPN_UNDONE_CL move to client.
+	//for (auto pWeapon : CBaseWeapon::m_lstWeapons)
+	//{
+	//	if (pWeapon->m_pPlayer != this)
+	//		continue;
 
-		if (pWeapon->IsDead())
-			continue;
+	//	if (pWeapon->IsDead())
+	//		continue;
 
-		if (g_rgRoleWeaponsAccessibility[m_iRoleType][pWeapon->m_iId] == WPN_F)
-		{
-			AddAccount(GetWeaponInfo(pWeapon->m_iId)->m_iCost / 2, RT_SOLD_ITEM);
-			UTIL_SayText(this, "#LeaderMod_RefundWpn", pWeapon->m_pItemInfo->m_pszExternalName, std::to_string(GetWeaponInfo(pWeapon->m_iId)->m_iCost / 2).c_str());
-			UTIL_PlayEarSound(this, SFX_REFUND_GUNS);
+	//	if (g_rgRoleWeaponsAccessibility[m_iRoleType][pWeapon->m_iId] == WPN_F)
+	//	{
+	//		AddAccount(GetWeaponInfo(pWeapon->m_iId)->m_iCost / 2, RT_SOLD_ITEM);
+	//		UTIL_SayText(this, "#LeaderMod_RefundWpn", pWeapon->m_pItemInfo->m_pszExternalName, std::to_string(GetWeaponInfo(pWeapon->m_iId)->m_iCost / 2).c_str());
+	//		UTIL_PlayEarSound(this, SFX_REFUND_GUNS);
 
-			pWeapon->Kill();	// RemovePlayerItem() is included!
-		}
-	}
+	//		pWeapon->Kill();	// RemovePlayerItem() is included!
+	//	}
+	//}
 }
 
 CBaseSkill* CBasePlayer::GetPrimarySkill()

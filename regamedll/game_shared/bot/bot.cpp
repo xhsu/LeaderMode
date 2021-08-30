@@ -32,6 +32,14 @@ void CBot::Spawn()
 	// Let CBasePlayer set some things up
 	CBasePlayer::Spawn();
 
+	// Server BOT weapon moved to here.
+	m_pLastItem = nullptr;
+
+	if (!m_bNotKilled)
+	{
+		m_rgAmmo.fill(0);
+	}
+
 	// Make sure everyone knows we are a bot
 	pev->flags |= (FL_CLIENT | FL_FAKECLIENT);
 
@@ -60,6 +68,16 @@ Vector CBot::GetAutoaimVector(float flDelta)
 {
 	UTIL_MakeVectors(pev->v_angle + pev->punchangle);
 	return gpGlobals->v_forward;
+}
+
+void CBot::PreThink()
+{
+	for (auto& p : m_rgpPlayerItems)
+	{
+		m_rgiPlayerItems[p->WpnInfo()->m_iSlot] = p->Id();	// Enforce sync on bot.
+	}
+
+	__super::PreThink();
 }
 
 void CBot::PostThink()
@@ -168,7 +186,7 @@ bool CBot::GiveAmmo(int iAmount, AmmoIdType iId)
 	m_rgAmmo[iId] += iAdd;
 
 	// #WPN_UNDONE_CMD
-	// Maybe add a method to regular real player such that server may send a meesage to ask client add ammo?
+	// Maybe add a method to regular real player such that server may send a message to ask client add ammo?
 
 	return true;
 }
@@ -404,6 +422,56 @@ void CBot::RemoveAllItems(bool removeSuit)
 	m_bHasNightVision = false;
 	SendItemStatus();
 	ResetMaxSpeed();	// ReGameDLL Fixes: Version 5.16.0.465
+}
+
+void CBot::SelectLastItem()
+{
+	// this action can cancel grenade throw.
+	if (m_pActiveItem && m_pActiveItem->Flags() & WPNSTATE_QUICK_THROWING)
+	{
+		m_pActiveItem->Flags() |= WPNSTATE_QT_EXIT;
+		m_flNextAttack = 0;
+		return;
+	}
+
+	if (m_pActiveItem && !m_pActiveItem->CanHolster())
+		return;
+
+	if (!m_pLastItem || m_pLastItem == m_pActiveItem)
+	{
+		for (int i = PRIMARY_WEAPON_SLOT; i < MAX_ITEM_TYPES; i++)
+		{
+			if (m_rgpPlayerItems[i] && m_rgpPlayerItems[i] != m_pActiveItem)
+			{
+				m_pLastItem = m_rgpPlayerItems[i];
+				break;
+			}
+		}
+	}
+
+	if (!m_pLastItem || m_pLastItem == m_pActiveItem)
+		return;
+
+	auto temp = m_pActiveItem;	// save this, and we can set it to last weapon later on.
+	StartSwitchingWeapon(m_pLastItem);
+	m_pLastItem = temp;
+}
+
+void CBot::SelectItem(const char* pstr)
+{
+	if (!pstr)
+	{
+		return;
+	}
+
+	if (m_pActiveItem && !m_pActiveItem->CanHolster())
+		return;
+
+	auto pWeapon = HasWeapon(WeaponClassnameToID(pstr));
+	if (!pWeapon || pWeapon == m_pActiveItem)
+		return;
+
+	StartSwitchingWeapon(pWeapon);
 }
 
 void CBot::BotThink()

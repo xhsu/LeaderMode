@@ -415,8 +415,10 @@ public:
 	virtual CWeaponBox* DropPlayerItem(WeaponIdType iId);
 	virtual IWeapon* HasWeapon(WeaponIdType iId) { return nullptr; }
 	virtual bool HasAnyWeapon();
-	void SelectLastItem();
-	void SelectItem(const char *pstr);
+	virtual void SelectLastItem();
+	virtual void SelectItem(const char *pstr);
+	virtual bool StartSwitchingWeapon(WeaponIdType iId);
+	virtual bool SwitchWeapon(WeaponIdType iId);
 
 	CBaseEntity *GiveNamedItem(const char *pszName);
 	void EnableControl(BOOL fControl);
@@ -707,6 +709,7 @@ public:
 	bool m_bIsOnClientRequestedFire : 1 {false};
 	Vector m_vecClientReportedGunPos{ g_vecZero };
 	Vector m_vecClientReportedViewAngles{ g_vecZero };
+	std::array<WeaponIdType, MAX_ITEM_TYPES> m_rgiPlayerItems;
 
 	// overhealing mechanism.
 	float m_flOHNextThink;

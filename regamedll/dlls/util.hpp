@@ -129,7 +129,7 @@ struct Message
 
 	// Constants
 	static constexpr auto NAME = _name.value;
-//	static constexpr auto SIZE = (sizeof(ArgTys) + ...);
+//	static constexpr auto SIZE = (sizeof(ArgTys) + ...);	// #WPN_POLISH_CODE This does not work on message without any args.
 	static constexpr auto COUNT = sizeof...(ArgTys);
 
 	// Members
@@ -369,11 +369,12 @@ inline void RegisterMessage()
 	(MsgTys::Register(), ...);
 }
 
-using gmsgRmWpn = Message<"RmWpn", BYTE/*Which weapon?*/>;	// 255: Current Weapon, 254: All weapons.
+using gmsgRmWpn = Message<"RmWpn", BYTE/*Which weapon?*/>;	// [0: Current Weapon]; [255: All weapons]; [255-Slot: Weapon in this slot];
 using gmsgUseTank = Message<"UseTank", short/* Entindex */, BYTE/* On or off */>;
 using gmsgSchemeEv = Message<"SchemeEv">;	// No arg.
 using gmsgAmmo = Message<"Ammo", BYTE/* What ammo? */, short/* Count */>;	// [AmmoType == 255: All ammo.]
-
+using gmsgDeployWpn = Message<"DeployWpn", BYTE /* Weapon ID */, BYTE /* Is insta switch? */>;
+using gmsgBuy = Message<"Buy", BYTE /* [0-Wpn; 1-Ammo; 2-Eqp] */, BYTE /* Index */, short /* Amount */>; enum : BYTE { BUYTYPE_WPN = 0U, BUYTYPE_AMMO, BUYTYPE_EQP, };
 
 
 

@@ -141,18 +141,6 @@ inline double M_clamp(double a, double min, double max) {
 }
 #endif
 
-template<typename T>
-inline T M_clamp(T a, T min, T max) {
-	return clamp(a, min, max);
-}
-
-template<class T>
-inline void SWAP(T &first, T &second) {
-	T temp = first;
-	first = second;
-	second = temp;
-}
-
 #define VectorSubtract(a,b,c) {(c)[0]=(a)[0]-(b)[0];(c)[1]=(a)[1]-(b)[1];(c)[2]=(a)[2]-(b)[2];}
 #define VectorAdd(a,b,c) {(c)[0]=(a)[0]+(b)[0];(c)[1]=(a)[1]+(b)[1];(c)[2]=(a)[2]+(b)[2];}
 #define VectorCopy(a,b) {(b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2];}
@@ -162,7 +150,7 @@ inline void SWAP(T &first, T &second) {
 // returns 0 if x == 0 or x > 0x80000000 (ie numbers that would be negative if x was signed)
 // NOTE: the old code took an int, and if you pass in an int of 0x80000000 casted to a uint,
 //       you'll get 0x80000000, which is correct for uints, instead of 0, which was correct for ints
-__forceinline unsigned SmallestPowerOfTwoGreaterOrEqual(unsigned x)
+constexpr unsigned SmallestPowerOfTwoGreaterOrEqual(unsigned x)
 {
 	x -= 1;
 	x |= x >> 1;
@@ -174,7 +162,7 @@ __forceinline unsigned SmallestPowerOfTwoGreaterOrEqual(unsigned x)
 }
 
 // return the largest power of two <= x. Will return 0 if passed 0
-__forceinline unsigned LargestPowerOfTwoLessThanOrEqual(unsigned x)
+constexpr unsigned LargestPowerOfTwoLessThanOrEqual(unsigned x)
 {
 	if (x >= 0x80000000)
 		return 0x80000000;
