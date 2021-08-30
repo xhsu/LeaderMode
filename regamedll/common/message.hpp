@@ -1,25 +1,39 @@
+/*
+* Modern Warfare Dev Team
+* 
+* Code:	Luna the Reborn
+* Date: Aug 29 2021
+*/
+
 #ifndef _GOLDSRC_MSG_HELPER_HPP_
 #define _GOLDSRC_MSG_HELPER_HPP_
 #pragma once
 
+#include <algorithm>
+#include <cassert>
+#include <type_traits>
+
 template<size_t N>
 struct StringLiteral
 {
+	// Constructor
 	constexpr StringLiteral(const char(&str)[N]) { std::copy_n(str, N, value); }
-	constexpr operator const char* () const { return &value[0]; }
 
+	// Operators
+	constexpr operator const char* () const { return &value[0]; }	// automatically convert to char* if necessary.
+	constexpr operator char* () { return &value[0]; }
+	constexpr decltype(auto) operator[] (size_t index) { assert(index < N); return value[index]; }
+
+	constexpr size_t length = N;
 	char value[N];
 };
 
-template<StringLiteral _name, typename... ArgTys>
-void MsgReceived(ArgTys&... args)
-{
-	std::cout << _name.value << ':' << std::endl;
-	((std::cout << args << std::endl), ...);
-}
+// DO NOT USE
+// This is used only for determine whether a class is a message.
+struct __Dummy_GoldSrc_Msg_Struct {};
 
 template<StringLiteral _name, typename... ArgTys>
-struct Message
+struct Message : public __Dummy_GoldSrc_Msg_Struct
 {
 	// Constrains
 	static_assert(sizeof(_name.value) <= 11U, "Name of message must less than 11 characters.");
@@ -49,16 +63,17 @@ struct Message
 
 //	using MsgArg2 = std::variant<ArgTys...>;
 	using CallbackArgs = std::tuple<ArgTys...>;
+	using TypeOfThis = Message<_name, ArgTys...>;
 
 	// Constants
-	static constexpr auto NAME = _name.value;
-//	static constexpr auto SIZE = (sizeof(ArgTys) + ...);
+	static constexpr auto NAME = _name;
+	static constexpr auto SIZE = (sizeof(ArgTys) + ...);
 	static constexpr auto COUNT = sizeof...(ArgTys);
 	static constexpr auto IDX_SEQ = std::make_index_sequence<COUNT>{};
 
 	static void Register(void)
 	{
-//		cout << "size of the message \"" << NAME << "\" is " << SIZE << '.' << endl;
+		cout << "size of the message \"" << NAME << "\" is " << SIZE << '.' << endl;
 	}
 
 	static void Cast(int iDest, const Vector& vecOrigin, void* pClient, const ArgTys&... args)
@@ -155,7 +170,7 @@ struct Message
 
 		auto fnApply = [&tplArgs]<size_t... I>(std::index_sequence<I...>)	// Fuck the std::apply. It totally does not work.
 		{
-			MsgReceived<_name, ArgTys...>(std::get<I>(tplArgs)...);
+			MsgReceived<TypeOfThis, ArgTys...>(std::get<I>(tplArgs)...);
 		};
 
 		fnFill(IDX_SEQ);
@@ -163,11 +178,24 @@ struct Message
 	}
 };
 
-using gmsgGiveWpn = Message<"GiveWpn", unsigned char, Vector, const char*, short>;
-template<> extern void MsgReceived<StringLiteral("GiveWpn")>(unsigned char&, Vector&, const char*&, short&);
+// Is this class a GoldSrc msg class?
+template<typename T>
+concept IsMessage = std::is_base_of_v<__Dummy_GoldSrc_Msg_Struct, T>;
 
-using gmsgRmAllWpn = Message<"RmAllWpn">;
-template<> extern void MsgReceived<StringLiteral("RmAllWpn")>();
+template<typename MsgClass, typename... ArgTys>
+requires(IsMessage<MsgClass>)
+void MsgReceived(ArgTys&... args)	// Default fallback function.
+{
+	std::cout << "[Generalized]" << endl;
+	std::cout << MsgClass::NAME << ':' << std::endl;
+	((std::cout << args << std::endl), ...);
+}
+
+using gmsgGiveWpn = Message<"GiveWpn", unsigned char, Vector, const char*, short>;
+template<> extern void MsgReceived<gmsgGiveWpn>(unsigned char&, Vector&, const char*&, short&);
+
+//using gmsgRmAllWpn = Message<"RmAllWpn">;
+//template<> extern void MsgReceived<StringLiteral("RmAllWpn")>();
 
 
 
