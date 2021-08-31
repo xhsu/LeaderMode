@@ -900,6 +900,9 @@
     <ClInclude Include="..\dlls\util.hpp">
       <Filter>dlls</Filter>
     </ClInclude>
+    <ClInclude Include="..\common\message.hpp">
+      <Filter>common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\linux\appversion.sh">

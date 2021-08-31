@@ -34,9 +34,9 @@ void CBaseDMStart::KeyValue(KeyValueData *pkvd)
 	}
 }
 
-BOOL CBaseDMStart::IsTriggered(CBaseEntity *pEntity)
+bool CBaseDMStart::IsTriggered(CBaseEntity *pActivator)
 {
-	return UTIL_IsMasterTriggered(pev->netname, pEntity);
+	return UTIL_IsMasterTriggered(pev->netname, pActivator);
 }
 
 // This updates global tables that need to know about entities being removed

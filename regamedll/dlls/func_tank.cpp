@@ -203,13 +203,13 @@ void CFuncTank::KeyValue(KeyValueData *pkvd)
 	}
 }
 
-BOOL CFuncTank::OnControls(entvars_t *pevTest)
+bool CFuncTank::OnControls(entvars_t *onpev)
 {
 	if (!(pev->spawnflags & SF_TANK_CANCONTROL))
 		return FALSE;
 
-	Vector offset = pevTest->origin - pev->origin;
-	if ((m_vecControllerUsePos - pevTest->origin).Length() < 30.0f)
+	Vector offset = onpev->origin - pev->origin;
+	if ((m_vecControllerUsePos - onpev->origin).Length() < 30.0f)
 	{
 		return TRUE;
 	}
@@ -235,7 +235,7 @@ BOOL CFuncTank::StartControl(CBasePlayer *pController)
 
 	m_pController = pController;
 
-	gmsgUseTank::Send(MSG_ONE, pController->pev, entindex(), TRUE);
+	gmsgUseTank::Send(pController->pev, entindex(), TRUE);
 
 	// #WPN_UNDONE_CL
 	// Move the tank hiding functionality to Client.
@@ -254,7 +254,7 @@ void CFuncTank::StopControl()
 	if (!m_pController)
 		return;
 
-	gmsgUseTank::Send(MSG_ONE, m_pController->pev, entindex(), FALSE);
+	gmsgUseTank::Send(m_pController->pev, entindex(), FALSE);
 
 	// #WPN_UNDONE_CL
 	// Move the tank hiding functionality to Client.

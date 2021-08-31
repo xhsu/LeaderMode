@@ -719,7 +719,7 @@ void CHalfLifeMultiplay::SwapAllPlayers()
 	}
 
 	// Swap Team victories
-	SWAP(m_iNumTerroristWins, m_iNumCTWins);
+	std::swap(m_iNumTerroristWins, m_iNumCTWins);
 
 	// Update the clients team score
 	UpdateTeamScores();
@@ -2336,7 +2336,7 @@ void CHalfLifeMultiplay::PlayerThink(CBasePlayer *pPlayer)
 
 	if (m_rgTeamTacticalScheme[pPlayer->m_iTeam] == Doctrine_SuperiorFirepower && pPlayer->m_flTSThink < gpGlobals->time)
 	{
-		gmsgSchemeEv::Send(MSG_ONE, pPlayer->pev);
+		gmsgSchemeEv::Send(pPlayer->pev);
 	}
 
 	// Doctrine_GrandBattleplan gives player 50$ every 5 sec.

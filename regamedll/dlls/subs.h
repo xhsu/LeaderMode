@@ -38,7 +38,7 @@ class CBaseDMStart: public CPointEntity
 {
 public:
 	virtual void KeyValue(KeyValueData *pkvd);
-	virtual BOOL IsTriggered(CBaseEntity *pEntity);
+	virtual bool IsTriggered(CBaseEntity *pActivator);
 };
 
 void FireTargets(const char *targetName, CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);

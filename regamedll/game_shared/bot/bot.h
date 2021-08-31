@@ -175,6 +175,8 @@ public:
 	void RemoveAllItems(bool removeSuit) override;
 	void SelectLastItem() override;
 	void SelectItem(const char* pstr) override;
+	int& GrenadeInventory(EquipmentIdType iId) override;
+	void ResetUsingEquipment(void) override;
 
 public:
 	// return bot's unique ID
@@ -199,6 +201,9 @@ public:
 
 	// return true if active weapon has no ammo at all
 	bool IsActiveWeaponOutOfAmmo() const;
+
+	// no point to pull out a weapon which cannot firing underwater.
+	bool IsActiveWeaponCanShootUnderwater() const;
 
 	// is the weapon in the middle of a reload
 	bool IsActiveWeaponReloading() const;
@@ -229,7 +234,7 @@ public:
 
 	void BotThink();
 
-	BOOL IsNetClient() override { return FALSE; }
+	bool IsNetClient() override { return FALSE; }
 
 	// return our personality profile
 	const BotProfile *GetProfile() const { return m_profile; }
@@ -318,6 +323,14 @@ inline void CBot::Run()
 inline void CBot::Walk()
 {
 	m_isRunning = false;
+}
+
+inline bool CBot::IsActiveWeaponCanShootUnderwater() const
+{
+	CBasePlayerWeapon* pCurrentWeapon = GetActiveWeapon();
+	if (pCurrentWeapon && !(pCurrentWeapon->iFlags() & ITEM_FLAG_NOFIREUNDERWATER))
+		return true;
+	return false;
 }
 
 inline bool CBot::IsActiveWeaponReloading() const

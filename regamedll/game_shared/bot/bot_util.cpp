@@ -615,13 +615,13 @@ float BotSIN(float angle)
 // Determine if this event is audible, and if so, return its audible range and priority
 bool IsGameEventAudible(GameEventType event, CBaseEntity *pEntity, CBaseEntity *pOther, float *range, PriorityType *priority, bool *isHostile)
 {
-	CBasePlayer *pPlayer = static_cast<CBasePlayer *>(pEntity);
+	CBasePlayer *pPlayer = dynamic_cast<CBasePlayer *>(pEntity);
 
 	if (!pEntity || !pPlayer->IsPlayer())
 		pPlayer = nullptr;
 
-	const float ShortRange = 1000.0f;
-	const float NormalRange = 2000.0f;
+	constexpr float ShortRange = 1000.0f;
+	constexpr float NormalRange = 2000.0f;
 
 	switch (event)
 	{

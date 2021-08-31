@@ -413,6 +413,9 @@ bool CCSBot::DoEquip(CBaseWeapon *pWeapon)
 	if (!pWeapon)
 		return false;
 
+	if (GetProfile()->GetSkill() > 0.4f && pev->waterlevel == 3 && (pWeapon->iFlags() & ITEM_FLAG_NOFIREUNDERWATER))
+		return false;
+
 	// check if weapon has any ammo left
 	if (!HasAnyAmmo(pWeapon))
 		return false;

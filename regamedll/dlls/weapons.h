@@ -327,7 +327,7 @@ public:
 	* Usage:	Anytime when this object is valid.
 	* Return:	Enumerator index value.
 	*/
-	virtual	constexpr WeaponIdType Id		(void) = 0;
+	virtual	constexpr WeaponIdType Id		(void)	const = 0;
 
 	/*
 	* Purpose:	Acquire information regarding weapon general database.
@@ -392,7 +392,13 @@ public:
 	*/
 	virtual	bool	IsBusy			(void)	const = 0;
 
+	/*
+	* Purpose:	Inquire whether this weapon is reloading. Note that if this is a tubular weapon, you may interrupt it.
+	* Usage:	Anytime when this object is activated.
+	* Return:	'true' if this weapon is reloading.
+	*/
 	virtual	bool	IsReloading		(void)	const = 0;
+
 #pragma endregion
 
 //-----------------------------------------------------------------------------
@@ -506,6 +512,11 @@ public:
 	*/
 	virtual int&	Clip			(void) = 0;
 
+	/*
+	* Purpose:	Inquire current weapon accuracy info.
+	* Usage:	Anytime when it is valid.
+	* Return:	Note that the accuracy value has different meaning amongst weapons.
+	*/
 	virtual	float&	Accuracy		(void) = 0;
 };
 

@@ -916,7 +916,7 @@ void CRotDoor::Spawn()
 		// swap pos1 and pos2, put door at pos2, invert movement direction
 		pev->angles = m_vecAngle2;
 
-		SWAP(m_vecAngle1, m_vecAngle2);
+		std::swap(m_vecAngle1, m_vecAngle2);
 
 		pev->movedir = pev->movedir * -1;
 	}

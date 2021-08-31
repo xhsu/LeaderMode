@@ -368,7 +368,7 @@ void CBaseMonster::Killed(entvars_t *pevAttacker, int iGib)
 	m_IdealMonsterState = MONSTERSTATE_DEAD;
 }
 
-BOOL CBaseMonster::TakeHealth(float flHealth, int bitsDamageType)
+bool CBaseMonster::TakeHealth(float flHealth, int bitsDamageType)
 {
 	if (pev->takedamage == DAMAGE_NO)
 		return FALSE;

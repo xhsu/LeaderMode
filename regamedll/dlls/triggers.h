@@ -106,7 +106,7 @@ public:
 	virtual int Save(CSave &save);
 	virtual int Restore(CRestore &restore);
 	virtual int ObjectCaps() { return (CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION); }
-	virtual BOOL HasTarget(string_t targetname);
+	virtual bool HasTarget(string_t targetname);
 
 public:
 	void EXPORT ManagerThink();

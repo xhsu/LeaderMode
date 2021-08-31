@@ -88,11 +88,11 @@ public:
 	virtual void DeathNotice(entvars_t *pevChild) {}
 	virtual void TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 	virtual bool TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
-	virtual BOOL TakeHealth(float flHealth, int bitsDamageType);
+	virtual bool TakeHealth(float flHealth, int bitsDamageType);
 	virtual void Killed(entvars_t *pevAttacker, int iGib);
 	virtual int BloodColor() { return DONT_BLEED; }
 	virtual void TraceBleed(float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
-	virtual BOOL IsTriggered(CBaseEntity *pActivator) { return TRUE; }
+	virtual bool IsTriggered(CBaseEntity *pActivator) { return TRUE; }
 	virtual CBaseMonster *MyMonsterPointer() { return nullptr; }
 	virtual CSquadMonster *MySquadMonsterPointer() { return nullptr; }
 	virtual int GetToggleState() { return TS_AT_TOP; }
@@ -107,14 +107,14 @@ public:
 	// This is ONLY used by the node graph to test movement through a door
 	virtual void SetToggleState(int state) {}
 
-	virtual BOOL OnControls(entvars_t *onpev) { return FALSE; }
-	virtual BOOL IsAlive() { return (pev->deadflag == DEAD_NO && pev->health > 0.0f); }
-	virtual BOOL IsBSPModel() { return (pev->solid == SOLID_BSP || pev->movetype == MOVETYPE_PUSHSTEP); }
-	virtual BOOL ReflectGauss() { return (IsBSPModel() && pev->takedamage == DAMAGE_NO); }
-	virtual BOOL HasTarget(string_t targetname) { return FStrEq(STRING(targetname), STRING(pev->targetname)); }
-	virtual BOOL IsInWorld();
-	virtual BOOL IsPlayer() { return FALSE; }
-	virtual BOOL IsNetClient() { return FALSE; }
+	virtual bool OnControls(entvars_t *onpev) { return false; }
+	virtual bool IsAlive() { return (pev->deadflag == DEAD_NO && pev->health > 0.0f); }
+	virtual bool IsBSPModel() { return (pev->solid == SOLID_BSP || pev->movetype == MOVETYPE_PUSHSTEP); }
+	virtual bool ReflectEnergyProj() { return (IsBSPModel() && pev->takedamage == DAMAGE_NO); }
+	virtual bool HasTarget(string_t targetname) { return FStrEq(STRING(targetname), STRING(pev->targetname)); }
+	virtual bool IsInWorld();
+	virtual bool IsPlayer() { return false; }
+	virtual bool IsNetClient() { return false; }
 	virtual const char *TeamID() { return ""; }
 	virtual CBaseEntity *GetNextTarget();
 	virtual void Think() { if (m_pfnThink) (this->*m_pfnThink)(); }
@@ -126,7 +126,6 @@ public:
 
 	// used by monsters that are created by the MonsterMaker
 	virtual void UpdateOwner() {}
-	virtual BOOL FBecomeProne() { return FALSE; }
 
 	virtual Vector Center() { return (pev->absmax + pev->absmin) * 0.5f; }		// center point of entity
 	virtual Vector EyePosition() { return (pev->origin + pev->view_ofs); }		// position of eyes
@@ -511,7 +510,7 @@ public:
 	virtual int Save(CSave &save);
 	virtual int Restore(CRestore &restore);
 	virtual int ObjectCaps() { return (CPointEntity::ObjectCaps() | FCAP_MASTER); }
-	virtual BOOL IsTriggered(CBaseEntity *pActivator);
+	virtual bool IsTriggered(CBaseEntity *pActivator);
 	virtual void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
 	virtual void Restart();
 

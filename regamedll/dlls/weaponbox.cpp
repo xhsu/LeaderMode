@@ -266,7 +266,7 @@ void CWeaponBox::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecD
 	EMIT_SOUND(edict(), CHAN_ITEM, "debris/metal6.wav", 0.5f, ATTN_STATIC);
 }
 
-BOOL CWeaponBox::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType)
+bool CWeaponBox::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType)
 {
 	if (bitsDamageType & DMG_EXPLOSION)
 	{

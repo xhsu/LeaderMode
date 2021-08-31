@@ -328,31 +328,30 @@ public:
 	virtual ~CBasePlayer();
 
 public:
-	virtual void Spawn();
-	virtual void Precache();
-	virtual int Save(CSave &save);
-	virtual int Restore(CRestore &restore);
-	virtual int ObjectCaps();
-	virtual int Classify();
-	virtual void TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
-	virtual bool TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
-	virtual BOOL TakeHealth(float flHealth, int bitsDamageType);
-	virtual void Killed(entvars_t *pevAttacker, int iGib);
-	virtual void AddPoints(int score, BOOL bAllowNegativeScore);
-	virtual void AddPointsToTeam(int score, BOOL bAllowNegativeScore);
+	void Spawn() override;
+	void Precache() override;
+	int Save(CSave &save) override;
+	int Restore(CRestore &restore) override;
+	int ObjectCaps() override;
+	int Classify() override;
+	void TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType) override;
+	bool TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType) override;
+	bool TakeHealth(float flHealth, int bitsDamageType) override;
+	void Killed(entvars_t *pevAttacker, int iGib) override;
+	void AddPoints(int score, BOOL bAllowNegativeScore) override;
+	void AddPointsToTeam(int score, BOOL bAllowNegativeScore) override;
 
-	virtual BOOL IsAlive() { return (pev->deadflag == DEAD_NO && pev->health > 0.0f); }
-	virtual BOOL IsPlayer() { return (pev->flags & FL_SPECTATOR) != FL_SPECTATOR; }
-	virtual BOOL IsNetClient() { return TRUE; }
-	virtual const char *TeamID();
-	virtual void Touch(CBaseEntity* pOther);
-	virtual BOOL FBecomeProne();
+	bool IsAlive() override { return (pev->deadflag == DEAD_NO && pev->health > 0.0f); }
+	bool IsPlayer() override { return (pev->flags & FL_SPECTATOR) != FL_SPECTATOR; }
+	bool IsNetClient() override { return TRUE; }
+	const char *TeamID() override;
+	void Touch(CBaseEntity* pOther) override;
 
 	// TODO: Need to investigate for what purposes used random to get relative eyes position
-	virtual Vector BodyTarget(const Vector &posSrc) { return Center() + pev->view_ofs * RANDOM_FLOAT(0.5, 1.1); }
-	virtual int Illumination();
-	virtual BOOL ShouldFadeOnDeath() { return FALSE; }
-	virtual void ResetMaxSpeed();
+	Vector BodyTarget(const Vector &posSrc) override { return Center() + pev->view_ofs * RANDOM_FLOAT(0.5, 1.1); }
+	int Illumination() override;
+	BOOL ShouldFadeOnDeath() override { return FALSE; }
+	void ResetMaxSpeed() override;
 	virtual void Jump();
 	virtual void Duck();
 	virtual void PreThink();
@@ -364,7 +363,7 @@ public:
 	virtual void RoundRespawn();
 	virtual Vector GetAutoaimVector(float flDelta);
 	virtual void Blind(float flUntilTime, float flHoldTime, float flFadeTime, int iAlpha);
-	virtual void UpdateOnRemove();
+	void UpdateOnRemove() override;
 
 public:
 	static CBasePlayer *Instance(edict_t *pEdict) { return GET_PRIVATE<CBasePlayer>(pEdict ? pEdict : ENT(0)); }
@@ -491,9 +490,8 @@ public:
 	void RemoveSpawnProtection();
 	void DropIdlePlayer(const char *reason);
 	bool CheckActivityInGame();
-	int GetGrenadeInventory(EquipmentIdType iId);
-	int* GetGrenadeInventoryPointer(EquipmentIdType iId);
-	void ResetUsingEquipment(void);
+	virtual int& GrenadeInventory(EquipmentIdType iId);
+	virtual void ResetUsingEquipment(void);
 	inline int QueryIndex(int i) { return i * gpGlobals->maxClients + entindex(); }
 	void QueryClientCvar(void);
 	void UpdateClientCvar(const char* cvarName, const char* value, int requestID);
@@ -710,6 +708,8 @@ public:
 	Vector m_vecClientReportedGunPos{ g_vecZero };
 	Vector m_vecClientReportedViewAngles{ g_vecZero };
 	std::array<WeaponIdType, MAX_ITEM_TYPES> m_rgiPlayerItems;
+	WeaponIdType m_iActiveItem{ WEAPON_NONE };	// #WPN_UNDONE_CMD update this value from client.
+	bool m_bXM8InSharpshooterMode{ false };	// #WPN_UNDONE_CMD update this value from client.
 
 	// overhealing mechanism.
 	float m_flOHNextThink;

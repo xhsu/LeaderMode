@@ -56,7 +56,7 @@ public:
 
 	// Bmodels don't go across transitions
 	virtual int ObjectCaps() { return CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
-	virtual BOOL OnControls(entvars_t *pevTest);
+	virtual bool OnControls(entvars_t *onpev);
 	virtual void Think();
 	virtual void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
 	virtual void Fire(const Vector &barrelEnd, const Vector &forward, entvars_t *pevAttacker);

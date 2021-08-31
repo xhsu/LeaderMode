@@ -979,7 +979,7 @@ void CGrenade::C4PickUpThink()
 	pev->flags |= FL_KILLME;	// remove entity on next frame.
 
 	CBasePlayer* pPlayer = CBasePlayer::Instance(pev->owner);
-	(*pPlayer->GetGrenadeInventoryPointer(EQP_C4))++;
+	pPlayer->GrenadeInventory(EQP_C4)++;
 
 	SetThink(&CBaseEntity::SUB_DoNothing);
 }

@@ -283,7 +283,7 @@ void CGameTeamMaster::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 	}
 }
 
-BOOL CGameTeamMaster::IsTriggered(CBaseEntity *pActivator)
+bool CGameTeamMaster::IsTriggered(CBaseEntity *pActivator)
 {
 	return TeamMatch(pActivator);
 }

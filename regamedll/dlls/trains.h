@@ -89,7 +89,7 @@ public:
 	virtual int Restore(CRestore &restore);
 	virtual int ObjectCaps() { return (CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION) | FCAP_DIRECTIONAL_USE; }
 	virtual void OverrideReset();
-	virtual BOOL OnControls(entvars_t *pev);
+	virtual bool OnControls(entvars_t *onpev);
 	virtual void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
 	virtual void Blocked(CBaseEntity *pOther);
 
@@ -141,7 +141,7 @@ public:
 	virtual int ObjectCaps() { return (CBaseEntity::ObjectCaps() & ~FCAP_ACROSS_TRANSITION) | FCAP_DIRECTIONAL_USE; }
 	virtual int Classify();
 	virtual void OverrideReset();
-	virtual BOOL OnControls(entvars_t *pev);
+	virtual bool OnControls(entvars_t *onpev);
 	virtual void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
 	virtual void Blocked(CBaseEntity *pOther);
 

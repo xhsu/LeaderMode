@@ -512,6 +512,12 @@ void CCSBot::Update()
 		m_isWaitingToTossGrenade = false;
 	}
 
+	// bots with low skill cannot switch weapons underwater
+	if (GetProfile()->GetSkill() > 0.4f && pev->waterlevel == 3 && !IsActiveWeaponCanShootUnderwater())
+	{
+		EquipBestWeapon(MUST_EQUIP);
+	}
+
 	if (IsHunting() && IsWellPastSafe() && IsUsingGrenade())
 	{
 		EquipBestWeapon(MUST_EQUIP);

@@ -208,7 +208,7 @@ CBaseEntity *UTIL_FindEntityByTargetname(CBaseEntity *pStartEntity, const char *
 CBaseEntity *UTIL_FindEntityGeneric(const char *szWhatever, const Vector &vecSrc, float flRadius);
 void UTIL_MakeVectors(const Vector &vecAngles);
 void UTIL_MakeAimVectors(const Vector &vecAngles);
-void UTIL_MakeInvVectors(const Vector &vec, globalvars_t *pgv);
+void UTIL_MakeInvVectors(const Vector &vec);
 void UTIL_EmitAmbientSound(edict_t *entity, const Vector &vecOrigin, const char *samp, float vol, float attenuation, int fFlags, int pitch);
 constexpr unsigned short FixedUnsigned16(float value, float scale);
 constexpr short FixedSigned16(float value, float scale);

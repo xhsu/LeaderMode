@@ -514,10 +514,7 @@ bool CSkillBulletproof::Execute()
 		// Client should: #SKILL_UNDONE
 		// If you are the SWAT who enact his skill: Refill all ammo and clip.
 		// If you are the teammates around: Insert an entire clip and stop reload.
-		MESSAGE_BEGIN(MSG_ONE, gmsgSkillEnact, m_pPlayer->pev->origin, pPlayer->edict());
-		WRITE_BYTE(m_pPlayer->entindex());
-		WRITE_BYTE(GetIndex());
-		MESSAGE_END();
+		gmsgSkillEnact::Send(pPlayer->pev, m_pPlayer->entindex(), GetIndex());
 	}
 
 	UTIL_ScreenFade(m_pPlayer, Vector(179, 217, 255), 0.5f, GetDuration(), 40, FFADE_IN);
@@ -766,7 +763,7 @@ void CSkillExplosiveBullets::OnPlayerFiringTraceLine(int& iDamage, TraceResult& 
 	// a. use KSG12 or STRIKER
 	// b. active your skill.
 
-	if (!((1 << m_pPlayer->m_pActiveItem->m_iId) & ((1 << WEAPON_KSG12) | (1 << WEAPON_M1014))) && !m_bUsingSkill)
+	if (!((1 << m_pPlayer->m_iActiveItem) & ((1 << WEAPON_KSG12) | (1 << WEAPON_M1014))) && !m_bUsingSkill)
 	{
 		// or you will make sure that your victim receive a hidden explosive bullet inside them.
 
@@ -1009,7 +1006,7 @@ void CSkillInfiniteGrenade::OnGrenadeThrew(EquipmentIdType iId, CGrenade* pGrena
 	if (!m_bUsingSkill)
 		return;
 
-	(*m_pPlayer->GetGrenadeInventoryPointer(iId))++;
+	m_pPlayer->GrenadeInventory(iId)++;
 
 	pGrenade->pev->dmgtime = gpGlobals->time + 9999.0f;
 	pGrenade->SetTouch(&CGrenade::ExplodeTouch);
@@ -1089,15 +1086,15 @@ bool CSkillEnfoceHeadshot::Terminate()
 
 void CSkillEnfoceHeadshot::OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr)
 {
-	if (!m_bUsingSkill || !m_pPlayer->m_pActiveItem)
+	if (!m_bUsingSkill || !m_pPlayer->m_iActiveItem)
 		return;
 
-	WeaponIdType iId = m_pPlayer->m_pActiveItem->m_iId;
+	WeaponIdType iId = m_pPlayer->m_iActiveItem;
 
 	// you have to use one of these weapon to trigger the enforced headshot.
 	if (iId != WEAPON_SRS && iId != WEAPON_PSG1 && iId != WEAPON_AWP && iId != WEAPON_SVD		// Sniper rifles
 		&& iId != WEAPON_ANACONDA && iId != WEAPON_DEAGLE										// Large caliber pistols
-		&& !(iId == WEAPON_XM8 && m_pPlayer->m_pActiveItem->m_iVariation == Role_Sharpshooter))	// XM8 in sharpshooter mode
+		&& !(iId == WEAPON_XM8 && m_pPlayer->m_bXM8InSharpshooterMode))	// XM8 in sharpshooter mode
 		return;
 
 	if (FNullEnt(tr.pHit))
@@ -1885,6 +1882,10 @@ bool CSkillInvisible::Execute()
 	m_pPlayer->pev->viewmodel = 0;
 	m_pPlayer->m_iHideHUD |= HIDEHUD;
 
+	// #SKILL_UNDONE
+	// Client should holster weapon on invisible execute!
+	gmsgSkillEnact::Send(m_pPlayer->pev, m_pPlayer->entindex(), GetIndex());
+
 	return true;
 }
 
@@ -1901,9 +1902,9 @@ void CSkillInvisible::Think()
 		m_pPlayer->ResetMaxSpeed();
 		m_pPlayer->pev->gravity = 1.0f;
 		m_pPlayer->pev->flags &= ~FL_NOTARGET;
-
-		m_pPlayer->m_pActiveItem->Deploy();
 		m_pPlayer->m_iHideHUD &= ~HIDEHUD;
+
+		gmsgSwitchWpn::Send(m_pPlayer->pev, m_pPlayer->m_iActiveItem, true);	// Insta switch means no holster animation. #SKILL_UNDONE Note that this deploy message also means skill ends.
 	}
 
 	// B. it's active!
@@ -1936,7 +1937,7 @@ bool CSkillInvisible::Terminate()
 	m_pPlayer->pev->gravity = 1.0f;
 	m_pPlayer->pev->flags &= ~FL_NOTARGET;
 
-	m_pPlayer->m_pActiveItem->Deploy();
+	gmsgSwitchWpn::Send(m_pPlayer->pev, m_pPlayer->m_iActiveItem, true);
 	m_pPlayer->m_iHideHUD &= ~HIDEHUD;
 
 	// This is the masterskill. Therefore, terminate all other skills as well.
@@ -1962,7 +1963,7 @@ void CSkillInvisible::Discharge(CBasePlayer* pCause)
 	m_pPlayer->pev->gravity = 1.0f;
 	m_pPlayer->pev->flags &= ~FL_NOTARGET;
 
-	m_pPlayer->m_pActiveItem->Deploy();
+	gmsgSwitchWpn::Send(m_pPlayer->pev, m_pPlayer->m_iActiveItem, true);
 	m_pPlayer->m_iHideHUD &= ~HIDEHUD;
 
 	// This is the masterskill. Therefore, terminate all other skills as well.
@@ -2022,7 +2023,7 @@ const int CSkillCriticalHit::ALLOWED_WEAPONS = (1 << WEAPON_MP7A1) | (1 << WEAPO
 
 void CSkillCriticalHit::OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr)
 {
-	if (!((1 << m_pPlayer->m_pActiveItem->m_iId) & ALLOWED_WEAPONS))	// you have to use these weapons!
+	if (!((1 << m_pPlayer->m_iActiveItem) & ALLOWED_WEAPONS))	// you have to use these weapons!
 		return;
 
 	if (FNullEnt(tr.pHit) || !CBaseEntity::Instance(tr.pHit)->IsPlayer())
@@ -2378,7 +2379,7 @@ void CSkillIncendiaryAmmo::OnHurtingAnotherPlayer(CBasePlayer* pVictim, entvars_
 
 void CSkillIncendiaryAmmo::OnPlayerFiringTraceLine(int& iDamage, TraceResult& tr)
 {
-	WeaponIdType iId = m_pPlayer->m_pActiveItem->m_iId;
+	WeaponIdType iId = m_pPlayer->m_iActiveItem;
 
 	if (!m_bUsingSkill && (iId != WEAPON_KSG12 && iId != WEAPON_M1014))
 		return;

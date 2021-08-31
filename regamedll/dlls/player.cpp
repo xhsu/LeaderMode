@@ -463,7 +463,7 @@ void CBasePlayer::DeathSound()
 
 // override takehealth
 // bitsDamageType indicates type of damage healed.
-BOOL EXT_FUNC CBasePlayer::TakeHealth(float flHealth, int bitsDamageType)
+bool CBasePlayer::TakeHealth(float flHealth, int bitsDamageType)
 {
 	if (pev->takedamage == DAMAGE_NO)
 		return FALSE;
@@ -1235,7 +1235,7 @@ void CBasePlayer::RemoveAllItems(bool removeSuit)
 	if (bKillProgBar)
 		SetProgressBarTime(0);
 
-	gmsgRmWpn::Send(MSG_ONE, pev, 0);	// 0: current weapon.
+	gmsgRmWpn::Send(pev, 0);	// 0: current weapon.
 
 	m_rgiPlayerItems.fill(WEAPON_NONE);
 	m_bHasPrimary = false;
@@ -1255,7 +1255,7 @@ void CBasePlayer::RemoveAllItems(bool removeSuit)
 	else
 		pev->weapons &= ~WEAPON_ALLWEAPONS;
 
-	gmsgAmmo::Send(MSG_ONE, pev, 255, -9999);	// 255: all ammo.
+	gmsgAmmo::Send(pev, 255, -9999);	// 255: all ammo.
 
 	UpdateClientData();
 
@@ -2746,7 +2746,7 @@ void EXT_FUNC CBasePlayer::StartObserver(Vector& vecPosition, Vector& vecViewAng
 	// Holster weapon immediately, to allow it to cleanup
 	// #WPN_UNDONE_CL
 	// Is it even a problem?
-	gmsgRmWpn::Send(MSG_ONE, pev, 0);	// 0: Current weapon.
+	gmsgRmWpn::Send(pev, 0);	// 0: Current weapon.
 
 	if (m_pTank)
 	{
@@ -4425,7 +4425,7 @@ bool CBasePlayer::StartSwitchingWeapon(WeaponIdType iId)
 	// #WPN_UNDONE_CMD
 	// Pre-determine is iId the current weapon.
 
-	gmsgDeployWpn::Send(MSG_ONE, pev, iId, false);
+	gmsgSwitchWpn::Send(pev, iId, false);
 	return true;	// Assuming true.
 }
 
@@ -5291,12 +5291,6 @@ bool CBasePlayer::ShouldToShowHealthInfo(CBasePlayer *pReceiver) const
 	return false;
 }
 
-BOOL CBasePlayer::FBecomeProne()
-{
-	m_afPhysicsFlags |= PFLAG_ONBARNACLE;
-	return TRUE;
-}
-
 // return player light level plus virtual muzzle flash
 int CBasePlayer::Illumination()
 {
@@ -5591,7 +5585,7 @@ void CBasePlayer::UpdateStatusBar()
 // DropPlayerItem - drop the named item, or if no name, the active item.
 CWeaponBox* CBasePlayer::DropPlayerItem(WeaponIdType iId)
 {
-	gmsgRmWpn::Send(MSG_ONE, pev, iId);	// Just remove at client. The weaponbox entity is spawn at server.
+	gmsgRmWpn::Send(pev, iId);	// Just remove at client. The weaponbox entity is spawn at server.
 
 	UTIL_MakeVectors(pev->angles);
 
@@ -6369,21 +6363,21 @@ void CBasePlayer::ParseAutoBuy()
 	}
 
 	if (!m_rgiPlayerItems[PRIMARY_WEAPON_SLOT])
-		gmsgBuy::Send(MSG_ONE, pev, BUYTYPE_WPN, iRecommandedPrim, 1);
+		gmsgBuy::Send(pev, BUYTYPE_WPN, iRecommandedPrim, 1);
 
-	gmsgBuy::Send(MSG_ONE, pev, BUYTYPE_AMMO, g_rgWpnInfo[iRecommandedPrim].m_iAmmoType, 9999);	// Buy as much as possible.
+	gmsgBuy::Send(pev, BUYTYPE_AMMO, g_rgWpnInfo[iRecommandedPrim].m_iAmmoType, 9999);	// Buy as much as possible.
 
 	if (!m_rgiPlayerItems[PISTOL_SLOT])
-		gmsgBuy::Send(MSG_ONE, pev, BUYTYPE_WPN, iRecommandedSed, 1);
+		gmsgBuy::Send(pev, BUYTYPE_WPN, iRecommandedSed, 1);
 
-	gmsgBuy::Send(MSG_ONE, pev, BUYTYPE_AMMO, g_rgWpnInfo[iRecommandedSed].m_iAmmoType, 9999);
+	gmsgBuy::Send(pev, BUYTYPE_AMMO, g_rgWpnInfo[iRecommandedSed].m_iAmmoType, 9999);
 
-	gmsgBuy::Send(MSG_ONE, pev, BUYTYPE_EQP, EQP_KEVLAR, 1);
-	gmsgBuy::Send(MSG_ONE, pev, BUYTYPE_EQP, EQP_ASSAULT_SUIT, 1);
-	gmsgBuy::Send(MSG_ONE, pev, BUYTYPE_EQP, CSGameRules()->SelectProperGrenade(this), 99);	// Same as above, buy as much as possible.
+	gmsgBuy::Send(pev, BUYTYPE_EQP, EQP_KEVLAR, 1);
+	gmsgBuy::Send(pev, BUYTYPE_EQP, EQP_ASSAULT_SUIT, 1);
+	gmsgBuy::Send(pev, BUYTYPE_EQP, CSGameRules()->SelectProperGrenade(this), 99);	// Same as above, buy as much as possible.
 
 	if (m_iAccount > 12000)	// too much money? I can fix that for you!
-		gmsgBuy::Send(MSG_ONE, pev, BUYTYPE_EQP, EQP_NVG, 1);
+		gmsgBuy::Send(pev, BUYTYPE_EQP, EQP_NVG, 1);
 }
 
 void CBasePlayer::ParseRebuy()
@@ -6396,7 +6390,7 @@ void CBasePlayer::ParseRebuy()
 
 	for (auto iId : m_lstRebuy)
 	{
-		gmsgBuy::Send(MSG_ONE, pev, BUYTYPE_WPN, iId, 1);
+		gmsgBuy::Send(pev, BUYTYPE_WPN, iId, 1);
 	}
 }
 
@@ -6713,50 +6707,20 @@ bool CBasePlayer::CheckActivityInGame()
 	return (Q_fabs(deltaYaw) >= 0.1f && Q_fabs(deltaPitch) >= 0.1f);
 }
 
-int CBasePlayer::GetGrenadeInventory(EquipmentIdType iId)
+int& CBasePlayer::GrenadeInventory(EquipmentIdType iId)
 {
-	return *GetGrenadeInventoryPointer(iId);
-}
+	// #WPN_UNDONE_CMD
+	// How about make the server know how many equipments we have?
 
-int* CBasePlayer::GetGrenadeInventoryPointer(EquipmentIdType iId)
-{
-	return &m_rgAmmo[GetAmmoIdOfEquipment(iId)];
+	static int dummy = 0;
+	return dummy;
 }
 
 void CBasePlayer::ResetUsingEquipment(void)
 {
-	// the stock is ok.
-	if (GetGrenadeInventory(m_iUsingGrenadeId) > 0)
-		return;
-
-	// if this is a non-consumable accessory, it's also fine.
-	if (m_rgbHasEquipment[m_iUsingGrenadeId])
-		return;
-
-	AmmoIdType iAmmoId = AMMO_NONE;
-	EquipmentIdType iCandidate = CSGameRules()->SelectProperGrenade(this);
-
-	// check inventory of recommended equipment.
-	if (GetGrenadeInventory(iCandidate))
-	{
-		// it's good? take and leave.
-		m_iUsingGrenadeId = iCandidate;
-		return;
-	}
-
-	// start the searching from the first.
-	for (int i = EQP_NONE; i < EQP_COUNT; i++)
-	{
-		iAmmoId = GetAmmoIdOfEquipment((EquipmentIdType)i);
-
-		if (!iAmmoId || m_rgAmmo[iAmmoId] <= 0)
-			continue;
-
-		iCandidate = (EquipmentIdType)i;
-		break;
-	}
-
-	m_iUsingGrenadeId = iCandidate;
+	// #WPN_UNDONE_CL
+	// Send a message to client such that client can auto select equipment.
+	// Check CBot::ResetUsingEquipment() to see the original code.
 }
 
 void CBasePlayer::QueryClientCvar(void)

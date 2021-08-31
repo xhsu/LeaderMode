@@ -83,7 +83,7 @@ void CTriggerRandom::KeyValue(KeyValueData *pkvd)
 
 		if (m_flMaxDelay > 0 && m_flMinDelay > m_flMaxDelay)
 		{
-			SWAP(m_flMinDelay, m_flMaxDelay);
+			std::swap(m_flMinDelay, m_flMaxDelay);
 		}
 
 		pkvd->fHandled = TRUE;
@@ -94,7 +94,7 @@ void CTriggerRandom::KeyValue(KeyValueData *pkvd)
 
 		if (m_flMinDelay > 0 && m_flMaxDelay < m_flMinDelay)
 		{
-			SWAP(m_flMinDelay, m_flMaxDelay);
+			std::swap(m_flMinDelay, m_flMaxDelay);
 		}
 
 		pkvd->fHandled = TRUE;

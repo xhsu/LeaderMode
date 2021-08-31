@@ -126,7 +126,7 @@ class CGameTeamMaster: public CRulePointEntity
 public:
 	virtual void KeyValue(KeyValueData *pkvd);
 	virtual int ObjectCaps() { return (CRulePointEntity::ObjectCaps() | FCAP_MASTER); }
-	virtual BOOL IsTriggered(CBaseEntity *pActivator);
+	virtual bool IsTriggered(CBaseEntity *pActivator);
 	virtual const char *TeamID();
 	virtual void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
 

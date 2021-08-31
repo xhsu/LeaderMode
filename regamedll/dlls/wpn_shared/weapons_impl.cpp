@@ -186,7 +186,7 @@ struct CWeapon : public IWeapon
 
 #ifndef CLIENT_DLL
 	// SV exclusive variables.
-	EntityHandle<CBasePlayer>	m_pPlayer;		// one of these two must be valid. or this weapon will be removed.
+	EntityHandle<CBot>			m_pPlayer;		// one of these two must be valid. or this weapon will be removed.
 	EntityHandle<CWeaponBox>	m_pWeaponBox;	// Aug 10 2021, LUNA: don't know why keeping this. The weaponbox is no longer saving a actual entity. Weapon object gets destoried when dropped on ground.
 	int		m_iClientClip		{ 0 };
 	int		m_iClientWeaponState{ 0 };
@@ -266,7 +266,7 @@ struct CWeapon : public IWeapon
 #ifdef CLIENT_DLL
 			m_pPlayer->SwitchWeapon(m_pPlayer->m_pWpnSwitchingTo);
 #else
-			m_pPlayer->SwitchWeapon(m_pPlayer->GetItemById(m_pPlayer->m_iWpnSwitchingTo));
+			m_pPlayer->SwitchWeapon(m_pPlayer->HasWeapon(m_pPlayer->m_iWpnSwitchingTo));
 #endif
 			return;
 		}
@@ -555,10 +555,10 @@ struct CWeapon : public IWeapon
 	{
 #ifndef CLIENT_DLL
 		CBaseEntity* pEntity = static_cast<CBaseEntity*>(pObject);
-		CBasePlayer* pPlayer = dynamic_cast<CBasePlayer*>(pEntity);
+		CBot* pPlayer = dynamic_cast<CBot*>(pEntity);	// Only bot can have weapon on server side.
 
 		// how can I add to someone who didn't even exist?
-		if (FNullEnt(pPlayer))
+		if (!pPlayer)
 		{
 			// Is it a weaponbox?
 			if (CWeaponBox* pWeaponBox = dynamic_cast<CWeaponBox*>(pEntity); !FNullEnt(pWeaponBox))
@@ -1076,8 +1076,8 @@ struct CWeapon : public IWeapon
 		// Save the current state of anim.
 		Pause();
 
-		BasicKnife::Deploy(this);
-		BasicKnife::Swing();
+//		BasicKnife::Deploy(this);	// #WPN_UNDONE_KNIFE
+//		BasicKnife::Swing();
 		return true;
 	}
 
@@ -1455,7 +1455,7 @@ struct CWeapon : public IWeapon
 		return true;
 	}
 
-	void	Precache(void)
+	void	Precache(void) override
 	{
 #ifndef CLIENT_DLL
 		PRECACHE_MODEL(CWpn::VIEW_MODEL);
@@ -1660,50 +1660,50 @@ struct CWeapon : public IWeapon
 	static constexpr WeaponIdType _Index(void)
 	{
 		// Pistols
-		if constexpr (std::is_same_v<CWpn, CG18C>)
-		{
-			return WEAPON_GLOCK18;
-		}
-		else if constexpr (std::is_same_v<CWpn, NCUSP>)
+		//if constexpr (std::is_same_v<CWpn, CG18C>)
+		//{
+		//	return WEAPON_GLOCK18;
+		//}
+		/*else */if constexpr (std::is_same_v<CWpn, NCUSP>)
 		{
 			return WEAPON_USP;
 		}
-		else if constexpr (std::is_same_v<CWpn, CAnaconda>)
-		{
-			return WEAPON_ANACONDA;
-		}
-		else if constexpr (std::is_same_v<CWpn, CDEagle>)
-		{
-			return WEAPON_DEAGLE;
-		}
-		else if constexpr (std::is_same_v<CWpn, CFN57>)
-		{
-			return WEAPON_FIVESEVEN;
-		}
-		else if constexpr (std::is_same_v<CWpn, CM45A1>)
-		{
-			return WEAPON_M45A1;
-		}
+		//else if constexpr (std::is_same_v<CWpn, CAnaconda>)
+		//{
+		//	return WEAPON_ANACONDA;
+		//}
+		//else if constexpr (std::is_same_v<CWpn, CDEagle>)
+		//{
+		//	return WEAPON_DEAGLE;
+		//}
+		//else if constexpr (std::is_same_v<CWpn, CFN57>)
+		//{
+		//	return WEAPON_FIVESEVEN;
+		//}
+		//else if constexpr (std::is_same_v<CWpn, CM45A1>)
+		//{
+		//	return WEAPON_M45A1;
+		//}
 
 		// Shotguns
-		else if constexpr (std::is_same_v<CWpn, CKSG12>)
+		/*else if constexpr (std::is_same_v<CWpn, CKSG12>)
 		{
 			return WEAPON_KSG12;
 		}
 		else if constexpr (std::is_same_v<CWpn, CM1014>)
 		{
 			return WEAPON_M1014;
-		}
+		}*/
 		//else if constexpr (std::is_same_v<CWpn, CAA12>)
 		//{
 		//	return WEAPON_AA12;
 		//}
 
 		// SMGs
-		else if constexpr (std::is_same_v<CWpn, CMP7A1>)
+		/*else if constexpr (std::is_same_v<CWpn, CMP7A1>)
 		{
 			return WEAPON_MP7A1;
-		}
+		}*/
 		//else if constexpr (std::is_same_v<CWpn, CMAC10>)
 		//{
 		//	return WEAPON_MAC10;
@@ -1712,10 +1712,10 @@ struct CWeapon : public IWeapon
 		//{
 		//	return WEAPON_MP5N;
 		//}
-		else if constexpr (std::is_same_v<CWpn, CUMP45>)
+		/*else if constexpr (std::is_same_v<CWpn, CUMP45>)
 		{
 			return WEAPON_UMP45;
-		}
+		}*/
 		//else if constexpr (std::is_same_v<CWpn, CP90>)
 		//{
 		//	return WEAPON_P90;
@@ -1726,7 +1726,7 @@ struct CWeapon : public IWeapon
 		//}
 
 		// Assault Rifles
-		else if constexpr (std::is_same_v<CWpn, CAK47>)
+		/*else if constexpr (std::is_same_v<CWpn, CAK47>)
 		{
 			return WEAPON_AK47;
 		}
@@ -1741,31 +1741,31 @@ struct CWeapon : public IWeapon
 		else if constexpr (std::is_same_v<CWpn, CXM8>)
 		{
 			return WEAPON_XM8;
-		}
+		}*/
 
 		// Sniper Rifles
 		//else if constexpr (std::is_same_v<CWpn, CSRS>)
 		//{
 		//	return WEAPON_SRS;
 		//}
-		else if constexpr (std::is_same_v<CWpn, CSVD>)
-		{
-			return WEAPON_SVD;
-		}
-		else if constexpr (std::is_same_v<CWpn, CAWP>)
-		{
-			return WEAPON_AWP;
-		}
-		else if constexpr (std::is_same_v<CWpn, CPSG1>)
-		{
-			return WEAPON_PSG1;
-		}
+		//else if constexpr (std::is_same_v<CWpn, CSVD>)
+		//{
+		//	return WEAPON_SVD;
+		//}
+		//else if constexpr (std::is_same_v<CWpn, CAWP>)
+		//{
+		//	return WEAPON_AWP;
+		//}
+		//else if constexpr (std::is_same_v<CWpn, CPSG1>)
+		//{
+		//	return WEAPON_PSG1;
+		//}
 
 		// LMGs
-		else if constexpr (std::is_same_v<CWpn, CMK46>)
-		{
-			return WEAPON_MK46;
-		}
+		//else if constexpr (std::is_same_v<CWpn, CMK46>)
+		//{
+		//	return WEAPON_MK46;
+		//}
 		//else if constexpr (std::is_same_v<CWpn, CRPD>)
 		//{
 		//	return WEAPON_RPD;
@@ -1777,28 +1777,30 @@ struct CWeapon : public IWeapon
 		}
 	}
 
-	constexpr WeaponIdType		Id(void)		override { return _Index(); }
+	constexpr WeaponIdType		Id(void)		const	override { return _Index(); }
 
-	const struct WeaponInfo*	WpnInfo(void)	override { return &g_rgWpnInfo[Id()]; }
+	const struct WeaponInfo*	WpnInfo(void)	const	override { return &g_rgWpnInfo[Id()]; }
 
-	const struct AmmoInfo*		AmmoInfo(void)	override { return &g_rgAmmoInfo[WpnInfo()->m_iAmmoType]; }
+	const struct AmmoInfo*		AmmoInfo(void)	const	override { return &g_rgAmmoInfo[WpnInfo()->m_iAmmoType]; }
 
-	constexpr const char*		ViewModel(void)	override { return CWpn::VIEW_MODEL; }
+	constexpr const char*		ViewModel(void)	const	override { return CWpn::VIEW_MODEL; }
 
-	constexpr const char*		WorldModel(void)override { return CWpn::WORLD_MODEL; }
+	constexpr const char*		WorldModel(void)const	override { return CWpn::WORLD_MODEL; }
 
 #pragma endregion
 
 #pragma region Status Inquiry APIs.
-	bool	IsDead(void) override { return m_bitsFlags & WPNSTATE_DEAD; }
+	bool	IsDead(void)			const override { return m_bitsFlags & WPNSTATE_DEAD; }
 
-	bool	IsDualWielding(void) override { return false; }	// UNDONE. It is querying current status not potential. Waiting for overrides.
+	bool	IsDualWielding(void)	const override { return false; }	// UNDONE. It is querying current status not potential. Waiting for overrides.
 
-	bool	IsDashing(void)	override { return m_bitsFlags & WPNSTATE_DASHING; }
+	bool	IsDashing(void)			const override { return m_bitsFlags & WPNSTATE_DASHING; }
 
-	bool	IsAiming(void)	override { return m_bInZoom; }
+	bool	IsAiming(void)			const override { return m_bInZoom; }
 
-	bool	IsBusy(void)	override { return m_bitsFlags & WPNSTATE_BUSY; }
+	bool	IsBusy(void)			const override { return m_bitsFlags & WPNSTATE_BUSY; }
+
+	bool	IsReloading(void)		const override { return m_bInReload; }
 
 #pragma endregion
 
@@ -2048,7 +2050,7 @@ struct CWeapon : public IWeapon
 			return 0;
 	}
 
-	uint32*	Flags(void) override { return &m_bitsFlags; }
+	uint32&	Flags(void) override { return m_bitsFlags; }
 
 	void*	GetOwner(void) override
 	{
@@ -2064,7 +2066,10 @@ struct CWeapon : public IWeapon
 #endif
 	}
 
-	int*	Clip(void) override { return &m_iClip; }
+	int&	Clip(void) override { return m_iClip; }
+
+	float&	Accuracy(void) override { return m_flAccuracy; }
+
 #pragma endregion
 
 #pragma region Private to this template.
@@ -2323,6 +2328,7 @@ void IWeapon::TheWeaponsThink(void)
 IWeapon* IWeapon::Give(WeaponIdType iId, void* pPlayer, int iClip, unsigned bitsFlags)
 {
 	IWeapon* p = nullptr;
+	auto pInfo = &g_rgWpnInfo[iId];
 
 	switch (iId)
 	{
@@ -2388,18 +2394,16 @@ IWeapon* IWeapon::Give(WeaponIdType iId, void* pPlayer, int iClip, unsigned bits
 
 	if (p)
 	{
-		p->Clip() = iClip;
+		p->Clip() = iClip < 0 ? pInfo->m_iMaxClip : iClip;
 		p->Flags() = bitsFlags;
 		
-		if (p->Attach(pPlayer))
+		if (!pPlayer)
 			return p;
-		else
-			return nullptr;
+
+		p->Attach(pPlayer);	// with no owner, this weapon will automatically removed in next frame. No need to worry.
 	}
-	else
-	{
-		return nullptr;
-	}
+
+	return p;
 }
 
 #pragma endregion

@@ -560,9 +560,6 @@ class Vector
 {
 public:
 	// Construction/destruction
-	constexpr Vector(Vector&& s) = default;
-	Vector& operator=(const Vector& s) = default;
-	Vector& operator=(Vector&& s) = default;
 	constexpr Vector() : x(0), y(0), z(0) {}
 	constexpr Vector(vec_t X, vec_t Y, vec_t Z) : x(X), y(Y), z(Z) {}
 	constexpr Vector(const Vector2D& v2d, vec_t Z) : x(v2d.x), y(v2d.y), z(Z) {}

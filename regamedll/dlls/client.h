@@ -295,4 +295,13 @@ inline int gmsgManpower = 0;
 inline int gmsgScheme = 0;
 inline int gmsgNewRound = 0;
 inline int gmsgGiveWpn = 0;
-inline int gmsgSkillEnact = 0;
+
+#include "common/message.hpp"
+
+using gmsgRmWpn = Message<"RmWpn", BYTE/* Which weapon? */>;	// [0: Current Weapon]; [255: All weapons]; [255-Slot: Weapon in this slot];
+using gmsgUseTank = Message<"UseTank", short/* Entindex */, bool /* On or off */>;
+using gmsgSchemeEv = Message<"SchemeEv">;	// No arg.
+using gmsgAmmo = Message<"Ammo", BYTE/* What ammo? */, short/* Count */>;	// [AmmoType == 255: All ammo.]
+using gmsgSwitchWpn = Message<"SwitchWpn", BYTE /* Weapon ID */, bool /* Is insta switch? */>;
+using gmsgBuy = Message<"Buy", BYTE /* [0-Wpn; 1-Ammo; 2-Eqp] */, BYTE /* Index */, short /* Amount */>; enum : BYTE { BUYTYPE_WPN = 0U, BUYTYPE_AMMO, BUYTYPE_EQP, };
+using gmsgSkillEnact = Message<"SkillEnact", BYTE /* Who? */, BYTE /* What skill? */>;

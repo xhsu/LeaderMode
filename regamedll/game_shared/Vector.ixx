@@ -1,3 +1,14 @@
+/*
+* Note from Luna:
+* NEVER create constructor list here:
+*	T(T&& v) = default;
+*	T& operator=(const T& s) = default;
+*	T& operator=(T&& s) = default;
+* 
+* Doing this would cause failing usage of ANY std template.
+* With error: 'no suitable constructor find'.
+*/
+
 module;
 
 #include <array>
@@ -58,9 +69,6 @@ constexpr auto VEC_INFINITY = std::numeric_limits<vec_t>::infinity();
 export struct Vector2D
 {
 	// Construction
-	constexpr Vector2D(Vector2D&& s) = default;
-	Vector2D& operator=(const Vector2D& s) = default;
-	Vector2D& operator=(Vector2D&& s) = default;
 	constexpr Vector2D() : x(0), y(0) {}
 	constexpr Vector2D(Arithmetic auto X, Arithmetic auto Y) : x(static_cast<vec_t>(X)), y(static_cast<vec_t>(Y)) {}
 	explicit constexpr Vector2D(Arithmetic auto sideLength) : width(static_cast<vec_t>(sideLength)), height(static_cast<vec_t>(sideLength)) {}
@@ -213,13 +221,11 @@ export std::ostream& operator<<(std::ostream& o, const Vector2D& v)
 export struct Vector
 {
 	// Construction
-	constexpr Vector(Vector&& s) = default;
-	Vector& operator=(const Vector& s) = default;
-	Vector& operator=(Vector&& s) = default;
 	constexpr Vector() : x(0), y(0), z(0) {}
 	constexpr Vector(Arithmetic auto X, Arithmetic auto Y, Arithmetic auto Z) : x(static_cast<vec_t>(X)), y(static_cast<vec_t>(Y)), z(static_cast<vec_t>(Z)) {}
 	constexpr Vector(const Vector2D& v2d, Arithmetic auto Z) : x(v2d.x), y(v2d.y), z(static_cast<vec_t>(Z)) {}
 	template<Arithmetic T, std::size_t size> requires(size >= 3U) explicit constexpr Vector(const T(&rgfl)[size]) : x(static_cast<vec_t>(rgfl[0])), y(static_cast<vec_t>(rgfl[1])), z(static_cast<vec_t>(rgfl[2])) {}
+	constexpr Vector(std::initializer_list<vec_t>&& lst) { assert(lst.size() >= 3U); auto it = lst.begin(); x = *it++; y = *it++; z = *it++; }
 
 	// Operators
 	constexpr decltype(auto) operator-()       const { return Vector(-x, -y, -z); }
@@ -1072,9 +1078,6 @@ constexpr auto QTN_INFINITY = std::numeric_limits<qtn_t>::infinity();
 
 export struct Quaternion
 {
-	constexpr Quaternion(Quaternion&& s) = default;
-	Quaternion& operator=(const Quaternion& s) = default;
-	Quaternion& operator=(Quaternion&& s) = default;
 	constexpr Quaternion() : a(1), b(0), c(0), d(0) {}	// Identity.
 	constexpr Quaternion(Arithmetic auto W, Arithmetic auto X, Arithmetic auto Y, Arithmetic auto Z) : a(static_cast<qtn_t>(W)), b(static_cast<qtn_t>(X)), c(static_cast<qtn_t>(Y)), d(static_cast<qtn_t>(Z)) {}
 	constexpr Quaternion(qtn_t yaw, qtn_t pitch, qtn_t roll) // yaw (Z), pitch (Y), roll (X)

@@ -627,7 +627,7 @@ void SaveReadFields(SAVERESTOREDATA *pSaveData, const char *pname, void *pBaseDa
 	restoreHelper.ReadFields(pname, pBaseData, pFields, fieldCount);
 }
 
-BOOL CBaseEntity::TakeHealth(float flHealth, int bitsDamageType)
+bool CBaseEntity::TakeHealth(float flHealth, int bitsDamageType)
 {
 	if (pev->takedamage == DAMAGE_NO)
 		return FALSE;
@@ -846,7 +846,7 @@ void CBaseEntity::MakeDormant()
 	UTIL_SetOrigin(pev, pev->origin);
 }
 
-BOOL CBaseEntity::IsInWorld()
+bool CBaseEntity::IsInWorld()
 {
 	// position
 	if (pev->origin.x >= 4096.0 || pev->origin.y >= 4096.0 || pev->origin.z >= 4096.0)

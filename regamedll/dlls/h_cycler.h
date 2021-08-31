@@ -38,7 +38,7 @@ public:
 	virtual bool TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
 
 	// Don't treat as a live target
-	virtual BOOL IsAlive() { return FALSE; }
+	virtual bool IsAlive() { return FALSE; }
 	virtual void Think();
 	virtual void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
 

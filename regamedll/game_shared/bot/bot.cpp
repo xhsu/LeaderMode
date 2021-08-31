@@ -77,6 +77,8 @@ void CBot::PreThink()
 		m_rgiPlayerItems[p->WpnInfo()->m_iSlot] = p->Id();	// Enforce sync on bot.
 	}
 
+	m_iActiveItem = m_pActiveItem->Id();
+
 	__super::PreThink();
 }
 
@@ -472,6 +474,47 @@ void CBot::SelectItem(const char* pstr)
 		return;
 
 	StartSwitchingWeapon(pWeapon);
+}
+
+int& CBot::GrenadeInventory(EquipmentIdType iId)
+{
+	return m_rgAmmo[GetAmmoIdOfEquipment(iId)];
+}
+
+void CBot::ResetUsingEquipment(void)
+{
+	// the stock is ok.
+	if (GrenadeInventory(m_iUsingGrenadeId) > 0)
+		return;
+
+	// if this is a non-consumable accessory, it's also fine.
+	if (m_rgbHasEquipment[m_iUsingGrenadeId])
+		return;
+
+	AmmoIdType iAmmoId = AMMO_NONE;
+	EquipmentIdType iCandidate = CSGameRules()->SelectProperGrenade(this);
+
+	// check inventory of recommended equipment.
+	if (GrenadeInventory(iCandidate))
+	{
+		// it's good? take and leave.
+		m_iUsingGrenadeId = iCandidate;
+		return;
+	}
+
+	// start the searching from the first.
+	for (int i = EQP_NONE; i < EQP_COUNT; i++)
+	{
+		iAmmoId = GetAmmoIdOfEquipment((EquipmentIdType)i);
+
+		if (!iAmmoId || m_rgAmmo[iAmmoId] <= 0)
+			continue;
+
+		iCandidate = (EquipmentIdType)i;
+		break;
+	}
+
+	m_iUsingGrenadeId = iCandidate;
 }
 
 void CBot::BotThink()

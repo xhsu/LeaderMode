@@ -346,15 +346,15 @@ void UTIL_MakeAimVectors(const Vector &vecAngles)
 	MAKE_VECTORS(rgflVec);
 }
 
-void UTIL_MakeInvVectors(const Vector &vec, globalvars_t *pgv)
+void UTIL_MakeInvVectors(const Vector &vec)
 {
 	MAKE_VECTORS(vec);
 
-	pgv->v_right = pgv->v_right * -1;
+	gpGlobals->v_right *= -1;
 
-	SWAP(pgv->v_forward.y, pgv->v_right.x);
-	SWAP(pgv->v_forward.z, pgv->v_up.x);
-	SWAP(pgv->v_right.z, pgv->v_up.y);
+	std::swap(gpGlobals->v_forward.y, gpGlobals->v_right.x);
+	std::swap(gpGlobals->v_forward.z, gpGlobals->v_up.x);
+	std::swap(gpGlobals->v_right.z, gpGlobals->v_up.y);
 }
 
 void UTIL_EmitAmbientSound(edict_t *entity, const Vector &vecOrigin, const char *samp, float vol, float attenuation, int fFlags, int pitch)

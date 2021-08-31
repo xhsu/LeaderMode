@@ -242,7 +242,7 @@ void CMultiManager::Restart()
 	m_index = 0;
 }
 
-BOOL CMultiManager::HasTarget(string_t targetname)
+bool CMultiManager::HasTarget(string_t targetname)
 {
 	for (int i = 0; i < m_cTargets; i++)
 	{

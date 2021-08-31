@@ -318,6 +318,7 @@
     <ClInclude Include="..\common\hltv.h" />
     <ClInclude Include="..\common\in_buttons.h" />
     <ClInclude Include="..\common\mathlib.h" />
+    <ClInclude Include="..\common\message.hpp" />
     <ClInclude Include="..\common\netadr.h" />
     <ClInclude Include="..\common\pmtrace.h" />
     <ClInclude Include="..\common\r_studioint.h" />
