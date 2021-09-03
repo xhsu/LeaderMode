@@ -316,12 +316,12 @@ bool CalcScreen(const Vector& in, Vector2D& out)
 		return false;
 
 	// we have to use current FOV instead of target FOV.
-	float num = (((ScreenWidth / 2) / newaim[0]) * (120.0 / gHUD::m_flDisplayedFOV - 1.0 / 3.0));
-	out[0] = (ScreenWidth / 2) - num * newaim[1];
-	out[1] = (ScreenHeight / 2) - num * newaim[2];
+	float num = (((ScreenWidth / 2.0f) / newaim[0]) * (120.0 / gHUD::m_flDisplayedFOV - 1.0 / 3.0));
+	out[0] = (ScreenWidth / 2.0f) - num * newaim[1];
+	out[1] = (ScreenHeight / 2.0f) - num * newaim[2];
 
-	Q_clamp(out[0], 0.0f, float(ScreenWidth));
-	Q_clamp(out[1], 0.0f, float(ScreenHeight));
+	out[0] = Q_clamp(out[0], 0.0f, float(ScreenWidth));
+	out[1] = Q_clamp(out[1], 0.0f, float(ScreenHeight));
 	return true;
 }
 

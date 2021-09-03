@@ -83,8 +83,8 @@ void IdleState::OnUpdate(CCSBot *me)
 		return;
 	}
 
-	const float defenseSniperCampChance = 75.0f;
-	const float offenseSniperCampChance = 10.0f;
+	constexpr float defenseSniperCampChance = 75.0f;
+	constexpr float offenseSniperCampChance = 10.0f;
 
 	// if we were following someone, continue following them
 	if (me->IsFollowing())

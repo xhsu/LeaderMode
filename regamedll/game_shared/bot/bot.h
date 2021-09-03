@@ -327,10 +327,7 @@ inline void CBot::Walk()
 
 inline bool CBot::IsActiveWeaponCanShootUnderwater() const
 {
-	CBasePlayerWeapon* pCurrentWeapon = GetActiveWeapon();
-	if (pCurrentWeapon && !(pCurrentWeapon->iFlags() & ITEM_FLAG_NOFIREUNDERWATER))
-		return true;
-	return false;
+	return m_pActiveItem && m_pActiveItem->CanFireSubmerge();
 }
 
 inline bool CBot::IsActiveWeaponReloading() const

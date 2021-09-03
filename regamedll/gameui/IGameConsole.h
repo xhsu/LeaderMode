@@ -12,7 +12,7 @@
 
 #include "interface.h"
 
-class Color;
+struct Color;
 
 //-----------------------------------------------------------------------------
 // Purpose: interface to game/dev console

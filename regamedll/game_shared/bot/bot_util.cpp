@@ -629,10 +629,11 @@ bool IsGameEventAudible(GameEventType event, CBaseEntity *pEntity, CBaseEntity *
 	// TODO: Use actual volume, account for silencers, etc.
 	case EVENT_WEAPON_FIRED:
 	{
-		if (!pPlayer->m_pActiveItem)
+		if (!pPlayer->m_iActiveItem)
 			return false;
 
-		switch (pPlayer->m_pActiveItem->m_iId)
+		// #WPN_POLISH_SOUND_RANGE
+		switch (pPlayer->m_iActiveItem)
 		{
 		// silent "firing"
 		case WEAPON_SHIELDGUN:
@@ -647,7 +648,7 @@ bool IsGameEventAudible(GameEventType event, CBaseEntity *pEntity, CBaseEntity *
 		// potential silenced
 		case WEAPON_FIVESEVEN:
 		{
-			if (pPlayer->m_pActiveItem->m_iVariation == Role_Assassin)
+			if (pPlayer->m_iRoleType == Role_Assassin)	// #WPN_POLISH_VARIATIONS should be detecting variations instead of player's class.
 				*range = ShortRange;
 			else
 				*range = NormalRange;
@@ -660,7 +661,7 @@ bool IsGameEventAudible(GameEventType event, CBaseEntity *pEntity, CBaseEntity *
 		case WEAPON_SVD:
 		case WEAPON_PSG1:
 		case WEAPON_DEAGLE:
-			*range = 99999.0f;
+			*range = std::numeric_limits<float>::max();
 			break;
 
 		// normal
@@ -674,7 +675,7 @@ bool IsGameEventAudible(GameEventType event, CBaseEntity *pEntity, CBaseEntity *
 		return true;
 	}
 	case EVENT_HE_GRENADE_EXPLODED:
-		*range = 99999.0f;
+		*range = std::numeric_limits<float>::max();
 		*priority = PRIORITY_HIGH;
 		*isHostile = true;
 		return true;

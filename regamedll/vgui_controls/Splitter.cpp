@@ -10,10 +10,7 @@
 using namespace vgui;
 
 
-enum
-{
-	SPLITTER_HANDLE_WIDTH = 4
-};
+constexpr auto SPLITTER_HANDLE_WIDTH = 4;
 
 
 //-----------------------------------------------------------------------------
@@ -667,7 +664,7 @@ void Splitter::ApplyUserConfigSettings(KeyValues *userConfig)
 	for ( int i = 0; i < c; i++ )
 	{
 		char name[128];
-		_snprintf(name, sizeof(name), "%d_splitter_pos", i);
+		Q_slprintf(name, "%d_splitter_pos", i);
 		pFractions[i] = userConfig->GetFloat( name, flTotalSize + SPLITTER_HANDLE_WIDTH + 1 );
 		flTotalSize = pFractions[i];
 	}

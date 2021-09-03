@@ -432,6 +432,14 @@ public:
 	* Return:	'true' if this object capable to do so.
 	*/
 	virtual	bool	CanDualWield	(void) = 0;
+
+	/*
+	* Purpose:	Inquire whether this weapon can fire under water.
+	* Usage:	Anytime when it is valid.
+	* Return:	'true' if this object capable to do so.
+	*/
+	virtual	bool	CanFireSubmerge	(void) = 0;
+
 #pragma endregion
 
 	/*
@@ -518,6 +526,13 @@ public:
 	* Return:	Note that the accuracy value has different meaning amongst weapons.
 	*/
 	virtual	float&	Accuracy		(void) = 0;
+
+	/*
+	* Purpose:	Get weapon variation status.
+	* Usage:	Anytime when it is valid.
+	* Return:	This is get only function. Use Vary() if you wish to designate one.
+	*/
+	virtual	RoleTypes Variation		(void) = 0;
 };
 
 //struct CUSP : public CBaseWeaponTemplate<CUSP>

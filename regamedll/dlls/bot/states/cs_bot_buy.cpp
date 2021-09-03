@@ -35,7 +35,7 @@ bool HasDefaultPistol(CCSBot *me)
 	if (!pSecondary)
 		return false;
 
-	if (pSecondary->m_iId == WEAPON_USP)	// LUNA: now this is the default starter weapon.
+	if (pSecondary->Id() == WEAPON_USP)	// LUNA: now this is the default starter weapon.
 		return true;
 
 	return false;
@@ -263,7 +263,7 @@ void BuyState::OnUpdate(CCSBot *me)
 			int weaponPreference = me->GetProfile()->GetWeaponPreference(m_prefIndex);
 
 			// don't buy it again if we still have one from last round
-			if (me->m_pActiveItem && me->m_pActiveItem->m_iId == weaponPreference)
+			if (me->m_pActiveItem && me->m_pActiveItem->Id() == weaponPreference)
 			{
 				// done with buying preferred weapon
 				m_prefIndex = 9999;

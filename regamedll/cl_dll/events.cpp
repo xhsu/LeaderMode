@@ -2390,6 +2390,7 @@ DECLARE_EVENT(C4Explo)
 
 void Events_Init(void)
 {
+	/*
 	HOOK_EVENT(ak47, FireAK47);
 	CAWP::RegisterEvent();	//HOOK_EVENT(awp, FireAWP);
 	HOOK_EVENT(deagle, FireDEagle);
@@ -2411,6 +2412,7 @@ void Events_Init(void)
 	CUSP::RegisterEvent(); //HOOK_EVENT(usp, FireUSP);
 	HOOK_EVENT(m1014, FireM1014);
 	HOOK_EVENT(xm8, FireXM8);
+	*/
 
 	HOOK_EVENT(createexplo, CreateExplo);
 	HOOK_EVENT(createsmoke, CreateSmoke);

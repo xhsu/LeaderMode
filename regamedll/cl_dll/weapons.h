@@ -7,7 +7,7 @@ Created Date: Mar 12 2020
 #pragma once
 
 // Dummy declaration.
-class CBaseWeapon;
+class IWeapon;
 class CBasePlayer;
 
 // util macros
@@ -62,7 +62,7 @@ struct pseudo_global_vars_s	// pseudo globalvars_t
 
 struct pseudo_gamerule_s	// pseudo CHalfLifeMultiplay
 {
-	bool FShouldSwitchWeapon(CBasePlayer* pPlayer, CBaseWeapon* pWeapon);
+	bool FShouldSwitchWeapon(CBasePlayer* pPlayer, IWeapon* pWeapon);
 	bool CanHaveAmmo(CBasePlayer* pPlayer, AmmoIdType iId);
 };
 
@@ -96,16 +96,16 @@ public:
 	int		m_afButtonLast;
 	int		m_afButtonPressed;
 	int		m_afButtonReleased;
-	CBaseWeapon* m_pActiveItem;
-	CBaseWeapon* m_pLastItem;
+	IWeapon* m_pActiveItem;
+	IWeapon* m_pLastItem;
 	Vector	m_vecVAngleShift;
 	EquipmentIdType m_iUsingGrenadeId;
-	CBaseWeapon* m_pWpnSwitchingTo;	// use this instead of g_iSelectedWeapon.
+	IWeapon* m_pWpnSwitchingTo;	// use this instead of g_iSelectedWeapon.
 	RoleTypes m_iRoleType;
 	std::array<bool, EQP_COUNT> m_rgbHasEquipment;
 	std::array<int, AMMO_MAXTYPE> m_rgAmmo;
 	bool	m_bHasPrimary : 1;
-	std::array<CBaseWeapon*, MAX_ITEM_TYPES> m_rgpPlayerItems;
+	std::array<IWeapon*, MAX_ITEM_TYPES> m_rgpPlayerItems;
 
 public:
 	void	SetAnimation(PLAYER_ANIM playerAnim)	{}
@@ -117,11 +117,11 @@ public:
 	int*	GetGrenadeInventoryPointer(EquipmentIdType iId);
 	void	ResetUsingEquipment(void);
 	void	Radio(const char* psz1, const char* psz2) {}
-	bool	StartSwitchingWeapon(CBaseWeapon* pSwitchingTo);	// play normal holster anim.
+	bool	StartSwitchingWeapon(IWeapon* pSwitchingTo);	// play normal holster anim.
 	bool	StartSwitchingWeapon(WeaponIdType iSwitchingTo);	// play normal holster anim.
-	bool	SwitchWeapon(CBaseWeapon* pSwitchingTo);	// skip holster anim.
-	CBaseWeapon* HasPlayerItem(WeaponIdType iId);
-	bool AddPlayerItem(IWeapon *pItem);
+	bool	SwitchWeapon(IWeapon* pSwitchingTo);	// skip holster anim.
+	IWeapon* HasPlayerItem(WeaponIdType iId);
+	bool	AddPlayerItem(IWeapon *pItem);
 	bool	GiveAmmo(int iAmount, AmmoIdType iId);
 };
 
@@ -131,7 +131,7 @@ extern local_state_t g_sWpnTo;
 extern usercmd_t g_sWpnCmd;
 inline std::shared_ptr<pseudo_global_vars_s> gpGlobals;
 extern const Vector g_vecZero;
-inline CBaseWeapon* g_pCurWeapon;
+inline IWeapon* g_pCurWeapon = nullptr;
 inline CBasePlayer gPseudoPlayer;
 extern WeaponIdType g_iSelectedWeapon;	// this means directly switch weapon. try to use gPseudoPlayer.StartSwitchingWeapon() instead!
 extern cvar_t* cl_holdtoaim;

@@ -1831,6 +1831,11 @@ struct CWeapon : public IWeapon
 		return false;	// pending on overrides.
 	}
 
+	bool	CanFireSubmerge(void)	override
+	{
+		return IS_MEMBER_PRESENTED_CPP20_W(ATTRIB_NO_FIRE_UNDERWATER);
+	}
+
 #pragma endregion
 
 #pragma region Dynamic Data Inquiry API.
@@ -2070,6 +2075,8 @@ struct CWeapon : public IWeapon
 
 	float&	Accuracy(void) override { return m_flAccuracy; }
 
+	RoleTypes Variation(void) override { return m_iVariation; }
+
 #pragma endregion
 
 #pragma region Private to this template.
@@ -2264,7 +2271,7 @@ struct NCUSP : public CWeapon<NCUSP>
 			info[BARREL].body = NORMAL;
 		}
 
-		return CalcBody(info);	// elements count of the info[].
+		return CalcBody(info, _countof(info));	// elements count of the info[].
 	}
 
 	// Dynamic data inquiry

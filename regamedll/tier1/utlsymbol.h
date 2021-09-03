@@ -116,7 +116,7 @@ protected:
 	class CStringPoolIndex
 	{
 	public:
-		inline CStringPoolIndex()
+		inline CStringPoolIndex() : m_iPool(0U), m_iOffset(0U)
 		{
 		}
 
@@ -131,8 +131,8 @@ protected:
 			return m_iPool == other.m_iPool && m_iOffset == other.m_iOffset;
 		}
 
-		unsigned short m_iPool;		// Index into m_StringPools.
-		unsigned short m_iOffset;	// Index into the string pool.
+		unsigned short m_iPool{ 0U };		// Index into m_StringPools.
+		unsigned short m_iOffset{ 0U };	// Index into the string pool.
 	};
 
 	class CLess

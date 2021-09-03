@@ -35,7 +35,7 @@ public:
 	Panel* operator= (Panel* pPanel) { return Set(pPanel); }
 
 	bool operator== (Panel* pPanel) { return (Get() == pPanel); }
-	operator bool() { return Get() != 0; }
+	explicit operator bool() { return Get() != 0; }
 	operator Panel*() { return Get(); }
 
 private:

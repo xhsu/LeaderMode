@@ -289,9 +289,9 @@ bool CCSBot::AdjustZoom(float range)
 }
 
 // Return true if the given weapon is a sniper rifle
-bool isSniperRifle(CBaseWeapon *item)
+bool isSniperRifle(IWeapon *item)
 {
-	switch (item->m_iId)
+	switch (item->Id())
 	{
 	case WEAPON_SRS:
 	case WEAPON_PSG1:
@@ -300,7 +300,7 @@ bool isSniperRifle(CBaseWeapon *item)
 		return true;
 
 	case WEAPON_XM8:	// only consider it's a sniper rifle when it's using by a sharpshooter.
-		return !!(item->m_iVariation == Role_Sharpshooter);
+		return item->Variation() == Role_Sharpshooter;
 
 	default:
 		return false;
@@ -309,10 +309,7 @@ bool isSniperRifle(CBaseWeapon *item)
 
 bool CCSBot::IsUsingAWP() const
 {
-	if (m_pActiveItem && m_pActiveItem->m_iId == WEAPON_AWP)
-		return true;
-
-	return false;
+	return m_pActiveItem && m_pActiveItem->Id() == WEAPON_AWP;
 }
 
 // Returns true if we are using a weapon with a removable silencer
@@ -321,30 +318,21 @@ bool CCSBot::DoesActiveWeaponHaveSilencer() const
 	if (!m_pActiveItem)
 		return false;
 
-	// TODO, FIXME, UNDONE
-	if (m_pActiveItem->m_iId == WEAPON_USP || m_pActiveItem->m_iId == WEAPON_MP7A1 || m_pActiveItem->m_iId == WEAPON_SRS)
-		return true;
-
-	return false;
+	// #WPN_POLISH_SOUND_RANGE
+	return m_pActiveItem->Id() == WEAPON_USP || m_pActiveItem->Id() == WEAPON_MP7A1 || m_pActiveItem->Id() == WEAPON_SRS;
 }
 
 // Return true if we are using a sniper rifle
 bool CCSBot::IsUsingSniperRifle() const
 {
-	if (m_pActiveItem && isSniperRifle(m_pActiveItem))
-		return true;
-
-	return false;
+	return m_pActiveItem && isSniperRifle(m_pActiveItem);
 }
 
 // Return true if we have a sniper rifle in our inventory
 bool CCSBot::IsSniper() const
 {
-	for (auto pWeapon : CBaseWeapon::m_lstWeapons)
+	for (auto& pWeapon : m_rgpPlayerItems)
 	{
-		if (pWeapon->m_pPlayer.IsValid() && pWeapon->m_pPlayer->entindex() != this->entindex())
-			continue;
-
 		if (pWeapon->IsDead())
 			continue;
 
@@ -370,13 +358,13 @@ bool CCSBot::IsUsingShotgun() const
 	if (!m_pActiveItem)
 		return false;
 
-	return (m_pActiveItem->m_iId == WEAPON_M1014 || m_pActiveItem->m_iId == WEAPON_KSG12);
+	return (m_pActiveItem->Id() == WEAPON_M1014 || m_pActiveItem->Id() == WEAPON_KSG12 || m_pActiveItem->Id() == WEAPON_AA12);
 }
 
 // Returns true if using the big 'ol machinegun
 bool CCSBot::IsUsingMachinegun() const
 {
-	return (m_pActiveItem && m_pActiveItem->m_iId == WEAPON_MK46);
+	return (m_pActiveItem && (m_pActiveItem->Id() == WEAPON_MK46 || m_pActiveItem->Id() == WEAPON_RPD));
 }
 
 // Return true if primary weapon doesn't exist or is totally out of ammo
@@ -408,12 +396,12 @@ bool CCSBot::IsPistolEmpty() const
 }
 
 // Equip the given item
-bool CCSBot::DoEquip(CBaseWeapon *pWeapon)
+bool CCSBot::DoEquip(IWeapon *pWeapon)
 {
 	if (!pWeapon)
 		return false;
 
-	if (GetProfile()->GetSkill() > 0.4f && pev->waterlevel == 3 && (pWeapon->iFlags() & ITEM_FLAG_NOFIREUNDERWATER))
+	if (GetProfile()->GetSkill() > 0.4f && pev->waterlevel == 3 && !pWeapon->CanFireSubmerge())
 		return false;
 
 	// check if weapon has any ammo left
@@ -421,7 +409,7 @@ bool CCSBot::DoEquip(CBaseWeapon *pWeapon)
 		return false;
 
 	// equip it
-	SelectItem(pWeapon->m_pItemInfo->m_pszInternalName);
+	SelectItem(pWeapon->WpnInfo()->m_pszInternalName);
 	m_equipTimer.Start();
 
 	return true;
@@ -440,14 +428,14 @@ void CCSBot::EquipBestWeapon(bool mustEquip)
 	auto *pPrimary = m_rgpPlayerItems[PRIMARY_WEAPON_SLOT];
 	if (pPrimary)
 	{
-		WeaponClassType weaponClass = WeaponIDToWeaponClass(pPrimary->m_iId);
+		WeaponClassType weaponClass = WeaponIDToWeaponClass(pPrimary->Id());
 
 		if ((TheCSBots()->AllowShotguns() && weaponClass == WEAPONCLASS_SHOTGUN)
 			|| (TheCSBots()->AllowMachineGuns() && weaponClass == WEAPONCLASS_MACHINEGUN)
 			|| (TheCSBots()->AllowRifles() && weaponClass == WEAPONCLASS_RIFLE)
 			|| (TheCSBots()->AllowSnipers() && weaponClass == WEAPONCLASS_SNIPERRIFLE)
 			|| (TheCSBots()->AllowSubMachineGuns() && weaponClass == WEAPONCLASS_SUBMACHINEGUN)
-			|| (TheCSBots()->AllowTacticalShield() && pPrimary->m_iId == WEAPON_SHIELDGUN))
+			|| (TheCSBots()->AllowTacticalShield() && pPrimary->Id() == WEAPON_SHIELDGUN))
 		{
 			if (DoEquip(pPrimary))
 				return;
@@ -485,7 +473,7 @@ void CCSBot::EquipKnife()
 	{
 		if (m_rgpPlayerItems[KNIFE_SLOT])
 		{
-			SelectItem(m_rgpPlayerItems[KNIFE_SLOT]->m_pItemInfo->m_pszInternalName);
+			SelectItem(m_rgpPlayerItems[KNIFE_SLOT]->WpnInfo()->m_pszInternalName);
 		}
 	}
 }
@@ -525,7 +513,8 @@ bool CCSBot::EquipGrenade(bool noSmoke)
 			if (m_pActiveItem)
 			{
 				// start quickthrow for bot.
-				m_pActiveItem->QuickThrowStart(m_iUsingGrenadeId);
+				// #EQP_UNDONE
+//				m_pActiveItem->QuickThrowStart(m_iUsingGrenadeId);
 				return true;
 			}
 		}
@@ -537,31 +526,19 @@ bool CCSBot::EquipGrenade(bool noSmoke)
 // Returns true if we have knife equipped
 bool CCSBot::IsUsingKnife() const
 {
-	if (m_pActiveItem && m_pActiveItem->m_bitsFlags & WPNSTATE_MELEE)
-		return true;
-
-	return false;
+	return m_pActiveItem && m_pActiveItem->Flags() & WPNSTATE_MELEE;
 }
 
 // Returns true if we have pistol equipped
 bool CCSBot::IsUsingPistol() const
 {
-	if (m_pActiveItem && m_pActiveItem->IsPistol())
-		return true;
-
-	return false;
+	return m_pActiveItem && m_pActiveItem->WpnInfo()->m_iSlot == PISTOL_SLOT;
 }
 
 // Returns true if we have a grenade equipped
 bool CCSBot::IsUsingGrenade() const
 {
-	if (!m_pActiveItem)
-		return false;
-
-	if (m_pActiveItem->m_bitsFlags & WPNSTATE_QUICK_THROWING)
-		return true;
-
-	return false;
+	return m_pActiveItem && m_pActiveItem->Flags() & WPNSTATE_QUICK_THROWING;
 }
 
 bool CCSBot::IsUsingHEGrenade() const
@@ -578,7 +555,7 @@ void CCSBot::ThrowGrenade(const Vector *target)
 {
 	if (IsUsingGrenade() && !m_isWaitingToTossGrenade)
 	{
-		const float angleTolerance = 1.0f;
+		constexpr float angleTolerance = 1.0f;
 
 		SetLookAt("GrenadeThrow", target, PRIORITY_UNINTERRUPTABLE, 3.0f, false, angleTolerance);
 
@@ -703,7 +680,7 @@ void CCSBot::ReloadCheck()
 		// high-skill players switch to pistol instead of reloading during combat
 		if (GetProfile()->GetSkill() > 0.5f && IsAttacking())
 		{
-			if (!m_pActiveItem->IsPistol() && !IsPistolEmpty())
+			if (m_pActiveItem->WpnInfo()->m_iSlot != PISTOL_SLOT && !IsPistolEmpty())
 			{
 				// switch to pistol instead of reloading
 				EquipPistol();
@@ -760,15 +737,15 @@ void CCSBot::ReloadCheck()
 // Invoked when in contact with a CWeaponBox
 void CCSBot::OnTouchingWeapon(CWeaponBox *box)
 {
-	auto pDroppedWeapon = box->m_rgpPlayerItems[PRIMARY_WEAPON_SLOT];
+	WeaponIdType iDroppedWeapon = box->m_StoredWeapon.what;
 
 	// right now we only care about primary weapons on the ground
-	if (pDroppedWeapon)
+	if (iDroppedWeapon)
 	{
 		auto *pWeapon = m_rgpPlayerItems[PRIMARY_WEAPON_SLOT];
 
-		// if the gun on the ground is the same one we have, dont bother
-		if (pWeapon && pDroppedWeapon->m_iId != pWeapon->m_iId)
+		// if the gun on the ground is the same one we have, don't bother
+		if (pWeapon && iDroppedWeapon != pWeapon->Id())
 		{
 			// if we don't have a weapon preference, give up
 			if (GetProfile()->HasPrimaryPreference())
@@ -785,10 +762,10 @@ void CCSBot::OnTouchingWeapon(CWeaponBox *box)
 							continue;
 
 						// if the gun we are using is more desirable, give up
-						if (prefID == pWeapon->m_iId)
+						if (prefID == pWeapon->Id())
 							break;
 
-						if (prefID == pDroppedWeapon->m_iId)
+						if (prefID == iDroppedWeapon)
 						{
 							// the gun on the ground is better than the one we have - drop our gun
 							DropPrimary();

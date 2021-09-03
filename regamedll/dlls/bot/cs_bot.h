@@ -847,7 +847,7 @@ private:
 	float m_fireWeaponTimestamp;
 
 	// reaction time system
-	enum { MAX_ENEMY_QUEUE = 20 };
+	static constexpr auto MAX_ENEMY_QUEUE = 20;
 	struct ReactionState
 	{
 		// NOTE: player position & orientation is not currently stored separately
