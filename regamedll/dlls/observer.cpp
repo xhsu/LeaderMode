@@ -24,8 +24,21 @@ CBasePlayer *CBasePlayer::Observer_IsValidTarget(int iPlayerIndex, bool bSameTea
 
 	CBasePlayer *pPlayer = UTIL_PlayerByIndex(iPlayerIndex);
 
+	// Update from ReGameDLL-CS "Observer_IsValidTarget: checks refactoring" (a390cad)
 	// Don't spec observers or players who haven't picked a class yet
-	if (!pPlayer || pPlayer == this || pPlayer->has_disconnected || pPlayer->GetObserverMode() != OBS_NONE || (pPlayer->pev->effects & EF_NODRAW) || pPlayer->m_iTeam == UNASSIGNED || (bSameTeam && pPlayer->m_iTeam != m_iTeam))
+	if (!pPlayer || pPlayer == this)
+		return nullptr;
+
+	if (pPlayer->has_disconnected)
+		return nullptr;
+
+	if (pPlayer->GetObserverMode() != OBS_NONE)
+		return nullptr;
+
+	if (pPlayer->pev->effects & EF_NODRAW)
+		return nullptr;
+
+	if (pPlayer->m_iTeam == UNASSIGNED || (bSameTeam && pPlayer->m_iTeam != m_iTeam))
 		return nullptr;
 
 	return pPlayer;
@@ -259,12 +272,22 @@ void CBasePlayer::Observer_CheckTarget()
 			CBasePlayer *target = UTIL_PlayerByIndex(m_hObserverTarget->entindex());
 
 			// check taget
-			if (!target || target->pev->deadflag == DEAD_RESPAWNABLE || (target->pev->effects & EF_NODRAW))
-				Observer_FindNextPlayer(false);
-
-			else if (target->pev->deadflag == DEAD_DEAD && gpGlobals->time > target->m_fDeadTime + 2.0f)
+			// Update from ReGameDLL-CS "Allow observe for dying player with EF_NODRAW effect (#647)" (59c297d)
+			if (!target || target->pev->deadflag == DEAD_RESPAWNABLE)
 			{
-				// 3 secs after death change target
+				Observer_FindNextPlayer(false);
+			}
+			else if (target->pev->effects & EF_NODRAW)
+			{
+				bool bStillDying = (target->pev->deadflag == DEAD_DYING || (target->pev->deadflag == DEAD_DEAD && !target->HasTimePassedSinceDeath(2)));
+
+				// keep observing to victim until dying, even if it is invisible
+				if (!bStillDying || (target->m_afPhysicsFlags & PFLAG_OBSERVER))
+					Observer_FindNextPlayer(false);
+			}
+			else if (target->pev->deadflag == DEAD_DEAD && target->HasTimePassedSinceDeath(2))
+			{
+				// 2 secs after death change target
 				Observer_FindNextPlayer(false);
 
 				if (!m_hObserverTarget)

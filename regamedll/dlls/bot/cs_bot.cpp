@@ -281,7 +281,7 @@ void CCSBot::BotTouch(CBaseEntity *pOther)
 			}
 		}
 
-		m_avoid = static_cast<CBasePlayer *>(pOther);
+		m_avoid = dynamic_cast<CBasePlayer *>(pOther);
 		m_avoidTimestamp = gpGlobals->time;
 
 		return;
@@ -297,6 +297,13 @@ void CCSBot::BotTouch(CBaseEntity *pOther)
 	// See if it's breakable
 	if (FClassnameIs(pOther->pev, "func_breakable"))
 	{
+		// Update from ReGameDLL-CS "Bot fixes (#659)" (5aec8aa)
+		CBreakable* pBreak = dynamic_cast<CBreakable*>(pOther);
+
+		// Skip if material is "UnbreakableGlass"
+		if (pBreak && !pBreak->IsBreakable())
+			return;
+
 		Vector center = (pOther->pev->absmax + pOther->pev->absmin) / 2.0f;
 		bool breakIt = true;
 

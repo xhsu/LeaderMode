@@ -89,6 +89,8 @@ bool CCStrikeGameMgrHelper::CanPlayerHearPlayer(CBasePlayer *pListener, CBasePla
 		return (pListener->m_iTeam == pSender->m_iTeam || pListener->m_iTeam == SPECTATOR || pListener->m_iTeam == UNASSIGNED);
 	case 4:
 		return (pListener->IsAlive() == pSender->IsAlive() || pSender->IsAlive());
+	case 5:
+		return ((pListener->IsAlive() == pSender->IsAlive() && pListener->m_iTeam == pSender->m_iTeam) || !pListener->IsAlive());	// Add from ReGameDLL-CS "Implement sv_alltalk 5" (5b7159e)
 	default:
 	{
 		if (pListener->m_iTeam != pSender->m_iTeam) // Different teams can't hear each other

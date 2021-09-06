@@ -463,6 +463,7 @@ public:
 	bool IsReloading() const { return m_Activity == ACT_RELOAD || m_IdealActivity == ACT_RELOAD; }
 	bool IsBlind() const { return (m_blindUntilTime > gpGlobals->time); }
 	bool IsAutoFollowAllowed() const { return (gpGlobals->time > m_allowAutoFollowTime); }
+	bool HasTimePassedSinceDeath(float duration) const { return gpGlobals->time > (m_fDeadTime + duration); }
 	void InhibitAutoFollow(float duration) { m_allowAutoFollowTime = gpGlobals->time + duration; }
 	void AllowAutoFollow() { m_allowAutoFollowTime = 0; }
 	void ClientCommand(const char *cmd, const char *arg1 = nullptr, const char *arg2 = nullptr, const char *arg3 = nullptr);
