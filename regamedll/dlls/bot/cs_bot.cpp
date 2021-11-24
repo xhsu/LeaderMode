@@ -57,8 +57,8 @@ int GetBotFollowCount(CBasePlayer *pLeader)
  		if (!pPlayer->IsAlive())
  			continue;
 
-		CCSBot *pBot = static_cast<CCSBot *>(pPlayer);
-		if (pBot->IsBot() && pBot->GetFollowLeader() == pLeader)
+		CCSBot *pBot = dynamic_cast<CCSBot *>(pPlayer);
+		if (pBot && pBot->IsBot() && pBot->GetFollowLeader() == pLeader)
 			count++;
 	}
 
@@ -111,7 +111,7 @@ bool CCSBot::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float f
 	// if we were attacked by a teammate, rebuke
 	if (pAttacker->IsPlayer())
 	{
-		CBasePlayer *pPlayer = static_cast<CBasePlayer *>(pAttacker);
+		CBasePlayer *pPlayer = dynamic_cast<CBasePlayer *>(pAttacker);
 		if (BotRelationship(pPlayer) == BOT_TEAMMATE && !pPlayer->IsBot())
 		{
 			GetChatter()->FriendlyFire();
@@ -258,7 +258,7 @@ void CCSBot::BotTouch(CBaseEntity *pOther)
 	// TODO: Need to account for reaction time, etc.
 	if (pOther->IsPlayer())
 	{
-		CBasePlayer *pPlayer = static_cast<CBasePlayer *>(pOther);
+		CBasePlayer *pPlayer = dynamic_cast<CBasePlayer *>(pOther);
 
 		// get priority of other player
 		unsigned int otherPri = TheCSBots()->GetPlayerPriority(pPlayer);

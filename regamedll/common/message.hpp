@@ -31,7 +31,7 @@ struct StringLiteral
 	constexpr operator char* () { return &value[0]; }
 	constexpr decltype(auto) operator[] (size_t index) { assert(index < N); return value[index]; }
 
-	static constexpr size_t length = N;
+	static constexpr size_t length = N - 1U;	// Remove the '\0' at the end.
 	char value[N];
 };
 

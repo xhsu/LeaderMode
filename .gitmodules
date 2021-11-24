@@ -1,3 +1,6 @@
 [submodule "regamedll/external/gcem"]
 	path = regamedll/external/gcem
 	url = https://github.com/kthohr/gcem
+[submodule "regamedll/external/Hydrogenium"]
+	path = regamedll/external/Hydrogenium
+	url = https://github.com/xhsu/Hydrogenium
